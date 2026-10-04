@@ -185,8 +185,9 @@ public sealed class RetiredSymbolAuditTests
 
     /// <summary>
     /// The startup view files the feature 010 removal deleted, as repository-relative paths. The rebuilt splash
-    /// pair is deliberately absent: US1 recreates <c>SplashWindow</c> and <c>SplashPage</c> in place, so their
-    /// paths are live again and listing them here would fail the build on the replacement.
+    /// pair is deliberately absent: US1 recreated that surface in place, and the one-window rework then folded
+    /// every launch surface into a stage page, so those paths are live again and listing them here would fail the
+    /// build on the replacement.
     /// </summary>
     private static readonly string[] s_removedStartupViewFiles =
     [
@@ -219,8 +220,9 @@ public sealed class RetiredSymbolAuditTests
         "StartupPasswordResetRequirement", "StartupRegistrationRequest", "StartupResult",
         "StartupSessionSnapshot", "StartupWindowOptions", "StartupLogService",
         "StartupLogForwarder",
-        // SplashWindow, SplashPage and SplashViewModel are absent on purpose: US1 rebuilds that surface in place
-        // under the same names. SplashView, the shared control the old pair drew through, is genuinely gone.
+        // SplashWindow, SplashPage and SplashViewModel are absent on purpose: US1 rebuilt that surface in place
+        // under the same names, and the one-window rework then made the four launch surfaces stage pages of the
+        // one window. SplashView, the shared control the old pair drew through, is genuinely gone.
         // StartupRecoveryService is absent for the same reason: US4 rebuilds it in place as the reset policy
         // and the silent repair (T123), so the type name cannot be forbidden; its old members are forbidden in the
         // pattern list instead (T209).
@@ -697,10 +699,11 @@ public sealed class RetiredSymbolAuditTests
     }
 
     /// <summary>
-    /// T005, re-pinned by US1 (T094), by US2 (T098), by US3 (T114) and again by US4 (T124). The rebuilt view set
-    /// is asserted positively rather than by absence: the module's view folder holds the surfaces the pipeline
-    /// shows, and the placeholder is gone along with the markup that pinned it. The next phase to add a surface
-    /// re-pins this list again, which is the point of asserting the set rather than each file in isolation.
+    /// T005, re-pinned by US1 (T094), by US2 (T098), by US3 (T114), by US4 (T124) and again by feature 011's
+    /// one-window rework (T042). The rebuilt view set is asserted positively rather than by absence: the module's
+    /// view folder holds the stage pages the one window swaps between, the set-up panel a plant-system person is
+    /// created on, and the launch surface a person watches a launch on. The next phase to add a surface re-pins
+    /// this list again, which is the point of asserting the set rather than each file in isolation.
     /// </summary>
     [TestMethod]
     public void RebuiltStartupViewSet_IsTheLaunchSurface()
@@ -720,16 +723,17 @@ public sealed class RetiredSymbolAuditTests
         CollectionAssert.AreEqual(
             new[]
             {
-                "BlockedStateWindow.xaml",
-                "MachineSetupWindow.xaml",
-                "SignInWindow.xaml",
+                "BlockedStatePage.xaml",
+                "MachineSetupPage.xaml",
+                "SetUpPanel.xaml",
+                "SignInPage.xaml",
                 "SplashPage.xaml",
-                "SplashWindow.xaml",
             },
             markupFiles,
-            "The rebuilt startup view set is what a launch shows: the window it runs in, the page drawing it, the "
-                + "setup window an unconfigured computer stops at, the sign-in window a launch ends at when "
-                + "nobody is signed in yet, and the blocked-state window a stopped launch states its cause on.");
+            "The rebuilt startup view set is what the one window shows: the launch surface a person watches a "
+                + "launch on, the sign-in stage a launch ends at when nobody is signed in yet, the set-up panel a "
+                + "plant-system person is created on, the machine-setup stage an unconfigured computer stops at, "
+                + "and the blocked stage a stopped launch states its cause on.");
 
         foreach (var markup in markupFiles)
         {
@@ -739,29 +743,29 @@ public sealed class RetiredSymbolAuditTests
         }
 
         StringAssert.Contains(
-            File.ReadAllText(Path.Combine(viewFolder, "SplashWindow.xaml")),
-            "x:Class=\"MTM_Waitlist.Module_Startup.Views.SplashWindow\"",
-            "The rebuilt launch window markup must declare the launch window type.");
-
-        StringAssert.Contains(
             File.ReadAllText(Path.Combine(viewFolder, "SplashPage.xaml")),
             "x:Class=\"MTM_Waitlist.Module_Startup.Views.SplashPage\"",
             "The rebuilt launch surface markup must declare the page a person watches the launch on.");
 
         StringAssert.Contains(
-            File.ReadAllText(Path.Combine(viewFolder, "MachineSetupWindow.xaml")),
-            "x:Class=\"MTM_Waitlist.Module_Startup.Views.MachineSetupWindow\"",
-            "The setup markup must declare the window an unconfigured computer is set up on.");
+            File.ReadAllText(Path.Combine(viewFolder, "SignInPage.xaml")),
+            "x:Class=\"MTM_Waitlist.Module_Startup.Views.SignInPage\"",
+            "The sign-in markup must declare the stage a launch ends at when nobody is signed in yet.");
 
         StringAssert.Contains(
-            File.ReadAllText(Path.Combine(viewFolder, "SignInWindow.xaml")),
-            "x:Class=\"MTM_Waitlist.Module_Startup.Views.SignInWindow\"",
-            "The sign-in markup must declare the window a launch ends at when nobody is signed in yet.");
+            File.ReadAllText(Path.Combine(viewFolder, "SetUpPanel.xaml")),
+            "x:Class=\"MTM_Waitlist.Module_Startup.Views.SetUpPanel\"",
+            "The set-up markup must declare the panel a plant-system person is created on.");
 
         StringAssert.Contains(
-            File.ReadAllText(Path.Combine(viewFolder, "BlockedStateWindow.xaml")),
-            "x:Class=\"MTM_Waitlist.Module_Startup.Views.BlockedStateWindow\"",
-            "The blocked-state markup must declare the window a stopped launch states its cause on.");
+            File.ReadAllText(Path.Combine(viewFolder, "MachineSetupPage.xaml")),
+            "x:Class=\"MTM_Waitlist.Module_Startup.Views.MachineSetupPage\"",
+            "The setup markup must declare the stage an unconfigured computer is set up on.");
+
+        StringAssert.Contains(
+            File.ReadAllText(Path.Combine(viewFolder, "BlockedStatePage.xaml")),
+            "x:Class=\"MTM_Waitlist.Module_Startup.Views.BlockedStatePage\"",
+            "The blocked markup must declare the stage a stopped launch states its cause on.");
     }
 
     /// <summary>Builds the declaration-shaped pattern set for an inventory of removed type names.</summary>

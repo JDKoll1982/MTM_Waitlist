@@ -1,33 +1,32 @@
-<windowex:WindowEx
-    x:Class="MTM_Waitlist.Module_Startup.Views.BlockedStateWindow"
+<Page
+    x:Class="MTM_Waitlist.Module_Startup.Views.BlockedStatePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:windowex="using:WinUIEx"
-    Width="480"
-    Height="420"
-    MinWidth="440"
-    MinHeight="380"
     mc:Ignorable="d">
 
     <!--
-        The size is the smallest this surface reads at rather than a dialog's default, and it opens there: the
-        heading, the cause the launch wrote, the message strip and the action row are all held at once, and the
-        restore preview is the only content that can grow past it. A wider window would put three short buttons
-        and a two-sentence diagnosis across a screen's worth of empty space.
+        The blocked stage: the single surface a stopped launch shows. It states the cause, offers only the actions
+        that could remove it, and lists what a reset will touch before anything is reset
+        (`contracts/launch-step-contract.md` §4, §5; FR-004, FR-008, FR-016, FR-017, FR-018, FR-019).
+
+        It starts collapsed: the repair policy is offered the fault before anything is shown, so a fault that can
+        be put right without asking produces no prompt at all rather than a surface that appears and takes itself
+        away again (FR-019). <see cref="MTM_Waitlist.Module_Startup.Views.BlockedStatePage.StartAsync"/> reveals it
+        only when the person really is needed.
 
         Four rows, and the cause is its own row rather than something laid over anything else: the person reads
         what stopped the launch and then chooses from the actions beneath it, which never cover the words that
-        explain them (FR-005's rule, applied here). The restore control is drawn only when a reset could remove
-        the cause, so a store that cannot be reached never shows one (FR-017).
+        explain them (FR-005's rule, applied here).
     -->
     <Grid
         x:Name="RootGrid"
         Padding="32"
         AutomationProperties.AutomationId="BlockedStateWindow_Root"
         AutomationProperties.Name="The launch stopped"
-        RowSpacing="16">
+        RowSpacing="16"
+        Visibility="Collapsed">
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -111,4 +110,4 @@
                 Style="{StaticResource AccentButtonStyle}" />
         </StackPanel>
     </Grid>
-</windowex:WindowEx>
+</Page>

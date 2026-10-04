@@ -10,7 +10,7 @@ using MTM_Waitlist.Mock.Services;
 namespace MTM_Waitlist.Tests.Module_Mock;
 
 /// <summary>
-/// Verifies the fallback invariant for all five read shapes: a live answer always wins — including a
+/// Verifies the fallback invariant for all six read shapes: a live answer always wins — including a
 /// legitimately empty one — only unreachability reads the mirror, a genuine read failure surfaces, and
 /// whichever source answers produces an identical row set (FR-004, FR-024, SC-004).
 /// </summary>
@@ -176,6 +176,42 @@ public sealed class VisualReadFallbackParityTests
         Assert.AreEqual(0, cache.ReadCount);
     }
 
+    // ---- Shape 6: employee_by_number -----------------------------------------------------------
+
+    [TestMethod]
+    public async Task EmployeeByNumber_Unreachable_ServesMirrorThroughShapeProcedure()
+    {
+        var cache = new RecordingMirrorCache([
+            Row(("EmployeeNumber", "6229"), ("FirstName", "John"), ("LastName", "Koll"))
+        ]);
+        var fallback = new VisualEmployeeByNumberFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Unreachable("down")), cache);
+
+        var rows = await fallback.ReadAsync(new VisualEmployeeByNumberRequest("6229"));
+
+        Assert.AreEqual(1, rows.Count);
+        Assert.AreEqual("6229", rows[0].EmployeeNumber);
+        Assert.AreEqual("John", rows[0].FirstName);
+        Assert.AreEqual("Koll", rows[0].LastName);
+        Assert.AreEqual("sp_visual_employee_by_number_get", cache.LastProcedureName);
+        Assert.AreEqual(MySqlDatabaseTarget.MtmMock, cache.LastTarget);
+        Assert.AreEqual("6229", cache.LastParameters?["p_employee_number"]);
+    }
+
+    [TestMethod]
+    public async Task EmployeeByNumber_EmptyLiveAnswer_IsNotReplacedByCache()
+    {
+        // A number the plant system does not hold is a real, empty answer; the mirror must not invent a name for
+        // it, because the set-up path has to be able to say it cannot be completed (FR-013).
+        var cache = new RecordingMirrorCache([Row(("EmployeeNumber", "SHOULD-NOT-APPEAR"))]);
+        var fallback = new VisualEmployeeByNumberFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Ok([])), cache);
+
+        var result = await fallback.ReadWithProvenanceAsync(new VisualEmployeeByNumberRequest("6229"));
+
+        Assert.AreEqual(0, result.Value.Count);
+        Assert.AreEqual(VisualReadSource.ServedFromLive, result.Source);
+        Assert.AreEqual(0, cache.ReadCount, "An empty live result is a real answer and must not consult the cache.");
+    }
+
     // ---- Cross-cutting ------------------------------------------------------------------------
 
     [TestMethod]
@@ -327,6 +363,7 @@ public sealed class VisualReadFallbackParityTests
             ("subordinate_parts", executor => new VisualSubordinatePartsFallback(executor).ReadAsync(new VisualSubordinatePartRequest("WO-1", "P-1", "020"))),
             ("inventory_locations", executor => new VisualInventoryLocationsFallback(executor).ReadAsync(new VisualInventoryLocationRequest("P-1"))),
             ("disposition_input", executor => new VisualDispositionInputFallback(executor).ReadAsync(new VisualDispositionInputRequest("WO-1", "P-1"))),
+            ("employee_by_number", executor => new VisualEmployeeByNumberFallback(executor).ReadAsync(new VisualEmployeeByNumberRequest("6229"))),
         };
 
         var violations = new List<string>();

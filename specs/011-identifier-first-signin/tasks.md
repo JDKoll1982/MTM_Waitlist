@@ -40,7 +40,7 @@ identifier types must exist before the sign-in stage can classify anything.
 - [x] **T018** Register the new fallback and shape · `MTM_Waitlist.Mock/DependencyInjection/MockServiceRegistrationExtensions.cs`
 - [x] **T019** Update the shape-count assertions five to six · `MTM_Waitlist.Tests/Module_Mock_Service/ShapeAdditionNoDowntimeTests.cs`, `MTM_Waitlist.Tests/Module_Mock/VisualReadRouteAuditTests.cs`
 - [x] **T020** Update the read-shape count in the ruleset · `Database/Database-Ruleset.md`
-- [ ] **T021** Test falling back to the mirror for the sixth shape · `MTM_Waitlist.Tests/Module_Mock/VisualReadFallbackParityTests.cs` — NOT DONE: the sixth shape's row parity is proved against the shipped scripts in `MTM_Waitlist.Tests/Module_Mock/EmployeeByNumberShapeParityTests.cs`, but no runtime mirror-fallback case was added to `VisualReadFallbackParityTests.cs`
+- [x] **T021** Test falling back to the mirror for the sixth shape · `MTM_Waitlist.Tests/Module_Mock/VisualReadFallbackParityTests.cs` — DONE (2026-10-04): the runtime mirror-fallback case for `employee_by_number` was added — an unreachable live read serves the mirror through `sp_visual_employee_by_number_get` with the row the shape maps, a reachable-but-empty live answer is never replaced by the mirror, and the sixth shape was added to the live-script parameter proof. Row parity against the shipped scripts stays in `MTM_Waitlist.Tests/Module_Mock/EmployeeByNumberShapeParityTests.cs`.
 - [x] **T022** Test the catalog holds six shapes with the new key · `MTM_Waitlist.Tests/Module_Mock_Service/RefreshShapeCatalogProviderTests.cs`
 
 **Checkpoint**: the catalog, database and service resolve six shapes, and the sixth round-trips from the mirror.
@@ -66,7 +66,7 @@ Files: `MTM_Waitlist.Startup/Services/IdentifierSignInService.cs`,
 **⟶ Wait for Wave 1 to finish, then:**
 
 - [x] **T027** [US1] Register the identifier service · `MTM_Waitlist.Startup/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs`
-- [ ] **T028** [US1] Present the identifier field and the store-first refusal in the sign-in view · `Module_Startup/Views/SignInWindow.xaml`, `Module_Startup/Views/SignInWindow.xaml.cs` — NOT DONE: the view model exposes the identifier stage, but `SignInWindow.xaml` was not reworked to show it
+- [x] **T028** [US1] Present the identifier field and the store-first refusal in the sign-in view · `Module_Startup/Views/SignInPage.xaml`, `Module_Startup/Views/SignInPage.xaml.cs` (renamed from `SignInWindow` by T042) — DONE (2026-10-04): the stage now shows an identifier field first (Enter or the continue button both call the view model's own `EnterAsync`), then the PIN stage for whoever the identifier resolved to, with the store-first refusal in the message strip and the form still open. The credential machinery behind the stage is untouched.
 
 **Checkpoint**: a person the store knows signs in by user name or employee number and reaches the credential
 stage, with the attempt, session, machine and temporary-credential behaviour unchanged.
@@ -90,8 +90,8 @@ Files: `MTM_Waitlist.Startup/Services/AccountCreationService.cs`,
 
 **⟶ Wait for Wave 1 to finish, then:**
 
-- [ ] **T033** [US2] Register the creation service and wire the panel from the sign-in view model · `MTM_Waitlist.Startup/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs`, `MTM_Waitlist.Startup/ViewModels/SignInViewModel.cs` — PART DONE: both services and the panel are registered and `SignInViewModel.SetUpRequested` is raised for a plant-system-only person; no surface consumes the event, so the panel is never actually opened
-- [ ] **T034** [US2] Present the set-up panel · `Module_Startup/Views/SetUpPanel.xaml`, `Module_Startup/Views/SetUpPanel.xaml.cs` — NOT DONE: `SetUpPanel.xaml(.cs)` was not created
+- [x] **T033** [US2] Register the creation service and wire the panel from the sign-in view model · `MTM_Waitlist.Startup/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs`, `MTM_Waitlist.Startup/ViewModels/SignInViewModel.cs` — DONE (2026-10-04): the panel is consumed by `SignInPage`, which opens it on `SignInViewModel.SetUpRequested` and redraws on its cancel; `SetUpPanelViewModel` now takes the sign-in stage, so a created account is signed in on the PIN the person chose and the existing `SignInAccepted` route carries the launch on.
+- [x] **T034** [US2] Present the set-up panel · `Module_Startup/Views/SetUpPanel.xaml`, `Module_Startup/Views/SetUpPanel.xaml.cs` — DONE (2026-10-04): the panel was created as a `UserControl` of the sign-in stage. It states the person is not set up for the waitlist yet, shows the plant system's first and last name pre-filled and editable, asks for the PIN twice under the existing rules (both values travelling as one argument), assigns the store's lowest rank through the creation procedure, and notes that a higher level needs IT. Enter walks the fields and submits only on the last; a blank field shows its hint.
 
 **Checkpoint**: a person known only to the plant system is created on their chosen PIN with the lowest store
 rank, and signs in immediately on it.
@@ -129,13 +129,13 @@ Files: `Module_Startup/Views/LaunchWindow.xaml(.cs)`, `App.xaml.cs`, `MainWindow
 **Wave 1 - independent (different files):**
 
 - [x] **T040** [P] [US4] Write the window placement service (centre, re-centre, maximise) · `MTM_Waitlist.Startup/Services/WindowPlacementService.cs`
-- [ ] **T041** [P] [US4] Create the one host window · `Module_Startup/Views/LaunchWindow.xaml`, `Module_Startup/Views/LaunchWindow.xaml.cs` — NOT DONE: no `LaunchWindow` was created; `App.xaml.cs` still builds `SplashWindow`, `SignInWindow`, `MachineSetupWindow` and `BlockedStateWindow` as four separate windows
+- [x] **T041** [P] [US4] Create the one host window · `MainWindow.xaml(.cs)` — DONE (2026-10-04) **as a deviation from plan line 53**: the owner's decision settles the plan's self-contradiction — there is ONE window for the whole life of the app and it is the existing `MainWindow`, so no `LaunchWindow` was created and no second window exists. `MainWindow` gained a stage host (`ContentPresenter`) and `ShowStage(LaunchStage, UIElement)`, which sizes, re-centres and maximises through `WindowPlacementService`. The deviation is recorded in `plan.md`.
 
 **⟶ Wait for Wave 1 to finish, then:**
 
-- [ ] **T042** [US4] Convert the four surfaces into stage views · `Module_Startup/Views/SplashPage.xaml(.cs)`, `Module_Startup/Views/SignInWindow.xaml(.cs)`, `Module_Startup/Views/MachineSetupWindow.xaml(.cs)`, `Module_Startup/Views/BlockedStateWindow.xaml(.cs)` — NOT DONE: the four surfaces are still separate windows
-- [ ] **T043** [US4] Choose a stage instead of opening a window · `App.xaml.cs` — NOT DONE: `LaunchStageSelection` and `WindowPlacementService` are written and tested, but `App.ShowLaunchSurface` still opens and closes separate windows
-- [ ] **T044** [US4] Hide the navigation panel during the launch, maximise on hand-over · `MainWindow.xaml`, `MainWindow.xaml.cs` — NOT DONE: `MainWindow` still declares no content of its own and the navigation panel is not yet hidable during a launch
+- [x] **T042** [US4] Convert the four surfaces into stage views · `Module_Startup/Views/SplashPage.xaml(.cs)`, `Module_Startup/Views/SignInPage.xaml(.cs)`, `Module_Startup/Views/MachineSetupPage.xaml(.cs)`, `Module_Startup/Views/BlockedStatePage.xaml(.cs)` — DONE (2026-10-04): the four surfaces are stage content of the one window rather than windows. `SplashWindow` was deleted (the existing `SplashPage` is the stage), and `SignInWindow`, `MachineSetupWindow` and `BlockedStateWindow` became the pages `SignInPage`, `MachineSetupPage` and `BlockedStatePage` — a `Page` named `…Window` would break the locked role-suffix rule. Each implements `ILaunchStageSurface`, so the one window's close box states each stage's own reason. `RetiredSymbolAuditTests.RebuiltStartupViewSet_IsTheLaunchSurface` and `MachineSetupNoBypassTests` were re-pinned to the new set deliberately.
+- [x] **T043** [US4] Choose a stage instead of opening a window · `App.xaml.cs` — DONE (2026-10-04): `ShowLaunchSurface` now maps the outcome through `LaunchStageSelection.For` and shows one stage in the one window; the shell is handed over only from `MainScreens`, and the window's close box is answered by the stage that is showing through `ILaunchStageSurface`. The four window fields and their open/close helpers are gone.
+- [x] **T044** [US4] Hide the navigation panel during the launch, maximise on hand-over · `MainWindow.xaml`, `MainWindow.xaml.cs` — DONE (2026-10-04): `MainWindow` now declares a stage host (`ContentPresenter`) that the host fills; the navigation panel exists only inside the shell stage, so it is absent for every launch stage. The window resizes between phases and re-centres after each resize it makes, opens centred on the screen it starts on, and maximises through `WindowPlacementService` only on the move to the shell (`LaunchStageSelection.Maximises`).
 
 **Checkpoint**: one window hosts every launch stage and becomes the shell, maximised, with the shell reachable
 only from `MainScreens`.
@@ -184,7 +184,7 @@ Files: `MTM_Waitlist.Startup/ViewModels/LaunchSurfaceViewModel.cs`, `Module_Star
 
 **⟶ Wait for Wave 1 to finish, then:**
 
-- [ ] **T055** [US6] Render every open line · `Module_Startup/Views/SplashPage.xaml`, `Module_Startup/Views/SplashPage.xaml.cs` — NOT DONE: the surface view model exists and is registered, but `SplashPage.xaml` still binds to the single-current-step `SplashViewModel`
+- [x] **T055** [US6] Render every open line · `Module_Startup/Views/SplashPage.xaml`, `Module_Startup/Views/SplashPage.xaml.cs` — DONE (2026-10-04): the surface's rows come from `LaunchSurfaceViewModel.Lines`, one row per operation from the moment it announces itself until the row that ends it arrives, and an open row carries its own moving indicator. `SplashViewModel` still supplies the progress count and the stop's diagnosis; it no longer supplies the line the surface shows.
 
 **Checkpoint**: a concurrent launch shows each operation as its own line.
 
@@ -193,7 +193,7 @@ Files: `MTM_Waitlist.Startup/ViewModels/LaunchSurfaceViewModel.cs`, `Module_Star
 The shape lands in Foundational; this phase proves parity and keeps the counts honest.
 
 - [x] **T056** [US7] Prove the mirror's row shape matches the live read · `MTM_Waitlist.Tests/Module_Mock/VisualReadFallbackParityTests.cs`
-- [ ] **T057** [US7] Prove the service's startup validation accepts a catalog of six · `MTM_Waitlist.Tests/Module_Mock_Service/RefreshShapeCatalogProviderTests.cs` — PART DONE: the catalog holding six shapes with the new key is proved in `MTM_Waitlist.Tests/Module_Mock/EmployeeByNumberShapeParityTests.cs`, and T019 already added the key to this file; the service's own startup-validation case was not added
+- [x] **T057** [US7] Prove the service's startup validation accepts a catalog of six · `MTM_Waitlist.Tests/Module_Mock_Service/RefreshShapeCatalogProviderTests.cs` — DONE (2026-10-04): the service's own startup-validation case was added — the six-shape catalog validates with `employee_by_number` on the refreshable work list, and a drift in that shape's own mirror projection is reported against that shape alone while the five shipped shapes still refresh.
 
 **Checkpoint**: the sixth shape resolves from the mirror under a cached verdict with live shape parity.
 

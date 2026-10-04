@@ -54,11 +54,21 @@ public sealed record SetUpEnterOutcome(SetUpField? FocusNext, bool WasSubmitted)
 /// </remarks>
 internal sealed partial class SetUpPanelViewModel : ObservableObject
 {    private readonly AccountCreationService _creation;
+    private readonly SignInViewModel? _signIn;
 
     /// <summary>Creates the panel over the one writer of a self set-up account.</summary>
     /// <param name="creation">The service that writes the profile, the credential and the rank in one call.</param>
-    public SetUpPanelViewModel(AccountCreationService creation)
-        => _creation = creation ?? throw new ArgumentNullException(nameof(creation));
+    /// <param name="signIn">
+    /// The sign-in stage, so a created account is signed in on the PIN the person chose and never passes through
+    /// the temporary-credential state (FR-009, FR-045). It is optional so the panel's own rules stay provable on
+    /// their own: with no sign-in stage the panel creates the account and raises
+    /// <see cref="AccountCreated"/> exactly as it always did.
+    /// </param>
+    public SetUpPanelViewModel(AccountCreationService creation, SignInViewModel? signIn = null)
+    {
+        _creation = creation ?? throw new ArgumentNullException(nameof(creation));
+        _signIn = signIn;
+    }
 
     /// <summary>Raised once an account has been created, carrying what the store answered.</summary>
     public event EventHandler<AccountSetupResult>? AccountCreated;
@@ -169,6 +179,25 @@ internal sealed partial class SetUpPanelViewModel : ObservableObject
             }
 
             IsVisible = false;
+
+            // The account exists, on the PIN the person just typed, so the sign-in is completed on that same PIN
+            // rather than asking for it a third time. The account was created with no requirement to change it,
+            // so this cannot put the person through the temporary-credential state (FR-009, FR-045).
+            if (_signIn is not null)
+            {
+                _signIn.SignInName = result.SignInName ?? confirmed.EmployeeNumber;
+                await _signIn.EnterAsync(SignInField.Credential, confirmed.Pin).ConfigureAwait(true);
+
+                if (_signIn.HasMessage)
+                {
+                    // The account was created but the sign-in was refused, so the panel stays open and says why
+                    // rather than leaving the person with a closed panel and no account to sign in with.
+                    IsVisible = true;
+                    Message = _signIn.Message;
+                    return;
+                }
+            }
+
             AccountCreated?.Invoke(this, result);
         }
         finally

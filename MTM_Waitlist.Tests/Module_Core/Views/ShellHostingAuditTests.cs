@@ -32,8 +32,8 @@ public sealed class ShellHostingAuditTests
 
         StringAssert.Contains(
             host,
-            "MainWindow.Content = _shellContent",
-            "the main window declares no content of its own, so the host is the only thing that can fill it");
+            "MainWindow.ShowStage(LaunchStage.Shell, _shellContent!);",
+            "the one window is the only thing that can show the shell, so the host is what fills it");
 
         StringAssert.Contains(
             host,
@@ -64,16 +64,18 @@ public sealed class ShellHostingAuditTests
 
         StringAssert.Contains(
             host,
-            "MaximizeMainWindow();",
-            "the shell opened maximized in the application this rebuild replaces, so the hand-over has to maximize it");
+            "MainWindow.ShowStage(LaunchStage.Shell, _shellContent!);",
+            "the hand-over hands the shell to the one window, and showing the shell stage is what maximizes it");
+
+        var window = Read("MainWindow.xaml.cs");
 
         StringAssert.Contains(
-            host,
-            "MainWindow.Maximize();",
+            window,
+            "_placement.Maximise(AppWindow);",
             "maximizing the window is the one call that does it");
 
         StringAssert.Contains(
-            host,
+            window,
             "The main window could not be maximized, so it is keeping the size it opened at.",
             "a window that cannot be maximized must still complete the hand-over rather than stop it");
     }

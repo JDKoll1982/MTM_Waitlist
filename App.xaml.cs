@@ -19,12 +19,14 @@ namespace MTM_Waitlist;
 public partial class App : Application
 {
     private static Microsoft.UI.Dispatching.DispatcherQueue? _uiDispatcher;
-    private static WindowEx? _mainWindow;
+    private static MainWindow? _mainWindow;
     private static FrameworkElement? _shellContent;
-    private static SplashWindow? _launchWindow;
-    private static SignInWindow? _signInWindow;
-    private static MachineSetupWindow? _setupWindow;
-    private static BlockedStateWindow? _blockedStateWindow;
+
+    /// <summary>The stage's own surface, when it is one that answers the window's close (FR-008).</summary>
+    private static ILaunchStageSurface? _launchStageSurface;
+
+    /// <summary>Whether the launch has handed over to the shell, after which the window closes normally.</summary>
+    private static bool s_launchHandedOver;
 
     /// <summary>How many faults this process has written down, so a fault inside a loop cannot fill the disk.</summary>
     private static int s_recordedFaults;
@@ -49,19 +51,29 @@ public partial class App : Application
         return service;
     }
 
-    public static WindowEx MainWindow => _mainWindow ??= new MainWindow();
+    public static MainWindow MainWindow => _mainWindow ??= new MainWindow();
 
     /// <summary>
-    /// The window the person is currently looking at, or <c>null</c> when no surface is up.
+    /// The one window for the whole life of the application, or <c>null</c> before it has been built.
     /// </summary>
     /// <remarks>
-    /// A dialog has to be owned by a window, and the one it belongs to is the surface on screen rather than the
-    /// shell: during a launch the shell does not exist yet, and a dialog owned by a window the person cannot see
-    /// would open behind it or refuse to open at all. The order is newest surface first, because the launch window
-    /// stays up until the surface replacing it has been shown.
+    /// There is one window and no second one (FR-016, FR-043). A dialog has to be owned by a window, so this is
+    /// the window it belongs to whatever stage is showing, because the stage the person is looking at is content
+    /// inside this window rather than a window of its own.
     /// </remarks>
-    internal static WindowEx? CurrentSurfaceWindow =>
-        _setupWindow ?? _signInWindow ?? _blockedStateWindow ?? _launchWindow ?? _mainWindow;
+    internal static WindowEx? CurrentSurfaceWindow => _mainWindow;
+
+    /// <summary>
+    /// Whether the launch has handed over to the shell, after which closing the window is an ordinary close
+    /// rather than a route out of a launch stage (FR-008, FR-022).
+    /// </summary>
+    internal static bool HasHandedOverToShell => s_launchHandedOver;
+
+    /// <summary>
+    /// Whether the process has already been asked to end, so a close that is part of the ending is not mistaken
+    /// for a route out of a launch stage.
+    /// </summary>
+    internal static bool IsExitRequested => Volatile.Read(ref s_exitRequested) == 1;
 
     public static UIElement? AppTitlebar
     {
@@ -194,272 +206,172 @@ public partial class App : Application
     }
 
     /// <summary>
-    /// Shows the launch window, which is the surface every launch shows while it runs (US1).
+    /// Shows the launch stage, which is what the one window shows while a launch runs
+    /// (`contracts/window-stage-contract.md` §2; US1, FR-016).
     /// </summary>
     /// <remarks>
     /// It is shown before the sequence starts rather than when the sequence ends, because the point of the
     /// surface is that a person can watch a launch that is still happening. A launch that never reaches the main
-    /// screens therefore leaves this window in place, which is what the sign-in, setup and blocked surfaces
-    /// replace as their phases land.
+    /// screens therefore leaves this stage in place, and the host replaces it with the stage the outcome means as
+    /// each phase lands.
     /// </remarks>
-    private static void ShowLaunchWindow()
-    {
-        _launchWindow ??= new SplashWindow();
-        _launchWindow.Activate();
-    }
+    private static void ShowLaunchWindow() => ShowLaunchStage(LaunchStage.Splash, new SplashPage());
 
     /// <summary>
-    /// Closes the launch window as part of handing over to the main screens. The window is told it is a hand-over
-    /// first, so closing it does not end the process it has just handed to.
+    /// Shows one launch stage as the whole content of the one window, and remembers it so the window's close box
+    /// can be answered by the stage that is showing (`contracts/window-stage-contract.md` §§1-2; FR-016, FR-022).
     /// </summary>
-    private static void CloseLaunchWindow()
+    /// <typeparam name="T">The stage's own surface type, which is also its content.</typeparam>
+    /// <param name="stage">The stage to show.</param>
+    /// <param name="surface">The stage's surface, which is what fills the window.</param>
+    private static void ShowLaunchStage<T>(LaunchStage stage, T surface)
+        where T : UIElement, ILaunchStageSurface
     {
-        if (_launchWindow is not { } window)
-        {
-            return;
-        }
+        _launchStageSurface = surface;
 
-        _launchWindow = null;
-        window.IsHandingOver = true;
-        window.Close();
+        MainWindow.ShowStage(stage, surface);
+        MainWindow.Activate();
     }
 
     /// <summary>
-    /// Shows the surface a launch ended at, replacing the launch window with it.
+    /// Shows the stage the launch ended at, as the whole content of the one window
+    /// (`contracts/window-stage-contract.md` §2; S4, FR-006, FR-016, FR-022).
     /// </summary>
     /// <remarks>
-    /// The launch decides where it ended; the host only shows what that outcome means. The shell is reachable
-    /// only from <see cref="LaunchOutcome.MainScreens"/> and machine setup only from
-    /// <see cref="LaunchOutcome.MachineSetup"/>, so no outcome shows a surface another outcome owns (S4, FR-006).
-    /// The three surfaces a launch can end at replace the launch window rather than sitting over it, so the window
-    /// the person is working in is the one that owns the ending and there is no behind-window left to close by
-    /// accident. A stop is one of those surfaces: it replaces the launch window and states the cause itself (US4).
-    /// <para>
-    /// <b>The new surface is shown before the launch window is closed, and the order matters.</b> Closing first
-    /// leaves the process with no window at all for as long as it takes to build the next one, and on 2026-09-27
-    /// that was long enough for the application to end itself: the first real launch reached machine setup, wrote
-    /// "The launch ended at MachineSetup" and then exited with code 0 without ever showing the setup screen. The
-    /// same rule is why <c>MachineSetupWindow</c> closes itself only after the launch already has a surface.
-    /// </para>
+    /// The launch decides where it ended; the host only shows what that outcome means, and the mapping from
+    /// outcome to stage is <see cref="LaunchStageSelection"/>'s single answer rather than a list repeated here. The
+    /// shell is reachable only from <see cref="LaunchOutcome.MainScreens"/> and machine setup only from
+    /// <see cref="LaunchOutcome.MachineSetup"/>, so no outcome shows a stage another outcome owns. Each stage takes
+    /// the previous one's place in the same window, so there is never a second window and never a moment with
+    /// none.
     /// </remarks>
     private static void ShowLaunchSurface(LaunchOutcome outcome)
     {
-        switch (outcome)
+        switch (LaunchStageSelection.For(outcome))
         {
-            case LaunchOutcome.MainScreens:
-                ShowShellContent();
-                MaximizeMainWindow();
-                MainWindow.Activate();
-                CloseLaunchWindow();
-                CloseSignInWindow();
-                CloseBlockedStateWindow();
+            case LaunchStage.Shell:
+                HandOverToShell();
                 break;
 
-            case LaunchOutcome.SignIn:
-                // The sign-in surface is where a launch ends when nobody is signed in yet (FR-001). It replaces the
-                // launch window for the same reason setup does: the person works in the window that owns the ending.
-                ShowSignInWindow();
-                CloseLaunchWindow();
-                CloseBlockedStateWindow();
+            case LaunchStage.SignIn:
+                // The sign-in stage is where a launch ends when nobody is signed in yet (FR-001). It takes the
+                // launch surface's place in the same window rather than opening one of its own.
+                ShowLaunchStage(LaunchStage.SignIn, new SignInPage());
                 break;
 
-            case LaunchOutcome.MachineSetup:
-                // Setup replaces the launch window rather than sitting over it: the window the person is working in
-                // is then the one that owns the ending when they abandon it, and there is no behind-window left to
-                // close by accident (FR-008).
-                ShowMachineSetupWindow();
-                CloseLaunchWindow();
-                CloseSignInWindow();
-                CloseBlockedStateWindow();
+            case LaunchStage.MachineSetup:
+                // Setup takes the launch surface's place for the same reason sign-in does: the window the person
+                // is working in is the one that owns the ending when they abandon it (FR-008).
+                ShowLaunchStage(LaunchStage.MachineSetup, new MachineSetupPage());
                 break;
 
-            case LaunchOutcome.Blocked:
-                // A stop is its own surface (US4): it states the cause and offers only the actions that could
-                // remove it. A stop that arrives while a stop is already showing reads the lines written since,
-                // which is why any earlier one is closed and a fresh one built rather than the old one being woken
-                // (FR-004, FR-017). The earlier one goes while the launch window is still up, so the process is
-                // never windowless, and the fresh one replaces the launch window in turn.
-                CloseBlockedStateWindow();
-                ShowBlockedStateWindow();
-                CloseLaunchWindow();
-                CloseSignInWindow();
-                break;
-
-            case LaunchOutcome.Ended:
-                ExitApplication();
+            case LaunchStage.Blocked:
+                ShowBlockedStateStage();
                 break;
 
             default:
-                // A surface no outcome owns: the launch window stays, because leaving the launch running with
-                // nothing to report to would be the silent stop SC-001 forbids. There is no such outcome today
-                // (FR-001), so this is the guard rather than a route.
-                CloseSignInWindow();
-                ShowLaunchWindow();
+                // The process is going, or an outcome no stage owns. There is no sixth outcome today (FR-001), so
+                // this is the guard rather than a route, and it ends rather than leaving a launch running with
+                // nothing to report to (SC-001).
+                ExitApplication();
                 break;
         }
     }
 
     /// <summary>
-    /// Puts the shell into the main window, once, the first time a launch reaches the main screens.
+    /// Shows the stopped-launch stage and offers the fault to the repair policy before revealing it (FR-019).
     /// </summary>
     /// <remarks>
-    /// <para>
-    /// <b>The window declares no content of its own, so this is the only thing that can fill it.</b>
-    /// <c>MainWindow.xaml</c> is a window and nothing else, and the shell is built here rather than in the host's
-    /// constructor so it does not exist until the launch routes to it (FR-008). The one page is kept because the
-    /// provider creates a new one per call: a second call would build a second shell and lose the person's place
-    /// in the first.
-    /// </para>
-    /// <para>
-    /// <b>Without this the main screens are a blank window.</b> Nothing else assigned the content, so a launch
-    /// that ended at <see cref="LaunchOutcome.MainScreens"/> activated a window with nothing in it and no page
-    /// ever asked the store for anything — which is what the store's log showed on 2026-09-28, and what the
-    /// person saw.
-    /// </para>
+    /// The stage decides whether it is needed: a fault that can be put right without asking is put right and the
+    /// launch carries on, so the stage stays collapsed and the host swaps the content when the launch reaches
+    /// its next surface rather than a prompt appearing and taking itself away again (FR-019).
     /// </remarks>
-    private static void ShowShellContent()
+    private static void ShowBlockedStateStage()
     {
-        if (_shellContent is not null)
-        {
-            return;
-        }
+        var page = new BlockedStatePage();
 
-        _shellContent = App.GetService<IShellContentProvider>().CreateShellContent();
-        MainWindow.Content = _shellContent;
+        ShowLaunchStage(LaunchStage.Blocked, page);
+
+        _ = page.StartAsync();
     }
 
     /// <summary>
-    /// Opens the main window maximized, which is the size the shell is designed for.
+    /// Hands the launch over to the shell: the one window becomes the shell, maximised, and nothing else can
+    /// reach it (`contracts/window-stage-contract.md` §§2-3; FR-019, FR-022, FR-043).
     /// </summary>
     /// <remarks>
     /// <para>
-    /// <b>Maximized before the window is activated, so it never appears small first.</b> The overlapped
-    /// presenter's state is what the system reads while it is showing the window, so setting it here is what makes
-    /// the window arrive maximized instead of resizing in front of the person a moment later.
+    /// <b>The shell is reachable only from the main-screens outcome.</b> This is the one place it is shown, and
+    /// it is reached only from <see cref="LaunchOutcome.MainScreens"/>, which is what keeps a launch that did not
+    /// reach the main screens away from it (FR-022, FR-043).
     /// </para>
     /// <para>
-    /// <b>A window that cannot be maximized is still a window that can show the shell.</b> A failure is recorded
-    /// and the hand-over carries on with the window at the size it opened at, which is the fallback the launch
-    /// contract asks for when it says a window that cannot be maximized falls back to the configured main size and
-    /// the transition still completes. Nothing here is allowed to throw, for that reason.
+    /// <b>The shell is built here rather than in the host's constructor</b>, so it does not exist until the
+    /// launch routes to it (FR-008). The one page is kept because the provider creates a new one per call: a
+    /// second call would build a second shell and lose the person's place in the first. Without this the main
+    /// screens are a blank window — which is what the store's log showed on 2026-09-28, and what the person saw.
     /// </para>
     /// </remarks>
-    private static void MaximizeMainWindow()
+    private static void HandOverToShell()
+    {
+        s_launchHandedOver = true;
+
+        ShowShellContent();
+
+        _launchStageSurface = null;
+
+        MainWindow.ShowStage(LaunchStage.Shell, _shellContent!);
+        MainWindow.Activate();
+    }
+
+    /// <summary>
+    /// Puts the shell into the one window, once, the first time a launch reaches the main screens. The shell is
+    /// maximized by the window itself as part of showing the shell stage, so a window that cannot be maximized
+    /// still completes the hand-over at the size it opened at (FR-019).
+    /// </summary>
+    private static void ShowShellContent()
+        => _shellContent ??= App.GetService<IShellContentProvider>().CreateShellContent();
+
+    /// <summary>
+    /// Answers the one window's close box while a launch stage is showing, by asking the stage what closing it
+    /// means (FR-008).
+    /// </summary>
+    /// <remarks>
+    /// The stage states its own reason — machine setup names the route it was dismissed by, a stop states its
+    /// cause, the sign-in states that nobody signed in — rather than the host inventing one reason for all of
+    /// them. The window's close was cancelled by the window itself, so it does not vanish before the reason has
+    /// been stated.
+    /// </remarks>
+    internal static void OnMainWindowClosingDuringLaunch()
+    {
+        if (_launchStageSurface is { } surface)
+        {
+            _ = surface.RequestCloseAsync();
+
+            return;
+        }
+
+        EndLaunch("Startup_Launch.EndedByWindowClose".GetLocalized());
+    }
+
+    /// <summary>
+    /// States why the process is ending, then ends it through the launch, which is the only thing that may end it
+    /// (FR-008).
+    /// </summary>
+    /// <param name="reason">Why the process is ending, in the reader's words.</param>
+    private static void EndLaunch(string reason)
     {
         try
         {
-            MainWindow.Maximize();
+            App.GetService<ILaunchPipeline>().End(reason);
         }
         catch (Exception exception)
         {
-            AppLog.Error(
-                "App",
-                exception,
-                "The main window could not be maximized, so it is keeping the size it opened at.");
+            // A launch that cannot be reached is still a process that was asked to end, so it ends with the
+            // failure recorded the only way left to record it.
+            AppLog.Error("Launch", exception, "The reason the process is ending could not be stated through the launch.");
+            ExitApplication();
         }
-    }
-
-    /// <summary>
-    /// Shows the sign-in window, which is the surface a launch ends at when nobody is signed in yet (FR-001).
-    /// </summary>
-    /// <remarks>
-    /// It is shown on the launch's own decision to end at <see cref="LaunchOutcome.SignIn"/>, so the pipeline
-    /// rather than a screen is what decides that a person is needed now. A window that has already closed is
-    /// forgotten rather than reactivated, so the next hand-over to this surface builds a fresh one.
-    /// </remarks>
-    private static void ShowSignInWindow()
-    {
-        if (_signInWindow is { } existing)
-        {
-            existing.Activate();
-            return;
-        }
-
-        var window = new SignInWindow();
-        window.Closed += (_, _) => _signInWindow = null;
-        _signInWindow = window;
-        window.Activate();
-    }
-
-    /// <summary>
-    /// Closes the sign-in window as part of handing over to another surface, and tells it the close is a hand-over.
-    /// </summary>
-    /// <remarks>
-    /// The window ends the process when the person closes it, because a sign-in window abandoned before anybody
-    /// signed in has no surface left to report to (FR-008). This is the host's own close, so the window is told
-    /// first for the same reason the launch window is.
-    /// </remarks>
-    private static void CloseSignInWindow()
-    {
-        if (_signInWindow is not { } window)
-        {
-            return;
-        }
-
-        _signInWindow = null;
-        window.IsHandingOver = true;
-        window.Close();
-    }
-
-    /// <summary>
-    /// Shows the machine-setup window, which is the surface an unconfigured computer is set up on (FR-006).
-    /// </summary>
-    /// <remarks>
-    /// A window that has already closed is forgotten rather than reactivated: setup ends by closing itself, either
-    /// because this computer was configured or because the process is going, so the next hand-over to this surface
-    /// builds a fresh window instead of waking one that is gone.
-    /// </remarks>
-    private static void ShowMachineSetupWindow()
-    {
-        if (_setupWindow is { } existing)
-        {
-            existing.Activate();
-            return;
-        }
-
-        var window = new MachineSetupWindow();
-        window.Closed += (_, _) => _setupWindow = null;
-        _setupWindow = window;
-        window.Activate();
-    }
-
-    /// <summary>
-    /// Shows the blocked-state surface, which is where a stopped launch states its cause and the actions that
-    /// could remove it (US4; FR-004, FR-016, FR-017, FR-019).
-    /// </summary>
-    /// <remarks>
-    /// The window decides whether it is needed at all: it offers the fault to the repair policy before it appears,
-    /// so a fault that can be put right without asking produces no prompt. The host therefore hands it the launch
-    /// and does not wait, and the window activates itself only when the person really has to be asked.
-    /// </remarks>
-    private static void ShowBlockedStateWindow()
-    {
-        var window = new BlockedStateWindow();
-        window.Closed += (_, _) => _blockedStateWindow = null;
-        _blockedStateWindow = window;
-
-        _ = window.StartAsync();
-    }
-
-    /// <summary>
-    /// Closes the blocked-state surface as part of handing over to another surface, and tells it the close is a
-    /// hand-over.
-    /// </summary>
-    /// <remarks>
-    /// A stopped launch the person closes ends the process, because there is no surface left to report to
-    /// (FR-008). This is the host's own close, so the window is told first for the same reason the launch window
-    /// is.
-    /// </remarks>
-    private static void CloseBlockedStateWindow()
-    {
-        if (_blockedStateWindow is not { } window)
-        {
-            return;
-        }
-
-        _blockedStateWindow = null;
-        window.IsHandingOver = true;
-        window.Close();
     }
 
     /// <summary>

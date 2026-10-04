@@ -1,0 +1,105 @@
+<UserControl
+    x:Class="MTM_Waitlist.Module_Startup.Views.SetUpPanel"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <!--
+        The set-up panel: the surface a person the plant system knows but the store does not is set up on
+        (`contracts/identifier-signin-contract.md` §4; FR-006 to FR-011, FR-014, FR-015, FR-024a).
+
+        It is a panel of the sign-in stage rather than a window of its own, because there is one window for the
+        whole life of the application and the person is in the middle of signing in. The plant system's name is
+        pre-filled and stays editable, the PIN is asked for twice, and the note about permission says plainly
+        that a higher level has to be requested from IT.
+
+        Each field answers Enter itself: Enter validates that field and moves to the next, and only the
+        confirmation submits, exactly as the button does (FR-014). A blank field states its own hint rather than
+        doing nothing (FR-015).
+    -->
+    <StackPanel Spacing="8">
+        <TextBlock
+            AutomationProperties.AutomationId="SetUpPanel_Heading"
+            Style="{ThemeResource BodyStrongTextBlockStyle}"
+            Text="{x:Bind Panel.HeadingText}"
+            TextWrapping="Wrap" />
+
+        <StackPanel
+            AutomationProperties.AutomationId="SetUpPanel_EmployeeNumber"
+            Orientation="Horizontal"
+            Spacing="4">
+            <TextBlock
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="{x:Bind EmployeeNumberLabelText}" />
+            <TextBlock
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="{x:Bind Panel.EmployeeNumber, Mode=OneWay}" />
+        </StackPanel>
+
+        <TextBlock
+            AutomationProperties.AutomationId="SetUpPanel_PermissionNote"
+            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+            Text="{x:Bind Panel.PermissionNoteText}"
+            TextWrapping="Wrap" />
+
+        <TextBlock
+            AutomationProperties.AutomationId="SetUpPanel_NamePrompt"
+            Text="{x:Bind Panel.NamePromptText}"
+            TextWrapping="Wrap" />
+        <TextBox
+            x:Name="FirstNameBox"
+            AutomationProperties.AutomationId="SetUpPanel_FirstName"
+            Header="{x:Bind FirstNameLabelText}"
+            KeyDown="OnFirstNameKeyDown"
+            Text="{x:Bind Panel.FirstName, Mode=TwoWay}" />
+        <TextBox
+            x:Name="LastNameBox"
+            AutomationProperties.AutomationId="SetUpPanel_LastName"
+            Header="{x:Bind LastNameLabelText}"
+            KeyDown="OnLastNameKeyDown"
+            Text="{x:Bind Panel.LastName, Mode=TwoWay}" />
+
+        <PasswordBox
+            x:Name="PinBox"
+            AutomationProperties.AutomationId="SetUpPanel_Pin"
+            Header="{x:Bind PinLabelText}"
+            KeyDown="OnPinKeyDown" />
+        <PasswordBox
+            x:Name="ConfirmPinBox"
+            AutomationProperties.AutomationId="SetUpPanel_ConfirmPin"
+            Header="{x:Bind ConfirmPinLabelText}"
+            KeyDown="OnConfirmationKeyDown" />
+
+        <TextBlock
+            x:Name="MessageText"
+            AutomationProperties.AutomationId="SetUpPanel_Message"
+            Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+            Text="{x:Bind Panel.Message, Mode=OneWay}"
+            TextWrapping="Wrap"
+            Visibility="{x:Bind Panel.HasMessage, Mode=OneWay}" />
+
+        <StackPanel
+            HorizontalAlignment="Right"
+            Orientation="Horizontal"
+            Spacing="8">
+            <ProgressRing
+                AutomationProperties.AutomationId="SetUpPanel_Busy"
+                IsActive="{x:Bind Panel.IsBusy, Mode=OneWay}"
+                Visibility="{x:Bind Panel.IsBusy, Mode=OneWay}" />
+            <Button
+                x:Name="LeaveButton"
+                AutomationProperties.AutomationId="SetUpPanel_LeaveButton"
+                Command="{x:Bind Panel.LeaveCommand}"
+                Content="{x:Bind LeaveActionText}" />
+            <Button
+                x:Name="CreateButton"
+                AutomationProperties.AutomationId="SetUpPanel_CreateButton"
+                Click="OnCreateClick"
+                Content="{x:Bind CreateActionText}"
+                IsEnabled="{x:Bind Panel.CanSubmit, Mode=OneWay}"
+                Style="{StaticResource AccentButtonStyle}" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>

@@ -50,13 +50,14 @@ MTM_Waitlist.Startup/
     SignInViewModel.cs                # two stages + set-up panel state machine
     LaunchSurfaceViewModel.cs         # NEW: several concurrent lines in one place
 Module_Startup/Views/
-  LaunchWindow.xaml(.cs)              # NEW: the one window that hosts every launch stage
-  SplashPage.xaml(.cs)                # becomes a stage view, not a window
-  SignInWindow.xaml(.cs)              # becomes the sign-in stage view
-  MachineSetupWindow.xaml(.cs)        # becomes the setup stage view
-  BlockedStateWindow.xaml(.cs)        # becomes the stopped stage view
+  SplashPage.xaml(.cs)                # the launch stage view (kept; the old SplashWindow wrapper is deleted)
+  SignInPage.xaml(.cs)                # was SignInWindow: the sign-in stage view
+  SetUpPanel.xaml(.cs)                # the set-up panel, a control of the sign-in stage
+  MachineSetupPage.xaml(.cs)          # was MachineSetupWindow: the setup stage view
+  BlockedStatePage.xaml(.cs)          # was BlockedStateWindow: the stopped stage view
+  ILaunchStageSurface.cs              # how a stage answers the one window's close box
 App.xaml.cs                           # ShowLaunchSurface -> one window, staged
-MainWindow.xaml(.cs)                  # nav hidden during launch, maximise on hand-over, re-centre on resize
+MainWindow.xaml(.cs)                  # the one window: stage host, nav absent during launch, maximise on hand-over, re-centre on resize
 MTM_Waitlist.Mock/
   Models/VisualReadShapeModule.cs     # + Employee (the new shape's module)
   Services/VisualReadShapeCatalog.cs  # five -> six entries
@@ -81,6 +82,16 @@ MTM_Waitlist.Tests/                   # see contracts/ and tasks
 existing composition root, the existing module DI extensions and the existing test projects keep working. The
 only new *kind* of thing is a read-shape module value, because the sixth shape belongs to neither the setup nor
 the waitlist module.
+
+**Deviation from the original file list (T041, 2026-10-04).** The plan contradicted itself here: line 53 listed a
+new `LaunchWindow.xaml`, while line 21 and line 59 say the launch stages become stages of the *single main
+window*. The owner's decision settles it, and it is not negotiable: there is ONE window for the whole life of the
+application and it is the existing `MainWindow`, so **no `LaunchWindow` was created and no second window exists**.
+The stages are hosted inside `MainWindow` through a stage host, and the four former surfaces became stage content —
+`SplashPage` (kept; the thin `SplashWindow` wrapper was deleted) and the pages `SignInPage`, `MachineSetupPage`
+and `BlockedStatePage`, renamed from the `…Window` types because a `Page` must carry a page's role suffix. The
+`LaunchWindow` row above was replaced with the real file list, and the stages' own surfaces implement
+`ILaunchStageSurface` so the one window's close box is answered by the stage that is showing.
 
 ## Constitution Check
 

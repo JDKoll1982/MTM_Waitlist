@@ -8,9 +8,30 @@
     xmlns:windowex="using:WinUIEx"
     MinWidth="500"
     MinHeight="500"
-    PersistenceId="MainWindow"
     mc:Ignorable="d">
     <Window.SystemBackdrop>
         <MicaBackdrop/>
     </Window.SystemBackdrop>
+
+    <!--
+        The one window for the whole life of the application (`contracts/window-stage-contract.md` §1; FR-016,
+        FR-019, FR-043). The host assigns the stage it is showing to the presenter below: the launch stages while
+        the launch runs, and the shell once the launch hands over. Nothing else ever fills it, and the navigation
+        panel exists only inside the shell stage, so nothing in the application can assume a signed-in person
+        before the hand-over (FR-023).
+
+        The presenter is why the window declares content of its own: the stage content is swapped into it rather
+        than assigned to the window, so the window's own root element — which the theme and the dialogs are
+        applied to — survives every swap.
+
+        There is deliberately no `PersistenceId`: a window whose placement is restored between sessions would
+        come back maximized from the previous run's shell and could not then open centred at the launch stage's
+        size (FR-020, FR-021).
+    -->
+    <Grid x:Name="RootGrid">
+        <ContentPresenter
+            x:Name="StageHost"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch" />
+    </Grid>
 </windowex:WindowEx>

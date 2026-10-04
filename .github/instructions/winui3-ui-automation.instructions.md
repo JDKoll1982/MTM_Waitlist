@@ -89,17 +89,21 @@ Start-Process $exe
   anybody in locally. A driven run reaches the shell only after this computer's configuration is present in
   `core_computers_registry` and its three picture sources in `config_images_locations`, and after somebody signs
   in with a credential the store accepts. Either seed both before the run, or drive the two surfaces below.
-- **Two surfaces stand between launch and the shell, and both must be driven in order.**
-  1. **Machine setup** (`MachineSetupWindow`) when this computer has no configuration. It asks for a display
+- **One window, and its stages are driven in order.** Every launch stage is content of the same `MainWindow`
+  (feature 011, T042), so a driven run talks to **one** window handle throughout and watches its content change.
+  1. **The machine-setup stage** (`MachineSetupPage`) when this computer has no configuration. It asks for a display
      name, a description and the shared folder, keys folder and dunnage root. It is unlocked by a sign-in holding
      `IT Department` or `Developer` authority, and that sign-in authorises configuration only — it never opens
-     the shell. Closing, cancelling, Escape, Alt+F4 or declining the sign-in all end the process, stating the
+     the shell. Closing the window, cancelling, Escape, Alt+F4 or declining the sign-in all end the process, stating the
      reason first, so a driven run that aborts here leaves no window behind.
-  2. **Sign-in** (`SignInWindow`) once the configuration is present. An account on a temporary credential is
-     allowed five attempts and is then asked to set a new password before it can carry on.
-- **A launch that stops shows the reason on the launch surface.** `BlockedStateWindow` names the cause, offers
+  2. **The sign-in stage** (`SignInPage`) once the configuration is present. It takes an identifier first — a user
+     name, or exactly four digits for an employee number — and then the PIN. An account on a temporary credential is
+     allowed five attempts and is then asked to set a new password before it can carry on. A person the plant
+     system knows and the store does not is set up on the set-up panel (`SetUpPanel`) inside this stage.
+- **A launch that stops shows the reason on the blocked stage.** `BlockedStatePage` names the cause, offers
   Retry and, only where a reset could remove the cause, Restore Defaults. A store outage offers no reset, so a
-  driven run against an unreachable store should expect Retry and Close and nothing else.
+  driven run against an unreachable store should expect Retry and Close and nothing else. The stage starts
+  collapsed, because a fault that can be repaired without asking produces no prompt at all (FR-019).
 - **Diagnostics live in the store, not in a log directory.** The panel is `DeveloperLogPanelView`, hosted inside
   Settings and gated on `permission.settings.log_panel` (Developer alone). There is no log folder to open and no
   local log file to read: entries go to `ops_startup_logs`, and the panel's copy puts the entry on the clipboard
@@ -129,9 +133,9 @@ $windows | ForEach-Object { "$($_.Current.ControlType.ProgrammaticName) | '$($_.
 ```
 
 Never locate the MTM_Waitlist window by title. The title is **not stable**: `MainWindow` is a
-`WinUIEx.WindowEx`, and several windows exist across a launch — the launch surface, machine setup, sign-in and
-the blocked state — each of which states its own title. A title lookup is therefore not merely
-wrong for this app, it is wrong for *some windows and states and not others* — which is worse,
+`WinUIEx.WindowEx`, and each launch stage states its own title, so the window's title changes as the launch moves
+from stage to stage. A title lookup is therefore not merely
+wrong for this app, it is wrong for *some stages and not others* — which is worse,
 because it works until it does not. Use the process id (`FromHandle($p.MainWindowHandle)`) or
 enumerate the process's top-level windows as above.
 
@@ -260,14 +264,16 @@ Get-Process MTM_Waitlist -ErrorAction SilentlyContinue | Stop-Process -Force
 | Nav destination: Waitlist | `x:Uid="Shell_WaitlistView"`, label `Waitlist` |
 | Nav destination: Work Center Setup | `x:Uid="Shell_ModuleSetup"`, label `Work Center Setup` |
 | Content frame | `x:Name="NavigationFrame"` |
-| Window | `MainWindow.xaml`, `WinUIEx.WindowEx` with `PersistenceId="MainWindow"` |
+| Window | `MainWindow.xaml`, `WinUIEx.WindowEx` — the one window (`PersistenceId` was removed by feature 011 so it always opens centred at the launch stage's size) |
 | Executable | `bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.exe` |
 
 Nav labels come from `Strings/en-us/Resources.resw`. A `x:Uid` rename or label edit changes the
 automation `Name`, so dump names again after touching resources instead of trusting a stale script.
 
-`PersistenceId` means WinUIEx persists window placement between runs. Close the app before
-measuring, and launch fresh before concluding that a sizing change did or did not take effect.
+Placement is **not persisted between runs**: feature 011 removed `PersistenceId` from `MainWindow` so the one
+window always opens centred on the screen it starts on, resizes between the launch's stages, and maximises only
+when the launch hands over to the shell. Close the app before measuring, and launch fresh before concluding that
+a sizing change did or did not take effect.
 
 ## What this catches
 

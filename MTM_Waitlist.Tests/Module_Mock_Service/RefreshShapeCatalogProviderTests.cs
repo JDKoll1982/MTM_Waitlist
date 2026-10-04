@@ -54,6 +54,55 @@ public sealed class RefreshShapeCatalogProviderTests
     }
 
     [TestMethod]
+    public async Task ValidateAsync_AcceptsTheSixShapeCatalogIncludingTheEmployeeByNumberShape()
+    {
+        // The service's own startup validation, at the moment the catalog moved from five shapes to six
+        // (FR-033): the new shape validates against its mirror, is refreshable, and does not push any other
+        // shape out of the work list.
+        var provider = CreateProvider(key => Metadata(ColumnsFor(key)));
+
+        var entries = await provider.ValidateAsync();
+
+        var employee = entries.Single(entry => entry.Shape.Key == "employee_by_number");
+        Assert.IsTrue(employee.IsValid, "the sixth shape must validate at startup, not be silently dropped");
+
+        CollectionAssert.AreEquivalent(
+            new[]
+            {
+                "work_order_lookup",
+                "operation_sequences",
+                "subordinate_parts",
+                "inventory_locations",
+                "disposition_input",
+                "employee_by_number",
+            },
+            provider.RefreshableShapes.Select(shape => shape.Key).ToArray(),
+            "all six shapes, including the employee lookup, are on the refreshable work list");
+
+        Assert.AreEqual(0, provider.InvalidShapes.Count);
+        Assert.AreEqual(0, provider.DisabledShapes.Count);
+    }
+
+    [TestMethod]
+    public async Task ValidateAsync_WhenTheEmployeeMirrorDrifts_ReportsTheEmployeeShapeOnly()
+    {
+        // A drift in the sixth shape's own mirror projection is reported against that shape and no other, so a
+        // half-deployed cache cannot take the five shipped shapes down with it (FR-020).
+        var provider = CreateProvider(
+            key => key == "employee_by_number"
+                ? Metadata("id,employee_number,first_name,refreshed_utc,is_seed_content")
+                : Metadata(ColumnsFor(key)));
+
+        await provider.ValidateAsync();
+
+        Assert.AreEqual(1, provider.InvalidShapes.Count);
+        Assert.AreEqual("employee_by_number", provider.InvalidShapes[0].Shape.Key);
+        StringAssert.Contains(provider.InvalidShapes[0].InvalidReason, "Mirror column mismatch");
+        StringAssert.Contains(provider.InvalidShapes[0].InvalidReason, "last_name");
+        Assert.AreEqual(5, provider.RefreshableShapes.Count, "the five shipped shapes still refresh");
+    }
+
+    [TestMethod]
     public async Task ValidateAsync_WhenArtifactsAreMissing_ReportsAndExcludesThatShapeOnly()
     {
         var provider = CreateProvider(

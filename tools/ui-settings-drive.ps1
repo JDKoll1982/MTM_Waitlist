@@ -109,12 +109,13 @@ Say 'launched'
 # --- walk to the shell --------------------------------------------------------------------------------------
 $deadline = (Get-Date).AddSeconds($WaitSeconds)
 $signedIn = $false
+$identifierDone = $false
 $shell = $null
 $lastStatus = ''
 
 while ((Get-Date) -lt $deadline) {
     foreach ($w in (Get-Windows)) {
-        $st = Find-ById $w 'SplashPage_Status'
+        $st = Find-ById $w 'SplashPage_Progress'
         if ($st -and $st.Current.Name -ne $lastStatus) {
             $lastStatus = $st.Current.Name
             Say "splash: $lastStatus"
@@ -130,10 +131,20 @@ while ((Get-Date) -lt $deadline) {
             continue
         }
 
-        $name = Find-ById $w 'SignInWindow_SignInName'
-        if ($name -and -not $signedIn) {
-            $name.GetCurrentPattern($Val).SetValue($User)
-            (Find-ById $w 'SignInWindow_Credential').GetCurrentPattern($Val).SetValue($Pin)
+        # The sign-in stage takes the identifier first: type it, confirm it, then the PIN stage appears.
+        $identifier = Find-ById $w 'SignInWindow_Identifier'
+        if ($identifier -and -not $identifierDone) {
+            $identifier.GetCurrentPattern($Val).SetValue($User)
+            (Find-ById $w 'SignInWindow_ContinueButton').GetCurrentPattern($Inv).Invoke()
+            $identifierDone = $true
+            Say 'identifier confirmed'
+            Start-Sleep -Seconds 2
+            continue
+        }
+
+        $credential = Find-ById $w 'SignInWindow_Credential'
+        if ($credential -and -not $signedIn) {
+            $credential.GetCurrentPattern($Val).SetValue($Pin)
             (Find-ById $w 'SignInWindow_SignInButton').GetCurrentPattern($Inv).Invoke()
             $signedIn = $true
             Say 'signed in'

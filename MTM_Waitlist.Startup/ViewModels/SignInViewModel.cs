@@ -171,6 +171,9 @@ internal sealed partial class SignInViewModel : ObservableObject
     /// <summary>The second action, for a person this machine already remembers.</summary>
     public string RememberedActionText => "Startup_SignIn.RememberedAction".GetLocalized();
 
+    /// <summary>The action that confirms the identifier, which is the first stage's own button.</summary>
+    public string ContinueActionText => "Startup_SignIn.ContinueAction".GetLocalized();
+
     /// <summary>A run of derived state follows every change to the name the person has typed.</summary>
     /// <param name="value">The new value, which is not read here.</param>
     partial void OnSignInNameChanged(string value)

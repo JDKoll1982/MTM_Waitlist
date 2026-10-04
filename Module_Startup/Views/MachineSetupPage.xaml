@@ -1,26 +1,22 @@
-<windowex:WindowEx
-    x:Class="MTM_Waitlist.Module_Startup.Views.MachineSetupWindow"
+<Page
+    x:Class="MTM_Waitlist.Module_Startup.Views.MachineSetupPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:windowex="using:WinUIEx"
-    Width="520"
-    Height="560"
-    MinWidth="480"
-    MinHeight="500"
     mc:Ignorable="d">
 
     <!--
-        The size is the smallest this surface reads at rather than a dialog's default, and it opens there. The
-        heading, the fields, the message strip and the action row are held at once; the middle is a scroll area
-        because the unlock panel and the naming panel are both long, and a smaller window scrolls them rather than
-        clipping them. The action row is a fixed row, so the route out of setup is always on screen.
+        The machine-setup stage: shown when this computer has no configuration and before any operator signs in
+        (`contracts/machine-configuration-contract.md` §§2-3; FR-006, FR-007, FR-008).
+
+        It is a stage of the one window rather than a window of its own. The close box, Escape, Alt+F4, the
+        screen's own cancel control, declining the sign-in and the one window's own close all arrive at the same
+        stated ending (FR-008): the close box routes through the host, which asks this stage what closing it
+        means, and Escape and Alt+F4 are answered here.
 
         Four rows, and the message is its own row rather than something laid over the form: a refusal or a stated
         reason for the ending never covers the fields the person is working in (FR-005's rule, applied here).
-        The route out of setup that is not completion is a control in the action row, and every other route the
-        window offers funnels into the same ending so none of them can be missed (FR-008).
     -->
     <Grid
         x:Name="RootGrid"
@@ -149,4 +145,4 @@
                 Visibility="{x:Bind ViewModel.ShowConfigurationForm, Mode=OneWay}" />
         </StackPanel>
     </Grid>
-</windowex:WindowEx>
+</Page>

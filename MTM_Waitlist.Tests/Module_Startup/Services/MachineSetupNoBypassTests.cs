@@ -34,7 +34,7 @@ public sealed class MachineSetupNoBypassTests
     private const string ReadinessStepId = "read-machine-configuration";
     private const string ReachabilityStepId = "store-reachability";
 
-    private const string SetupWindowCodeBehind = @"Module_Startup\Views\MachineSetupWindow.xaml.cs";
+    private const string SetupWindowCodeBehind = @"Module_Startup\Views\MachineSetupPage.xaml.cs";
     private const string ResourceFile = @"Strings\en-us\Resources.resw";
 
     [TestMethod]
