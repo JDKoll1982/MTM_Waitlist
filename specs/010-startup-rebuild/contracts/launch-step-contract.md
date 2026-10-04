@@ -60,6 +60,7 @@ rather than against the code that happens to implement it. The ceiling is 30 sec
 
 | Operation | Category | Maximum | Best effort |
 |---|---|---|---|
+| refresh the picture copies | Pictures | 10 s | yes |
 | read this computer's saved settings | Configuration | 10 s | |
 | contact the store | Configuration | 15 s | |
 | read this computer's hardware identity | Machine | 5 s | |
@@ -74,13 +75,21 @@ rather than against the code that happens to implement it. The ceiling is 30 sec
 | check this computer against the store | Session | 15 s | |
 | check whether a new password is needed | Session | 15 s | |
 | set a new password | Session | 30 s | |
-| refresh the picture copies | Pictures | 10 s | yes |
 | settle the external-system verdict | ExternalSystem | 5 s | yes |
 | hand over to the first screen | Shell | 10 s | |
 
 A change to a maximum is a change to this table first and to the catalog second. The catalog validates the list
 it ships — refusing an unbounded entry, one past the ceiling, a best-effort entry at the ceiling, a repeated id
 or a nameless entry — so the two cannot drift apart without the build failing.
+
+**Feature 011's deltas.** The picture refresh moved to the first position, so the copies start at the beginning
+of the launch instead of near its end (FR-028); it is still best effort and still may not hold the launch. A
+launch-wide budget of 45 seconds now sits over the whole walk *in addition to* each entry's own maximum above,
+which is unchanged (FR-024, FR-025). Independent entries also run at the same time: `read-local-settings`,
+`read-hardware-identity` and `store-reachability` start together, and so do `judge-session`,
+`check-computer-against-store` and `check-temporary-credential` (FR-026, FR-027). Each member still runs under
+its own maximum stated here, so the table remains the bound each operation is held to, and a group still cannot
+become an unbounded wait (FR-036). `visual-priming` deliberately stays last before the hand-over (FR-029).
 
 ## 2. Running one step
 

@@ -67,6 +67,10 @@ public static class ModuleDependencyInjectionExtensions
         // draws the very lines the steps append, and a second copy would be a second account of one launch.
         services.AddSingleton<SplashViewModel>();
 
+        // The surface with several operations in flight (feature 011, T053). A second instance would be a second
+        // reading of the same feed, so it is one instance for the same reason the splash's own state is.
+        services.AddSingleton<LaunchSurfaceViewModel>();
+
         // The two best-effort steps (US1). The picture step takes the mirror the Settings screen also drives, so
         // the launch and the screen bring the copies up to date the same way; the priming step takes the one thing
         // permitted to probe the external system, rather than becoming a second probe path with its own idea of
@@ -108,6 +112,19 @@ public static class ModuleDependencyInjectionExtensions
         // is: there is one sign-in window, and a second copy would be a second account of the same act.
         services.AddSingleton<SignInViewModel>();
         services.AddSingleton<PasswordChangeViewModel>();
+
+        // The identifier-first sign-in (feature 011, T027): it classifies what the person typed, resolves it
+        // store-first and answers the plant system only for an employee number the store does not hold. One
+        // instance, because it reads once per attempt and holds nothing between them.
+        services.AddSingleton<IdentifierSignInService>();
+
+        // The self set-up path (feature 011, T033): the one writer of a self-created account, over the stored
+        // procedure that writes the profile, the credential and the rank in one transaction (FR-034).
+        services.AddSingleton<AccountCreationService>();
+
+        // The set-up panel's own state (feature 011, T033). One instance for the same reason the sign-in's is:
+        // there is one panel, and a second copy would be a second account of the same act.
+        services.AddSingleton<SetUpPanelViewModel>();
 
         // Signing out (T186): it ends the session in the store, ends the identity, and restarts the process. The
         // restart is a seam because a process cannot relaunch itself from inside a test, which is the reason it

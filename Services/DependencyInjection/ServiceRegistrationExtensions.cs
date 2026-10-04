@@ -113,10 +113,15 @@ public static partial class ServiceRegistrationExtensions
             MTM_Waitlist.Module_Core.Contracts.Services.IEmployeeDirectoryService,
             MTM_Waitlist.Module_Waitlist.Services.EmployeeDirectoryService>();
 
-        // Infor Visual read fallback: the reachability detector and the five shape fallbacks, so every
+        // Infor Visual read fallback: the reachability detector and the six shape fallbacks, so every
         // Visual read is attempted live and transparently falls back to the mtm_mock mirror only when
         // the source is unreachable (FR-002, FR-004).
         services.AddVisualReadFallback();
+
+        // The bridge between the startup module's plant-system employee read and the sixth read shape (feature
+        // 011). The startup module declares the abstraction; this root, where both libraries are visible, is the
+        // only place that can join them without giving the module a reference to the mock library.
+        services.AddSingleton<MTM_Waitlist.Module_Startup.Services.IPlantEmployeeReader, PlantEmployeeReader>();
 
         services.AddSingleton<MTM_Waitlist.Module_Core.Services.WipFloorInventoryService>();
         services.AddSingleton<MTM_Waitlist.Module_Settings.Services.RequestDispositionResolver>();

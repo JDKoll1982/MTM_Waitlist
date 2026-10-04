@@ -68,6 +68,9 @@ public sealed class EmployeeDirectoryService : IEmployeeDirectoryService
             EmployeeNumber = storedIdentifier,
             DisplayName = ReadString(row, "display_name"),
             IsActive = ReadBool(row, "is_active"),
+            // Present when the read carries it (feature 011); empty for a store that does not, which is why the
+            // identifier path only uses it when it is there.
+            SignInName = ReadString(row, "username_normalized"),
         };
 
         AppLog.Info(

@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Startup.Models;
 using MTM_Waitlist.Module_Startup.Services;
 
 namespace MTM_Waitlist.Module_Startup.ViewModels;
@@ -43,6 +44,7 @@ internal sealed partial class SignInViewModel : ObservableObject
     private readonly IPendingSignIn _pendingSignIn;
     private readonly ISignInOutcome _outcome;
     private readonly IMachineFacts _machine;
+    private readonly IdentifierSignInService? _identifierSignIn;
 
     private readonly string _nameHint;
     private readonly string _credentialHint;
@@ -53,18 +55,25 @@ internal sealed partial class SignInViewModel : ObservableObject
     /// <param name="pendingSignIn">What the launch holds, which is what the steps read once the form is done.</param>
     /// <param name="outcome">The accepted check and the new password, held for the launch's own steps.</param>
     /// <param name="machine">This computer's facts, which name the machine a remembered sign-in is keyed to.</param>
+    /// <param name="identifierSignIn">
+    /// The identifier stage's resolution, or <c>null</c> for a surface that only shows the credential form. It is
+    /// optional so the existing credential-only tests keep their subject: the front of sign-in is the only thing
+    /// this adds, and the credential machinery behind it is unchanged (FR-005).
+    /// </param>
     public SignInViewModel(
         CredentialCheckService credentialCheck,
         RememberedSignInService rememberedSignIn,
         IPendingSignIn pendingSignIn,
         ISignInOutcome outcome,
-        IMachineFacts machine)
+        IMachineFacts machine,
+        IdentifierSignInService? identifierSignIn = null)
     {
         _credentialCheck = credentialCheck ?? throw new ArgumentNullException(nameof(credentialCheck));
         _rememberedSignIn = rememberedSignIn ?? throw new ArgumentNullException(nameof(rememberedSignIn));
         _pendingSignIn = pendingSignIn ?? throw new ArgumentNullException(nameof(pendingSignIn));
         _outcome = outcome ?? throw new ArgumentNullException(nameof(outcome));
         _machine = machine ?? throw new ArgumentNullException(nameof(machine));
+        _identifierSignIn = identifierSignIn;
 
         _nameHint = "Startup_SignIn.HintNameRequired".GetLocalized();
         _credentialHint = "Startup_SignIn.HintCredentialRequired".GetLocalized();
@@ -75,6 +84,31 @@ internal sealed partial class SignInViewModel : ObservableObject
     /// identity step. It is raised only after the store accepted the credential.
     /// </summary>
     internal event EventHandler? SignInAccepted;
+
+    /// <summary>
+    /// Raised when the identifier resolved to somebody the plant system knows and the store does not, so the
+    /// surface opens the set-up panel with the name the plant system supplied (FR-006, FR-007).
+    /// </summary>
+    internal event EventHandler<SetUpRequestedEventArgs>? SetUpRequested;
+
+    /// <summary>What the person typed in the first stage: a user name, or exactly four digits.</summary>
+    [ObservableProperty]
+    public partial string IdentifierText { get; set; } = string.Empty;
+
+    /// <summary>Whether the identifier stage is the one shown, which is where a sign-in starts (FR-001).</summary>
+    [ObservableProperty]
+    public partial bool IsIdentifierStage { get; set; } = true;
+
+    /// <summary>
+    /// The sign-in name the identifier resolved to, which is what the credential stage signs in with. An
+    /// employee number resolves to the account's own name, so the credential check is asked a question it can
+    /// answer (FR-003, FR-005).
+    /// </summary>
+    [ObservableProperty]
+    public partial string? ResolvedSignInName { get; set; }
+
+    /// <summary>Whether the credential stage is the one shown, which is the identifier stage's counterpart.</summary>
+    public bool IsCredentialStage => !IsIdentifierStage;
 
     /// <summary>The sign-in name the person is typing. It is not a secret and it is shown back to them.</summary>
     [ObservableProperty]
@@ -164,6 +198,107 @@ internal sealed partial class SignInViewModel : ObservableObject
         OnPropertyChanged(nameof(CanSignIn));
         OnPropertyChanged(nameof(ShowSignInForm));
         OnPropertyChanged(nameof(CanUseRememberedSignIn));
+    }
+
+    /// <summary>The switch between the two stages follows every change to the identifier-stage flag.</summary>
+    /// <param name="value">The new value, which is not read here.</param>
+    partial void OnIsIdentifierStageChanged(bool value) => OnPropertyChanged(nameof(IsCredentialStage));
+
+    /// <summary>
+    /// Resolves what the person typed in the first stage and routes to the stage it means
+    /// (`contracts/identifier-signin-contract.md` §§2-3; FR-002 to FR-006, FR-012, FR-013).
+    /// </summary>
+    /// <param name="identifier">What the person typed: a user name, or exactly four digits.</param>
+    /// <remarks>
+    /// A refusal leaves the identifier form open and says why, so the person can try again rather than being sent
+    /// away. Nothing here touches the credential machinery: the attempt count, the session check, the machine
+    /// gate and the temporary-credential handling are all behind the credential stage and unchanged (FR-005).
+    /// </remarks>
+    [RelayCommand]
+    private async Task ContinueWithIdentifierAsync(string? identifier)
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(identifier))
+        {
+            // FR-015: a blank field shows its hint rather than doing nothing.
+            Message = _nameHint;
+            return;
+        }
+
+        if (_identifierSignIn is null)
+        {
+            Message = "Startup_SignIn.RefusedCredential".GetLocalized();
+            return;
+        }
+
+        IsBusy = true;
+        Message = null;
+
+        try
+        {
+            IdentifierText = identifier.Trim();
+
+            var result = await _identifierSignIn
+                .ResolveAsync(IdentifierText, CancellationToken.None)
+                .ConfigureAwait(true);
+
+            switch (result.Outcome)
+            {
+                case IdentifierSignInOutcome.ResolvedInStore:
+                    ResolvedSignInName = result.SignInName ?? IdentifierText;
+                    SignInName = ResolvedSignInName;
+                    IsIdentifierStage = false;
+                    break;
+
+                case IdentifierSignInOutcome.KnownToPlantSystemOnly:
+                    SetUpRequested?.Invoke(
+                        this,
+                        new SetUpRequestedEventArgs(
+                            result.EmployeeNumber ?? IdentifierText,
+                            result.FirstName ?? string.Empty,
+                            result.LastName ?? string.Empty));
+                    break;
+
+                default:
+                    // Unknown or not active: refused in plain words with the form still open (FR-012).
+                    Message = result.Reason;
+                    break;
+            }
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    /// <summary>
+    /// What pressing Enter does on either stage, which is exactly what the stage's button does
+    /// (`contracts/identifier-signin-contract.md` §5; FR-014, FR-015).
+    /// </summary>
+    /// <param name="field">The stage the person is on.</param>
+    /// <param name="value">What the field holds.</param>
+    public async Task EnterAsync(SignInField field, string? value)
+    {
+        switch (field)
+        {
+            case SignInField.Identifier:
+                await ContinueWithIdentifierAsync(value).ConfigureAwait(true);
+                break;
+
+            default:
+                if (string.IsNullOrEmpty(value))
+                {
+                    Message = _credentialHint;
+                    return;
+                }
+
+                await SignInAsync(new SignInCredentials(SignInName, value)).ConfigureAwait(true);
+                break;
+        }
     }
 
     /// <summary>
@@ -359,3 +494,22 @@ internal sealed partial class SignInViewModel : ObservableObject
 /// <param name="SignInName">The name the person typed.</param>
 /// <param name="Credential">The credential the person typed, which lives as an argument and nowhere else.</param>
 internal sealed record SignInCredentials(string SignInName, string Credential);
+
+/// <summary>Which of the two sign-in stages a keypress is on (FR-014).</summary>
+public enum SignInField
+{
+    /// <summary>The first stage, which takes a user name or an employee number.</summary>
+    Identifier,
+
+    /// <summary>The second stage, which takes the PIN.</summary>
+    Credential,
+}
+
+/// <summary>
+/// What the identifier resolved to when the plant system knows the person and the store does not, so the surface
+/// can open the set-up panel (FR-006, FR-007).
+/// </summary>
+/// <param name="EmployeeNumber">The employee number the person typed.</param>
+/// <param name="FirstName">The first name the plant system answered.</param>
+/// <param name="LastName">The last name the plant system answered.</param>
+public sealed record SetUpRequestedEventArgs(string EmployeeNumber, string FirstName, string LastName);

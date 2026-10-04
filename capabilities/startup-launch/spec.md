@@ -138,3 +138,93 @@ only thing left on a computer is what it needs to reach the store, and the local
 #### Scenario: The plant-wide locations list is readable by everyone and changeable by two roles
 - **WHEN** somebody without `IT Department` or `Developer` authority opens the locations-to-hide list
 - **THEN** they can read it and the write is refused where it happens, with the reason stated
+
+---
+
+## Requirement: Sign-in asks who a person is before it asks for their PIN
+
+Feature 011. The first stage takes a user name, or exactly four digits for an employee number. An employee number
+is resolved in the store first, by `employee_identifier`; only a number the store does not hold is put to the
+plant system through the sixth read shape, `employee_by_number`. Everything behind the credential stage — the
+attempt count, the session check, the machine gate, the temporary-credential limit and the new-PIN write — is
+unchanged.
+
+#### Scenario: An employee number the store holds reaches the PIN stage
+- **WHEN** a person types exactly four digits and the store holds that `employee_identifier` on an active account
+- **THEN** the second stage asks for their PIN, signing in with the account's own sign-in name
+
+#### Scenario: An employee number the store holds on an inactive account is refused
+- **WHEN** the store holds the number but the account is not active
+- **THEN** the person is told the employee is not active, no set-up is offered, and no duplicate account is created
+  even when the plant system also knows the number
+
+#### Scenario: Nobody holds the identifier
+- **WHEN** neither the store nor the plant system holds what was typed
+- **THEN** the person is refused in plain words and the form stays open and usable
+
+#### Scenario: The plant system cannot be reached and has never held the number
+- **WHEN** the plant system is unreachable and the mirror has never held that employee
+- **THEN** the set-up states it cannot be completed right now and no name is invented
+
+#### Scenario: Two people legitimately share an employee number
+- **WHEN** more than one account carries the number
+- **THEN** the store answers with the active account first, by its own ordering, and no rank or name is decided in
+  the application
+
+---
+
+## Requirement: A person the plant system knows sets themselves up
+
+Feature 011. A number the store does not hold but the plant system does opens a set-up panel: it states the person
+is not set up for the waitlist yet, shows the plant system's first and last name pre-filled and editable, and asks
+for a PIN twice under the existing rules (at least four characters, no upper bound, both values typed the same
+way and passed together as one argument). The chosen PIN is the credential from creation, so the account never
+enters the temporary-credential state; the lowest rank is read inside the creation procedure from the store's own
+rank list, and the panel says a higher permission level needs IT. Leaving creates nothing.
+
+#### Scenario: A person only the plant system knows is created and signs in straight away
+- **WHEN** they confirm their name, choose a PIN twice and submit
+- **THEN** the profile, the credential and the rank are written in one stored-procedure call, and they sign in on
+  that PIN without ever seeing a temporary-credential prompt
+
+#### Scenario: The set-up write fails part-way
+- **WHEN** the creation call cannot complete
+- **THEN** nothing is written — no credential without a rank and no rank without a credential — and the reason is
+  stated
+
+#### Scenario: The form is completable from the keyboard
+- **WHEN** Enter is pressed on a stage
+- **THEN** it submits exactly as that stage's button does, on the set-up panel it moves to the next field and
+  submits only at the last, and a blank required field shows its hint rather than doing nothing
+
+---
+
+## Requirement: One window, and a launch that overlaps its independent work
+
+Feature 011. The splash, sign-in, machine-setup and blocked surfaces are stages of the one window, which hosts the
+launch, hides its navigation panel until the hand-over, resizes between the big phases, re-centres after each
+resize it makes, opens centred on the screen it starts on, and maximises when it becomes the shell. The shell
+remains reachable only from the `MainScreens` outcome, and nothing in the application assumes a signed-in person
+before the hand-over. A launch-wide budget of 45 seconds sits **in addition to** each step's own stated maximum
+and never replaces it. Independent work overlaps: the three session checks run together, the local reads run
+alongside the first store contact, and the picture copies start at the beginning. The external-system verdict
+stays last before the hand-over. The surface renders every open line at once, each written before the work it
+describes. No launch path refreshes the cached plant data.
+
+#### Scenario: A launch passes its budget
+- **WHEN** a bounded step has not itself failed and the walk passes the launch-wide budget
+- **THEN** the launch stops at a stated stop whose cause names the budget, and each step's own maximum still
+  applied independently
+
+#### Scenario: Several operations are in flight at once
+- **WHEN** concurrent work is running
+- **THEN** the surface shows each operation as its own line, so a stall is still attributable to a named line
+
+#### Scenario: The application never refreshes the mirror
+- **WHEN** any launch runs
+- **THEN** no request that refreshes the cached plant data is made, because refreshing belongs to
+  `MTM_Waitlist.Mock.Service` alone
+
+**Accepted risk (recorded, not fixed).** Two-stage sign-in reveals whether an identifier exists. This is accepted
+for an internal application. Hiding the navigation panel means nothing in the shell may assume a signed-in person
+before the hand-over. Re-centring on resize is only smooth if resizes happen at the big phases.

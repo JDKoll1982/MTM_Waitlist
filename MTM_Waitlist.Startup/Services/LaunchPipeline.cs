@@ -215,82 +215,224 @@ internal sealed class LaunchPipeline : ILaunchPipeline
     }
 
     /// <summary>Walks the catalogue from <paramref name="startIndex"/> and answers where the launch ended.</summary>
+    /// <remarks>
+    /// <para>
+    /// <b>A launch-wide budget sits over the whole walk.</b> Every step still runs under its own stated maximum
+    /// through the runner, and the budget is additional to that rather than a replacement: a walk made of many
+    /// bounded steps still cannot add up to an unbounded wait. When the budget is passed the walk ends at a
+    /// stated stop whose cause names the budget (FR-024, FR-025).
+    /// </para>
+    /// <para>
+    /// <b>Grouped entries run together.</b> A group declared in <see cref="LaunchStepGroups"/> starts all of its
+    /// members at once and ends when every one of them has ended, so the session checks and the local reads
+    /// overlap rather than queueing (FR-026, FR-027).
+    /// </para>
+    /// </remarks>
     private async Task<LaunchOutcome> RunSequenceAsync(int startIndex, CancellationToken cancellationToken)
     {
         var descriptors = _catalog.Steps;
 
-        for (var index = startIndex; index < descriptors.Count; index++)
+        using var budget = new LaunchBudget(cancellationToken);
+
+        // The positions a group has already consumed, so a member is never run a second time by the walk that
+        // follows its group.
+        var handled = new HashSet<int>();
+
+        try
         {
-            var descriptor = descriptors[index];
-
-            // A person is needed from the point identity is resolved. Read before the step rather than after it,
-            // so the launch stops for the sign-in form rather than trying to resolve somebody who has not
-            // arrived. A sign-in held already — the remembered path — passes straight through (FR-014).
-            if (string.Equals(descriptor.Id, ResolvePersonStepId, StringComparison.Ordinal)
-                && !_person.IsSignedIn
-                && !_pendingSignIn.HasSignInToPresent)
+            for (var index = startIndex; index < descriptors.Count; index++)
             {
-                return HandOver(LaunchOutcome.SignIn);
-            }
-
-            // The shell is only ever opened for a signed-in person (S4): there is no continue-anyway path past
-            // this, and a launch that reached here without a person is handed to the sign-in surface instead.
-            if (string.Equals(descriptor.Id, ShellStepId, StringComparison.Ordinal) && !_person.IsSignedIn)
-            {
-                return HandOver(LaunchOutcome.SignIn);
-            }
-
-            if (!_steps.TryGetValue(descriptor.Id, out var step))
-            {
-                // Not built yet. The entry stays in the count so the surface shows the sequence honestly.
-                continue;
-            }
-
-            var outcome = await _runner.RunAsync(step, BuildContext(), cancellationToken).ConfigureAwait(false);
-
-            if (outcome.Status is LaunchStepStatus.Failed)
-            {
-                return HandOver(LaunchOutcome.Blocked);
-            }
-
-            // A new PIN replaces the credential this process signed in with, and the identity this process holds
-            // was accepted on the credential that has just been replaced. So this launch does not carry on over
-            // it: the application is started again and the person signs in with the PIN they chose (FR-013). The
-            // reason goes through the ending route, which is what states it before the process goes (FR-008).
-            if (string.Equals(descriptor.Id, SetNewPasswordStepId, StringComparison.Ordinal)
-                && outcome.Status is LaunchStepStatus.Succeeded
-                && StartAgainAfterTheNewPin())
-            {
-                return End("The new PIN has been set, so the application is starting again on it.");
-            }
-
-            if (string.Equals(descriptor.Id, MachineReadinessStepId, StringComparison.Ordinal))
-            {
-                var state = await ReadConfigurationStateAsync(descriptor, cancellationToken).ConfigureAwait(false);
-
-                if (state is null)
+                if (budget.IsReached)
                 {
-                    // The verdict could not be read within the step's own bound, so the machine cannot be shown
-                    // to be configured and the launch may not carry on as though it were (FR-006, FR-009).
+                    return StopForBudget(budget);
+                }
+
+                if (!handled.Add(index))
+                {
+                    // A group already ran this entry.
+                    continue;
+                }
+
+                var descriptor = descriptors[index];
+
+                // A person is needed from the point identity is resolved. Read before the step rather than after
+                // it, so the launch stops for the sign-in form rather than trying to resolve somebody who has not
+                // arrived. A sign-in held already — the remembered path — passes straight through (FR-014).
+                if (string.Equals(descriptor.Id, ResolvePersonStepId, StringComparison.Ordinal)
+                    && !_person.IsSignedIn
+                    && !_pendingSignIn.HasSignInToPresent)
+                {
+                    return HandOver(LaunchOutcome.SignIn);
+                }
+
+                // The shell is only ever opened for a signed-in person (S4): there is no continue-anyway path past
+                // this, and a launch that reached here without a person is handed to the sign-in surface instead.
+                if (string.Equals(descriptor.Id, ShellStepId, StringComparison.Ordinal) && !_person.IsSignedIn)
+                {
+                    return HandOver(LaunchOutcome.SignIn);
+                }
+
+                if (LaunchStepGroups.GroupStartingAt(descriptors, index) is { } group)
+                {
+                    var stopped = await RunGroupAsync(group, descriptors, budget, handled, cancellationToken)
+                        .ConfigureAwait(false);
+
+                    if (stopped is { } outcome)
+                    {
+                        return outcome;
+                    }
+
+                    continue;
+                }
+
+                if (!_steps.TryGetValue(descriptor.Id, out var step))
+                {
+                    // Not built yet. The entry stays in the count so the surface shows the sequence honestly.
+                    continue;
+                }
+
+                var stepOutcome = await _runner.RunAsync(step, BuildContext(), budget.Token).ConfigureAwait(false);
+
+                if (stepOutcome.Status is LaunchStepStatus.Failed)
+                {
                     return HandOver(LaunchOutcome.Blocked);
                 }
 
-                if (!state.IsConfigured)
+                // A new PIN replaces the credential this process signed in with, and the identity this process holds
+                // was accepted on the credential that has just been replaced. So this launch does not carry on over
+                // it: the application is started again and the person signs in with the PIN they chose (FR-013). The
+                // reason goes through the ending route, which is what states it before the process goes (FR-008).
+                if (string.Equals(descriptor.Id, SetNewPasswordStepId, StringComparison.Ordinal)
+                    && stepOutcome.Status is LaunchStepStatus.Succeeded
+                    && StartAgainAfterTheNewPin())
                 {
-                    // The pipeline, not a screen, is what refuses to continue here (FR-006, S10.1).
-                    return HandOver(LaunchOutcome.MachineSetup);
+                    return End("The new PIN has been set, so the application is starting again on it.");
+                }
+
+                if (string.Equals(descriptor.Id, MachineReadinessStepId, StringComparison.Ordinal))
+                {
+                    var state = await ReadConfigurationStateAsync(descriptor, budget.Token).ConfigureAwait(false);
+
+                    if (state is null)
+                    {
+                        // The verdict could not be read within the step's own bound, so the machine cannot be shown
+                        // to be configured and the launch may not carry on as though it were (FR-006, FR-009).
+                        return budget.IsReached ? StopForBudget(budget) : HandOver(LaunchOutcome.Blocked);
+                    }
+
+                    if (!state.IsConfigured)
+                    {
+                        // The pipeline, not a screen, is what refuses to continue here (FR-006, S10.1).
+                        return HandOver(LaunchOutcome.MachineSetup);
+                    }
+                }
+
+                if (string.Equals(descriptor.Id, ShellStepId, StringComparison.Ordinal))
+                {
+                    budget.MarkCompleted();
+
+                    return HandOver(LaunchOutcome.MainScreens);
                 }
             }
-
-            if (string.Equals(descriptor.Id, ShellStepId, StringComparison.Ordinal))
-            {
-                return HandOver(LaunchOutcome.MainScreens);
-            }
         }
+        catch (OperationCanceledException) when (budget.IsReached)
+        {
+            // The budget was passed while a step or a group was in flight, which is the stated stop FR-024 asks
+            // for. An outer cancellation is the launch being abandoned and is not caught here.
+            return StopForBudget(budget);
+        }
+
+        budget.MarkCompleted();
 
         // The sequence ended without reaching its hand-over, which means the entries after the last one built
         // are still to come. A signed-in person is handed to the main screens; anybody else is asked to sign in.
         return HandOver(_person.IsSignedIn ? LaunchOutcome.MainScreens : LaunchOutcome.SignIn);
+    }
+
+    /// <summary>
+    /// Runs one group's members at the same time, each still under its own stated maximum, and answers the stop
+    /// the group caused or <c>null</c> when the walk carries on (FR-026, FR-027, FR-036).
+    /// </summary>
+    /// <param name="group">The group to run.</param>
+    /// <param name="descriptors">The catalogue's ordered sequence.</param>
+    /// <param name="budget">The launch-wide budget every member is linked to.</param>
+    /// <param name="handled">The positions the walk has consumed, which the group's members join.</param>
+    /// <param name="cancellationToken">Cancelled when the launch is abandoned.</param>
+    private async Task<LaunchOutcome?> RunGroupAsync(
+        LaunchStepGroup group,
+        IReadOnlyList<LaunchStep> descriptors,
+        LaunchBudget budget,
+        HashSet<int> handled,
+        CancellationToken cancellationToken)
+    {
+        var members = new List<ILaunchStep>();
+
+        foreach (var memberId in group.Members)
+        {
+            var memberIndex = IndexOf(memberId);
+
+            if (memberIndex >= 0)
+            {
+                // The member's position is consumed whether or not it is built, so the ordinary walk never runs
+                // it a second time.
+                handled.Add(memberIndex);
+            }
+
+            if (memberIndex >= 0 && _steps.TryGetValue(memberId, out var step))
+            {
+                members.Add(step);
+            }
+        }
+
+        if (members.Count == 0)
+        {
+            return null;
+        }
+
+        var work = new List<Task<LaunchStepOutcome>>(members.Count);
+        var context = BuildContext();
+
+        foreach (var member in members)
+        {
+            // Every member is named before any of them runs, so each operation still holds its own line even
+            // though they overlap (FR-031).
+            work.Add(_runner.RunAsync(member, context, budget.Token));
+        }
+
+        var outcomes = await Task.WhenAll(work).ConfigureAwait(false);
+
+        cancellationToken.ThrowIfCancellationRequested();
+
+        foreach (var outcome in outcomes)
+        {
+            if (outcome.Status is LaunchStepStatus.Failed)
+            {
+                return budget.IsReached ? StopForBudget(budget) : HandOver(LaunchOutcome.Blocked);
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Ends the launch at the stated stop the budget names, with a line that says the budget was passed rather
+    /// than a step failing (FR-024).
+    /// </summary>
+    /// <param name="budget">The budget that was passed.</param>
+    private LaunchOutcome StopForBudget(LaunchBudget budget)
+    {
+        var diagnosis = budget.Overrun.Diagnosis
+            ?? "The launch did not reach a first screen within the budget it is allowed.";
+
+        _feed.Append(new LaunchFeedEntry(
+            DateTimeOffset.UtcNow,
+            "launch-budget",
+            LaunchFeedEntryKind.SubOperation,
+            diagnosis,
+            null,
+            false));
+
+        return HandOver(LaunchOutcome.Blocked);
     }
 
     /// <summary>

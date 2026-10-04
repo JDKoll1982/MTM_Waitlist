@@ -58,6 +58,14 @@ public sealed class LaunchStepCatalog
     private static readonly LaunchStep[] s_steps =
     [
         new(
+            "picture-cache",
+            "Refreshing the picture copies",
+            "Copies the shared pictures this computer keeps. Recorded, never blocking.",
+            LaunchStepCategory.Pictures,
+            TimeSpan.FromSeconds(10),
+            true,
+            "the picture share"),
+        new(
             "read-local-settings",
             "Reading this computer's saved settings",
             "Reads what this computer keeps so it can reach the store.",
@@ -167,14 +175,6 @@ public sealed class LaunchStepCatalog
             Ceiling,
             false,
             "the store"),
-        new(
-            "picture-cache",
-            "Refreshing the picture copies",
-            "Copies the shared pictures this computer keeps. Recorded, never blocking.",
-            LaunchStepCategory.Pictures,
-            TimeSpan.FromSeconds(10),
-            true,
-            "the picture share"),
         new(
             "visual-priming",
             "Asking whether the external system answers",

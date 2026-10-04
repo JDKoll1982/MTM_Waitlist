@@ -35,6 +35,7 @@ public sealed class LaunchStepCatalogTests
     /// </summary>
     private static readonly string[] s_individualOperations =
     [
+        "picture-cache",
         "read-local-settings",
         "store-reachability",
         "read-hardware-identity",
@@ -49,7 +50,6 @@ public sealed class LaunchStepCatalogTests
         "check-computer-against-store",
         "check-temporary-credential",
         "set-new-password",
-        "picture-cache",
         "visual-priming",
         "shell",
     ];

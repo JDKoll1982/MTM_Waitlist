@@ -2756,7 +2756,10 @@ ON DUPLICATE KEY UPDATE
 -- Contract:
 --   IN  p_employee_identifier  VARCHAR(128)  the identifier the caller holds
 --
---   OUT zero or one row: employee_identifier, display_name, is_active
+--   OUT zero or one row: employee_identifier, display_name, is_active, username_normalized
+--
+-- `username_normalized` was added by feature 011 so an employee number resolves to the account's own sign-in
+-- name; the three original columns keep their names and order (see the artifact's create.sql).
 --
 -- The comparison is on the STORED IDENTIFIER, never on a name: a name is not the key an account is found by, and
 -- two people may hold similar names. An identifier no account carries returns no row at all, which is what lets
@@ -2778,7 +2781,8 @@ CREATE PROCEDURE sp_core_employee_by_identifier_get(
 )
 SELECT u.employee_identifier,
        COALESCE(u.display_name, '') AS display_name,
-       u.is_active
+       u.is_active,
+       COALESCE(u.username_normalized, '') AS username_normalized
 FROM core_users_profiles u
 WHERE u.employee_identifier IS NOT NULL
   AND u.employee_identifier = p_employee_identifier

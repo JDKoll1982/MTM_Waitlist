@@ -188,12 +188,132 @@ public sealed class SignInViewModelTests
         CollectionAssert.Contains(store.CalledProcedures, "sp_auth_remembered_sign_ins_upsert");
     }
 
-    private static SignInViewModel Build(StubAccountStore store) => new(
+    [TestMethod]
+    public async Task Enter_OnTheIdentifierStageWithAValue_ResolvesExactlyAsTheContinueButtonDoes()
+    {
+        // Arrange: a user name the store holds.
+        var store = new StubAccountStore(TemporaryAccount(requirePasswordChange: false));
+        var viewModel = Build(store, Identifier(new StubDirectory(), new StubPlant()));
+
+        // Act
+        await viewModel.EnterAsync(SignInField.Identifier, SignInName);
+
+        // Assert: the second stage is showing, with the name the store resolved.
+        Assert.IsTrue(viewModel.IsCredentialStage, "an identifier the store holds moves to the credential stage");
+        Assert.IsFalse(viewModel.IsIdentifierStage);
+        Assert.AreEqual(SignInName, viewModel.ResolvedSignInName);
+        Assert.IsFalse(viewModel.HasMessage);
+    }
+
+    [TestMethod]
+    public async Task Enter_OnTheIdentifierStageWithABlankField_ShowsItsHint()
+    {
+        var viewModel = Build(
+            new StubAccountStore(TemporaryAccount()),
+            Identifier(new StubDirectory(), new StubPlant()));
+
+        await viewModel.EnterAsync(SignInField.Identifier, "   ");
+
+        Assert.IsTrue(viewModel.IsIdentifierStage, "nothing resolved, so the first stage is still showing");
+        Assert.AreEqual("Startup_SignIn.HintNameRequired".GetLocalized(), viewModel.Message);
+    }
+
+    [TestMethod]
+    public async Task Enter_OnTheIdentifierStageForAnUnknownNumber_RefusesAndKeepsTheFormOpen()
+    {
+        var viewModel = Build(
+            new StubAccountStore(TemporaryAccount()),
+            Identifier(new StubDirectory(), new StubPlant()));
+
+        await viewModel.EnterAsync(SignInField.Identifier, "6229");
+
+        Assert.IsTrue(viewModel.IsIdentifierStage, "a refusal leaves the form open (FR-012)");
+        Assert.IsTrue(viewModel.HasMessage);
+    }
+
+    [TestMethod]
+    public async Task ContinueWithIdentifier_WhenOnlyThePlantSystemKnowsTheNumber_AsksForSetUp()
+    {
+        var directory = new StubDirectory();
+        var plant = new StubPlant
+        {
+            Answer = PlantEmployeeLookup.Found(new PlantEmployee("6229", "John", "Koll")),
+        };
+        var viewModel = Build(new StubAccountStore(TemporaryAccount()), Identifier(directory, plant));
+        SetUpRequestedEventArgs? requested = null;
+        viewModel.SetUpRequested += (_, args) => requested = args;
+
+        await viewModel.ContinueWithIdentifierCommand.ExecuteAsync("6229");
+
+        Assert.IsNotNull(requested, "FR-006: a person the plant system knows is offered set-up");
+        Assert.AreEqual("6229", requested!.EmployeeNumber);
+        Assert.AreEqual("John", requested.FirstName);
+        Assert.AreEqual("Koll", requested.LastName);
+    }
+
+    [TestMethod]
+    public async Task Enter_OnTheCredentialStageWithAValue_SubmitsExactlyAsTheButtonDoes()
+    {
+        var store = new StubAccountStore(TemporaryAccount(requirePasswordChange: false));
+        var viewModel = Build(store, Identifier(new StubDirectory(), new StubPlant()));
+        var accepted = 0;
+        viewModel.SignInAccepted += (_, _) => accepted++;
+
+        await viewModel.EnterAsync(SignInField.Identifier, SignInName);
+        await viewModel.EnterAsync(SignInField.Credential, Pin);
+
+        Assert.AreEqual(1, accepted, "Enter on the credential stage signs in exactly as the button does (FR-014)");
+    }
+
+    [TestMethod]
+    public async Task Enter_OnTheCredentialStageWithABlankField_ShowsItsHint()
+    {
+        var viewModel = Build(
+            new StubAccountStore(TemporaryAccount()),
+            Identifier(new StubDirectory(), new StubPlant()));
+
+        await viewModel.EnterAsync(SignInField.Credential, string.Empty);
+
+        Assert.AreEqual("Startup_SignIn.HintCredentialRequired".GetLocalized(), viewModel.Message);
+    }
+
+    /// <summary>The identifier stage over the store directory and the plant system the test supplied.</summary>
+    private static IdentifierSignInService Identifier(
+        IEmployeeDirectoryService directory,
+        IPlantEmployeeReader plant)
+        => new(directory, new CredentialCheckService(new StubAccountStore(TemporaryAccount())), plant);
+
+    /// <summary>The store's account records, answering the employee-identifier read.</summary>
+    private sealed class StubDirectory : IEmployeeDirectoryService
+    {
+        public EmployeeIdentity? Answer { get; set; }
+
+        public Task<EmployeeIdentity?> FindByEmployeeIdentifierAsync(
+            string employeeIdentifier,
+            CancellationToken cancellationToken = default)
+            => Task.FromResult(Answer);
+    }
+
+    /// <summary>The plant system, answering the sixth read shape's contract.</summary>
+    private sealed class StubPlant : IPlantEmployeeReader
+    {
+        public PlantEmployeeLookup Answer { get; set; } = PlantEmployeeLookup.NotHeld;
+
+        public Task<PlantEmployeeLookup> FindByNumberAsync(
+            string employeeNumber,
+            CancellationToken cancellationToken = default)
+            => Task.FromResult(Answer);
+    }
+
+    private static SignInViewModel Build(StubAccountStore store) => Build(store, identifierSignIn: null);
+
+    private static SignInViewModel Build(StubAccountStore store, IdentifierSignInService? identifierSignIn) => new(
         new CredentialCheckService(store),
         new RememberedSignInService(store, new StubKeySource()),
         new PendingSignIn(),
         new SignInOutcome(),
-        new StubMachineFacts());
+        new StubMachineFacts(),
+        identifierSignIn);
 
     /// <summary>One account row in the column names the credential read returns.</summary>
     private static Dictionary<string, object?> TemporaryAccount(

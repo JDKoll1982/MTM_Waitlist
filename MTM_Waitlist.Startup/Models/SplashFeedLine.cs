@@ -30,6 +30,24 @@ public sealed record SplashFeedLine(
     string? Target)
 {
     /// <summary>
+    /// The catalogue entry the line belongs to, or empty for a line that belongs to none.
+    /// </summary>
+    public string StepId { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Whether the operation this line names is still in flight.
+    /// </summary>
+    /// <remarks>
+    /// A launch that runs independent work at the same time has more than one operation in flight, so a line is
+    /// open until the line that ends it arrives. The surface renders every open line at once rather than one
+    /// current step, while each operation still holds its own line (FR-031).
+    /// </remarks>
+    public bool IsOpen { get; init; }
+
+    /// <summary>The same line, closed, once the operation it names has ended.</summary>
+    public SplashFeedLine Closed() => this with { IsOpen = false };
+
+    /// <summary>
     /// The time the line was written, on this computer's own clock, for the row's leading column. Only the time of
     /// day is shown: a launch lasts seconds, and the window is read while it is happening.
     /// </summary>
@@ -43,6 +61,10 @@ public sealed record SplashFeedLine(
     {
         ArgumentNullException.ThrowIfNull(entry);
 
-        return new SplashFeedLine(entry.TimestampUtc, entry.Text, entry.Target);
+        return new SplashFeedLine(entry.TimestampUtc, entry.Text, entry.Target)
+        {
+            StepId = entry.StepId,
+            IsOpen = entry.Kind is LaunchFeedEntryKind.StepStarted,
+        };
     }
 }
