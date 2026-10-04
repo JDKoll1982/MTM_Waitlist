@@ -3,12 +3,12 @@ using MTM_Waitlist.Mock.Models;
 namespace MTM_Waitlist.Mock.Services;
 
 /// <summary>
-/// The shipped read-shape catalog — the five initial shapes the service refreshes.
+/// The shipped read-shape catalog — the six shapes the service refreshes.
 /// </summary>
 /// <remarks>
 /// <para>
 /// This is the shape-catalog registration named as step 4 of the extension playbook
-/// (<c>contracts/mock-service-configuration.md</c> §4). Adding a sixth shape adds one entry here;
+/// (<c>contracts/mock-service-configuration.md</c> §4). Adding a shape adds one entry here;
 /// no existing shape's artifact, procedure signature, contract, or result type changes (FR-016/FR-020).
 /// </para>
 /// <para>
@@ -22,7 +22,7 @@ namespace MTM_Waitlist.Mock.Services;
 /// </remarks>
 public static class VisualReadShapeCatalog
 {
-    /// <summary>Creates the five shipped read-shape definitions.</summary>
+    /// <summary>Creates the six shipped read-shape definitions.</summary>
     public static IReadOnlyList<VisualReadShape> Create() =>
     [
         new VisualReadShape
@@ -118,6 +118,23 @@ public static class VisualReadShapeCatalog
                 new VisualShapeColumn("OpenWorkOrderQuantity", "decimal(18,4)"),
                 new VisualShapeColumn("FinishedGoodsQuantity", "decimal(18,4)"),
                 new VisualShapeColumn("HasOutsideVendorOperation", "bit")
+            ]
+        },
+        new VisualReadShape
+        {
+            Key = "employee_by_number",
+            Module = VisualReadShapeModule.ModuleStartup,
+            SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Startup/Queries/GetEmployeeByNumber.sql",
+            PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/employee_by_number_population.sql",
+            InputParameters =
+            [
+                new VisualShapeParameter("EmployeeNumber", "nvarchar(32)", IsRequired: true)
+            ],
+            OutputColumns =
+            [
+                new VisualShapeColumn("EmployeeNumber", "nvarchar(32)"),
+                new VisualShapeColumn("FirstName", "nvarchar(128)"),
+                new VisualShapeColumn("LastName", "nvarchar(128)")
             ]
         }
     ];

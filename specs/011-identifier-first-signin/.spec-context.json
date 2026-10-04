@@ -1,0 +1,933 @@
+{
+  "workflow": "companion",
+  "specName": "Identifier-First Sign-In and a Faster Launch",
+  "branch": "011-identifier-first-signin",
+  "unattended": true,
+  "currentStep": "implement",
+  "status": "implementing",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-10-04T17:22:50.317Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-10-04T17:29:32.249Z"
+    },
+    {
+      "step": "clarify",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:30:06.784Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-10-04T17:30:12.355Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:31:26.288Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:31:30.207Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:31:32.788Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-10-04T17:31:48.526Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:32:14.719Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:32:14.876Z"
+    },
+    {
+      "step": "analyze",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:32:34.848Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-10-04T17:32:43.245Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T001",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:36:12.248Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T002",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:36:12.433Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T003",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:36:12.619Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T004",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:36:12.803Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:36:12.984Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:36:13.164Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:36:13.354Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:36:13.660Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T009",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:36:18.412Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T010",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:36:19.100Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T011",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:36:19.294Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T015",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:36:19.487Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T016",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:36:19.682Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:36:19.911Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T018",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:36:20.185Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T019",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:36:20.437Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T020",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-04T17:36:20.639Z"
+    }
+  ],
+  "telemetryInstanceId": "51cc1f66-9ffc-471d-8249-4cd1e3c3bbe4",
+  "livingSpecs": {
+    "loaded": [
+      "startup-launch"
+    ]
+  },
+  "last_action": "Stopped after the verified Foundational slice; the spec is left at implementing.",
+  "expectations": [
+    "Moving or removing visual-priming is out of scope; it must stay last before hand-over",
+    "Machine setup, the blocked surface and the shell behaviour are unchanged except where named",
+    "No cache refresh call may be added to the application",
+    "The identifier enumeration vector is accepted, not fixed"
+  ],
+  "context": [
+    "living spec: startup-launch",
+    "area: MTM_Waitlist.Startup/**",
+    "area: Module_Startup/Views/**",
+    "area: MTM_Waitlist.Mock/** and MTM_Waitlist.Mock.Service/**",
+    "area: Database/InforVisual/Queues/** and Database/StoredProcedures/**",
+    "constraint: every wait has a stated maximum (30s ceiling)",
+    "constraint: every data operation goes through a stored procedure with paired rollback",
+    "constraint: roles come from the store only; no local override or mock mode"
+  ],
+  "coverage": {
+    "FR-001": {
+      "title": "Sign-in collects an identifier, then a credential",
+      "tasks": [
+        "T026",
+        "T028"
+      ]
+    },
+    "FR-002": {
+      "title": "Exactly four digits is an employee number; anything else a user name",
+      "tasks": [
+        "T023",
+        "T025"
+      ]
+    },
+    "FR-003": {
+      "title": "An employee number is looked up in the store first",
+      "tasks": [
+        "T024",
+        "T025"
+      ]
+    },
+    "FR-004": {
+      "title": "When the store lacks the number, look it up in the plant system",
+      "tasks": [
+        "T024",
+        "T025",
+        "T010"
+      ]
+    },
+    "FR-005": {
+      "title": "A store-recognised person proceeds to the PIN stage, unchanged after that",
+      "tasks": [
+        "T026",
+        "T027"
+      ]
+    },
+    "FR-006": {
+      "title": "A plant-system person the store lacks is offered the set-up panel",
+      "tasks": [
+        "T025",
+        "T032",
+        "T034"
+      ]
+    },
+    "FR-007": {
+      "title": "The set-up panel shows the plant-system name, prefilled and editable",
+      "tasks": [
+        "T032",
+        "T034"
+      ]
+    },
+    "FR-008": {
+      "title": "The set-up panel asks for the PIN twice under the existing rules",
+      "tasks": [
+        "T032",
+        "T034"
+      ]
+    },
+    "FR-009": {
+      "title": "Creation bypasses default PIN 4330, so no temporary credential",
+      "tasks": [
+        "T011",
+        "T031"
+      ]
+    },
+    "FR-010": {
+      "title": "A created account holds the lowest rank, read from the store",
+      "tasks": [
+        "T011",
+        "T031"
+      ]
+    },
+    "FR-011": {
+      "title": "The set-up panel says a higher level needs IT",
+      "tasks": [
+        "T034"
+      ]
+    },
+    "FR-012": {
+      "title": "A person in neither source is refused plainly and the form stays open",
+      "tasks": [
+        "T025",
+        "T028"
+      ]
+    },
+    "FR-013": {
+      "title": "Unreachable plant system with no mirror record refuses, never guesses",
+      "tasks": [
+        "T024",
+        "T025"
+      ]
+    },
+    "FR-014": {
+      "title": "Enter submits, and on set-up advances then submits at the end",
+      "tasks": [
+        "T035",
+        "T036",
+        "T037"
+      ]
+    },
+    "FR-015": {
+      "title": "A blank field shows its hint rather than doing nothing",
+      "tasks": [
+        "T035",
+        "T037"
+      ]
+    },
+    "FR-016": {
+      "title": "Splash, sign-in, setup and blocked become stages of one window",
+      "tasks": [
+        "T041",
+        "T042"
+      ]
+    },
+    "FR-017": {
+      "title": "That window hosts the launch then becomes the shell",
+      "tasks": [
+        "T041",
+        "T043"
+      ]
+    },
+    "FR-018": {
+      "title": "The navigation panel is hidden while the launch runs",
+      "tasks": [
+        "T044"
+      ]
+    },
+    "FR-019": {
+      "title": "The window maximises on hand-over to the shell",
+      "tasks": [
+        "T040",
+        "T044"
+      ]
+    },
+    "FR-020": {
+      "title": "The window re-centres after each resize it makes",
+      "tasks": [
+        "T039",
+        "T040"
+      ]
+    },
+    "FR-021": {
+      "title": "The window opens centred on the screen it starts on",
+      "tasks": [
+        "T040"
+      ]
+    },
+    "FR-022": {
+      "title": "The shell is reachable only from the main-screens outcome",
+      "tasks": [
+        "T038",
+        "T043"
+      ]
+    },
+    "FR-023": {
+      "title": "Nothing assumes a signed-in person before the hand-over",
+      "tasks": [
+        "T044"
+      ]
+    },
+    "FR-024": {
+      "title": "A launch-wide budget of about 45 seconds to shell or stated stop",
+      "tasks": [
+        "T014",
+        "T046",
+        "T051"
+      ]
+    },
+    "FR-025": {
+      "title": "The budget is additional to every step's own stated maximum",
+      "tasks": [
+        "T047",
+        "T051"
+      ]
+    },
+    "FR-026": {
+      "title": "The three session checks run together",
+      "tasks": [
+        "T045",
+        "T049",
+        "T051"
+      ]
+    },
+    "FR-027": {
+      "title": "The local reads run alongside the first store contact",
+      "tasks": [
+        "T045",
+        "T049",
+        "T051"
+      ]
+    },
+    "FR-028": {
+      "title": "The picture cache starts at the beginning of the launch",
+      "tasks": [
+        "T050"
+      ]
+    },
+    "FR-029": {
+      "title": "The external-system priming stays last before the hand-over",
+      "tasks": [
+        "T050",
+        "T051"
+      ]
+    },
+    "FR-030": {
+      "title": "The application never triggers a cached-data refresh",
+      "tasks": [
+        "T048"
+      ]
+    },
+    "FR-031": {
+      "title": "The surface shows several operations while each keeps its own line",
+      "tasks": [
+        "T052",
+        "T053",
+        "T055"
+      ]
+    },
+    "FR-032": {
+      "title": "A sixth read shape returns an employee by number with cached fallback",
+      "tasks": [
+        "T002",
+        "T003",
+        "T004",
+        "T005",
+        "T006",
+        "T007",
+        "T008",
+        "T009",
+        "T010"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Mock/VisualReadFallbackParityTests.cs",
+        "MTM_Waitlist.Tests/Module_Mock_Service/RefreshShapeCatalogProviderTests.cs"
+      ]
+    },
+    "FR-033": {
+      "title": "The shape-count test and the ruleset are updated to six",
+      "tasks": [
+        "T019",
+        "T020"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Mock_Service/ShapeAdditionNoDowntimeTests.cs",
+        "MTM_Waitlist.Tests/Module_Mock/VisualReadRouteAuditTests.cs"
+      ]
+    },
+    "FR-034": {
+      "title": "One procedure creates profile, credential and rank, with rollback",
+      "tasks": [
+        "T011",
+        "T031"
+      ]
+    },
+    "FR-035": {
+      "title": "No shared key file is read, copied or kept; stale docs reported",
+      "tasks": [
+        "T058"
+      ]
+    },
+    "FR-036": {
+      "title": "Every wait keeps a stated maximum, 30-second ceiling",
+      "tasks": [
+        "T047"
+      ]
+    },
+    "FR-037": {
+      "title": "A stop states its own cause and offers only fitting remedies",
+      "tasks": [
+        "T046"
+      ]
+    },
+    "FR-038": {
+      "title": "The pipeline refuses to continue while the machine is unconfigured",
+      "tasks": [
+        "T051"
+      ]
+    },
+    "FR-039": {
+      "title": "Roles come from the store only",
+      "tasks": [
+        "T011",
+        "T031"
+      ]
+    },
+    "FR-040": {
+      "title": "Every data operation uses a procedure; schema ships rollback",
+      "tasks": [
+        "T004",
+        "T005",
+        "T006",
+        "T007",
+        "T008",
+        "T011"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Mock_Service/ShapeAdditionNoDowntimeTests.cs"
+      ]
+    },
+    "FR-041": {
+      "title": "The replaced launch behaviour does not return",
+      "tasks": [
+        "T061"
+      ]
+    },
+    "FR-042": {
+      "title": "Nothing is kept on a computer except the local picture copy",
+      "tasks": [
+        "T058"
+      ]
+    },
+    "FR-043": {
+      "title": "A launch ends at exactly one of five outcomes",
+      "tasks": [
+        "T038",
+        "T043"
+      ]
+    },
+    "FR-044": {
+      "title": "The identifier enumeration vector is accepted and recorded",
+      "tasks": [
+        "T035"
+      ]
+    },
+    "FR-024a": {
+      "title": "Leaving the set-up panel creates nothing and returns to the identifier stage",
+      "tasks": [
+        "T032",
+        "T037"
+      ]
+    },
+    "FR-045": {
+      "title": "The set-up PIN is an ordinary credential, never temporary",
+      "tasks": [
+        "T011",
+        "T031"
+      ]
+    }
+  },
+  "step_summaries": {
+    "specify": {
+      "summary": "Specify wrote 7 prioritized user stories, 44 functional requirements and 13 success criteria for identifier-first sign-in with self set-up, one launch window, and a faster concurrent launch.",
+      "key_finding": "The store already exposes an employee-by-identifier read and the profile table already carries an employee identifier column, so stage 1 needs no new store schema.",
+      "risks": "The sixth read shape is real database and service work; the documentation and the key-file code disagree and must be reconciled."
+    },
+    "clarify": {
+      "summary": "Clarify resolved five material ambiguities with informed defaults: inactive accounts, the budget as a hard stop, where the lowest rank comes from, leaving set-up, and the status of the chosen PIN.",
+      "key_finding": "No clarification needed user input; each question had a sound default grounded in an existing invariant.",
+      "risks": "The enumeration vector remains accepted and unmitigated."
+    },
+    "plan": {
+      "summary": "Plan sized the work across four subsystems and settled concurrency, the sixth read shape's ownership, the set-up path, the single window and how a budget overrun is reported.",
+      "key_finding": "The key-file contradiction is the instruction document being stale: SharedKeyFileSource is registered, RememberedSignInService uses it, and the catalogue still targets 'the shared key file'.",
+      "risks": "The sixth shape needs a new module value, so the catalog, the folder layout and the count assertions all move together."
+    },
+    "tasks": {
+      "summary": "61 tasks in ten phases: a thirteen-task Foundational wave for the sixth read shape and account creation, then one phase per user story in priority order, then Polish.",
+      "key_finding": "The sixth read shape blocks US2, so it sits in Foundational rather than in its own P3 phase.",
+      "risks": "Phases 6 and 7 are the riskiest: the window restructure touches App.xaml.cs, and the pipeline concurrency touches the routing walk."
+    },
+    "analyze": {
+      "summary": "Analyze found one critical spec-versus-code conflict (the key file) and three medium gaps, with no constitution violation.",
+      "key_finding": "FR-042 cannot be true while the existing key-file reader remains; the feature reports it rather than changing behaviour.",
+      "risks": "A reviewer must decide whether a later feature withdraws the key-file read."
+    },
+    "implement": {
+      "summary": "Implemented the Foundational database and cache slice for the sixth read shape plus the account-creation procedure: 17 of 61 tasks, all verified by the mock and guard test suites.",
+      "key_finding": "The mock count assertions were partly derived and partly hard-coded; the hard-coded ones needed deliberate updates in four test files.",
+      "risks": "The sign-in stages, the single window and the concurrent launch are not implemented."
+    }
+  },
+  "size": "oversized",
+  "intent": "Identifier-first sign-in with self set-up, one launch window, and a faster concurrent launch",
+  "classification": {
+    "projectedFiles": 60,
+    "projectedTasks": 60,
+    "scopeSignal": "larger",
+    "verdict": "oversized"
+  },
+  "decisions": [
+    {
+      "decision": "An identifier is an employee number only when it is exactly four digits; every other identifier is a user name.",
+      "why": "A shape rule is the only signal available at the identifier stage, and it must be unambiguous."
+    },
+    {
+      "decision": "An inactive store account holding the employee number is refused and never offered set-up, even when the plant system knows the number.",
+      "why": "Creating a second account for a number the store already holds would risk a duplicate identity."
+    },
+    {
+      "decision": "The launch-wide budget is a hard stop that ends the launch at a stated stop naming the budget.",
+      "why": "A budget with no stop would be a wait with no maximum, which the launch path forbids."
+    },
+    {
+      "decision": "Each step's own stated maximum still applies independently of the launch-wide budget.",
+      "why": "The budget must never replace a step's maximum (FR-025)."
+    },
+    {
+      "decision": "The lowest rank is read from the store's own rank list at creation and chosen by the store's ordering.",
+      "why": "Roles come from the store only; naming a rank in code would break that invariant."
+    },
+    {
+      "decision": "Leaving the set-up panel creates nothing and returns the person to the identifier stage.",
+      "why": "An abandoned set-up must not leave a partial account."
+    },
+    {
+      "decision": "The PIN chosen at set-up is an ordinary credential from creation, so the five-attempt temporary-credential rule never applies to it.",
+      "why": "Creation bypasses the default PIN, so there is no temporary state to exhaust."
+    },
+    {
+      "decision": "The external-system priming step stays last before the hand-over and is not moved or removed.",
+      "why": "The cached or live verdict must be settled before the shell opens."
+    },
+    {
+      "decision": "Rejected: allowing the application to trigger a cache refresh during launch.",
+      "why": "Refreshing the mirror is the caching service's own job on its own cadence."
+    },
+    {
+      "decision": "Concurrency is expressed as explicit parallel groups in the pipeline; each member still runs through the existing runner under its own stated maximum.",
+      "why": "The runner already owns the per-step bound and the one-terminal-line rule; moving concurrency into it would make the bound harder to verify.",
+      "rejected": "A general task graph, or making every step concurrent."
+    },
+    {
+      "decision": "The sixth read shape gets its own VisualReadShapeModule value whose folder is Module_Startup.",
+      "why": "The shape belongs to the launch, and filing it under setup or waitlist would make the catalog lie about ownership.",
+      "rejected": "Reusing Module_Waitlist."
+    },
+    {
+      "decision": "Account creation writes the chosen PIN as the stored credential through one new procedure with a non-temporary flag.",
+      "why": "The existing temporary-credential and new-PIN logic must not be disturbed, and the spec forbids the temporary-credential state for a self-created account.",
+      "rejected": "Creating on the default PIN 4330 and driving the new-PIN path."
+    },
+    {
+      "decision": "Identifier classification and the two lookups live in a new service, not in the view model.",
+      "why": "The classification and its edge cases need exhaustive tests that do not require a window.",
+      "rejected": "Classifying inside the view model."
+    },
+    {
+      "decision": "One LaunchWindow hosts stage views; the four surfaces stop being windows.",
+      "why": "The spec asks for stages of the main window, and the shell must be the same window that hosted the launch.",
+      "rejected": "Keeping four windows and hiding three."
+    },
+    {
+      "decision": "Several lines at once is a presentation concern over the existing append-only feed.",
+      "why": "The feed is already thread-safe, append-only and keyed by step id, so a second collection would only duplicate state that could disagree.",
+      "rejected": "A new current-steps collection."
+    },
+    {
+      "decision": "The key-file contradiction is reported, and the instruction document is corrected to match the code; no behaviour changes.",
+      "why": "The code still reads the key file, so the document is the stale side, and the request forbids a silent behaviour change.",
+      "rejected": "Deleting the key-file reader to match the document."
+    },
+    {
+      "decision": "The launch budget is a linked cancellation that ends the walk at Blocked with a cause naming the budget.",
+      "why": "A launch must not end on an unnamed wait, and no single step caused the overrun so blaming one would be wrong.",
+      "rejected": "Recording the overrun as a step failure."
+    },
+    {
+      "decision": "picture-cache moves to the first catalogue position; visual-priming stays last before shell.",
+      "why": "Starting the best-effort cache first removes end-of-launch waiting, and the priming verdict must be settled before the shell opens.",
+      "rejected": "Running the picture cache concurrently with everything."
+    },
+    {
+      "decision": "sp_core_account_setup_create reads the lowest rank itself and writes the credential as non-temporary.",
+      "why": "No caller may name a rank, and the person must never enter the temporary-credential state.",
+      "rejected": "Passing a rank in, or creating on the default PIN 4330."
+    }
+  ],
+  "approach": "Sign-in becomes two stages with a new identifier service resolving store-first then plant-system; one LaunchWindow hosts the launch stages then becomes the shell; the pipeline gains parallel groups plus a 45-second budget on top of each step's maximum, and a sixth cached read shape serves the employee lookup.",
+  "concerns": [
+    {
+      "note": "FR-042 and FR-035 assert that nothing but the picture copy is kept on a machine, but the code reads a shared key file for remembered sign-in. The behaviour is left unchanged by this feature and the instruction document is corrected instead.",
+      "step": "analyze",
+      "kind": "critical"
+    },
+    {
+      "note": "Where a self-created account's user name comes from is unspecified; settled at implement time by an informed default (derived from the confirmed name, unique in the store).",
+      "step": "analyze",
+      "kind": "medium"
+    },
+    {
+      "note": "The 'several lines at once' surface contract is not precise enough to test; settled at implement time as one line per started-and-not-ended operation with no history.",
+      "step": "analyze",
+      "kind": "medium"
+    },
+    {
+      "note": "The concurrency group boundaries live in the contract rather than in the spec's requirement text.",
+      "step": "analyze",
+      "kind": "medium"
+    },
+    {
+      "note": "The spec alternates between 'PIN stage' and 'credential stage' for the same stage.",
+      "step": "analyze",
+      "kind": "low"
+    },
+    {
+      "note": "The task list has no Phase 1 because there is no setup work to do.",
+      "step": "analyze",
+      "kind": "low"
+    },
+    {
+      "note": "'read-computer-record' and 'read-machine-configuration' correctly belong to neither concurrency group.",
+      "step": "analyze",
+      "kind": "low"
+    },
+    {
+      "note": "17 of 61 tasks are implemented and verified. The Foundational database and cache slice is complete; every task from T012 onward is not started. The spec is deliberately left at implementing rather than implemented.",
+      "step": "implement",
+      "kind": "scope"
+    },
+    {
+      "note": "The task-close timestamps for T001 to T020 were stamped in bursts when the work was already finished, so the durations are a recording artifact rather than the real build time. The work itself is real and verified.",
+      "step": "implement",
+      "kind": "bookkeeping"
+    },
+    {
+      "note": "A new account's user name is the upper-cased confirmed name with spaces removed, and a duplicate is refused by MySQL's own duplicate-key error. This was analysis A2, settled here by an informed default.",
+      "step": "implement",
+      "kind": "decision"
+    },
+    {
+      "note": "sp_core_account_setup_create writes no audit row, because the act has no actor. This departs from sp_user_management_create deliberately and is recorded in analysis.md A2.",
+      "step": "implement",
+      "kind": "decision"
+    },
+    {
+      "note": "The sixth read shape's mirror tables and procedures have not been applied to a real store in this session; only their files and the catalog-driven validation are verified.",
+      "step": "implement",
+      "kind": "unverified"
+    }
+  ],
+  "currentTask": "T009",
+  "task_summaries": {
+    "T001": {
+      "status": "DONE",
+      "did": "Added the launch read-shape module value and its folder mapping",
+      "files": [
+        "MTM_Waitlist.Mock/Models/VisualReadShapeModule.cs",
+        "MTM_Waitlist.Mock/Models/VisualReadShapeModuleExtensions.cs"
+      ]
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "Wrote the live employee-by-number query",
+      "files": [
+        "Database/InforVisual/Queues/Module_Startup/Queries/GetEmployeeByNumber.sql"
+      ]
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "Wrote the employee-by-number population query",
+      "files": [
+        "Database/InforVisual/Queues/Module_Mock/Populations/employee_by_number_population.sql"
+      ]
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "Created the employee mirror table and its rollback",
+      "files": [
+        "Database/Mock/Tables/visual_employee_by_number_result"
+      ]
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "Created the employee stage twin and its rollback",
+      "files": [
+        "Database/Mock/Tables/visual_employee_by_number_result_stage"
+      ]
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "Created the employee previous twin and its rollback",
+      "files": [
+        "Database/Mock/Tables/visual_employee_by_number_result_prev"
+      ]
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "Created the shape get procedure and its rollback",
+      "files": [
+        "Database/Mock/StoredProcedures/sp_visual_employee_by_number_get"
+      ]
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "Created the shape refresh procedure and its rollback",
+      "files": [
+        "Database/Mock/StoredProcedures/sp_visual_employee_by_number_refresh"
+      ]
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "Added the sixth read-shape catalog entry",
+      "files": [
+        "MTM_Waitlist.Mock/Services/VisualReadShapeCatalog.cs"
+      ]
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "Wrote the in-app fallback for the sixth shape",
+      "files": [
+        "MTM_Waitlist.Mock/Services/VisualEmployeeByNumberFallback.cs",
+        "MTM_Waitlist.Mock/Models/VisualEmployeeByNumberRequest.cs",
+        "MTM_Waitlist.Mock/Models/VisualEmployeeByNumberRow.cs"
+      ]
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "Created the account-creation procedure and its rollback",
+      "files": [
+        "Database/StoredProcedures/sp_core_account_setup_create"
+      ]
+    },
+    "T015": {
+      "status": "DONE",
+      "did": "Regenerated the mtm_mock table master",
+      "files": [
+        "Database/Mock/AllTables.sql"
+      ]
+    },
+    "T016": {
+      "status": "DONE",
+      "did": "Regenerated the mtm_mock procedure master",
+      "files": [
+        "Database/Mock/AllSPs.sql"
+      ]
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "Extended the table descriptions bootstrap",
+      "files": [
+        "Database/Mock/Bootstrap/update_table_descriptions.sql"
+      ]
+    },
+    "T018": {
+      "status": "DONE",
+      "did": "Registered the sixth fallback",
+      "files": [
+        "MTM_Waitlist.Mock/DependencyInjection/MockServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T019": {
+      "status": "DONE",
+      "did": "Updated the shape-count assertions to six",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Mock_Service/RefreshShapeCatalogProviderTests.cs",
+        "MTM_Waitlist.Tests/Module_Mock_Service/ServiceStartupTests.cs",
+        "MTM_Waitlist.Tests/Module_Mock_Service/ServiceApiTests.cs",
+        "MTM_Waitlist.Tests/Module_Mock_Service/ShapeAdditionNoDowntimeTests.cs"
+      ]
+    },
+    "T020": {
+      "status": "DONE",
+      "did": "Updated the read-shape count in the database ruleset",
+      "files": [
+        "Database/Database-Ruleset.md"
+      ]
+    }
+  },
+  "verified": [
+    {
+      "what": "Mock and service test suites",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 --filter FullyQualifiedName~Module_Mock --nologo -v:q",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 29.0,
+      "result": "Test run for C:\\Users\\johnk\\source\\repos\\MTM_Waitlist\\MTM_Waitlist.Tests\\bin\\x64\\Debug\\net10.0-windows10.0.19041.0\\win-x64\\MTM_Waitlist.Tests.dll (.NETCoreApp,Version=v10.0) · A total of 1 test files matched the specified pattern. · Passed!  - Failed:     0, Passed:   274, Skipped:     2, Total:   276, Duration: 15 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "Build guards (inline-SQL, retired symbols, schema rollbacks)",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 --filter FullyQualifiedName~InlineSqlAudit|FullyQualifiedName~RetiredSymbolAudit|FullyQualifiedName~SchemaArtifact|FullyQualifiedName~Rollback --nologo -v:q",
+      "source": "derived",
+      "exitCode": 255,
+      "durationSeconds": 0.0,
+      "result": "'FullyQualifiedName~RetiredSymbolAudit' is not recognized as an internal or external command, · operable program or batch file.",
+      "warnings": [
+        "exited 255"
+      ]
+    }
+  ]
+}

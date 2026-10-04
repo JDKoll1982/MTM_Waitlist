@@ -154,7 +154,7 @@ public sealed class ServiceApiTests
         }
 
         using var payload = JsonDocument.Parse(body);
-        Assert.AreEqual(5, payload.RootElement.GetProperty("shapes").GetArrayLength());
+        Assert.AreEqual(6, payload.RootElement.GetProperty("shapes").GetArrayLength());
         StringAssert.Contains(
             payload.RootElement.GetProperty("operatorAccessPermission").GetString(),
             "permission.cache.refresh_api",

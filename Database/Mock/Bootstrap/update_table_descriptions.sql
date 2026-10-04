@@ -13,6 +13,7 @@
 -- Updated by:
 --   T008  initial (empty — no tables yet)
 --   T014  five mirror tables + five stage twins
+--   011   sixth mirror table (employee_by_number) + its stage twin
 -- ============================================================
 
 USE mtm_mock;
@@ -158,5 +159,29 @@ MODIFY COLUMN work_order_status VARCHAR(8) NULL COMMENT 'Raw Visual WORK_ORDER.S
 MODIFY COLUMN open_work_order_quantity DECIMAL(18,4) NOT NULL DEFAULT 0 COMMENT 'Open quantity still on the order.',
 MODIFY COLUMN finished_goods_quantity DECIMAL(18,4) NOT NULL DEFAULT 0 COMMENT 'Finished-goods on-hand quantity for the part.',
 MODIFY COLUMN has_outside_vendor_operation TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 when an operation carries vendor/service fields.',
+MODIFY COLUMN refreshed_utc DATETIME NOT NULL COMMENT 'UTC time of the refresh that produced this row.',
+MODIFY COLUMN is_seed_content TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 for baseline seed rows; 0 for refreshed content.';
+
+-- ------------------------------------------------------------
+-- Shape 6: employee_by_number
+-- ------------------------------------------------------------
+
+ALTER TABLE visual_employee_by_number_result COMMENT = 'Cached Infor Visual employee lookup result (shape 6 mirror); complete snapshot, replaced atomically.';
+
+ALTER TABLE visual_employee_by_number_result
+MODIFY COLUMN id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
+MODIFY COLUMN employee_number VARCHAR(32) NOT NULL COMMENT 'Employee number lookup key, matched verbatim against EMPLOYEE.ID.',
+MODIFY COLUMN first_name VARCHAR(128) NULL COMMENT 'Employee first name (empty string when Visual has none).',
+MODIFY COLUMN last_name VARCHAR(128) NULL COMMENT 'Employee last name (empty string when Visual has none).',
+MODIFY COLUMN refreshed_utc DATETIME NOT NULL COMMENT 'UTC time of the refresh that produced this row.',
+MODIFY COLUMN is_seed_content TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 for baseline seed rows; 0 for refreshed content.';
+
+ALTER TABLE visual_employee_by_number_result_stage COMMENT = 'Staging twin used by sp_visual_employee_by_number_refresh for the atomic live-table swap.';
+
+ALTER TABLE visual_employee_by_number_result_stage
+MODIFY COLUMN id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
+MODIFY COLUMN employee_number VARCHAR(32) NOT NULL COMMENT 'Employee number lookup key, matched verbatim against EMPLOYEE.ID.',
+MODIFY COLUMN first_name VARCHAR(128) NULL COMMENT 'Employee first name (empty string when Visual has none).',
+MODIFY COLUMN last_name VARCHAR(128) NULL COMMENT 'Employee last name (empty string when Visual has none).',
 MODIFY COLUMN refreshed_utc DATETIME NOT NULL COMMENT 'UTC time of the refresh that produced this row.',
 MODIFY COLUMN is_seed_content TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 for baseline seed rows; 0 for refreshed content.';

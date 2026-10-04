@@ -19,7 +19,7 @@ namespace MTM_Waitlist.Tests.Module_Mock_Service;
 [TestClass]
 public sealed class ShapeAdditionNoDowntimeTests
 {
-    /// <summary>The five shipped shape keys. A change here is a contract change and must be deliberate.</summary>
+    /// <summary>The six shipped shape keys. A change here is a contract change and must be deliberate.</summary>
     private static readonly string[] s_shippedShapeKeys =
     [
         "work_order_lookup",
@@ -27,10 +27,11 @@ public sealed class ShapeAdditionNoDowntimeTests
         "subordinate_parts",
         "inventory_locations",
         "disposition_input",
+        "employee_by_number",
     ];
 
     [TestMethod]
-    public void ShippedCatalog_ContainsExactlyTheFivePublishedShapeKeys()
+    public void ShippedCatalog_ContainsExactlyTheSixPublishedShapeKeys()
     {
         var keys = VisualReadShapeCatalog.Create().Select(shape => shape.Key).ToArray();
 

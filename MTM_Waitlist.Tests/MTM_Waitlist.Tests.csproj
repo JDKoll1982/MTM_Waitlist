@@ -29,6 +29,7 @@
   <ItemGroup>
     <Content Include="..\Database\InforVisual\Queues\Module_Setup\**\*.sql" Link="Database\InforVisual\Queues\Module_Setup\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\Database\InforVisual\Queues\Module_Waitlist\**\*.sql" Link="Database\InforVisual\Queues\Module_Waitlist\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\Database\InforVisual\Queues\Module_Startup\**\*.sql" Link="Database\InforVisual\Queues\Module_Startup\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\Database\InforVisual\Queues\Module_Mock\**\*.sql" Link="Database\InforVisual\Queues\Module_Mock\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\Database\MTMWipApp\Queues\Module_Waitlist\**\*.sql" Link="Database\MTMWipApp\Queues\Module_Waitlist\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\Database\InforVisual\Queues\Module_Setup\README.md" Link="Database\InforVisual\Queues\Module_Setup\README.md" CopyToOutputDirectory="PreserveNewest" />

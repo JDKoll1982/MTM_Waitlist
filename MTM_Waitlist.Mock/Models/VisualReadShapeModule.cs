@@ -5,9 +5,10 @@ namespace MTM_Waitlist.Mock.Models;
 /// </summary>
 /// <remarks>
 /// The member names are the PascalCase form of the on-disk folder names
-/// (<c>Module_Setup</c>, <c>Module_Waitlist</c>); use <see cref="VisualReadShapeModuleExtensions.ToFolderName"/>
-/// when composing a path. The module is informational — <see cref="VisualReadShape.SourceScriptRelativePath"/>
-/// is the authoritative script location.
+/// (<c>Module_Setup</c>, <c>Module_Waitlist</c>, <c>Module_Startup</c>); use
+/// <see cref="VisualReadShapeModuleExtensions.ToFolderName"/> when composing a path. The module is
+/// informational — <see cref="VisualReadShape.SourceScriptRelativePath"/> is the authoritative script
+/// location.
 /// </remarks>
 public enum VisualReadShapeModule
 {
@@ -15,5 +16,8 @@ public enum VisualReadShapeModule
     ModuleSetup,
 
     /// <summary>Scripts under <c>Database/InforVisual/Queues/Module_Waitlist/Queries</c>.</summary>
-    ModuleWaitlist
+    ModuleWaitlist,
+
+    /// <summary>Scripts under <c>Database/InforVisual/Queues/Module_Startup/Queries</c>.</summary>
+    ModuleStartup
 }

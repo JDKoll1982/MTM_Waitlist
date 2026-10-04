@@ -74,6 +74,9 @@
     <Content Include="..\Database\InforVisual\Queues\Module_Waitlist\**\*.sql"
              Link="Database\InforVisual\Queues\Module_Waitlist\%(RecursiveDir)%(Filename)%(Extension)"
              CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\Database\InforVisual\Queues\Module_Startup\**\*.sql"
+             Link="Database\InforVisual\Queues\Module_Startup\%(RecursiveDir)%(Filename)%(Extension)"
+             CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\Database\InforVisual\Queues\Module_Mock\**\*.sql"
              Link="Database\InforVisual\Queues\Module_Mock\%(RecursiveDir)%(Filename)%(Extension)"
              CopyToOutputDirectory="PreserveNewest" />

@@ -12,6 +12,7 @@ public static class VisualReadShapeModuleExtensions
     {
         VisualReadShapeModule.ModuleSetup => "Module_Setup",
         VisualReadShapeModule.ModuleWaitlist => "Module_Waitlist",
+        VisualReadShapeModule.ModuleStartup => "Module_Startup",
         _ => throw new ArgumentOutOfRangeException(nameof(module), module, "Unknown read-shape module.")
     };
 }

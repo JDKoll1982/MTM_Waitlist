@@ -93,9 +93,9 @@ public sealed class ServiceStartupTests
         var catalogProvider = provider.GetRequiredService<RefreshShapeCatalogProvider>();
         var entries = await catalogProvider.ValidateAsync();
 
-        Assert.AreEqual(5, entries.Count, "Every catalog shape is still reported.");
+        Assert.AreEqual(6, entries.Count, "Every catalog shape is still reported.");
         Assert.AreEqual(0, catalogProvider.RefreshableShapes.Count);
-        Assert.AreEqual(5, catalogProvider.InvalidShapes.Count);
+        Assert.AreEqual(6, catalogProvider.InvalidShapes.Count);
 
         StringAssert.Contains(
             catalogProvider.InvalidShapes[0].InvalidReason,
@@ -119,7 +119,7 @@ public sealed class ServiceStartupTests
         // Status is exactly what an operator asks for while something is misconfigured, so it must answer.
         Assert.IsTrue(outcome.Succeeded, "A missing cache connection must not make the status surface fail.");
         Assert.IsNotNull(outcome.Payload);
-        Assert.AreEqual(5, outcome.Payload!.Shapes.Count);
+        Assert.AreEqual(6, outcome.Payload!.Shapes.Count);
         StringAssert.Contains(
             outcome.Payload.OperatorAccessPermission,
             "permission.cache.refresh_api",

@@ -89,6 +89,102 @@ CREATE TABLE IF NOT EXISTS visual_disposition_input_result_stage (
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- ============================================================
+-- Artifact: visual_employee_by_number_result
+-- ============================================================
+
+-- ============================================================
+-- Object:      visual_employee_by_number_result
+-- Database:    mtm_mock
+-- Engine:      MySQL 5.7
+-- Kind:        Table / create (mirror, shape 6 of 6)
+-- Feature:     011-identifier-first-signin (task T004)
+-- Shape key:   employee_by_number
+-- Source read: Database/InforVisual/Queues/Module_Startup/Queries/GetEmployeeByNumber.sql
+-- Caller:      IdentifierSignInService (the self set-up path)
+-- ============================================================
+--
+-- Stores the flattened result of the Infor Visual employee lookup so the set-up path can confirm a
+-- person's name while Infor Visual is unreachable (FR-032). Read exactly once from a snapshot: the
+-- live table always resolves to a complete result because refreshes swap it atomically with its
+-- _stage twin.
+-- ============================================================
+
+USE mtm_mock;
+
+SET NAMES utf8mb4;
+
+CREATE TABLE IF NOT EXISTS visual_employee_by_number_result (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    employee_number VARCHAR(32) NOT NULL,
+    first_name VARCHAR(128) NULL,
+    last_name VARCHAR(128) NULL,
+    refreshed_utc DATETIME NOT NULL,
+    is_seed_content TINYINT(1) NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_visual_employee_by_number_result_employee_number (employee_number)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ============================================================
+-- Artifact: visual_employee_by_number_result_prev
+-- ============================================================
+
+-- ============================================================
+-- Object:      visual_employee_by_number_result_prev
+-- Database:    mtm_mock
+-- Kind:        Table / create (previous-snapshot twin, shape 6 of 6)
+-- Feature:     011-identifier-first-signin (task T006)
+-- ============================================================
+--
+-- Holds the outgoing snapshot between the two halves of the atomic three-name rename. Structure
+-- copied from visual_employee_by_number_result.
+-- ============================================================
+
+USE mtm_mock;
+
+SET NAMES utf8mb4;
+
+CREATE TABLE IF NOT EXISTS visual_employee_by_number_result_prev (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    employee_number VARCHAR(32) NOT NULL,
+    first_name VARCHAR(128) NULL,
+    last_name VARCHAR(128) NULL,
+    refreshed_utc DATETIME NOT NULL,
+    is_seed_content TINYINT(1) NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_visual_employee_by_number_result_prev_employee_number (employee_number)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ============================================================
+-- Artifact: visual_employee_by_number_result_stage
+-- ============================================================
+
+-- ============================================================
+-- Object:      visual_employee_by_number_result_stage
+-- Database:    mtm_mock
+-- Kind:        Table / create (staging twin, shape 6 of 6)
+-- Feature:     011-identifier-first-signin (task T005)
+-- ============================================================
+--
+-- Identical-structure staging twin used by sp_visual_employee_by_number_refresh for the atomic
+-- live-table swap. Structure copied from visual_employee_by_number_result.
+-- ============================================================
+
+USE mtm_mock;
+
+SET NAMES utf8mb4;
+
+CREATE TABLE IF NOT EXISTS visual_employee_by_number_result_stage (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    employee_number VARCHAR(32) NOT NULL,
+    first_name VARCHAR(128) NULL,
+    last_name VARCHAR(128) NULL,
+    refreshed_utc DATETIME NOT NULL,
+    is_seed_content TINYINT(1) NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_visual_employee_by_number_result_stage_employee_number (employee_number)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ============================================================
 -- Artifact: visual_inventory_locations_result
 -- ============================================================
 

@@ -179,7 +179,7 @@ next validation run.
 
 ### Review note — the `mtm_mock` mirror schema lives only under `Database/Mock/`
 
-- The five `visual_*_result` mirror tables, their `_stage` twins and the `sp_visual_*` procedures are defined
+- The six `visual_*_result` mirror tables, their `_stage` twins and the `sp_visual_*` procedures are defined
   **once**, under `Database/Mock/Tables`, `Database/Mock/StoredProcedures` and `Database/Mock/Seeds`.
 - `Database/Tables/AllTables.sql` does **not** list any `mtm_mock` object; the mirror ships through the generated
   `Database/Mock/All*.sql` masters.
