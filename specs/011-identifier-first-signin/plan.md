@@ -1,6 +1,6 @@
 # Implementation Plan: Identifier-First Sign-In and a Faster Launch
 
-**Feature**: `specs/011-identifier-first-signin/identifier-first-signin.spec.md`
+**Feature**: `specs/011-identifier-first-signin/spec.md`
 **Branch**: `011-identifier-first-signin`
 **Size**: oversized
 

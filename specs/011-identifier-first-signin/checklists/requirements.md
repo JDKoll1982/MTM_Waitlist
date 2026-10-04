@@ -2,7 +2,7 @@
 
 **Purpose**: Validate Companion specification completeness before planning
 **Created**: 2026-10-04
-**Feature**: [identifier-first-signin.spec.md](../identifier-first-signin.spec.md)
+**Feature**: [spec.md](../spec.md)
 
 ## Content Quality
 

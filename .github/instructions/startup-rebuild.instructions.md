@@ -87,8 +87,9 @@ groups repeated faults. The seam is **unconditional** — no `[Conditional]`, no
 build has to record.
 
 Never write a credential, a token, a salt, the remembered-sign-in payload, key material or a connection string.
-There is no exception for a key file's path any more: the shared key file is retired, because nothing reads a key
-(FR-043), so there is no path to record and a later change must not reintroduce an allowance for one.
+There is no exception for a key file's path: the plant's shared key is read from its share to honour a remembered
+sign-in, it is never written, copied or held on this computer, and its path must never be recorded — so a later
+change must not reintroduce an allowance for one.
 `contracts/logging-contract.md` §6 is the authoritative list, and `ExceptionDetailSerializer.IsNeverWritten` is
 the check that enforces it.
 
@@ -127,10 +128,10 @@ they follow the person to another computer. Nothing but what is needed to reach 
 - **The replaced launch behaviour must not come back.** `RetiredSymbolAuditTests` fails the build if it does, and
   it asserts the rebuilt view set positively rather than only by absence.
 - **Nothing is kept on the machine except the picture copy** (FR-025, FR-043). What a computer keeps is what it
-  needs to reach the store and the local copy of the pictures, and nothing else: no key file is read, copied or
-  kept, no log file is written locally, and no folder of its own is captured. A change that would keep anything
-  else on a computer, or that would assume a key file exists to read, is not a change this module can take — a
-  person's preferences belong to the store, and where pictures come from is held once for the plant (FR-040).
+  needs to reach the store and the local copy of the pictures, and nothing else: no key file is copied or kept on
+  this computer, no log file is written locally, and no folder of its own is captured. A change that would keep
+  anything else on a computer is not a change this module can take — a person's preferences belong to the store,
+  and where pictures come from is held once for the plant (FR-040).
 
 ## Where the pieces are
 

@@ -300,9 +300,10 @@ for a mirrored employee number and confirm the shape resolves from the mirror.
 
 **Reconciliation**
 
-- FR-035: The application MUST NOT read, copy or keep any shared key file; where an instruction document still
-  claims otherwise, the discrepancy MUST be reported and the stale statement corrected, with no change to
-  behaviour.
+- FR-035: The application MUST NOT copy or keep any shared key file on this computer. The plant's shared key is
+  read from its share to honour a remembered sign-in and is never written, copied or held locally, and its path
+  MUST never be recorded. Where an instruction document claims that no key is read at all, the discrepancy MUST
+  be reported and the stale statement corrected, with no change to behaviour.
 
 **Invariants that must not break**
 

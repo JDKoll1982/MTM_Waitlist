@@ -1,6 +1,6 @@
 # Analysis Report: Identifier-First Sign-In and a Faster Launch
 
-Read-only consistency analysis across `identifier-first-signin.spec.md`, `plan.md`, `tasks.md` and
+Read-only consistency analysis across `spec.md`, `plan.md`, `tasks.md` and
 `.specify/memory/constitution.md`. Produced before implementation, as the analyze step requires.
 
 ## Summary
@@ -18,7 +18,7 @@ requirement and the code as it stands, and it is the reconciliation item this fe
 
 ### A1 - FR-042 asserts nothing but pictures is kept on a machine, and the code reads a key file
 
-`identifier-first-signin.spec.md` FR-042 states that nothing must be kept on a computer except the local picture
+`spec.md` FR-042 states that nothing must be kept on a computer except the local picture
 copy, and FR-035 states that no shared key file is read, copied or kept. The code does read one:
 `SharedKeyFileSource` reads a UNC path, it is registered as `ISharedKeySource` in
 `ModuleDependencyInjectionExtensions`, `RememberedSignInService` uses it to unlock a remembered sign-in,
