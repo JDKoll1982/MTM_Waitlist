@@ -4,7 +4,7 @@
   "branch": "011-identifier-first-signin",
   "unattended": true,
   "currentStep": "implement",
-  "status": "implemented",
+  "status": "completed",
   "history": [
     {
       "step": "specify",
@@ -1140,7 +1140,7 @@
       "kind": "unverified"
     }
   ],
-  "currentTask": "T020",
+  "currentTask": "T009",
   "task_summaries": {
     "T001": {
       "status": "DONE",
