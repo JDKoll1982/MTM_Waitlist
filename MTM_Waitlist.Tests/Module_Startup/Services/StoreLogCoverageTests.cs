@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using System.Reflection;
 
+using Microsoft.Extensions.Logging;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
@@ -72,7 +74,16 @@ public sealed class StoreLogCoverageTests
     {
         // Arrange
         var store = new RecordingLogStore();
-        var seam = new LogService(new FakeMachineFacts(), new FakePersonIdentity(), new StoreLogWriter(store));
+
+        // The threshold is widened for this case on purpose: what it proves is that a launch's outcome runs through
+        // the seam and reaches the store at all, which is the property the retired debug-only path lacked. Whether
+        // the shipped default keeps a launch's successful progress line is a separate decision, covered by
+        // LogStoreLevelTests.
+        var seam = new LogService(
+            new FakeMachineFacts(),
+            new FakePersonIdentity(),
+            new StoreLogWriter(store),
+            new LogStoreLevel(LogSeverity.Info));
         AppLog.Configure(seam);
 
         // Act: the host's own line for a launch that reached its outcome, raised through the façade the whole

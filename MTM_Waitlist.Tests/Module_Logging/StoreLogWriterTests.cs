@@ -30,7 +30,7 @@ public sealed class StoreLogWriterTests
         var service = CreateService(writer);
 
         service.Info("Waitlist", "the entry the store is stuck inside");
-        await store.FirstWriteStarted;
+        await store.WaitForFirstWriteAsync();
 
         // Act
         var callers = Task.Run(() =>
@@ -62,7 +62,7 @@ public sealed class StoreLogWriterTests
         var service = CreateService(writer);
 
         service.Info("Waitlist", "entry 1");
-        await store.FirstWriteStarted;
+        await store.WaitForFirstWriteAsync();
 
         service.Info("Waitlist", "entry 2");
         service.Info("Waitlist", "entry 3");
@@ -88,7 +88,7 @@ public sealed class StoreLogWriterTests
         var service = CreateService(writer);
 
         service.Info("Waitlist", "entry 0");
-        await store.FirstWriteStarted;
+        await store.WaitForFirstWriteAsync();
 
         // Act: one in flight plus the queue's whole capacity means the second entry is the first to be dropped.
         for (var index = 1; index <= StoreLogWriter.DefaultQueueCapacity + 1; index++)
@@ -116,7 +116,7 @@ public sealed class StoreLogWriterTests
         var service = CreateService(writer);
 
         service.Info("Waitlist", "the entry the store is stuck inside");
-        await store.FirstWriteStarted;
+        await store.WaitForFirstWriteAsync();
 
         // Act
         await writer.FlushAsync(CancellationToken.None);
@@ -198,6 +198,19 @@ public sealed class StoreLogWriterTests
         CollectionAssert.AreEqual(raised, store.Messages.ToList());
     }
 
+    /// <summary>
+    /// A seam whose store keeps every severity.
+    /// </summary>
+    /// <remarks>
+    /// These cases are about the queue rather than about which severities are kept, so they widen the store's
+    /// threshold deliberately. It matters here more than anywhere: the entries they raise are Informational, and
+    /// a seam left on the shipped threshold drops them before they are ever queued, so a test waiting for the
+    /// store to be reached would wait for ever. The threshold itself is proved by <see cref="LogStoreLevelTests"/>.
+    /// </remarks>
     private static LogService CreateService(StoreLogWriter writer) =>
-        new(new FakeMachineFacts { Hostname = "test-workstation" }, new FakePersonIdentity(), writer);
+        new(
+            new FakeMachineFacts { Hostname = "test-workstation" },
+            new FakePersonIdentity(),
+            writer,
+            new LogStoreLevel(LogSeverity.Debug));
 }

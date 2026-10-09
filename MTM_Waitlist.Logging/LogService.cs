@@ -37,6 +37,7 @@ public sealed class LogService : ILogService
     private readonly IMachineFacts _machineFacts;
     private readonly IPersonIdentity _personIdentity;
     private readonly StoreLogWriter _writer;
+    private readonly LogStoreLevel _level;
     private readonly DateTime _processStartedUtc;
 
     /// <summary>
@@ -45,7 +46,17 @@ public sealed class LogService : ILogService
     /// <param name="machineFacts">This machine, read at write time so no call site has to pass it.</param>
     /// <param name="personIdentity">The person, read at write time so no call site has to pass it.</param>
     /// <param name="writer">The queue the composed records go to.</param>
-    public LogService(IMachineFacts machineFacts, IPersonIdentity personIdentity, StoreLogWriter writer)
+    /// <param name="level">
+    /// The threshold this seam keeps entries at. The shipped default is
+    /// <see cref="LogStoreLevel.ShippedMinimum"/>, so errors and warnings are kept and progress lines are
+    /// dropped; the host passes the one instance the logging module registered, so a change made in Settings
+    /// takes effect here without a restart (<see cref="LogStoreLevel.SectionName"/>).
+    /// </param>
+    public LogService(
+        IMachineFacts machineFacts,
+        IPersonIdentity personIdentity,
+        StoreLogWriter writer,
+        LogStoreLevel? level = null)
     {
         ArgumentNullException.ThrowIfNull(machineFacts);
         ArgumentNullException.ThrowIfNull(personIdentity);
@@ -54,8 +65,20 @@ public sealed class LogService : ILogService
         _machineFacts = machineFacts;
         _personIdentity = personIdentity;
         _writer = writer;
+        _level = level ?? new LogStoreLevel();
         _processStartedUtc = DiagnosticContext.ResolveProcessStartedUtc();
     }
+
+    /// <summary>
+    /// The threshold this seam keeps entries at, exposed to the <c>ILogger</c> provider beside it.
+    /// </summary>
+    /// <remarks>
+    /// Exposed instead of copied so there is exactly one threshold in the process: two copies could disagree, and
+    /// a level one door honoured and the other ignored would let entries of the same severity in through one door
+    /// and not the other (FR-032). Internal because it is this module's own wiring and not part of the seam a call
+    /// site writes through.
+    /// </remarks>
+    internal LogStoreLevel Level => _level;
 
     /// <inheritdoc />
     public void Write(LogEntry entry)
@@ -109,6 +132,14 @@ public sealed class LogService : ILogService
     {
         try
         {
+            // The store keeps what a reader needs rather than everything the application did, and the threshold
+            // is consulted here so that both doors onto the store — this seam and the ILogger provider beside it
+            // — drop the same entries (FR-032).
+            if (_level.Keeps(entry.Severity) is false)
+            {
+                return;
+            }
+
             // An entry raised from inside a write to the log store is the recorder describing its own work. It is
             // dropped here rather than queued, because the data-access seam announces every call it makes and the
             // announcement of a log write would itself be a log write (§1.4, FR-037).
@@ -176,14 +207,32 @@ public sealed class LogService : ILogService
     /// Reads the signed-in person, or null when nobody is signed in.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// The internal account identifier is written and the display name never is: the store is built to be copied
     /// out of a panel, and a reader who needs the person's name joins the account row by the identifier they
     /// already have.
+    /// </para>
+    /// <para>
+    /// <b>The person is context, not a gate.</b> A sign-in state that cannot be read costs the entry its person
+    /// and never the entry, so a machine nobody is signed in on — and a machine whose identity read fails — still
+    /// records what happened on it. Recording nothing because nobody was signed in would leave the store holding
+    /// one machine's history, which is the opposite of what it is for (FR-021, FR-025).
+    /// </para>
     /// </remarks>
-    private string? ReadPerson() =>
-        _personIdentity.IsSignedIn
-            ? _personIdentity.UserId.ToString(CultureInfo.InvariantCulture)
-            : null;
+    private string? ReadPerson()
+    {
+        try
+        {
+            return _personIdentity.IsSignedIn
+                ? _personIdentity.UserId.ToString(CultureInfo.InvariantCulture)
+                : null;
+        }
+        catch (Exception)
+        {
+            // An unreadable identity is recorded as nobody rather than losing the entry.
+            return null;
+        }
+    }
 
     private string? ReadMachineFacts(Func<IMachineFacts, string?> read)
     {

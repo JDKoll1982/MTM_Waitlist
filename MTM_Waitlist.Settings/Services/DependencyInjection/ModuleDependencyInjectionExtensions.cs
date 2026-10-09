@@ -12,6 +12,12 @@ public static class ModuleDependencyInjectionExtensions
         services.AddSingleton<SettingsModuleService>();
         services.AddSingleton<IConfigSettingsValueService, ConfigSettingsValueService>();
 
+        // How much the log store keeps is held as a plant-wide setting and changed from this module's own screen,
+        // so the reader, the writer and the threshold the logging seam uses are joined here rather than in the
+        // screen. The LogStoreLevel it adopts is the one the logging module registered, so a change made in
+        // Settings is in force for the very next entry raised (FR-032).
+        services.AddSingleton<ILogStoreLevelService, LogStoreLevelService>();
+
         // The "Computers" screen's registry seam moved into this module with the launch rebuild (T187), so it
         // is registered where its screen lives rather than in the app's own registration file.
         services.AddSingleton<IComputerRegistryService, ComputerRegistryService>();

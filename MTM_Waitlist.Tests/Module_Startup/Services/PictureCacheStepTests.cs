@@ -1,5 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Startup.Models;
 using MTM_Waitlist.Module_Startup.Services;
@@ -135,6 +137,74 @@ public sealed class PictureCacheStepTests
         StringAssert.Contains(outcome.Diagnosis!, "2 replaced copies cleaned up");
     }
 
+    /// <summary>
+    /// A folder the copies cannot be written into is named as the folder, not as the share. The two faults have
+    /// different remedies, and the line on the splash screen is the only clue the person reading it gets.
+    /// </summary>
+    [TestMethod]
+    public async Task RunAsync_WhenTheCopiesCannotBeWritten_NamesTheFolderRatherThanTheShare()
+    {
+        // Arrange: the share was readable and the folder the copies go into could not be written.
+        var cache = new RecordingPictureCache
+        {
+            Result = new ImageCacheSyncResult(0, 0, [])
+            {
+                DestinationsUnavailable = ["dunnage pictures"],
+            },
+        };
+
+        var step = new PictureCacheStep(new LaunchStepCatalog(), cache);
+
+        // Act
+        var outcome = await step.RunAsync(Context(), CancellationToken.None);
+
+        // Assert
+        Assert.AreEqual(LaunchStepStatus.Failed, outcome.Status);
+        StringAssert.Contains(outcome.Diagnosis!, "dunnage pictures");
+        StringAssert.Contains(outcome.Diagnosis!, "could not be written to");
+        StringAssert.DoesNotMatch(
+            outcome.Diagnosis!,
+            new System.Text.RegularExpressions.Regex("share could not be read"),
+            "sending an administrator to a share that is healthy spends the one clue they get");
+    }
+
+    /// <summary>
+    /// The failure that leaves a machine holding only the few pictures an installer put there is recorded through
+    /// the log seam, so it reaches the store from every computer. The feed it is also reported on is in memory and
+    /// dies with the launch, so a fault that only ever reached the feed is a fault nobody can look back at.
+    /// </summary>
+    [TestMethod]
+    public async Task RunAsync_WhenTheCopiesCannotBeWritten_IsRecordedRatherThanOnlyShown()
+    {
+        var sink = new RecordingAppLogSink();
+        AppLog.Configure(sink);
+
+        try
+        {
+            var cache = new RecordingPictureCache
+            {
+                Result = new ImageCacheSyncResult(0, 0, [])
+                {
+                    DestinationsUnavailable = ["dunnage pictures"],
+                },
+            };
+
+            var step = new PictureCacheStep(new LaunchStepCatalog(), cache);
+
+            // Act
+            await step.RunAsync(Context(), CancellationToken.None);
+
+            // Assert
+            Assert.AreEqual(1, sink.Messages.Count, "the fault has to be recorded once rather than not at all");
+            StringAssert.Contains(sink.Messages[0], "dunnage pictures");
+            CollectionAssert.Contains(sink.Areas.ToArray(), "PictureCache");
+        }
+        finally
+        {
+            AppLog.Configure(null);
+        }
+    }
+
     [TestMethod]
     public async Task RunAsync_WhenThereWasNothingToDo_SaysTheCopiesWereAlreadyUpToDate()
     {
@@ -169,6 +239,30 @@ public sealed class PictureCacheStepTests
     /// <summary>What a step is handed: no person yet, this computer's facts, and the feed.</summary>
     private static LaunchStepContext Context(ILaunchActivityFeed? feed = null)
         => new(null, new FakeMachineFacts { Hostname = "test-workstation" }, feed ?? new LaunchActivityFeed());
+
+    /// <summary>Captures what the facade forwards to the seam.</summary>
+    private sealed class RecordingAppLogSink : IAppLogSink
+    {
+        /// <summary>What was recorded, in the order it was recorded.</summary>
+        public List<string> Messages { get; } = [];
+
+        /// <summary>The part of the application each entry came from.</summary>
+        public List<string> Areas { get; } = [];
+
+        /// <inheritdoc />
+        public void Info(string module, string message, string? target = null)
+        {
+            Areas.Add(module);
+            Messages.Add(message);
+        }
+
+        /// <inheritdoc />
+        public void Error(string module, string message, Exception? exception = null)
+        {
+            Areas.Add(module);
+            Messages.Add(message);
+        }
+    }
 
     /// <summary>A mirror that answers from what the test stated and records that it was asked.</summary>
     private sealed class RecordingPictureCache : IImageCacheSyncService

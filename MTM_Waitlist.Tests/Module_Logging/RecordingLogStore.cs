@@ -21,6 +21,9 @@ namespace MTM_Waitlist.Tests.Module_Logging;
 /// </remarks>
 internal sealed class RecordingLogStore : IMySqlHelperServer
 {
+    /// <summary>How long a test waits for the writer to be inside its first write before failing.</summary>
+    private static readonly TimeSpan DefaultFirstWriteWait = TimeSpan.FromSeconds(10);
+
     private readonly TaskCompletionSource _firstWriteStarted = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private TaskCompletionSource _gate = Released();
 
@@ -30,8 +33,32 @@ internal sealed class RecordingLogStore : IMySqlHelperServer
     /// <summary>When set, every write throws it. Used to prove a refusal is absorbed.</summary>
     public Exception? WriteFailure { get; set; }
 
-    /// <summary>Completes when the writer is inside its first write, so a test can assert from a known state.</summary>
-    public Task FirstWriteStarted => _firstWriteStarted.Task;
+    /// <summary>
+    /// Waits, within a stated limit, for the writer to be inside its first write.
+    /// </summary>
+    /// <param name="timeout">How long to wait; ten seconds when none is named.</param>
+    /// <returns>A task that completes once the first write has started.</returns>
+    /// <exception cref="TimeoutException">No write reached the store within the limit.</exception>
+    /// <remarks>
+    /// <b>A bare wait on the first write is a way to hang the whole run.</b> When nothing reaches the store —
+    /// because the entry was dropped before it was queued, or the writer never drained — that wait never
+    /// completes: the test never returns, the run produces no summary and names nothing, and the test host it
+    /// leaves behind holds the test assembly so every later run waits on that lock too. MSTest cannot abort a
+    /// non-cooperative async test, so nothing upstream rescues it. This turns that silence into a failure that
+    /// says what did not happen.
+    /// </remarks>
+    public async Task WaitForFirstWriteAsync(TimeSpan? timeout = null)
+    {
+        var limit = timeout ?? DefaultFirstWriteWait;
+        var finished = await Task.WhenAny(_firstWriteStarted.Task, Task.Delay(limit)).ConfigureAwait(false);
+
+        if (!ReferenceEquals(finished, _firstWriteStarted.Task))
+        {
+            throw new TimeoutException(
+                $"No write reached the store within {limit.TotalSeconds:0.#}s. The entry was most likely dropped "
+                + "before it was queued (a severity below the store's threshold), so the writer had nothing to drain.");
+        }
+    }
 
     /// <summary>Whether the writer is currently held inside a write.</summary>
     public bool IsBlocked => !Volatile.Read(ref _gate).Task.IsCompleted;

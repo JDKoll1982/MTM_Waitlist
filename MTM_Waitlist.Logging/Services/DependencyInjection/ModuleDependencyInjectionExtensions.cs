@@ -42,14 +42,30 @@ public static class ModuleDependencyInjectionExtensions
         services.AddSingleton(sp => new StoreLogWriter(sp.GetRequiredService<IMySqlHelperServer>()));
         services.AddSingleton<IHostedService>(sp => sp.GetRequiredService<StoreLogWriter>());
 
+        // What the store keeps is settled once here and adopted again whenever the plant setting changes, so the
+        // threshold is one object both surfaces read rather than a value copied into each of them. The shipped
+        // default is errors and warnings, from LogStore:MinimumLevel when a deployment configures one, and the
+        // stored setting is applied on top of that at launch and again when Settings changes it. A value that
+        // names no severity answers the default rather than silencing the store, so a mistyped setting is never
+        // the reason no fault is recorded (FR-032).
+        var level = new LogStoreLevel(LogStoreLevel.ParseSeverity(
+            configuration[$"{LogStoreLevel.SectionName}:{LogStoreLevel.MinimumLevelKey}"]));
+
+        services.AddSingleton(level);
+
         // One seam instance behind both surfaces. One instance is one queue, which is what makes the entries in
         // the store read as a single history of what the application did.
-        services.AddSingleton<LogService>();
+        services.AddSingleton(sp => new LogService(
+            sp.GetRequiredService<IMachineFacts>(),
+            sp.GetRequiredService<IPersonIdentity>(),
+            sp.GetRequiredService<StoreLogWriter>(),
+            level));
         services.AddSingleton<ILogService>(sp => sp.GetRequiredService<LogService>());
 
         // Every ILogger call site in this application resolves its ILogger from this container, so registering the
         // provider is the whole of that surface's migration: no call site is edited (plan D5). The provider is
-        // registered as an ILoggerProvider, which is how the container's ILoggerFactory collects its providers.
+        // registered as an ILoggerProvider, which is how the container's ILoggerFactory collects its providers, and
+        // it takes its threshold from the seam it writes through rather than from a second copy.
         services.AddSingleton<ILoggerProvider, StoreLoggerProvider>();
 
         return services;

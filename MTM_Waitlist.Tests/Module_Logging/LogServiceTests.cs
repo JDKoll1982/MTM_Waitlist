@@ -123,6 +123,56 @@ public sealed class LogServiceTests
         StringAssert.Contains(write.Value("p_payload_json"), "WaitlistViewPage", "the caller's target belongs in the payload");
     }
 
+    /// <summary>
+    /// Builds the seam at a threshold that keeps every severity, so a case about what an entry carries is not also
+    /// asserting the shipped threshold. The default has its own case below.
+    /// </summary>
     private static LogService CreateService(StoreLogWriter writer) =>
-        new(new FakeMachineFacts(), new FakePersonIdentity(), writer);
+        new(new FakeMachineFacts(), new FakePersonIdentity(), writer, new LogStoreLevel(LogSeverity.Debug));
+
+    /// <summary>
+    /// The store keeps errors and warnings by default and drops the progress lines below them, which is the whole
+    /// point of the setting: a shop-floor machine is not a transcript, and the entries worth keeping on it are the
+    /// faults and the near-faults.
+    /// </summary>
+    [TestMethod]
+    public async Task Info_IsDroppedByTheShippedDefault_AndKeptOnceTheStoreIsWidened()
+    {
+        // Arrange: the shipped default, which is what a host that configures nothing runs with.
+        var defaultStore = new RecordingLogStore();
+        var defaultWriter = new StoreLogWriter(defaultStore);
+        var seam = new LogService(new FakeMachineFacts(), new FakePersonIdentity(), defaultWriter);
+
+        // Act
+        seam.Info("Waitlist", "The list was refreshed.");
+        seam.Warn("Waitlist", "The share could not be read.");
+        seam.Error("Waitlist", "The request could not be saved.");
+
+        await defaultWriter.FlushAsync(CancellationToken.None);
+
+        // Assert: the progress line is gone and the warning and the fault are kept.
+        Assert.AreEqual(2, defaultStore.Writes.Count, "the default did not keep exactly the warnings and faults");
+        CollectionAssert.AreEqual(
+            new[] { "warning", "error" },
+            defaultStore.Writes.Select(write => write.Value("p_level")).ToArray(),
+            "the store kept an entry the shipped default drops");
+
+        // Arrange: the same seam, widened the way Settings widens it.
+        var widenedStore = new RecordingLogStore();
+        var widenedWriter = new StoreLogWriter(widenedStore);
+        var widened = new LogService(
+            new FakeMachineFacts(),
+            new FakePersonIdentity(),
+            widenedWriter,
+            new LogStoreLevel(LogSeverity.Info));
+
+        // Act
+        widened.Info("Waitlist", "The list was refreshed.");
+
+        await widenedWriter.FlushAsync(CancellationToken.None);
+
+        // Assert
+        Assert.AreEqual(1, widenedStore.Writes.Count, "a widened store did not keep the progress line");
+        Assert.AreEqual("info", widenedStore.Writes[0].Value("p_level"));
+    }
 }

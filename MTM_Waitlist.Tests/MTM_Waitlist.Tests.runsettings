@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Run settings for MTM_Waitlist.Tests.
+
+  Why this file exists: without a timeout a test that never finishes takes the whole run with it. The run then
+  looks like it never started (no summary, no failure, nothing named), and the test host it leaves behind keeps a
+  lock on the test assembly, so every later run waits on that lock and looks stuck too. That is what a "test run
+  that never starts" is, seen from the outside.
+
+  The two settings below are the documented way to bound that (Microsoft Learn, "Configure unit tests with a
+  .runsettings file"):
+
+    RunConfiguration/TestSessionTimeout  the whole session is terminated after this many milliseconds
+    MSTest/TestTimeout                    a single test case is given this many milliseconds
+
+  The values are deliberately generous. Every unit test in this suite is milliseconds, and the slowest legitimate
+  ones are a few seconds (a bounded connect to an unreachable host, a priming step that waits three seconds). A
+  test that reaches the limit is a hang rather than a slow test, and the runner then names it instead of waiting
+  for ever.
+
+  tools/run-tests.ps1 passes this file explicitly and adds the blame hang detector, so a run started from the
+  command line is protected by both the timeout and the detector.
+-->
+<RunSettings>
+  <RunConfiguration>
+    <!-- Fifteen minutes for the whole assembly: the suite takes well under two, so this only ever trips on a hang. -->
+    <TestSessionTimeout>900000</TestSessionTimeout>
+  </RunConfiguration>
+
+  <MSTest>
+    <!-- Ninety seconds for one test. A test that needs longer than this is not measuring anything worth waiting for. -->
+    <TestTimeout>90000</TestTimeout>
+    <CaptureTraceOutput>true</CaptureTraceOutput>
+  </MSTest>
+</RunSettings>

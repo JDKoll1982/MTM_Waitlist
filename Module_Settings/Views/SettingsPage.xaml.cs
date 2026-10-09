@@ -68,6 +68,14 @@ public sealed partial class SettingsPage : Page
     private void RefreshPictureCache_Click(object sender, RoutedEventArgs e) =>
         ViewModel.RefreshPictureCacheCommand.Execute(null);
 
+    /// <summary>Stores how much the log store keeps, for every computer.</summary>
+    /// <remarks>
+    /// Through the view model's command for the same reason the cache folder is: the value that is saved is the one
+    /// the command validated and adopted, and a test can drive it without a control.
+    /// </remarks>
+    private void SaveLogStoreLevel_Click(object sender, RoutedEventArgs e) =>
+        ViewModel.SaveLogStoreLevelCommand.Execute(null);
+
     private async void AddComputer_Click(object sender, RoutedEventArgs e)
     {
         if (!ViewModel.ComputerManagement.CanManageComputers)

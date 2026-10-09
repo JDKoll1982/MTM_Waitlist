@@ -2096,6 +2096,33 @@
   <data name="Settings_StoragePaths_SaveFailed.Text" xml:space="preserve">
     <value>Unable to save those settings.</value>
   </data>
+  <data name="Settings_LogStoreLevel_Title.Text" xml:space="preserve">
+    <value>How much the log store keeps</value>
+  </data>
+  <data name="Settings_LogStoreLevel_Description.Text" xml:space="preserve">
+    <value>Which entries are worth keeping, for every computer. Errors and warnings are kept by default; the levels below that record ordinary progress and are for investigating a problem.</value>
+  </data>
+  <data name="Settings_LogStoreLevel_Label.Text" xml:space="preserve">
+    <value>Keep entries at this level and above</value>
+  </data>
+  <data name="Settings_LogStoreLevel_Save.Text" xml:space="preserve">
+    <value>Save log level</value>
+  </data>
+  <data name="Settings_LogStoreLevel_StoreIsTruth.Text" xml:space="preserve">
+    <value>This applies to every computer and changes what is recorded from now on. Recording is never switched off: every machine records what happens on it, whoever is signed in.</value>
+  </data>
+  <data name="Settings_LogStoreLevel_Saved.Text" xml:space="preserve">
+    <value>Saved for every computer. Entries are kept at the level you chose and above.</value>
+  </data>
+  <data name="Settings_LogStoreLevel_EditRefused.Text" xml:space="preserve">
+    <value>Your role may not change what the log store keeps.</value>
+  </data>
+  <data name="Settings_LogStoreLevel_Invalid.Text" xml:space="preserve">
+    <value>Choose one of the levels in the list.</value>
+  </data>
+  <data name="Settings_LogStoreLevel_SaveFailed.Text" xml:space="preserve">
+    <value>Unable to save that level.</value>
+  </data>
   <data name="PartPictureCard_NoPicture.Text" xml:space="preserve">
     <value>No picture</value>
   </data>

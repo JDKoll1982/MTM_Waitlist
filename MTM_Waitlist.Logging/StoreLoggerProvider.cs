@@ -62,6 +62,10 @@ public sealed class StoreLoggerProvider : ILoggerProvider
     /// the logging module and is the one caller that has a fault plus the structured properties to hand over
     /// together.
     /// </param>
+    /// <remarks>
+    /// The threshold is taken from the seam rather than passed in beside it, so the process holds one threshold
+    /// and the two doors onto the store cannot disagree about what is worth keeping.
+    /// </remarks>
     public StoreLoggerProvider(LogService logService)
     {
         ArgumentNullException.ThrowIfNull(logService);
@@ -112,10 +116,12 @@ public sealed class StoreLoggerProvider : ILoggerProvider
 
         /// <inheritdoc />
         /// <remarks>
-        /// Everything but <see cref="LogLevel.None"/> is enabled, because the store is the filter: the panel
-        /// narrows by severity when it is read, and a level the store never received cannot be recovered later.
+        /// Everything at or above the store's threshold is enabled, and everything below it is not: a level the
+        /// store would drop is not worth the caller building its message and structured properties for. The store
+        /// is still the filter a reader narrows with — the panel queries by severity — and the threshold is a
+        /// deployment's decision (<see cref="LogStoreLevel.SectionName"/>), defaulting to warnings and faults.
         /// </remarks>
-        public bool IsEnabled(LogLevel logLevel) => logLevel != LogLevel.None;
+        public bool IsEnabled(LogLevel logLevel) => _logService.Level.Keeps(logLevel);
 
         /// <inheritdoc />
         public void Log<TState>(
@@ -135,7 +141,7 @@ public sealed class StoreLoggerProvider : ILoggerProvider
                 var message = formatter is null ? string.Empty : formatter(state, exception) ?? string.Empty;
 
                 var entry = new LogEntry(
-                    SeverityFor(logLevel),
+                    LogStoreLevel.SeverityOf(logLevel),
                     _module,
                     message,
                     OutcomeFor(logLevel),
@@ -178,16 +184,6 @@ public sealed class StoreLoggerProvider : ILoggerProvider
 
             return properties.Count == 0 ? null : properties;
         }
-
-        private static LogSeverity SeverityFor(LogLevel logLevel) => logLevel switch
-        {
-            LogLevel.Trace or LogLevel.Debug => LogSeverity.Debug,
-            LogLevel.Information => LogSeverity.Info,
-            LogLevel.Warning => LogSeverity.Warning,
-            LogLevel.Error => LogSeverity.Error,
-            LogLevel.Critical => LogSeverity.Critical,
-            _ => LogSeverity.Info,
-        };
 
         private static string OutcomeFor(LogLevel logLevel) => logLevel switch
         {

@@ -109,10 +109,20 @@ public static class ImageCachePaths
     /// The places the MTM Receiving Application's own Dunnage cache can be, in the order they are looked in.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// That application caches Dunnage pictures into <c>{its application folder}\Assets\DunnageImages</c> and never
     /// lets the folder be configured (<c>SetLocalCacheRootFolder</c> is declared and never called), so the folder
     /// is found by looking where that application can be installed rather than by reading a setting. When one of
-    /// these exists it is <b>shared</b> rather than duplicated — one copy of a Dunnage picture per machine.
+    /// these exists <b>and this account may write in it</b> it is <b>shared</b> rather than duplicated — one copy
+    /// of a Dunnage picture per machine.
+    /// </para>
+    /// <para>
+    /// <b>These are candidates, not answers.</b> Where that application is installed machine-wide its folder is
+    /// under <c>Program Files</c>, which a standard account may read and may not write. Pointing the mirror there
+    /// means every copy fails while the folder keeps only the pictures an elevated installer left behind — a
+    /// handful of Dunnage pictures and no error that names the folder. <see cref="ResolveDunnageCacheFolder"/>
+    /// therefore requires the folder to be writable and falls back to this application's own cache when it is not.
+    /// </para>
     /// </remarks>
     public static IReadOnlyList<string> ReceivingApplicationDunnageCaches { get; } =
     [
@@ -129,14 +139,122 @@ public static class ImageCachePaths
             "DunnageImages"),
     ];
 
+    /// <summary>Whether the shared receiving-application folder has been settled for this process yet.</summary>
+    private static bool s_sharedDunnageCacheDecided;
+
+    /// <summary>The receiving-application folder this machine shares, or null when there is none it may write in.</summary>
+    private static string? s_sharedDunnageCache;
+
     /// <summary>
     /// The Dunnage cache folder to write into: the receiving application's own cache when this machine already has
-    /// one, and this application's own folder when it does not.
+    /// one and this account may write in it, and this application's own folder when it does not.
     /// </summary>
     /// <returns>The folder to mirror the Dunnage pictures into.</returns>
-    public static string ResolveDunnageCacheFolder() =>
-        ReceivingApplicationDunnageCaches.FirstOrDefault(Directory.Exists)
-            ?? Path.Combine(LocalCacheRoot, DunnageFolderName);
+    /// <remarks>
+    /// Whether the shared folder can be written to is settled <b>once per process</b>, because this is read on the
+    /// path that resolves a picture for a card and a menu that repainted would otherwise test the file system for
+    /// every picture it drew. What is settled is a fact about this machine and this account rather than a setting,
+    /// so deciding it once cannot go stale the way a cached setting could. The configured cache folder is read on
+    /// every call rather than captured, so a change made in the settings panel is picked up without a restart.
+    /// </remarks>
+    public static string ResolveDunnageCacheFolder()
+    {
+        if (s_sharedDunnageCacheDecided is false)
+        {
+            s_sharedDunnageCache = FindWritableReceivingCache();
+            s_sharedDunnageCacheDecided = true;
+        }
+
+        return s_sharedDunnageCache ?? Path.Combine(LocalCacheRoot, DunnageFolderName);
+    }
+
+    /// <summary>
+    /// Forgets the once-per-process answer above, so a test can set a machine up and ask again.
+    /// </summary>
+    internal static void ForgetSharedDunnageCacheDecision()
+    {
+        s_sharedDunnageCache = null;
+        s_sharedDunnageCacheDecided = false;
+    }
+
+    /// <summary>The first receiving-application cache folder that exists and that this account may write in.</summary>
+    private static string? FindWritableReceivingCache()
+    {
+        foreach (var candidate in ReceivingApplicationDunnageCaches)
+        {
+            if (IsFolderWritable(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Whether this account may create a file in a folder.
+    /// </summary>
+    /// <param name="folder">The folder to test. A folder that is not there is not writable.</param>
+    /// <returns><see langword="true"/> when a file could be created in it and removed again.</returns>
+    /// <remarks>
+    /// Asking costs one file, and it is the only answer that is true for the account the application is running as:
+    /// a path's permissions, what it inherits, a read-only share and a full disk all arrive at the same yes or no
+    /// without any of them having to be reasoned about. The probe names itself uniquely and is deleted as it closes,
+    /// so two machines starting at the same moment cannot collide and nothing is left behind that a later run could
+    /// take for a picture.
+    /// </remarks>
+    public static bool IsFolderWritable(string? folder)
+    {
+        if (string.IsNullOrWhiteSpace(folder) || Directory.Exists(folder) is false)
+        {
+            return false;
+        }
+
+        try
+        {
+            var probe = Path.Combine(folder, $".write-probe-{Guid.NewGuid():N}.tmp");
+
+            using (new FileStream(probe, FileMode.CreateNew, FileAccess.Write, FileShare.None, 1, FileOptions.DeleteOnClose))
+            {
+            }
+
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Brings a cache folder into being and answers whether copies can be written into it.
+    /// </summary>
+    /// <param name="cacheFolder">The folder the copies are to go into.</param>
+    /// <returns><see langword="true"/> when the folder exists and this account may write in it.</returns>
+    /// <remarks>
+    /// Creating and verifying are one step because they answer one question — can the copies go here — and because
+    /// separating them would leave a caller that created a folder believing it had done enough. The mirror asks
+    /// this <b>before</b> it walks the source, so a destination this account cannot use is reported as itself
+    /// rather than surfacing as the first <c>File.Copy</c> to fail.
+    /// </remarks>
+    public static bool TryPrepareCacheFolder(string? cacheFolder)
+    {
+        if (string.IsNullOrWhiteSpace(cacheFolder))
+        {
+            return false;
+        }
+
+        try
+        {
+            Directory.CreateDirectory(cacheFolder);
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+
+        return IsFolderWritable(cacheFolder);
+    }
 
     /// <summary>
     /// The local cache folder one part collection's copies live in, named for the collection itself.

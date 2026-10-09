@@ -101,7 +101,9 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
         var copied = 0;
         var removed = 0;
         var archivesRemoved = 0;
+        var notCopied = 0;
         var skipped = new List<string>();
+        var destinationsUnavailable = new List<string>();
 
         foreach (var source in sources)
         {
@@ -113,12 +115,23 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
                 continue;
             }
 
+            if (ImageCachePaths.TryPrepareCacheFolder(source.CacheRoot) is false)
+            {
+                // The pictures are readable and this account cannot write where the copies go. Settling that here,
+                // before the walk, is what keeps the two faults apart: reporting this one as an unreachable share
+                // sends an administrator to look at a share that is perfectly healthy, and says nothing about the
+                // folder that actually needs fixing.
+                destinationsUnavailable.Add(source.Label);
+                continue;
+            }
+
             try
             {
                 var sourceResult = SynchronizeSource(source, cancellationToken);
                 copied += sourceResult.Copied;
                 removed += sourceResult.Removed;
                 archivesRemoved += sourceResult.ArchivesRemoved;
+                notCopied += sourceResult.NotCopied;
             }
             catch (OperationCanceledException)
             {
@@ -132,20 +145,27 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
             }
         }
 
-        return new ImageCacheSyncResult(copied, removed, skipped, archivesRemoved);
+        return new ImageCacheSyncResult(copied, removed, skipped, archivesRemoved)
+        {
+            DestinationsUnavailable = destinationsUnavailable,
+            NotCopied = notCopied,
+        };
     }
 
     /// <summary>Mirrors one source, returning what it did.</summary>
-    private static (int Copied, int Removed, int ArchivesRemoved) SynchronizeSource(
+    /// <remarks>
+    /// The caller has already established that the source can be read and that the copies can be written: this walk
+    /// is only ever entered for a source that has a readable root and a usable destination.
+    /// </remarks>
+    private static (int Copied, int Removed, int ArchivesRemoved, int NotCopied) SynchronizeSource(
         ImageCacheSource source,
         CancellationToken cancellationToken)
     {
-        Directory.CreateDirectory(source.CacheRoot);
-
         // What the share holds, gathered before anything is deleted, so the deletion pass can only ever remove a
         // copy whose original was genuinely looked for and not found.
         var onShare = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var copied = 0;
+        var notCopied = 0;
 
         foreach (var sharedPath in Directory.EnumerateFiles(source.SourceRoot, "*", SearchOption.AllDirectories))
         {
@@ -176,12 +196,22 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
                 continue;
             }
 
-            File.Copy(sharedPath, cachePath, overwrite: true);
+            try
+            {
+                File.Copy(sharedPath, cachePath, overwrite: true);
 
-            // The copy carries the share's own last-written time. Without that stamp every cached picture would
-            // differ from its original on the next run and be copied again for ever.
-            File.SetLastWriteTimeUtc(cachePath, File.GetLastWriteTimeUtc(sharedPath));
-            copied++;
+                // The copy carries the share's own last-written time. Without that stamp every cached picture would
+                // differ from its original on the next run and be copied again for ever.
+                File.SetLastWriteTimeUtc(cachePath, File.GetLastWriteTimeUtc(sharedPath));
+                copied++;
+            }
+            catch (Exception)
+            {
+                // One picture that will not copy — held open on this machine, or a name the file system refuses —
+                // must not abandon the other hundred and forty and leave the cache half built with nothing said.
+                // The count carries the fault out to the caller, which reports it.
+                notCopied++;
+            }
         }
 
         var removed = 0;
@@ -212,7 +242,7 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
         // without anybody having to remember to tidy up (FR-011, FR-037).
         var archivesRemoved = RemoveExpiredArchives(source, cancellationToken);
 
-        return (copied, removed, archivesRemoved);
+        return (copied, removed, archivesRemoved, notCopied);
     }
 
     /// <summary>

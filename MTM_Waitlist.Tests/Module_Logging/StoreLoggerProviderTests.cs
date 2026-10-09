@@ -177,6 +177,49 @@ public sealed class StoreLoggerProviderTests
         return int.Parse(match.Groups["width"].Value, CultureInfo.InvariantCulture);
     }
 
+    /// <summary>
+    /// Builds a provider whose threshold keeps every severity the store accepts.
+    /// </summary>
+    /// <remarks>
+    /// These cases are about what an entry <em>carries</em> — its module, its level, its structured payload — so
+    /// they run at the level that keeps everything and are not also asserting the shipped threshold. The shipped
+    /// default has its own cases in <see cref="LogStoreLevelTests"/> and in
+    /// <c>StoreLoggerProvider_KeepsWhatTheThresholdKeeps</c>. The one threshold object is handed to the seam and
+    /// the provider takes it from there, which is what these cases can rely on.
+    /// </remarks>
     private static StoreLoggerProvider CreateProvider(StoreLogWriter writer) =>
-        new(new LogService(new FakeMachineFacts { Hostname = "test-workstation" }, new FakePersonIdentity(), writer));
+        new(new LogService(
+            new FakeMachineFacts { Hostname = "test-workstation" },
+            new FakePersonIdentity(),
+            writer,
+            new LogStoreLevel(LogSeverity.Debug)));
+
+    /// <summary>
+    /// The provider drops what the store's threshold drops, so a progress line is not built for a store that would
+    /// not keep it, and the default is errors and warnings.
+    /// </summary>
+    [TestMethod]
+    public async Task StoreLoggerProvider_KeepsWhatTheThresholdKeeps()
+    {
+        // Arrange: the shipped default, which is what a host that configures nothing runs with.
+        var store = new RecordingLogStore();
+        var writer = new StoreLogWriter(store);
+        using var provider = new StoreLoggerProvider(
+            new LogService(new FakeMachineFacts { Hostname = "test-workstation" }, new FakePersonIdentity(), writer));
+        var logger = provider.CreateLogger("MTM_Waitlist.Tests.Probe");
+
+        // Act
+        Assert.IsFalse(logger.IsEnabled(LogLevel.Information), "a progress line is not kept by default");
+        Assert.IsTrue(logger.IsEnabled(LogLevel.Warning), "a warning is kept by default");
+        Assert.IsTrue(logger.IsEnabled(LogLevel.Error), "an error is kept by default");
+
+        logger.LogInformation("The list was refreshed.");
+        logger.LogWarning("The share could not be read.");
+
+        await writer.FlushAsync(CancellationToken.None);
+
+        // Assert: only the warning reached the store.
+        Assert.AreEqual(1, store.Writes.Count, "the store kept an entry the default drops");
+        Assert.AreEqual("warning", store.Writes[0].Value("p_level"));
+    }
 }

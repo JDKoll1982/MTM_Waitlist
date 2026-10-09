@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
+using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Startup.Models;
 using MTM_Waitlist.Module_Startup.Services;
@@ -163,6 +164,12 @@ public partial class App : Application
 
         AppLog.Configure(Host.Services.GetService<ILogService>());
         AppLog.Info("App", "Host built.");
+
+        // How much the store keeps is a plant-wide setting, so it is applied here rather than only when somebody
+        // opens Settings: a machine has to keep what the plant decided from its first entry, not from its first
+        // visit to a screen. The read is one configuration row and is deliberately not awaited — the shipped
+        // default is already in force, and a launch must never wait on the diagnostics it is recording.
+        AdoptStoredLogStoreLevel(Host.Services);
 
         try
         {
@@ -562,6 +569,46 @@ public partial class App : Application
         {
             // Writing the record is best-effort, and a failure here is deliberately not reported anywhere.
         }
+    }
+
+    /// <summary>
+    /// Applies the plant-wide log-store level to the threshold the logging seam keeps entries at.
+    /// </summary>
+    /// <param name="services">The host's services.</param>
+    /// <remarks>
+    /// <para>
+    /// <b>Best effort and never awaited.</b> The shipped default is already in force, so the worst a store that
+    /// will not answer can cost is that this machine keeps the default until the next launch — which must never
+    /// be paid for with a launch that waits on diagnostics.
+    /// </para>
+    /// <para>
+    /// <b>Nothing about it is user-gated.</b> Every computer signs in as somebody, every computer records what
+    /// happens on it, and where the level comes from is a plant-wide row rather than a person's role. A host with
+    /// no configuration store registered simply keeps the configured default.
+    /// </para>
+    /// </remarks>
+    private static void AdoptStoredLogStoreLevel(IServiceProvider services)
+    {
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                if (services.GetService<ILogStoreLevelService>() is not { } levels)
+                {
+                    return;
+                }
+
+                var applied = await levels.ApplyStoredLevelAsync().ConfigureAwait(false);
+
+                AppLog.Info("LogStore", $"The log store keeps entries at '{applied}' and above.");
+            }
+            catch (Exception exception)
+            {
+                // The default is in force, so a stored level that could not be read is a diagnostic about the
+                // diagnostics rather than a reason to do anything else about it.
+                AppLog.Error("LogStore", exception, "The stored log-store level could not be applied, so the shipped default is in force.");
+            }
+        });
     }
 
     private static void CurrentDomain_FirstChanceException(object? sender, FirstChanceExceptionEventArgs e)

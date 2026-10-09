@@ -14,6 +14,7 @@ using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Services;
+using MTM_Waitlist.Module_Logging;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Mock.Contracts;
@@ -92,6 +93,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         nameof(IsImageLocationSettingsPanelVisible),
         nameof(IsStoragePathsPanelVisible),
         nameof(IsPictureCachePanelVisible),
+        nameof(IsLogStoreLevelPanelVisible),
         nameof(IsUserManagementEntryVisible),
         nameof(IsPermissionsEntryVisible),
         nameof(IsPartPicturesEntryVisible),
@@ -111,6 +113,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     private readonly IConfigSettingsValueService? _configSettingsValueService;
     private readonly IImageCacheSyncService? _imageCacheSyncService;
     private readonly IPictureEnlargePreference? _pictureEnlargePreference;
+    private readonly ILogStoreLevelService? _logStoreLevelService;
 
     // Suppresses the OnNewRequestAlertsEnabledChanged side effect while the initial value is loaded in the
     // constructor, so opening the page does not log a misleading "changed" or re-persist.
@@ -259,6 +262,42 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     }
 
     /// <summary>
+    /// The least severe entry the log store keeps, as the store holds it.
+    /// </summary>
+    /// <remarks>
+    /// The value in force, shown beside the box so a reader can see what the store is actually doing rather than
+    /// only what the box holds. It is a severity name from the store's own vocabulary, and it is applied to the
+    /// live threshold because the logging module's single <see cref="LogStoreLevel"/> is what both the seam and
+    /// the <c>ILogger</c> provider consult.
+    /// </remarks>
+    [ObservableProperty]
+    public partial string LogStoreMinimumLevel
+    {
+        get; set;
+    } = LogStoreLevel.ShippedMinimum.ToString();
+
+    /// <summary>What the level box holds, kept apart from the value in force so an unsaved pick is never treated as saved.</summary>
+    [ObservableProperty]
+    public partial string LogStoreMinimumLevelInput
+    {
+        get; set;
+    } = LogStoreLevel.ShippedMinimum.ToString();
+
+    /// <summary>What the log-store section last did, in a sentence.</summary>
+    [ObservableProperty]
+    public partial string LogStoreStatusMessage
+    {
+        get; set;
+    } = string.Empty;
+
+    /// <summary>Whether the level is being written, so the button is not started twice.</summary>
+    [ObservableProperty]
+    public partial bool IsLogStoreBusy
+    {
+        get; set;
+    }
+
+    /// <summary>
     /// The picture folder that is in effect for every computer, as the store holds it (FR-009, FR-010).
     /// </summary>
     [ObservableProperty]
@@ -336,6 +375,16 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     public ObservableCollection<DunnageTypeVisibilityOption> HiddenDunnageTypes { get; } = new();
 
     public ObservableCollection<string> IgnoredLocations { get; } = new();
+
+    /// <summary>
+    /// The severities a person may choose between, from the store's own vocabulary.
+    /// </summary>
+    /// <remarks>
+    /// Read from <see cref="LogStoreLevel.Chooseable"/> rather than spelled again here, so a severity added to the
+    /// store is offered by the screen instead of being unreachable from it.
+    /// </remarks>
+    public IReadOnlyList<string> LogStoreLevelOptions { get; } =
+        LogStoreLevel.Chooseable.Select(severity => severity.ToString()).ToArray();
 
     /// <summary>
     /// Whether the signed-in person may change the hot work centres, answered from
@@ -675,6 +724,43 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         "error",
         "exception");
 
+    /// <summary>
+    /// The row that decides how much the log store keeps, offered beside the log panel to the same person.
+    /// </summary>
+    /// <remarks>
+    /// Gated on <c>permission.settings.log_panel</c> rather than on a key of its own, because it decides the same
+    /// thing about the same screen: whoever may read the log is the person who may say how much of it is kept.
+    /// Nothing here gates <em>writing</em> to the store — every computer records what happens on it, for every
+    /// person who signs in, and this row only widens or narrows what is worth keeping (FR-032, FR-025).
+    /// </remarks>
+    public bool IsLogStoreLevelPanelVisible => CanOpenDeveloperLogPanel
+        && _logStoreLevelService is not null
+        && MatchesSearch(
+            "log",
+            "logs",
+            "logging",
+            "store",
+            "severity",
+            "level",
+            "diagnostics",
+            "verbosity",
+            "how much is kept");
+
+    /// <summary>The log-store section's heading.</summary>
+    public string LogStoreLevelPanelTitle => "Settings_LogStoreLevel_Title.Text".GetLocalized();
+
+    /// <summary>What the section holds, in a sentence.</summary>
+    public string LogStoreLevelPanelDescription => "Settings_LogStoreLevel_Description.Text".GetLocalized();
+
+    /// <summary>The label on the severity box.</summary>
+    public string LogStoreLevelLabel => "Settings_LogStoreLevel_Label.Text".GetLocalized();
+
+    /// <summary>The section's save action.</summary>
+    public string LogStoreLevelSaveLabel => "Settings_LogStoreLevel_Save.Text".GetLocalized();
+
+    /// <summary>The line saying what the store is doing right now.</summary>
+    public string LogStoreLevelStoreIsTruthText => "Settings_LogStoreLevel_StoreIsTruth.Text".GetLocalized();
+
     /// <summary>What the session-length box is for, in the reader's language.</summary>
     public string SessionLengthTitle => "Settings_SessionLength_Title.Text".GetLocalized();
 
@@ -786,7 +872,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         "display name",
         string.Join(" ", ComputerManagement.Computers.Select(record => record.GetDisplayLabel())));
 
-    public bool IsOperationsCategoryVisible => IsHotWorkCentersPanelVisible || IsDunnageTypeVisibilityPanelVisible || IsImageLocationSettingsPanelVisible || IsPictureCachePanelVisible || IsPartPicturesEntryVisible || IsComputersPanelVisible || IsIgnoredLocationsPanelVisible || IsSessionLengthPanelVisible || IsDeveloperLogPanelVisible || IsNewRequestAlertsPanelVisible || IsUrgencyAllotmentsPanelVisible;
+    public bool IsOperationsCategoryVisible => IsHotWorkCentersPanelVisible || IsDunnageTypeVisibilityPanelVisible || IsImageLocationSettingsPanelVisible || IsPictureCachePanelVisible || IsPartPicturesEntryVisible || IsComputersPanelVisible || IsIgnoredLocationsPanelVisible || IsSessionLengthPanelVisible || IsDeveloperLogPanelVisible || IsLogStoreLevelPanelVisible || IsNewRequestAlertsPanelVisible || IsUrgencyAllotmentsPanelVisible;
 
     public bool IsAboutCategoryVisible => IsAboutPanelVisible;
 
@@ -814,7 +900,8 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         IImageStorageConfigurationResolver? imageStorageConfigurationResolver = null,
         IConfigSettingsValueService? configSettingsValueService = null,
         IImageCacheSyncService? imageCacheSyncService = null,
-        IPictureEnlargePreference? pictureEnlargePreference = null)
+        IPictureEnlargePreference? pictureEnlargePreference = null,
+        ILogStoreLevelService? logStoreLevelService = null)
     {
         AppLog.Info("SettingsViewModel", "Constructor started.");
         _themeSelectorService = themeSelectorService;
@@ -834,6 +921,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         _configSettingsValueService = configSettingsValueService;
         _imageCacheSyncService = imageCacheSyncService;
         _pictureEnlargePreference = pictureEnlargePreference;
+        _logStoreLevelService = logStoreLevelService;
         ComputerManagement = computerManagement;
         UrgencyAllotments = urgencyAllotments;
 
@@ -856,6 +944,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         _ = InitializeSessionLengthAsync();
         _ = InitializeStoragePathsAsync();
         _ = InitializePictureCacheAsync();
+        _ = InitializeLogStoreLevelAsync();
 
         SwitchThemeCommand = new RelayCommand<ElementTheme>(
             async (param) =>
@@ -1698,6 +1787,102 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     }
 
     /// <summary>
+    /// Reads the level the log store keeps entries at, so the section opens on the value in force rather than on
+    /// the shipped default (FR-032).
+    /// </summary>
+    private async Task InitializeLogStoreLevelAsync()
+    {
+        if (_logStoreLevelService is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var severity = await _logStoreLevelService.ReadStoredLevelAsync().ConfigureAwait(true);
+
+            LogStoreMinimumLevel = severity.ToString();
+            LogStoreMinimumLevelInput = severity.ToString();
+            LogStoreStatusMessage = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            // The shipped default is what the store is already doing in this case, so the box is seeded from it
+            // rather than left empty, and the failure is recorded rather than swallowed.
+            LogStoreMinimumLevel = LogStoreLevel.ShippedMinimum.ToString();
+            LogStoreMinimumLevelInput = LogStoreLevel.ShippedMinimum.ToString();
+            AppLog.Error("SettingsLogStore", ex, "The log store's level could not be read; the shipped default is shown.");
+        }
+
+        RefreshSearchVisibility();
+    }
+
+    /// <summary>
+    /// Stores how much the log store keeps, for every computer, and applies it to the store straight away.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The gate is read here rather than inferred from whether the control was drawn, so a caller that reaches the
+    /// command without going through the panel is refused, and refused in the words the hidden control implies
+    /// (FR-054, FR-117).
+    /// </para>
+    /// <para>
+    /// <b>The change needs no restart.</b> The logging module holds one threshold and both doors onto the store
+    /// read it, so adopting the new value is what puts it in force for the next entry raised — on this computer
+    /// at once, and on every other computer the next time it reads the setting (FR-032).
+    /// </para>
+    /// <para>
+    /// A name this cannot parse is refused rather than quietly stored as the default, because a silent change to
+    /// what is recorded is the one outcome a reader could never detect.
+    /// </para>
+    /// </remarks>
+    [RelayCommand]
+    private async Task SaveLogStoreLevelAsync()
+    {
+        if (!CanOpenDeveloperLogPanel || _logStoreLevelService is null)
+        {
+            LogStoreStatusMessage = "Settings_LogStoreLevel_EditRefused.Text".GetLocalized();
+            return;
+        }
+
+        if (IsLogStoreBusy)
+        {
+            return;
+        }
+
+        if (Enum.TryParse<LogSeverity>(LogStoreMinimumLevelInput?.Trim(), ignoreCase: true, out var severity) is false
+            || Enum.IsDefined(severity) is false)
+        {
+            LogStoreStatusMessage = "Settings_LogStoreLevel_Invalid.Text".GetLocalized();
+            return;
+        }
+
+        IsLogStoreBusy = true;
+
+        try
+        {
+            await _logStoreLevelService
+                .SaveLevelAsync(severity, _personIdentity.UserId > 0 ? _personIdentity.UserId : null)
+                .ConfigureAwait(true);
+
+            LogStoreMinimumLevel = severity.ToString();
+            LogStoreMinimumLevelInput = severity.ToString();
+            LogStoreStatusMessage = "Settings_LogStoreLevel_Saved.Text".GetLocalized();
+
+            AppLog.Info("SettingsLogStore", $"The log store's level was stored as '{severity}' for every computer.");
+        }
+        catch (Exception ex)
+        {
+            LogStoreStatusMessage = "Settings_LogStoreLevel_SaveFailed.Text".GetLocalized();
+            AppLog.Error("SettingsLogStore", ex, "The log store's level could not be stored.");
+        }
+        finally
+        {
+            IsLogStoreBusy = false;
+        }
+    }
+
+    /// <summary>
     /// Copies the pictures onto this computer now, without waiting for the next start.
     /// </summary>
     /// <remarks>
@@ -1720,9 +1905,13 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         {
             var result = await _imageCacheSyncService.SynchronizeAsync().ConfigureAwait(true);
 
-            PictureCacheStatusMessage = result.SourcesSkipped.Count > 0
-                ? $"Copied {result.Copied}, removed {result.Removed}. Nothing was done for {string.Join(", ", result.SourcesSkipped)}, which could not be reached."
-                : $"Copied {result.Copied}, removed {result.Removed}.";
+            PictureCacheStatusMessage = result.DestinationsUnavailable.Count > 0
+                ? $"Copied {result.Copied}, removed {result.Removed}. Nothing was done for {string.Join(", ", result.DestinationsUnavailable)}, because the folder the copies go into could not be written to."
+                : result.SourcesSkipped.Count > 0
+                    ? $"Copied {result.Copied}, removed {result.Removed}. Nothing was done for {string.Join(", ", result.SourcesSkipped)}, which could not be reached."
+                    : result.NotCopied > 0
+                        ? $"Copied {result.Copied}, removed {result.Removed}. {result.NotCopied} picture(s) could not be copied."
+                        : $"Copied {result.Copied}, removed {result.Removed}.";
         }
         catch (Exception ex)
         {

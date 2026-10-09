@@ -921,6 +921,64 @@
                     </wct:SettingsExpander.Items>
                 </wct:SettingsExpander>
 
+                <!-- How much the log store keeps. Offered beside the log panel to the same person: whoever may
+                     read the log is who may say how much of it is kept. This narrows or widens what is STORED, for
+                     every computer — it never gates the write, which happens on every machine for every person.
+                     The wrapping status line sits in a vertically-aligned card for the reason the storage panel
+                     and the log panel do: a right-aligned content slot measures its content with unbounded width,
+                     and wrapping text in an unbounded slot is the layout cycle recorded in the notes above. -->
+                <wct:SettingsExpander
+                    AutomationProperties.AutomationId="SettingsPage_LogStoreLevelExpander"
+                    x:Name="LogStoreLevelExpander"
+                    x:Load="{x:Bind ViewModel.IsLogStoreLevelPanelVisible, Mode=OneWay}"
+                    Description="{x:Bind ViewModel.LogStoreLevelPanelDescription}"
+                    Header="{x:Bind ViewModel.LogStoreLevelPanelTitle}"
+                    HorizontalAlignment="Stretch"
+                    IsExpanded="False">
+                    <wct:SettingsExpander.HeaderIcon>
+                        <SymbolIcon Symbol="Filter" />
+                    </wct:SettingsExpander.HeaderIcon>
+
+                    <wct:SettingsExpander.Items>
+                        <wct:SettingsCard Header="{x:Bind ViewModel.LogStoreLevelLabel}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <ComboBox
+                                    AutomationProperties.AutomationId="SettingsPage_LogStoreLevelBox"
+                                    AutomationProperties.Name="{x:Bind ViewModel.LogStoreLevelLabel}"
+                                    MinWidth="180"
+                                    ItemsSource="{x:Bind ViewModel.LogStoreLevelOptions}"
+                                    SelectedItem="{x:Bind ViewModel.LogStoreMinimumLevelInput, Mode=TwoWay}" />
+                                <Button
+                                    AutomationProperties.AutomationId="SettingsPage_LogStoreLevelSaveButton"
+                                    AutomationProperties.Name="{x:Bind ViewModel.LogStoreLevelSaveLabel}"
+                                    MinWidth="110"
+                                    Click="SaveLogStoreLevel_Click"
+                                    Content="{x:Bind ViewModel.LogStoreLevelSaveLabel}" />
+                                <ProgressRing
+                                    Width="20"
+                                    Height="20"
+                                    IsActive="{x:Bind ViewModel.IsLogStoreBusy, Mode=OneWay}" />
+                            </StackPanel>
+                        </wct:SettingsCard>
+
+                        <wct:SettingsCard
+                            ContentAlignment="Vertical"
+                            HorizontalContentAlignment="Stretch">
+                            <StackPanel Spacing="8">
+                                <TextBlock
+                                    MaxWidth="680"
+                                    Text="{x:Bind ViewModel.LogStoreLevelStoreIsTruthText}"
+                                    TextWrapping="Wrap" />
+
+                                <TextBlock
+                                    MaxWidth="680"
+                                    Text="{x:Bind ViewModel.LogStoreStatusMessage, Mode=OneWay}"
+                                    TextWrapping="Wrap" />
+                            </StackPanel>
+                        </wct:SettingsCard>
+                    </wct:SettingsExpander.Items>
+                </wct:SettingsExpander>
+
                 <!-- New request alerts -->
                 <wct:SettingsCard
                     AutomationProperties.AutomationId="SettingsPage_NewRequestAlertsExpander"

@@ -169,6 +169,73 @@ public sealed class ImageCachePathsTests
         }
     }
 
+    [TestMethod]
+    public void AFolderThatIsNotThereIsNotWritable()
+    {
+        Assert.IsFalse(ImageCachePaths.IsFolderWritable(Path.Combine(_workingDirectory, "no-such-folder")));
+        Assert.IsFalse(ImageCachePaths.IsFolderWritable(null));
+        Assert.IsFalse(ImageCachePaths.IsFolderWritable("   "));
+    }
+
+    [TestMethod]
+    public void APathThatIsAFileIsNotAFolderThatCanBeWrittenTo()
+    {
+        var filePath = Path.Combine(_workingDirectory, "pickup-coil.png");
+        File.WriteAllBytes(filePath, [1]);
+
+        Assert.IsFalse(ImageCachePaths.IsFolderWritable(filePath));
+    }
+
+    [TestMethod]
+    public void AFolderThisAccountMayWriteInIsWritable()
+    {
+        Directory.CreateDirectory(_cacheRoot);
+
+        Assert.IsTrue(ImageCachePaths.IsFolderWritable(_cacheRoot));
+    }
+
+    [TestMethod]
+    public void PreparingACacheFolder_MakesItAndAnswersWhetherCopiesCanGoIn()
+    {
+        var folder = Path.Combine(_cacheRoot, ImageCachePaths.DunnageFolderName);
+
+        Assert.IsTrue(ImageCachePaths.TryPrepareCacheFolder(folder));
+        Assert.IsTrue(Directory.Exists(folder), "preparing a folder has to leave it there");
+
+        var notAFolder = Path.Combine(_workingDirectory, "not-a-folder.txt");
+        File.WriteAllText(notAFolder, "x");
+
+        Assert.IsFalse(
+            ImageCachePaths.TryPrepareCacheFolder(Path.Combine(notAFolder, "DunnageImages")),
+            "a folder that cannot be created is not one copies can go into");
+    }
+
+    /// <summary>
+    /// The rule that decides where the Dunnage copies go. The receiving application's own cache is shared when
+    /// this account may write in it, and this application's own folder is used when it may not — because a folder
+    /// under <c>Program Files</c> is readable and not writable for the account the application runs as, and every
+    /// copy written into it fails.
+    /// </summary>
+    [TestMethod]
+    public void TheDunnageCacheIsAlwaysAFolderThisAccountCanWriteTo()
+    {
+        var chosen = ImageCachePaths.ResolveDunnageCacheFolder();
+        var ourOwn = Path.Combine(ImageCachePaths.LocalCacheRoot, ImageCachePaths.DunnageFolderName);
+
+        if (string.Equals(chosen, ourOwn, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        Assert.IsTrue(
+            ImageCachePaths.IsFolderWritable(chosen),
+            "the Dunnage copies were pointed at a folder this account may not write to, so every copy would fail");
+        CollectionAssert.Contains(
+            ImageCachePaths.ReceivingApplicationDunnageCaches.ToArray(),
+            chosen,
+            "a shared folder has to be the receiving application's own cache rather than somewhere new");
+    }
+
     /// <summary>
     /// The two part collections keep their own cache folders, named for the collections themselves. A Visual part
     /// and a WIP part may share a part number, so a shared folder would make one copy stand for two parts

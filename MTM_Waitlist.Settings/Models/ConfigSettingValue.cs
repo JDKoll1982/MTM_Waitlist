@@ -201,6 +201,21 @@ public static class ConfigSettingKeys
     public const string ImageCacheEnabled = "image_cache.enabled";
 
     /// <summary>
+    /// How much the log store keeps, as a severity name from the store's own vocabulary.
+    /// Setting Key: "logging.store_minimum_level"
+    /// Value Type: "text" (a <c>LogSeverity</c> name: Debug, Info, Warning, Error or Critical)
+    /// Scope: "all_users" (global setting)
+    /// Description: the least severe entry the store keeps. Held once for the plant so one decision covers every
+    ///             computer, and changed from Settings by a person holding the diagnostics entitlement. The shipped
+    ///             default is <c>Warning</c> — errors and warnings are kept and ordinary progress lines are dropped
+    ///             — and <c>LogStore:MinimumLevel</c> in <c>appsettings.json</c> is what a machine uses until
+    ///             somebody changes it. A value that names no severity answers the default rather than silencing
+    ///             the store.
+    /// Default: Warning
+    /// </summary>
+    public const string LogStoreMinimumLevel = "logging.store_minimum_level";
+
+    /// <summary>
     /// Whether clicking a picture shows it enlarged.
     /// Setting Key: "display.enlarge_pictures_on_click"
     /// Value Type: "bool" (true/false)

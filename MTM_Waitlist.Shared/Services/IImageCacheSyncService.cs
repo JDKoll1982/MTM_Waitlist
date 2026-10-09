@@ -40,6 +40,26 @@ public sealed record ImageCacheSyncResult(
     IReadOnlyList<string> SourcesSkipped,
     int ArchivesRemoved = 0)
 {
+    /// <summary>
+    /// The sources whose local folder could not be written to, so nothing under them was copied.
+    /// </summary>
+    /// <remarks>
+    /// Kept apart from <see cref="SourcesSkipped"/> on purpose, because the two faults have different remedies and
+    /// the same words for both sends an administrator to the wrong one. A source here was <b>readable</b>: the
+    /// pictures were there and the copies could not be put anywhere, which on a shop-floor machine usually means
+    /// the folder belongs to an elevated install and this account may only read it.
+    /// </remarks>
+    public IReadOnlyList<string> DestinationsUnavailable { get; init; } = Array.Empty<string>();
+
+    /// <summary>
+    /// How many pictures could not be copied although their destination was usable.
+    /// </summary>
+    /// <remarks>
+    /// One picture held open by another program, or a name this file system refuses, costs that picture and not
+    /// the rest of the run. The count is what makes such a run visible rather than looking like an up-to-date one.
+    /// </remarks>
+    public int NotCopied { get; init; }
+
     /// <summary>A run that had nothing to do and nothing to report.</summary>
     public static ImageCacheSyncResult NothingToDo { get; } = new(0, 0, Array.Empty<string>());
 

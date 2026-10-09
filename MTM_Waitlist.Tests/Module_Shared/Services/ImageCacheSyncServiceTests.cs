@@ -175,6 +175,57 @@ public sealed class ImageCacheSyncServiceTests
             "The pictures already cached stay put.");
     }
 
+    /// <summary>
+    /// A folder the copies cannot be written into is not an unreachable share, and saying so is what tells an
+    /// administrator where to look. The share here is perfectly readable; a folder under a file is the same
+    /// failure a standard account meets trying to write under <c>Program Files</c>.
+    /// </summary>
+    [TestMethod]
+    public void AnUnwritableDestinationIsNotReportedAsAnUnreachableShare()
+    {
+        WriteSharedPicture(@"Parts\Steel Rack.png");
+
+        var notAFolder = Path.Combine(_workingDirectory, "not-a-folder.txt");
+        File.WriteAllText(notAFolder, "x");
+        var unusableCache = Path.Combine(notAFolder, "DunnageImages");
+
+        var result = ImageCacheSyncService.Synchronize([Source(_shareRoot, unusableCache)]);
+
+        Assert.AreEqual(0, result.Copied);
+        Assert.AreEqual(
+            0,
+            result.SourcesSkipped.Count,
+            "the share was readable, so it is not the share that could not be read");
+        CollectionAssert.AreEqual(
+            new[] { "test pictures" },
+            result.DestinationsUnavailable.ToArray(),
+            "the folder the copies could not be written into is the fault, and it has to be named as one");
+    }
+
+    /// <summary>
+    /// One picture that will not copy costs that picture and not the rest of the run. Leaving the cache half built
+    /// and saying nothing is how a machine comes to hold only a few of the pictures it should.
+    /// </summary>
+    [TestMethod]
+    public void APictureThatWillNotCopyDoesNotAbandonTheOthers()
+    {
+        WriteSharedPicture(@"request_item\pickup-coil.png");
+        WriteSharedPicture(@"request_item\steel-rack.png");
+        WriteSharedPicture(@"request_item\boxes.png");
+
+        // One of the three cannot be written: the name the copy would take is already a folder, which the file
+        // system refuses. This is the shape of a picture held open by another program, without needing one.
+        Directory.CreateDirectory(Path.Combine(_cacheRoot, "request_item", "steel-rack.png"));
+
+        var result = ImageCacheSyncService.Synchronize([Source(_shareRoot, _cacheRoot)]);
+
+        Assert.AreEqual(2, result.Copied, "the two pictures that could be copied were still copied");
+        Assert.AreEqual(1, result.NotCopied, "the one that could not is counted rather than swallowed");
+        Assert.AreEqual(0, result.SourcesSkipped.Count);
+        Assert.IsTrue(File.Exists(Path.Combine(_cacheRoot, "request_item", "pickup-coil.png")));
+        Assert.IsTrue(File.Exists(Path.Combine(_cacheRoot, "request_item", "boxes.png")));
+    }
+
     [TestMethod]
     public void FilesThatAreNotPicturesAreNeitherCopiedNorKept()
     {
@@ -245,24 +296,28 @@ public sealed class ImageCacheSyncServiceTests
     }
 
     /// <summary>
-    /// The receiving application's own Dunnage cache is shared when this machine has one, and this application's
-    /// own folder is used when it does not — never a second copy of the same pictures on one machine.
+    /// The receiving application's own Dunnage cache is shared when this account may write in it, and this
+    /// application's own folder is used when it may not — never a second copy of the same pictures on one machine,
+    /// and never a folder that cannot be written into.
     /// </summary>
     [TestMethod]
-    public void TheDunnageCacheIsTheReceivingApplicationsWhenItExists()
+    public void TheDunnageCacheIsTheReceivingApplicationsWhenThisAccountMayWriteInIt()
     {
-        var receivingCache = Path.Combine(AppContext.BaseDirectory, "Assets", "DunnageImages");
+        var chosen = ImageCachePaths.ResolveDunnageCacheFolder();
+        var ourOwn = Path.Combine(ImageCachePaths.LocalCacheRoot, ImageCachePaths.DunnageFolderName);
 
-        if (Directory.Exists(receivingCache))
+        if (string.Equals(chosen, ourOwn, StringComparison.OrdinalIgnoreCase))
         {
-            Assert.AreEqual(receivingCache, ImageCachePaths.ResolveDunnageCacheFolder());
+            Assert.IsFalse(
+                ImageCachePaths.ReceivingApplicationDunnageCaches.Any(
+                    candidate => Directory.Exists(candidate) && ImageCachePaths.IsFolderWritable(candidate)),
+                "a receiving-application folder this account may write in has to be the one used");
             return;
         }
 
-        Assert.AreEqual(
-            Path.Combine(ImageCachePaths.LocalCacheRoot, ImageCachePaths.DunnageFolderName),
-            ImageCachePaths.ResolveDunnageCacheFolder(),
-            "With no receiving-application cache on this machine the pictures go into our own folder.");
+        Assert.IsTrue(
+            ImageCachePaths.IsFolderWritable(chosen),
+            "a folder this account may not write in must never be the one chosen");
     }
 
     // ── The part collections are left to the part cache store (US7, FR-030) ─────────────────────────────────────

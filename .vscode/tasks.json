@@ -60,7 +60,7 @@
 			"args": [
 				"-NoProfile",
 				"-Command",
-				"Get-Process -Name MTM_Waitlist,Microsoft.UI.Xaml.Markup.Compiler,VBCSCompiler,MSBuild -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; $env:MSBUILDDISABLENODEREUSE='1'; dotnet test \"${workspaceFolder}/MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj\" -c Debug -p:Platform=x64"
+				"Get-Process -Name MTM_Waitlist,Microsoft.UI.Xaml.Markup.Compiler,VBCSCompiler,MSBuild,testhost,vstest.console -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; $env:MSBUILDDISABLENODEREUSE='1'; dotnet test \"${workspaceFolder}/MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj\" -c Debug -p:Platform=x64 /m:1 --settings \"${workspaceFolder}/MTM_Waitlist.Tests/MTM_Waitlist.Tests.runsettings\" --blame-hang --blame-hang-timeout 90s --blame-hang-dump-type none"
 			],
 			"group": {
 				"kind": "test",
@@ -158,6 +158,269 @@
 			"args": [
 				"/c",
 				"del /q tools\\record-verify.cmd"
+			]
+		},
+		{
+			"label": "Force kill test processes",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$all = Get-CimInstance Win32_Process -Filter \"Name='dotnet.exe' OR Name='testhost.exe' OR Name='vstest.console.exe'\" | Where-Object { $_.Name -ne 'dotnet.exe' -or ($_.CommandLine -match '\\btest\\b|vstest|testhost') }; $report = $all | ForEach-Object { '{0} {1} :: {2}' -f $_.ProcessId, $_.Name, ($_.CommandLine -replace '\\s+', ' ') }; $report | Set-Content -LiteralPath '.specify\\killed-tests.txt'; $all | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }; if ($report) { 'KILLED:'; $report } else { 'No test processes were running.' }"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "Kill test processes",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"tools\\kill-tests.ps1"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "Run logging tests with hang detection",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"& 'C:\\Program Files\\dotnet\\dotnet.exe' test 'MTM_Waitlist.Tests\\MTM_Waitlist.Tests.csproj' -c Debug -p:Platform=x64 /m:1 --filter 'FullyQualifiedName~Module_Logging|FullyQualifiedName~LogStoreLevel|FullyQualifiedName~StoreLogCoverage' --blame-hang --blame-hang-timeout 90s --blame-hang-dump-type none --logger 'console;verbosity=normal' *> .specify\\log-hang.txt; Write-Output \"EXIT=$LASTEXITCODE\""
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "Run logging tests (hang detection)",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"tools\\run-tests.ps1",
+				"-LogPath",
+				".specify\\log-hang.txt"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "Investigate slow tests",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"tools\\investigate-tests.ps1"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "Whole suite with hang detection",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"tools\\run-tests.ps1",
+				"-All",
+				"-LogPath",
+				".specify\\suite-hang.txt",
+				"-HangTimeoutSeconds",
+				"120"
+			],
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check suite progress",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"tools\\investigate-tests.ps1",
+				"-LogPath",
+				".specify\\suite-hang.txt"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "Show blame artifacts",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"tools\\show-blame.ps1"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "Whole suite with timeouts",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"tools\\run-tests.ps1",
+				"-All",
+				"-LogPath",
+				".specify\\suite-timeout.txt",
+				"-HangTimeoutSeconds",
+				"90"
+			],
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Check timeout run",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"tools\\investigate-tests.ps1",
+				"-LogPath",
+				".specify\\suite-timeout.txt"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "Bisect test modules",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"tools\\bisect-tests.ps1",
+				"-TimeoutSeconds",
+				"180"
+			],
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run all tests (clean)",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"tools\\run-tests.ps1",
+				"-All",
+				"-LogPath",
+				".specify\\all-tests.txt"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run dunnage regression test",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"tools\\run-tests.ps1",
+				"-Modules",
+				"AnUnwritableDestination",
+				"-LogPath",
+				".specify\\prefix-run.txt"
+			]
+		},
+		{
+			"label": "Build after dunnage fix",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$env:MSBUILDDISABLENODEREUSE=1; & 'C:\\Program Files\\dotnet\\dotnet.exe' build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false 2>&1 | Select-String -Pattern 'error|warning CS|Build succeeded|Build FAILED|Warning\\(s\\)|Error\\(s\\)' | Select-Object -First 40"
+			]
+		},
+		{
+			"label": "Check build",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"tools\\check-build.ps1"
+			]
+		},
+		{
+			"label": "Run dunnage fix tests",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"tools\\run-tests.ps1",
+				"-Modules",
+				"ImageCacheSyncService,ImageCachePaths,PictureCacheStep,DunnageImagePathResolver,ImageStorageConfigurationResolver",
+				"-LogPath",
+				".specify\\dunnage-fix-tests.txt"
+			]
+		},
+		{
+			"label": "Run all tests after dunnage fix",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"tools\\run-tests.ps1",
+				"-All",
+				"-LogPath",
+				".specify\\dunnage-all-tests.txt"
+			]
+		},
+		{
+			"label": "Probe dunnage folders",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"tools\\probe-dunnage-folders.ps1"
 			]
 		}
 	]

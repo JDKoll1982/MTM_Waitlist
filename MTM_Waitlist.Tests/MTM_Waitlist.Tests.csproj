@@ -10,6 +10,11 @@
     <Prefer32Bit>false</Prefer32Bit>
     <UseWinUI>false</UseWinUI>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
+
+    <!-- The suite's own run settings, so both the IDE and the command line bound a hung test instead of waiting
+         for ever. See the file for why: without it a test that never finishes leaves a host holding the test
+         assembly, and every later run then looks like it never started. -->
+    <RunSettingsFilePath>$(MSBuildProjectDirectory)\MTM_Waitlist.Tests.runsettings</RunSettingsFilePath>
   </PropertyGroup>
 
   <ItemGroup>
