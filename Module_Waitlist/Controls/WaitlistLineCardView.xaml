@@ -1,11 +1,11 @@
 <UserControl
     x:Class="MTM_Waitlist.Module_Waitlist.Controls.WaitlistLineCardView"
-    x:Name="Root"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
+    x:Name="Root"
     mc:Ignorable="d">
 
     <Border
@@ -15,7 +15,7 @@
         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
         BorderThickness="1"
         CornerRadius="10">
-        <Grid RowSpacing="8" ColumnSpacing="10">
+        <Grid ColumnSpacing="10" RowSpacing="8">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -24,11 +24,12 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="6" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" MinWidth="180" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <!-- Accent bar spans the full card height on the far left -->
+            <!--  Accent bar spans the full card height on the far left  -->
             <Border
                 Grid.Row="0"
                 Grid.RowSpan="3"
@@ -36,13 +37,15 @@
                 Background="{Binding AccentBrush, ElementName=Root}"
                 CornerRadius="6" />
 
-            <!-- The material part's picture + badge (fixed square, not stretched). This is the part the request is
-                 about, never the picture for the kind of request, and never the part's family's artwork: a request
-                 whose material cannot be pictured draws the one shared placeholder (FR-019, FR-020).
-
-                 The card is the click target that opens the request, so the picture's plain click belongs to the
-                 card. The control works that out for itself and enlarges on Shift+click here, which keeps the whole
-                 row opening on an ordinary click while the picture is still enlargeable (009 A3). -->
+            <!--
+                The material part's picture + badge (fixed square, not stretched). This is the part the request is
+                about, never the picture for the kind of request, and never the part's family's artwork: a request
+                whose material cannot be pictured draws the one shared placeholder (FR-019, FR-020).
+                
+                The card is the click target that opens the request, so the picture's plain click belongs to the
+                card. The control works that out for itself and enlarges on Shift+click here, which keeps the whole
+                row opening on an ordinary click while the picture is still enlargeable (009 A3).
+            -->
             <Border
                 Grid.Row="0"
                 Grid.RowSpan="3"
@@ -61,9 +64,11 @@
                         Source="{Binding Order.EffectiveImagePath, ElementName=Root, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
                         Stretch="Uniform" />
 
-                    <!-- New-message indicator, pinned to the lower-right of the Item's image: this
-                         request changed after the viewer last opened its details. Clicking the card opens the
-                         request, which clears it. -->
+                    <!--
+                        New-message indicator, pinned to the lower-right of the Item's image: this
+                        request changed after the viewer last opened its details. Clicking the card opens the
+                        request, which clears it.
+                    -->
                     <Border
                         Width="26"
                         Height="26"
@@ -74,96 +79,119 @@
                         CornerRadius="999"
                         ToolTipService.ToolTip="{Binding Order.NewMessageTooltip, ElementName=Root}"
                         Visibility="{Binding Order.HasNewMessages, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <FontIcon FontSize="14" Foreground="White" Glyph="&#xE8BD;" />
+                        <FontIcon
+                            FontSize="14"
+                            Foreground="White"
+                            Glyph="&#xE8BD;" />
                     </Border>
                 </Grid>
             </Border>
 
-            <!-- Line 1 on its own top row: the Item's umbrella phrase (FR-005). -->
-            <TextBlock
-                Grid.Row="0"
-                Grid.Column="2"
-                FontSize="20"
-                MaxLines="1"
-                Style="{ThemeResource BodyStrongTextBlockStyle}"
-                Text="{Binding Order.Title, ElementName=Root}"
-                TextTrimming="CharacterEllipsis"
-                TextWrapping="NoWrap" />
-
-            <!-- Line 2 beneath it: the Item's identifier (FR-005). -->
-            <TextBlock
-                Grid.Row="1"
-                Grid.Column="2"
-                FontSize="16"
-                MaxLines="1"
-                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                Text="{Binding Order.Subtitle, ElementName=Root}"
-                TextTrimming="CharacterEllipsis"
-                TextWrapping="NoWrap" />
-
-            <!-- Row 2 content: the four metadata rows. An Item's own declared fields are not drawn here —
-                 they belong to the request's page (FR-007). -->
-            <Grid
+            <Border
                 Grid.Row="2"
                 Grid.Column="2"
-                ColumnSpacing="10"
-                RowSpacing="4"
-                VerticalAlignment="Top">
-                <Grid.Resources>
-                    <Style TargetType="TextBlock">
-                        <Setter Property="FontSize" Value="14" />
-                        <Setter Property="VerticalAlignment" Value="Center" />
-                    </Style>
-                </Grid.Resources>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+                Padding="6"
+                VerticalAlignment="Top"
+                BorderBrush="AntiqueWhite"
+                BorderThickness="1"
+                CornerRadius="6">
+                <Grid ColumnSpacing="10" RowSpacing="4">
+                    <Grid.Resources>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="FontSize" Value="14" />
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                        </Style>
+                    </Grid.Resources>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-                <TextBlock x:Uid="Waitlist_Card.RequestedBy" FontWeight="SemiBold" Text="Requested by" />
-                <TextBlock Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Order.RequestedByName, ElementName=Root}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock
+                        x:Uid="Waitlist_Card.RequestedBy"
+                        FontWeight="SemiBold"
+                        Text="Requested by" />
+                    <TextBlock
+                        Grid.Column="1"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{Binding Order.RequestedByName, ElementName=Root}"
+                        TextTrimming="CharacterEllipsis" />
 
-                <TextBlock x:Uid="Waitlist_Card.Press" Grid.Row="1" FontWeight="SemiBold" Text="Press" />
-                <TextBlock Grid.Row="1" Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Order.RequestedPressName, ElementName=Root}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock
+                        x:Uid="Waitlist_Card.Press"
+                        Grid.Row="1"
+                        FontWeight="SemiBold"
+                        Text="Press" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{Binding Order.RequestedPressName, ElementName=Root}"
+                        TextTrimming="CharacterEllipsis" />
 
-                <TextBlock x:Uid="Waitlist_Card.RemainingTime" Grid.Row="2" FontWeight="SemiBold" Text="Remaining time" />
-                <TextBlock Grid.Row="2" Grid.Column="1" FontWeight="{Binding RemainingTimeFontWeight, ElementName=Root}" Foreground="{Binding RemainingTimeBrush, ElementName=Root}" Text="{Binding Order.RemainingTimeText, ElementName=Root}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock
+                        x:Uid="Waitlist_Card.RemainingTime"
+                        Grid.Row="2"
+                        FontWeight="SemiBold"
+                        Text="Remaining time" />
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        FontWeight="{Binding RemainingTimeFontWeight, ElementName=Root}"
+                        Foreground="{Binding RemainingTimeBrush, ElementName=Root}"
+                        Text="{Binding Order.RemainingTimeText, ElementName=Root}"
+                        TextTrimming="CharacterEllipsis" />
 
-                <TextBlock x:Uid="Waitlist_Card.Waiting" Grid.Row="3" FontWeight="SemiBold" Text="Waiting" Visibility="{Binding Order.HasWaitingFor, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}" />
-                <TextBlock Grid.Row="3" Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{Binding Order.WaitingForText, ElementName=Root}" TextTrimming="CharacterEllipsis" Visibility="{Binding Order.HasWaitingFor, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}" />
-            </Grid>
+                    <TextBlock
+                        x:Uid="Waitlist_Card.Waiting"
+                        Grid.Row="3"
+                        FontWeight="SemiBold"
+                        Text="Waiting"
+                        Visibility="{Binding Order.HasWaitingFor, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{Binding Order.WaitingForText, ElementName=Root}"
+                        TextTrimming="CharacterEllipsis"
+                        Visibility="{Binding Order.HasWaitingFor, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}" />
+                </Grid>
 
-            <!-- Action buttons (vertically centered) + compact status pill below spanning button width -->
+            </Border>
+
+            <!--  Action buttons (vertically centered) + compact status pill below spanning button width  -->
             <Grid
                 Grid.Row="0"
                 Grid.RowSpan="3"
-                Grid.Column="3"
+                Grid.Column="4"
                 Width="150">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <!-- The actions this viewer may take on this row. A button is drawn only while the row's
-                     own gate says the action is available, carries the command the view model put on the
-                     row, and names itself with the row's localized label. The action area offers only what
-                     the application can actually do (FR-007/FR-008/FR-020, contracts C1/C7), and it keeps
-                     the approved anatomy: at most three 44x44 icon buttons, vertically centred above the
-                     compact status pill. The third is Give back, added when the owner superseded C7's
-                     "Release — not drawn": without a control, a claimed request could never be handed
-                     back, and releasing is the only way it returns to the open list (FR-047).
-
-                     Accept and Complete are the same slot in two states, so they must never be mistaken for
-                     each other: Accept is green with the Accept glyph, Complete is the accent colour with the
-                     Completed glyph, and Give back is solid neutral with the Undo glyph — three different
-                     colours and three different icons. Glyph names come from the Segoe Fluent Icons list;
-                     E10B is in the deprecated E0-E5 range and is not used. -->
+                <!--
+                    The actions this viewer may take on this row. A button is drawn only while the row's
+                    own gate says the action is available, carries the command the view model put on the
+                    row, and names itself with the row's localized label. The action area offers only what
+                    the application can actually do (FR-007/FR-008/FR-020, contracts C1/C7), and it keeps
+                    the approved anatomy: at most three 44x44 icon buttons, vertically centred above the
+                    compact status pill. The third is Give back, added when the owner superseded C7's
+                    "Release — not drawn": without a control, a claimed request could never be handed
+                    back, and releasing is the only way it returns to the open list (FR-047).
+                    
+                    Accept and Complete are the same slot in two states, so they must never be mistaken for
+                    each other: Accept is green with the Accept glyph, Complete is the accent colour with the
+                    Completed glyph, and Give back is solid neutral with the Undo glyph — three different
+                    colours and three different icons. Glyph names come from the Segoe Fluent Icons list;
+                    E10B is in the deprecated E0-E5 range and is not used.
+                -->
                 <StackPanel
                     Grid.Row="0"
                     HorizontalAlignment="Center"
@@ -181,7 +209,10 @@
                         CornerRadius="9"
                         ToolTipService.ToolTip="{Binding Order.AcceptActionText, ElementName=Root}"
                         Visibility="{Binding Order.CanAccept, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <FontIcon FontSize="18" Foreground="White" Glyph="&#xE8FB;" />
+                        <FontIcon
+                            FontSize="18"
+                            Foreground="White"
+                            Glyph="&#xE8FB;" />
                     </Button>
                     <Button
                         MinWidth="44"
@@ -194,12 +225,17 @@
                         CornerRadius="9"
                         ToolTipService.ToolTip="{Binding Order.CompleteActionText, ElementName=Root}"
                         Visibility="{Binding Order.CanCompleteOrRelease, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <FontIcon FontSize="18" Foreground="White" Glyph="&#xE930;" />
+                        <FontIcon
+                            FontSize="18"
+                            Foreground="White"
+                            Glyph="&#xE930;" />
                     </Button>
-                    <!-- Give back sits beside Complete and rides the same gate: it is the assignee's other
-                         option on their own claim, and it is what puts the request back on the open list for
-                         somebody else (FR-047). Solid neutral keeps it visibly quieter than Complete without
-                         borrowing the red that means Cancel. -->
+                    <!--
+                        Give back sits beside Complete and rides the same gate: it is the assignee's other
+                        option on their own claim, and it is what puts the request back on the open list for
+                        somebody else (FR-047). Solid neutral keeps it visibly quieter than Complete without
+                        borrowing the red that means Cancel.
+                    -->
                     <Button
                         MinWidth="44"
                         MinHeight="44"
@@ -211,7 +247,10 @@
                         CornerRadius="9"
                         ToolTipService.ToolTip="{Binding Order.ReleaseActionText, ElementName=Root}"
                         Visibility="{Binding Order.CanCompleteOrRelease, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <FontIcon FontSize="18" Foreground="White" Glyph="&#xE7A7;" />
+                        <FontIcon
+                            FontSize="18"
+                            Foreground="White"
+                            Glyph="&#xE7A7;" />
                     </Button>
                     <Button
                         MinWidth="44"
@@ -224,14 +263,19 @@
                         CornerRadius="9"
                         ToolTipService.ToolTip="{Binding Order.CancelActionText, ElementName=Root}"
                         Visibility="{Binding Order.CanCancelRequest, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <FontIcon FontSize="18" Foreground="White" Glyph="&#xE10A;" />
+                        <FontIcon
+                            FontSize="18"
+                            Foreground="White"
+                            Glyph="&#xE10A;" />
                     </Button>
                 </StackPanel>
 
-                <!-- Status pill: the request's real lifecycle status, compact and fixed-height, below the
-                     buttons (contract C7). One colour per state (RequestStatusPalette) so the badge says where
-                     the request is without the label having to be read: grey queued, blue claimed, green done,
-                     red cancelled. -->
+                <!--
+                    Status pill: the request's real lifecycle status, compact and fixed-height, below the
+                    buttons (contract C7). One colour per state (RequestStatusPalette) so the badge says where
+                    the request is without the label having to be read: grey queued, blue claimed, green done,
+                    red cancelled.
+                -->
                 <Border
                     Grid.Row="1"
                     Height="36"
@@ -241,10 +285,10 @@
                     CornerRadius="12"
                     Visibility="{Binding Order.HasStatusBadge, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}">
                     <TextBlock
-                        FontSize="13"
-                        FontWeight="SemiBold"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
+                        FontSize="13"
+                        FontWeight="SemiBold"
                         Foreground="{Binding Order.Status, ElementName=Root, Converter={StaticResource RequestStatusToBrushConverter}, ConverterParameter=Foreground}"
                         Text="{Binding Order.StatusBadgeText, ElementName=Root}" />
                 </Border>
@@ -257,7 +301,7 @@
     Notes
     One card shape for every Item (FR-006). Nothing above selects a layout, a span or a section from the
     Item; every difference a person sees comes from the row it is handed.
-
+    
     Card contents:
     Item image - The Item's resolved picture, falling back to the Category family and then the placeholder.
     Item badge - The Item's short label.
@@ -268,8 +312,8 @@
     Remaining time - The calculated time remaining before the request's target or promise time.
     Waiting - How long the request has been waiting.
     Actions - Accept, Complete and Cancel controls. Each action is wired to a command and hidden unless the
-              row's own gate says the action is available (FR-018).
-
+    row's own gate says the action is available (FR-018).
+    
     Not on the card:
     An Item's own declared fields. They are laid out on the request's page, two per row in declared order
     (FR-007, data-model.md §7).

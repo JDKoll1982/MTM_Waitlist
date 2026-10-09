@@ -22,8 +22,17 @@ namespace MTM_Waitlist.Mock.Service.Services;
 /// </remarks>
 public sealed class ServiceApiOperations
 {
-    /// <summary>Reported service version, so an operator can tell which build answered.</summary>
-    public const string ServiceVersion = "1.0.0";
+    /// <summary>
+    /// Reported service version, so an operator can tell which build answered.
+    /// </summary>
+    /// <remarks>
+    /// Read from this assembly rather than written a second time: the status page and the API both answer with the
+    /// version of the binary that is actually running, so a release bump cannot leave the service claiming the
+    /// version before it. Three parts, which is the shape the status surface and the HTTP payload have always
+    /// carried.
+    /// </remarks>
+    public static string ServiceVersion { get; } =
+        typeof(ServiceApiOperations).Assembly.GetName().Version?.ToString(3) ?? "unknown";
 
     private readonly RefreshEngine _refreshEngine;
     private readonly RefreshShapeCatalogProvider _catalogProvider;

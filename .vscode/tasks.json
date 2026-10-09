@@ -422,6 +422,18 @@
 				"-File",
 				"tools\\probe-dunnage-folders.ps1"
 			]
+		},
+		{
+			"label": "Show app version",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				"tools\\show-app-version.ps1"
+			]
 		}
 	]
 }
