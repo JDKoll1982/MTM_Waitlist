@@ -12,7 +12,7 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.Views;
 public sealed class NewRequestWorkCenterBuildingFlyoutTests
 {
     [TestMethod]
-    public void TheWizard_BuildsTheBuildingListAsCards()
+    public void UI_NewRequestWorkCenterBuildingFlyoutTests_TheWizard_BuildsTheBuildingListAsCards()
     {
         var markup = Markup();
 
@@ -24,7 +24,7 @@ public sealed class NewRequestWorkCenterBuildingFlyoutTests
     }
 
     [TestMethod]
-    public void TheWizard_NoLongerOffersADropDownForTheBuilding()
+    public void UI_NewRequestWorkCenterBuildingFlyoutTests_TheWizard_NoLongerOffersADropDownForTheBuilding()
     {
         var markup = Markup();
 
@@ -33,7 +33,7 @@ public sealed class NewRequestWorkCenterBuildingFlyoutTests
     }
 
     [TestMethod]
-    public void TheBuildingInEffect_IsNotAmongTheWizardsCards()
+    public void UI_NewRequestWorkCenterBuildingFlyoutTests_TheBuildingInEffect_IsNotAmongTheWizardsCards()
     {
         var source = ViewModelSource();
 
@@ -47,7 +47,7 @@ public sealed class NewRequestWorkCenterBuildingFlyoutTests
     }
 
     [TestMethod]
-    public void ChoosingACard_SelectsTheBuildingRatherThanRestatingIt()
+    public void UI_NewRequestWorkCenterBuildingFlyoutTests_ChoosingACard_SelectsTheBuildingRatherThanRestatingIt()
     {
         var codeBehind = CodeBehind();
 

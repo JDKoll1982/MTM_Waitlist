@@ -573,8 +573,8 @@ it must say so, and the change must carry:
   (both currently assert the per-type detail grid stays on the card), recorded as a supersession, not a
   deletion of history;
 - the four markup tests in `MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs` that
-  lock the old anatomy — `Card_KeepsTheFourMetadataRows`, `PerTypeDetailGrids_KeepTheTwoByThreeFourColumnPattern`,
-  `Card_KeepsTheFixedSquareRequestImage`, `Card_KeepsTheCompactStatusPillBelowTheButtons` — rewritten to the new
+  lock the old anatomy — `UI_WaitlistLineCardMarkupTests_UI_WaitlistLineCardMarkupTests_Card_KeepsTheFourMetadataRows`, `PerTypeDetailGrids_KeepTheTwoByThreeFourColumnPattern`,
+  `UI_WaitlistLineCardMarkupTests_UI_WaitlistLineCardMarkupTests_Card_KeepsTheFixedSquareRequestImage`, `UI_WaitlistLineCardMarkupTests_UI_WaitlistLineCardMarkupTests_Card_KeepsTheCompactStatusPillBelowTheButtons` — rewritten to the new
   anatomy rather than deleted, so they still fail on an unintended change.
 
 *Consequence:* Phase 4's "move type-specific detail fields to the detail page" is now **in** scope and is a

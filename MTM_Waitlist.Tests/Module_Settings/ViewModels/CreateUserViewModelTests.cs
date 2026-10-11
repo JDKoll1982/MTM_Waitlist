@@ -25,7 +25,7 @@ public sealed class CreateUserViewModelTests
     private const long SignedInUserId = 42;
 
     [TestMethod]
-    public async Task OnePress_CreatesExactlyOnePerson()
+    public async Task ViewModel_CreateUserViewModelTests_OnePress_CreatesExactlyOnePerson()
     {
         var repository = new InMemoryUserManagementRepository();
         var gate = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -52,7 +52,7 @@ public sealed class CreateUserViewModelTests
     }
 
     [TestMethod]
-    public async Task ADuplicateSignInName_BecomesTheOneTypedAnswer_KeepsWhatWasTyped_AndIsNotRetried()
+    public async Task ViewModel_CreateUserViewModelTests_ADuplicateSignInName_BecomesTheOneTypedAnswerKeepsWhatWasTypedAndIsNotRetried()
     {
         var repository = new InMemoryUserManagementRepository();
         repository.Seed("JSMITH", "Jane Smith", "6229", "developer");
@@ -80,7 +80,7 @@ public sealed class CreateUserViewModelTests
     }
 
     [TestMethod]
-    public async Task AnOverLengthName_IsRefusedWithTheLimitStated_AndKeepsWhatWasTyped()
+    public async Task ViewModel_CreateUserViewModelTests_AnOverLengthName_IsRefusedWithTheLimitStatedAndKeepsWhatWasTyped()
     {
         var repository = new InMemoryUserManagementRepository();
         var viewModel = Build(repository: repository);
@@ -101,7 +101,7 @@ public sealed class CreateUserViewModelTests
     }
 
     [TestMethod]
-    public async Task ThePicker_OffersNothingAboveTheReadersOwnRung()
+    public async Task ViewModel_CreateUserViewModelTests_ThePicker_OffersNothingAboveTheReadersOwnRung()
     {
         var viewModel = Build(readerRoleCode: "plant_manager");
         await viewModel.InitializeAsync();
@@ -118,7 +118,7 @@ public sealed class CreateUserViewModelTests
     }
 
     [TestMethod]
-    public async Task TheDerivedDisplayName_StaysInsideItsLimit()
+    public async Task ViewModel_CreateUserViewModelTests_TheDerivedDisplayName_StaysInsideItsLimit()
     {
         var repository = new InMemoryUserManagementRepository();
         var viewModel = Build(repository: repository);
@@ -140,7 +140,7 @@ public sealed class CreateUserViewModelTests
     }
 
     [TestMethod]
-    public async Task TwoPeopleSharingOneEmployeeNumber_AreBothCreatedAndBothListed()
+    public async Task ViewModel_CreateUserViewModelTests_TwoPeopleSharingOneEmployeeNumber_AreBothCreatedAndBothListed()
     {
         var repository = new InMemoryUserManagementRepository();
         var state = Reader();
@@ -170,7 +170,7 @@ public sealed class CreateUserViewModelTests
     }
 
     [TestMethod]
-    public async Task ASuccessfulCreate_IssuesAFourDigitCredential_ThatIsDroppedWhenItIsDismissed()
+    public async Task ViewModel_CreateUserViewModelTests_ASuccessfulCreate_IssuesAFourDigitCredentialThatIsDroppedWhenItIsDismissed()
     {
         var viewModel = Build(repository: new InMemoryUserManagementRepository());
         await viewModel.InitializeAsync();
@@ -190,7 +190,7 @@ public sealed class CreateUserViewModelTests
     }
 
     [TestMethod]
-    public async Task AReaderWithoutThePermission_IsToldSoAndTheFormIsUnavailable()
+    public async Task ViewModel_CreateUserViewModelTests_AReaderWithoutThePermission_IsToldSoAndTheFormIsUnavailable()
     {
         var viewModel = Build(entitled: false);
         await viewModel.InitializeAsync();

@@ -294,7 +294,7 @@ INSERT INTO
         hostname_normalized,
         mac_address_normalized,
         display_name,
-        description,
+        location,
         is_registered,
         created_utc,
         updated_utc

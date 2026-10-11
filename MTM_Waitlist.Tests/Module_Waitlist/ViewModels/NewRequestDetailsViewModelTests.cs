@@ -19,7 +19,7 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.ViewModels;
 public sealed class NewRequestDetailsViewModelTests
 {
     [TestMethod]
-    public void Continue_WithNoListedAnswerChosen_ReportsItAndStaysOnTheStep()
+    public void ViewModel_NewRequestDetailsViewModelTests_Continue_WithNoListedAnswerChosenReportsItAndStaysOnTheStep()
     {
         var navigation = new RecordingNavigationService();
         var viewModel = new NewRequestDetailsViewModel(navigation);
@@ -34,7 +34,7 @@ public sealed class NewRequestDetailsViewModelTests
     }
 
     [TestMethod]
-    public void Continue_WithAListedAnswerChosen_RecordsItAndAdvancesToTheConfirmStep()
+    public void ViewModel_NewRequestDetailsViewModelTests_Continue_WithAListedAnswerChosenRecordsItAndAdvancesToTheConfirmStep()
     {
         var navigation = new RecordingNavigationService();
         var viewModel = new NewRequestDetailsViewModel(navigation);
@@ -52,7 +52,7 @@ public sealed class NewRequestDetailsViewModelTests
     }
 
     [TestMethod]
-    public void Continue_WithATypedAnswerShorterThanTheConfiguredMinimum_ReportsItAndStaysOnTheStep()
+    public void ViewModel_NewRequestDetailsViewModelTests_Continue_WithATypedAnswerShorterThanTheConfiguredMinimumReportsItAndStaysOnTheStep()
     {
         var navigation = new RecordingNavigationService();
         var viewModel = new NewRequestDetailsViewModel(navigation);
@@ -69,7 +69,7 @@ public sealed class NewRequestDetailsViewModelTests
     }
 
     [TestMethod]
-    public void Continue_WithATypedAnswerWithinTheConfiguredLength_RecordsItAndAdvancesToTheConfirmStep()
+    public void ViewModel_NewRequestDetailsViewModelTests_Continue_WithATypedAnswerWithinTheConfiguredLengthRecordsItAndAdvancesToTheConfirmStep()
     {
         var navigation = new RecordingNavigationService();
         var viewModel = new NewRequestDetailsViewModel(navigation);
@@ -86,7 +86,7 @@ public sealed class NewRequestDetailsViewModelTests
     }
 
     [TestMethod]
-    public void OnNavigatedTo_WithAPreviousTypedAnswer_RestoresItForCorrection()
+    public void ViewModel_NewRequestDetailsViewModelTests_OnNavigatedTo_WithAPreviousTypedAnswerRestoresItForCorrection()
     {
         // Arriving back from the confirm step must show the answer that was given, so the step can be corrected
         // rather than silently re-asked. The page refuses to treat that restore as a fresh choice.
@@ -100,7 +100,7 @@ public sealed class NewRequestDetailsViewModelTests
     }
 
     [TestMethod]
-    public void OnNavigatedTo_WithAPreviousListedAnswer_RecordsItAsTheRestoredAnswer()
+    public void ViewModel_NewRequestDetailsViewModelTests_OnNavigatedTo_WithAPreviousListedAnswerRecordsItAsTheRestoredAnswer()
     {
         // The view compares each selection change against this value to tell the restore apart from a pick, so a
         // restored answer that were not recorded here would make the step leave the moment it appeared.
@@ -115,7 +115,7 @@ public sealed class NewRequestDetailsViewModelTests
     }
 
     [TestMethod]
-    public void OnNavigatedTo_WithNoPreviousAnswer_RecordsNoRestoredAnswer()
+    public void ViewModel_NewRequestDetailsViewModelTests_OnNavigatedTo_WithNoPreviousAnswerRecordsNoRestoredAnswer()
     {
         var viewModel = new NewRequestDetailsViewModel(new RecordingNavigationService());
 

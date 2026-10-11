@@ -40,7 +40,7 @@ public sealed class ServiceLogTests
     }
 
     [TestMethod]
-    public void Write_CreatesTheDailyFileUnderTheConfiguredDirectory()
+    public void Service_ServiceLogTests_Write_CreatesTheDailyFileUnderTheConfiguredDirectory()
     {
         ServiceLog.Info("ServiceApp", "hello");
 
@@ -50,7 +50,7 @@ public sealed class ServiceLogTests
     }
 
     [TestMethod]
-    public void Write_RecordsLevelAreaAndMessageAsOneJsonLine()
+    public void Service_ServiceLogTests_Write_RecordsLevelAreaAndMessageAsOneJsonLine()
     {
         ServiceLog.Info("ServiceApp", "refresh cycle started");
 
@@ -69,7 +69,7 @@ public sealed class ServiceLogTests
     }
 
     [TestMethod]
-    public void Error_RecordsTheExceptionText()
+    public void Service_ServiceLogTests_Error_RecordsTheExceptionText()
     {
         ServiceLog.Error("ServiceApp", new InvalidOperationException("boom"), "the engines failed");
 
@@ -83,7 +83,7 @@ public sealed class ServiceLogTests
     }
 
     [TestMethod]
-    public void Write_AppendsRatherThanReplacing()
+    public void Service_ServiceLogTests_Write_AppendsRatherThanReplacing()
     {
         ServiceLog.Info("ServiceApp", "first");
         ServiceLog.Info("ServiceApp", "second");
@@ -92,7 +92,7 @@ public sealed class ServiceLogTests
     }
 
     [TestMethod]
-    public void Write_WhenTheDirectoryCannotBeCreated_DoesNotThrow()
+    public void Service_ServiceLogTests_Write_WhenTheDirectoryCannotBeCreatedDoesNotThrow()
     {
         // A path containing a reserved character cannot be created, which is the failure a durable logger has
         // to survive: the engines must keep running even when the log destination is unusable.
@@ -102,7 +102,7 @@ public sealed class ServiceLogTests
     }
 
     [TestMethod]
-    public void FileLoggerProvider_RoutesContainerLogMessagesToTheDailyFile()
+    public void Service_ServiceLogTests_FileLoggerProvider_RoutesContainerLogMessagesToTheDailyFile()
     {
         using var provider = new ServiceFileLoggerProvider();
         var logger = provider.CreateLogger("MTM_Waitlist.Mock.Service.RefreshEngine");
@@ -123,7 +123,7 @@ public sealed class ServiceLogTests
     }
 
     [TestMethod]
-    public void FileLoggerProvider_IsEnabledForEverythingExceptNone()
+    public void Service_ServiceLogTests_FileLoggerProvider_IsEnabledForEverythingExceptNone()
     {
         using var provider = new ServiceFileLoggerProvider();
         var logger = provider.CreateLogger("any");

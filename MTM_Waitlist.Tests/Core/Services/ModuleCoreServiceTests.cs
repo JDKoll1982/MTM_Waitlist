@@ -8,7 +8,7 @@ namespace MTM_Waitlist.Tests.Core.Services;
 public sealed class ModuleCoreServiceTests
 {
     [TestMethod]
-    public void GetModuleName_ReturnsModuleCore()
+    public void Service_ModuleCoreServiceTests_GetModuleName_ReturnsModuleCore()
     {
         var service = new ModuleCoreService();
 

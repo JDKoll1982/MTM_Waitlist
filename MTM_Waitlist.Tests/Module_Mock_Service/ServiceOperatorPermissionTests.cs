@@ -50,7 +50,7 @@ public sealed class ServiceOperatorPermissionTests
         "create.sql");
 
     [TestMethod]
-    public void TheShippedBaselines_AdmitToTheApiEveryRoleTheSettingsCacheRefreshGateAdmits()
+    public void Service_ServiceOperatorPermissionTests_TheShippedBaselines_AdmitToTheApiEveryRoleTheSettingsCacheRefreshGateAdmits()
     {
         var baselines = ReadBaselines();
 
@@ -72,7 +72,7 @@ public sealed class ServiceOperatorPermissionTests
     }
 
     [TestMethod]
-    public void TheDeclaration_NamesTheServiceOperatorGateAsTheReaderOfTheApiPermission()
+    public void Service_ServiceOperatorPermissionTests_TheDeclaration_NamesTheServiceOperatorGateAsTheReaderOfTheApiPermission()
     {
         var entry = PermissionRegistry.Find(PermissionKeys.CacheRefreshApi);
 
@@ -84,7 +84,7 @@ public sealed class ServiceOperatorPermissionTests
     }
 
     [TestMethod]
-    public void TheDeclaredFallback_RefusesTheApiWhenTheStoreCannotBeReached()
+    public void Service_ServiceOperatorPermissionTests_TheDeclaredFallback_RefusesTheApiWhenTheStoreCannotBeReached()
     {
         // The service host fails closed: an unanswerable authorization question is a "no". The declaration's
         // fallback is what answers when neither a person's row nor a role baseline exists, which is also what
@@ -98,7 +98,7 @@ public sealed class ServiceOperatorPermissionTests
     }
 
     [TestMethod]
-    public void TheRetiredOperatorList_IsStillTheListThisFeatureReplaces()
+    public void Service_ServiceOperatorPermissionTests_TheRetiredOperatorList_IsStillTheListThisFeatureReplaces()
     {
         // The list the shipped baselines were derived from, read from the fixture rather than from the service
         // project, so the parity this feature claims is against what the service actually admitted.

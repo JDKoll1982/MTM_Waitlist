@@ -13,7 +13,7 @@ namespace MTM_Waitlist.Tests.Module_Setup.ViewModels;
 public sealed class SetupDunnageTypeViewModelTests
 {
     [TestMethod]
-    public void CanContinue_WhenNoScrapSelected_IsFalse()
+    public void ViewModel_SetupDunnageTypeViewModelTests_CanContinue_WhenNoScrapSelectedIsFalse()
     {
         var (viewModel, _) = CreateViewModel();
 
@@ -25,7 +25,7 @@ public sealed class SetupDunnageTypeViewModelTests
     }
 
     [TestMethod]
-    public void CanContinue_WhenPlaceholderSelected_IsFalse()
+    public void ViewModel_SetupDunnageTypeViewModelTests_CanContinue_WhenPlaceholderSelectedIsFalse()
     {
         var (viewModel, _) = CreateViewModel();
 
@@ -37,7 +37,7 @@ public sealed class SetupDunnageTypeViewModelTests
     }
 
     [TestMethod]
-    public void CanContinue_WhenNoScrapExplicitlyChosen_IsTrue()
+    public void ViewModel_SetupDunnageTypeViewModelTests_CanContinue_WhenNoScrapExplicitlyChosenIsTrue()
     {
         var (viewModel, _) = CreateViewModel();
 
@@ -49,7 +49,7 @@ public sealed class SetupDunnageTypeViewModelTests
     }
 
     [TestMethod]
-    public void CanContinue_WhenRealScrapTypeSelected_IsTrue()
+    public void ViewModel_SetupDunnageTypeViewModelTests_CanContinue_WhenRealScrapTypeSelectedIsTrue()
     {
         var (viewModel, _) = CreateViewModel();
 
@@ -61,7 +61,7 @@ public sealed class SetupDunnageTypeViewModelTests
     }
 
     [TestMethod]
-    public void DisplayScrapTypes_ExcludesPlaceholderAndIncludesNoScrap()
+    public void ViewModel_SetupDunnageTypeViewModelTests_DisplayScrapTypes_ExcludesPlaceholderAndIncludesNoScrap()
     {
         var state = new SetupWorkflowState();
         state.ScrapTypes.Add("Scrap Type Required");
@@ -76,7 +76,7 @@ public sealed class SetupDunnageTypeViewModelTests
     }
 
     [TestMethod]
-    public async Task ContinueToReviewAsync_WhenNoDunnageAndConfirmed_NavigatesToReview()
+    public async Task ViewModel_SetupDunnageTypeViewModelTests_ContinueToReviewAsync_WhenNoDunnageAndConfirmedNavigatesToReview()
     {
         var state = new SetupWorkflowState();
         var navigation = new RecordingNavigationService();
@@ -95,7 +95,7 @@ public sealed class SetupDunnageTypeViewModelTests
     }
 
     [TestMethod]
-    public async Task ContinueToReviewAsync_WhenNoDunnageAndCanceled_DoesNotNavigate()
+    public async Task ViewModel_SetupDunnageTypeViewModelTests_ContinueToReviewAsync_WhenNoDunnageAndCanceledDoesNotNavigate()
     {
         var state = new SetupWorkflowState();
         var navigation = new RecordingNavigationService();
@@ -113,7 +113,7 @@ public sealed class SetupDunnageTypeViewModelTests
     }
 
     [TestMethod]
-    public async Task ContinueToReviewAsync_WhenDunnageSelected_NavigatesWithoutConfirmation()
+    public async Task ViewModel_SetupDunnageTypeViewModelTests_ContinueToReviewAsync_WhenDunnageSelectedNavigatesWithoutConfirmation()
     {
         var state = new SetupWorkflowState();
         state.SelectedDunnageParts.Add(new SetupDunnagePart
@@ -139,7 +139,7 @@ public sealed class SetupDunnageTypeViewModelTests
     }
 
     [TestMethod]
-    public async Task AddDunnageAsync_WhenPartSelected_AddsToPairAndShowsMessage()
+    public async Task ViewModel_SetupDunnageTypeViewModelTests_AddDunnageAsync_WhenPartSelectedAddsToPairAndShowsMessage()
     {
         var state = new SetupWorkflowState();
         var navigation = new RecordingNavigationService();
@@ -166,7 +166,7 @@ public sealed class SetupDunnageTypeViewModelTests
     }
 
     [TestMethod]
-    public async Task AddDunnageAsync_WhenDialogDismissed_DoesNotAdd()
+    public async Task ViewModel_SetupDunnageTypeViewModelTests_AddDunnageAsync_WhenDialogDismissedDoesNotAdd()
     {
         var state = new SetupWorkflowState();
         var navigation = new RecordingNavigationService();

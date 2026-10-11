@@ -18,7 +18,7 @@ namespace MTM_Waitlist.Tests.Module_Setup.Services;
 public sealed class SetupWorkflowServiceTests
 {
     [TestMethod]
-    public async Task SearchWorkOrderAsync_MultiplePartsMovesToPartSelection()
+    public async Task Service_SetupWorkflowServiceTests_SearchWorkOrderAsync_MultiplePartsMovesToPartSelection()
     {
         var service = CreateService();
 
@@ -31,7 +31,7 @@ public sealed class SetupWorkflowServiceTests
     }
 
     [TestMethod]
-    public async Task SearchWorkOrderAsync_SinglePartMovesToSequenceSelection()
+    public async Task Service_SetupWorkflowServiceTests_SearchWorkOrderAsync_SinglePartMovesToSequenceSelection()
     {
         var service = CreateService();
 
@@ -44,7 +44,7 @@ public sealed class SetupWorkflowServiceTests
     }
 
     [TestMethod]
-    public async Task SaveAsync_WhenActiveJobExistsRequestsReplacementConfirmation()
+    public async Task Service_SetupWorkflowServiceTests_SaveAsync_WhenActiveJobExistsRequestsReplacementConfirmation()
     {
         var service = CreateService();
 
@@ -65,7 +65,7 @@ public sealed class SetupWorkflowServiceTests
     // integration test rather than being asserted against sample rows.
 
     [TestMethod]
-    public async Task SelectSequenceAsync_LoadsSubordinatePartsForReviewContext()
+    public async Task Service_SetupWorkflowServiceTests_SelectSequenceAsync_LoadsSubordinatePartsForReviewContext()
     {
         var service = CreateService();
 
@@ -82,7 +82,7 @@ public sealed class SetupWorkflowServiceTests
     }
 
     [TestMethod]
-    public async Task SelectSequenceAsync_KeepsSubordinatePartsWhoseLocationIsAPlantCode()
+    public async Task Service_SetupWorkflowServiceTests_SelectSequenceAsync_KeepsSubordinatePartsWhoseLocationIsAPlantCode()
     {
         // Setup does not consult the ignored-locations set: that set keeps plant inventory codes out of the
         // waitlist's inventory location LISTS, and applying it here removed whole parts from the job.
@@ -102,7 +102,7 @@ public sealed class SetupWorkflowServiceTests
     }
 
     [TestMethod]
-    public async Task SelectSequenceAsync_KeepsTheJobsCoilAtItsWorkCentreLocation()
+    public async Task Service_SetupWorkflowServiceTests_SelectSequenceAsync_KeepsTheJobsCoilAtItsWorkCentreLocation()
     {
         // The job's own coil, as WO-074171 has it: issued to the work centre, so Infor Visual reports its location
         // as 'WC'. Dropping it made the review, the saved record and the waitlist's coil availability all see a
@@ -122,7 +122,7 @@ public sealed class SetupWorkflowServiceTests
     }
 
     [TestMethod]
-    public async Task ClearAllDunnageForPairAsync_RemovesAllAssignedItems()
+    public async Task Service_SetupWorkflowServiceTests_ClearAllDunnageForPairAsync_RemovesAllAssignedItems()
     {
         var service = CreateService();
 
@@ -140,7 +140,7 @@ public sealed class SetupWorkflowServiceTests
     }
 
     [TestMethod]
-    public async Task AddDunnageTypeAsync_WhenNameIsMissing_ReturnsValidationFailure()
+    public async Task Service_SetupWorkflowServiceTests_AddDunnageTypeAsync_WhenNameIsMissingReturnsValidationFailure()
     {
         var result = await CreateDunnageWorkflowService().AddDunnageTypeAsync(string.Empty);
 
@@ -149,7 +149,7 @@ public sealed class SetupWorkflowServiceTests
     }
 
     [TestMethod]
-    public async Task AddDunnagePartAsync_WhenTypeIdIsInvalid_ReturnsValidationFailure()
+    public async Task Service_SetupWorkflowServiceTests_AddDunnagePartAsync_WhenTypeIdIsInvalidReturnsValidationFailure()
     {
         var result = await CreateDunnageWorkflowService().AddDunnagePartAsync("not-an-id", "Test Part");
 

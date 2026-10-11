@@ -51,7 +51,7 @@ public sealed class ImageCacheSyncServiceTests
     }
 
     [TestMethod]
-    public void TheFirstRunCopiesEveryPictureAndItsFolders()
+    public void Service_ImageCacheSyncServiceTests_TheFirstRunCopiesEveryPictureAndItsFolders()
     {
         WriteSharedPicture(@"request_item\pickup-coil.png");
         WriteSharedPicture(@"work_center\100-03.jpg");
@@ -72,7 +72,7 @@ public sealed class ImageCacheSyncServiceTests
     /// alone, so a startup with nothing new on the share reads no picture at all.
     /// </summary>
     [TestMethod]
-    public void AnUnchangedPictureIsNotCopiedAgain()
+    public void Service_ImageCacheSyncServiceTests_AnUnchangedPictureIsNotCopiedAgain()
     {
         WriteSharedPicture(@"request_item\pickup-coil.png");
 
@@ -89,7 +89,7 @@ public sealed class ImageCacheSyncServiceTests
     /// its original and be copied again on every startup for ever.
     /// </summary>
     [TestMethod]
-    public void ACopyCarriesTheOriginalsLastWrittenTime()
+    public void Service_ImageCacheSyncServiceTests_ACopyCarriesTheOriginalsLastWrittenTime()
     {
         var shared = WriteSharedPicture(@"request_item\pickup-coil.png");
         var stamp = new DateTime(2026, 1, 2, 3, 4, 5, DateTimeKind.Utc);
@@ -104,7 +104,7 @@ public sealed class ImageCacheSyncServiceTests
     }
 
     [TestMethod]
-    public void APictureThatChangedSizeIsCopiedAgain()
+    public void Service_ImageCacheSyncServiceTests_APictureThatChangedSizeIsCopiedAgain()
     {
         var shared = WriteSharedPicture(@"request_item\pickup-coil.png", 1, 2, 3);
 
@@ -120,7 +120,7 @@ public sealed class ImageCacheSyncServiceTests
     }
 
     [TestMethod]
-    public void APictureThatWasEditedIsCopiedAgain()
+    public void Service_ImageCacheSyncServiceTests_APictureThatWasEditedIsCopiedAgain()
     {
         var shared = WriteSharedPicture(@"request_item\pickup-coil.png");
         ImageCacheSyncService.Synchronize([Source(_shareRoot, _cacheRoot)]);
@@ -135,7 +135,7 @@ public sealed class ImageCacheSyncServiceTests
 
     /// <summary>The other half of the run: copies whose original is gone are removed, and the folder they left is too.</summary>
     [TestMethod]
-    public void ACopyWhoseOriginalIsGoneIsRemovedAndItsFolderTidiedAway()
+    public void Service_ImageCacheSyncServiceTests_ACopyWhoseOriginalIsGoneIsRemovedAndItsFolderTidiedAway()
     {
         var shared = WriteSharedPicture(@"request_item\pickup-coil.png");
         WriteSharedPicture(@"work_center\100-03.png");
@@ -159,7 +159,7 @@ public sealed class ImageCacheSyncServiceTests
     /// cache is the only thing still working.
     /// </summary>
     [TestMethod]
-    public void AnUnreachableSourceIsLeftExactlyAsItIs()
+    public void Service_ImageCacheSyncServiceTests_AnUnreachableSourceIsLeftExactlyAsItIs()
     {
         WriteSharedPicture(@"request_item\pickup-coil.png");
         ImageCacheSyncService.Synchronize([Source(_shareRoot, _cacheRoot)]);
@@ -181,7 +181,7 @@ public sealed class ImageCacheSyncServiceTests
     /// failure a standard account meets trying to write under <c>Program Files</c>.
     /// </summary>
     [TestMethod]
-    public void AnUnwritableDestinationIsNotReportedAsAnUnreachableShare()
+    public void Service_ImageCacheSyncServiceTests_AnUnwritableDestinationIsNotReportedAsAnUnreachableShare()
     {
         WriteSharedPicture(@"Parts\Steel Rack.png");
 
@@ -207,7 +207,7 @@ public sealed class ImageCacheSyncServiceTests
     /// and saying nothing is how a machine comes to hold only a few of the pictures it should.
     /// </summary>
     [TestMethod]
-    public void APictureThatWillNotCopyDoesNotAbandonTheOthers()
+    public void Service_ImageCacheSyncServiceTests_APictureThatWillNotCopyDoesNotAbandonTheOthers()
     {
         WriteSharedPicture(@"request_item\pickup-coil.png");
         WriteSharedPicture(@"request_item\steel-rack.png");
@@ -227,7 +227,7 @@ public sealed class ImageCacheSyncServiceTests
     }
 
     [TestMethod]
-    public void FilesThatAreNotPicturesAreNeitherCopiedNorKept()
+    public void Service_ImageCacheSyncServiceTests_FilesThatAreNotPicturesAreNeitherCopiedNorKept()
     {
         WriteSharedPicture(@"request_item\pickup-coil.png");
         WriteSharedPicture(@"notes.txt");
@@ -245,7 +245,7 @@ public sealed class ImageCacheSyncServiceTests
     /// a picture whose original went missing.
     /// </summary>
     [TestMethod]
-    public void TheApplicationsOwnWorkingFolderIsLeftAlone()
+    public void Service_ImageCacheSyncServiceTests_TheApplicationsOwnWorkingFolderIsLeftAlone()
     {
         WriteSharedPicture(@"request_item\pickup-coil.png");
 
@@ -261,7 +261,7 @@ public sealed class ImageCacheSyncServiceTests
     }
 
     [TestMethod]
-    public void EverySourceIsMirroredIntoItsOwnFolder()
+    public void Service_ImageCacheSyncServiceTests_EverySourceIsMirroredIntoItsOwnFolder()
     {
         var otherShare = Path.Combine(_workingDirectory, "other-share");
         Directory.CreateDirectory(otherShare);
@@ -285,7 +285,7 @@ public sealed class ImageCacheSyncServiceTests
     /// not writable for every account that runs the application, and an update must not take the cache with it.
     /// </summary>
     [TestMethod]
-    public void TheCacheRootIsLocalApplicationData()
+    public void Service_ImageCacheSyncServiceTests_TheCacheRootIsLocalApplicationData()
     {
         var expected = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -301,7 +301,7 @@ public sealed class ImageCacheSyncServiceTests
     /// and never a folder that cannot be written into.
     /// </summary>
     [TestMethod]
-    public void TheDunnageCacheIsTheReceivingApplicationsWhenThisAccountMayWriteInIt()
+    public void Service_ImageCacheSyncServiceTests_TheDunnageCacheIsTheReceivingApplicationsWhenThisAccountMayWriteInIt()
     {
         var chosen = ImageCachePaths.ResolveDunnageCacheFolder();
         var ourOwn = Path.Combine(ImageCachePaths.LocalCacheRoot, ImageCachePaths.DunnageFolderName);
@@ -339,7 +339,7 @@ public sealed class ImageCacheSyncServiceTests
             ArchiveKeepDays: 0);
 
     [TestMethod]
-    public void TheTwoPartCollectionsAreNotMirroredInOnePassAtStartup()
+    public void Service_ImageCacheSyncServiceTests_TheTwoPartCollectionsAreNotMirroredInOnePassAtStartup()
     {
         WriteSharedPicture(@"Waitlist\request_item\pickup-coil.png");
         WritePartCollectionPicture(PartPictureLayout.VisualCollection, "MMC-1.png");
@@ -357,7 +357,7 @@ public sealed class ImageCacheSyncServiceTests
     }
 
     [TestMethod]
-    public void APartCollectionCopyLeftByAnEarlierRunIsRemoved()
+    public void Service_ImageCacheSyncServiceTests_APartCollectionCopyLeftByAnEarlierRunIsRemoved()
     {
         WriteSharedPicture(@"Waitlist\request_item\pickup-coil.png");
         WritePartCollectionPicture(PartPictureLayout.VisualCollection, "MMC-1.png");
@@ -373,7 +373,7 @@ public sealed class ImageCacheSyncServiceTests
     }
 
     [TestMethod]
-    public void ACollectionTheSourceDoesNotNameIsStillMirrored()
+    public void Service_ImageCacheSyncServiceTests_ACollectionTheSourceDoesNotNameIsStillMirrored()
     {
         WriteSharedPicture(@"Visual\MMC\MMC-1.png");
 

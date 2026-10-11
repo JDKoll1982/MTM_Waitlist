@@ -18,7 +18,7 @@ public sealed class BackupRetentionTests
     private static readonly DateTime BaseUtc = new(2026, 9, 10, 1, 0, 0, DateTimeKind.Utc);
 
     [TestMethod]
-    public async Task PruneAsync_KeepsTheNewestArtifacts_AndMarksTheRestPrunedAndDeleted()
+    public async Task Service_BackupRetentionTests_PruneAsync_KeepsTheNewestArtifactsAndMarksTheRestPrunedAndDeleted()
     {
         using var fixture = new StoreFixture();
         var artifacts = await fixture.SeedAsync(BackupStore.MtmWaitlist, 5);
@@ -46,7 +46,7 @@ public sealed class BackupRetentionTests
     }
 
     [TestMethod]
-    public async Task PruneAsync_NeverPrunesASafetySnapshot_AndDoesNotCountItAgainstRetention()
+    public async Task Service_BackupRetentionTests_PruneAsync_NeverPrunesASafetySnapshotAndDoesNotCountItAgainstRetention()
     {
         using var fixture = new StoreFixture();
         var scheduled = await fixture.SeedAsync(BackupStore.MtmWaitlist, 4);
@@ -73,7 +73,7 @@ public sealed class BackupRetentionTests
     }
 
     [TestMethod]
-    public async Task PruneAsync_IsPerStore_OneStoresRetentionLeavesAnotherStoreIntact()
+    public async Task Service_BackupRetentionTests_PruneAsync_IsPerStoreOneStoresRetentionLeavesAnotherStoreIntact()
     {
         using var fixture = new StoreFixture();
         var waitlist = await fixture.SeedAsync(BackupStore.MtmWaitlist, 4);
@@ -103,7 +103,7 @@ public sealed class BackupRetentionTests
     }
 
     [TestMethod]
-    public async Task PruneAsync_IsIdempotent_AndToleratesAMissingFile()
+    public async Task Service_BackupRetentionTests_PruneAsync_IsIdempotentAndToleratesAMissingFile()
     {
         using var fixture = new StoreFixture();
         var artifacts = await fixture.SeedAsync(BackupStore.MtmMock, 3);
@@ -120,7 +120,7 @@ public sealed class BackupRetentionTests
     }
 
     [TestMethod]
-    public async Task PruneAsync_WithRetentionBelowOne_IsRejected()
+    public async Task Service_BackupRetentionTests_PruneAsync_WithRetentionBelowOneIsRejected()
     {
         using var fixture = new StoreFixture();
         await fixture.SeedAsync(BackupStore.MtmWaitlist, 1);
@@ -130,7 +130,7 @@ public sealed class BackupRetentionTests
     }
 
     [TestMethod]
-    public async Task EnforceRetentionAsync_UsesTheRequestedRetentionForThatStoreOnly()
+    public async Task Service_BackupRetentionTests_EnforceRetentionAsync_UsesTheRequestedRetentionForThatStoreOnly()
     {
         using var fixture = new StoreFixture();
         await fixture.SeedAsync(BackupStore.MtmReceivingApplication, 5);

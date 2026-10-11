@@ -8,7 +8,7 @@ namespace MTM_Waitlist.Tests.Core.Services;
 public sealed class AppModuleClockTests
 {
     [TestMethod]
-    public void UtcNow_IsCloseToCurrentUtcTime()
+    public void Service_AppModuleClockTests_UtcNow_IsCloseToCurrentUtcTime()
     {
         var clock = new AppModuleClock();
 
@@ -21,7 +21,7 @@ public sealed class AppModuleClockTests
     }
 
     [TestMethod]
-    public void UtcNow_IsUtc()
+    public void Service_AppModuleClockTests_UtcNow_IsUtc()
     {
         var clock = new AppModuleClock();
 

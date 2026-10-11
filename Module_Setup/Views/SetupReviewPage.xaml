@@ -22,7 +22,7 @@
         </Grid.RowDefinitions>
 
         <TabView AutomationProperties.AutomationId="SetupReviewPage_Tabs" Grid.Row="0" IsAddTabButtonVisible="False">
-            <TabViewItem AutomationProperties.AutomationId="SetupReviewPage_JobContextTab" x:Uid="Setup_Review.Tab.JobContext" Header="Job Context">
+            <TabViewItem AutomationProperties.AutomationId="SetupReviewPage_JobContextTab" x:Uid="Setup_Review_Tab_JobContext" Header="Job Context">
                 <Border Margin="0,8,0,0" Style="{StaticResource SetupSectionCardStyle}">
                     <Grid ColumnSpacing="16" RowSpacing="10">
                         <Grid.ColumnDefinitions>
@@ -34,17 +34,17 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Grid.Column="0" x:Uid="Setup_Review.Header.WorkOrder" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Work Order" />
+                        <TextBlock Grid.Row="0" Grid.Column="0" x:Uid="Setup_Review_Header_WorkOrder" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Work Order" />
                         <TextBlock Grid.Row="0" Grid.Column="1" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.NormalizedWorkOrder, Mode=OneWay}" />
-                        <TextBlock Grid.Row="1" Grid.Column="0" x:Uid="Setup_Review.Header.Part" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Part" />
+                        <TextBlock Grid.Row="1" Grid.Column="0" x:Uid="Setup_Review_Header_Part" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Part" />
                         <TextBlock Grid.Row="1" Grid.Column="1" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.SelectedPartNumber, Mode=OneWay}" />
-                        <TextBlock Grid.Row="2" Grid.Column="0" x:Uid="Setup_Review.Header.Sequence" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Sequence" />
+                        <TextBlock Grid.Row="2" Grid.Column="0" x:Uid="Setup_Review_Header_Sequence" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Sequence" />
                         <TextBlock Grid.Row="2" Grid.Column="1" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.SelectedSequence, Mode=OneWay}" />
                     </Grid>
                 </Border>
             </TabViewItem>
 
-            <TabViewItem AutomationProperties.AutomationId="SetupReviewPage_SubordinatePartsTab" x:Uid="Setup_Review.Tab.SubordinateParts" Header="Subordinate Parts">
+            <TabViewItem AutomationProperties.AutomationId="SetupReviewPage_SubordinatePartsTab" x:Uid="Setup_Review_Tab_SubordinateParts" Header="Subordinate Parts">
                 <ScrollViewer Margin="0,8,0,0">
                     <ItemsControl AutomationProperties.AutomationId="SetupReviewPage_SubordinatePartsList" ItemsSource="{x:Bind ViewModel.SubordinatePartGroups, Mode=OneWay}">
                         <ItemsControl.ItemTemplate>
@@ -120,10 +120,10 @@
                 </ScrollViewer>
             </TabViewItem>
 
-            <TabViewItem AutomationProperties.AutomationId="SetupReviewPage_DunnageAssignmentsTab" x:Uid="Setup_Review.Tab.DunnageAssignments" Header="Dunnage &amp; Scrap Assignments">
+            <TabViewItem AutomationProperties.AutomationId="SetupReviewPage_DunnageAssignmentsTab" x:Uid="Setup_Review_Tab_DunnageAssignments" Header="Dunnage &amp; Scrap Assignments">
                 <Border Margin="0,8,0,0" Style="{StaticResource SetupSectionCardStyle}">
                     <StackPanel Spacing="8">
-                        <TextBlock x:Uid="Setup_Review.SelectedDunnageTitle" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Selected Dunnage Summary" />
+                        <TextBlock x:Uid="Setup_Review_SelectedDunnageTitle" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Selected Dunnage Summary" />
                         <ItemsControl AutomationProperties.AutomationId="SetupReviewPage_DunnageAssignmentsList" ItemsSource="{x:Bind ViewModel.DunnageAssignmentDisplays, Mode=OneWay}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="viewmodels:SetupDunnageAssignmentDisplay">
@@ -152,10 +152,10 @@
         </TabView>
 
         <StackPanel Grid.Row="1" Style="{StaticResource SetupActionBarStyle}">
-            <Button AutomationProperties.AutomationId="SetupReviewPage_EditButton" x:Uid="Setup_Action.Edit" Content="Edit" Command="{x:Bind ViewModel.EditCommand}" />
-            <Button AutomationProperties.AutomationId="SetupReviewPage_ConfirmButton" x:Uid="Setup_Action.Confirm" Content="Confirm" Command="{x:Bind ViewModel.ConfirmCommand}" Visibility="{x:Bind ViewModel.ConfirmButtonVisibility, Mode=OneWay}" />
-            <Button AutomationProperties.AutomationId="SetupReviewPage_CancelButton" x:Uid="Setup_Action.Cancel" Content="Cancel" Command="{x:Bind ViewModel.CancelReplacementCommand}" Visibility="{x:Bind ViewModel.ReplacementConfirmationVisibility, Mode=OneWay}" />
-            <Button AutomationProperties.AutomationId="SetupReviewPage_ReplaceButton" x:Uid="Setup_Action.Replace" Content="Replace" Command="{x:Bind ViewModel.ReplaceCommand}" Visibility="{x:Bind ViewModel.ReplacementConfirmationVisibility, Mode=OneWay}" />
+            <Button AutomationProperties.AutomationId="SetupReviewPage_EditButton" x:Uid="Setup_Action_Edit" Content="Edit" Command="{x:Bind ViewModel.EditCommand}" />
+            <Button AutomationProperties.AutomationId="SetupReviewPage_ConfirmButton" x:Uid="Setup_Action_Confirm" Content="Confirm" Command="{x:Bind ViewModel.ConfirmCommand}" Visibility="{x:Bind ViewModel.ConfirmButtonVisibility, Mode=OneWay}" />
+            <Button AutomationProperties.AutomationId="SetupReviewPage_CancelButton" x:Uid="Setup_Action_Cancel" Content="Cancel" Command="{x:Bind ViewModel.CancelReplacementCommand}" Visibility="{x:Bind ViewModel.ReplacementConfirmationVisibility, Mode=OneWay}" />
+            <Button AutomationProperties.AutomationId="SetupReviewPage_ReplaceButton" x:Uid="Setup_Action_Replace" Content="Replace" Command="{x:Bind ViewModel.ReplaceCommand}" Visibility="{x:Bind ViewModel.ReplacementConfirmationVisibility, Mode=OneWay}" />
         </StackPanel>
     </Grid>
 </Page>

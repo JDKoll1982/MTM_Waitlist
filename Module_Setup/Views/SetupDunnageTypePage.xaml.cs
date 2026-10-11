@@ -35,10 +35,10 @@ public sealed partial class SetupDunnageTypePage : Page
     {
         var dialog = new ContentDialog
         {
-            Title = LocalizeOrDefault("Setup_DunnagePair.ClearAll.DialogTitle", "Clear all dunnage assignments?"),
-            Content = LocalizeOrDefault("Setup_DunnagePair.ClearAll.DialogMessage", "This will remove all dunnage assignments for the current part/sequence pair."),
-            PrimaryButtonText = LocalizeOrDefault("Setup_DunnagePair.ClearAll.Confirm", "Clear All"),
-            CloseButtonText = LocalizeOrDefault("Setup_DunnagePair.ClearAll.Cancel", "Cancel"),
+            Title = LocalizeOrDefault("Setup_DunnagePair_ClearAll.DialogTitle", "Clear all dunnage assignments?"),
+            Content = LocalizeOrDefault("Setup_DunnagePair_ClearAll.DialogMessage", "This will remove all dunnage assignments for the current part/sequence pair."),
+            PrimaryButtonText = LocalizeOrDefault("Setup_DunnagePair_ClearAll.Confirm", "Clear All"),
+            CloseButtonText = LocalizeOrDefault("Setup_DunnagePair_ClearAll.Cancel", "Cancel"),
             DefaultButton = ContentDialogButton.Close,
             XamlRoot = XamlRoot,
         };

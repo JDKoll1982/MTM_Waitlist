@@ -507,11 +507,11 @@
         "T008"
       ],
       "tests": [
-        "CanViewerAccept_OnlyWhenAvailableAndViewerCanHandle",
-        "Gates_MatchThePolicyForEveryViewerAndState",
-        "Accept_CallsTheServiceWithTheSignedInHandlerAndTheRowsRequestId",
-        "Accept_WhenTheViewerIsNotAHandler_IsNotOfferedAndNeverCallsTheService",
-        "Card_ActionButtonsAreGatedByTheRowsOwnFlags"
+        "Service_RequestActionPolicyTests_Service_RequestActionPolicyTests_CanViewerAccept_OnlyWhenAvailableAndViewerCanHandle",
+        "ViewModel_WaitlistViewViewModelActionTests_Gates_MatchThePolicyForEveryViewerAndState",
+        "ViewModel_WaitlistViewViewModelActionTests_ViewModel_WaitlistViewViewModelActionTests_Accept_CallsTheServiceWithTheSignedInHandlerAndTheRowsRequestId",
+        "ViewModel_WaitlistViewViewModelActionTests_Accept_WhenTheViewerIsNotAHandlerIsNotOfferedAndNeverCallsTheService",
+        "UI_WaitlistLineCardMarkupTests_UI_WaitlistLineCardMarkupTests_Card_ActionButtonsAreGatedByTheRowsOwnFlags"
       ]
     },
     "FR-002": {
@@ -521,8 +521,8 @@
         "T011"
       ],
       "tests": [
-        "Accept_CallsTheServiceWithTheSignedInHandlerAndTheRowsRequestId",
-        "AcceptAsync_AssignsToHandlerAndMarksInProgress"
+        "ViewModel_WaitlistViewViewModelActionTests_ViewModel_WaitlistViewViewModelActionTests_Accept_CallsTheServiceWithTheSignedInHandlerAndTheRowsRequestId",
+        "Service_WaitlistRequestServiceTests_Service_WaitlistRequestServiceTests_AcceptAsync_AssignsToHandlerAndMarksInProgress"
       ]
     },
     "FR-003": {
@@ -531,8 +531,8 @@
         "T008"
       ],
       "tests": [
-        "AcceptAsync_AssignsToHandlerAndMarksInProgress",
-        "RefreshFromDatabaseAsync_LoadsOpenRequestsFromDb"
+        "Service_WaitlistRequestServiceTests_Service_WaitlistRequestServiceTests_AcceptAsync_AssignsToHandlerAndMarksInProgress",
+        "Service_WaitlistRequestServiceTests_Service_WaitlistRequestServiceTests_RefreshFromDatabaseAsync_LoadsOpenRequestsFromDb"
       ]
     },
     "FR-004": {
@@ -542,10 +542,10 @@
         "T007"
       ],
       "tests": [
-        "AssignedToViewer_IsCaseInsensitive_OnlyWhenTaken",
-        "CompleteAndRelease_AreNotOfferedToAHandlerTheRequestIsNotAssignedTo",
-        "Gates_MatchThePolicyForEveryViewerAndState",
-        "AcceptAsync_NotAvailable_ReturnsNull"
+        "Service_RequestActionPolicyTests_AssignedToViewer_IsCaseInsensitiveOnlyWhenTaken",
+        "ViewModel_WaitlistViewViewModelActionTests_ViewModel_WaitlistViewViewModelActionTests_CompleteAndRelease_AreNotOfferedToAHandlerTheRequestIsNotAssignedTo",
+        "ViewModel_WaitlistViewViewModelActionTests_Gates_MatchThePolicyForEveryViewerAndState",
+        "Service_WaitlistRequestServiceTests_AcceptAsync_NotAvailableReturnsNull"
       ]
     },
     "FR-005": {
@@ -558,10 +558,10 @@
         "T016"
       ],
       "tests": [
-        "CanViewerCompleteOrRelease_OnlyAssignedHandlerAndNotDone",
-        "CompleteAndRelease_AreNotOfferedToAHandlerTheRequestIsNotAssignedTo",
-        "CompleteAsync_OnlyAssignedHandlerCanComplete",
-        "ReleaseAsync_NonAssignee_ReturnsNull"
+        "Service_RequestActionPolicyTests_Service_RequestActionPolicyTests_CanViewerCompleteOrRelease_OnlyAssignedHandlerAndNotDone",
+        "ViewModel_WaitlistViewViewModelActionTests_ViewModel_WaitlistViewViewModelActionTests_CompleteAndRelease_AreNotOfferedToAHandlerTheRequestIsNotAssignedTo",
+        "Service_WaitlistRequestServiceTests_Service_WaitlistRequestServiceTests_CompleteAsync_OnlyAssignedHandlerCanComplete",
+        "Service_WaitlistRequestServiceTests_ReleaseAsync_NonAssigneeReturnsNull"
       ]
     },
     "FR-006": {
@@ -570,10 +570,10 @@
         "T014"
       ],
       "tests": [
-        "Complete_CallsTheServiceWithTheSignedInAssignee",
-        "CompleteAsync_OnlyAssignedHandlerCanComplete",
-        "TransitionStatusAsync_ChangesPendingToAcceptedCompletedAndCanceled",
-        "TransitionStatusAsync_SetsAcceptedAndCompletedTimestamps"
+        "ViewModel_WaitlistViewViewModelActionTests_ViewModel_WaitlistViewViewModelActionTests_Complete_CallsTheServiceWithTheSignedInAssignee",
+        "Service_WaitlistRequestServiceTests_Service_WaitlistRequestServiceTests_CompleteAsync_OnlyAssignedHandlerCanComplete",
+        "Service_WaitlistRequestServiceTests_Service_WaitlistRequestServiceTests_TransitionStatusAsync_ChangesPendingToAcceptedCompletedAndCanceled",
+        "Service_WaitlistRequestServiceTests_Service_WaitlistRequestServiceTests_TransitionStatusAsync_SetsAcceptedAndCompletedTimestamps"
       ]
     },
     "FR-007": {
@@ -583,8 +583,8 @@
         "T014"
       ],
       "tests": [
-        "ReleaseAsync_ReturnsToOpenList_NotACancellation",
-        "ReleaseAsync_NonAssignee_ReturnsNull"
+        "Service_WaitlistRequestServiceTests_ReleaseAsync_ReturnsToOpenListNotACancellation",
+        "Service_WaitlistRequestServiceTests_ReleaseAsync_NonAssigneeReturnsNull"
       ]
     },
     "FR-008": {
@@ -594,9 +594,9 @@
         "T007"
       ],
       "tests": [
-        "CanViewerAccept_OnlyWhenAvailableAndViewerCanHandle",
-        "Accept_WhenTheViewerIsNotAHandler_IsNotOfferedAndNeverCallsTheService",
-        "Gates_MatchThePolicyForEveryViewerAndState"
+        "Service_RequestActionPolicyTests_Service_RequestActionPolicyTests_CanViewerAccept_OnlyWhenAvailableAndViewerCanHandle",
+        "ViewModel_WaitlistViewViewModelActionTests_Accept_WhenTheViewerIsNotAHandlerIsNotOfferedAndNeverCallsTheService",
+        "ViewModel_WaitlistViewViewModelActionTests_Gates_MatchThePolicyForEveryViewerAndState"
       ]
     },
     "FR-009": {
@@ -606,9 +606,9 @@
         "T016"
       ],
       "tests": [
-        "IsDone_RecognizesTerminalStatuses",
-        "Gates_MatchThePolicyForEveryViewerAndState",
-        "CompleteAndRelease_AreNotOfferedToAHandlerTheRequestIsNotAssignedTo"
+        "Service_RequestActionPolicyTests_Service_RequestActionPolicyTests_IsDone_RecognizesTerminalStatuses",
+        "ViewModel_WaitlistViewViewModelActionTests_Gates_MatchThePolicyForEveryViewerAndState",
+        "ViewModel_WaitlistViewViewModelActionTests_ViewModel_WaitlistViewViewModelActionTests_CompleteAndRelease_AreNotOfferedToAHandlerTheRequestIsNotAssignedTo"
       ]
     },
     "FR-010": {
@@ -621,10 +621,10 @@
         "T022"
       ],
       "tests": [
-        "Cancel_CallsTheServiceWithTheRequesterIdentityAndThePromptedReason",
-        "Cancel_WithAnEmptyReason_IsStillAConfirmedCancellation",
-        "Cancel_WhenThePromptIsDismissed_PerformsNoActionAndSaysNothing",
-        "CancelOwnRequestAsync_CreatorCancelsOwnWaitingRequest_SucceedsAndRecordsCancelled"
+        "ViewModel_WaitlistViewViewModelActionTests_ViewModel_WaitlistViewViewModelActionTests_Cancel_CallsTheServiceWithTheRequesterIdentityAndThePromptedReason",
+        "ViewModel_WaitlistViewViewModelActionTests_Cancel_WithAnEmptyReasonIsStillAConfirmedCancellation",
+        "ViewModel_WaitlistViewViewModelActionTests_Cancel_WhenThePromptIsDismissedPerformsNoActionAndSaysNothing",
+        "Service_WaitlistRequestServiceTests_CancelOwnRequestAsync_CreatorCancelsOwnWaitingRequestSucceedsAndRecordsCancelled"
       ]
     },
     "FR-011": {
@@ -635,10 +635,10 @@
         "T022"
       ],
       "tests": [
-        "TransitionStatusAsync_WhenCanceled_RecordsCancellationMetadata",
-        "CancelOwnRequestAsync_PersistsCancelledRowToDb",
-        "CancelOwnRequestAsync_AfterAcceptIsDenied",
-        "CancelOwnRequestAsync_NonCreatorIsDenied"
+        "Service_WaitlistRequestServiceTests_TransitionStatusAsync_WhenCanceledRecordsCancellationMetadata",
+        "Service_WaitlistRequestServiceTests_Service_WaitlistRequestServiceTests_CancelOwnRequestAsync_PersistsCancelledRowToDb",
+        "Service_WaitlistRequestServiceTests_Service_WaitlistRequestServiceTests_CancelOwnRequestAsync_AfterAcceptIsDenied",
+        "Service_WaitlistRequestServiceTests_Service_WaitlistRequestServiceTests_CancelOwnRequestAsync_NonCreatorIsDenied"
       ]
     },
     "FR-012": {
@@ -648,8 +648,8 @@
         "T045"
       ],
       "tests": [
-        "RequestPage_AnyoneSignedInCanSendAMessage",
-        "RequestPage_ARefresh_KeepsAnUnsavedMessageOnScreen"
+        "ViewModel_WaitlistViewDetailActionTests_ViewModel_WaitlistViewDetailActionTests_RequestPage_AnyoneSignedInCanSendAMessage",
+        "ViewModel_WaitlistViewDetailActionTests_RequestPage_ARefreshKeepsAnUnsavedMessageOnScreen"
       ]
     },
     "FR-013": {
@@ -660,9 +660,9 @@
         "T046"
       ],
       "tests": [
-        "RequestPage_HistoryNamesTheSenderAndNotTheMessageType",
-        "HistoryEntry_WithNoAuthor_IsAttributedToTheSystem",
-        "RequestPage_ReadsTheHistoryFromTheStore_NotJustThisSession"
+        "ViewModel_WaitlistViewDetailActionTests_ViewModel_WaitlistViewDetailActionTests_RequestPage_HistoryNamesTheSenderAndNotTheMessageType",
+        "ViewModel_WaitlistViewDetailActionTests_HistoryEntry_WithNoAuthorIsAttributedToTheSystem",
+        "ViewModel_WaitlistViewDetailActionTests_RequestPage_ReadsTheHistoryFromTheStoreNotJustThisSession"
       ]
     },
     "FR-014": {
@@ -671,11 +671,11 @@
         "T012"
       ],
       "tests": [
-        "CreateSessionOrder_SurfacesTheHandlerNeededDataTheRequestCarries",
-        "CreateSessionOrder_AddsNoHandlerSectionToTheCardsFixedLayout",
-        "CreateSessionOrder_ForEveryRequestShape_CarriesOnlyValuesTheRequestCarries",
-        "CreateSessionOrder_ForEveryRequestShape_RendersNoFabricatedLookingValue",
-        "CreateSessionOrder_ForEveryRequestShape_LeavesAnEmptySlotEmpty"
+        "ViewModel_WaitlistViewViewModelFieldTests_ViewModel_WaitlistViewViewModelFieldTests_CreateSessionOrder_SurfacesTheHandlerNeededDataTheRequestCarries",
+        "ViewModel_WaitlistViewViewModelFieldTests_ViewModel_WaitlistViewViewModelFieldTests_CreateSessionOrder_AddsNoHandlerSectionToTheCardsFixedLayout",
+        "ViewModel_WaitlistViewViewModelFieldTests_CreateSessionOrder_ForEveryRequestShapeCarriesOnlyValuesTheRequestCarries",
+        "ViewModel_WaitlistViewViewModelFieldTests_CreateSessionOrder_ForEveryRequestShapeRendersNoFabricatedLookingValue",
+        "ViewModel_WaitlistViewViewModelFieldTests_CreateSessionOrder_ForEveryRequestShapeLeavesAnEmptySlotEmpty"
       ]
     },
     "FR-015": {
@@ -686,10 +686,10 @@
         "T019"
       ],
       "tests": [
-        "List_LeadsWithTheMostOverdueRowThenTheLeastRemainingTime",
-        "List_OrderNeverContradictsTheCountdownOnEachCard",
-        "Compute_DueIsCreatedPlusAllotted_RemainingAndOverdue",
-        "WaitlistViewViewModel_CreatesSessionOrder_WithProperRemainingTimeAndOverdueState"
+        "ViewModel_WaitlistViewViewModelActionTests_ViewModel_WaitlistViewViewModelActionTests_List_LeadsWithTheMostOverdueRowThenTheLeastRemainingTime",
+        "ViewModel_WaitlistViewViewModelActionTests_ViewModel_WaitlistViewViewModelActionTests_List_OrderNeverContradictsTheCountdownOnEachCard",
+        "Service_UrgencyCalculatorTests_Compute_DueIsCreatedPlusAllottedRemainingAndOverdue",
+        "Service_WaitlistRequestServiceTests_WaitlistViewViewModel_CreatesSessionOrderWithProperRemainingTimeAndOverdueState"
       ]
     },
     "FR-016": {
@@ -698,9 +698,9 @@
         "T013"
       ],
       "tests": [
-        "TransitionStatusAsync_PersistsStatusUpdateToDb",
-        "AcceptAsync_AssignsToHandlerAndMarksInProgress",
-        "NoMySqlStatementTextRemainsInApplicationCode"
+        "Service_WaitlistRequestServiceTests_Service_WaitlistRequestServiceTests_TransitionStatusAsync_PersistsStatusUpdateToDb",
+        "Service_WaitlistRequestServiceTests_Service_WaitlistRequestServiceTests_AcceptAsync_AssignsToHandlerAndMarksInProgress",
+        "Audit_InlineSqlAuditTests_Audit_InlineSqlAuditTests_NoMySqlStatementTextRemainsInApplicationCode"
       ]
     },
     "FR-017": {
@@ -709,11 +709,11 @@
         "T013"
       ],
       "tests": [
-        "AuditTrail_RecordsFromToStatusAcrossLifecycle",
-        "AuditTrail_PersistsAuditEntriesToDb",
-        "GetAuditTrail_RecordsRequestCreationAndLifecycleTransitions",
-        "UpdateNote_SetsNoteOnRequestAndRecordsAudit",
-        "RequestPage_SavingANote_StoresItAndRecordsItInTheHistory"
+        "Service_WaitlistRequestServiceTests_Service_WaitlistRequestServiceTests_AuditTrail_RecordsFromToStatusAcrossLifecycle",
+        "Service_WaitlistRequestServiceTests_Service_WaitlistRequestServiceTests_AuditTrail_PersistsAuditEntriesToDb",
+        "Service_WaitlistRequestServiceTests_Service_WaitlistRequestServiceTests_GetAuditTrail_RecordsRequestCreationAndLifecycleTransitions",
+        "Service_WaitlistRequestServiceTests_Service_WaitlistRequestServiceTests_UpdateNote_SetsNoteOnRequestAndRecordsAudit",
+        "ViewModel_WaitlistViewDetailActionTests_RequestPage_SavingANoteStoresItAndRecordsItInTheHistory"
       ]
     },
     "FR-018": {
@@ -723,10 +723,10 @@
         "T007"
       ],
       "tests": [
-        "Gates_MatchThePolicyForEveryViewerAndState",
-        "CanViewerCompleteOrRelease_OnlyAssignedHandlerAndNotDone",
-        "AcceptAsync_NotAvailable_ReturnsNull",
-        "CancelOwnRequestAsync_NonCreatorIsDenied"
+        "ViewModel_WaitlistViewViewModelActionTests_Gates_MatchThePolicyForEveryViewerAndState",
+        "Service_RequestActionPolicyTests_Service_RequestActionPolicyTests_CanViewerCompleteOrRelease_OnlyAssignedHandlerAndNotDone",
+        "Service_WaitlistRequestServiceTests_AcceptAsync_NotAvailableReturnsNull",
+        "Service_WaitlistRequestServiceTests_Service_WaitlistRequestServiceTests_CancelOwnRequestAsync_NonCreatorIsDenied"
       ]
     },
     "FR-019": {
@@ -738,9 +738,9 @@
         "T022"
       ],
       "tests": [
-        "Accept_WhenTheStoreRefuses_ReportsItAndWarnsTheHandler",
-        "Accept_WhenTheRequestLeftTheList_TellsTheHandlerToChooseSomethingElse",
-        "Cancel_WhenTheStoreRefuses_ReportsItInPlainLanguage"
+        "ViewModel_WaitlistViewViewModelActionTests_Accept_WhenTheStoreRefusesReportsItAndWarnsTheHandler",
+        "ViewModel_WaitlistViewViewModelActionTests_Accept_WhenTheRequestLeftTheListTellsTheHandlerToChooseSomethingElse",
+        "ViewModel_WaitlistViewViewModelActionTests_Cancel_WhenTheStoreRefusesReportsItInPlainLanguage"
       ]
     },
     "FR-020": {
@@ -753,10 +753,10 @@
         "T021"
       ],
       "tests": [
-        "Card_DrawsNoButtonThatCannotAct",
-        "Card_ActionButtonsAreGatedByTheRowsOwnFlags",
-        "Gates_EveryTrueFlagCarriesACommandAndNoFlagCarriesNone",
-        "Card_ActionButtonsAreNamedFromTheRowNotFromALiteral"
+        "UI_WaitlistLineCardMarkupTests_UI_WaitlistLineCardMarkupTests_Card_DrawsNoButtonThatCannotAct",
+        "UI_WaitlistLineCardMarkupTests_UI_WaitlistLineCardMarkupTests_Card_ActionButtonsAreGatedByTheRowsOwnFlags",
+        "ViewModel_WaitlistViewViewModelActionTests_ViewModel_WaitlistViewViewModelActionTests_Gates_EveryTrueFlagCarriesACommandAndNoFlagCarriesNone",
+        "UI_WaitlistLineCardMarkupTests_UI_WaitlistLineCardMarkupTests_Card_ActionButtonsAreNamedFromTheRowNotFromALiteral"
       ]
     },
     "FR-021": {
@@ -769,10 +769,10 @@
         "T028"
       ],
       "tests": [
-        "Card_KeepsTheFixedSquareRequestImage",
+        "UI_WaitlistLineCardMarkupTests_UI_WaitlistLineCardMarkupTests_Card_KeepsTheFixedSquareRequestImage",
         "Card_KeepsTheTitleOnItsOwnTopRow",
-        "Card_KeepsTheFourMetadataRows",
-        "Card_KeepsTheCompactStatusPillBelowTheButtons",
+        "UI_WaitlistLineCardMarkupTests_UI_WaitlistLineCardMarkupTests_Card_KeepsTheFourMetadataRows",
+        "UI_WaitlistLineCardMarkupTests_UI_WaitlistLineCardMarkupTests_Card_KeepsTheCompactStatusPillBelowTheButtons",
         "PerTypeDetailGrids_KeepTheTwoByThreeFourColumnPattern"
       ]
     },
@@ -784,9 +784,9 @@
         "T025"
       ],
       "tests": [
-        "EveryNewString_ResolvesThroughTheResourceFileAndIsReferencedWhereItIsShown",
-        "Card_ActionButtonsAreNamedFromTheRowNotFromALiteral",
-        "Card_ActionButtonsCarryATooltipFromTheRowNotFromALiteral"
+        "ViewModel_WaitlistViewDetailActionTests_ViewModel_WaitlistViewDetailActionTests_EveryNewString_ResolvesThroughTheResourceFileAndIsReferencedWhereItIsShown",
+        "UI_WaitlistLineCardMarkupTests_UI_WaitlistLineCardMarkupTests_Card_ActionButtonsAreNamedFromTheRowNotFromALiteral",
+        "UI_WaitlistLineCardMarkupTests_UI_WaitlistLineCardMarkupTests_Card_ActionButtonsCarryATooltipFromTheRowNotFromALiteral"
       ]
     },
     "FR-023": {
@@ -796,9 +796,9 @@
         "T023"
       ],
       "tests": [
-        "RequestsChanged_IsRaised_WhenRequestIsSubmittedOrStatusTransitions",
-        "WaitlistViewViewModel_RefreshesActiveList_WhenRequestIsSubmitted",
-        "RequestPage_ARefreshAfterSending_LeavesTheSentMessageInPlace"
+        "Service_WaitlistRequestServiceTests_RequestsChanged_IsRaisedWhenRequestIsSubmittedOrStatusTransitions",
+        "Service_WaitlistRequestServiceTests_WaitlistViewViewModel_RefreshesActiveListWhenRequestIsSubmitted",
+        "ViewModel_WaitlistViewDetailActionTests_RequestPage_ARefreshAfterSendingLeavesTheSentMessageInPlace"
       ]
     },
     "FR-024": {
@@ -807,8 +807,8 @@
       ],
       "title": "Of two handlers claiming one request, exactly one wins and the loser is warned",
       "tests": [
-        "Accept_TwoHandlersRaceForTheSameRequest_FirstWinsAndSecondIsWarned",
-        "LostClaimWarning_SaysAnotherHandlerTookItAndToChooseSomethingElse"
+        "ViewModel_WaitlistViewViewModelActionTests_Accept_TwoHandlersRaceForTheSameRequestFirstWinsAndSecondIsWarned",
+        "ViewModel_WaitlistViewViewModelActionTests_ViewModel_WaitlistViewViewModelActionTests_LostClaimWarning_SaysAnotherHandlerTookItAndToChooseSomethingElse"
       ]
     },
     "FR-031": {
@@ -817,11 +817,11 @@
         "T049"
       ],
       "tests": [
-        "ARealResolvedPathIsUsed",
-        "TheServicesOwnPlaceholderIsNotAnImage",
-        "ThePlaceholderIsRecognisedWhateverTheSeparatorsOrCasing",
-        "NothingAtAllIsNotUsableEither",
-        "AnEmptyPathIsNotAPlaceholder"
+        "Helper_RequestImagePathPolicyTests_Helper_RequestImagePathPolicyTests_ARealResolvedPathIsUsed",
+        "Helper_RequestImagePathPolicyTests_Helper_RequestImagePathPolicyTests_TheServicesOwnPlaceholderIsNotAnImage",
+        "Helper_RequestImagePathPolicyTests_Helper_RequestImagePathPolicyTests_ThePlaceholderIsRecognisedWhateverTheSeparatorsOrCasing",
+        "Helper_RequestImagePathPolicyTests_Helper_RequestImagePathPolicyTests_NothingAtAllIsNotUsableEither",
+        "Helper_RequestImagePathPolicyTests_Helper_RequestImagePathPolicyTests_AnEmptyPathIsNotAPlaceholder"
       ]
     },
     "FR-025": {
@@ -831,8 +831,8 @@
         "T039"
       ],
       "tests": [
-        "RequestPage_DrawsNoActionButton",
-        "Card_ActionButtonsAreGatedByTheRowsOwnFlags"
+        "ViewModel_WaitlistViewDetailActionTests_ViewModel_WaitlistViewDetailActionTests_RequestPage_DrawsNoActionButton",
+        "UI_WaitlistLineCardMarkupTests_UI_WaitlistLineCardMarkupTests_Card_ActionButtonsAreGatedByTheRowsOwnFlags"
       ]
     },
     "FR-026": {
@@ -842,7 +842,7 @@
         "T041"
       ],
       "tests": [
-        "RequestPage_RefreshIntervalIsThirtySeconds"
+        "ViewModel_WaitlistViewDetailActionTests_ViewModel_WaitlistViewDetailActionTests_RequestPage_RefreshIntervalIsThirtySeconds"
       ]
     },
     "FR-027": {
@@ -851,8 +851,8 @@
         "T040"
       ],
       "tests": [
-        "Card_MessageTheViewerHasNotRead_ShowsTheMarker",
-        "Card_MessageTheViewerHasAlreadyRead_ShowsNoMarker"
+        "ViewModel_WaitlistViewViewModelActionTests_Card_MessageTheViewerHasNotReadShowsTheMarker",
+        "ViewModel_WaitlistViewViewModelActionTests_Card_MessageTheViewerHasAlreadyReadShowsNoMarker"
       ]
     },
     "FR-028": {
@@ -861,7 +861,7 @@
         "T044"
       ],
       "tests": [
-        "Card_LifecycleChangeOnly_ShowsNoMessageMarker"
+        "ViewModel_WaitlistViewViewModelActionTests_Card_LifecycleChangeOnlyShowsNoMessageMarker"
       ]
     },
     "FR-029": {
@@ -870,9 +870,9 @@
         "T048"
       ],
       "tests": [
-        "EveryLifecycleStateGetsItsOwnRole",
-        "NoTwoStatusesShareAColour",
-        "EveryStatusBadgeIsReadable"
+        "Helper_RequestStatusPaletteTests_Helper_RequestStatusPaletteTests_EveryLifecycleStateGetsItsOwnRole",
+        "Helper_RequestStatusPaletteTests_Helper_RequestStatusPaletteTests_NoTwoStatusesShareAColour",
+        "Helper_RequestStatusPaletteTests_Helper_RequestStatusPaletteTests_EveryStatusBadgeIsReadable"
       ]
     },
     "FR-030": {
@@ -881,7 +881,7 @@
         "T047"
       ],
       "tests": [
-        "Card_AcceptAndCompleteAreUnmistakablyDifferent"
+        "UI_WaitlistLineCardMarkupTests_UI_WaitlistLineCardMarkupTests_Card_AcceptAndCompleteAreUnmistakablyDifferent"
       ]
     }
   },

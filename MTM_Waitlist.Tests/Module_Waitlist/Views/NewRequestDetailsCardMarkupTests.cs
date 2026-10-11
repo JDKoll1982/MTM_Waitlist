@@ -19,7 +19,7 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.Views;
 public sealed class NewRequestDetailsCardMarkupTests
 {
     [TestMethod]
-    public void TheAnswerList_IsACardListCarryingEachAnswersPicture()
+    public void UI_NewRequestDetailsCardMarkupTests_TheAnswerList_IsACardListCarryingEachAnswersPicture()
     {
         var cards = AnswerCards();
 
@@ -35,7 +35,7 @@ public sealed class NewRequestDetailsCardMarkupTests
     }
 
     [TestMethod]
-    public void TheAnswerList_IsNoLongerADropDown()
+    public void UI_NewRequestDetailsCardMarkupTests_TheAnswerList_IsNoLongerADropDown()
     {
         var markup = PageMarkup();
 
@@ -44,7 +44,7 @@ public sealed class NewRequestDetailsCardMarkupTests
     }
 
     [TestMethod]
-    public void ChoosingACard_StillChoosesTheAnswerAndAdvances()
+    public void UI_NewRequestDetailsCardMarkupTests_ChoosingACard_StillChoosesTheAnswerAndAdvances()
     {
         var codeBehind = CodeBehind();
 

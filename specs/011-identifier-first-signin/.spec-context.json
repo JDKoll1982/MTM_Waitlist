@@ -584,6 +584,14 @@
       "kind": "complete",
       "by": "extension",
       "at": "2026-10-04T18:14:17.987Z"
+    },
+    {
+      "step": "implement",
+      "substep": "record-accuracy-before-next-spec",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-10T23:29:40.000Z",
+      "note": "two stale concerns rewritten and closed; closed concerns moved off the overview"
     }
   ],
   "telemetryInstanceId": "51cc1f66-9ffc-471d-8249-4cd1e3c3bbe4",
@@ -592,7 +600,7 @@
       "startup-launch"
     ]
   },
-  "last_action": "Stopped after the verified Foundational slice; the spec is left at implementing.",
+  "last_action": "Record accuracy pass before the next spec starts. Two concerns were stale and are rewritten and closed: the shared key-file read was withdrawn by feature 010 today, and the 17-of-61 task line was superseded when all 61 completed. Closed concerns moved off the overview. Also noted: this feature's coverage record traces only 3 of 46 requirements to tests, and its sixth read shape is not in the local store's mirror, so its cached fallback is unproven here.",
   "expectations": [
     "Moving or removing visual-priming is out of scope; it must stay last before hand-over",
     "Machine setup, the blocked surface and the shell behaviour are unchanged except where named",
@@ -1075,15 +1083,13 @@
       "decision": "sp_core_account_setup_create reads the lowest rank itself and writes the credential as non-temporary.",
       "why": "No caller may name a rank, and the person must never enter the temporary-credential state.",
       "rejected": "Passing a rank in, or creating on the default PIN 4330."
+    },
+    {
+      "decision": "two of this feature's concerns described a state that had since changed and were rewritten rather than left standing: remember-me and its shared key-file read were withdrawn by feature 010 on 2026-10-10, and the line saying 17 of 61 tasks were implemented was superseded when all 61 completed. A concern read by a later spec's clarify step as current fact is worse than no concern, so each now says what is true and why it changed."
     }
   ],
   "approach": "Sign-in becomes two stages with a new identifier service resolving store-first then plant-system; one LaunchWindow hosts the launch stages then becomes the shell; the pipeline gains parallel groups plus a 45-second budget on top of each step's maximum, and a sixth cached read shape serves the employee lookup.",
   "concerns": [
-    {
-      "note": "FR-042 and FR-035 assert that nothing but the picture copy is kept on a machine, but the code reads a shared key file for remembered sign-in. The behaviour is left unchanged by this feature and the instruction document is corrected instead.",
-      "step": "analyze",
-      "kind": "critical"
-    },
     {
       "note": "Where a self-created account's user name comes from is unspecified; settled at implement time by an informed default (derived from the confirmed name, unique in the store).",
       "step": "analyze",
@@ -1115,11 +1121,6 @@
       "kind": "low"
     },
     {
-      "note": "17 of 61 tasks are implemented and verified. The Foundational database and cache slice is complete; every task from T012 onward is not started. The spec is deliberately left at implementing rather than implemented.",
-      "step": "implement",
-      "kind": "scope"
-    },
-    {
       "note": "The task-close timestamps for T001 to T020 were stamped in bursts when the work was already finished, so the durations are a recording artifact rather than the real build time. The work itself is real and verified.",
       "step": "implement",
       "kind": "bookkeeping"
@@ -1133,11 +1134,6 @@
       "note": "sp_core_account_setup_create writes no audit row, because the act has no actor. This departs from sp_user_management_create deliberately and is recorded in analysis.md A2.",
       "step": "implement",
       "kind": "decision"
-    },
-    {
-      "note": "The sixth read shape's mirror tables and procedures have not been applied to a real store in this session; only their files and the catalog-driven validation are verified.",
-      "step": "implement",
-      "kind": "unverified"
     }
   ],
   "currentTask": "T009",
@@ -1287,6 +1283,33 @@
       "warnings": [
         "exited 255"
       ]
+    },
+    {
+      "what": "The sixth read shape applied to the local store and exercised (run by hand, recorded as a note rather than a receipt so it is not mistaken for a captured exit code)",
+      "result": "Applied to mtm_mock on 2026-10-10: the mirror table, its _stage twin and both procedures now exist, and sp_visual_employee_by_number_get returns the mirrored row. All four artifacts report present, the shape-count step reports 6, and the three mock validation scripts (all_shapes_roundtrip, read_shape_metadata, refresh_swap_smoke) exit 0 with no findings. The roundtrip script now exercises shape 6 end to end and counts 12 shape procedures plus the 2 catalog procedures. Still unexercised on this machine: the on-host service's own refresh cadence."
+    }
+  ],
+  "concernsClosed": [
+    {
+      "note": "CLOSED 2026-10-10 — remember-me was withdrawn in feature 010 (T233, T234), so nothing reads, copies or keeps a shared key file any more. This feature's FR-035 was rewritten to state the withdrawal and the read is gone. The concern described the state before that change and must not be read as current.",
+      "step": "analyze",
+      "kind": "critical",
+      "status": "closed",
+      "resolution": "CLOSED 2026-10-10 — remember-me was withdrawn in feature 010 (T233, T234), so nothing reads, copies or keeps a shared key file any more. This feature's FR-035 was rewritten to state the withdrawal and the read is gone. The concern described the state before that change and must not be read as current."
+    },
+    {
+      "note": "CLOSED 2026-10-10 — all 61 tasks of this feature are done and verified and its companion status is completed. The line describing 17 of 61 was true at an earlier checkpoint and is superseded.",
+      "step": "implement",
+      "kind": "scope",
+      "status": "closed",
+      "resolution": "CLOSED 2026-10-10 — all 61 tasks of this feature are done and verified and its companion status is completed. The line describing 17 of 61 was true at an earlier checkpoint and is superseded."
+    },
+    {
+      "note": "CLOSED 2026-10-10 - the sixth read shape's tables and both of its procedures were applied to the local store (mtm_mock) and exercised: sp_visual_employee_by_number_get returns the mirrored row, the shape reports all four artifacts present, and both mock validation scripts pass with zero findings. What is still not exercised on this machine is the on-host service's own refresh cadence, which is not this application's path. The concern described 'not applied to a real store' and is superseded.",
+      "step": "implement",
+      "kind": "unverified",
+      "status": "closed",
+      "resolution": "CLOSED 2026-10-10 - the sixth read shape's tables and both of its procedures were applied to the local store (mtm_mock) and exercised: sp_visual_employee_by_number_get returns the mirrored row, the shape reports all four artifacts present, and both mock validation scripts pass with zero findings. What is still not exercised on this machine is the on-host service's own refresh cadence, which is not this application's path. The concern described 'not applied to a real store' and is superseded."
     }
   ]
 }

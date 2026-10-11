@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -20,6 +22,11 @@ namespace MTM_Waitlist.Module_Startup.ViewModels;
 /// instead of asking a second time, which is what keeps one typing equal to one attempt (FR-012).
 /// </para>
 /// <para>
+/// <b>The list beside the form offers a name, never a way in.</b> The last six people who signed in on this
+/// computer are read from the session records the store already holds and shown on the right, behind a divider;
+/// choosing one fills in the user name and nothing else, so the PIN is still required (FR-014, FR-048).
+/// </para>
+/// <para>
 /// <b>The credential is an argument, never a property.</b> It arrives with the command and is handed straight to
 /// the check, so there is no field to bind, no field to log and nothing left behind after the attempt (FR-025,
 /// logging contract section 6).
@@ -40,7 +47,7 @@ internal sealed partial class SignInViewModel : ObservableObject
     internal const string ResumeAtStepId = "resolve-person";
 
     private readonly CredentialCheckService _credentialCheck;
-    private readonly RememberedSignInService _rememberedSignIn;
+    private readonly PreviousSignInService _previousSignIns;
     private readonly IPendingSignIn _pendingSignIn;
     private readonly ISignInOutcome _outcome;
     private readonly IMachineFacts _machine;
@@ -49,12 +56,12 @@ internal sealed partial class SignInViewModel : ObservableObject
     private readonly string _nameHint;
     private readonly string _credentialHint;
 
-    /// <summary>Creates the sign-in screen's state over the check, the remembered sign-in and what the launch holds.</summary>
+    /// <summary>Creates the sign-in screen's state over the check, the previous people and what the launch holds.</summary>
     /// <param name="credentialCheck">The one place a credential is compared and an attempt is counted.</param>
-    /// <param name="rememberedSignIn">The remembered sign-in, read so a person who chose it is not asked again.</param>
+    /// <param name="previousSignIns">The read behind the list of people who signed in on this computer before.</param>
     /// <param name="pendingSignIn">What the launch holds, which is what the steps read once the form is done.</param>
     /// <param name="outcome">The accepted check and the new password, held for the launch's own steps.</param>
-    /// <param name="machine">This computer's facts, which name the machine a remembered sign-in is keyed to.</param>
+    /// <param name="machine">This computer's facts, which name the machine the offer is drawn for.</param>
     /// <param name="identifierSignIn">
     /// The identifier stage's resolution, or <c>null</c> for a surface that only shows the credential form. It is
     /// optional so the existing credential-only tests keep their subject: the front of sign-in is the only thing
@@ -62,14 +69,14 @@ internal sealed partial class SignInViewModel : ObservableObject
     /// </param>
     public SignInViewModel(
         CredentialCheckService credentialCheck,
-        RememberedSignInService rememberedSignIn,
+        PreviousSignInService previousSignIns,
         IPendingSignIn pendingSignIn,
         ISignInOutcome outcome,
         IMachineFacts machine,
         IdentifierSignInService? identifierSignIn = null)
     {
         _credentialCheck = credentialCheck ?? throw new ArgumentNullException(nameof(credentialCheck));
-        _rememberedSignIn = rememberedSignIn ?? throw new ArgumentNullException(nameof(rememberedSignIn));
+        _previousSignIns = previousSignIns ?? throw new ArgumentNullException(nameof(previousSignIns));
         _pendingSignIn = pendingSignIn ?? throw new ArgumentNullException(nameof(pendingSignIn));
         _outcome = outcome ?? throw new ArgumentNullException(nameof(outcome));
         _machine = machine ?? throw new ArgumentNullException(nameof(machine));
@@ -114,9 +121,14 @@ internal sealed partial class SignInViewModel : ObservableObject
     [ObservableProperty]
     public partial string SignInName { get; set; } = string.Empty;
 
-    /// <summary>Whether the person asked this machine to remember them once the sign-in is accepted (FR-014).</summary>
-    [ObservableProperty]
-    public partial bool RememberMe { get; set; }
+    /// <summary>
+    /// The people who signed in on this computer recently, shown beside the form as choices that fill in a user
+    /// name. It is empty until the stage has read them and stays empty when the store cannot answer (FR-014, FR-048).
+    /// </summary>
+    public ObservableCollection<PreviousSignIn> PreviousPeople { get; } = [];
+
+    /// <summary>Whether there is anybody to offer, which is what shows the list beside the form.</summary>
+    public bool HasPreviousPeople => PreviousPeople.Count > 0;
 
     /// <summary>True from the moment a sign-in starts until it answers, which guards the repeated press.</summary>
     [ObservableProperty]
@@ -147,9 +159,6 @@ internal sealed partial class SignInViewModel : ObservableObject
     /// <summary>Whether the sign-in form is shown, which is until a temporary credential has been accepted.</summary>
     public bool ShowSignInForm => !IsPasswordChangeRequired;
 
-    /// <summary>Whether the form's own route into the remembered sign-in is offered.</summary>
-    public bool CanUseRememberedSignIn => CanSignIn && !string.IsNullOrWhiteSpace(SignInName);
-
     /// <summary>The screen's heading.</summary>
     public string HeadingText => "Startup_SignIn.Heading".GetLocalized();
 
@@ -162,33 +171,22 @@ internal sealed partial class SignInViewModel : ObservableObject
     /// <summary>The label over the credential.</summary>
     public string CredentialLabelText => "Startup_SignIn.CredentialLabel".GetLocalized();
 
-    /// <summary>The label beside the remember-me choice.</summary>
-    public string RememberMeLabelText => "Startup_SignIn.RememberMeLabel".GetLocalized();
+    /// <summary>The heading over the list of people who signed in on this computer before.</summary>
+    public string PreviousPeopleHeadingText => "Startup_SignIn.PreviousPeopleHeading".GetLocalized();
 
     /// <summary>The one action that confirms a sign-in.</summary>
     public string SignInActionText => "Startup_SignIn.SignInAction".GetLocalized();
-
-    /// <summary>The second action, for a person this machine already remembers.</summary>
-    public string RememberedActionText => "Startup_SignIn.RememberedAction".GetLocalized();
 
     /// <summary>The action that confirms the identifier, which is the first stage's own button.</summary>
     public string ContinueActionText => "Startup_SignIn.ContinueAction".GetLocalized();
 
     /// <summary>A run of derived state follows every change to the name the person has typed.</summary>
     /// <param name="value">The new value, which is not read here.</param>
-    partial void OnSignInNameChanged(string value)
-    {
-        OnPropertyChanged(nameof(Hint));
-        OnPropertyChanged(nameof(CanUseRememberedSignIn));
-    }
+    partial void OnSignInNameChanged(string value) => OnPropertyChanged(nameof(Hint));
 
     /// <summary>A run of derived state follows every change to the busy flag.</summary>
     /// <param name="value">The new value, which is not read here.</param>
-    partial void OnIsBusyChanged(bool value)
-    {
-        OnPropertyChanged(nameof(CanSignIn));
-        OnPropertyChanged(nameof(CanUseRememberedSignIn));
-    }
+    partial void OnIsBusyChanged(bool value) => OnPropertyChanged(nameof(CanSignIn));
 
     /// <summary>Whether the message strip is shown follows every change to the message.</summary>
     /// <param name="value">The new value, which is not read here.</param>
@@ -200,7 +198,6 @@ internal sealed partial class SignInViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(CanSignIn));
         OnPropertyChanged(nameof(ShowSignInForm));
-        OnPropertyChanged(nameof(CanUseRememberedSignIn));
     }
 
     /// <summary>The switch between the two stages follows every change to the identifier-stage flag.</summary>
@@ -341,7 +338,7 @@ internal sealed partial class SignInViewModel : ObservableObject
                 return;
             }
 
-            await AcceptAsync(check, credentials?.Credential, applyRememberMeChoice: true).ConfigureAwait(true);
+            Accept(check, credentials?.Credential);
         }
         finally
         {
@@ -350,96 +347,71 @@ internal sealed partial class SignInViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Signs the person in with the sign-in this machine remembers for them, so a person who chose to be
-    /// recognised is not asked for the credential again (FR-014).
+    /// Reads the people who signed in on this computer before, so the stage can offer them beside the form
+    /// (FR-014, FR-048).
     /// </summary>
     /// <remarks>
-    /// The remembered credential is presented to the launch's own check rather than trusted: it is a stored
-    /// value, and a stored value that is no longer accepted must be refused like any other. Nothing is read when
-    /// the name is blank, because the store keys a remembered sign-in by person and this screen has no person
-    /// yet.
+    /// It is a read the stage performs for itself and never a reason to refuse a sign-in: a store that cannot
+    /// answer leaves the list empty and the ordinary form in full working order (FR-015). The list is cleared
+    /// before it is filled, so a second read cannot show a person the store no longer holds.
+    /// </remarks>
+    public async Task LoadPreviousPeopleAsync()
+    {
+        PreviousPeople.Clear();
+
+        var people = await _previousSignIns
+            .ReadAsync(_machine.RegisteredComputer?.Id ?? 0, CancellationToken.None)
+            .ConfigureAwait(true);
+
+        foreach (var person in people)
+        {
+            PreviousPeople.Add(person);
+        }
+
+        OnPropertyChanged(nameof(HasPreviousPeople));
+    }
+
+    /// <summary>
+    /// Takes one of the people offered and fills in the user name only, leaving the PIN to be entered
+    /// (FR-014).
+    /// </summary>
+    /// <param name="person">The person chosen from the list, or <c>null</c> for a press with nothing behind it.</param>
+    /// <remarks>
+    /// Choosing somebody moves to the credential stage with their name already in it. Nothing is checked and
+    /// nothing is signed in here: the name is not a secret, and the PIN is still required, which is the whole
+    /// difference between this and the remember-me route it replaced (FR-014, FR-048).
     /// </remarks>
     [RelayCommand]
-    private async Task UseRememberedSignInAsync()
+    private void ChoosePreviousPerson(PreviousSignIn? person)
     {
-        if (!CanUseRememberedSignIn)
+        if (person is null || string.IsNullOrWhiteSpace(person.SignInName))
         {
             return;
         }
 
-        IsBusy = true;
+        SignInName = person.SignInName;
+        IdentifierText = person.SignInName;
+        ResolvedSignInName = person.SignInName;
         Message = null;
-
-        try
-        {
-            var userId = await _credentialCheck
-                .FindAccountIdAsync(SignInName, CancellationToken.None)
-                .ConfigureAwait(true);
-
-            if (userId <= 0)
-            {
-                Message = RefusalText(CredentialCheckRefusals.CredentialRefused);
-                return;
-            }
-
-            var remembered = await _rememberedSignIn
-                .TryReadAsync(userId, _machine.RegisteredComputer?.Id ?? 0, CancellationToken.None)
-                .ConfigureAwait(true);
-
-            if (remembered.Outcome is not RememberedSignInOutcome.Held
-                || remembered.SignInName is null
-                || remembered.Secret is null)
-            {
-                // Every other answer is the fall-back FR-014 asks for, and the person is told to give the
-                // credential rather than being left wondering why the button did nothing.
-                Message = "Startup_SignIn.RememberedUnavailable".GetLocalized();
-                return;
-            }
-
-            var check = await _credentialCheck
-                .CheckAsync(remembered.SignInName, remembered.Secret, CancellationToken.None)
-                .ConfigureAwait(true);
-
-            if (!check.IsAccepted)
-            {
-                Message = RefusalText(check.RefusalReason);
-                return;
-            }
-
-            await AcceptAsync(check, remembered.Secret, applyRememberMeChoice: false).ConfigureAwait(true);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
+        IsIdentifierStage = false;
     }
 
     /// <summary>
-    /// Hands the launch the accepted sign-in, applies the person's remember-me choice, and says whether a new
-    /// password must be chosen first.
+    /// Hands the launch the accepted sign-in and says whether a new password must be chosen first.
     /// </summary>
     /// <param name="check">The accepted answer, which names the person the sign-in belongs to.</param>
     /// <param name="credential">The credential that was accepted, held only so the launch's steps can use it.</param>
-    /// <param name="applyRememberMeChoice">
-    /// Whether this sign-in is the person's own answer to the remember-me choice. It is false on the remembered
-    /// path, where the person never saw the choice and nothing they did should change it.
-    /// </param>
-    private async Task AcceptAsync(CredentialCheckResult check, string? credential, bool applyRememberMeChoice)
+    /// <remarks>
+    /// Nothing is written to the machine here, because nothing about a sign-in is kept on one: the only thing
+    /// that used to be stored was the remembered sign-in, and that was withdrawn (FR-025, FR-043, FR-048).
+    /// </remarks>
+    private void Accept(CredentialCheckResult check, string? credential)
     {
         _outcome.RecordCheck(check);
 
         if (!string.IsNullOrEmpty(credential))
         {
             _pendingSignIn.Hold(check.SignInName, credential);
-        }
-
-        if (applyRememberMeChoice)
-        {
-            // The choice is reversible, and unchecking it is how a person stops being remembered on a shared
-            // computer. A failure on either side is not a failure to sign in: the person is on their way in, and
-            // what could not be stored or forgotten is reported by the store rather than by refusing them
-            // (FR-014).
-            await ApplyRememberMeChoiceAsync(check, credential).ConfigureAwait(true);
         }
 
         if (check.RequiresNewPassword)
@@ -454,31 +426,6 @@ internal sealed partial class SignInViewModel : ObservableObject
         SignInAccepted?.Invoke(this, EventArgs.Empty);
     }
 
-    /// <summary>Stores or forgets this machine's memory of the person, according to the choice they just made.</summary>
-    /// <param name="check">The accepted answer, which names the person the choice belongs to.</param>
-    /// <param name="credential">The credential that was accepted, stored only when the person asked to be remembered.</param>
-    private async Task ApplyRememberMeChoiceAsync(CredentialCheckResult check, string? credential)
-    {
-        var computerId = _machine.RegisteredComputer?.Id ?? 0;
-
-        if (RememberMe && !string.IsNullOrEmpty(credential))
-        {
-            await _rememberedSignIn
-                .RememberAsync(check.UserId, computerId, check.SignInName, credential, CancellationToken.None)
-                .ConfigureAwait(true);
-
-            return;
-        }
-
-        if (!RememberMe)
-        {
-            // Not asking to be remembered is an answer in its own right: whatever this machine held for the
-            // person is forgotten, so a choice made earlier cannot outlive the person changing their mind.
-            await _rememberedSignIn
-                .ForgetAsync(check.UserId, computerId, CancellationToken.None)
-                .ConfigureAwait(true);
-        }
-    }
 
     /// <summary>One refusal, said in the reader's language rather than as the token the check produced.</summary>
     /// <param name="refusalReason">One of <see cref="CredentialCheckRefusals"/>, or <c>null</c>.</param>

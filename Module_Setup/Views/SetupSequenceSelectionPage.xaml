@@ -18,7 +18,7 @@
         <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}">
             <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind ViewModel.State.NormalizedWorkOrder, Mode=OneWay}" />
             <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind ViewModel.State.SelectedPartNumber, Mode=OneWay}" />
-            <TextBlock x:Uid="Setup_Sequence.AvailableLabel" Style="{StaticResource SetupPageTitleStyle}" Text="Available operations" />
+            <TextBlock x:Uid="Setup_Sequence_AvailableLabel" Style="{StaticResource SetupPageTitleStyle}" Text="Available operations" />
             <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" TextWrapping="Wrap" />
         </StackPanel>
 
@@ -37,8 +37,8 @@
         </ListView>
 
         <StackPanel Grid.Row="2" Style="{StaticResource SetupActionBarStyle}">
-            <Button AutomationProperties.AutomationId="SetupSequenceSelectionPage_BackButton" x:Uid="Setup_Action.Back" Content="Back" Command="{x:Bind ViewModel.BackCommand}" />
-            <Button AutomationProperties.AutomationId="SetupSequenceSelectionPage_ContinueButton" x:Uid="Setup_Action.Continue" Content="Continue" Command="{x:Bind ViewModel.ContinueCommand}" />
+            <Button AutomationProperties.AutomationId="SetupSequenceSelectionPage_BackButton" x:Uid="Setup_Action_Back" Content="Back" Command="{x:Bind ViewModel.BackCommand}" />
+            <Button AutomationProperties.AutomationId="SetupSequenceSelectionPage_ContinueButton" x:Uid="Setup_Action_Continue" Content="Continue" Command="{x:Bind ViewModel.ContinueCommand}" />
         </StackPanel>
     </Grid>
 </Page>

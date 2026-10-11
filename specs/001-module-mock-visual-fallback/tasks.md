@@ -192,9 +192,9 @@ and no demo control exists. The retired demo systems are gone from code and data
 >   workflow tests — the last now own their lookup fixture data in
 >   `MTM_Waitlist.Tests/Module_Setup/Services/SetupLookupFixtureData.cs`).
 > - **New coverage (T044)**: the reworked suites assert the live contract directly —
->   `SubmitAsync_AlwaysPersistsNewRequestToDatabase`, `RefreshFromDatabaseAsync_AlwaysQueriesTheDatabase`,
->   `TransitionStatusAsync_PersistsStatusUpdateToDb`, `AuditTrail_PersistsAuditEntriesToDb`,
->   `CancelOwnRequestAsync_PersistsCancelledRowToDb`, and `AverageCoilWeightServiceTests.Resolve_RunsQuery_AndFormatsAverage`.
+>   `Service_WaitlistRequestServiceTests_Service_WaitlistRequestServiceTests_SubmitAsync_AlwaysPersistsNewRequestToDatabase`, `Service_WaitlistRequestServiceTests_Service_WaitlistRequestServiceTests_RefreshFromDatabaseAsync_AlwaysQueriesTheDatabase`,
+>   `Service_WaitlistRequestServiceTests_Service_WaitlistRequestServiceTests_TransitionStatusAsync_PersistsStatusUpdateToDb`, `Service_WaitlistRequestServiceTests_Service_WaitlistRequestServiceTests_AuditTrail_PersistsAuditEntriesToDb`,
+>   `Service_WaitlistRequestServiceTests_Service_WaitlistRequestServiceTests_CancelOwnRequestAsync_PersistsCancelledRowToDb`, and `AverageCoilWeightServiceTests.Service_AverageCoilWeightServiceTests_Resolve_RunsQueryAndFormatsAverage`.
 > - **T057** needed no separate change beyond T036: `MySqlHelperServer`'s mock overloads and `IsMockDataEnabledAsync`
 >   were already removed by T033, and the `SqlHelperServer` mock overloads lived in the class T036 deletes.
 
@@ -588,9 +588,9 @@ this task specifies, plus two more the wiring proved necessary:
 - **Tests:** the one assertion that read SQL text
   (`GetOverrideAsync_FiltersOnScopeItemAndActiveFlag`) now asserts the procedure seam instead, per the pattern
   used for `ComputerRegistryServiceTests` and `AverageCoilWeightServiceTests`; and three tests were added —
-  `EveryRead_RoutesThroughItsProcedure_AndCarriesNoInlineStatement` (walks all seven reads and fails if any
-  recorded statement contains `SELECT`/`FROM `), `GetRecentlyUpdatedOverridesAsync_BindsTheCap_InsteadOfInterpolatingIt`,
-  and `DetectOrphanedOverridesAsync_ChecksWorkCenterExistenceThroughItsProcedure`.
+  `Service_ImageOverrideReadServiceTests_EveryRead_RoutesThroughItsProcedureAndCarriesNoInlineStatement` (walks all seven reads and fails if any
+  recorded statement contains `SELECT`/`FROM `), `Service_ImageOverrideReadServiceTests_GetRecentlyUpdatedOverridesAsync_BindsTheCapInsteadOfInterpolatingIt`,
+  and `Service_ImageOverrideReadServiceTests_Service_ImageOverrideReadServiceTests_DetectOrphanedOverridesAsync_ChecksWorkCenterExistenceThroughItsProcedure`.
 - Gates: build **0 warnings / 0 errors**; suite **646 total, 0 failed, 633 passed, 13 skipped** (was 643/630
   before the three added tests).
 
@@ -637,10 +637,10 @@ write pairs here), all deployed and registered.
   spans two of the new procedures. The tests namespace their rows with a GUID and clean up after themselves; the
   table was confirmed empty afterwards with no stray `itest-%` rows, and the captured log file was deleted because
   it contained a connection string.
-- **Tests added** (5): `DeleteByPublicIdAsync_WhenTheRowWasWithdrawn_ReportsSuccess`,
-  `DeleteByPublicIdAsync_WhenNothingChanged_ReturnsNotFound`, `PurgeInactiveOverridesAsync_ReturnsTheAffectedRowCount`,
-  `DeactivateAllForScopeAsync_ReturnsTheAffectedRowCount`, and
-  `EveryWrite_RoutesThroughItsProcedure_AndCarriesNoInlineStatement` (walks every write path and the probe, and
+- **Tests added** (5): `Service_ImageOverrideWriteServiceTests_DeleteByPublicIdAsync_WhenTheRowWasWithdrawnReportsSuccess`,
+  `Service_ImageOverrideWriteServiceTests_DeleteByPublicIdAsync_WhenNothingChangedReturnsNotFound`, `Service_ImageOverrideWriteServiceTests_Service_ImageOverrideWriteServiceTests_PurgeInactiveOverridesAsync_ReturnsTheAffectedRowCount`,
+  `Service_ImageOverrideWriteServiceTests_Service_ImageOverrideWriteServiceTests_DeactivateAllForScopeAsync_ReturnsTheAffectedRowCount`, and
+  `Service_ImageOverrideWriteServiceTests_EveryWrite_RoutesThroughItsProcedureAndCarriesNoInlineStatement` (walks every write path and the probe, and
   fails if any recorded statement contains `INSERT INTO` / `UPDATE ` / `DELETE FROM` / `SELECT `).
 - **Whole-table check:** `config_images_locations` now appears in `MTM_Waitlist.Settings/**` only in doc comments
   and the procedure-name constants — no statement text anywhere in the two services, and no other production file
@@ -1162,8 +1162,8 @@ Where each task landed, and what proves it:
 - **T127** — `RefreshRunRecordRecorder` (`MTM_Waitlist.Mock.Service/Services/RefreshRunRecordRecorder.cs`)
   subscribes `RefreshEngine.RunCompleted` in its constructor and is registered in
   `ServiceHostBuilder.RegisterRefreshPipeline`, so the event now has a production subscriber. Proven by
-  `RefreshCycleGateTests.Recorder_PersistsEveryCompletedRun_SoLastRunStatusIsReal` and
-  `Recorder_StopsRecordingOnceDisposed`.
+  `RefreshCycleGateTests.Service_RefreshCycleGateTests_Recorder_PersistsEveryCompletedRunSoLastRunStatusIsReal` and
+  `Service_RefreshCycleGateTests_Service_RefreshCycleGateTests_Recorder_StopsRecordingOnceDisposed`.
 - **T128** — `ServiceApiOperations.RunRefreshAsync` now runs the cycle through the gated
   `RefreshEngine.TryRunShapesAsync`, mapping the rejected (`null`) result to the contract's
   `409 refreshInProgress`. The engine's overlapping start-or-refuse callback now covers this path. Proven by
@@ -1267,18 +1267,18 @@ reachable MySQL/Infor Visual, so the live subset of T105 was not re-run).
 ### What landed, by task
 
 - **T098 (inline-SQL audit)** — `MTM_Waitlist.Tests/Module_Mock/InlineSqlAuditTests.cs`, three tests.
-  1. `NoMySqlStatementTextRemainsInApplicationCode` — strips C# comments (preserving string-literal contents,
+  1. `Audit_InlineSqlAuditTests_Audit_InlineSqlAuditTests_NoMySqlStatementTextRemainsInApplicationCode` — strips C# comments (preserving string-literal contents,
      including verbatim, interpolated, and raw literals) and fails on `SELECT` / `INSERT INTO` / `UPDATE … SET` /
      `DELETE FROM` / `CALL` / DDL markers. Markers are matched **case-sensitively**, because SQL keywords are
      written upper-case here while `Select…`, `Call Initialize…`, and `selected_*_json` are prose or identifiers.
      The test project is excluded: its integration suites legitimately seed rows with raw SQL.
-  2. `RawSqlSeamIsConfinedToItsReviewedAllowlist` — the wrong-helper-for-DML guard. The defect shape needs a DML
+  2. `Audit_InlineSqlAuditTests_Audit_InlineSqlAuditTests_RawSqlSeamIsConfinedToItsReviewedAllowlist` — the wrong-helper-for-DML guard. The defect shape needs a DML
      statement somewhere to route, so the raw seams (`ExecuteSqlQueryAsync` / `ExecuteSqlNonQueryAsync`) are pinned
      to a three-entry allowlist: the contract, the implementation, and `WipFloorInventoryService` (which loads the
      checked-in MTMWipApp queue script `GetWipFloorQuantities.sql` by name — Discovery/03 §C records it as a file
      load, not an inline literal). A new raw-SQL call site now fails the audit instead of silently reopening the
      defect.
-  3. `EveryRawSqlSeamAllowlistEntryIsStillAccurate` — a stale exemption fails rather than lingering.
+  3. `Audit_InlineSqlAuditTests_Audit_InlineSqlAuditTests_EveryRawSqlSeamAllowlistEntryIsStillAccurate` — a stale exemption fails rather than lingering.
   The scan needed no exemption for the shape metadata/freshness reads: they pass a procedure-name constant with
   `CommandType.StoredProcedure`, so they carry no statement text at all.
 
@@ -1386,9 +1386,9 @@ reachable MySQL/Infor Visual, so the live subset of T105 was not re-run).
 
 - **T058 (re-reviewed, then closed)** — the parity suite was present and passing but had not been re-reviewed. It
   now also carries the two assertions the task named and the file did not have:
-  `TheReadSeam_CannotTellACallerWhichSourceAnswered` (reflection over `IVisualReadFallback<,>`: `ReadAsync` returns
+  `Service_VisualReadFallbackParityTests_Service_VisualReadFallbackParityTests_TheReadSeam_CannotTellACallerWhichSourceAnswered` (reflection over `IVisualReadFallback<,>`: `ReadAsync` returns
   a plain `IReadOnlyList<TRow>` and not a wrapper, and provenance is opt-in through exactly one method) and
-  `NoFallbackCode_PointsAtAnInternalStore` (no file under `MTM_Waitlist.Mock/` may name
+  `Service_VisualReadFallbackParityTests_Service_VisualReadFallbackParityTests_NoFallbackCode_PointsAtAnInternalStore` (no file under `MTM_Waitlist.Mock/` may name
   `MySqlDatabaseTarget.MtmWaitlist` / `MtmReceivingApplication` / `MtmWipApplication` — the FR-027 guard, asserted
   by construction rather than by review). One assertion in the first of these was written wrongly on the first
   attempt (it inspected `IReadOnlyList<TRow>`'s own properties, which always exist) and was corrected to assert the
@@ -2951,7 +2951,7 @@ and the environment differs between the workstation and the host.
 |---|---|
 | `MTM_Waitlist.Setup/Services/SetupPersistenceService.cs` | Depends on `IMySqlHelperServer` — the seam every other consumer already uses — instead of the sealed `MySqlHelperServer`, which is what made it untestable without a store. DI already registers the interface over the concrete instance. |
 | `MTM_Waitlist.Tests/Module_Setup/Services/SetupPersistenceServiceTests.cs` | Both tests drive a stub whose non-query returns **0 affected rows** — exactly the `affectedRows <= 0` branch that produces "no rows were written to setup_active_jobs". The replacement-prompt test now also asserts that **nothing** was written. |
-| `MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs` | Renamed to `SubmitAsync_WhenTheInsertAffectsNoRows_ReturnsPersistenceFailureAsync` and driven by the same 0-row stub, which is the documented cause of the message it asserts. The file's stub gained an `affectedRows` parameter (default 1, so its other tests are unchanged). |
+| `MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs` | Renamed to `Service_WaitlistRequestServiceTests_SubmitAsync_WhenTheInsertAffectsNoRowsReturnsPersistenceFailureAsync` and driven by the same 0-row stub, which is the documented cause of the message it asserts. The file's stub gained an `affectedRows` parameter (default 1, so its other tests are unchanged). |
 | `MTM_Waitlist.Tests/ProductionBackendAvailability.cs` | **Deleted.** No test consults the environment any more, so neither the guard nor its blind spot exists. |
 
 **This removes the write hazard rather than reporting it.** The old tests could not merely fail on a configured host —

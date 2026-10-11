@@ -36,6 +36,11 @@ file-per-artifact sources. Run this after adding or changing an artifact.
 `-Check` regenerates in memory and exits non-zero if a committed master list is stale —
 use it as a verification gate.
 
+Requires **PowerShell 7+ (`pwsh`)** and refuses to run under Windows PowerShell 5.1. 5.1 decodes
+this BOM-less script with the ANSI codepage, so an em dash in the generated header becomes mojibake,
+and its `-Encoding utf8` writes a BOM — silently rewriting all three masters. `-Check` cannot catch
+that, because 5.1 mangles both sides of its comparison identically and still reports "up to date".
+
 ```powershell
 pwsh -NoProfile -File Database/CopilotScripts/build_mtm_mock_masters.ps1
 pwsh -NoProfile -File Database/CopilotScripts/build_mtm_mock_masters.ps1 -Check

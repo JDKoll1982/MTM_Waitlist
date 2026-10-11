@@ -12,7 +12,7 @@ namespace MTM_Waitlist.Tests.Core.Services;
 public sealed class CoreModuleDependencyInjectionExtensionsTests
 {
     [TestMethod]
-    public void AddCoreModuleServices_RegistersAppModuleClock()
+    public void Helper_CoreModuleDependencyInjectionExtensionsTests_AddCoreModuleServices_RegistersAppModuleClock()
     {
         var services = new ServiceCollection();
         services.AddCoreModuleServices(new ConfigurationBuilder().Build());
@@ -22,7 +22,7 @@ public sealed class CoreModuleDependencyInjectionExtensionsTests
     }
 
     [TestMethod]
-    public void AddCoreModuleServices_RegistersModuleCoreService()
+    public void Helper_CoreModuleDependencyInjectionExtensionsTests_AddCoreModuleServices_RegistersModuleCoreService()
     {
         var services = new ServiceCollection();
         services.AddCoreModuleServices(new ConfigurationBuilder().Build());
@@ -32,7 +32,7 @@ public sealed class CoreModuleDependencyInjectionExtensionsTests
     }
 
     [TestMethod]
-    public void AddCoreModuleServices_RegistersAppModuleClockAsSingleton()
+    public void Helper_CoreModuleDependencyInjectionExtensionsTests_AddCoreModuleServices_RegistersAppModuleClockAsSingleton()
     {
         var services = new ServiceCollection();
         services.AddCoreModuleServices(new ConfigurationBuilder().Build());
@@ -45,7 +45,7 @@ public sealed class CoreModuleDependencyInjectionExtensionsTests
     }
 
     [TestMethod]
-    public void AddCoreModuleServices_ReturnsSameCollection()
+    public void Helper_CoreModuleDependencyInjectionExtensionsTests_AddCoreModuleServices_ReturnsSameCollection()
     {
         var services = new ServiceCollection();
         var configuration = new ConfigurationBuilder().Build();

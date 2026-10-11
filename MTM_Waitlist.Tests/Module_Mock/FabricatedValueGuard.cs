@@ -83,7 +83,7 @@ public sealed class FabricatedValueGuardTests
     /// An empty set finds nothing, which is what every later caller asserts over a populated set.
     /// </summary>
     [TestMethod]
-    public void FindFabricatedLooking_WithAnEmptyValueSet_ReturnsNothing()
+    public void Audit_FabricatedValueGuard_FindFabricatedLooking_WithAnEmptyValueSetReturnsNothing()
     {
         var offenders = FabricatedValueGuard.FindFabricatedLooking([]);
 
@@ -94,7 +94,7 @@ public sealed class FabricatedValueGuardTests
     /// Absence is not fabrication: a null or blank value is what the surfaces should render instead of one.
     /// </summary>
     [TestMethod]
-    public void IsFabricatedLooking_WithAnAbsentValue_IsFalse()
+    public void Audit_FabricatedValueGuard_IsFabricatedLooking_WithAnAbsentValueIsFalse()
     {
         Assert.IsFalse(FabricatedValueGuard.IsFabricatedLooking(null));
         Assert.IsFalse(FabricatedValueGuard.IsFabricatedLooking(string.Empty));
@@ -106,7 +106,7 @@ public sealed class FabricatedValueGuardTests
     /// deliberately invented here and are not any value the repository has ever shipped.
     /// </summary>
     [TestMethod]
-    public void IsFabricatedLooking_WithASyntheticValueOfEachShape_IsTrue()
+    public void Audit_FabricatedValueGuard_IsFabricatedLooking_WithASyntheticValueOfEachShapeIsTrue()
     {
         string[] samples =
         [
@@ -131,7 +131,7 @@ public sealed class FabricatedValueGuardTests
     /// Sourced values that merely contain a number must pass, or the guard would forbid truthful data.
     /// </summary>
     [TestMethod]
-    public void IsFabricatedLooking_WithASourcedValue_IsFalse()
+    public void Audit_FabricatedValueGuard_IsFabricatedLooking_WithASourcedValueIsFalse()
     {
         string[] sourced =
         [

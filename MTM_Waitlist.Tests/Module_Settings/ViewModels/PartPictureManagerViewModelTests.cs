@@ -75,7 +75,7 @@ public sealed class PartPictureManagerViewModelTests
     }
 
     [TestMethod]
-    public async Task FindingAPartWithNoPicture_AnswersTheSharedPlaceholderRatherThanNothing()
+    public async Task ViewModel_PartPictureManagerViewModelTests_FindingAPartWithNoPicture_AnswersTheSharedPlaceholderRatherThanNothing()
     {
         var part = await _Find(PartPictureSystem.Visual, "MMC0001000");
 
@@ -87,7 +87,7 @@ public sealed class PartPictureManagerViewModelTests
     }
 
     [TestMethod]
-    public async Task FindingAPartThatHasAPicture_AnswersTheFileASurfaceWouldDraw()
+    public async Task ViewModel_PartPictureManagerViewModelTests_FindingAPartThatHasAPicture_AnswersTheFileASurfaceWouldDraw()
     {
         var stored = Path.Combine(_sharePath, "Visual", "MMC", "MMC0001000.png");
         TestPngWriter.Write(stored, 64, 64);
@@ -100,7 +100,7 @@ public sealed class PartPictureManagerViewModelTests
     }
 
     [TestMethod]
-    public async Task FindingAPartWithNoNumberSaysWhatIsMissing()
+    public async Task ViewModel_PartPictureManagerViewModelTests_FindingAPartWithNoNumberSaysWhatIsMissing()
     {
         _viewModel.PartNumberInput = "   ";
 
@@ -113,7 +113,7 @@ public sealed class PartPictureManagerViewModelTests
     }
 
     [TestMethod]
-    public async Task SettingAPicture_StoresItAndSaysSo()
+    public async Task ViewModel_PartPictureManagerViewModelTests_SettingAPicture_StoresItAndSaysSo()
     {
         await _Find(PartPictureSystem.Visual, "MMC0001000");
 
@@ -130,7 +130,7 @@ public sealed class PartPictureManagerViewModelTests
     }
 
     [TestMethod]
-    public async Task AnOverLongNumber_IsRefusedWithTheLimitStated()
+    public async Task ViewModel_PartPictureManagerViewModelTests_AnOverLongNumber_IsRefusedWithTheLimitStated()
     {
         var tooLong = new string('M', PartPictureLayout.MaxPartNumberLength + 5);
         await _Find(PartPictureSystem.Visual, tooLong);
@@ -145,7 +145,7 @@ public sealed class PartPictureManagerViewModelTests
     }
 
     [TestMethod]
-    public async Task ANameAnotherPartHolds_IsRefusedNamingThatPart()
+    public async Task ViewModel_PartPictureManagerViewModelTests_ANameAnotherPartHolds_IsRefusedNamingThatPart()
     {
         _readService.AddOverride("visual_part", "MMC/0001", "Visual/MMC/MMC_0001.png");
         await _Find(PartPictureSystem.Visual, "MMC:0001");
@@ -159,7 +159,7 @@ public sealed class PartPictureManagerViewModelTests
     }
 
     [TestMethod]
-    public async Task TheChangeRecord_IsReadBackWithWhoChangedItAndWhatItReplaced()
+    public async Task ViewModel_PartPictureManagerViewModelTests_TheChangeRecord_IsReadBackWithWhoChangedItAndWhatItReplaced()
     {
         var helper = new FakeMySqlHelperServer();
         helper.EnqueueQueryResult(
@@ -198,7 +198,7 @@ public sealed class PartPictureManagerViewModelTests
     }
 
     [TestMethod]
-    public async Task TheMissingList_IsLoadedCountedAndExportable()
+    public async Task ViewModel_PartPictureManagerViewModelTests_TheMissingList_IsLoadedCountedAndExportable()
     {
         _readService.AddOverride("wip_part", "MMC0001000", "WIP/MMC/MMC0001000.png");
 
@@ -212,7 +212,7 @@ public sealed class PartPictureManagerViewModelTests
     }
 
     [TestMethod]
-    public void TheSystemsTheScreenCannotListPartsFor_AreNamedInOneLine()
+    public void ViewModel_PartPictureManagerViewModelTests_TheSystemsTheScreenCannotListPartsFor_AreNamedInOneLine()
     {
         // Only the WIP floor can be listed, so the screen says so rather than leaving the Visual part of the list
         // looking empty, which would read as "nothing to do here". The sentence itself is translated and lives in

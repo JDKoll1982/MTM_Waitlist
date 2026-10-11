@@ -30,7 +30,7 @@ public sealed class LaunchPipelineConcurrencyTests
     private const string TemporaryCredential = "check-temporary-credential";
 
     [TestMethod]
-    public async Task RunAsync_TheLocalReadsAndTheFirstStoreContact_AreAllInFlightTogether()
+    public async Task Service_LaunchPipelineConcurrencyTests_RunAsync_TheLocalReadsAndTheFirstStoreContactAreAllInFlightTogether()
     {
         using var gate = new Gate(3);
         var run = new LaunchRun()
@@ -58,7 +58,7 @@ public sealed class LaunchPipelineConcurrencyTests
     }
 
     [TestMethod]
-    public async Task RunAsync_TheThreeSessionChecks_AreAllInFlightTogether()
+    public async Task Service_LaunchPipelineConcurrencyTests_RunAsync_TheThreeSessionChecksAreAllInFlightTogether()
     {
         using var gate = new Gate(3);
         var run = new LaunchRun()
@@ -83,7 +83,7 @@ public sealed class LaunchPipelineConcurrencyTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenOneGroupMemberFails_TheOthersStillRan()
+    public async Task Service_LaunchPipelineConcurrencyTests_RunAsync_WhenOneGroupMemberFailsTheOthersStillRan()
     {
         var run = new LaunchRun()
             .With(LocalSettings, Succeeded())
@@ -100,7 +100,7 @@ public sealed class LaunchPipelineConcurrencyTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenTheGroupSucceeds_TheWalkCarriesOnPastIt()
+    public async Task Service_LaunchPipelineConcurrencyTests_RunAsync_WhenTheGroupSucceedsTheWalkCarriesOnPastIt()
     {
         var run = new LaunchRun()
             .With(LocalSettings, Succeeded())

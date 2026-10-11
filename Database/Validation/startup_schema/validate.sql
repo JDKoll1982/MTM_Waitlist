@@ -378,7 +378,7 @@ FROM (
                     AND is_nullable = 'NO'
             )
         UNION ALL
-        SELECT 'missing_column', 'core_computers_registry.description', 'VARCHAR(255) NULL', 'missing'
+        SELECT 'missing_column', 'core_computers_registry.location', 'VARCHAR(255) NULL', 'missing'
         WHERE
             NOT EXISTS (
                 SELECT 1
@@ -386,7 +386,7 @@ FROM (
                 WHERE
                     table_schema = DATABASE()
                     AND table_name = 'core_computers_registry'
-                    AND column_name = 'description'
+                    AND column_name = 'location'
                     AND data_type = 'varchar'
                     AND character_maximum_length = 255
             )

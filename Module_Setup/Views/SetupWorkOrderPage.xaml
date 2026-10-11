@@ -18,11 +18,11 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}">
-            <TextBlock x:Uid="Setup_WorkOrder.EnterTitle" Style="{StaticResource SetupPageTitleStyle}" Text="Start Setup" />
+            <TextBlock x:Uid="Setup_WorkOrder_EnterTitle" Style="{StaticResource SetupPageTitleStyle}" Text="Start Setup" />
             <TextBox
                 AutomationProperties.AutomationId="SetupWorkOrderPage_WorkOrderInput"
                 x:Name="WorkOrderTextBox"
-                x:Uid="Setup_WorkOrder.Input"
+                x:Uid="Setup_WorkOrder_Input"
                 Header="Work Order"
                 Text="{x:Bind ViewModel.WorkOrderInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 LostFocus="OnWorkOrderTextBoxLostFocus"
@@ -35,18 +35,18 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel>
-                        <TextBlock x:Uid="Setup_Combined.Header.WorkOrder" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="WORK ORDER" CharacterSpacing="120" />
+                        <TextBlock x:Uid="Setup_Combined_Header_WorkOrder" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="WORK ORDER" CharacterSpacing="120" />
                         <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.NormalizedWorkOrder, Mode=OneWay}" />
                     </StackPanel>
                     <StackPanel Grid.Column="1">
-                        <TextBlock x:Uid="Setup_Combined.Header.SelectedPart" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="SELECTED PART" CharacterSpacing="120" />
+                        <TextBlock x:Uid="Setup_Combined_Header_SelectedPart" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="SELECTED PART" CharacterSpacing="120" />
                         <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.SelectedPartDisplay, Mode=OneWay}" />
                     </StackPanel>
                 </Grid>
             </Border>
 
             <StackPanel Visibility="{x:Bind ViewModel.PartSectionVisibility, Mode=OneWay}">
-                <TextBlock x:Uid="Setup_Part.FoundPartsLabel" Style="{StaticResource SetupPageTitleStyle}" Text="Matching parts" Margin="0,8,0,4" />
+                <TextBlock x:Uid="Setup_Part_FoundPartsLabel" Style="{StaticResource SetupPageTitleStyle}" Text="Matching parts" Margin="0,8,0,4" />
                 <ItemsControl AutomationProperties.AutomationId="SetupWorkOrderPage_PartTiles" ItemsSource="{x:Bind ViewModel.State.PartResults, Mode=OneWay}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -71,7 +71,7 @@
             </StackPanel>
 
             <StackPanel Visibility="{x:Bind ViewModel.SequenceSectionVisibility, Mode=OneWay}">
-                <TextBlock x:Uid="Setup_Sequence.AvailableLabel" Style="{StaticResource SetupPageTitleStyle}" Text="Available operations" Margin="0,8,0,4" />
+                <TextBlock x:Uid="Setup_Sequence_AvailableLabel" Style="{StaticResource SetupPageTitleStyle}" Text="Available operations" Margin="0,8,0,4" />
                 <ItemsControl AutomationProperties.AutomationId="SetupWorkOrderPage_OperationTiles" ItemsSource="{x:Bind ViewModel.State.SequenceResults, Mode=OneWay}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -109,9 +109,9 @@
             IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
 
         <StackPanel Grid.Row="2" Style="{StaticResource SetupActionBarStyle}">
-            <Button AutomationProperties.AutomationId="SetupWorkOrderPage_BackButton" x:Uid="Setup_Action.BackToWorkstations" Content="Back" Command="{x:Bind ViewModel.BackToWorkCentersCommand}" />
-            <Button AutomationProperties.AutomationId="SetupWorkOrderPage_CancelButton" x:Uid="Setup_Action.Cancel" Content="Cancel" Command="{x:Bind ViewModel.CancelCommand}" />
-            <Button AutomationProperties.AutomationId="SetupWorkOrderPage_SearchButton" x:Uid="Setup_Action.Search" Content="Search" Command="{x:Bind ViewModel.SearchCommand}" IsEnabled="{x:Bind ViewModel.IsIdle, Mode=OneWay}" />
+            <Button AutomationProperties.AutomationId="SetupWorkOrderPage_BackButton" x:Uid="Setup_Action_BackToWorkstations" Content="Back" Command="{x:Bind ViewModel.BackToWorkCentersCommand}" />
+            <Button AutomationProperties.AutomationId="SetupWorkOrderPage_CancelButton" x:Uid="Setup_Action_Cancel" Content="Cancel" Command="{x:Bind ViewModel.CancelCommand}" />
+            <Button AutomationProperties.AutomationId="SetupWorkOrderPage_SearchButton" x:Uid="Setup_Action_Search" Content="Search" Command="{x:Bind ViewModel.SearchCommand}" IsEnabled="{x:Bind ViewModel.IsIdle, Mode=OneWay}" />
         </StackPanel>
     </Grid>
 </Page>

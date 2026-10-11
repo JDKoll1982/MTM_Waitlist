@@ -13,7 +13,7 @@ namespace MTM_Waitlist.Tests.Module_Setup.Services;
 public sealed class SetupPersistenceServiceTests
 {
     [TestMethod]
-    public async Task SaveAsync_WhenBackendWritesNoRows_ReturnsFailureAsync()
+    public async Task Service_SetupPersistenceServiceTests_SaveAsync_WhenBackendWritesNoRowsReturnsFailureAsync()
     {
         // "Writes no rows" is what the store reports when its procedure affects nothing. Driven by a stub so the
         // premise is deterministic and the test can never write to a live store (T155): the previous version
@@ -34,7 +34,7 @@ public sealed class SetupPersistenceServiceTests
     }
 
     [TestMethod]
-    public async Task SaveAsync_WhenActiveJobExistsWithoutForce_ReturnsReplacementPromptAsync()
+    public async Task Service_SetupPersistenceServiceTests_SaveAsync_WhenActiveJobExistsWithoutForceReturnsReplacementPromptAsync()
     {
         var activeJobCoordinator = new FakeActiveJobCoordinatorService(hasActiveJob: true);
         var mySqlHelperServer = new StubMySqlHelperServer(affectedRows: 1);

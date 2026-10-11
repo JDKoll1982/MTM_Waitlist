@@ -4,13 +4,15 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:MTM_Waitlist.Module_Startup.Models"
     xmlns:views="using:MTM_Waitlist.Module_Startup.Views"
     mc:Ignorable="d">
 
     <!--
         The sign-in stage, in two parts: an identifier first (a user name, or exactly four digits for an employee
         number), then the PIN (`contracts/identifier-signin-contract.md` §§1-3, §5; FR-001 to FR-007, FR-012 to
-        FR-015).
+        FR-015). The people who signed in on this computer before are offered beside the form, behind a rule, as
+        choices that fill in the user name only (FR-014, FR-048).
 
         It is a stage of the one window rather than a window of its own, because there is one window for the whole
         life of the application. The message is its own row rather than something laid over the form, so a refusal
@@ -45,8 +47,20 @@
                 TextWrapping="Wrap" />
         </StackPanel>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel Spacing="16">
+        <!--
+            Two columns: the form on the left and the people who signed in here before on the right, divided by a
+            rule. The list is a set of choices that fill in the user name only, so the PIN is always still entered
+            (FR-014, FR-048).
+        -->
+        <Grid Grid.Row="1" ColumnSpacing="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="16">
 
                 <!-- The first stage: what identifies the person. -->
                 <StackPanel
@@ -88,10 +102,6 @@
                         AutomationProperties.AutomationId="SignInWindow_Credential"
                         Header="{x:Bind ViewModel.CredentialLabelText}"
                         KeyDown="OnCredentialKeyDown" />
-                    <CheckBox
-                        AutomationProperties.AutomationId="SignInWindow_RememberMe"
-                        Content="{x:Bind ViewModel.RememberMeLabelText}"
-                        IsChecked="{x:Bind ViewModel.RememberMe, Mode=TwoWay}" />
                     <TextBlock
                         AutomationProperties.AutomationId="SignInWindow_Hint"
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -104,12 +114,6 @@
                         Content="{x:Bind ViewModel.SignInActionText}"
                         IsEnabled="{x:Bind ViewModel.CanSignIn, Mode=OneWay}"
                         Style="{StaticResource AccentButtonStyle}" />
-                    <Button
-                        x:Name="RememberedSignInButton"
-                        AutomationProperties.AutomationId="SignInWindow_RememberedButton"
-                        Click="OnUseRememberedSignInClick"
-                        Content="{x:Bind ViewModel.RememberedActionText}"
-                        IsEnabled="{x:Bind ViewModel.CanUseRememberedSignIn, Mode=OneWay}" />
                 </StackPanel>
 
                 <!-- The forced password change. It appears only once a temporary credential has been accepted (FR-013). -->
@@ -156,8 +160,59 @@
                     x:Name="PanelView"
                     AutomationProperties.AutomationId="SignInWindow_SetUpPanel"
                     Visibility="{x:Bind Panel.IsVisible, Mode=OneWay}" />
-            </StackPanel>
-        </ScrollViewer>
+                </StackPanel>
+            </ScrollViewer>
+
+            <Border
+                Grid.Column="1"
+                Width="1"
+                Margin="20,0"
+                Background="{ThemeResource CardStrokeColorDefaultBrush}"
+                Visibility="{x:Bind ViewModel.HasPreviousPeople, Mode=OneWay}" />
+
+            <!-- The people who signed in here before: one card each, drawn on the right of the form (FR-048). -->
+            <ScrollViewer
+                Grid.Column="2"
+                MaxWidth="300"
+                VerticalScrollBarVisibility="Auto">
+                <StackPanel
+                    x:Name="PreviousPeoplePanel"
+                    AutomationProperties.AutomationId="SignInWindow_PreviousPeoplePanel"
+                    Spacing="8"
+                    Visibility="{x:Bind ViewModel.HasPreviousPeople, Mode=OneWay}">
+                    <TextBlock
+                        AutomationProperties.AutomationId="SignInWindow_PreviousPeopleHeading"
+                        Style="{ThemeResource BodyStrongTextBlockStyle}"
+                        Text="{x:Bind ViewModel.PreviousPeopleHeadingText}"
+                        TextWrapping="Wrap" />
+                    <ItemsControl
+                        AutomationProperties.AutomationId="SignInWindow_PreviousPeople"
+                        ItemsSource="{x:Bind ViewModel.PreviousPeople}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:PreviousSignIn">
+                                <Button
+                                    Margin="0,0,0,4"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Left"
+                                    AutomationProperties.AutomationId="{x:Bind SignInName}"
+                                    Click="OnPreviousPersonClick">
+                                    <StackPanel>
+                                        <TextBlock
+                                            Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                            Text="{x:Bind DisplayName}"
+                                            TextWrapping="Wrap" />
+                                        <TextBlock
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Text="{x:Bind SignInName}"
+                                            TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
 
         <Grid Grid.Row="2" ColumnSpacing="8">
             <Grid.ColumnDefinitions>

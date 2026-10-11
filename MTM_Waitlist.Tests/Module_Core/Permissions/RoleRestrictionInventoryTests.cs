@@ -80,7 +80,7 @@ public sealed class RoleRestrictionInventoryTests
     private static readonly string[] s_ignoredLocationsWriteHolders = ["developer", "it_department"];
 
     [TestMethod]
-    public void TheInventory_CoversEveryDeclaredSettingExactlyOncePerKeyAndGate()
+    public void Service_RoleRestrictionInventoryTests_TheInventory_CoversEveryDeclaredSettingExactlyOncePerKeyAndGate()
     {
         var declaredKeys = PermissionRegistry.All
             .Where(entry => entry.Key != PermissionKeys.RequestsHandle && entry.Key != PermissionKeys.CacheRefreshApi)
@@ -105,7 +105,7 @@ public sealed class RoleRestrictionInventoryTests
     }
 
     [TestMethod]
-    public void EveryRestrictedSetting_ReadsAKeyWhoseDeclarationNamesItsGate()
+    public void Service_RoleRestrictionInventoryTests_EveryRestrictedSetting_ReadsAKeyWhoseDeclarationNamesItsGate()
     {
         var offenders = new List<string>();
 
@@ -131,7 +131,7 @@ public sealed class RoleRestrictionInventoryTests
     }
 
     [TestMethod]
-    public void EveryRestrictedSetting_HoldsItsRestrictionInTheShippedBaseline()
+    public void Service_RoleRestrictionInventoryTests_EveryRestrictedSetting_HoldsItsRestrictionInTheShippedBaseline()
     {
         var baselines = ReadShippedBaselines();
 
@@ -159,7 +159,7 @@ public sealed class RoleRestrictionInventoryTests
     /// exactly as they were, and the narrowed write is the two roles FR-024 names.
     /// </summary>
     [TestMethod]
-    public void TheLocationsToHide_KeepTheirReadRestrictionAndNarrowOnlyTheWrite()
+    public void Service_RoleRestrictionInventoryTests_TheLocationsToHide_KeepTheirReadRestrictionAndNarrowOnlyTheWrite()
     {
         var baselines = ReadShippedBaselines();
 
@@ -184,7 +184,7 @@ public sealed class RoleRestrictionInventoryTests
     /// They are listed separately because the inventory above is about the surfaces a person finds in Settings.
     /// </summary>
     [TestMethod]
-    public void TheTwoKeysThatAreNotSettingsScreens_AreStillRestricted()
+    public void Service_RoleRestrictionInventoryTests_TheTwoKeysThatAreNotSettingsScreens_AreStillRestricted()
     {
         var baselines = ReadShippedBaselines();
 

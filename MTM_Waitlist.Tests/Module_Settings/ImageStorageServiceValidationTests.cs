@@ -35,7 +35,7 @@ public sealed class ImageStorageServiceValidationTests
     }
 
     [TestMethod]
-    public async Task ValidateImageAsync_WhenFileMissing_ReturnsFileNotFound()
+    public async Task Service_ImageStorageServiceValidationTests_ValidateImageAsync_WhenFileMissingReturnsFileNotFound()
     {
         var missingPath = Path.Combine(_workingDirectory, "does-not-exist.png");
 
@@ -46,7 +46,7 @@ public sealed class ImageStorageServiceValidationTests
     }
 
     [TestMethod]
-    public async Task ValidateImageAsync_WhenExtensionNotAllowed_ReturnsUnsupportedExtension()
+    public async Task Service_ImageStorageServiceValidationTests_ValidateImageAsync_WhenExtensionNotAllowedReturnsUnsupportedExtension()
     {
         var path = Path.Combine(_workingDirectory, "logo.gif");
         TestPngWriter.Write(path, 64, 64);
@@ -61,7 +61,7 @@ public sealed class ImageStorageServiceValidationTests
     [DataRow(".png")]
     [DataRow(".jpg")]
     [DataRow(".jpeg")]
-    public async Task ValidateImageAsync_AllowsEveryApprovedExtension(string extension)
+    public async Task Service_ImageStorageServiceValidationTests_ValidateImageAsync_AllowsEveryApprovedExtension(string extension)
     {
         var path = Path.Combine(_workingDirectory, $"square{extension}");
         TestPngWriter.Write(path, 64, 64);
@@ -72,7 +72,7 @@ public sealed class ImageStorageServiceValidationTests
     }
 
     [TestMethod]
-    public async Task ValidateImageAsync_WhenFileExceedsMaxSize_ReturnsFileTooLarge()
+    public async Task Service_ImageStorageServiceValidationTests_ValidateImageAsync_WhenFileExceedsMaxSizeReturnsFileTooLarge()
     {
         _resolver.MaxFileSizeBytes = 10 * 1024 * 1024;
         var path = Path.Combine(_workingDirectory, "oversize.png");
@@ -85,7 +85,7 @@ public sealed class ImageStorageServiceValidationTests
     }
 
     [TestMethod]
-    public async Task ValidateImageAsync_WhenFileIsAtMaxSize_IsAccepted()
+    public async Task Service_ImageStorageServiceValidationTests_ValidateImageAsync_WhenFileIsAtMaxSizeIsAccepted()
     {
         var path = Path.Combine(_workingDirectory, "boundary.png");
         TestPngWriter.Write(path, 64, 64);
@@ -97,7 +97,7 @@ public sealed class ImageStorageServiceValidationTests
     }
 
     [TestMethod]
-    public async Task ValidateImageAsync_WhenImageIsNotSquare_ReturnsNotSquare()
+    public async Task Service_ImageStorageServiceValidationTests_ValidateImageAsync_WhenImageIsNotSquareReturnsNotSquare()
     {
         var path = Path.Combine(_workingDirectory, "wide.png");
         TestPngWriter.Write(path, 128, 64);
@@ -110,7 +110,7 @@ public sealed class ImageStorageServiceValidationTests
     }
 
     [TestMethod]
-    public async Task ValidateImageAsync_WhenSquareRequirementDisabled_AcceptsNonSquare()
+    public async Task Service_ImageStorageServiceValidationTests_ValidateImageAsync_WhenSquareRequirementDisabledAcceptsNonSquare()
     {
         _resolver.RequireSquareAspectRatio = false;
         var path = Path.Combine(_workingDirectory, "wide.png");
@@ -122,7 +122,7 @@ public sealed class ImageStorageServiceValidationTests
     }
 
     [TestMethod]
-    public async Task ValidateImageAsync_WhenBelowMinimumDimensions_ReturnsDimensionTooSmall()
+    public async Task Service_ImageStorageServiceValidationTests_ValidateImageAsync_WhenBelowMinimumDimensionsReturnsDimensionTooSmall()
     {
         var path = Path.Combine(_workingDirectory, "tiny.png");
         TestPngWriter.Write(path, 16, 16);
@@ -134,7 +134,7 @@ public sealed class ImageStorageServiceValidationTests
     }
 
     [TestMethod]
-    public async Task ValidateImageAsync_WhenFileIsNotAnImage_ReturnsUnreadableImage()
+    public async Task Service_ImageStorageServiceValidationTests_ValidateImageAsync_WhenFileIsNotAnImageReturnsUnreadableImage()
     {
         var path = Path.Combine(_workingDirectory, "not-an-image.png");
         await File.WriteAllTextAsync(path, new string('x', 4096));
@@ -146,7 +146,7 @@ public sealed class ImageStorageServiceValidationTests
     }
 
     [TestMethod]
-    public async Task ValidateImageAsync_WhenPathIsEmpty_Throws()
+    public async Task Service_ImageStorageServiceValidationTests_ValidateImageAsync_WhenPathIsEmptyThrows()
     {
         await Assert.ThrowsExceptionAsync<ArgumentNullException>(
             () => _service.ValidateImageAsync(string.Empty));

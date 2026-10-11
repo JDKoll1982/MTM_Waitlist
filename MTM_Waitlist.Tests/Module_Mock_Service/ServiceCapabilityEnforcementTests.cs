@@ -23,7 +23,7 @@ namespace MTM_Waitlist.Tests.Module_Mock_Service;
 public sealed class ServiceCapabilityEnforcementTests
 {
     [TestMethod]
-    public async Task RunRefreshAsync_WhenRefreshIsDisabledOnThisHost_RefusesWithTheReasonAsync()
+    public async Task Service_ServiceCapabilityEnforcementTests_RunRefreshAsync_WhenRefreshIsDisabledOnThisHostRefusesWithTheReasonAsync()
     {
         using var fixture = new OperationsFixture(GateWithoutRefresh());
 
@@ -36,7 +36,7 @@ public sealed class ServiceCapabilityEnforcementTests
     }
 
     [TestMethod]
-    public async Task RunBackupAsync_WhenTheStoreCannotBeReached_RefusesWithTheReasonAsync()
+    public async Task Service_ServiceCapabilityEnforcementTests_RunBackupAsync_WhenTheStoreCannotBeReachedRefusesWithTheReasonAsync()
     {
         using var fixture = new OperationsFixture(GateWithoutStore(BackupStore.MtmWaitlist));
 
@@ -49,7 +49,7 @@ public sealed class ServiceCapabilityEnforcementTests
     }
 
     [TestMethod]
-    public async Task RunBackupAsync_WhenOnlyAnotherStoreIsUnreachable_StillRunsThisStoreAsync()
+    public async Task Service_ServiceCapabilityEnforcementTests_RunBackupAsync_WhenOnlyAnotherStoreIsUnreachableStillRunsThisStoreAsync()
     {
         using var fixture = new OperationsFixture(GateWithoutStore(BackupStore.MtmWaitlist));
 
@@ -61,7 +61,7 @@ public sealed class ServiceCapabilityEnforcementTests
     }
 
     [TestMethod]
-    public async Task GetStatusAsync_ReportsRefreshAndPerStoreCapabilityWithReasonsAsync()
+    public async Task Service_ServiceCapabilityEnforcementTests_GetStatusAsync_ReportsRefreshAndPerStoreCapabilityWithReasonsAsync()
     {
         using var fixture = new OperationsFixture(GateWithoutRefreshAndStore(BackupStore.MtmMock));
 
@@ -83,7 +83,7 @@ public sealed class ServiceCapabilityEnforcementTests
     }
 
     [TestMethod]
-    public async Task GetStatusAsync_WithoutAGate_ReportsEveryCapabilityEnabledAsync()
+    public async Task Service_ServiceCapabilityEnforcementTests_GetStatusAsync_WithoutAGateReportsEveryCapabilityEnabledAsync()
     {
         using var fixture = new OperationsFixture(capabilityGate: null);
 
@@ -94,7 +94,7 @@ public sealed class ServiceCapabilityEnforcementTests
     }
 
     [TestMethod]
-    public async Task RunDueStoresAsync_WhenAStoreCannotBeReached_SkipsItAndStillRunsTheOthersAsync()
+    public async Task Service_ServiceCapabilityEnforcementTests_RunDueStoresAsync_WhenAStoreCannotBeReachedSkipsItAndStillRunsTheOthersAsync()
     {
         using var fixture = new BackupFixture(GateWithoutStore(BackupStore.MtmWipApplicationWinforms));
         var clock = TimeProvider.System;
@@ -113,7 +113,7 @@ public sealed class ServiceCapabilityEnforcementTests
     }
 
     [TestMethod]
-    public async Task ConfirmAndRestoreAsync_WhenTheStoreCannotBeReached_RefusesBeforeTakingASafetySnapshotAsync()
+    public async Task Service_ServiceCapabilityEnforcementTests_ConfirmAndRestoreAsync_WhenTheStoreCannotBeReachedRefusesBeforeTakingASafetySnapshotAsync()
     {
         using var fixture = new RestoreFixture(GateWithoutStore(BackupStore.MtmWaitlist));
 

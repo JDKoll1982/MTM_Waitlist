@@ -21,7 +21,7 @@ public sealed class RequestJobFieldValuesTests
     };
 
     [TestMethod]
-    public void Resolve_Die_IsTheNumberAndTheLocationTogether()
+    public void Service_RequestJobFieldValuesTests_Resolve_DieIsTheNumberAndTheLocationTogether()
     {
         Assert.AreEqual("FGT0002000", RequestJobFieldValues.Resolve("Die", DieJob()));
     }
@@ -34,7 +34,7 @@ public sealed class RequestJobFieldValuesTests
     ]);
 
     [TestMethod]
-    public void Resolve_Die_ListsEveryDieTheJobCarries_NotJustTheFirst()
+    public void Service_RequestJobFieldValuesTests_Resolve_DieListsEveryDieTheJobCarriesNotJustTheFirst()
     {
         // FR-057: a job carrying more than one die is one row per die, never the first die standing in for all
         // of them. The requester reads the row to see which dies the job has.
@@ -44,7 +44,7 @@ public sealed class RequestJobFieldValuesTests
     }
 
     [TestMethod]
-    public void Resolve_PickupLocation_ListsEveryDieLocationTheJobCarries()
+    public void Service_RequestJobFieldValuesTests_Resolve_PickupLocationListsEveryDieLocationTheJobCarries()
     {
         // FR-057, stated directly: the request page lists every die location. The locations are drawn in the
         // job's own order, so the row reads in the same order as the job does.
@@ -54,7 +54,7 @@ public sealed class RequestJobFieldValuesTests
     }
 
     [TestMethod]
-    public void Resolve_Die_WithADieThatHasNoLocation_LeavesNoDanglingSeparatorInTheList()
+    public void Service_RequestJobFieldValuesTests_Resolve_DieWithADieThatHasNoLocationLeavesNoDanglingSeparatorInTheList()
     {
         // The second die has no recorded location, so its entry is its number alone and no separator is left
         // hanging off it.
@@ -68,7 +68,7 @@ public sealed class RequestJobFieldValuesTests
     }
 
     [TestMethod]
-    public void Resolve_PickupLocation_WithOnlyOneDieThatHasNoLocation_YieldsNothing()
+    public void Service_RequestJobFieldValuesTests_Resolve_PickupLocationWithOnlyOneDieThatHasNoLocationYieldsNothing()
     {
         // A location the job does not record is omitted rather than drawn as a blank standing in for a value.
         var noLocations = DieJob().WithDies(
@@ -81,19 +81,19 @@ public sealed class RequestJobFieldValuesTests
     }
 
     [TestMethod]
-    public void Resolve_PickupLocation_IsWhereTheDieIs()
+    public void Service_RequestJobFieldValuesTests_Resolve_PickupLocationIsWhereTheDieIs()
     {
         Assert.AreEqual("DIE SHOP", RequestJobFieldValues.Resolve("Pickup location", DieJob()));
     }
 
     [TestMethod]
-    public void Resolve_PartNumber_IsThePartTheDieIsAssignedTo()
+    public void Service_RequestJobFieldValuesTests_Resolve_PartNumberIsThePartTheDieIsAssignedTo()
     {
         Assert.AreEqual("PART-9003", RequestJobFieldValues.Resolve("Part number", DieJob()));
     }
 
     [TestMethod]
-    public void Resolve_IsCaseAndSpacingInsensitive()
+    public void Service_RequestJobFieldValuesTests_Resolve_IsCaseAndSpacingInsensitive()
     {
         // The label comes from the Item's stored configuration, so the row's own spacing must not decide it.
         foreach (var label in new[] { "die", "DIE", "  Die  " })
@@ -103,7 +103,7 @@ public sealed class RequestJobFieldValuesTests
     }
 
     [TestMethod]
-    public void Resolve_DieWithNoKnownLocation_LeavesNoDanglingSeparator()
+    public void Service_RequestJobFieldValuesTests_Resolve_DieWithNoKnownLocationLeavesNoDanglingSeparator()
     {
         var noLocation = DieJob() with { DieLocation = string.Empty };
 
@@ -112,7 +112,7 @@ public sealed class RequestJobFieldValuesTests
     }
 
     [TestMethod]
-    public void Resolve_JobWithNoDie_YieldsNothing_SoNoEmptyRowIsDrawn()
+    public void Service_RequestJobFieldValuesTests_Resolve_JobWithNoDieYieldsNothingSoNoEmptyRowIsDrawn()
     {
         var noDie = RequestJobPartAvailability.None with { HasActiveJob = true, HasDie = false };
 
@@ -121,14 +121,14 @@ public sealed class RequestJobFieldValuesTests
     }
 
     [TestMethod]
-    public void Resolve_WithoutAJob_YieldsNothing()
+    public void Service_RequestJobFieldValuesTests_Resolve_WithoutAJobYieldsNothing()
     {
         // The page resolves before the job arrives; it must show the rows the request itself carries and no more.
         Assert.IsNull(RequestJobFieldValues.Resolve("Die", job: null));
     }
 
     [TestMethod]
-    public void Resolve_UnknownOrEmptyLabel_YieldsNothing()
+    public void Service_RequestJobFieldValuesTests_Resolve_UnknownOrEmptyLabelYieldsNothing()
     {
         // A label this snapshot cannot supply is omitted rather than drawn as a blank standing in for a value.
         Assert.IsNull(RequestJobFieldValues.Resolve("Average coil weight", DieJob()));

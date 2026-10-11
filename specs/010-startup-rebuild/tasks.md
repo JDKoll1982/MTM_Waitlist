@@ -511,7 +511,11 @@ local settings type.
 - [x] **T167** Record in S13 the reason for every case that no longer applies, beside the case itself, rather than leaving it untested and unexplained (checklist 9.1b, FR-031, SC-013). · `STARTUP-REBUILD-BRIEF.md`
 
 **⟶ Wait for Wave 3 to finish, then:**
-- [ ] **T168** Run with the store unreachable and prove the diagnosis is shown and nothing is persisted anywhere; then run against a slow store and a stalled share and prove neither holds the splash past its bound; compare the closing result with the Phase 1 baseline and account for every difference, including the exclusions recorded in T167 (checklist 9.2b–9.2d, SC-001, SC-002). · `specs/010-startup-rebuild/acceptance.md`
+- **T168 — retired 2026-10-10**: the owner performs this by hand rather than as a task. It asked for the
+  unreachable-store, slow-store and stalled-share runs compared against the Phase 1 baseline, but the launch it
+  would have measured has since been replaced by the concurrent one `011` shipped, so the comparison no longer
+  describes the same process. `plan.md` §Reconciliation 2026-10-10 records it as owner-performed verification so
+  the coverage is not mistaken for work still outstanding.
 
 **⟶ Wait for Wave 4 to finish, then:**
 - [x] **T169** Run the retired-symbol audit one final time and confirm nothing came back (checklist 10.3d, FR-028, SC-009). · `MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs`
@@ -853,10 +857,11 @@ held locally and says so, and the shared key file is retired along with remember
   reintroduce one by assumption (FR-025, FR-043). The log-entry section's allowance for writing a shared key
   file's path is withdrawn with it, because the key file it named is retired and that allowance is the one place
   a reader could take as licence to bring one back. Documentation only: no code changed.
-- [ ] **T204** Test each of the above: a computer is configured by its name alone; a save that writes nothing
-  new is not reported as a failure; an unreachable share resolves to the local cache and says so; a picture with
-  neither copy nor share is missing rather than a stand-in; and nothing reads, copies or keeps a key file
-  (FR-040–FR-044, SC-018–SC-021).
+- [x] **T204** Test each of the above: a computer is configured by its location alone, with its own name read
+  from the computer and shown rather than typed; a save that writes nothing new is not reported as a failure; an
+  unreachable share resolves to the local cache and says so; a picture with neither copy nor share is missing
+  rather than a stand-in; and nothing reads, copies or keeps a key file (FR-040–FR-044, FR-049, FR-050,
+  SC-018–SC-021, SC-025). T240 covers the setup stage's own cases in the same file.
 
 ---
 
@@ -867,7 +872,9 @@ already resolved, superseded or accepted and have been removed from the record. 
 the owner as questions and every one is answered; the answers are in `spec.md` under `Clarifications`. Three of
 them changed requirements rather than confirming them: remember-me is withdrawn in favour of a previous-users
 list (FR-014), the launch window states the work under way on one line instead of accumulating a history
-(FR-039), and the launch window and the setup surfaces gained layout requirements (FR-045, FR-046).
+(FR-039), and the launch window and the setup surfaces gained layout requirements (FR-045, FR-046). **Amended
+2026-10-10**: the second and third of those three are withdrawn — `011` gave every running operation its own
+line, and the setup layout is accepted as it stands — while the first stands and is built in Phase 13.
 
 - [x] **T205** Update the permission parity test to the widened role list the seed grants, so it stops failing
   whenever the store is online.
@@ -882,15 +889,18 @@ list (FR-014), the launch window states the work under way on one line instead o
   install. The seeded row is no longer dead.
 - [x] **T209** Restore the retired-symbol guard's pattern for the old recovery service, so reintroducing that
   name fails the build again.
-- [ ] **T210** Re-take T033's removal proof against the shipped launch, which now reads the store.
-- [ ] **T211** Bring the launch's step catalogue and the implemented steps level, so the completed count is
-  never partial.
+- **T210 — retired 2026-10-10**: the removal proof is the owner's to re-take by hand, against the launch `011`
+  shipped rather than the one T033 measured. Recorded in `plan.md` §Reconciliation 2026-10-10.
+- [x] **T211** Bring the launch's step catalogue and the implemented steps level, so the completed count is
+  never partial. **Verified and closed by T241**, which checks the shipped catalogue rather than rebuilding it:
+  every entry has a registered implementation, with the shell handled by the pipeline.
 - [x] **T212** Closed 2026-09-28: the installer ran every `Validation\*\validate.sql` file against the store
   it had just built — startup, settings, user management, user sessions and remembered sign-ins — and exited 0.
   That is the same live validation the standalone wrapper performs, reached through the installer instead.
 - [x] **T213** Fix and run the live integration test file that still names the replaced startup types.
-- [ ] **T214** Clear the shared strings file's older naming findings, so a future change touching that file does
-  not fail the changed-file check on problems it did not create.
+- [x] **T214** Clear the shared strings file's older naming findings, so a future change touching that file does
+  not fail the changed-file check on problems it did not create. Extended by T243, which folds in the strings
+  this feature itself left behind.
 - [x] **T215** Remove the inert `StartupLoggingOptions` section from `appsettings.json`.
 - [x] **T216** Hand the launch back to the main window on the interface thread rather than a background one.
 - [x] **T217** Delete the seed folder that is named for work centres but contains workstations.
@@ -901,24 +911,124 @@ list (FR-014), the launch window states the work under way on one line instead o
   The installer's two dialogs cannot be driven unattended, so it was run from a patched copy under `%TEMP%`
   that answers the credential prompts and the confirmation, points `scriptDir` at the repository's `Database`
   folder, and leaves `Database\install_local_database.vbs` untouched.
-- [ ] **T219** Withdraw remember-me and add the previous-users section: a modal on the sign-in screen showing
-  the last six people who signed in as cards, where choosing a card fills in the user name and the password is
-  still required, backed by a store read (FR-014). The shared key file goes with it — the reader that opened it
-  is the code being withdrawn, so the file, its provider and its local copy are all removed (FR-025, FR-043).
+- [x] **T219** Withdraw remember-me and build the previous-people list, re-scoped 2026-10-10. The reader is
+  deleted rather than changed: `ReadRememberedSignInStep`, `RememberedSignInService`, the AES decryption and the
+  shared key file read all go, with the `read-remembered-sign-in` entry they belong to (T233, T234). The list
+  itself is not a modal: it sits on the right-hand side of the sign-in form, separated from it by a divider, and
+  choosing a person fills in the user name only while the PIN is still required — backed by a store read of the
+  session records the store already holds (T235, T236). The stage is sized so the whole list is visible
+  (FR-014, FR-025, FR-043, FR-048).
 - [x] **T220** Open the launch window centred on the screen (FR-045).
 - [x] **T221** Replace the launch's list of performed steps with a single line showing only the work under way,
-  with no history (FR-039, US1).
-- [ ] **T222** Rework the administrator sign-in that precedes machine setup, and the machine setup screen
-  itself, using cards, padding and margins (FR-046).
-- [ ] **T223** Rewrite the blocked-state window's wording to match the surfaces that have already been rewritten.
-- [ ] **T224** Drive the window-behaviour cases against a running application instead of reading the window's
-  code — the abort routes out of setup, the reset preview, the close route and the saved window size.
-- [ ] **T225** Prove the close route and the reset preview end to end against a reachable store.
-- [ ] **T226** Prove the theme in a real window rather than by reading a seeded store.
-- [ ] **T227** Recover the sweeps' full 111-case breakdown, and review it with the owner before it is accepted.
-- [ ] **T228** After Phase 11 lands, run T161 and T168 by hand: the machine-setup gate against a fresh store,
-  and the store unreachable with a slow store and a stalled share, then the comparison with the Phase 1
-  baseline.
-- [ ] **T229** Record the machine-with-no-readable-hardware-address case as environment-gated, with the reason,
-  so it is not mistaken for coverage.
+  with no history (FR-039, US1). **Superseded 2026-10-10**: `011` made the launch concurrent, so the surface now
+  gives every running operation its own line (FR-047) and T244 proves it. The clause that survived — a line is
+  shown while its work runs and not afterwards, so no history accumulates — still holds.
+- **T222 — retired 2026-10-10**: it asked for the administrator sign-in that precedes machine setup, and the
+  machine setup screen itself, to be laid out with cards, padding and margins (FR-046). Both surfaces have since
+  been rebuilt as stages of one window and the owner accepted the layout as it stands, so the requirement is
+  retired with the task.
+- [x] **T223** Rewrite the blocked-state window's wording to match the surfaces that have already been rewritten.
+  **Largely done already** — the shipped words in `Strings/en-us/Resources.resw` read as rewritten; T242 verifies
+  them and closes the task, and the one stale entry it leaves behind moves to T243.
+- **T224 — retired 2026-10-10**, **T225 — retired 2026-10-10**, **T226 — retired 2026-10-10**: the
+  window-behaviour, close-route, reset-preview and theme runs are the owner's to perform by hand. All were
+  written against the four-window model `011` replaced with one window, so they no longer describe what would be
+  driven. Recorded in `plan.md` §Reconciliation 2026-10-10.
+- **T227 — retired 2026-10-10** and **T229 — retired 2026-10-10**: the sweeps' 111-case catalogue review and the
+  environment-gated hardware-address record are not required.
+- **T228 — retired 2026-10-10**: it repeated T161 and T168 by hand after Phase 11; T161 is satisfied and T168 is
+  the owner's by hand.
+
+---
+
+## Phase 13: Reconciling the record with the launch that ships
+
+**Added 2026-10-10.** `011-identifier-first-signin` shipped after this feature and replaced the sign-in and the
+window model, so the tasks above that described the older process are retired where they stand and the work that
+follows from the reset is carried here. `plan.md` §Reconciliation 2026-10-10 holds the four withdrawn statements
+with their reasons, and `spec.md` holds the requirements as reset: FR-039 and FR-046 retired, FR-014 and FR-041
+restated, and FR-047 to FR-050 added.
+
+Roughly eleven tasks: three waves. Wave A withdraws remember-me and builds the previous-people list; Wave B
+settles the machine-setup stage on the computer's own name; Wave C closes the record out. Waves A and B touch
+different files and may run at the same time; Wave C waits for both, because it verifies what they shipped.
+
+### Wave A — remember-me goes, the previous people arrive (FR-014, FR-043, FR-048; SC-022, SC-024)
+
+- [x] **T233** [P] Delete the remembered sign-in reading: the `read-remembered-sign-in` entry in the catalogue
+  and its step, `RememberedSignInService`, the AES decryption, the shared key file reader, and the registration
+  that wires them. Nothing reads, copies or keeps a key file (FR-025, FR-043, SC-024).
+  · `MTM_Waitlist.Startup/Services/ConfigurationStep.cs`, `RememberedSignInService.cs`,
+  `Services/LaunchStepCatalog.cs`, `Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs`
+- [x] **T234** [P] Retire the store artifacts remember-me owned: the `auth_remembered_sign_ins` table and the
+  three `sp_auth_remembered_sign_ins_*` procedures, each with the `rollback.sql` that pairs it, the validation
+  script and the aggregate entries that name them (constitution III, FR-043).
+  · `Database/Tables/35_auth_remembered_sign_ins/`, `Database/StoredProcedures/sp_auth_remembered_sign_ins_*/`,
+  `Database/Validation/auth_remembered_sign_ins_schema/`
+- [x] **T235** [P] Add `sp_auth_user_previous_sign_ins_list` with the `rollback.sql` that pairs it: the last six
+  people who signed in on one computer, most recent first, read from the `user_active_sessions` rows the store
+  already holds and carrying no credential of any kind (FR-014, FR-048).
+  · `Database/StoredProcedures/sp_auth_user_previous_sign_ins_list/`
+- [x] **T236** Build the previous-people list on the sign-in stage: one card per person, on the right-hand side
+  of the form and separated from it by a divider, choosing one fills in the user name only and leaves the PIN to
+  be entered, and the stage is sized so the whole list is visible rather than cut off (FR-014, FR-048, SC-022).
+  · `Module_Startup/Views/SignInPage.xaml`, `MTM_Waitlist.Startup/ViewModels/SignInViewModel.cs`
+- [x] **T237** Prove the withdrawal and the list together: with the shared key file absent the launch completes
+  and the sign-in stage is fully usable; the last six people are offered with no credential among them;
+  choosing one fills in the user name and nothing else; and a search of the tree finds nothing that reads,
+  copies or keeps a key file (FR-043, FR-048, SC-022, SC-024).
+  · `MTM_Waitlist.Tests/Module_Startup/`
+
+### Wave B — the computer's own name, and its location (FR-049, FR-050; SC-018, SC-025)
+
+- [x] **T238** [P] Rename this computer's stored note to its location:
+  `core_computers_registry.description` becomes `location`, the `sp_core_computers_registry_*` procedures and
+  `sp_machine_configuration_reset` move with it, and the change ships a paired `rollback.sql`, its validation
+  script and its seed entry (FR-050, constitution III).
+  · `Database/Tables/02_core_computers_registry/`, `Database/StoredProcedures/`, `Database/Validation/`
+- [x] **T239** Take the computer's own name for its identity and stop asking for one:
+  `MachineConfigurationDraft` carries the name the computer reports for itself, the setup stage shows it and
+  refuses to let it be typed, the location is the only value a person supplies, and the unique rule on the
+  stored name is kept so no two records can claim one name (FR-041, FR-049, SC-018).
+  · `MTM_Waitlist.Startup/Services/MachineConfigurationService.cs`, `ViewModels/MachineSetupViewModel.cs`,
+  `Module_Startup/Views/MachineSetupPage.xaml`, `Strings/en-us/Resources.resw`
+- [x] **T240** Prove the setup stage: the computer's own name is shown and cannot be typed; a save with the
+  location alone configures the computer; a blank location still configures it; a name another record already
+  holds is refused with the record left as it was; and a computer set up before the change reads what it stored
+  as its location (FR-049, FR-050, SC-018, SC-025).
+  · `MTM_Waitlist.Tests/Module_Startup/ViewModels/MachineSetupViewModelTests.cs`
+
+### Wave C — the record closes over what shipped (FR-004, FR-031, FR-047; SC-001, SC-013, SC-023)
+
+- [x] **T241** Verify and close T211: every entry in `LaunchStepCatalog` has a registered implementation, with
+  the shell handled by the pipeline itself, so the count the surface shows is never partial.
+  · `MTM_Waitlist.Startup/Services/LaunchStepCatalog.cs`, `MTM_Waitlist.Tests/Module_Startup/`
+- [x] **T242** Verify and close T223: the blocked-state words read as rewritten, and the one entry that no
+  longer describes anything — `Startup_BlockedState.PartPictureSources` — is moved to T243 rather than left
+  standing (FR-004, SC-001).
+  · `Strings/en-us/Resources.resw`
+- [x] **T243** Clear the shared strings file's older naming findings, as T214 asked, and with them the strings
+  this feature itself left behind: `Startup_BlockedState.PartPictureSources` and the machine-setup entries that
+  still tell a person three shared folders must be filled in (FR-031, SC-013).
+  · `Strings/en-us/Resources.resw`
+- [x] **T244** Prove the launch surface gives every running operation its own line, that a line appears before
+  the work it describes, and that no line stands for a group of operations (FR-047, SC-023).
+  · `MTM_Waitlist.Tests/Module_Startup/`
+- [x] **T245** Bring the surrounding record level with the change, so nothing anywhere still states the
+  opposite: the startup instruction file's remembered-sign-in and key-file passages, the logging contract's
+  allowance for writing a key file's path, `capabilities/startup-launch/spec.md`'s unreadable-key-file scenario,
+  and `011`'s FR-035, which records that the shared key is read to honour a remembered sign-in (FR-043).
+  · `.github/instructions/startup-rebuild.instructions.md`, `contracts/logging-contract.md`,
+  `capabilities/startup-launch/spec.md`, `specs/011-identifier-first-signin/spec.md`
+- [x] **T246** Run the whole suite and the build-gate audits after the withdrawal: `RetiredSymbolAuditTests`
+  fails the build if the withdrawn names can return, `InlineSqlAuditTests` fails it if any data operation left a
+  stored procedure behind, and the suite is green with the remembered-sign-in tests accounted for (FR-028,
+  SC-009, SC-012).
+  · `MTM_Waitlist.sln`, `MTM_Waitlist.Tests/`
+
+**Checkpoint**: nothing reads, copies or keeps a key file; the sign-in stage offers the last six people on its
+right, behind a divider, with the window sized to show them; a new computer is set up by its location alone and
+carries the name the computer reports for itself; the blocked-state and machine-setup words describe what ships;
+and the record — specification, plan and tasks — carries no requirement or task that describes a process that no
+longer runs.
 

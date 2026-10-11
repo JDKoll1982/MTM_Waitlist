@@ -31,14 +31,6 @@ public sealed class ImageStorageOptions
     public string SharedFolderPath { get; init; } = AppStoragePaths.ImagesRootDefault;
 
     /// <summary>
-    /// The folder holding the key files, one per key, named "{keyname}.txt".
-    /// Default: \\mtmanu-fs01\Expo Drive\MH_RESOURCE\Material_Handler\MTM Applications\Keys - DO NOT EDIT FILES\MTM Waitlist Application
-    /// A plant-wide setting like the picture folder, and this is the fallback.
-    /// Nothing reads these files yet. See <see cref="AppStoragePaths.KeysFolderDefault"/>.
-    /// </summary>
-    public string KeysFolderPath { get; init; } = AppStoragePaths.KeysFolderDefault;
-
-    /// <summary>
     /// The root the dunnage pictures sit under, one folder per dunnage type and part beneath it.
     /// Default: \\mtmanu-fs01\Expo Drive\Software Development\Live Applications\Shared\Images\Dunnage
     /// A plant-wide setting like the picture folder, and this is the fallback. See

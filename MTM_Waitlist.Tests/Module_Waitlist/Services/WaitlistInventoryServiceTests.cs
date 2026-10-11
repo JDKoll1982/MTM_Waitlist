@@ -18,7 +18,7 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.Services;
 public sealed class WaitlistInventoryServiceTests
 {
     [TestMethod]
-    public async Task GetInventoryLocationRowsAsync_FiltersQtyZeroAndIgnoredLocations()
+    public async Task Service_WaitlistInventoryServiceTests_GetInventoryLocationRowsAsync_FiltersQtyZeroAndIgnoredLocations()
     {
         var preferences = new InMemoryScopedPreferenceStore();
         preferences.SeedText(IgnoredLocationDefaults.SettingKey, PreferenceScope.Plant, "SHIP");
@@ -32,7 +32,7 @@ public sealed class WaitlistInventoryServiceTests
     }
 
     [TestMethod]
-    public async Task GetInventoryLocationRowsAsync_EmptyPartNumber_ReturnsEmptyWithoutReading()
+    public async Task Service_WaitlistInventoryServiceTests_GetInventoryLocationRowsAsync_EmptyPartNumberReturnsEmptyWithoutReading()
     {
         var fallback = new FakeVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow>(
             Array.Empty<VisualInventoryLocationRow>());
@@ -45,7 +45,7 @@ public sealed class WaitlistInventoryServiceTests
     }
 
     [TestMethod]
-    public async Task GetInventoryLocationRowsAsync_WhenFallbackFails_ReturnsEmptyWithoutThrowing()
+    public async Task Service_WaitlistInventoryServiceTests_GetInventoryLocationRowsAsync_WhenFallbackFailsReturnsEmptyWithoutThrowing()
     {
         // A failed Visual read surfaces from the fallback; the service must degrade rather than crash.
         var fallback = new FakeVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow>(
@@ -59,7 +59,7 @@ public sealed class WaitlistInventoryServiceTests
     }
 
     [TestMethod]
-    public void MapToInventoryLocationRow_MapsPartLocationAndQuantity()
+    public void Service_WaitlistInventoryServiceTests_MapToInventoryLocationRow_MapsPartLocationAndQuantity()
     {
         var mapped = WaitlistInventoryService.MapToInventoryLocationRow(new VisualInventoryLocationRow
         {
@@ -74,7 +74,7 @@ public sealed class WaitlistInventoryServiceTests
     }
 
     [TestMethod]
-    public void MapToInventoryLocationRow_HandlesEmptyRow()
+    public void Service_WaitlistInventoryServiceTests_MapToInventoryLocationRow_HandlesEmptyRow()
     {
         var mapped = WaitlistInventoryService.MapToInventoryLocationRow(new VisualInventoryLocationRow());
 

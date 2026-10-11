@@ -13,7 +13,7 @@ public sealed class StartupModelsTests
     /// person state, so they are left in place rather than deleted blind.
     /// </summary>
     [TestMethod]
-    public void ModuleCoreSettingsOptions_Defaults()
+    public void Model_StartupModelsTests_ModuleCoreSettingsOptions_Defaults()
     {
         var options = new ModuleCoreSettingsOptions();
 

@@ -15,7 +15,7 @@ public sealed class WorkOrderValidationServiceTests
     [DataRow("WO-76951", "WO-076951")]
     [DataRow("100089", "WO-100089")]
     [DataRow("  076951  ", "WO-076951")]
-    public void TryNormalize_AutoFormatsEveryAcceptedInputToTheCanonicalWorkOrderKey(string input, string expectedNormalized)
+    public void Service_WorkOrderValidationServiceTests_TryNormalize_AutoFormatsEveryAcceptedInputToTheCanonicalWorkOrderKey(string input, string expectedNormalized)
     {
         var service = new WorkOrderValidationService();
 
@@ -33,7 +33,7 @@ public sealed class WorkOrderValidationServiceTests
     [DataRow("WO-")]
     [DataRow("bad-input")]
     [DataRow("")]
-    public void TryNormalize_RejectsInputItCannotFormat(string input)
+    public void Service_WorkOrderValidationServiceTests_TryNormalize_RejectsInputItCannotFormat(string input)
     {
         var service = new WorkOrderValidationService();
 

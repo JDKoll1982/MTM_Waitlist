@@ -58,7 +58,7 @@ public sealed class ComputerRegistryService : IComputerRegistryService
         string hostnameNormalized,
         string macAddressNormalized,
         string displayName,
-        string? description,
+        string? location,
         CancellationToken cancellationToken = default)
     {
         _ = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
@@ -69,7 +69,7 @@ public sealed class ComputerRegistryService : IComputerRegistryService
                 ["p_hostname_normalized"] = hostnameNormalized.Trim(),
                 ["p_mac_address_normalized"] = macAddressNormalized.Trim(),
                 ["p_display_name"] = displayName.Trim(),
-                ["p_description"] = string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
+                ["p_location"] = string.IsNullOrWhiteSpace(location) ? null : location.Trim(),
             },
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
@@ -85,7 +85,7 @@ public sealed class ComputerRegistryService : IComputerRegistryService
         string hostnameNormalized,
         string macAddressNormalized,
         string displayName,
-        string? description,
+        string? location,
         bool isRegistered,
         CancellationToken cancellationToken = default)
     {
@@ -98,7 +98,7 @@ public sealed class ComputerRegistryService : IComputerRegistryService
                 ["p_hostname_normalized"] = hostnameNormalized.Trim(),
                 ["p_mac_address_normalized"] = macAddressNormalized.Trim(),
                 ["p_display_name"] = displayName.Trim(),
-                ["p_description"] = string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
+                ["p_location"] = string.IsNullOrWhiteSpace(location) ? null : location.Trim(),
                 ["p_is_registered"] = isRegistered ? 1 : 0,
             },
             MySqlDatabaseTarget.MtmWaitlist,
@@ -149,7 +149,7 @@ public sealed class ComputerRegistryService : IComputerRegistryService
             Id = ReadInt64(row, "id"),
             ComputerName = ReadString(row, "computer_name"),
             DisplayName = ReadString(row, "display_name"),
-            Description = ReadString(row, "description"),
+            Location = ReadString(row, "location"),
             MacAddressNormalized = ReadString(row, "mac_address_normalized"),
             IsRegistered = ReadInt64(row, "is_registered") == 1,
         };

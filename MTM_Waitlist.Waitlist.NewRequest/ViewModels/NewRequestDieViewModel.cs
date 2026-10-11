@@ -134,7 +134,7 @@ public partial class NewRequestDieViewModel : ObservableRecipient, INavigationAw
         {
             IsUnavailableVisible = true;
             UnavailableMessage = LocalizeOrDefault(
-                "NewRequest_Die.NoDies.Message",
+                "NewRequest_Die_NoDies.Message",
                 "This job has no die saved on it, so there is no die to ask about. Go back and choose a different item.");
         }
 
@@ -217,7 +217,7 @@ public partial class NewRequestDieViewModel : ObservableRecipient, INavigationAw
         {
             IsUnavailableVisible = true;
             UnavailableMessage = LocalizeOrDefault(
-                "NewRequest_Die.NothingChosen.Message",
+                "NewRequest_Die_NothingChosen.Message",
                 "Choose at least one die before continuing.");
             return;
         }

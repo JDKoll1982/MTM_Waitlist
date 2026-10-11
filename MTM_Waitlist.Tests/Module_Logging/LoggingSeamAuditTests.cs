@@ -27,7 +27,7 @@ public sealed class LoggingSeamAuditTests
     private static RepositoryScanScope LoggingModuleScope => new() { IncludeUnder = ["MTM_Waitlist.Logging"] };
 
     [TestMethod]
-    public void LoggingModuleScope_CoversTheSeamSource()
+    public void Audit_LoggingSeamAuditTests_LoggingModuleScope_CoversTheSeamSource()
     {
         // A scan whose scope resolves to nothing finds nothing, so the two checks below would pass without ever
         // reading a file. This proves the scope reaches the seam before either of them is believed.
@@ -42,7 +42,7 @@ public sealed class LoggingSeamAuditTests
     }
 
     [TestMethod]
-    public void LoggingModule_CarriesNoConditionalAttributeAndNoDebugOnlyGuard()
+    public void Audit_LoggingSeamAuditTests_LoggingModule_CarriesNoConditionalAttributeAndNoDebugOnlyGuard()
     {
         // Arrange
         var patterns = new List<(string Description, string Pattern)>
@@ -66,7 +66,7 @@ public sealed class LoggingSeamAuditTests
     }
 
     [TestMethod]
-    public void LoggingModule_WritesNothingToTheMachine()
+    public void Audit_LoggingSeamAuditTests_LoggingModule_WritesNothingToTheMachine()
     {
         // Arrange
         var patterns = new List<(string Description, string Pattern)>

@@ -59,7 +59,7 @@ public sealed class PermissionRegistryTests
     };
 
     [TestMethod]
-    public void Declaration_HoldsEveryPinnedKeyExactlyOnce()
+    public void Service_PermissionRegistryTests_Declaration_HoldsEveryPinnedKeyExactlyOnce()
     {
         var keys = PermissionRegistry.All.Select(entry => entry.Key).ToArray();
 
@@ -70,7 +70,7 @@ public sealed class PermissionRegistryTests
     }
 
     [TestMethod]
-    public void Declaration_SpellsEveryKeyExactlyAsTheSpecificationPinsIt()
+    public void Service_PermissionRegistryTests_Declaration_SpellsEveryKeyExactlyAsTheSpecificationPinsIt()
     {
         foreach (var pinned in PinnedKeys)
         {
@@ -89,7 +89,7 @@ public sealed class PermissionRegistryTests
     }
 
     [TestMethod]
-    public void Declaration_GivesEveryKeyANamedGateSiteThatReadsIt()
+    public void Service_PermissionRegistryTests_Declaration_GivesEveryKeyANamedGateSiteThatReadsIt()
     {
         // A declared key nothing reads would be a permission that decides nothing (FR-062).
         foreach (var entry in PermissionRegistry.All)
@@ -105,7 +105,7 @@ public sealed class PermissionRegistryTests
     }
 
     [TestMethod]
-    public void Declaration_NamesTheResetActionAsAReaderOfTheResetKey()
+    public void Service_PermissionRegistryTests_Declaration_NamesTheResetActionAsAReaderOfTheResetKey()
     {
         // permission.admin.reset_password exists only to gate the reset action on a person's page, so that action
         // has to be one of its named readers or the key is declared without a reader.
@@ -116,7 +116,7 @@ public sealed class PermissionRegistryTests
     }
 
     [TestMethod]
-    public void Declaration_HoldsTheThreeKeysThatReplaceNoRetiredList()
+    public void Service_PermissionRegistryTests_Declaration_HoldsTheThreeKeysThatReplaceNoRetiredList()
     {
         foreach (var key in KeysWithNoPredecessor)
         {
@@ -125,7 +125,7 @@ public sealed class PermissionRegistryTests
     }
 
     [TestMethod]
-    public void Declaration_PutsEveryKeyInOneOfTheFiveAreas()
+    public void Service_PermissionRegistryTests_Declaration_PutsEveryKeyInOneOfTheFiveAreas()
     {
         var areas = PermissionRegistry.All.Select(entry => entry.BelongsTo).Distinct().ToArray();
 
@@ -142,7 +142,7 @@ public sealed class PermissionRegistryTests
     }
 
     [TestMethod]
-    public void Declaration_DerivesEachKeysResourceNamesFromTheKeyItself()
+    public void Service_PermissionRegistryTests_Declaration_DerivesEachKeysResourceNamesFromTheKeyItself()
     {
         foreach (var entry in PermissionRegistry.All)
         {
@@ -158,7 +158,7 @@ public sealed class PermissionRegistryTests
     }
 
     [TestMethod]
-    public void Declaration_HasAStringForEveryKeyInTheResourceFile()
+    public void Service_PermissionRegistryTests_Declaration_HasAStringForEveryKeyInTheResourceFile()
     {
         var resourceKeys = ReadResourceKeys();
 
@@ -170,7 +170,7 @@ public sealed class PermissionRegistryTests
     }
 
     [TestMethod]
-    public void Declaration_NamesARoleForEveryRoleTheCatalogueWillHold()
+    public void Service_PermissionRegistryTests_Declaration_NamesARoleForEveryRoleTheCatalogueWillHold()
     {
         // The nine codes the specification pins, each with its own display text, keyed on the code.
         var resourceKeys = ReadResourceKeys();
@@ -189,12 +189,12 @@ public sealed class PermissionRegistryTests
 
         foreach (var code in pinnedCodes)
         {
-            Assert.IsTrue(resourceKeys.Contains($"Role_{code}"), $"Role_{code} is missing from the resource file.");
+            Assert.IsTrue(resourceKeys.Contains($"Role_{code}.Text"), $"Role_{code} is missing from the resource file.");
         }
     }
 
     [TestMethod]
-    public void Declaration_ExposesNoPerRoleBaseline()
+    public void Service_PermissionRegistryTests_Declaration_ExposesNoPerRoleBaseline()
     {
         // The baselines are seeded data so that what a role may do changes without a code change (FR-048, FR-046).
         // Nothing on the declaration may carry one, so the type has no member for it and no member returns a

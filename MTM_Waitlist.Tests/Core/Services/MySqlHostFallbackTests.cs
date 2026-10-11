@@ -26,7 +26,7 @@ public sealed class MySqlHostFallbackTests
         "Server=172.16.1.104;Port=3306;Database=mtm_waitlist;User Id=root;Password=root;";
 
     [TestMethod]
-    public void Apply_WhenTheConfiguredServerAnswers_LeavesTheConnectionStringAlone()
+    public void Service_MySqlHostFallbackTests_Apply_WhenTheConfiguredServerAnswersLeavesTheConnectionStringAlone()
     {
         var result = MySqlHostFallback.Apply(ConfiguredConnectionString, (host, _) => host == "172.16.1.104");
 
@@ -34,7 +34,7 @@ public sealed class MySqlHostFallbackTests
     }
 
     [TestMethod]
-    public void Apply_WhenOnlyTheLocalServerAnswers_PointsAtLocalhostAndKeepsEverythingElse()
+    public void Service_MySqlHostFallbackTests_Apply_WhenOnlyTheLocalServerAnswersPointsAtLocalhostAndKeepsEverythingElse()
     {
         var result = MySqlHostFallback.Apply(
             ConfiguredConnectionString,
@@ -49,7 +49,7 @@ public sealed class MySqlHostFallbackTests
     }
 
     [TestMethod]
-    public void Apply_WhenNeitherServerAnswers_LeavesTheConnectionStringAlone()
+    public void Service_MySqlHostFallbackTests_Apply_WhenNeitherServerAnswersLeavesTheConnectionStringAlone()
     {
         // Failing is the caller's job: this helper must not invent a target, so the operation fails and is
         // reported exactly as it was before the fallback existed.
@@ -59,7 +59,7 @@ public sealed class MySqlHostFallbackTests
     }
 
     [TestMethod]
-    public void Apply_WhenTheStringAlreadyTargetsThisMachine_DoesNotProbeAtAll()
+    public void Service_MySqlHostFallbackTests_Apply_WhenTheStringAlreadyTargetsThisMachineDoesNotProbeAtAll()
     {
         const string localConnectionString = "Server=localhost;Port=3306;Database=mtm_mock;User Id=root;Password=root;";
         var probes = 0;
@@ -77,7 +77,7 @@ public sealed class MySqlHostFallbackTests
     }
 
     [TestMethod]
-    public void Apply_WhenThereIsNothingToResolve_ReturnsTheInputUnchanged()
+    public void Service_MySqlHostFallbackTests_Apply_WhenThereIsNothingToResolveReturnsTheInputUnchanged()
     {
         Assert.IsNull(MySqlHostFallback.Apply(null, (_, _) => true));
         Assert.AreEqual(string.Empty, MySqlHostFallback.Apply(string.Empty, (_, _) => true));
@@ -85,7 +85,7 @@ public sealed class MySqlHostFallbackTests
     }
 
     [TestMethod]
-    public void ShouldRemember_WhenNeitherServerAnswered_SaysNo()
+    public void Service_MySqlHostFallbackTests_ShouldRemember_WhenNeitherServerAnsweredSaysNo()
     {
         // A decision that describes an outage is not a verdict, so it must not be remembered: the retry a
         // surface offers after the person switches the local server on has to check again rather than inherit
@@ -106,7 +106,7 @@ public sealed class MySqlHostFallbackTests
     }
 
     [TestMethod]
-    public void Apply_AfterAnOutage_ChecksAgainSoALocalServerStartedLaterIsFound()
+    public void Service_MySqlHostFallbackTests_Apply_AfterAnOutageChecksAgainSoALocalServerStartedLaterIsFound()
     {
         var port = ReserveFreePort();
         var configured = $"Server=127.0.0.2;Port={port};Database=mtm_waitlist;User Id=root;Password=root;";
@@ -130,7 +130,7 @@ public sealed class MySqlHostFallbackTests
     }
 
     [TestMethod]
-    public void Apply_WhenAHostAnswered_RemembersTheDecisionForItsWindow()
+    public void Service_MySqlHostFallbackTests_Apply_WhenAHostAnsweredRemembersTheDecisionForItsWindow()
     {
         var port = ReserveFreePort();
         var configured = $"Server=127.0.0.2;Port={port};Database=mtm_waitlist;User Id=root;Password=root;";

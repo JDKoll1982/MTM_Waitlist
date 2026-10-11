@@ -31,18 +31,17 @@ seventeen entries as shipped — so every operation is individually reportable: 
 maximum, its best-effort marker and the target it reaches for (the store, a share, the external system, a
 screen), and the count the window shows is derived from the list rather than stored. Two read-only
 contracts, person identity and machine facts, replace the single `StartupState` object. Sessions move into a
-new `user_active_sessions` table judged on the store's clock, remembered sign-in moves into the store encrypted
-with a pre-existing shared key read from a UNC path, and every diagnostic goes to the store on
-`ops_startup_logs` through one unconditional logging module with a developer panel in Settings. Machine
-configuration becomes a hard gate satisfied by a new pre-sign-in setup surface that only `IT Department` or
-`Developer` may open and that cannot be bypassed by any route.
+new `user_active_sessions` table judged on the store's clock, the last six people who signed in on this computer
+read from the session records the store already holds rather than kept on the computer, and every diagnostic goes
+to the store on `ops_startup_logs` through one unconditional logging module with a developer panel in Settings.
+Machine configuration becomes a hard gate satisfied by a new pre-sign-in setup surface that only `IT Department`
+or `Developer` may open and that cannot be bypassed by any route.
 
 The stack is unchanged: WinUI 3 on .NET 10 (`net10.0-windows10.0.19041.0`, win-x64), MVVM through
 CommunityToolkit.Mvvm, DI through `Microsoft.Extensions.Hosting`, MySQL through MySqlConnector with every data
-operation behind a stored procedure. Two additions are worth naming because they are new here rather than
-familiar: a new class library `MTM_Waitlist.Logging` holding the logging module and its `ILogger` provider, and
-AES decryption of the remembered sign-in using `System.Security.Cryptography` with a 32-byte key read from the
-shared key file.
+operation behind a stored procedure. One addition is worth naming because it is new here rather than familiar:
+a class library `MTM_Waitlist.Logging` holding the logging module and its `ILogger` provider. No key material is
+read anywhere: nothing opens the shared key file, and no cryptographic key is loaded from a share.
 
 The logging this plan already builds is specified in more detail than the brief carried. Every diagnostic records
 the fault whole — its type, message, stack and complete exception chain — with a fingerprint that groups repeated
@@ -60,14 +59,49 @@ history and device syncing (D29).
 The owner's own `STARTUP-REBUILD-CHECKLIST.md` (181 tasks, 11 phases, 11 gates) is the execution instrument for
 this plan. `tasks.md` carries its content and its gates and is sequenced by user-story priority.
 
+## Reconciliation 2026-10-10
+
+`011-identifier-first-signin` shipped after this feature and replaced the sign-in and the window model. The
+owner reviewed this plan against the process that actually runs and reset it, so the plan now describes what
+ships. Four earlier statements are withdrawn:
+
+- **Remember-me is withdrawn, as first decided.** `ReadRememberedSignInStep`, `RememberedSignInService`, the
+  `auth_remembered_sign_ins` table with its three procedures, the AES decryption and the shared key file read all
+  go. In their place the sign-in stage reads the last six people who signed in on this computer from the session
+  records the store already holds and shows them on the right of the form behind a divider (FR-014, FR-043,
+  FR-048).
+- **The launch surface shows every operation that is running**, each as its own line, because the launch now
+  runs several at once. FR-039's single replaced line is retired, and FR-047 states what replaced it.
+- **The computer's own name is read from the computer and shown, never typed.** The only value a person gives at
+  setup is the computer's location, and the record's free-text note is renamed to hold it (FR-049, FR-050).
+- **FR-046 is retired.** The setup layout is accepted as it stands.
+
+`011` also brought the process this plan is now written against: one window whose stages are splash, sign-in,
+machine setup, blocked and shell; a two-stage sign-in with a self set-up panel for a person the plant system
+knows but the store does not; a launch-wide budget of about 45 seconds sitting on top of each step's own
+maximum; and the three session checks running together, with the local reads alongside the first store contact.
+Its contracts are `specs/011-identifier-first-signin/contracts/`.
+
+Three kinds of work follow from the reset, and `tasks.md` carries them as Phase 13: the withdrawal of
+remember-me and the build of the previous-people list; the machine-setup change with the note-to-location
+rename and its paired rollback; and the close-out of the record — verifying and closing T211 and T223,
+extending T204, and clearing the stale strings T214 owns. The hand runs the earlier plan called for — the
+unreachable store, the slow store, the stalled share, the removal proof, the window-behaviour cases, the theme
+and the sweeps' catalogue — are **owner-performed verification** rather than tasks. They are recorded here so
+that the coverage they would have given is not mistaken for work still outstanding, and so a later reader does
+not go looking for tasks that were deliberately retired.
+
 ## Technical Context
 
 **Language/Version**: C# on .NET 10 (`net10.0-windows10.0.19041.0`, win-x64)
 **Primary Dependencies**: Microsoft.WindowsAppSDK 2.3.1, WinUIEx 2.9.2, CommunityToolkit.Mvvm 8.4.2,
 Microsoft.Extensions.Hosting 10.0.10, MySqlConnector 2.6.1
-**Storage**: MySQL `mtm_waitlist`. New table `user_active_sessions`; new table for the remembered sign-in;
-`ops_startup_logs` extended and repurposed as the one log store; existing `config_settings_values` and
-`core_computers_registry` carry the scoped preferences and the machine configuration
+**Storage**: MySQL `mtm_waitlist`. New table `user_active_sessions`, which both holds the session and is the
+record the sign-in stage reads to offer the last six people who signed in on this computer;
+`ops_startup_logs` extended and repurposed as the one log store; `auth_remembered_sign_ins` and its three
+procedures deleted with remember-me; existing `config_settings_values` and `core_computers_registry` carry the
+scoped preferences and the machine configuration, the latter with its free-text note renamed to hold the
+computer's location
 **Testing**: xUnit in `MTM_Waitlist.Tests`, plus the build-gate audit tests (`RetiredSymbolAuditTests`,
 `InlineSqlAuditTests`, `PermissionGateSiteAuditTests`, `PageActivationAuditTests`)
 **Target Platform**: Windows desktop, unpackaged and MSIX
@@ -322,6 +356,9 @@ follow from that are named in its Dependencies & Execution Order section.
 | 8. The new pipeline | Steps as data, one entry per operation, the runner and the feed, the splash and toast, the host seam, sign-in with the machine gate, forced password change, remember-me, the picture step and the verdict priming, the blocked state and targeted reset | The pipeline reaches the shell, the gate and setup in the right order, every block states its cause, no wait is unbounded |
 | 9. Acceptance surface | A test for every reconstructed edge case, and live runs against a fresh store, an unreachable store and a slow store | Every applicable edge case has a test, the live runs pass, the difference against the baseline is explained |
 | 10. Embed instructions and close-out | The module instruction file, living-spec re-adoption, changelog, README, the final audit | The embed guide exists, the registry matches the tree, the audit is clean |
+| 11. The shared locations belong to the plant | The setup stage reduced to the machine's own identity, the per-computer picture sources retired with a seed that withdraws the rows an older store holds, the dunnage root made plant-wide | A computer is configured by its own identity alone, no per-computer folder can be set, and an unreachable share resolves to the local copy and says so |
+| 12. The decisions on the remaining concerns | The 27 open concerns put to the owner and answered, three of them changing requirements rather than confirming them | Every concern is either resolved on the record or carried into Phase 13 |
+| 13. Reconciling with the shipped launch | Remember-me withdrawn and the previous-people list built on the right of the sign-in form; the computer's own name read and shown, its location the only value typed, and the note renamed to hold it with a paired rollback; the record closed out — T211 and T223 verified and closed, T204 extended, the stale strings T214 owns cleared | Nothing anywhere reads, copies or keeps a key file; the sign-in stage offers the last six people and the window fits them; a new computer is set up by its location alone; and the record carries no task that describes a process that no longer runs |
 
 Two orderings inside that table are load-bearing and must survive into `tasks.md`: `StartupDebugLog` is deleted
 in Phase 6 and `StartupState` in Phase 4, both after their replacements exist, because deleting either in Phase

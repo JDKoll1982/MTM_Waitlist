@@ -14,11 +14,11 @@ namespace MTM_Waitlist.Tests.Module_Startup.Services;
 public sealed class LaunchBudgetTests
 {
     [TestMethod]
-    public void TheShippedBudget_IsFortyFiveSeconds()
+    public void Service_LaunchBudgetTests_TheShippedBudget_IsFortyFiveSeconds()
         => Assert.AreEqual(TimeSpan.FromSeconds(45), LaunchBudget.DefaultDuration, "FR-024 states 45 seconds");
 
     [TestMethod]
-    public async Task Budget_ThatPasses_ReportsItWasReachedAndNamesItself()
+    public async Task Service_LaunchBudgetTests_Budget_ThatPassesReportsItWasReachedAndNamesItself()
     {
         using var budget = new LaunchBudget(CancellationToken.None, TimeSpan.FromMilliseconds(40));
 
@@ -30,7 +30,7 @@ public sealed class LaunchBudgetTests
     }
 
     [TestMethod]
-    public void Budget_NamesItselfInTheStopItStates()
+    public void Service_LaunchBudgetTests_Budget_NamesItselfInTheStopItStates()
     {
         // FR-024: the stop's cause names the budget rather than a step, and the shipped budget is 45 seconds.
         using var budget = new LaunchBudget(CancellationToken.None);
@@ -41,7 +41,7 @@ public sealed class LaunchBudgetTests
     }
 
     [TestMethod]
-    public void Budget_ThatFinishedFirst_IsNotReportedAsReached()
+    public void Service_LaunchBudgetTests_Budget_ThatFinishedFirstIsNotReportedAsReached()
     {
         using var budget = new LaunchBudget(CancellationToken.None, TimeSpan.FromMilliseconds(40));
 
@@ -52,7 +52,7 @@ public sealed class LaunchBudgetTests
     }
 
     [TestMethod]
-    public void Budget_AbandonedByTheCaller_IsNotABudgetOverrun()
+    public void Service_LaunchBudgetTests_Budget_AbandonedByTheCallerIsNotABudgetOverrun()
     {
         using var abandoned = new CancellationTokenSource();
         using var budget = new LaunchBudget(abandoned.Token, TimeSpan.FromMinutes(5));
@@ -64,12 +64,12 @@ public sealed class LaunchBudgetTests
     }
 
     [TestMethod]
-    public void Budget_OfNoTime_IsRefused()
+    public void Service_LaunchBudgetTests_Budget_OfNoTimeIsRefused()
         => Assert.ThrowsException<ArgumentOutOfRangeException>(
             () => new LaunchBudget(CancellationToken.None, TimeSpan.Zero));
 
     [TestMethod]
-    public void EveryStep_KeepsItsOwnMaximumUnderTheBudget()
+    public void Service_LaunchBudgetTests_EveryStep_KeepsItsOwnMaximumUnderTheBudget()
     {
         // FR-025: the budget is additional to each step's stated maximum, never a replacement, so the catalogue's
         // own bounds are untouched by the budget's existence.

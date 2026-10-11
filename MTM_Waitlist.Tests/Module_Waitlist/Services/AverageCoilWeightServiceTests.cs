@@ -14,7 +14,7 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.Services;
 public sealed class AverageCoilWeightServiceTests
 {
     [TestMethod]
-    public async Task Resolve_RunsQuery_AndFormatsAverage()
+    public async Task Service_AverageCoilWeightServiceTests_Resolve_RunsQueryAndFormatsAverage()
     {
         var helper = new StubMySqlHelperServer(rows: new[] { AverageRow(5200m) });
         var service = new AverageCoilWeightService(helper);
@@ -27,7 +27,7 @@ public sealed class AverageCoilWeightServiceTests
     }
 
     [TestMethod]
-    public async Task Resolve_UsesTheReceivingStoredProcedure_AndNoInlineStatement()
+    public async Task Service_AverageCoilWeightServiceTests_Resolve_UsesTheReceivingStoredProcedureAndNoInlineStatement()
     {
         var helper = new StubMySqlHelperServer(rows: new[] { AverageRow(5200m) });
         var service = new AverageCoilWeightService(helper);
@@ -46,7 +46,7 @@ public sealed class AverageCoilWeightServiceTests
     }
 
     [TestMethod]
-    public async Task Resolve_RoundsToWholePounds()
+    public async Task Service_AverageCoilWeightServiceTests_Resolve_RoundsToWholePounds()
     {
         var helper = new StubMySqlHelperServer(rows: new[] { AverageRow(5199.6m) });
         var service = new AverageCoilWeightService(helper);
@@ -57,7 +57,7 @@ public sealed class AverageCoilWeightServiceTests
     }
 
     [TestMethod]
-    public async Task Resolve_NoRows_ReturnsEmpty()
+    public async Task Service_AverageCoilWeightServiceTests_Resolve_NoRowsReturnsEmpty()
     {
         var helper = new StubMySqlHelperServer(rows: Array.Empty<Dictionary<string, object?>>());
         var service = new AverageCoilWeightService(helper);
@@ -68,7 +68,7 @@ public sealed class AverageCoilWeightServiceTests
     }
 
     [TestMethod]
-    public async Task Resolve_EmptyPart_ReturnsEmptyWithoutQuery()
+    public async Task Service_AverageCoilWeightServiceTests_Resolve_EmptyPartReturnsEmptyWithoutQuery()
     {
         var helper = new StubMySqlHelperServer(rows: Array.Empty<Dictionary<string, object?>>());
         var service = new AverageCoilWeightService(helper);

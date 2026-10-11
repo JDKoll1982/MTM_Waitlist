@@ -11,7 +11,7 @@ public sealed class RequestItemCatalogServiceTests
     private readonly IRequestItemCatalogService _service = new RequestItemCatalogService();
 
     [TestMethod]
-    public void GetAllItems_ReturnsAll24CanonicalRows()
+    public void Service_RequestItemCatalogServiceTests_GetAllItems_ReturnsAll24CanonicalRows()
     {
         var items = _service.GetAllItems();
 
@@ -21,7 +21,7 @@ public sealed class RequestItemCatalogServiceTests
     }
 
     [TestMethod]
-    public void GetByCategory_MatchesCsvCounts_Pickup11_Deliver9_Assist3_Other1()
+    public void Service_RequestItemCatalogServiceTests_GetByCategory_MatchesCsvCountsPickup11Deliver9Assist3Other1()
     {
         Assert.AreEqual(11, _service.GetByCategory(RequestCategory.Pickup).Count);
         Assert.AreEqual(9, _service.GetByCategory(RequestCategory.Deliver).Count);
@@ -30,7 +30,7 @@ public sealed class RequestItemCatalogServiceTests
     }
 
     [TestMethod]
-    public void GetByCategory_IsOrderedByCsvOrder()
+    public void Service_RequestItemCatalogServiceTests_GetByCategory_IsOrderedByCsvOrder()
     {
         var pickup = _service.GetByCategory(RequestCategory.Pickup);
 
@@ -39,7 +39,7 @@ public sealed class RequestItemCatalogServiceTests
     }
 
     [TestMethod]
-    public void FindById_ReturnsItem_OrNull()
+    public void Service_RequestItemCatalogServiceTests_FindById_ReturnsItemOrNull()
     {
         Assert.AreEqual(RequestCategory.Pickup, _service.FindById("pickup-coil")!.Category);
         Assert.AreEqual("Other", _service.FindById("other")!.UmbrellaVerb);
@@ -48,7 +48,7 @@ public sealed class RequestItemCatalogServiceTests
     }
 
     [TestMethod]
-    public void GetCategoriesInOrder_ReturnsPickupDeliverAssistOther()
+    public void Service_RequestItemCatalogServiceTests_GetCategoriesInOrder_ReturnsPickupDeliverAssistOther()
     {
         var categories = _service.GetCategoriesInOrder();
 

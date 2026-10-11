@@ -127,7 +127,7 @@ public partial class NewRequestDunnageViewModel : ObservableRecipient, INavigati
             // here (FR-026).
             IsUnavailableVisible = true;
             UnavailableMessage = LocalizeOrDefault(
-                "NewRequest_Dunnage.NoAssignedParts.Message",
+                "NewRequest_Dunnage_NoAssignedParts.Message",
                 "This job has no dunnage saved on it. Use a substitute if you need one, or go back and choose a different item.");
         }
 
@@ -180,7 +180,7 @@ public partial class NewRequestDunnageViewModel : ObservableRecipient, INavigati
             AppLog.Error("NewRequestDunnage", ex, "The substitute dunnage picker failed to open.");
             IsUnavailableVisible = true;
             UnavailableMessage = LocalizeOrDefault(
-                "NewRequest_Dunnage.SubstituteFailed.Message",
+                "NewRequest_Dunnage_SubstituteFailed.Message",
                 "The dunnage list could not be opened. Try again, or choose one of the parts listed here.");
         }
         finally
@@ -206,7 +206,7 @@ public partial class NewRequestDunnageViewModel : ObservableRecipient, INavigati
             // captured as an empty answer (FR-026).
             IsUnavailableVisible = true;
             UnavailableMessage = LocalizeOrDefault(
-                "NewRequest_Dunnage.SubstituteFailed.Message",
+                "NewRequest_Dunnage_SubstituteFailed.Message",
                 "The dunnage list could not be opened. Try again, or choose one of the parts listed here.");
             return;
         }

@@ -40,7 +40,7 @@ public sealed class RoleBadgeCatalogTests
         { "admin", "administrator", "supervisor", "manager", "quality", "quality inspector", "Setup Tech", "Admin" };
 
     [TestMethod]
-    public void All_HoldsOneEntryPerRoleTheCatalogueHolds()
+    public void Service_RoleBadgeCatalogTests_All_HoldsOneEntryPerRoleTheCatalogueHolds()
     {
         var catalogueCodes = ShippedCatalogueCodes();
 
@@ -59,7 +59,7 @@ public sealed class RoleBadgeCatalogTests
     }
 
     [TestMethod]
-    public void All_LeavesNoRoleReachingTheGreyDefault()
+    public void Service_RoleBadgeCatalogTests_All_LeavesNoRoleReachingTheGreyDefault()
     {
         var fallingToTheDefault = RoleBadgeCatalog.All
             .Where(entry => string.Equals(entry.ColorHex, RoleBadgeCatalog.Fallback.ColorHex, StringComparison.Ordinal)
@@ -74,7 +74,7 @@ public sealed class RoleBadgeCatalogTests
     }
 
     [TestMethod]
-    public void All_GivesEachRoleItsOwnGlyphAndItsOwnColour()
+    public void Service_RoleBadgeCatalogTests_All_GivesEachRoleItsOwnGlyphAndItsOwnColour()
     {
         Assert.AreEqual(
             RoleBadgeCatalog.All.Count,
@@ -87,7 +87,7 @@ public sealed class RoleBadgeCatalogTests
     }
 
     [TestMethod]
-    public void All_HoldsNoCodeOutsideTheCatalogue()
+    public void Service_RoleBadgeCatalogTests_All_HoldsNoCodeOutsideTheCatalogue()
     {
         foreach (var entry in RoleBadgeCatalog.All)
         {
@@ -102,7 +102,7 @@ public sealed class RoleBadgeCatalogTests
     [DataRow(null, DisplayName = "no role at all")]
     [DataRow("", DisplayName = "an empty role")]
     [DataRow("   ", DisplayName = "whitespace only")]
-    public void For_ABlankRole_ReturnsTheGreyDefault(string? roleCode)
+    public void Service_RoleBadgeCatalogTests_For_ABlankRoleReturnsTheGreyDefault(string? roleCode)
     {
         Assert.AreEqual(RoleBadgeCatalog.Fallback, RoleBadgeCatalog.For(roleCode));
     }
@@ -112,7 +112,7 @@ public sealed class RoleBadgeCatalogTests
     [DataRow("quality inspector")]
     [DataRow("Setup Tech")]
     [DataRow("zz-not-a-role")]
-    public void For_ARoleTheCatalogueHasNeverHeld_ReturnsTheGreyDefault(string roleCode)
+    public void Service_RoleBadgeCatalogTests_For_ARoleTheCatalogueHasNeverHeldReturnsTheGreyDefault(string roleCode)
     {
         // Not because the vocabulary was re-pointed at a real role: the lookup holds no branch for any of these.
         Assert.AreEqual(RoleBadgeCatalog.Fallback, RoleBadgeCatalog.For(roleCode));
@@ -125,7 +125,7 @@ public sealed class RoleBadgeCatalogTests
     [DataRow("administrator")]
     [DataRow("admin")]
     [DataRow("Admin")]
-    public void For_TheRetiredAdministratorVocabulary_ReturnsTheGreyDefault(string roleCode)
+    public void Service_RoleBadgeCatalogTests_For_TheRetiredAdministratorVocabularyReturnsTheGreyDefault(string roleCode)
     {
         // IT Department carries the badge the administrator role used to carry, and the retired spellings reach
         // nothing. Anything else would let a retired name keep a live badge.
@@ -133,7 +133,7 @@ public sealed class RoleBadgeCatalogTests
     }
 
     [TestMethod]
-    public void For_IsKeyedOnTheRoleCodeAndNotOnTheDisplayName()
+    public void Service_RoleBadgeCatalogTests_For_IsKeyedOnTheRoleCodeAndNotOnTheDisplayName()
     {
         StringAssert.Contains(
             RoleBadgeCatalog.For("plant_manager").RoleCode,
@@ -147,14 +147,14 @@ public sealed class RoleBadgeCatalogTests
     }
 
     [TestMethod]
-    public void For_AcceptsTheCodeInAnyCaseOrWithSurroundingSpace()
+    public void Service_RoleBadgeCatalogTests_For_AcceptsTheCodeInAnyCaseOrWithSurroundingSpace()
     {
         // Codes arrive from the store and from typed input; case and padding are not part of the identity.
         Assert.AreEqual(RoleBadgeCatalog.For("developer"), RoleBadgeCatalog.For("  DEVELOPER "));
     }
 
     [TestMethod]
-    public void TheBadge_IsNotAPermission()
+    public void Service_RoleBadgeCatalogTests_TheBadge_IsNotAPermission()
     {
         Assert.IsFalse(
             PermissionRegistry.All.Any(entry => entry.Key.Contains("badge", StringComparison.OrdinalIgnoreCase)),

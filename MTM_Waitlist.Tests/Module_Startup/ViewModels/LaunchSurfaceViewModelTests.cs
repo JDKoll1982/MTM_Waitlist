@@ -15,7 +15,7 @@ namespace MTM_Waitlist.Tests.Module_Startup.ViewModels;
 public sealed class LaunchSurfaceViewModelTests
 {
     [TestMethod]
-    public void TwoOperationsInFlight_RenderAsTwoOpenLines()
+    public void ViewModel_LaunchSurfaceViewModelTests_TwoOperationsInFlight_RenderAsTwoOpenLines()
     {
         var feed = new LaunchActivityFeed();
         var surface = new LaunchSurfaceViewModel(feed);
@@ -29,7 +29,7 @@ public sealed class LaunchSurfaceViewModelTests
     }
 
     [TestMethod]
-    public void AnOperationLine_AppearsBeforeItsWorkBegins()
+    public void ViewModel_LaunchSurfaceViewModelTests_AnOperationLine_AppearsBeforeItsWorkBegins()
     {
         var feed = new LaunchActivityFeed();
         var surface = new LaunchSurfaceViewModel(feed);
@@ -44,7 +44,7 @@ public sealed class LaunchSurfaceViewModelTests
     }
 
     [TestMethod]
-    public void WhenAnOperationEndsItsOwnLine_IsClosedAndTheOtherStaysOpen()
+    public void ViewModel_LaunchSurfaceViewModelTests_WhenAnOperationEndsItsOwnLine_IsClosedAndTheOtherStaysOpen()
     {
         var feed = new LaunchActivityFeed();
         var surface = new LaunchSurfaceViewModel(feed);
@@ -67,7 +67,7 @@ public sealed class LaunchSurfaceViewModelTests
     }
 
     [TestMethod]
-    public void AGroupOfOperations_NeverHidesBehindASingleLine()
+    public void ViewModel_LaunchSurfaceViewModelTests_AGroupOfOperations_NeverHidesBehindASingleLine()
     {
         var feed = new LaunchActivityFeed();
         var surface = new LaunchSurfaceViewModel(feed);
@@ -81,7 +81,31 @@ public sealed class LaunchSurfaceViewModelTests
     }
 
     [TestMethod]
-    public void ALaunchAlreadyUnderWay_IsDrawnFromTheFeedItNeverSaw()
+    public void ViewModel_LaunchSurfaceViewModelTests_EveryMemberOfAShippedGroup_HoldsItsOwnLine()
+    {
+        // The cases above name ids by hand; this one walks the groups the launch actually ships, so a group that
+        // grew a fourth member cannot hide two operations behind the count the others happen to use (FR-047).
+        var feed = new LaunchActivityFeed();
+        var surface = new LaunchSurfaceViewModel(feed);
+        var largest = LaunchStepGroups.Shipped.OrderByDescending(group => group.Members.Count).First();
+
+        foreach (var id in largest.Members)
+        {
+            feed.Append(Started(id, id));
+        }
+
+        Assert.IsTrue(largest.Members.Count >= 3, "the shipped groups are no longer worth this check");
+        Assert.AreEqual(
+            largest.Members.Count,
+            surface.OpenLineCount,
+            $"'{largest.Id}' is {largest.Members.Count} operations and must read as {largest.Members.Count} lines");
+        CollectionAssert.AreEquivalent(
+            largest.Members.ToArray(),
+            surface.Lines.Where(line => line.IsOpen).Select(line => line.StepId).ToArray());
+    }
+
+    [TestMethod]
+    public void ViewModel_LaunchSurfaceViewModelTests_ALaunchAlreadyUnderWay_IsDrawnFromTheFeedItNeverSaw()
     {
         var feed = new LaunchActivityFeed();
         feed.Append(Started("store-reachability", "Contacting the store"));

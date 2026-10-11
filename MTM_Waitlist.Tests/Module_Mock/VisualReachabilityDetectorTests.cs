@@ -14,7 +14,7 @@ namespace MTM_Waitlist.Tests.Module_Mock;
 public sealed class VisualReachabilityDetectorTests
 {
     [TestMethod]
-    public async Task Probe_FirstSuccess_GoesLive()
+    public async Task Service_VisualReachabilityDetectorTests_Probe_FirstSuccessGoesLive()
     {
         var detector = new VisualReachabilityDetector(new FakeVisualConnectivityProbe(true));
 
@@ -24,7 +24,7 @@ public sealed class VisualReachabilityDetectorTests
     }
 
     [TestMethod]
-    public async Task Probe_SingleFailure_StaysUnknownSoOneBlipDoesNotFlipTheApp()
+    public async Task Service_VisualReachabilityDetectorTests_Probe_SingleFailureStaysUnknownSoOneBlipDoesNotFlipTheApp()
     {
         var detector = new VisualReachabilityDetector(new FakeVisualConnectivityProbe(false));
 
@@ -34,7 +34,7 @@ public sealed class VisualReachabilityDetectorTests
     }
 
     [TestMethod]
-    public async Task Probe_TwoConsecutiveFailures_GoesCached()
+    public async Task Service_VisualReachabilityDetectorTests_Probe_TwoConsecutiveFailuresGoesCached()
     {
         var detector = new VisualReachabilityDetector(new FakeVisualConnectivityProbe(false, false));
 
@@ -45,7 +45,7 @@ public sealed class VisualReachabilityDetectorTests
     }
 
     [TestMethod]
-    public async Task Probe_OneSuccessWhileCached_ReturnsLiveImmediately()
+    public async Task Service_VisualReachabilityDetectorTests_Probe_OneSuccessWhileCachedReturnsLiveImmediately()
     {
         var detector = new VisualReachabilityDetector(new FakeVisualConnectivityProbe(false, false, true));
 
@@ -59,7 +59,7 @@ public sealed class VisualReachabilityDetectorTests
     }
 
     [TestMethod]
-    public async Task Probe_SuccessResetsTheFailureCount()
+    public async Task Service_VisualReachabilityDetectorTests_Probe_SuccessResetsTheFailureCount()
     {
         // A success between two failures means they are not consecutive, so the state must stay Live.
         var detector = new VisualReachabilityDetector(new FakeVisualConnectivityProbe(true, false, true, false));
@@ -71,7 +71,7 @@ public sealed class VisualReachabilityDetectorTests
     }
 
     [TestMethod]
-    public async Task StateChanged_IsRaisedOnlyWhenTheStateActuallyChanges()
+    public async Task Service_VisualReachabilityDetectorTests_StateChanged_IsRaisedOnlyWhenTheStateActuallyChanges()
     {
         var detector = new VisualReachabilityDetector(new FakeVisualConnectivityProbe(false, false, false));
         var transitions = new List<VisualReadStatus>();
@@ -85,7 +85,7 @@ public sealed class VisualReachabilityDetectorTests
     }
 
     [TestMethod]
-    public void Current_StartsUnknown()
+    public void Service_VisualReachabilityDetectorTests_Current_StartsUnknown()
     {
         var detector = new VisualReachabilityDetector(new FakeVisualConnectivityProbe(true));
 

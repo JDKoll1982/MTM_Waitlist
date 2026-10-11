@@ -15,6 +15,14 @@
 - Q: Can a person leave the set-up panel without creating an account? → A: Yes. Leaving creates nothing, leaves no partial account, and returns to the identifier stage with the form still usable.
 - Q: Is the PIN chosen at set-up subject to the temporary-credential attempt limit? → A: No. The chosen PIN is an ordinary credential from creation, so the account never enters the temporary-credential state and the five-attempt rule never applies to it.
 
+### Session 2026-10-10
+
+- Q: This feature's FR-035 kept remember-me and had the plant's shared key read from its share, while the
+startup rebuild had already decided to withdraw it. Which stands? → A: Remember-me is withdrawn. FR-035 is
+rewritten so nothing reads, copies or keeps a key file, and the `read-remembered-sign-in` step identifier is
+removed from Verbatim Constraints. `specs/010-startup-rebuild` carries the work and the previous-people list
+that replaces it.
+
 ## User Scenarios & Testing
 
 ### User Story 1 - Signing in by identifier, in two stages (Priority: P1)
@@ -300,10 +308,12 @@ for a mirrored employee number and confirm the shape resolves from the mirror.
 
 **Reconciliation**
 
-- FR-035: The application MUST NOT copy or keep any shared key file on this computer. The plant's shared key is
-  read from its share to honour a remembered sign-in and is never written, copied or held locally, and its path
-  MUST never be recorded. Where an instruction document claims that no key is read at all, the discrepancy MUST
-  be reported and the stale statement corrected, with no change to behaviour.
+- FR-035: The application MUST NOT read, copy or keep any shared key file. Remember-me was withdrawn on
+  2026-10-10, and it was the only thing that ever opened the plant's shared key, so nothing opens that file and
+  no key material is loaded from a share. Its path MUST never be recorded. This replaces the earlier statement
+  that the key is read from its share to honour a remembered sign-in: where a document still claims that read,
+  the document MUST be corrected, because a later change must not take the old wording as licence to bring the
+  read back.
 
 **Invariants that must not break**
 
@@ -390,8 +400,9 @@ Values the request pinned exactly; downstream steps and the implementation must 
 verbatim.
 
 - Step identifiers: `judge-session`, `check-computer-against-store`, `check-temporary-credential`,
-  `read-local-settings`, `read-hardware-identity`, `store-reachability`, `picture-cache`, `visual-priming`,
-  `read-remembered-sign-in`.
+  `read-local-settings`, `read-hardware-identity`, `store-reachability`, `picture-cache`, `visual-priming`.
+  `read-remembered-sign-in` was pinned here when this feature shipped and was removed with remember-me on
+  2026-10-10; the launch no longer runs a step by that name.
 - The default PIN to bypass: `4330`.
 - The lowest rank to assign: `Production`.
 - The profile column the employee number is stored in: `employee_identifier`.

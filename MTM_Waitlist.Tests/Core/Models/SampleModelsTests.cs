@@ -8,7 +8,7 @@ namespace MTM_Waitlist.Tests.Core.Models;
 public sealed class SampleModelsTests
 {
     [TestMethod]
-    public void SampleOrder_DefaultsAndDetailBindingsWork()
+    public void Model_SampleModelsTests_SampleOrder_DefaultsAndDetailBindingsWork()
     {
         var order = new SampleOrder();
 
@@ -20,7 +20,7 @@ public sealed class SampleModelsTests
     }
 
     [TestMethod]
-    public void SampleOrder_CanBePopulatedForDetailBinding()
+    public void Model_SampleModelsTests_SampleOrder_CanBePopulatedForDetailBinding()
     {
         var order = new SampleOrder
         {

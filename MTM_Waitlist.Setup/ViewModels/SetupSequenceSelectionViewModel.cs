@@ -65,7 +65,7 @@ public partial class SetupSequenceSelectionViewModel : ObservableRecipient, INav
     {
         if (SelectedSequence is null)
         {
-            StatusMessage = "Setup_Sequence.Validation.SelectSequence".GetLocalized();
+            StatusMessage = "Setup_Sequence_Validation.SelectSequence".GetLocalized();
             return;
         }
 

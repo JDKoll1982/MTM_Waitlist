@@ -45,7 +45,7 @@ public sealed class ImageOverrideWriteServiceTests
     }
 
     [TestMethod]
-    public async Task CreateOverrideAsync_WhenNoRowExists_InsertsAndReportsSuccess()
+    public async Task Service_ImageOverrideWriteServiceTests_CreateOverrideAsync_WhenNoRowExistsInsertsAndReportsSuccess()
     {
         _helper.EnqueueEmptyQueryResult(); // existence probe
         _helper.EnqueueNonQueryResult(1);  // insert
@@ -62,7 +62,7 @@ public sealed class ImageOverrideWriteServiceTests
     }
 
     [TestMethod]
-    public async Task CreateOverrideAsync_WhenActiveRowExists_ReturnsDuplicateKeyAndDoesNotInsert()
+    public async Task Service_ImageOverrideWriteServiceTests_CreateOverrideAsync_WhenActiveRowExistsReturnsDuplicateKeyAndDoesNotInsert()
     {
         _helper.EnqueueQueryResult(FakeMySqlHelperServer.OverrideRow("request_item", "abc-123", "existing.png"));
 
@@ -74,7 +74,7 @@ public sealed class ImageOverrideWriteServiceTests
     }
 
     [TestMethod]
-    public async Task CreateOverrideAsync_WhenSoftDeletedRowExists_ReactivatesInsteadOfInserting()
+    public async Task Service_ImageOverrideWriteServiceTests_CreateOverrideAsync_WhenSoftDeletedRowExistsReactivatesInsteadOfInserting()
     {
         // The unique key spans (scope, scope_item_id) regardless of is_active, so a second
         // INSERT for a soft-deleted pair would violate it.
@@ -90,7 +90,7 @@ public sealed class ImageOverrideWriteServiceTests
     }
 
     [TestMethod]
-    public async Task CreateOverrideAsync_WhenInsertAffectsNoRows_ReportsDatabaseError()
+    public async Task Service_ImageOverrideWriteServiceTests_CreateOverrideAsync_WhenInsertAffectsNoRowsReportsDatabaseError()
     {
         _helper.EnqueueEmptyQueryResult();
         _helper.EnqueueNonQueryResult(0);
@@ -102,7 +102,7 @@ public sealed class ImageOverrideWriteServiceTests
     }
 
     [TestMethod]
-    public async Task CreateOverrideAsync_NotifiesSubscribersOnSuccess()
+    public async Task Service_ImageOverrideWriteServiceTests_CreateOverrideAsync_NotifiesSubscribersOnSuccess()
     {
         _helper.EnqueueEmptyQueryResult();
         _helper.EnqueueNonQueryResult(1);
@@ -116,7 +116,7 @@ public sealed class ImageOverrideWriteServiceTests
     }
 
     [TestMethod]
-    public async Task CreateOverrideAsync_WhenPathExceedsColumnLength_Throws()
+    public async Task Service_ImageOverrideWriteServiceTests_CreateOverrideAsync_WhenPathExceedsColumnLengthThrows()
     {
         var tooLong = new string('x', 501);
 
@@ -125,14 +125,14 @@ public sealed class ImageOverrideWriteServiceTests
     }
 
     [TestMethod]
-    public async Task CreateOverrideAsync_WithUnknownScope_Throws()
+    public async Task Service_ImageOverrideWriteServiceTests_CreateOverrideAsync_WithUnknownScopeThrows()
     {
         await Assert.ThrowsExceptionAsync<ArgumentException>(
             () => _service.CreateOverrideAsync("building", "abc-123", "rt.png"));
     }
 
     [TestMethod]
-    public async Task UpdateOverrideAsync_WhenNoRowExists_ReturnsNotFound()
+    public async Task Service_ImageOverrideWriteServiceTests_UpdateOverrideAsync_WhenNoRowExistsReturnsNotFound()
     {
         var result = await _service.UpdateOverrideAsync("request_item", "missing", "rt.png");
 
@@ -142,7 +142,7 @@ public sealed class ImageOverrideWriteServiceTests
     }
 
     [TestMethod]
-    public async Task UpdateOverrideAsync_WhenRowExists_IssuesAnUpdate()
+    public async Task Service_ImageOverrideWriteServiceTests_UpdateOverrideAsync_WhenRowExistsIssuesAnUpdate()
     {
         _readService.AddOverride("request_item", "abc-123", "old.png");
         _helper.EnqueueNonQueryResult(1);
@@ -156,7 +156,7 @@ public sealed class ImageOverrideWriteServiceTests
     }
 
     [TestMethod]
-    public async Task DeleteOverrideAsync_WhenRowIsDeactivated_ReportsSuccess()
+    public async Task Service_ImageOverrideWriteServiceTests_DeleteOverrideAsync_WhenRowIsDeactivatedReportsSuccess()
     {
         _helper.EnqueueNonQueryResult(1);
 
@@ -169,7 +169,7 @@ public sealed class ImageOverrideWriteServiceTests
     }
 
     [TestMethod]
-    public async Task DeleteOverrideAsync_WhenNothingWasDeactivated_ReturnsNotFound()
+    public async Task Service_ImageOverrideWriteServiceTests_DeleteOverrideAsync_WhenNothingWasDeactivatedReturnsNotFound()
     {
         _helper.EnqueueNonQueryResult(0);
 
@@ -186,7 +186,7 @@ public sealed class ImageOverrideWriteServiceTests
     /// signal, and it is what the non-query path returns.
     /// </summary>
     [TestMethod]
-    public async Task DeleteByPublicIdAsync_WhenTheRowWasWithdrawn_ReportsSuccess()
+    public async Task Service_ImageOverrideWriteServiceTests_DeleteByPublicIdAsync_WhenTheRowWasWithdrawnReportsSuccess()
     {
         _helper.EnqueueNonQueryResult(1);
 
@@ -199,7 +199,7 @@ public sealed class ImageOverrideWriteServiceTests
     }
 
     [TestMethod]
-    public async Task DeleteByPublicIdAsync_WhenNothingChanged_ReturnsNotFound()
+    public async Task Service_ImageOverrideWriteServiceTests_DeleteByPublicIdAsync_WhenNothingChangedReturnsNotFound()
     {
         _helper.EnqueueNonQueryResult(0);
 
@@ -214,7 +214,7 @@ public sealed class ImageOverrideWriteServiceTests
     /// so callers were told nothing had been purged however many rows were removed.
     /// </summary>
     [TestMethod]
-    public async Task PurgeInactiveOverridesAsync_ReturnsTheAffectedRowCount()
+    public async Task Service_ImageOverrideWriteServiceTests_PurgeInactiveOverridesAsync_ReturnsTheAffectedRowCount()
     {
         _helper.EnqueueNonQueryResult(3);
 
@@ -229,7 +229,7 @@ public sealed class ImageOverrideWriteServiceTests
     /// however many overrides were withdrawn.
     /// </summary>
     [TestMethod]
-    public async Task DeactivateAllForScopeAsync_ReturnsTheAffectedRowCount()
+    public async Task Service_ImageOverrideWriteServiceTests_DeactivateAllForScopeAsync_ReturnsTheAffectedRowCount()
     {
         _helper.EnqueueNonQueryResult(2);
 
@@ -246,7 +246,7 @@ public sealed class ImageOverrideWriteServiceTests
     /// invocation, and the query path is used only where a row comes back (the existence probe).
     /// </summary>
     [TestMethod]
-    public async Task EveryWrite_RoutesThroughItsProcedure_AndCarriesNoInlineStatement()
+    public async Task Service_ImageOverrideWriteServiceTests_EveryWrite_RoutesThroughItsProcedureAndCarriesNoInlineStatement()
     {
         _helper.EnqueueEmptyQueryResult(); // existence probe
         _helper.EnqueueNonQueryResult(1);  // insert

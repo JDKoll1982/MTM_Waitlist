@@ -16,7 +16,7 @@ namespace MTM_Waitlist.Tests.Module_Mock_Service;
 public sealed class ServiceShowChannelTests
 {
     [TestMethod]
-    public void EventNames_AreSessionLocal()
+    public void Service_ServiceShowChannelTests_EventNames_AreSessionLocal()
     {
         StringAssert.StartsWith(
             ServiceShowChannel.StatusEventName,
@@ -27,7 +27,7 @@ public sealed class ServiceShowChannelTests
     }
 
     [TestMethod]
-    public void EventNames_AreDistinct()
+    public void Service_ServiceShowChannelTests_EventNames_AreDistinct()
     {
         Assert.AreNotEqual(
             ServiceShowChannel.StatusEventName,
@@ -36,7 +36,7 @@ public sealed class ServiceShowChannelTests
     }
 
     [TestMethod]
-    public void EventNames_AreNamespacedToThisService()
+    public void Service_ServiceShowChannelTests_EventNames_AreNamespacedToThisService()
     {
         StringAssert.Contains(ServiceShowChannel.StatusEventName, "MTM_Waitlist.Mock.Service");
         StringAssert.Contains(ServiceShowChannel.SettingsEventName, "MTM_Waitlist.Mock.Service");

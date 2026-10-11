@@ -82,11 +82,16 @@ keys exist, both foreign keys resolve, and no row stores a plaintext token (asse
 
 ---
 
-## 2. New table: `auth_remembered_sign_ins`
+## 2. Retired table: `auth_remembered_sign_ins`
 
-Folder: `Database/Tables/<next-free-ordinal>_auth_remembered_sign_ins/`, with `create.sql` and `rollback.sql`.
-Registered in `AllTables.sql`. The brief does not name a table for the remembered sign-in; this is the plan's
-decision D12, and the reasoning is recorded in `research.md`.
+**Retired 2026-10-10.** Remember-me was withdrawn and the table went with it, along with the three procedures
+below it and its validation script (T234; FR-014, FR-043). The section is kept as the record of what the store
+carried and why, so a later reader can see what was withdrawn rather than finding a gap.
+
+What is left of it is the read that replaced it: `sp_auth_user_previous_sign_ins_list` returns the last six
+people who signed in on one computer, most recent first, from the `user_active_sessions` rows the store already
+holds. It carries no payload, no initialisation vector and no key fingerprint, because the list offers a name to
+type beside, not a way past the PIN (FR-014, FR-048).
 
 ```sql
 CREATE TABLE IF NOT EXISTS auth_remembered_sign_ins (

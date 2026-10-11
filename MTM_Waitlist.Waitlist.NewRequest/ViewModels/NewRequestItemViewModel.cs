@@ -283,10 +283,10 @@ public partial class NewRequestItemViewModel : ObservableRecipient, INavigationA
     }
 
     /// <summary>The Category step's prompt, resolved through the resource mechanism (FR-022).</summary>
-    public static string ResolveCategoryPrompt() => ResolveMessage("NewRequest_Category.Prompt.Text", "Choose a request category to continue.");
+    public static string ResolveCategoryPrompt() => ResolveMessage("NewRequest_Category_Prompt.Text", "Choose a request category to continue.");
 
     /// <summary>The Item step's prompt, resolved through the resource mechanism (FR-022).</summary>
-    public static string ResolveItemPrompt() => ResolveMessage("NewRequest_Item.Prompt.Text", "Choose an item to continue.");
+    public static string ResolveItemPrompt() => ResolveMessage("NewRequest_Item_Prompt.Text", "Choose an item to continue.");
 
     private static string ResolveMessage(string resourceKey, string fallback)
     {

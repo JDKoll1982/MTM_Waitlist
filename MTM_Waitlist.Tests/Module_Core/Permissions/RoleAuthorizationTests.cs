@@ -43,7 +43,7 @@ public sealed class RoleAuthorizationTests
     };
 
     [TestMethod]
-    public void IsAtLeast_AgreesAtAndAroundEveryBoundary()
+    public void Service_RoleAuthorizationTests_IsAtLeast_AgreesAtAndAroundEveryBoundary()
     {
         var ladder = Ladder();
 
@@ -73,7 +73,7 @@ public sealed class RoleAuthorizationTests
     }
 
     [TestMethod]
-    public void IsAtLeast_PeersAtOneRungAreMutuallyAtOrAboveAndNobodyIsAboveTheirPeer()
+    public void Service_RoleAuthorizationTests_IsAtLeast_PeersAtOneRungAreMutuallyAtOrAboveAndNobodyIsAboveTheirPeer()
     {
         var workers = Ladder().Where(entry => WorkerCodes.Contains(entry.RoleCode)).ToArray();
 
@@ -91,7 +91,7 @@ public sealed class RoleAuthorizationTests
     }
 
     [TestMethod]
-    public void AtOrAbove_ReturnsEveryRoleAtThatRungOrHigherInCatalogueOrder()
+    public void Service_RoleAuthorizationTests_AtOrAbove_ReturnsEveryRoleAtThatRungOrHigherInCatalogueOrder()
     {
         var ladder = Ladder();
 
@@ -103,7 +103,7 @@ public sealed class RoleAuthorizationTests
     }
 
     [TestMethod]
-    public void AtOrAbove_TheLowestRungReturnsTheWholeCatalogue()
+    public void Service_RoleAuthorizationTests_AtOrAbove_TheLowestRungReturnsTheWholeCatalogue()
     {
         var ladder = Ladder();
 
@@ -115,7 +115,7 @@ public sealed class RoleAuthorizationTests
     }
 
     [TestMethod]
-    public void AtOrBelow_IsTheMirrorOfAtOrAbove()
+    public void Service_RoleAuthorizationTests_AtOrBelow_IsTheMirrorOfAtOrAbove()
     {
         var ladder = Ladder();
 
@@ -143,7 +143,7 @@ public sealed class RoleAuthorizationTests
     }
 
     [TestMethod]
-    public void Highest_TakesTheHighestRungWhenAPersonHoldsMoreThanOneLiveRole()
+    public void Service_RoleAuthorizationTests_Highest_TakesTheHighestRungWhenAPersonHoldsMoreThanOneLiveRole()
     {
         var ladder = Ladder();
 
@@ -155,7 +155,7 @@ public sealed class RoleAuthorizationTests
     }
 
     [TestMethod]
-    public void Highest_WithOneRoleReturnsThatRole()
+    public void Service_RoleAuthorizationTests_Highest_WithOneRoleReturnsThatRole()
     {
         var ladder = Ladder();
 
@@ -166,7 +166,7 @@ public sealed class RoleAuthorizationTests
     }
 
     [TestMethod]
-    public void Highest_BreaksATieOnTheCodeSoTwoPeersAlwaysAnswerTheSameWay()
+    public void Service_RoleAuthorizationTests_Highest_BreaksATieOnTheCodeSoTwoPeersAlwaysAnswerTheSameWay()
     {
         var ladder = Ladder();
 
@@ -178,13 +178,13 @@ public sealed class RoleAuthorizationTests
     }
 
     [TestMethod]
-    public void Highest_WithNoRoleReturnsNothing()
+    public void Service_RoleAuthorizationTests_Highest_WithNoRoleReturnsNothing()
     {
         Assert.IsNull(RoleAuthorization.Highest(Array.Empty<RoleCatalogEntry>()));
     }
 
     [TestMethod]
-    public void TheLadder_IsTheEightLiveCodesWhileTheRetiredRoleIsStillInTheCatalogue()
+    public void Service_RoleAuthorizationTests_TheLadder_IsTheEightLiveCodesWhileTheRetiredRoleIsStillInTheCatalogue()
     {
         // Phase 3's catalogue holds the eight codes the shipped seed ranks. The retired role is still in the
         // catalogue at this point and the catalogue read excludes it, which is what this asserts: the ladder

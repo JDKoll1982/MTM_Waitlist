@@ -49,7 +49,7 @@ public sealed class MockServiceRefreshClientTests
     }
 
     [TestMethod]
-    public async Task RequestRefreshAsync_WithoutAnEndpoint_ReportsUnavailableWithoutCallingTheService()
+    public async Task Service_MockServiceRefreshClientTests_RequestRefreshAsync_WithoutAnEndpointReportsUnavailableWithoutCallingTheService()
     {
         var handler = new RecordingHandler();
         var client = CreateClient(handler, endpoint: null, userName: UserName);
@@ -62,7 +62,7 @@ public sealed class MockServiceRefreshClientTests
     }
 
     [TestMethod]
-    public async Task RequestRefreshAsync_WithoutAUserName_ReportsUnavailableWithoutCallingTheService()
+    public async Task Service_MockServiceRefreshClientTests_RequestRefreshAsync_WithoutAUserNameReportsUnavailableWithoutCallingTheService()
     {
         var handler = new RecordingHandler();
         var client = CreateClient(handler, endpoint: Endpoint, userName: null);
@@ -75,7 +75,7 @@ public sealed class MockServiceRefreshClientTests
     }
 
     [TestMethod]
-    public async Task RequestRefreshAsync_WhenConfigured_PostsTheUserNameHeaderAndMapsPerShapeOutcomes()
+    public async Task Service_MockServiceRefreshClientTests_RequestRefreshAsync_WhenConfiguredPostsTheUserNameHeaderAndMapsPerShapeOutcomes()
     {
         const string body = """
             {"runId":"r1","startedUtc":"2026-09-11T00:00:00Z","finishedUtc":"2026-09-11T00:00:01Z",
@@ -97,7 +97,7 @@ public sealed class MockServiceRefreshClientTests
     }
 
     [TestMethod]
-    public async Task RequestRefreshAsync_WhenTheServiceRefusesTheCaller_ReportsUnavailable()
+    public async Task Service_MockServiceRefreshClientTests_RequestRefreshAsync_WhenTheServiceRefusesTheCallerReportsUnavailable()
     {
         var handler = new RecordingHandler(HttpStatusCode.Unauthorized, """{"error":"unauthorized"}""");
         var client = CreateClient(handler, Endpoint, UserName);
@@ -109,7 +109,7 @@ public sealed class MockServiceRefreshClientTests
     }
 
     [TestMethod]
-    public async Task RequestRefreshAsync_WhenTheServiceIsAbsent_FailsGracefullyWithoutThrowing()
+    public async Task Service_MockServiceRefreshClientTests_RequestRefreshAsync_WhenTheServiceIsAbsentFailsGracefullyWithoutThrowing()
     {
         var handler = new RecordingHandler(new HttpRequestException("connection refused"));
         var client = CreateClient(handler, Endpoint, UserName);
@@ -121,7 +121,7 @@ public sealed class MockServiceRefreshClientTests
     }
 
     [TestMethod]
-    public async Task RequestRefreshAsync_WhenTheResponseIsUnreadable_ReportsUnavailable()
+    public async Task Service_MockServiceRefreshClientTests_RequestRefreshAsync_WhenTheResponseIsUnreadableReportsUnavailable()
     {
         var handler = new RecordingHandler(HttpStatusCode.OK, """{"unexpected":true}""");
         var client = CreateClient(handler, Endpoint, UserName);
@@ -132,7 +132,7 @@ public sealed class MockServiceRefreshClientTests
     }
 
     [TestMethod]
-    public async Task RequestRefreshAsync_HonorsCallerCancellation()
+    public async Task Service_MockServiceRefreshClientTests_RequestRefreshAsync_HonorsCallerCancellation()
     {
         var handler = new RecordingHandler();
         var client = CreateClient(handler, Endpoint, UserName);

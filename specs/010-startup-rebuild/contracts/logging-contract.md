@@ -217,9 +217,9 @@ Rules:
 
 - Credentials, in any form, including temporary credentials and the one-time reset PIN.
 - Session tokens, in plaintext or as a hash, and the salt.
-- The remembered sign-in payload, its initialisation vector, or its plaintext.
-- Key material. The shared key file's **path** is the only secret-adjacent value ever written, and that is
-  deliberate so a support reader can see which key a decryption failure used.
+- Key material, in any form. Remember-me was withdrawn on 2026-10-10 and nothing reads the plant's shared key
+  file, so its path is no longer written either: there is no remaining secret-adjacent value a call site may
+  record.
 - Connection strings with credentials in them.
 
 ## 7. The developer panel

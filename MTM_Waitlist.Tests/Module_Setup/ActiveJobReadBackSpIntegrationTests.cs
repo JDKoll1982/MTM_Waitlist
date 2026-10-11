@@ -73,7 +73,7 @@ public sealed class ActiveJobReadBackSpIntegrationTests
     }
 
     [TestMethod]
-    public async Task ActiveJobsReadBack_ReturnsJsonColumns_ForSeededWorkCenter()
+    public async Task Database_ActiveJobReadBackSpIntegrationTests_ActiveJobsReadBack_ReturnsJsonColumnsForSeededWorkCenter()
     {
         var partsJson = "[{\"Category\":\"Coil\",\"PartNumber\":\"MMC0001000\",\"Description\":\"C\",\"Location\":\"Rack A1\"}]";
         var dunnageJson = "[{\"Id\":\"dn-1\",\"PartNumber\":\"DN-STL-4\",\"DisplayName\":\"Steel Rack\"}]";
@@ -108,7 +108,7 @@ public sealed class ActiveJobReadBackSpIntegrationTests
     }
 
     [TestMethod]
-    public async Task AverageCoilWeight_ReturnsRoundedAvg_ForSeededPart()
+    public async Task Database_ActiveJobReadBackSpIntegrationTests_AverageCoilWeight_ReturnsRoundedAvgForSeededPart()
     {
         const int skidWeight1 = 4800;
         const int skidWeight2 = 5200;

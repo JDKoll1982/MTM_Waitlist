@@ -57,8 +57,8 @@ public sealed class StartupRecoveryService
     private static readonly string[] s_thisMachinesParts =
     [
         MachineConfigurationParts.Configuration,
-        MachineConfigurationParts.DisplayName,
-        MachineConfigurationParts.Description,
+        MachineConfigurationParts.ComputerName,
+        MachineConfigurationParts.Location,
         MachineConfigurationParts.ScopedPreference,
     ];
 

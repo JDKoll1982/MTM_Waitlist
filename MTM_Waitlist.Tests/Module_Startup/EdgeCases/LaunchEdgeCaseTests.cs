@@ -19,8 +19,8 @@ namespace MTM_Waitlist.Tests.Module_Startup.EdgeCases;
 /// <remarks>
 /// <para>
 /// <b>One test per case, and no case twice.</b> The cases another task already proves are not repeated here:
-/// the picture share being unreachable is `PictureCacheStepTests`, the display name already being in use is
-/// `MachineSetupViewModelTests`, an unreadable remembered sign-in is `RememberedSignInServiceTests`, two copies
+/// the picture share being unreachable is `PictureCacheStepTests`, the name already being in use is
+/// `MachineSetupViewModelTests`, two copies
 /// launched at once is `LaunchPipelineRetryTests`, a slow store is `LaunchStepRunnerTests`, and the five
 /// diagnostic cases and the refused clipboard are the logging tests. What is left is what nothing else asserts.
 /// </para>
@@ -39,7 +39,7 @@ public sealed class LaunchEdgeCaseTests
     private const string LegacyTemporaryValue = "0000";
 
     [TestMethod]
-    public async Task TheStoreCannotBeReachedAtLaunch_StopsWithItsOwnStatementAndOffersNoReset()
+    public async Task Service_LaunchEdgeCaseTests_TheStoreCannotBeReachedAtLaunch_StopsWithItsOwnStatementAndOffersNoReset()
     {
         // Arrange: the step that contacts the store cannot reach it.
         var run = new LaunchRun().With("store-reachability", Failed("the store did not answer"));
@@ -58,7 +58,7 @@ public sealed class LaunchEdgeCaseTests
     }
 
     [TestMethod]
-    public async Task AConfigurationWithdrawnWhileTheApplicationRuns_ReturnsSetupAtTheNextCheck()
+    public async Task Service_LaunchEdgeCaseTests_AConfigurationWithdrawnWhileTheApplicationRuns_ReturnsSetupAtTheNextCheck()
     {
         // Arrange: the machine's picture sources were withdrawn, so the read reports the configuration removed.
         var run = new LaunchRun().With(ReadinessStepId, Succeeded()).Removed();
@@ -71,7 +71,7 @@ public sealed class LaunchEdgeCaseTests
     }
 
     [TestMethod]
-    public async Task TheLaunchWindowIsClosedWhileALaunchIsRunning_LeavesNoStepReadingAsFailed()
+    public async Task Service_LaunchEdgeCaseTests_TheLaunchWindowIsClosedWhileALaunchIsRunning_LeavesNoStepReadingAsFailed()
     {
         // Arrange: the launch is abandoned while its first step is under way.
         using var closing = new CancellationTokenSource();
@@ -96,7 +96,7 @@ public sealed class LaunchEdgeCaseTests
     }
 
     [TestMethod]
-    public async Task ATemporaryCredentialResetWhileThePersonSignsIn_TheOldValueMeetsTheReset()
+    public async Task Service_LaunchEdgeCaseTests_ATemporaryCredentialResetWhileThePersonSignsIn_TheOldValueMeetsTheReset()
     {
         // Arrange: the account's temporary credential has just been replaced by a reset.
         var account = TemporaryAccount();
@@ -113,7 +113,7 @@ public sealed class LaunchEdgeCaseTests
     }
 
     [TestMethod]
-    public void ACredentialResetIssuedElsewhere_EndsNoSessionAlreadyRunning()
+    public void Service_LaunchEdgeCaseTests_ACredentialResetIssuedElsewhere_EndsNoSessionAlreadyRunning()
     {
         // Arrange: every procedure that writes an account's credential.
         var repositoryRoot = RepositoryPatternScan.FindRepositoryRoot();
@@ -139,7 +139,7 @@ public sealed class LaunchEdgeCaseTests
     }
 
     [TestMethod]
-    public async Task AnAccountStillHoldingTheLegacyTemporaryValue_SignsInAndIsAskedToReplaceIt()
+    public async Task Service_LaunchEdgeCaseTests_AnAccountStillHoldingTheLegacyTemporaryValue_SignsInAndIsAskedToReplaceIt()
     {
         // Arrange: an account whose credential is the legacy temporary value, not one this work issued.
         var account = TemporaryAccount();
@@ -156,7 +156,7 @@ public sealed class LaunchEdgeCaseTests
     }
 
     [TestMethod]
-    public async Task ASignOutWhoseRestartFails_EndsTheSessionAndTellsThePersonToOpenTheApplicationAgain()
+    public async Task Service_LaunchEdgeCaseTests_ASignOutWhoseRestartFails_EndsTheSessionAndTellsThePersonToOpenTheApplicationAgain()
     {
         // Arrange: a signed-in person whose relaunch cannot happen.
         var store = new SessionStore();

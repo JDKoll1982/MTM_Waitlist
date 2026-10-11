@@ -27,7 +27,7 @@ public sealed class BlockedStateViewModelTests
     private const string StoreDiagnosis = "Contacting the store did not finish within the 15 second(s) it is allowed.";
 
     [TestMethod]
-    public void Constructor_WhenAStepFailed_StatesThatStepsOwnWordsRatherThanItsNumber()
+    public void ViewModel_BlockedStateViewModelTests_Constructor_WhenAStepFailedStatesThatStepsOwnWordsRatherThanItsNumber()
     {
         var feed = FeedWith(Failed(StoreStepId, StoreDiagnosis, "the store"));
 
@@ -38,7 +38,7 @@ public sealed class BlockedStateViewModelTests
     }
 
     [TestMethod]
-    public void Constructor_WhenABestEffortStepAlsoFailed_KeepsTheStopItDidNotCause()
+    public void ViewModel_BlockedStateViewModelTests_Constructor_WhenABestEffortStepAlsoFailedKeepsTheStopItDidNotCause()
     {
         // The picture refresh records its failure on the same feed and cannot stop the launch (FR-026). A surface
         // that took the last line would show a recorded, harmless failure as the reason a person cannot carry on.
@@ -56,7 +56,7 @@ public sealed class BlockedStateViewModelTests
     }
 
     [TestMethod]
-    public void Constructor_WhenALaterStepFailedAfterAnEarlierOne_KeepsTheStopThatJustHappened()
+    public void ViewModel_BlockedStateViewModelTests_Constructor_WhenALaterStepFailedAfterAnEarlierOneKeepsTheStopThatJustHappened()
     {
         // A retry that carried on and a later step that failed both leave lines behind, and the surface is rebuilt
         // for each stop, so the reading has to be the latest stop rather than the first one ever seen.
@@ -70,7 +70,7 @@ public sealed class BlockedStateViewModelTests
     }
 
     [TestMethod]
-    public void Constructor_WhenTheStoreCouldNotBeReached_OffersNoResetAtAll()
+    public void ViewModel_BlockedStateViewModelTests_Constructor_WhenTheStoreCouldNotBeReachedOffersNoResetAtAll()
     {
         // FR-017, SC-010, US4 scenario 1: resetting cannot make a store answer, so it is not among the actions.
         var feed = FeedWith(Failed(StoreStepId, StoreDiagnosis, "the store"));
@@ -83,7 +83,7 @@ public sealed class BlockedStateViewModelTests
     }
 
     [TestMethod]
-    public void Constructor_WhenThisComputersConfigurationIsBroken_NamesWhatAResetWouldTouch()
+    public void ViewModel_BlockedStateViewModelTests_Constructor_WhenThisComputersConfigurationIsBrokenNamesWhatAResetWouldTouch()
     {
         var feed = FeedWith(Failed(SaveConfigurationStepId, "This computer's configuration could not be written.", "the store"));
 
@@ -91,11 +91,11 @@ public sealed class BlockedStateViewModelTests
 
         Assert.IsTrue(viewModel.CanRestoreDefaults);
         Assert.IsFalse(string.IsNullOrWhiteSpace(viewModel.RestoreDefaultsPreview));
-        CollectionAssert.Contains(viewModel.ResetParts.ToArray(), MachineConfigurationParts.DisplayName);
+        CollectionAssert.Contains(viewModel.ResetParts.ToArray(), MachineConfigurationParts.ComputerName);
     }
 
     [TestMethod]
-    public void Retry_StartsTheApplicationAgain_AndDoesNotResumeTheStoppedLaunch()
+    public void ViewModel_BlockedStateViewModelTests_Retry_StartsTheApplicationAgainAndDoesNotResumeTheStoppedLaunch()
     {
         // FR-016: the failed work is repeated by starting the launch again, which is one pass from its first
         // step, rather than by resuming a half-run sequence at a step id.
@@ -109,7 +109,7 @@ public sealed class BlockedStateViewModelTests
     }
 
     [TestMethod]
-    public void Retry_WhenTheApplicationCouldNotBeStartedAgain_SaysSoAndLeavesTheSurfaceOpen()
+    public void ViewModel_BlockedStateViewModelTests_Retry_WhenTheApplicationCouldNotBeStartedAgainSaysSoAndLeavesTheSurfaceOpen()
     {
         var feed = FeedWith(Failed(StoreStepId, StoreDiagnosis, "the store"));
         var viewModel = CreateViewModel(feed, out var restarter, out _, start: () => false);
@@ -121,7 +121,7 @@ public sealed class BlockedStateViewModelTests
     }
 
     [TestMethod]
-    public void Retry_WhenStartingAgainThrew_SaysSoRatherThanEscapingFromTheCommand()
+    public void ViewModel_BlockedStateViewModelTests_Retry_WhenStartingAgainThrewSaysSoRatherThanEscapingFromTheCommand()
     {
         var feed = FeedWith(Failed(StoreStepId, StoreDiagnosis, "the store"));
         var viewModel = CreateViewModel(
@@ -136,7 +136,7 @@ public sealed class BlockedStateViewModelTests
     }
 
     [TestMethod]
-    public async Task Prepare_WhenTheStopIsNotRepairableQuietly_AsksThePersonAndStartsNothing()
+    public async Task ViewModel_BlockedStateViewModelTests_Prepare_WhenTheStopIsNotRepairableQuietlyAsksThePersonAndStartsNothing()
     {
         var feed = FeedWith(Failed(StoreStepId, StoreDiagnosis, "the store"));
         var viewModel = CreateViewModel(feed, out var restarter, out var configuration);
@@ -149,7 +149,7 @@ public sealed class BlockedStateViewModelTests
     }
 
     [TestMethod]
-    public async Task Prepare_WhenTheFaultCanBePutRightQuietly_RepairsItAndRaisesNoPrompt()
+    public async Task ViewModel_BlockedStateViewModelTests_Prepare_WhenTheFaultCanBePutRightQuietlyRepairsItAndRaisesNoPrompt()
     {
         // FR-019, US4 scenario 3: the fault is repaired, the application starts again, and no question is asked.
         var feed = FeedWith(Failed(SaveConfigurationStepId, "This computer's configuration could not be written.", "the store"));
@@ -169,7 +169,7 @@ public sealed class BlockedStateViewModelTests
     }
 
     [TestMethod]
-    public async Task Prepare_WhenTheQuietRepairChangedNothing_AsksThePerson()
+    public async Task ViewModel_BlockedStateViewModelTests_Prepare_WhenTheQuietRepairChangedNothingAsksThePerson()
     {
         var feed = FeedWith(Failed(SaveConfigurationStepId, "This computer's configuration could not be written.", "the store"));
         var viewModel = CreateViewModel(
@@ -185,7 +185,7 @@ public sealed class BlockedStateViewModelTests
     }
 
     [TestMethod]
-    public async Task Prepare_WhenTheQuietRepairWorkedButTheApplicationCouldNotStartAgain_AsksThePerson()
+    public async Task ViewModel_BlockedStateViewModelTests_Prepare_WhenTheQuietRepairWorkedButTheApplicationCouldNotStartAgainAsksThePerson()
     {
         var feed = FeedWith(Failed(SaveConfigurationStepId, "This computer's configuration could not be written.", "the store"));
         var viewModel = CreateViewModel(feed, out var restarter, out _, start: () => false);
@@ -198,7 +198,7 @@ public sealed class BlockedStateViewModelTests
     }
 
     [TestMethod]
-    public async Task RestoreDefaults_ResetsExactlyThePartsThePreviewNamed_AndStartsTheApplicationAgain()
+    public async Task ViewModel_BlockedStateViewModelTests_RestoreDefaults_ResetsExactlyThePartsThePreviewNamedAndStartsTheApplicationAgain()
     {
         // FR-018: what the person agreed to is what is reset, and the launch then runs once more.
         var feed = FeedWith(Failed(SaveConfigurationStepId, "This computer's configuration could not be written.", "the store"));
@@ -215,7 +215,7 @@ public sealed class BlockedStateViewModelTests
     }
 
     [TestMethod]
-    public async Task RestoreDefaults_WhenTheStoreRefusedTheReset_SaysSoAndLeavesTheLaunchStopped()
+    public async Task ViewModel_BlockedStateViewModelTests_RestoreDefaults_WhenTheStoreRefusedTheResetSaysSoAndLeavesTheLaunchStopped()
     {
         var feed = FeedWith(Failed(SaveConfigurationStepId, "This computer's configuration could not be written.", "the store"));
         var viewModel = CreateViewModel(

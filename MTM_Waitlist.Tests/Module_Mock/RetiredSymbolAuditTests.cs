@@ -162,6 +162,20 @@ public sealed class RetiredSymbolAuditTests
         // members — the repair of a single named setting, and the corrupt-then-restart path — and a
         // reintroduction of the old behaviour would arrive carrying one of them (T209).
         ("retired recovery-service member", new Regex(@"\b(CorruptAndRestartAsync|ResetSettingAsync)\b", RegexOptions.Compiled)),
+
+        // ── feature 010-startup-rebuild (T237): remember-me and the shared key file it unlocked ──
+        // Remember-me was withdrawn on 2026-10-10 (FR-043, SC-024): the read, the service, the step, the store
+        // table and the three procedures all went, and the sign-in stage offers the last six people who signed in
+        // on this computer instead. The names are forbidden rather than a namespace, so the withdrawal is what is
+        // pinned and not the shape of whatever replaces it. A design note, a defect record, a retained rollback
+        // artifact or the maintenance file's retired-objects section may still name them — those are the record
+        // *of* the removal — but no live code or database artifact may.
+        ("retired remembered sign-in type", new Regex(@"\bRememberedSignIn\w*\b", RegexOptions.Compiled)),
+        ("retired shared key source", new Regex(@"\bI?SharedKey(File)?Source\b", RegexOptions.Compiled)),
+        ("retired remembered sign-in step", new Regex(@"\bReadRememberedSignInStep\b", RegexOptions.Compiled)),
+        ("retired remembered sign-in catalogue entry", new Regex(@"read-remembered-sign-in", RegexOptions.Compiled)),
+        ("retired remembered sign-in table", new Regex(@"\bauth_remembered_sign_ins\b", RegexOptions.Compiled)),
+        ("retired shared key file name", new Regex(@"MTM_AUTH_USER_SECRET_KEY", RegexOptions.Compiled)),
     ];
 
     /// <summary>File extensions this audit treats as code or database artifacts.</summary>
@@ -265,7 +279,7 @@ public sealed class RetiredSymbolAuditTests
     /// Fails when any retired symbol survives in code or in a live database artifact.
     /// </summary>
     [TestMethod]
-    public void NoRetiredSymbolRemainsInCodeOrDatabaseArtifacts()
+    public void Audit_RetiredSymbolAuditTests_NoRetiredSymbolRemainsInCodeOrDatabaseArtifacts()
     {
         var repositoryRoot = FindRepositoryRoot();
         var violations = new List<string>();
@@ -354,7 +368,7 @@ public sealed class RetiredSymbolAuditTests
     /// something through its pattern set rather than accidentally through the scanner.
     /// </summary>
     [TestMethod]
-    public void PatternScan_WithAnEmptyPatternSet_ReturnsNoHits()
+    public void Audit_RetiredSymbolAuditTests_PatternScan_WithAnEmptyPatternSetReturnsNoHits()
     {
         var hits = RepositoryPatternScan.Scan(Array.Empty<(string Description, string Pattern)>());
 
@@ -371,7 +385,7 @@ public sealed class RetiredSymbolAuditTests
     /// every declared pattern, so adding a pattern without proving it bites fails the build.
     /// </remarks>
     [TestMethod]
-    public void EveryRetiredPattern_BitesOnAReintroductionOfItsSymbol()
+    public void Audit_RetiredSymbolAuditTests_EveryRetiredPattern_BitesOnAReintroductionOfItsSymbol()
     {
         var samples = ReintroductionSamples();
 
@@ -482,6 +496,13 @@ public sealed class RetiredSymbolAuditTests
         ["retired startup log forwarder"] = "public sealed class StartupLogForwarder : IStartupLogForwarder",
         ["retired debug-only static logger"] = "StartupDebugLog.Info(\"Startup\", \"Launching MTM Waitlist\");",
         ["retired recovery-service member"] = "await recovery.CorruptAndRestartAsync();",
+        ["retired remembered sign-in type"] = "public sealed class RememberedSignInService { }",
+        ["retired shared key source"] = "public interface ISharedKeySource { byte[]? ReadKey(); }",
+        ["retired remembered sign-in step"] = "internal sealed class ReadRememberedSignInStep : ILaunchStep",
+        ["retired remembered sign-in catalogue entry"] = "new(\"read-remembered-sign-in\", \"Reading the remembered sign-in\",",
+        ["retired remembered sign-in table"] = "CREATE TABLE auth_remembered_sign_ins (",
+        ["retired shared key file name"] =
+            "MTM_AUTH_USER_SECRET_KEY.txt",
     };
 
     /// <summary>
@@ -494,7 +515,7 @@ public sealed class RetiredSymbolAuditTests
     /// scanning names would fail on correct markup.
     /// </remarks>
     [TestMethod]
-    public void NoPlaceholderResourceValueShips()
+    public void Audit_RetiredSymbolAuditTests_NoPlaceholderResourceValueShips()
     {
         (string Description, Regex Pattern)[] patterns =
         [
@@ -538,7 +559,7 @@ public sealed class RetiredSymbolAuditTests
     /// return, and no shipped text may present one as current.
     /// </summary>
     [TestMethod]
-    public void NoRetiredWordingSurvives()
+    public void Audit_RetiredSymbolAuditTests_NoRetiredWordingSurvives()
     {
         (string Description, Regex Pattern)[] retiredWording =
         [
@@ -606,7 +627,7 @@ public sealed class RetiredSymbolAuditTests
     /// scan check vacuous.
     /// </summary>
     [TestMethod]
-    public void PatternScan_WithTheDefaultScope_EnumeratesProductionSource()
+    public void Audit_RetiredSymbolAuditTests_PatternScan_WithTheDefaultScopeEnumeratesProductionSource()
     {
         var files = RepositoryPatternScan
             .EnumerateScannedFiles(RepositoryPatternScan.FindRepositoryRoot(), RepositoryScanScope.Default)
@@ -633,7 +654,7 @@ public sealed class RetiredSymbolAuditTests
     /// set cannot come from a matcher that never matches.
     /// </summary>
     [TestMethod]
-    public void PatternScan_WithAKnownPresentLiteral_FindsIt()
+    public void Audit_RetiredSymbolAuditTests_PatternScan_WithAKnownPresentLiteralFindsIt()
     {
         var hits = RepositoryPatternScan.Scan([("waitlist field population", new Regex(@"AddRequestFields", RegexOptions.Compiled))]);
 
@@ -646,7 +667,7 @@ public sealed class RetiredSymbolAuditTests
     /// survived would still compile into the app and a launch path could still show it.
     /// </summary>
     [TestMethod]
-    public void RemovedStartupViewFiles_DoNotExist()
+    public void Audit_RetiredSymbolAuditTests_RemovedStartupViewFiles_DoNotExist()
     {
         var repositoryRoot = RepositoryPatternScan.FindRepositoryRoot();
         var survivors = s_removedStartupViewFiles
@@ -665,7 +686,7 @@ public sealed class RetiredSymbolAuditTests
     /// a design note or a database comment that names the retirement does not.
     /// </summary>
     [TestMethod]
-    public void NoRemovedStartupTypeIsDeclaredAnywhere()
+    public void Audit_RetiredSymbolAuditTests_NoRemovedStartupTypeIsDeclaredAnywhere()
     {
         Assert.IsTrue(
             s_removedStartupTypeNames.Length >= 35,
@@ -686,7 +707,7 @@ public sealed class RetiredSymbolAuditTests
     /// <c>MTM_Waitlist.Core</c> may be declared again.
     /// </summary>
     [TestMethod]
-    public void NoRemovedCoreStartupContractModelOrOptionIsDeclared()
+    public void Audit_RetiredSymbolAuditTests_NoRemovedCoreStartupContractModelOrOptionIsDeclared()
     {
         var hits = RepositoryPatternScan.Scan(DeclarationPatterns(s_removedCoreStartupTypeNames), s_startupSurfaceScope);
 
@@ -706,7 +727,7 @@ public sealed class RetiredSymbolAuditTests
     /// this list again, which is the point of asserting the set rather than each file in isolation.
     /// </summary>
     [TestMethod]
-    public void RebuiltStartupViewSet_IsTheLaunchSurface()
+    public void Audit_RetiredSymbolAuditTests_RebuiltStartupViewSet_IsTheLaunchSurface()
     {
         var repositoryRoot = RepositoryPatternScan.FindRepositoryRoot();
         var viewFolder = Path.Combine(repositoryRoot, "Module_Startup", "Views");
@@ -766,6 +787,27 @@ public sealed class RetiredSymbolAuditTests
             File.ReadAllText(Path.Combine(viewFolder, "BlockedStatePage.xaml")),
             "x:Class=\"MTM_Waitlist.Module_Startup.Views.BlockedStatePage\"",
             "The blocked markup must declare the stage a stopped launch states its cause on.");
+    }
+
+    /// <summary>
+    /// T237. The withdrawal is asserted both ways: the names it removed are gone (the pattern set above), and the
+    /// surface that replaced them is present. Without the second half a clean scan would also be produced by a
+    /// sign-in stage that had simply lost the list, which is the failure this guards against (FR-014, FR-048).
+    /// </summary>
+    [TestMethod]
+    public void Audit_RetiredSymbolAuditTests_WithdrawnRememberMe_LeftTheSignInSurfaceThatReplacedIt()
+    {
+        var repositoryRoot = RepositoryPatternScan.FindRepositoryRoot();
+
+        StringAssert.Contains(
+            File.ReadAllText(Path.Combine(repositoryRoot, "Module_Startup", "Views", "SignInPage.xaml")),
+            "AutomationProperties.AutomationId=\"SignInWindow_PreviousPeople\"",
+            "The sign-in stage must carry the list of people who signed in on this computer before (FR-048).");
+
+        StringAssert.Contains(
+            File.ReadAllText(Path.Combine(repositoryRoot, "MTM_Waitlist.Startup", "Services", "PreviousSignInService.cs")),
+            "sp_auth_user_previous_sign_ins_list",
+            "The offer must be drawn from the stored read that replaced the remembered sign-in (FR-014, FR-048).");
     }
 
     /// <summary>Builds the declaration-shaped pattern set for an inventory of removed type names.</summary>

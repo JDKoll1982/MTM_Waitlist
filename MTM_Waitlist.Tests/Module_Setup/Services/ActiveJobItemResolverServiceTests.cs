@@ -13,7 +13,7 @@ namespace MTM_Waitlist.Tests.Module_Setup.Services;
 public sealed class ActiveJobItemResolverServiceTests
 {
     [TestMethod]
-    public async Task ResolveAsync_BlankWorkCenter_ReturnsNull_NoQuery()
+    public async Task Service_ActiveJobItemResolverServiceTests_ResolveAsync_BlankWorkCenterReturnsNullNoQuery()
     {
         var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
         var service = new ActiveJobItemResolverService(helper);
@@ -25,7 +25,7 @@ public sealed class ActiveJobItemResolverServiceTests
     }
 
     [TestMethod]
-    public async Task ResolveAsync_NoActiveJobForWorkCenter_ReturnsNull()
+    public async Task Service_ActiveJobItemResolverServiceTests_ResolveAsync_NoActiveJobForWorkCenterReturnsNull()
     {
         var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
         var service = new ActiveJobItemResolverService(helper);
@@ -37,7 +37,7 @@ public sealed class ActiveJobItemResolverServiceTests
     }
 
     [TestMethod]
-    public async Task ResolveAsync_JobItems_ReturnsCoilFlatstockDieComponent()
+    public async Task Service_ActiveJobItemResolverServiceTests_ResolveAsync_JobItemsReturnsCoilFlatstockDieComponent()
     {
         var parts = new List<SetupSubordinatePart>
         {
@@ -65,7 +65,7 @@ public sealed class ActiveJobItemResolverServiceTests
     }
 
     [TestMethod]
-    public async Task ResolveAsync_DieLocation_SurfacesHomeLocation()
+    public async Task Service_ActiveJobItemResolverServiceTests_ResolveAsync_DieLocationSurfacesHomeLocation()
     {
         var parts = new List<SetupSubordinatePart> { MakePart("Die", "FGT-0653", "V-A1-01", 0m) };
         var helper = new StubMySqlHelperServer(new[]
@@ -82,7 +82,7 @@ public sealed class ActiveJobItemResolverServiceTests
     }
 
     [TestMethod]
-    public async Task ResolveAsync_DunnageParts_AreReturned()
+    public async Task Service_ActiveJobItemResolverServiceTests_ResolveAsync_DunnagePartsAreReturned()
     {
         var dunnage = new List<SetupDunnagePart>
         {
@@ -102,7 +102,7 @@ public sealed class ActiveJobItemResolverServiceTests
     }
 
     [TestMethod]
-    public async Task ResolveAsync_Sequence_ReturnsSequenceNumber()
+    public async Task Service_ActiveJobItemResolverServiceTests_ResolveAsync_SequenceReturnsSequenceNumber()
     {
         var helper = new StubMySqlHelperServer(new[]
         {
@@ -117,7 +117,7 @@ public sealed class ActiveJobItemResolverServiceTests
     }
 
     [TestMethod]
-    public async Task ResolveAsync_PrefixCanonicalization_OverridesMisTaggedCategory()
+    public async Task Service_ActiveJobItemResolverServiceTests_ResolveAsync_PrefixCanonicalizationOverridesMisTaggedCategory()
     {
         // Simulate the SetupDataCatalog quirk: an MMF part persisted with Category "Component".
         var parts = new List<SetupSubordinatePart> { MakePart("Component", "MMF0001154", "Rack B2", 0m) };
@@ -136,7 +136,7 @@ public sealed class ActiveJobItemResolverServiceTests
     }
 
     [TestMethod]
-    public async Task ResolveAsync_BlankOrMalformedJson_ReturnsEmptyLists()
+    public async Task Service_ActiveJobItemResolverServiceTests_ResolveAsync_BlankOrMalformedJsonReturnsEmptyLists()
     {
         var helper = new StubMySqlHelperServer(new[]
         {

@@ -12,7 +12,7 @@ public sealed class RequestDispositionMapperTests
     // --- MapInforRow ---
 
     [TestMethod]
-    public void MapInforRow_MapsRawRow_ToInforDispositionRow()
+    public void Service_RequestDispositionMapperTests_MapInforRow_MapsRawRowToInforDispositionRow()
     {
         var row = new Dictionary<string, object?>
         {
@@ -32,14 +32,14 @@ public sealed class RequestDispositionMapperTests
     }
 
     [TestMethod]
-    public void MapInforRow_NullOrEmptyRow_ReturnsNull()
+    public void Service_RequestDispositionMapperTests_MapInforRow_NullOrEmptyRowReturnsNull()
     {
         Assert.IsNull(RequestDispositionMapper.MapInforRow(null));
         Assert.IsNull(RequestDispositionMapper.MapInforRow(new Dictionary<string, object?>()));
     }
 
     [TestMethod]
-    public void MapInforRow_BlankStatus_ReturnsNullStatus()
+    public void Service_RequestDispositionMapperTests_MapInforRow_BlankStatusReturnsNullStatus()
     {
         var mapped = RequestDispositionMapper.MapInforRow(new Dictionary<string, object?>
         {
@@ -56,7 +56,7 @@ public sealed class RequestDispositionMapperTests
     // --- BuildDispositionInput: Infor snapshot drives ---
 
     [TestMethod]
-    public void BuildDispositionInput_InforReleasedOpenQuantity_ClassifiesWip()
+    public void Service_RequestDispositionMapperTests_BuildDispositionInput_InforReleasedOpenQuantityClassifiesWip()
     {
         var input = RequestDispositionMapper.BuildDispositionInput(
             new InforDispositionRow
@@ -72,7 +72,7 @@ public sealed class RequestDispositionMapperTests
     }
 
     [TestMethod]
-    public void BuildDispositionInput_InforClosedOnHandNoOpen_ClassifiesFinishedGoods()
+    public void Service_RequestDispositionMapperTests_BuildDispositionInput_InforClosedOnHandNoOpenClassifiesFinishedGoods()
     {
         var input = RequestDispositionMapper.BuildDispositionInput(
             new InforDispositionRow
@@ -88,7 +88,7 @@ public sealed class RequestDispositionMapperTests
     }
 
     [TestMethod]
-    public void BuildDispositionInput_InforOutsideOperation_ClassifiesOutsideService()
+    public void Service_RequestDispositionMapperTests_BuildDispositionInput_InforOutsideOperationClassifiesOutsideService()
     {
         var input = RequestDispositionMapper.BuildDispositionInput(
             new InforDispositionRow
@@ -106,7 +106,7 @@ public sealed class RequestDispositionMapperTests
     // --- BuildDispositionInput: floor snapshot fallback / confirmation ---
 
     [TestMethod]
-    public void BuildDispositionInput_NoInforRow_FloorWipOnly_ClassifiesWip()
+    public void Service_RequestDispositionMapperTests_BuildDispositionInput_NoInforRowFloorWipOnlyClassifiesWip()
     {
         var floor = new WipFloorQuantitySnapshot
         {
@@ -122,7 +122,7 @@ public sealed class RequestDispositionMapperTests
     }
 
     [TestMethod]
-    public void BuildDispositionInput_NoInforRow_FloorOutsideService_ClassifiesOutsideService()
+    public void Service_RequestDispositionMapperTests_BuildDispositionInput_NoInforRowFloorOutsideServiceClassifiesOutsideService()
     {
         var floor = new WipFloorQuantitySnapshot
         {
@@ -138,7 +138,7 @@ public sealed class RequestDispositionMapperTests
     }
 
     [TestMethod]
-    public void BuildDispositionInput_FloorOutsideService_OverridesClosedStatus()
+    public void Service_RequestDispositionMapperTests_BuildDispositionInput_FloorOutsideServiceOverridesClosedStatus()
     {
         // Infor says closed + on hand (would be FG), but the part is physically staged at O/S on the floor.
         var floor = new WipFloorQuantitySnapshot { OutsideServiceFloorQuantity = 10m };
@@ -156,7 +156,7 @@ public sealed class RequestDispositionMapperTests
     }
 
     [TestMethod]
-    public void BuildDispositionInput_InforClosedZeroOnHand_FloorFinishedGoodsFillsGap()
+    public void Service_RequestDispositionMapperTests_BuildDispositionInput_InforClosedZeroOnHandFloorFinishedGoodsFillsGap()
     {
         // Infor has no on-hand recorded but closed, and the floor shows finished-goods stock.
         var floor = new WipFloorQuantitySnapshot { FinishedGoodsFloorQuantity = 25m };
@@ -174,7 +174,7 @@ public sealed class RequestDispositionMapperTests
     }
 
     [TestMethod]
-    public void BuildDispositionInput_NoInforRow_FloorFinishedGoodsOnly_ClassifiesUnknown()
+    public void Service_RequestDispositionMapperTests_BuildDispositionInput_NoInforRowFloorFinishedGoodsOnlyClassifiesUnknown()
     {
         // Floor FG stock alone cannot prove the order is closed -> Unknown (documented boundary).
         var floor = new WipFloorQuantitySnapshot { FinishedGoodsFloorQuantity = 25m };

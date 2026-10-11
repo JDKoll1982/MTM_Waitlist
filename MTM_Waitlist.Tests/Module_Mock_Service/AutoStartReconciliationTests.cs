@@ -17,7 +17,7 @@ public sealed class AutoStartReconciliationTests
     private const string ExecutablePath = @"C:\Program Files\MTM\MTM_Waitlist.Mock.Service.exe";
 
     [TestMethod]
-    public async Task EnabledWithNoEntry_RegistersTheRunEntry()
+    public async Task Service_AutoStartReconciliationTests_EnabledWithNoEntry_RegistersTheRunEntry()
     {
         using var fixture = new Fixture(autoStartEnabled: true);
         var registration = new FakeStartupRegistrationStore();
@@ -31,7 +31,7 @@ public sealed class AutoStartReconciliationTests
     }
 
     [TestMethod]
-    public async Task EnabledWithACorrectEntry_ChangesNothing()
+    public async Task Service_AutoStartReconciliationTests_EnabledWithACorrectEntry_ChangesNothing()
     {
         using var fixture = new Fixture(autoStartEnabled: true);
         var registration = new FakeStartupRegistrationStore { RegisteredCommand = $"\"{ExecutablePath}\"" };
@@ -44,7 +44,7 @@ public sealed class AutoStartReconciliationTests
     }
 
     [TestMethod]
-    public async Task EnabledWithAnEntryPointingElsewhere_CorrectsIt()
+    public async Task Service_AutoStartReconciliationTests_EnabledWithAnEntryPointingElsewhere_CorrectsIt()
     {
         using var fixture = new Fixture(autoStartEnabled: true);
         var registration = new FakeStartupRegistrationStore { RegisteredCommand = "\"C:\\Old\\Service.exe\"" };
@@ -58,7 +58,7 @@ public sealed class AutoStartReconciliationTests
     }
 
     [TestMethod]
-    public async Task DisabledWithAnEntry_RemovesItAndReportsTheStaleState()
+    public async Task Service_AutoStartReconciliationTests_DisabledWithAnEntry_RemovesItAndReportsTheStaleState()
     {
         using var fixture = new Fixture(autoStartEnabled: false);
         var registration = new FakeStartupRegistrationStore { RegisteredCommand = $"\"{ExecutablePath}\"" };
@@ -72,7 +72,7 @@ public sealed class AutoStartReconciliationTests
     }
 
     [TestMethod]
-    public async Task DisabledWithNoEntry_IsAlreadyReconciled()
+    public async Task Service_AutoStartReconciliationTests_DisabledWithNoEntry_IsAlreadyReconciled()
     {
         using var fixture = new Fixture(autoStartEnabled: false);
         var registration = new FakeStartupRegistrationStore();
@@ -86,7 +86,7 @@ public sealed class AutoStartReconciliationTests
     }
 
     [TestMethod]
-    public async Task WhenTheEntryCannotBeRead_TheMismatchIsReportedAndNothingIsChanged()
+    public async Task Service_AutoStartReconciliationTests_WhenTheEntryCannotBeRead_TheMismatchIsReportedAndNothingIsChanged()
     {
         using var fixture = new Fixture(autoStartEnabled: true);
         var registration = new FakeStartupRegistrationStore { ReadThrows = new InvalidOperationException("access denied") };
@@ -99,7 +99,7 @@ public sealed class AutoStartReconciliationTests
     }
 
     [TestMethod]
-    public async Task WhenTheEntryCannotBeWritten_TheFailureIsReportedInsteadOfClaimingSuccess()
+    public async Task Service_AutoStartReconciliationTests_WhenTheEntryCannotBeWritten_TheFailureIsReportedInsteadOfClaimingSuccess()
     {
         using var fixture = new Fixture(autoStartEnabled: true);
         var registration = new FakeStartupRegistrationStore { WriteThrows = new InvalidOperationException("policy") };
@@ -112,7 +112,7 @@ public sealed class AutoStartReconciliationTests
     }
 
     [TestMethod]
-    public async Task WhenTheEntryCannotBeRemoved_TheFailureIsReportedInsteadOfClaimingSuccess()
+    public async Task Service_AutoStartReconciliationTests_WhenTheEntryCannotBeRemoved_TheFailureIsReportedInsteadOfClaimingSuccess()
     {
         using var fixture = new Fixture(autoStartEnabled: false);
         var registration = new FakeStartupRegistrationStore

@@ -51,7 +51,7 @@ public sealed class ServiceStartupTests
     }
 
     [TestMethod]
-    public void Build_WithNoCacheConnectionConfigured_Succeeds()
+    public void Service_ServiceStartupTests_Build_WithNoCacheConnectionConfiguredSucceeds()
     {
         using var fixture = new StartupFixture();
 
@@ -69,7 +69,7 @@ public sealed class ServiceStartupTests
     }
 
     [TestMethod]
-    public void Build_WithNoCacheConnectionConfigured_StillResolvesTheSettingsSurface()
+    public void Service_ServiceStartupTests_Build_WithNoCacheConnectionConfiguredStillResolvesTheSettingsSurface()
     {
         using var fixture = new StartupFixture();
 
@@ -85,7 +85,7 @@ public sealed class ServiceStartupTests
     }
 
     [TestMethod]
-    public async Task CatalogValidation_WithNoCacheConnection_ExcludesEveryShapeWithTheReason_InsteadOfThrowing()
+    public async Task Service_ServiceStartupTests_CatalogValidation_WithNoCacheConnectionExcludesEveryShapeWithTheReasonInsteadOfThrowing()
     {
         using var fixture = new StartupFixture();
         var provider = fixture.Build();
@@ -104,7 +104,7 @@ public sealed class ServiceStartupTests
     }
 
     [TestMethod]
-    public async Task StatusPayload_WithNoCacheConnection_IsStillProduced()
+    public async Task Service_ServiceStartupTests_StatusPayload_WithNoCacheConnectionIsStillProduced()
     {
         using var fixture = new StartupFixture();
         var provider = fixture.Build();
@@ -136,7 +136,7 @@ public sealed class ServiceStartupTests
     /// running would make the cache look configured-but-rejected rather than unconfigured.
     /// </summary>
     [TestMethod]
-    public void RestorePicker_FollowsItsOwnStore_NotTheBackupStore()
+    public void Service_ServiceStartupTests_RestorePicker_FollowsItsOwnStoreNotTheBackupStore()
     {
         using var fixture = new StartupFixture();
         var viewModel = fixture.Build()
@@ -165,7 +165,7 @@ public sealed class ServiceStartupTests
     }
 
     [TestMethod]
-    public async Task RestorePicker_ListsOnlyTheArtifactsOfTheStoreBeingRestored()
+    public async Task Service_ServiceStartupTests_RestorePicker_ListsOnlyTheArtifactsOfTheStoreBeingRestored()
     {
         using var fixture = new StartupFixture();
         var provider = fixture.Build();

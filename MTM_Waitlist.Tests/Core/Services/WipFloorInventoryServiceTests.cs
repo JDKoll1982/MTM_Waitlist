@@ -10,7 +10,7 @@ namespace MTM_Waitlist.Tests.Core.Services;
 public sealed class WipFloorInventoryServiceTests
 {
     [TestMethod]
-    public async Task GetFloorSnapshotAsync_ReturnsMappedSnapshot_WhenScriptAndRowAvailable()
+    public async Task Service_WipFloorInventoryServiceTests_GetFloorSnapshotAsync_ReturnsMappedSnapshotWhenScriptAndRowAvailable()
     {
         var stub = new StubMySqlHelperServer(new[]
         {
@@ -33,7 +33,7 @@ public sealed class WipFloorInventoryServiceTests
     }
 
     [TestMethod]
-    public async Task GetFloorSnapshotAsync_TrimsAndNormalizesPartNumber()
+    public async Task Service_WipFloorInventoryServiceTests_GetFloorSnapshotAsync_TrimsAndNormalizesPartNumber()
     {
         var stub = new StubMySqlHelperServer(new[] { FloorRow(wip: 5m) });
         var service = new WipFloorInventoryService(stub);
@@ -45,7 +45,7 @@ public sealed class WipFloorInventoryServiceTests
     }
 
     [TestMethod]
-    public async Task GetFloorSnapshotAsync_NoRows_ReturnsNull()
+    public async Task Service_WipFloorInventoryServiceTests_GetFloorSnapshotAsync_NoRowsReturnsNull()
     {
         var stub = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
         var service = new WipFloorInventoryService(stub);
@@ -56,7 +56,7 @@ public sealed class WipFloorInventoryServiceTests
     }
 
     [TestMethod]
-    public async Task GetFloorSnapshotAsync_BlankPart_ReturnsNullWithoutCallingBackend()
+    public async Task Service_WipFloorInventoryServiceTests_GetFloorSnapshotAsync_BlankPartReturnsNullWithoutCallingBackend()
     {
         var stub = new StubMySqlHelperServer(new[] { FloorRow(wip: 5m) });
         var service = new WipFloorInventoryService(stub);
@@ -68,7 +68,7 @@ public sealed class WipFloorInventoryServiceTests
     }
 
     [TestMethod]
-    public async Task GetFloorSnapshotAsync_AllZeroBuckets_SnapshotHasNoFloorQuantity()
+    public async Task Service_WipFloorInventoryServiceTests_GetFloorSnapshotAsync_AllZeroBucketsSnapshotHasNoFloorQuantity()
     {
         var stub = new StubMySqlHelperServer(new[] { FloorRow(finishedGoods: 0m, outsideService: 0m, nonConforming: 0m, wip: 0m) });
         var service = new WipFloorInventoryService(stub);
@@ -85,7 +85,7 @@ public sealed class WipFloorInventoryServiceTests
     /// part this application can picture (FR-001).
     /// </summary>
     [TestMethod]
-    public async Task GetInventoryPartNumbersAsync_ReturnsTheScriptsRowsThroughTheExistingSeam()
+    public async Task Service_WipFloorInventoryServiceTests_GetInventoryPartNumbersAsync_ReturnsTheScriptsRowsThroughTheExistingSeam()
     {
         var stub = new StubMySqlHelperServer(new[]
         {
@@ -110,7 +110,7 @@ public sealed class WipFloorInventoryServiceTests
 
     /// <summary>An empty floor is an empty list, not a failure and not a fabricated part.</summary>
     [TestMethod]
-    public async Task GetInventoryPartNumbersAsync_NoRows_ReturnsAnEmptyList()
+    public async Task Service_WipFloorInventoryServiceTests_GetInventoryPartNumbersAsync_NoRowsReturnsAnEmptyList()
     {
         var stub = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
         var service = new WipFloorInventoryService(stub);
@@ -123,7 +123,7 @@ public sealed class WipFloorInventoryServiceTests
     /// key. A repeated number is one part, not two.
     /// </summary>
     [TestMethod]
-    public async Task GetInventoryPartNumbersAsync_LeavesOutBlankPartNumbersAndRepeats()
+    public async Task Service_WipFloorInventoryServiceTests_GetInventoryPartNumbersAsync_LeavesOutBlankPartNumbersAndRepeats()
     {
         var stub = new StubMySqlHelperServer(new[]
         {

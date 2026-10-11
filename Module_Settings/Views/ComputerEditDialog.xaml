@@ -39,10 +39,10 @@
             Text="{x:Bind ViewModel.MacAddressNormalized, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
         <TextBox
-            AutomationProperties.AutomationId="ComputerEditDialog_DescriptionInput"
-            Header="Description (optional)"
+            AutomationProperties.AutomationId="ComputerEditDialog_LocationInput"
+            Header="Location (optional)"
             PlaceholderText="Describe this computer"
-            Text="{x:Bind ViewModel.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            Text="{x:Bind ViewModel.Location, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
             AcceptsReturn="True"
             TextWrapping="Wrap" />
 

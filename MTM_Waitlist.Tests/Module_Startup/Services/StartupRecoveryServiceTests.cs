@@ -27,14 +27,14 @@ namespace MTM_Waitlist.Tests.Module_Startup.Services;
 public sealed class StartupRecoveryServiceTests
 {
     [TestMethod]
-    public async Task RestoreDefaultsAsync_ResetsExactlyThePartsItWasGiven()
+    public async Task Service_StartupRecoveryServiceTests_RestoreDefaultsAsync_ResetsExactlyThePartsItWasGiven()
     {
         var configuration = new RecordingConfigurationService();
         var recovery = new StartupRecoveryService(configuration);
         var agreed = new[]
         {
-            MachineConfigurationParts.DisplayName,
-            MachineConfigurationParts.Description,
+            MachineConfigurationParts.ComputerName,
+            MachineConfigurationParts.Location,
         };
 
         var result = await recovery.RestoreDefaultsAsync(agreed, CancellationToken.None);
@@ -48,7 +48,7 @@ public sealed class StartupRecoveryServiceTests
     }
 
     [TestMethod]
-    public async Task RestoreDefaultsAsync_WhenAskedForAPersonARoleOrAPermission_TouchesNothingAtAll()
+    public async Task Service_StartupRecoveryServiceTests_RestoreDefaultsAsync_WhenAskedForAPersonARoleOrAPermissionTouchesNothingAtAll()
     {
         // FR-018: a reset must never change people, roles or permissions. The policy is what makes that true
         // regardless of who calls it or what they name, so the store is not even asked.
@@ -68,7 +68,7 @@ public sealed class StartupRecoveryServiceTests
     }
 
     [TestMethod]
-    public async Task RestoreDefaultsAsync_ReportsThePartsTheResetRestored()
+    public async Task Service_StartupRecoveryServiceTests_RestoreDefaultsAsync_ReportsThePartsTheResetRestored()
     {
         var configuration = new RecordingConfigurationService();
         var recovery = new StartupRecoveryService(configuration);
@@ -85,7 +85,7 @@ public sealed class StartupRecoveryServiceTests
     }
 
     [TestMethod]
-    public async Task RepairWithoutAskingAsync_WhenThePartComesFromTheScope_RepairsItAndReportsIt()
+    public async Task Service_StartupRecoveryServiceTests_RepairWithoutAskingAsync_WhenThePartComesFromTheScopeRepairsItAndReportsIt()
     {
         // FR-019: a row the scope supplies is put right without the person being asked, because restoring it
         // costs nothing they chose.
@@ -105,7 +105,7 @@ public sealed class StartupRecoveryServiceTests
     }
 
     [TestMethod]
-    public async Task RepairWithoutAskingAsync_WhenThePartIsAChoiceThePersonMade_RepairsNothing()
+    public async Task Service_StartupRecoveryServiceTests_RepairWithoutAskingAsync_WhenThePartIsAChoiceThePersonMadeRepairsNothing()
     {
         // FR-019: the display name is something the person typed, so a repair may not throw it away behind their
         // back. It is refused here and reaches them as a question instead.
@@ -114,8 +114,8 @@ public sealed class StartupRecoveryServiceTests
 
         var result = await recovery.RepairWithoutAskingAsync(
             [
-                MachineConfigurationParts.DisplayName,
-                MachineConfigurationParts.Description,
+                MachineConfigurationParts.ComputerName,
+                MachineConfigurationParts.Location,
             ],
             CancellationToken.None);
 
@@ -127,7 +127,7 @@ public sealed class StartupRecoveryServiceTests
     }
 
     [TestMethod]
-    public async Task RepairWithoutAskingAsync_IsAttemptedOnce_SoAFaultThatCameBackIsAskedAbout()
+    public async Task Service_StartupRecoveryServiceTests_RepairWithoutAskingAsync_IsAttemptedOnceSoAFaultThatCameBackIsAskedAbout()
     {
         // A fault that survived being put right quietly is a fault the person is asked about. Without that rule a
         // fault that came back on every stop would be repaired again on every stop, and the launch would go round
@@ -149,7 +149,7 @@ public sealed class StartupRecoveryServiceTests
     }
 
     [TestMethod]
-    public async Task RepairWithoutAskingAsync_WhenTheStoreRefusedTheWrite_AnswersThatNothingWasRepaired()
+    public async Task Service_StartupRecoveryServiceTests_RepairWithoutAskingAsync_WhenTheStoreRefusedTheWriteAnswersThatNothingWasRepaired()
     {
         // The fault is left where it was and the person is asked about it. A repair they never asked for must not
         // be the thing that ends their launch, so nothing is raised.
@@ -166,7 +166,7 @@ public sealed class StartupRecoveryServiceTests
     }
 
     [TestMethod]
-    public async Task RepairWithoutAskingAsync_WhenTheResetRestoredNoRow_AnswersThatNothingWasRepaired()
+    public async Task Service_StartupRecoveryServiceTests_RepairWithoutAskingAsync_WhenTheResetRestoredNoRowAnswersThatNothingWasRepaired()
     {
         // A store that took the write and changed no row leaves the fault where it was, so the person must be
         // asked about it rather than the launch carrying on as though it had been put right (FR-019, T207).

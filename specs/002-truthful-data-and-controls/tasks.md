@@ -352,13 +352,13 @@ is sourced data.
 
 ```text
 dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 --filter "FullyQualifiedName~PatternScan|FullyQualifiedName~FabricatedValueGuard"
-  Passed FindFabricatedLooking_WithAnEmptyValueSet_ReturnsNothing
-  Passed IsFabricatedLooking_WithAnAbsentValue_IsFalse
-  Passed IsFabricatedLooking_WithASyntheticValueOfEachShape_IsTrue
-  Passed IsFabricatedLooking_WithASourcedValue_IsFalse
-  Passed PatternScan_WithAnEmptyPatternSet_ReturnsNoHits
-  Passed PatternScan_WithTheDefaultScope_EnumeratesProductionSource
-  Passed PatternScan_WithAKnownPresentLiteral_FindsIt
+  Passed Audit_FabricatedValueGuard_FindFabricatedLooking_WithAnEmptyValueSetReturnsNothing
+  Passed Audit_FabricatedValueGuard_IsFabricatedLooking_WithAnAbsentValueIsFalse
+  Passed Audit_FabricatedValueGuard_IsFabricatedLooking_WithASyntheticValueOfEachShapeIsTrue
+  Passed Audit_FabricatedValueGuard_IsFabricatedLooking_WithASourcedValueIsFalse
+  Passed Audit_RetiredSymbolAuditTests_PatternScan_WithAnEmptyPatternSetReturnsNoHits
+  Passed Audit_RetiredSymbolAuditTests_PatternScan_WithTheDefaultScopeEnumeratesProductionSource
+  Passed Audit_RetiredSymbolAuditTests_PatternScan_WithAKnownPresentLiteralFindsIt
   Passed: 7   Failed: 0
 ```
 
@@ -379,11 +379,11 @@ flagged. Without them a clean scan would be indistinguishable from a broken enum
 
 ```text
 dotnet test ... --filter "WaitlistViewViewModelFieldTests|WaitlistViewDetailFieldTests|WaitlistLineCardMarkupTests"
-  Failed FieldValue_ExposesNoFallbackDefault
-  Failed LoadedSections_RenderNoInventedAttributeAndNoAbsencePlaceholder
-  Failed CreateSessionOrder_ForEveryRequestShape_CarriesOnlyValuesTheRequestCarries
-  Failed CreateSessionOrder_ForEveryRequestShape_RendersNoFabricatedLookingValue
-  Failed Card_DrawsNoButtonThatCannotAct
+  Failed ViewModel_WaitlistViewDetailFieldTests_ViewModel_WaitlistViewDetailFieldTests_FieldValue_ExposesNoFallbackDefault
+  Failed ViewModel_WaitlistViewDetailFieldTests_ViewModel_WaitlistViewDetailFieldTests_LoadedSections_RenderNoInventedAttributeAndNoAbsencePlaceholder
+  Failed ViewModel_WaitlistViewViewModelFieldTests_CreateSessionOrder_ForEveryRequestShapeCarriesOnlyValuesTheRequestCarries
+  Failed ViewModel_WaitlistViewViewModelFieldTests_CreateSessionOrder_ForEveryRequestShapeRendersNoFabricatedLookingValue
+  Failed UI_WaitlistLineCardMarkupTests_UI_WaitlistLineCardMarkupTests_Card_DrawsNoButtonThatCannotAct
   Failed Card_OffersNoCancelOrAcceptControl
   Failed!  - Failed: 6, Passed: 4, Total: 10
 
@@ -473,7 +473,7 @@ behaviour and are corrected with the rest of the wording sweep rather than left 
 
 **T016/T018 — written first, confirmed failing**
 
-`ConfirmStepPage_CarriesNoQueueOrWaitFigure` failed against the shipped card, and both settings checks could
+`ViewModel_NewRequestSummaryHonestyTests_ViewModel_NewRequestSummaryHonestyTests_ConfirmStepPage_CarriesNoQueueOrWaitFigure` failed against the shipped card, and both settings checks could
 not be expressed at all — the compiler named the absent capability:
 
 ```text
@@ -517,7 +517,7 @@ scan: Module_Settings + MTM_Waitlist.Settings for the static "packaged app" clai
 
 One pre-existing check encoded the defect and was rewritten: `NewRequestAlerts_TogglePersistsUnderKey`
 asserted that toggling always persists, which is exactly the silent-preference behaviour the defect names.
-It is now `NewRequestAlerts_TogglePersistsOnlyWhenTheInstallationCanDeliver`, asserting the branch this
+It is now `ViewModel_SettingsViewModelTests_ViewModel_SettingsViewModelTests_NewRequestAlerts_TogglePersistsOnlyWhenTheInstallationCanDeliver`, asserting the branch this
 installation is actually in.
 
 ### Phase 5 — User Story 3 (Settings labels, privacy entry, search completeness)
@@ -525,17 +525,17 @@ installation is actually in.
 **RED evidence — captured by temporarily restoring the pre-change state, then restoring the fix**
 
 ```text
-dotnet test ... --filter "SettingsPageMarkupTests|NoPlaceholderResourceValueShips|SearchQuery_ChangeAnnounces…|SearchRegistration_Covers…|PanelAndCategoryMatchSearch"
-  Failed SettingsPage_DeclaresEachXUidAtMostOnce                          (x:Uid="Settings_About" three times)
-  Failed NewRequestAlerts_PanelAndCategoryMatchSearch_AndTheChangeIsAnnounced
-  Failed SearchQuery_ChangeAnnouncesEveryPanelThatConsumesTheTerm
-  Failed NoPlaceholderResourceValueShips                                  (the placeholder address value)
+dotnet test ... --filter "SettingsPageMarkupTests|Audit_RetiredSymbolAuditTests_Audit_RetiredSymbolAuditTests_NoPlaceholderResourceValueShips|SearchQuery_ChangeAnnounces…|SearchRegistration_Covers…|PanelAndCategoryMatchSearch"
+  Failed UI_SettingsPageMarkupTests_UI_SettingsPageMarkupTests_SettingsPage_DeclaresEachXUidAtMostOnce                          (x:Uid="Settings_About" three times)
+  Failed ViewModel_SettingsViewModelTests_NewRequestAlerts_PanelAndCategoryMatchSearchAndTheChangeIsAnnounced
+  Failed ViewModel_SettingsViewModelTests_ViewModel_SettingsViewModelTests_SearchQuery_ChangeAnnouncesEveryPanelThatConsumesTheTerm
+  Failed Audit_RetiredSymbolAuditTests_Audit_RetiredSymbolAuditTests_NoPlaceholderResourceValueShips                                  (the placeholder address value)
   Failed!  - Failed: 4, Passed: 2, Total: 6
 
 restored -> Passed!  - Failed: 0, Passed: 804, Skipped: 19, Total: 823
 ```
 
-`SearchRegistration_CoversEveryPropertyThatConsumesTheTerm` passed in the reverted state, correctly: it
+`ViewModel_SettingsViewModelTests_ViewModel_SettingsViewModelTests_SearchRegistration_CoversEveryPropertyThatConsumesTheTerm` passed in the reverted state, correctly: it
 tests the *declared list*, and only the iteration had been reverted. It fails when a panel that consumes the
 term is missing from the list — the case it exists for.
 
@@ -672,13 +672,13 @@ therefore out of scope by construction — they are inputs, not rendered values.
 
 FR-006/FR-031 keep the external-read fallback, its read-only indicator, its age and its manual retry exactly
 as delivered. That behaviour is covered by spec 001's checks, all still green in this run, including
-`Probe_TwoConsecutiveFailures_GoesCached`, `Probe_OneSuccessWhileCached_ReturnsLiveImmediately`,
-`WorkOrderLookup_Unreachable_ServesMirrorThroughShapeProcedure`,
-`WorkOrderLookup_EmptyLiveAnswer_IsNotReplacedByCache`,
-`OperationSequences_Unreachable_ServesMirrorThroughShapeProcedure`,
-`OperationSequences_EmptyLiveAnswer_IsNotReplacedByCache`,
-`RefreshAsync_ReportsCachedDataAge_FromTheMostRecentShapeRefresh` and
-`EveryShippedShape_HasAnInAppFallbackRegistered`. No file on the fallback path was edited by this feature.
+`Service_VisualReachabilityDetectorTests_Probe_TwoConsecutiveFailuresGoesCached`, `Service_VisualReachabilityDetectorTests_Probe_OneSuccessWhileCachedReturnsLiveImmediately`,
+`Service_VisualReadFallbackParityTests_WorkOrderLookup_UnreachableServesMirrorThroughShapeProcedure`,
+`Service_VisualReadFallbackParityTests_WorkOrderLookup_EmptyLiveAnswerIsNotReplacedByCache`,
+`Service_VisualReadFallbackParityTests_OperationSequences_UnreachableServesMirrorThroughShapeProcedure`,
+`Service_VisualReadFallbackParityTests_OperationSequences_EmptyLiveAnswerIsNotReplacedByCache`,
+`Service_ReadStatusProviderTests_RefreshAsync_ReportsCachedDataAgeFromTheMostRecentShapeRefresh` and
+`Service_ShapeAdditionNoDowntimeTests_Service_ShapeAdditionNoDowntimeTests_EveryShippedShape_HasAnInAppFallbackRegistered`. No file on the fallback path was edited by this feature.
 
 **T048 — the full gate**
 

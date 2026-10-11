@@ -19,7 +19,7 @@ public sealed class LogStoreLevelTests
 {
     /// <summary>The shipped default keeps errors and warnings and drops the progress lines beneath them.</summary>
     [TestMethod]
-    public void TheShippedDefault_KeepsErrorsAndWarnings_AndDropsProgressLines()
+    public void Service_LogStoreLevelTests_TheShippedDefault_KeepsErrorsAndWarningsAndDropsProgressLines()
     {
         var level = new LogStoreLevel();
 
@@ -38,7 +38,7 @@ public sealed class LogStoreLevelTests
     /// without a restart and without a rebuild.
     /// </summary>
     [TestMethod]
-    public void AdoptingALevel_TakesEffectOnTheNextEntry()
+    public void Service_LogStoreLevelTests_AdoptingALevel_TakesEffectOnTheNextEntry()
     {
         var level = new LogStoreLevel();
 
@@ -56,7 +56,7 @@ public sealed class LogStoreLevelTests
     /// than silencing the store.
     /// </summary>
     [TestMethod]
-    public void AConfiguredName_NamesTheThreshold_AndAnUnreadableOneAnswersTheDefault()
+    public void Service_LogStoreLevelTests_AConfiguredName_NamesTheThresholdAndAnUnreadableOneAnswersTheDefault()
     {
         Assert.AreEqual(LogSeverity.Critical, LogStoreLevel.ParseSeverity("critical"));
         Assert.AreEqual(LogSeverity.Debug, LogStoreLevel.ParseSeverity("  Debug "), "case and padding must not matter");
@@ -74,7 +74,7 @@ public sealed class LogStoreLevelTests
     /// by the screen instead of becoming unreachable from it.
     /// </summary>
     [TestMethod]
-    public void TheChooseableLevels_AreTheStoresOwnVocabulary()
+    public void Service_LogStoreLevelTests_TheChooseableLevels_AreTheStoresOwnVocabulary()
     {
         CollectionAssert.AreEqual(
             Enum.GetValues<LogSeverity>(),
@@ -84,7 +84,7 @@ public sealed class LogStoreLevelTests
 
     /// <summary>An <c>ILogger</c> level projects onto the column's vocabulary, so both doors agree.</summary>
     [TestMethod]
-    public void AnILoggerLevel_ProjectsOntoTheStoresVocabulary()
+    public void Service_LogStoreLevelTests_AnILoggerLevel_ProjectsOntoTheStoresVocabulary()
     {
         Assert.AreEqual(LogSeverity.Debug, LogStoreLevel.SeverityOf(LogLevel.Trace));
         Assert.AreEqual(LogSeverity.Debug, LogStoreLevel.SeverityOf(LogLevel.Debug));
@@ -96,7 +96,7 @@ public sealed class LogStoreLevelTests
 
     /// <summary><see cref="LogLevel.None"/> is the absence of a severity, so no threshold ever keeps it.</summary>
     [TestMethod]
-    public void NoneIsNeverKept_HoweverWideTheStoreIs()
+    public void Service_LogStoreLevelTests_NoneIsNeverKept_HoweverWideTheStoreIs()
     {
         Assert.IsFalse(new LogStoreLevel(LogSeverity.Debug).Keeps(LogLevel.None));
     }
@@ -106,7 +106,7 @@ public sealed class LogStoreLevelTests
     /// see each other's value.
     /// </summary>
     [TestMethod]
-    public void TheSectionAndKey_AreSpelledOnce()
+    public void Service_LogStoreLevelTests_TheSectionAndKey_AreSpelledOnce()
     {
         Assert.AreEqual("LogStore", LogStoreLevel.SectionName);
         Assert.AreEqual("MinimumLevel", LogStoreLevel.MinimumLevelKey);

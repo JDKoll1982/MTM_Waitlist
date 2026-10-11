@@ -20,7 +20,7 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.ViewModels;
 public sealed class WaitlistViewDetailBlockStateTests
 {
     [TestMethod]
-    public void FailedSectionRead_ReportsTheFailedStateInPlaceWithARetry()
+    public void ViewModel_WaitlistViewDetailBlockStateTests_FailedSectionRead_ReportsTheFailedStateInPlaceWithARetry()
     {
         var viewModel = BuildViewModel(new ThrowingRequestService());
 
@@ -44,7 +44,7 @@ public sealed class WaitlistViewDetailBlockStateTests
     }
 
     [TestMethod]
-    public void SuccessfulReadWithNoSourcedRows_ReportsTheHiddenStateNotAFailedOrEmptyLabeledShell()
+    public void ViewModel_WaitlistViewDetailBlockStateTests_SuccessfulReadWithNoSourcedRows_ReportsTheHiddenStateNotAFailedOrEmptyLabeledShell()
     {
         var requestService = new SparseRequestService();
         var viewModel = BuildViewModel(requestService);
@@ -70,7 +70,7 @@ public sealed class WaitlistViewDetailBlockStateTests
     }
 
     [TestMethod]
-    public void RetryAfterAFailedRead_ReachesThePresentState()
+    public void ViewModel_WaitlistViewDetailBlockStateTests_RetryAfterAFailedRead_ReachesThePresentState()
     {
         var requestService = new FlakyRequestService();
         var viewModel = BuildViewModel(requestService);
@@ -86,7 +86,7 @@ public sealed class WaitlistViewDetailBlockStateTests
     }
 
     [TestMethod]
-    public void FailedSectionRead_DoesNotSubstituteSampleRows()
+    public void ViewModel_WaitlistViewDetailBlockStateTests_FailedSectionRead_DoesNotSubstituteSampleRows()
     {
         var viewModel = BuildViewModel(new ThrowingRequestService());
 

@@ -19,7 +19,7 @@ public sealed class PartPictureCoverageServiceTests
     public void TestInitialize() => _readService = new FakeImageOverrideReadService();
 
     [TestMethod]
-    public async Task TheListIsTheNamedPartsMinusThePicturedOnes()
+    public async Task Service_PartPictureCoverageServiceTests_TheListIsTheNamedPartsMinusThePicturedOnes()
     {
         _readService.AddOverride("wip_part", "MMC0001000", "WIP/MMC/MMC0001000.png");
 
@@ -35,7 +35,7 @@ public sealed class PartPictureCoverageServiceTests
     }
 
     [TestMethod]
-    public async Task APartTheStoreHoldsForTheOtherSystem_IsStillMissing()
+    public async Task Service_PartPictureCoverageServiceTests_APartTheStoreHoldsForTheOtherSystem_IsStillMissing()
     {
         // The Visual part is pictured; the WIP part that shares its number is not (FR-002).
         _readService.AddOverride("visual_part", "MMC0001000", "Visual/MMC/MMC0001000.png");
@@ -50,7 +50,7 @@ public sealed class PartPictureCoverageServiceTests
     }
 
     [TestMethod]
-    public async Task TheSameNumberTwiceInOneSystem_IsListedOnce()
+    public async Task Service_PartPictureCoverageServiceTests_TheSameNumberTwiceInOneSystem_IsListedOnce()
     {
         var service = CreateService(new StubPartNumberSource(PartPictureSystem.Wip, "MMC0001000", "mmc0001000"));
 
@@ -63,7 +63,7 @@ public sealed class PartPictureCoverageServiceTests
     }
 
     [TestMethod]
-    public async Task ASourceThatCannotBeRead_ContributesNothingRatherThanEverything()
+    public async Task Service_PartPictureCoverageServiceTests_ASourceThatCannotBeRead_ContributesNothingRatherThanEverything()
     {
         var source = new StubPartNumberSource(PartPictureSystem.Wip, "MMC0001000")
         {
@@ -79,7 +79,7 @@ public sealed class PartPictureCoverageServiceTests
     }
 
     [TestMethod]
-    public async Task EveryNamedPartPictured_AnswersAnEmptyList()
+    public async Task Service_PartPictureCoverageServiceTests_EveryNamedPartPictured_AnswersAnEmptyList()
     {
         _readService.AddOverride("wip_part", "MMC0001000", "WIP/MMC/MMC0001000.png");
 
@@ -89,7 +89,7 @@ public sealed class PartPictureCoverageServiceTests
     }
 
     [TestMethod]
-    public async Task TheExport_CarriesTheHeaderAndOneLinePerPart()
+    public async Task Service_PartPictureCoverageServiceTests_TheExport_CarriesTheHeaderAndOneLinePerPart()
     {
         var service = CreateService(new StubPartNumberSource(PartPictureSystem.Wip, "MMC0001000", "FGT0009000"));
 
@@ -107,7 +107,7 @@ public sealed class PartPictureCoverageServiceTests
     }
 
     [TestMethod]
-    public async Task TheExportPath_NamesTheFolderAndTheFileWithoutClaimingAnExtension()
+    public async Task Service_PartPictureCoverageServiceTests_TheExportPath_NamesTheFolderAndTheFileWithoutClaimingAnExtension()
     {
         var service = CreateService(new StubPartNumberSource(PartPictureSystem.Wip, "OTHER-1"));
 
@@ -121,7 +121,7 @@ public sealed class PartPictureCoverageServiceTests
     }
 
     [TestMethod]
-    public void TheExport_QuotesAValueThatWouldOtherwiseSplitALine()
+    public void Service_PartPictureCoverageServiceTests_TheExport_QuotesAValueThatWouldOtherwiseSplitALine()
     {
         var rows = new[]
         {
@@ -141,7 +141,7 @@ public sealed class PartPictureCoverageServiceTests
     }
 
     [TestMethod]
-    public async Task TheSystemsItCanList_AreTheOnesItsSourcesName()
+    public async Task Service_PartPictureCoverageServiceTests_TheSystemsItCanList_AreTheOnesItsSourcesName()
     {
         var service = CreateService(new StubPartNumberSource(PartPictureSystem.Wip, "MMC0001000"));
 

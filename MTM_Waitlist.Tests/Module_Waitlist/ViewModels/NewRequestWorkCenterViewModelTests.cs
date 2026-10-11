@@ -25,7 +25,7 @@ public sealed class NewRequestWorkCenterViewModelTests
     private const string SignedInEmployeeName = "Sam Reyes";
 
     [TestMethod]
-    public void OnNavigatedTo_LoadsCatalogPopulatesHotAndOtherWithDetail()
+    public void ViewModel_NewRequestWorkCenterViewModelTests_OnNavigatedTo_LoadsCatalogPopulatesHotAndOtherWithDetail()
     {
         var catalogService = new FakeWorkCenterCatalogService
         {
@@ -79,7 +79,7 @@ public sealed class NewRequestWorkCenterViewModelTests
     }
 
     [TestMethod]
-    public void ApplyFilter_FiltersBySelectedBuildingAndOnBuildingChange()
+    public void ViewModel_NewRequestWorkCenterViewModelTests_ApplyFilter_FiltersBySelectedBuildingAndOnBuildingChange()
     {
         var catalogService = new FakeWorkCenterCatalogService
         {
@@ -108,7 +108,7 @@ public sealed class NewRequestWorkCenterViewModelTests
     }
 
     [TestMethod]
-    public void ApplyFilter_FiltersByFilterTextAcrossNameAndJobDetail()
+    public void ViewModel_NewRequestWorkCenterViewModelTests_ApplyFilter_FiltersByFilterTextAcrossNameAndJobDetail()
     {
         var catalogService = new FakeWorkCenterCatalogService
         {
@@ -144,7 +144,7 @@ public sealed class NewRequestWorkCenterViewModelTests
     }
 
     [TestMethod]
-    public void LoadWorkCenters_NoLocalHidesLocalSectionAndExpandsOther()
+    public void ViewModel_NewRequestWorkCenterViewModelTests_LoadWorkCenters_NoLocalHidesLocalSectionAndExpandsOther()
     {
         var catalogService = new FakeWorkCenterCatalogService
         {
@@ -169,7 +169,7 @@ public sealed class NewRequestWorkCenterViewModelTests
     }
 
     [TestMethod]
-    public void OtherWorkCentersHeader_TracksExpandedState()
+    public void ViewModel_NewRequestWorkCenterViewModelTests_OtherWorkCentersHeader_TracksExpandedState()
     {
         var viewModel = CreateViewModel(
             new FakeWorkCenterCatalogService(),
@@ -185,7 +185,7 @@ public sealed class NewRequestWorkCenterViewModelTests
     }
 
     [TestMethod]
-    public async Task SelectWorkCenter_MarksSelectedClearsOthersAndNavigates()
+    public async Task ViewModel_NewRequestWorkCenterViewModelTests_SelectWorkCenter_MarksSelectedClearsOthersAndNavigates()
     {
         var catalogService = new FakeWorkCenterCatalogService
         {
@@ -220,7 +220,7 @@ public sealed class NewRequestWorkCenterViewModelTests
     }
 
     [TestMethod]
-    public async Task SelectWorkCenter_AttributesTheRequestToTheSignedInPersonFromTheDirectory()
+    public async Task ViewModel_NewRequestWorkCenterViewModelTests_SelectWorkCenter_AttributesTheRequestToTheSignedInPersonFromTheDirectory()
     {
         // FR-046, SC-021. The signed-in person is 9004, deliberately not the 6229 the step used to name:
         // both the number and the name on the request have to come from that person's stored record, and the
@@ -261,7 +261,7 @@ public sealed class NewRequestWorkCenterViewModelTests
     }
 
     [TestMethod]
-    public async Task SelectWorkCenter_BlocksTheStepWhenTheDirectoryDoesNotHoldTheSignedInNumber()
+    public async Task ViewModel_NewRequestWorkCenterViewModelTests_SelectWorkCenter_BlocksTheStepWhenTheDirectoryDoesNotHoldTheSignedInNumber()
     {
         // The refusal survives the fix: a person no active record accounts for cannot raise a request, and
         // the step says so in plain language and stays put rather than navigating on (FR-026, FR-046).
@@ -295,7 +295,7 @@ public sealed class NewRequestWorkCenterViewModelTests
     }
 
     [TestMethod]
-    public void SelectWorkCenter_BlocksWorkCenterWithoutActiveJob()
+    public void ViewModel_NewRequestWorkCenterViewModelTests_SelectWorkCenter_BlocksWorkCenterWithoutActiveJob()
     {
         var catalogService = new FakeWorkCenterCatalogService
         {
@@ -322,7 +322,7 @@ public sealed class NewRequestWorkCenterViewModelTests
     }
 
     [TestMethod]
-    public void WorkCenterSelectionItem_ComputedDisplays_FormatJobPartAndLastUpdated()
+    public void ViewModel_NewRequestWorkCenterViewModelTests_WorkCenterSelectionItem_ComputedDisplaysFormatJobPartAndLastUpdated()
     {
         var full = new WorkCenterSelectionItem
         {
@@ -349,7 +349,7 @@ public sealed class NewRequestWorkCenterViewModelTests
     }
 
     [TestMethod]
-    public void WorkCenterSelectionItem_LastUpdatedDisplay_FormatsLocalTimeAndNeverWhenNull()
+    public void ViewModel_NewRequestWorkCenterViewModelTests_WorkCenterSelectionItem_LastUpdatedDisplayFormatsLocalTimeAndNeverWhenNull()
     {
         var withDate = new WorkCenterSelectionItem
         {

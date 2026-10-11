@@ -8,7 +8,7 @@ namespace MTM_Waitlist.Tests.Module_Shared.Services;
 public sealed class TooltipServiceTests
 {
     [TestMethod]
-    public void ResolvePresentation_WhenRoleIsDeveloper_UsesDeveloperModeAndKeepsFiles()
+    public void Service_TooltipServiceTests_ResolvePresentation_WhenRoleIsDeveloperUsesDeveloperModeAndKeepsFiles()
     {
         var service = CreateService("developer");
 
@@ -30,7 +30,7 @@ public sealed class TooltipServiceTests
     }
 
     [TestMethod]
-    public void ResolvePresentation_WhenRoleIsNormal_UsesStandardMode()
+    public void Service_TooltipServiceTests_ResolvePresentation_WhenRoleIsNormalUsesStandardMode()
     {
         var service = CreateService("production");
 
@@ -45,7 +45,7 @@ public sealed class TooltipServiceTests
     }
 
     [TestMethod]
-    public void ResolvePresentation_WhenResourceKeyMissing_UsesFallbackText()
+    public void Service_TooltipServiceTests_ResolvePresentation_WhenResourceKeyMissingUsesFallbackText()
     {
         var service = CreateService("production");
 

@@ -86,25 +86,26 @@ severity vocabulary, the runtime and store context, the serialized exception cha
 groups repeated faults. The seam is **unconditional** — no `[Conditional]`, no `#if DEBUG` — because a Release
 build has to record.
 
-Never write a credential, a token, a salt, the remembered-sign-in payload, key material or a connection string.
-There is no exception for a key file's path: the plant's shared key is read from its share to honour a remembered
-sign-in, it is never written, copied or held on this computer, and its path must never be recorded — so a later
-change must not reintroduce an allowance for one.
+Never write a credential, a token, a salt, key material or a connection string. There is no exception for a key
+file's path either: remember-me was withdrawn on 2026-10-10 and nothing reads, copies or keeps the plant's
+shared key file, so neither its path nor any key material may be recorded — and a later change must not
+reintroduce an allowance for one.
 `contracts/logging-contract.md` §6 is the authoritative list, and `ExceptionDetailSerializer.IsNeverWritten` is
 the check that enforces it.
 
 ## Adding a machine-configuration field
 
-`IMachineConfigurationService` is the **only** writer of this machine's display name and its description, and
+`IMachineConfigurationService` is the **only** writer of this machine's own name and its location, and
 `MachineConfigurationService` is its only implementation. Where pictures come from is not this machine's
 configuration: the shared pictures folder is held once for the whole plant and changed from the settings panel
 (FR-040).
 
 - For a field on the machine's own registry row, extend `MachineConfigurationDraft` and the service's save and
   read, over the `sp_core_computers_registry_*` procedures. Do not write the row from a screen.
-- The machine-setup screen asks for this computer's name and its note, and for nothing else (FR-040, SC-018), and
-  the draft it saves carries no picture source. A machine is configured once the store holds its record and its
-  name, so never add a field a machine must fill in before it can be used (FR-041).
+- The machine-setup stage asks for this computer's location and for nothing else (FR-049, SC-018). Its name is
+  read from the computer itself, shown, and cannot be typed; the draft it saves carries no picture source. A
+  machine is configured once the store holds its record and its name, so never add a field a machine must fill
+  in before it can be used (FR-041).
 - Nothing reads or writes a folder of this machine's own any more. The storage resolver's cascade is the
   plant-wide setting and then the shipped default, `MachineConfigurationSourceKinds` and `PictureSource` name
   only the rows that are being retired, and the dunnage root is the shipped default. Do not add a folder to
@@ -128,10 +129,19 @@ they follow the person to another computer. Nothing but what is needed to reach 
 - **The replaced launch behaviour must not come back.** `RetiredSymbolAuditTests` fails the build if it does, and
   it asserts the rebuilt view set positively rather than only by absence.
 - **Nothing is kept on the machine except the picture copy** (FR-025, FR-043). What a computer keeps is what it
-  needs to reach the store and the local copy of the pictures, and nothing else: no key file is copied or kept on
+  needs to reach the store and the local copy of the pictures, and nothing else: no key file is read or kept on
   this computer, no log file is written locally, and no folder of its own is captured. A change that would keep
   anything else on a computer is not a change this module can take — a person's preferences belong to the store,
   and where pictures come from is held once for the plant (FR-040).
+- **A fault goes to the store and never to a file** (FR-021, FR-025, SC-016). Every diagnostic is written through
+  `ILogService` to `ops_startup_logs`, including one raised where the process is about to end: those routes record
+  through the seam and then force the queue out with the bounded `FlushAsync`, because the queue is flushed by a
+  thread that is going away with the process. Writing the fault to a file instead was tried once, to name a crash
+  the store could not account for, and it was wrong twice over — it kept a file on the machine, and it wrote the
+  exception unredacted, so a connection string or a statement's parameter value would have reached the disk where
+  the seam would have dropped it (FR-036). `LocalStateFreeTests` fails if any production file but the picture
+  cache writes under the application's local folder, and `FaultRecordAuditTests` fails if a fault route reaches
+  for a file.
 
 ## Where the pieces are
 

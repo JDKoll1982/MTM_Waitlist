@@ -107,8 +107,8 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
         if (State.PartResults.Count == 0)
         {
             AppLog.Info("SetupWorkflow", "No matching parts found.");
-            var noMatchingPartsMessage = "Setup_WorkOrder.Validation.NoMatchingParts".GetLocalized();
-            State.ValidationMessage = string.Equals(noMatchingPartsMessage, "Setup_WorkOrder.Validation.NoMatchingParts", StringComparison.Ordinal)
+            var noMatchingPartsMessage = "Setup_WorkOrder_Validation.NoMatchingParts".GetLocalized();
+            State.ValidationMessage = string.Equals(noMatchingPartsMessage, "Setup_WorkOrder_Validation.NoMatchingParts", StringComparison.Ordinal)
                 ? "No parts were found for this work order."
                 : noMatchingPartsMessage;
             State.CurrentStep = SetupWorkflowStep.WorkOrderEntry;
@@ -167,8 +167,8 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
         if (State.SequenceResults.Count == 0)
         {
             AppLog.Info("SetupWorkflow", "No sequences found; staying on part selection.");
-            var noMatchingSequencesMessage = "Setup_Sequence.Validation.NoMatchingSequences".GetLocalized();
-            State.StatusMessage = string.Equals(noMatchingSequencesMessage, "Setup_Sequence.Validation.NoMatchingSequences", StringComparison.Ordinal)
+            var noMatchingSequencesMessage = "Setup_Sequence_Validation.NoMatchingSequences".GetLocalized();
+            State.StatusMessage = string.Equals(noMatchingSequencesMessage, "Setup_Sequence_Validation.NoMatchingSequences", StringComparison.Ordinal)
                 ? "No operations were found for the selected part."
                 : noMatchingSequencesMessage;
             State.CurrentStep = SetupWorkflowStep.PartSelection;

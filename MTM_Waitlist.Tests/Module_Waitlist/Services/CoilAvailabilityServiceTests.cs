@@ -20,7 +20,7 @@ public sealed class CoilAvailabilityServiceTests
     private const string WorkCenter = "100-03";
 
     [TestMethod]
-    public async Task GetCoilForJobAsync_ReadsTheSavedActiveJob_AndReportsTheRealCoil()
+    public async Task Service_CoilAvailabilityServiceTests_GetCoilForJobAsync_ReadsTheSavedActiveJobAndReportsTheRealCoil()
     {
         var helper = new StubMySqlHelperServer(
             ActiveJobRow("MMC0001000", "COIL 0.5 X 12.0", 4_200m));
@@ -41,7 +41,7 @@ public sealed class CoilAvailabilityServiceTests
     }
 
     [TestMethod]
-    public async Task GetCoilForJobAsync_AsksForTheResolvedCoil_NotAFixedPart()
+    public async Task Service_CoilAvailabilityServiceTests_GetCoilForJobAsync_AsksForTheResolvedCoilNotAFixedPart()
     {
         // A distinctive part proves the average weight is keyed on what the job actually carries: a fixed
         // key cannot satisfy this assertion, and neither can it satisfy the field being empty below.
@@ -56,7 +56,7 @@ public sealed class CoilAvailabilityServiceTests
     }
 
     [TestMethod]
-    public async Task GetCoilForJobAsync_WhenTheWeightCannotBeResolved_LeavesTheFieldEmpty()
+    public async Task Service_CoilAvailabilityServiceTests_GetCoilForJobAsync_WhenTheWeightCannotBeResolvedLeavesTheFieldEmpty()
     {
         var helper = new StubMySqlHelperServer(ActiveJobRow("MMC778812", "COIL 0.050 X 48.0 GALV", 4_310m));
         var service = new CoilAvailabilityService(helper, new StubAverageCoilWeightService(string.Empty));
@@ -68,7 +68,7 @@ public sealed class CoilAvailabilityServiceTests
     }
 
     [TestMethod]
-    public async Task GetCoilForJobAsync_WhenNoActiveJobIsSaved_ReportsNoCoil()
+    public async Task Service_CoilAvailabilityServiceTests_GetCoilForJobAsync_WhenNoActiveJobIsSavedReportsNoCoil()
     {
         var helper = new StubMySqlHelperServer();
         var service = new CoilAvailabilityService(helper, new StubAverageCoilWeightService("5,000 lb"));
@@ -80,7 +80,7 @@ public sealed class CoilAvailabilityServiceTests
     }
 
     [TestMethod]
-    public async Task GetCoilForJobAsync_WhenTheSavedJobIsForAnotherWorkCenter_ReportsNoCoil()
+    public async Task Service_CoilAvailabilityServiceTests_GetCoilForJobAsync_WhenTheSavedJobIsForAnotherWorkCenterReportsNoCoil()
     {
         var helper = new StubMySqlHelperServer(ActiveJobRow("MMC0001000", "COIL", 10m, workCenter: "999-9"));
         var service = new CoilAvailabilityService(helper, new StubAverageCoilWeightService("5,000 lb"));
@@ -91,7 +91,7 @@ public sealed class CoilAvailabilityServiceTests
     }
 
     [TestMethod]
-    public async Task GetCoilForJobAsync_WhenTheJobCarriesNoCoilPart_ReportsNoCoil()
+    public async Task Service_CoilAvailabilityServiceTests_GetCoilForJobAsync_WhenTheJobCarriesNoCoilPartReportsNoCoil()
     {
         // A flatstock/die-only job: subordinate parts exist but none carries the MMC coil prefix.
         var helper = new StubMySqlHelperServer(ActiveJobRow("MMF0001154", "FLATSTOCK", 12m));
@@ -103,7 +103,7 @@ public sealed class CoilAvailabilityServiceTests
     }
 
     [TestMethod]
-    public async Task GetCoilForJobAsync_ToleratesAMalformedSubordinatePayload_WithoutAssumingACoil()
+    public async Task Service_CoilAvailabilityServiceTests_GetCoilForJobAsync_ToleratesAMalformedSubordinatePayloadWithoutAssumingACoil()
     {
         var helper = new StubMySqlHelperServer(new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase)
         {
@@ -118,7 +118,7 @@ public sealed class CoilAvailabilityServiceTests
     }
 
     [TestMethod]
-    public async Task GetCoilForJobAsync_WithoutAWorkCenter_ReadsNothingAndReportsNoCoil()
+    public async Task Service_CoilAvailabilityServiceTests_GetCoilForJobAsync_WithoutAWorkCenterReadsNothingAndReportsNoCoil()
     {
         var helper = new StubMySqlHelperServer(ActiveJobRow("MMC0001000", "COIL", 10m));
         var service = new CoilAvailabilityService(helper, new StubAverageCoilWeightService("5,000 lb"));
@@ -130,7 +130,7 @@ public sealed class CoilAvailabilityServiceTests
     }
 
     [TestMethod]
-    public async Task GetCoilForJobAsync_HonorsCancellation()
+    public async Task Service_CoilAvailabilityServiceTests_GetCoilForJobAsync_HonorsCancellation()
     {
         var service = new CoilAvailabilityService(
             new StubMySqlHelperServer(),

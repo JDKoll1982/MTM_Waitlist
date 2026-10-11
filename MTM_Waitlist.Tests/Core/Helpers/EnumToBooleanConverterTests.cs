@@ -11,7 +11,7 @@ public sealed class EnumToBooleanConverterTests
     private readonly EnumToBooleanConverter _converter = new();
 
     [TestMethod]
-    public void Convert_ReturnsTrue_WhenParameterMatchesValue()
+    public void Converter_EnumToBooleanConverterTests_Convert_ReturnsTrueWhenParameterMatchesValue()
     {
         var result = _converter.Convert(ElementTheme.Dark, typeof(bool), "Dark", "en-US");
 
@@ -19,7 +19,7 @@ public sealed class EnumToBooleanConverterTests
     }
 
     [TestMethod]
-    public void Convert_ReturnsFalse_WhenParameterDoesNotMatchValue()
+    public void Converter_EnumToBooleanConverterTests_Convert_ReturnsFalseWhenParameterDoesNotMatchValue()
     {
         var result = _converter.Convert(ElementTheme.Dark, typeof(bool), "Light", "en-US");
 
@@ -27,14 +27,14 @@ public sealed class EnumToBooleanConverterTests
     }
 
     [TestMethod]
-    public void Convert_Throws_WhenParameterIsNotString()
+    public void Converter_EnumToBooleanConverterTests_Convert_ThrowsWhenParameterIsNotString()
     {
         Assert.ThrowsException<ArgumentException>(
             () => _converter.Convert(ElementTheme.Dark, typeof(bool), 123, "en-US"));
     }
 
     [TestMethod]
-    public void ConvertBack_ReturnsParsedEnum()
+    public void Converter_EnumToBooleanConverterTests_ConvertBack_ReturnsParsedEnum()
     {
         var result = _converter.ConvertBack(true, typeof(ElementTheme), "Light", "en-US");
 
@@ -42,7 +42,7 @@ public sealed class EnumToBooleanConverterTests
     }
 
     [TestMethod]
-    public void ConvertBack_Throws_WhenParameterIsNotString()
+    public void Converter_EnumToBooleanConverterTests_ConvertBack_ThrowsWhenParameterIsNotString()
     {
         Assert.ThrowsException<ArgumentException>(
             () => _converter.ConvertBack(true, typeof(ElementTheme), 123, "en-US"));

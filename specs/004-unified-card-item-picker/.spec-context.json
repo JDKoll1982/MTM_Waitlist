@@ -1364,9 +1364,9 @@
         "T078"
       ],
       "tests": [
-        "Core/Services/UrgencyCalculatorTests.cs::OrderBy_MostUrgent_IsWhatNothingRememberedAndTheDefaultKeyBothGive",
-        "Module_Core/Services/WaitlistSortPreferenceServiceTests.cs::GetSortOrder_FirstRun_IsMostUrgent",
-        "Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs::List_NothingRemembered_LeadsWithTheMostUrgentRow"
+        "Core/Services/UrgencyCalculatorTests.cs::Service_UrgencyCalculatorTests_OrderBy_MostUrgentIsWhatNothingRememberedAndTheDefaultKeyBothGive",
+        "Module_Core/Services/WaitlistSortPreferenceServiceTests.cs::Service_WaitlistSortPreferenceServiceTests_GetSortOrder_FirstRunIsMostUrgent",
+        "Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs::ViewModel_WaitlistViewViewModelActionTests_List_NothingRememberedLeadsWithTheMostUrgentRow"
       ]
     },
     "FR-011": {
@@ -1378,8 +1378,8 @@
         "T081"
       ],
       "tests": [
-        "Module_Core/Services/WaitlistSortPreferenceServiceTests.cs::SetSortOrder_EachOfTheFiveKeys_SurvivesAServiceReconstruction",
-        "Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs::List_AppliesTheRememberedOrder_OnLoad"
+        "Module_Core/Services/WaitlistSortPreferenceServiceTests.cs::Service_WaitlistSortPreferenceServiceTests_SetSortOrder_EachOfTheFiveKeysSurvivesAServiceReconstruction",
+        "Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs::ViewModel_WaitlistViewViewModelActionTests_List_AppliesTheRememberedOrderOnLoad"
       ]
     },
     "FR-012": {
@@ -1392,8 +1392,8 @@
         "T078"
       ],
       "tests": [
-        "Core/Services/UrgencyCalculatorTests.cs::OrderBy_EveryOrder_LeavesAnOverdueRowMarkedAndAheadOfItsPeers",
-        "Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs::ApplySortOrder_SwitchingTheOrder_KeepsEveryAffordanceAndTheOverdueMarking"
+        "Core/Services/UrgencyCalculatorTests.cs::Service_UrgencyCalculatorTests_OrderBy_EveryOrderLeavesAnOverdueRowMarkedAndAheadOfItsPeers",
+        "Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs::ViewModel_WaitlistViewViewModelActionTests_ApplySortOrder_SwitchingTheOrderKeepsEveryAffordanceAndTheOverdueMarking"
       ]
     },
     "FR-013": {
@@ -1408,7 +1408,7 @@
         "T086"
       ],
       "tests": [
-        "Module_Settings/Services/RequestItemConfigurationServiceTests.cs::GetConfigurationsAsync_ReadsTheDeclaredFieldsInDeclaredOrder_WithTheirTypesAndLabels",
+        "Module_Settings/Services/RequestItemConfigurationServiceTests.cs::Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_ReadsTheDeclaredFieldsInDeclaredOrderWithTheirTypesAndLabels",
         "Module_Waitlist/ViewModels/WaitlistViewDetailFieldTests.cs::DeclaredFields_AreDrawnInDeclaredOrder_WithTheirDeclaredTypesAndLabels"
       ]
     },
@@ -1423,7 +1423,7 @@
         "T083"
       ],
       "tests": [
-        "Module_Settings/Services/RequestItemConfigurationServiceTests.cs::GetConfigurationsAsync_CataloguedItemWithNoRow_IsReportedUnavailableInPlainLanguage"
+        "Module_Settings/Services/RequestItemConfigurationServiceTests.cs::Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_CataloguedItemWithNoRowIsReportedUnavailableInPlainLanguage"
       ]
     },
     "FR-015": {
@@ -1434,7 +1434,7 @@
         "T087"
       ],
       "tests": [
-        "Module_Settings/Services/RequestItemConfigurationServiceTests.cs::GetConfigurationsAsync_ADifferentDeclaredFieldSet_IsReadInsteadOfTheOneBefore",
+        "Module_Settings/Services/RequestItemConfigurationServiceTests.cs::Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_ADifferentDeclaredFieldSetIsReadInsteadOfTheOneBefore",
         "Module_Waitlist/ViewModels/WaitlistViewDetailFieldTests.cs::DeclaredFields_ADifferentDeclaredSet_IsDrawnInsteadOfTheOneBefore"
       ]
     },
@@ -1445,8 +1445,8 @@
         "T094"
       ],
       "tests": [
-        "MTM_Waitlist.Tests/Core/Services/UrgencyDeadlineServiceTests.cs::Compute_DueIsCreatedPlusTheItemsStoredAllotment",
-        "MTM_Waitlist.Tests/Core/Services/UrgencySettingsServiceTests.cs::GetMaxAllotted_ReadsTheItemsStoredConfiguration"
+        "MTM_Waitlist.Tests/Core/Services/UrgencyDeadlineServiceTests.cs::Service_UrgencyDeadlineServiceTests_Service_UrgencyDeadlineServiceTests_Compute_DueIsCreatedPlusTheItemsStoredAllotment",
+        "MTM_Waitlist.Tests/Core/Services/UrgencySettingsServiceTests.cs::Service_UrgencySettingsServiceTests_Service_UrgencySettingsServiceTests_GetMaxAllotted_ReadsTheItemsStoredConfiguration"
       ]
     },
     "FR-017": {
@@ -1458,8 +1458,8 @@
         "T095"
       ],
       "tests": [
-        "MTM_Waitlist.Tests/Core/Services/UrgencySettingsServiceTests.cs::GetMaxAllotted_ForAnItemWithNoConfiguredMinutes_UsesTheFifteenMinuteDefault",
-        "MTM_Waitlist.Tests/Module_Settings/UrgencyAllotmentEditorViewModelTests.cs::Load_ForAnItemWithNoConfiguredMinutes_UsesThe15MinuteDefaultAndLabelsItAsADefault"
+        "MTM_Waitlist.Tests/Core/Services/UrgencySettingsServiceTests.cs::Service_UrgencySettingsServiceTests_GetMaxAllotted_ForAnItemWithNoConfiguredMinutesUsesTheFifteenMinuteDefault",
+        "MTM_Waitlist.Tests/Module_Settings/UrgencyAllotmentEditorViewModelTests.cs::ViewModel_UrgencyAllotmentEditorViewModelTests_Load_ForAnItemWithNoConfiguredMinutesUsesThe15MinuteDefaultAndLabelsItAsADefault"
       ]
     },
     "FR-018": {
@@ -1469,7 +1469,7 @@
         "T095"
       ],
       "tests": [
-        "MTM_Waitlist.Tests/Module_Settings/UrgencyAllotmentEditorViewModelTests.cs::Load_ShowsTheConfiguredMinutesAndTheObservedAverageAsTwoSeparateValues"
+        "MTM_Waitlist.Tests/Module_Settings/UrgencyAllotmentEditorViewModelTests.cs::ViewModel_UrgencyAllotmentEditorViewModelTests_ViewModel_UrgencyAllotmentEditorViewModelTests_Load_ShowsTheConfiguredMinutesAndTheObservedAverageAsTwoSeparateValues"
       ]
     },
     "FR-019": {
@@ -1480,8 +1480,8 @@
         "T091"
       ],
       "tests": [
-        "MTM_Waitlist.Tests/Module_Settings/Services/RequestItemObservedTimeServiceTests.cs::GetObservedTimesAsync_IsARead_ItNeverWritesTheObservedValueBack",
-        "MTM_Waitlist.Tests/Module_Settings/Services/RequestItemObservedTimeServiceTests.cs::GetObservedTimesAsync_ForAnItemWithNoCompletedRequest_YieldsNoValueRatherThanAZero"
+        "MTM_Waitlist.Tests/Module_Settings/Services/RequestItemObservedTimeServiceTests.cs::Service_RequestItemObservedTimeServiceTests_GetObservedTimesAsync_IsAReadItNeverWritesTheObservedValueBack",
+        "MTM_Waitlist.Tests/Module_Settings/Services/RequestItemObservedTimeServiceTests.cs::Service_RequestItemObservedTimeServiceTests_GetObservedTimesAsync_ForAnItemWithNoCompletedRequestYieldsNoValueRatherThanAZero"
       ]
     },
     "FR-020": {
@@ -1507,7 +1507,7 @@
         "T096"
       ],
       "tests": [
-        "MTM_Waitlist.Tests/Module_Settings/RequestItemImagesDialogViewModelTests.cs::ResolveEffectivePath_WhenNothingIsConfiguredForTheItem_KeepsTheInheritedCategoryImage"
+        "MTM_Waitlist.Tests/Module_Settings/RequestItemImagesDialogViewModelTests.cs::ViewModel_RequestItemImagesDialogViewModelTests_ResolveEffectivePath_WhenNothingIsConfiguredForTheItemKeepsTheInheritedCategoryImage"
       ]
     },
     "FR-022": {
@@ -1521,8 +1521,8 @@
         "T099"
       ],
       "tests": [
-        "MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs::Card_DrawsGiveBackFromTheRowsOwnCommand",
-        "Card_ActionButtonsAreNamedFromTheRowNotFromALiteral"
+        "MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs::UI_WaitlistLineCardMarkupTests_UI_WaitlistLineCardMarkupTests_Card_DrawsGiveBackFromTheRowsOwnCommand",
+        "UI_WaitlistLineCardMarkupTests_UI_WaitlistLineCardMarkupTests_Card_ActionButtonsAreNamedFromTheRowNotFromALiteral"
       ]
     },
     "FR-023": {
@@ -1538,8 +1538,8 @@
         "T110"
       ],
       "tests": [
-        "MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs::NoRetiredSymbolRemainsInCodeOrDatabaseArtifacts",
-        "MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs::EveryRetiredPattern_BitesOnAReintroductionOfItsSymbol"
+        "MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs::Audit_RetiredSymbolAuditTests_Audit_RetiredSymbolAuditTests_NoRetiredSymbolRemainsInCodeOrDatabaseArtifacts",
+        "MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs::Audit_RetiredSymbolAuditTests_Audit_RetiredSymbolAuditTests_EveryRetiredPattern_BitesOnAReintroductionOfItsSymbol"
       ]
     },
     "FR-024": {
@@ -1557,7 +1557,7 @@
         "T093"
       ],
       "tests": [
-        "Module_Settings/Services/RequestItemConfigurationServiceTests.cs::GetConfigurationsAsync_ReadsThroughItsOwnStoredProcedure"
+        "Module_Settings/Services/RequestItemConfigurationServiceTests.cs::Service_RequestItemConfigurationServiceTests_Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_ReadsThroughItsOwnStoredProcedure"
       ]
     },
     "FR-025": {
@@ -1594,7 +1594,7 @@
         "T091"
       ],
       "tests": [
-        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestWorkCenterViewModelTests.cs::SelectWorkCenter_BlocksTheStepWhenTheDirectoryDoesNotHoldTheSignedInNumber"
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestWorkCenterViewModelTests.cs::ViewModel_NewRequestWorkCenterViewModelTests_ViewModel_NewRequestWorkCenterViewModelTests_SelectWorkCenter_BlocksTheStepWhenTheDirectoryDoesNotHoldTheSignedInNumber"
       ]
     },
     "FR-027": {
@@ -1605,8 +1605,8 @@
         "T112"
       ],
       "tests": [
-        "MTM_Waitlist.Tests/Module_Mock/DocumentInputAuditTests.cs::NoShippedFileReferencesTheDesignDocuments",
-        "MTM_Waitlist.Tests/Module_Mock/DocumentInputAuditTests.cs::DesignDocumentScan_ReachesAFixtureThatReferencesThem"
+        "MTM_Waitlist.Tests/Module_Mock/DocumentInputAuditTests.cs::Audit_DocumentInputAuditTests_Audit_DocumentInputAuditTests_NoShippedFileReferencesTheDesignDocuments",
+        "MTM_Waitlist.Tests/Module_Mock/DocumentInputAuditTests.cs::Audit_DocumentInputAuditTests_Audit_DocumentInputAuditTests_DesignDocumentScan_ReachesAFixtureThatReferencesThem"
       ]
     },
     "FR-028": {
@@ -1653,14 +1653,14 @@
     },
     "FR-033": {
       "tests": [
-        "TheSignedInBadge_OffersSignOut",
-        "TheSignedInBadge_CarriesAnAutomationId_SoTheEntryCanBeAddressed",
-        "EveryStringThisCapabilityShows_ComesFromTheResourceMechanism"
+        "ViewModel_ShellViewModelTests_ViewModel_ShellViewModelTests_TheSignedInBadge_OffersSignOut",
+        "ViewModel_ShellViewModelTests_TheSignedInBadge_CarriesAnAutomationIdSoTheEntryCanBeAddressed",
+        "ViewModel_ShellViewModelTests_ViewModel_ShellViewModelTests_EveryStringThisCapabilityShows_ComesFromTheResourceMechanism"
       ]
     },
     "FR-034": {
       "tests": [
-        "SignOut_ReachesTheSignOutService_AndDoesNotMerelyClearTheDisplayedName",
+        "ViewModel_ShellViewModelTests_SignOut_ReachesTheSignOutServiceAndDoesNotMerelyClearTheDisplayedName",
         "SignOutAsync_ClearsEveryKeyTheSignInPathReads_BeforeTheRelaunchIsAskedFor",
         "SignOutAsync_WhenTheRelaunchIsRefused_ReportsItInPlainLanguage_AndDoesNotExit",
         "SignOutAsync_OnAComputerWhereNothingWasRemembered_StillRelaunches"
@@ -1668,10 +1668,10 @@
     },
     "FR-035": {
       "tests": [
-        "GetConfigurationsAsync_EnumeratedAnswerWithNoConfiguredList_TakesItsChoicesFromTheJob",
-        "GetConfigurationsAsync_AConfiguredList_WinsOverTheJob",
-        "GetConfigurationsAsync_AnAnswerTheRowDoesNotDeclare_AsksForNothing_SoNoChoicesAreInvented",
-        "ShippedConfigurationSeed_PickupComponent_StillDeclaresAnEnumeratedAnswerWithNoListOfItsOwn"
+        "Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_EnumeratedAnswerWithNoConfiguredListTakesItsChoicesFromTheJob",
+        "Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_AConfiguredListWinsOverTheJob",
+        "Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_AnAnswerTheRowDoesNotDeclareAsksForNothingSoNoChoicesAreInvented",
+        "Service_RequestItemConfigurationServiceTests_ShippedConfigurationSeed_PickupComponentStillDeclaresAnEnumeratedAnswerWithNoListOfItsOwn"
       ]
     },
     "FR-039": {
@@ -1682,35 +1682,35 @@
         "Seeded100_18_ComponentOnly_KeepsTheStoredCategory",
         "Seeded100_1806_DunnageOnly_HasNoSubordinatePart",
         "SeededV100_33_EverythingAtOnce_NormalisesEveryCategory",
-        "SeededV100_34_EmptySubordinateArray_ResolvesWithNothingPresent",
-        "Seeded100_8_WorkCentreWithNoRow_ReadsAsNoActiveJob",
-        "Retired900Fixtures_ResolveToNoActiveJob"
+        "SeededV100_34_Service_ActiveJobSeedRoundTripTests_Service_ActiveJobSeedRoundTripTests_EmptySubordinateArray_ResolvesWithNothingPresent",
+        "Seeded100_8_Service_ActiveJobSeedRoundTripTests_Service_ActiveJobSeedRoundTripTests_WorkCentreWithNoRow_ReadsAsNoActiveJob",
+        "Service_ActiveJobSeedRoundTripTests_Service_ActiveJobSeedRoundTripTests_Retired900Fixtures_ResolveToNoActiveJob"
       ]
     },
     "FR-043": {
       "tests": [
-        "AcceptAsync_WhenTheRowIsNoLongerInTheStateTheHandlerSaw_ReportsZeroAffectedRows_AndDoesNotReassignTheHandler"
+        "Service_WaitlistRequestServiceTests_AcceptAsync_WhenTheRowIsNoLongerInTheStateTheHandlerSawReportsZeroAffectedRowsAndDoesNotReassignTheHandler"
       ]
     },
     "FR-046": {
       "tests": [
-        "MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs::NewRequestFlowRules_VerifyEmployeeIdentity_AcceptsTheSignedInEmployeeFromTheDirectory",
-        "NewRequestFlowRules_VerifyEmployeeIdentity_RefusesANumberTheDirectoryDoesNotHold",
-        "NewRequestFlowRules_VerifyEmployeeIdentity_RefusesAKnownButInactiveEmployee",
-        "NewRequestFlowRules_VerifyEmployeeIdentity_ComparesTheStoredIdentifierNotTheName;MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestWorkCenterViewModelTests.cs::SelectWorkCenter_AttributesTheRequestToTheSignedInPersonFromTheDirectory",
-        "SelectWorkCenter_BlocksTheStepWhenTheDirectoryDoesNotHoldTheSignedInNumber"
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs::Service_WaitlistRequestServiceTests_NewRequestFlowRules_VerifyEmployeeIdentityAcceptsTheSignedInEmployeeFromTheDirectory",
+        "Service_WaitlistRequestServiceTests_NewRequestFlowRules_VerifyEmployeeIdentityRefusesANumberTheDirectoryDoesNotHold",
+        "Service_WaitlistRequestServiceTests_NewRequestFlowRules_VerifyEmployeeIdentityRefusesAKnownButInactiveEmployee",
+        "Service_WaitlistRequestServiceTests_NewRequestFlowRules_VerifyEmployeeIdentityComparesTheStoredIdentifierNotTheName;MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestWorkCenterViewModelTests.cs::ViewModel_NewRequestWorkCenterViewModelTests_ViewModel_NewRequestWorkCenterViewModelTests_SelectWorkCenter_AttributesTheRequestToTheSignedInPersonFromTheDirectory",
+        "ViewModel_NewRequestWorkCenterViewModelTests_ViewModel_NewRequestWorkCenterViewModelTests_SelectWorkCenter_BlocksTheStepWhenTheDirectoryDoesNotHoldTheSignedInNumber"
       ]
     },
     "FR-047": {
       "tests": [
-        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs::GiveBack_IsOfferedToTheAssigneeAndCarriesTheListsOwnReleaseCommand",
-        "GiveBack_ReachesTheReleasePathOnceAsTheSignedInHandler",
-        "GiveBack_IsNotOfferedToAViewerTheGateExcludes;MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs::Card_DrawsGiveBackFromTheRowsOwnCommand"
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs::ViewModel_WaitlistViewViewModelActionTests_ViewModel_WaitlistViewViewModelActionTests_GiveBack_IsOfferedToTheAssigneeAndCarriesTheListsOwnReleaseCommand",
+        "ViewModel_WaitlistViewViewModelActionTests_ViewModel_WaitlistViewViewModelActionTests_GiveBack_ReachesTheReleasePathOnceAsTheSignedInHandler",
+        "ViewModel_WaitlistViewViewModelActionTests_ViewModel_WaitlistViewViewModelActionTests_GiveBack_IsNotOfferedToAViewerTheGateExcludes;MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs::UI_WaitlistLineCardMarkupTests_UI_WaitlistLineCardMarkupTests_Card_DrawsGiveBackFromTheRowsOwnCommand"
       ]
     },
     "SC-021": {
       "tests": [
-        "MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs::NewRequestFlowRules_VerifyEmployeeIdentity_AcceptsTheSignedInEmployeeFromTheDirectory;MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestWorkCenterViewModelTests.cs::SelectWorkCenter_AttributesTheRequestToTheSignedInPersonFromTheDirectory;MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs::Card_DrawsGiveBackFromTheRowsOwnCommand"
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs::Service_WaitlistRequestServiceTests_NewRequestFlowRules_VerifyEmployeeIdentityAcceptsTheSignedInEmployeeFromTheDirectory;MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestWorkCenterViewModelTests.cs::ViewModel_NewRequestWorkCenterViewModelTests_ViewModel_NewRequestWorkCenterViewModelTests_SelectWorkCenter_AttributesTheRequestToTheSignedInPersonFromTheDirectory;MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs::UI_WaitlistLineCardMarkupTests_UI_WaitlistLineCardMarkupTests_Card_DrawsGiveBackFromTheRowsOwnCommand"
       ]
     }
   },
@@ -1975,7 +1975,7 @@
       "step": "implement"
     },
     {
-      "note": "Phase 3 US1 cannot reach a build-clean checkpoint on its own: T048 re-keys the request pair and the card/detail layer that reads it is US2 (T061/T062/T065). Ten tests stay red in that seam: 6 WaitlistViewDetailViewModel fixtures whose submit helpers pass a legacy pair such as (Coil, Pickup Coil) the retired catalog never carried, 2 of NewRequestItemViewModelTests, SubmitAsync_OnlyFlagsExactDuplicateRequests, and a detail item-resolution assertion.",
+      "note": "Phase 3 US1 cannot reach a build-clean checkpoint on its own: T048 re-keys the request pair and the card/detail layer that reads it is US2 (T061/T062/T065). Ten tests stay red in that seam: 6 WaitlistViewDetailViewModel fixtures whose submit helpers pass a legacy pair such as (Coil, Pickup Coil) the retired catalog never carried, 2 of NewRequestItemViewModelTests, Service_WaitlistRequestServiceTests_Service_WaitlistRequestServiceTests_SubmitAsync_OnlyFlagsExactDuplicateRequests, and a detail item-resolution assertion.",
       "step": "implement"
     },
     {

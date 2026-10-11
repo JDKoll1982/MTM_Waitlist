@@ -6,7 +6,7 @@
 --          ComputerRegistryService.GetAllComputersAsync (FR-015).
 --
 -- Contract:
---   OUT one row per registered machine: id, computer_name, display_name, description,
+--   OUT one row per registered machine: id, computer_name, display_name, location,
 --       mac_address_normalized, is_registered — ordered by display_name then computer_name, exactly as the
 --       statement this replaces ordered them, so the settings list keeps its current sequence.
 --
@@ -22,7 +22,7 @@ SELECT
     id,
     computer_name,
     display_name,
-    description,
+    location,
     mac_address_normalized,
     is_registered
 FROM core_computers_registry

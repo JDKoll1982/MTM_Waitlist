@@ -247,7 +247,7 @@ Next task: **Database Migration: Enumerate every deployed table, procedure, func
 - [ ] **Database Migration: Add the reader procedures for the panel's filter set — criticality, machine, user, module, error type and a time window.** (Ref: S9) *Depends on: the schema task above* | **Persona: Database Engineer**
 - [ ] **Database Migration: Add the retention routine, bounded by age and by size, removing the oldest first.** (Ref: S9) *Depends on: the schema task above* | **Persona: Database Engineer**
 - [ ] **Database Migration: Add the indexes the filter set needs and a validation script wired into the schema validator.** (Ref: S9) *Depends on: the reader task above* | **Persona: Database Engineer**
-- [ ] **Security Review: Prove no credential, key material or remembered secret can reach the log store, and that the key file's path is the only secret-adjacent value ever written.** (Ref: S8.3, S9) | **Persona: Security Engineer**
+- [ ] **Security Review: Prove no credential, key material or remembered secret can reach the log store.** (Ref: S8.3, S9) **Amended 2026-10-10**: with remember-me withdrawn the key file's path is no longer written either, so there is no remaining secret-adjacent value a call site may record — the rule is that none is (FR-043). | **Persona: Security Engineer**
 
 Next task: **Database Table: Extend the log store on `ops_startup_logs` with every field the panel filters on — severity, module, machine, user, error type, message, exception detail, correlation id and the chain hashes.** | **Persona: Database Engineer**
 
@@ -345,8 +345,10 @@ Next task: **Database Migration: Baseline the four keys per role, including IT D
 
 ## Phase 8: The new startup pipeline
 
-> Sign-in reads its encryption key from the shared key file at the verified UNC path in S8.3. Read only — the
-> file pre-exists and is likely shared with other MTM applications, so it is never written or rotated here.
+> **Amended 2026-10-10.** Remember-me was withdrawn, so sign-in reads no key at all: the shared key file at the
+> verified UNC path in S8.3 is read, copied and kept by nothing, because remember-me was the only thing that ever
+> opened it. What the sign-in stage offers instead is the last six people who signed in on this computer, on the
+> right of the form behind a divider (FR-014, FR-043, FR-048).
 
 ### Subphase 8.1: Steps as data
 - [ ] **Data Model: Define the step model — name, description, category — so the displayed count is derived rather than hard-coded.** (Ref: S6) | **Persona: Backend Engineer**
@@ -374,13 +376,20 @@ Next task: **Frontend: Build the splash window with the live, append-only activi
 Next task: **Service Layer: Build the launch pipeline behind a single entry point that the host calls.** | **Persona: Backend Engineer**
 
 ### Subphase 8.4: Sign-in, the machine gate, the forced password change and remember-me
+
+> **Amended 2026-10-10.** The two remember-me tasks below were both superseded. Remember-me is withdrawn: nothing
+> reads, copies or keeps the plant's shared key file, and the sign-in stage offers the last six people who signed
+> in on this computer, on the right of the form behind a divider, from the session records the store already holds
+> (FR-014, FR-043, FR-048; `specs/010-startup-rebuild` Phase 13, T233–T237). The tasks are kept below as the record
+> of what was originally asked for.
+
 - [ ] **Frontend: Build the sign-in surface, carrying the hint that states what is missing.** (Ref: S13) *Depends on: Subphase 8.3* | **Persona: Frontend Engineer**
 - [ ] **Service Layer: Implement the credential check with the five-attempt limit on temporary credentials only.** (Ref: S13) *Depends on: the sign-in task above* | **Persona: Backend Engineer**
 - [ ] **Service Layer: Implement the forced password change, opened only once the temporary credential has been accepted.** (Ref: S13) *Depends on: the credential check task above* | **Persona: Backend Engineer**
 - [ ] **Service Layer: Implement the machine gate with its four outcomes, and admit a machine whose hardware identity cannot be read.** (Ref: S13) *Depends on: the credential check task above* | **Persona: Backend Engineer**
 - [ ] **Service Layer: Implement the session against `user_active_sessions`, judged on the store's clock.** (Ref: S8.1) *Depends on: Subphase 5.5* | **Persona: Backend Engineer**
-- [ ] **Security Review: Implement and review remember-me against the store, using the shared key file at the verified UNC path, read only.** (Ref: S8.2, S8.3) *Depends on: the session task above* | **Persona: Security Engineer**
-- [ ] **Service Layer: Fall back to the ordinary sign-in form when the key file cannot be read, recording the fault and storing nothing locally instead.** (Ref: S8.3) *Depends on: the remember-me task above* | **Persona: Backend Engineer**
+- [ ] **Security Review: ~~Implement and review remember-me against the store, using the shared key file at the verified UNC path, read only.~~ Withdrawn 2026-10-10.** (Ref: S8.2, S8.3) | **Persona: Security Engineer**
+- [ ] **Service Layer: ~~Fall back to the ordinary sign-in form when the key file cannot be read, recording the fault and storing nothing locally instead.~~ Withdrawn 2026-10-10**, because there is no key file to read and nothing stored to fall back from. (Ref: S8.3) | **Persona: Backend Engineer**
 - [ ] **Testing: Prove the sixth attempt on a temporary credential is refused even with the correct value, and stays refused after a restart.** (Ref: S13) *Depends on: the credential check task above* | **Persona: QA Engineer**
 
 Next task: **Frontend: Build the sign-in surface, carrying the hint that states what is missing.** | **Persona: Frontend Engineer**

@@ -26,7 +26,7 @@ public sealed class WaitlistViewViewModelFieldTests
         RequestItemCatalog.Items.Select(item => Shape(item.Id)).ToArray();
 
     [TestMethod]
-    public void CreateSessionOrder_ForEveryRequestShape_CarriesOnlyValuesTheRequestCarries()
+    public void ViewModel_WaitlistViewViewModelFieldTests_CreateSessionOrder_ForEveryRequestShapeCarriesOnlyValuesTheRequestCarries()
     {
         foreach (var request in EveryRequestShape)
         {
@@ -42,7 +42,7 @@ public sealed class WaitlistViewViewModelFieldTests
     }
 
     [TestMethod]
-    public void CreateSessionOrder_ForEveryRequestShape_RendersNoFabricatedLookingValue()
+    public void ViewModel_WaitlistViewViewModelFieldTests_CreateSessionOrder_ForEveryRequestShapeRendersNoFabricatedLookingValue()
     {
         foreach (var request in EveryRequestShape)
         {
@@ -57,7 +57,7 @@ public sealed class WaitlistViewViewModelFieldTests
     }
 
     [TestMethod]
-    public void CreateSessionOrder_ForEveryRequestShape_LeavesAnEmptySlotEmpty()
+    public void ViewModel_WaitlistViewViewModelFieldTests_CreateSessionOrder_ForEveryRequestShapeLeavesAnEmptySlotEmpty()
     {
         foreach (var request in EveryRequestShape)
         {
@@ -79,7 +79,7 @@ public sealed class WaitlistViewViewModelFieldTests
     /// row carries exactly the slots the request produces, and no invented empty-label filler.
     /// </summary>
     [TestMethod]
-    public void CreateSessionOrder_PadsNoRowToATemplatesSlotCount()
+    public void ViewModel_WaitlistViewViewModelFieldTests_CreateSessionOrder_PadsNoRowToATemplatesSlotCount()
     {
         foreach (var request in EveryRequestShape)
         {
@@ -93,7 +93,7 @@ public sealed class WaitlistViewViewModelFieldTests
     }
 
     [TestMethod]
-    public void CreateSessionOrder_SurfacesTheHandlerNeededDataTheRequestCarries()
+    public void ViewModel_WaitlistViewViewModelFieldTests_CreateSessionOrder_SurfacesTheHandlerNeededDataTheRequestCarries()
     {
         // FR-014: a handler must be able to read who asked, where it goes, and how urgent it is off the card
         // itself. Every one of these comes from the request — nothing is derived into a value the request
@@ -112,7 +112,7 @@ public sealed class WaitlistViewViewModelFieldTests
     }
 
     [TestMethod]
-    public void CreateSessionOrder_AddsNoHandlerSectionToTheCardsFixedLayout()
+    public void ViewModel_WaitlistViewViewModelFieldTests_CreateSessionOrder_AddsNoHandlerSectionToTheCardsFixedLayout()
     {
         // FR-021: handler data is surfaced through the card's existing slots, never by adding a section.
         foreach (var request in EveryRequestShape)

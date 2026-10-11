@@ -28,7 +28,7 @@ namespace MTM_Waitlist.Tests.Module_Mock_Service;
 public sealed class ServiceApiSecurityTests
 {
     [TestMethod]
-    public async Task StatusPayload_CarriesNoConnectionSecret()
+    public async Task Service_ServiceApiSecurityTests_StatusPayload_CarriesNoConnectionSecret()
     {
         using var fixture = new ServiceApiFixture();
 
@@ -50,7 +50,7 @@ public sealed class ServiceApiSecurityTests
     }
 
     [TestMethod]
-    public async Task Refresh_WithAnUnknownShape_IsRefusedAsUnknownShape()
+    public async Task Service_ServiceApiSecurityTests_Refresh_WithAnUnknownShapeIsRefusedAsUnknownShape()
     {
         using var fixture = new ServiceApiFixture();
 
@@ -62,7 +62,7 @@ public sealed class ServiceApiSecurityTests
     }
 
     [TestMethod]
-    public async Task Backup_AndListing_WithAnUnknownStore_AreRefused()
+    public async Task Service_ServiceApiSecurityTests_Backup_AndListingWithAnUnknownStoreAreRefused()
     {
         using var fixture = new ServiceApiFixture();
 
@@ -76,7 +76,7 @@ public sealed class ServiceApiSecurityTests
     }
 
     [TestMethod]
-    public void NoCodePathLeadsFromTheApiToARestore()
+    public void Service_ServiceApiSecurityTests_NoCodePathLeadsFromTheApiToARestore()
     {
         // FR-023: restore is host-only. The surface must not even depend on RestoreService, so no approved
         // operator — and no request at all — can reach a destructive database replacement over the network.

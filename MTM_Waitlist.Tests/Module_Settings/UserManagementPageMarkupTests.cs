@@ -24,7 +24,7 @@ public sealed class UserManagementPageMarkupTests
     private const string CodeBehindPath = "Module_Settings/Views/UserManagementPage.xaml.cs";
 
     [TestMethod]
-    public void TheTable_ShowsTheFiveFactsThisSystemHolds_AndNothingItDoesNot()
+    public void UI_UserManagementPageMarkupTests_TheTable_ShowsTheFiveFactsThisSystemHoldsAndNothingItDoesNot()
     {
         var markup = PageMarkup();
 
@@ -54,7 +54,7 @@ public sealed class UserManagementPageMarkupTests
     }
 
     [TestMethod]
-    public void ARow_OpensItsPerson_WithNoWayToChangeOneFromTheRoster()
+    public void UI_UserManagementPageMarkupTests_ARow_OpensItsPersonWithNoWayToChangeOneFromTheRoster()
     {
         var markup = PageMarkup();
         var codeBehind = CodeBehind();
@@ -73,7 +73,7 @@ public sealed class UserManagementPageMarkupTests
     }
 
     [TestMethod]
-    public void TheColumnWidths_AreSharedAndStopAtAMinimum_WithNoColumnPinnedToPixels()
+    public void UI_UserManagementPageMarkupTests_TheColumnWidths_AreSharedAndStopAtAMinimumWithNoColumnPinnedToPixels()
     {
         // The table's own region, so the page's other grids are not measured as if they were columns of it.
         var table = Regex
@@ -106,7 +106,7 @@ public sealed class UserManagementPageMarkupTests
     }
 
     [TestMethod]
-    public void EveryStringThePageShows_IsAShippedResource()
+    public void UI_UserManagementPageMarkupTests_EveryStringThePageShows_IsAShippedResource()
     {
         var resources = File.ReadAllText(RepositoryPath("Strings/en-us/Resources.resw"));
         var sources = new[]
@@ -136,7 +136,7 @@ public sealed class UserManagementPageMarkupTests
     }
 
     [TestMethod]
-    public void TheFooterRange_IsShippedWithTheThreeValuesItPutsInIt()
+    public void UI_UserManagementPageMarkupTests_TheFooterRange_IsShippedWithTheThreeValuesItPutsInIt()
     {
         var resources = File.ReadAllText(RepositoryPath("Strings/en-us/Resources.resw"));
 

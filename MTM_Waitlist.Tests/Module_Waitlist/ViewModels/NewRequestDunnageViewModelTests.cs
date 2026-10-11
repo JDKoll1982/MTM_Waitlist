@@ -28,7 +28,7 @@ public sealed class NewRequestDunnageViewModelTests
     private const string SubstitutePartNumber = "DN-SUB-9";
 
     [TestMethod]
-    public void OnNavigatedTo_BindsEveryPartTheJobCarries()
+    public void ViewModel_NewRequestDunnageViewModelTests_OnNavigatedTo_BindsEveryPartTheJobCarries()
     {
         var viewModel = CreateViewModel();
         viewModel.OnNavigatedTo(StateWith(FirstAssignedPart, SecondAssignedPart));
@@ -42,7 +42,7 @@ public sealed class NewRequestDunnageViewModelTests
     }
 
     [TestMethod]
-    public void SelectPart_CapturesTheChosenPartAndMovesOn()
+    public void ViewModel_NewRequestDunnageViewModelTests_SelectPart_CapturesTheChosenPartAndMovesOn()
     {
         var navigation = new RecordingNavigationService();
         var viewModel = CreateViewModel(navigation: navigation);
@@ -61,7 +61,7 @@ public sealed class NewRequestDunnageViewModelTests
     }
 
     [TestMethod]
-    public void SelectPart_WithNoChoice_DoesNothing()
+    public void ViewModel_NewRequestDunnageViewModelTests_SelectPart_WithNoChoiceDoesNothing()
     {
         var navigation = new RecordingNavigationService();
         var viewModel = CreateViewModel(navigation: navigation);
@@ -75,7 +75,7 @@ public sealed class NewRequestDunnageViewModelTests
     }
 
     [TestMethod]
-    public async Task UseSubstitute_CapturesAPartTheJobDoesNotCarry()
+    public async Task ViewModel_NewRequestDunnageViewModelTests_UseSubstitute_CapturesAPartTheJobDoesNotCarry()
     {
         var navigation = new RecordingNavigationService();
         var substitute = new RequestDunnagePart
@@ -104,7 +104,7 @@ public sealed class NewRequestDunnageViewModelTests
     }
 
     [TestMethod]
-    public async Task UseSubstitute_Dismissed_ChangesNothing()
+    public async Task ViewModel_NewRequestDunnageViewModelTests_UseSubstitute_DismissedChangesNothing()
     {
         var navigation = new RecordingNavigationService();
         var viewModel = CreateViewModel(navigation: navigation, picker: new FakeSubstitutePicker(null));
@@ -120,7 +120,7 @@ public sealed class NewRequestDunnageViewModelTests
     }
 
     [TestMethod]
-    public async Task UseSubstitute_ThatCannotOpen_IsReportedInPlainLanguageAndLeavesTheStepUsable()
+    public async Task ViewModel_NewRequestDunnageViewModelTests_UseSubstitute_ThatCannotOpenIsReportedInPlainLanguageAndLeavesTheStepUsable()
     {
         var navigation = new RecordingNavigationService();
         var viewModel = CreateViewModel(navigation: navigation, picker: new ThrowingSubstitutePicker());
@@ -139,7 +139,7 @@ public sealed class NewRequestDunnageViewModelTests
     }
 
     [TestMethod]
-    public void OnNavigatedTo_ForAJobWithNoDunnage_ReportsItAndDropsNoCards()
+    public void ViewModel_NewRequestDunnageViewModelTests_OnNavigatedTo_ForAJobWithNoDunnageReportsItAndDropsNoCards()
     {
         var viewModel = CreateViewModel();
         viewModel.OnNavigatedTo(StateWith());
@@ -149,7 +149,7 @@ public sealed class NewRequestDunnageViewModelTests
     }
 
     [TestMethod]
-    public void OnNavigatedTo_ComingBackWithASubstituteChosen_ShowsItAgainAsTheChosenCard()
+    public void ViewModel_NewRequestDunnageViewModelTests_OnNavigatedTo_ComingBackWithASubstituteChosenShowsItAgainAsTheChosenCard()
     {
         var substitute = new RequestDunnagePart
         {
@@ -174,7 +174,7 @@ public sealed class NewRequestDunnageViewModelTests
     }
 
     [TestMethod]
-    public void OnNavigatedTo_ComingBackWithAnAssignedPartChosen_DoesNotDuplicateIt()
+    public void ViewModel_NewRequestDunnageViewModelTests_OnNavigatedTo_ComingBackWithAnAssignedPartChosenDoesNotDuplicateIt()
     {
         var state = StateWith(FirstAssignedPart, SecondAssignedPart);
         state.InputValue = SecondAssignedPart;
@@ -187,7 +187,7 @@ public sealed class NewRequestDunnageViewModelTests
     }
 
     [TestMethod]
-    public void OnNavigatedTo_WithoutAState_LeavesTheStep()
+    public void ViewModel_NewRequestDunnageViewModelTests_OnNavigatedTo_WithoutAStateLeavesTheStep()
     {
         var navigation = new RecordingNavigationService();
         var viewModel = CreateViewModel(navigation: navigation);

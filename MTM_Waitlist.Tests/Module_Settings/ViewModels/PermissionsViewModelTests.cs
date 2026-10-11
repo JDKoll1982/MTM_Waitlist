@@ -41,7 +41,7 @@ public sealed class PermissionsViewModelTests
         new((TargetUserId, "Tess Target", "TTARGET", "setup"), (SecondUserId, "Ruby Lead", "RLEAD", "setup_lead"));
 
     [TestMethod]
-    public async Task TheFiveCards_AreTheDeclarationAreas_AndEveryPermissionIsInExactlyOne()
+    public async Task ViewModel_PermissionsViewModelTests_TheFiveCards_AreTheDeclarationAreasAndEveryPermissionIsInExactlyOne()
     {
         var viewModel = Build();
 
@@ -68,7 +68,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task TheColumns_CarryThePermissionsWords_AndNeverItsKey()
+    public async Task ViewModel_PermissionsViewModelTests_TheColumns_CarryThePermissionsWordsAndNeverItsKey()
     {
         var viewModel = Build();
 
@@ -86,7 +86,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task TheRows_AreThePeople_OrderedByRungAndThenByName()
+    public async Task ViewModel_PermissionsViewModelTests_TheRows_AreThePeopleOrderedByRungAndThenByName()
     {
         var people = new FakeUserManagementService(
             (1, "Zoe Worker", "ZWORKER", "setup"),
@@ -104,7 +104,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task TwoAccountsSharingAName_AreStillToldApart()
+    public async Task ViewModel_PermissionsViewModelTests_TwoAccountsSharingAName_AreStillToldApart()
     {
         var people = new FakeUserManagementService(
             (1, "John Koll", "JOHNK", "setup"),
@@ -126,7 +126,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task EveryPersonAppearsInEveryCard_WithOnlyThatCardsCells()
+    public async Task ViewModel_PermissionsViewModelTests_EveryPersonAppearsInEveryCard_WithOnlyThatCardsCells()
     {
         var viewModel = Build();
 
@@ -146,7 +146,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task AChosenCell_AnInheritedCell_AndAnOffCell_AreThreeDifferentShapes()
+    public async Task ViewModel_PermissionsViewModelTests_AChosenCell_AnInheritedCellAndAnOffCellAreThreeDifferentShapes()
     {
         var service = new FakePermissionAdministrationService()
             .SetOwn(TargetUserId, PermissionKeys.SettingsHotWorkCenters, true)
@@ -173,7 +173,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task EveryCell_SaysItsStateAndWhoseItIsInWords_BecauseAShapeCannotBeReadAloud()
+    public async Task ViewModel_PermissionsViewModelTests_EveryCell_SaysItsStateAndWhoseItIsInWordsBecauseAShapeCannotBeReadAloud()
     {
         var service = new FakePermissionAdministrationService()
             .SetOwn(TargetUserId, PermissionKeys.SettingsHotWorkCenters, true)
@@ -221,7 +221,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task TurningACellOver_MarksTheRowPending_AndTheWarningStatesTheCount()
+    public async Task ViewModel_PermissionsViewModelTests_TurningACellOver_MarksTheRowPendingAndTheWarningStatesTheCount()
     {
         var viewModel = Build(service: new FakePermissionAdministrationService()
             .SetFromRole(TargetUserId, PermissionKeys.SettingsHotWorkCenters, true));
@@ -252,7 +252,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task TheConfirmation_NamesWhatChangesAndForWhom_AndCountsWhenSeveralChange()
+    public async Task ViewModel_PermissionsViewModelTests_TheConfirmation_NamesWhatChangesAndForWhomAndCountsWhenSeveralChange()
     {
         var viewModel = Build(service: new FakePermissionAdministrationService()
             .SetFromRole(TargetUserId, PermissionKeys.SettingsHotWorkCenters, true)
@@ -291,7 +291,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task TheChangeSet_SendsNoValueFromThePerson_WhenTheirRoleSuppliesTheAnswer()
+    public async Task ViewModel_PermissionsViewModelTests_TheChangeSet_SendsNoValueFromThePersonWhenTheirRoleSuppliesTheAnswer()
     {
         var viewModel = Build(service: new FakePermissionAdministrationService()
             .SetFromRole(TargetUserId, PermissionKeys.SettingsHotWorkCenters, true));
@@ -311,7 +311,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task TheChangeSet_SendsTheStoredValueBack_WhenThePersonOwnsIt()
+    public async Task ViewModel_PermissionsViewModelTests_TheChangeSet_SendsTheStoredValueBackWhenThePersonOwnsIt()
     {
         var viewModel = Build(service: new FakePermissionAdministrationService()
             .SetOwn(TargetUserId, PermissionKeys.SettingsHotWorkCenters, true));
@@ -328,7 +328,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task ASaveOfACellThePersonDoesNotOwn_Lands()
+    public async Task ViewModel_PermissionsViewModelTests_ASaveOfACellThePersonDoesNotOwn_Lands()
     {
         var service = new FakePermissionAdministrationService()
             .SetFromRole(TargetUserId, PermissionKeys.SettingsHotWorkCenters, false);
@@ -349,7 +349,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task ASaveThatCannotReachTheStore_IsStatedOnThePage_InsteadOfFaultingOutOfTheCommand()
+    public async Task ViewModel_PermissionsViewModelTests_ASaveThatCannotReachTheStore_IsStatedOnThePageInsteadOfFaultingOutOfTheCommand()
     {
         var service = new FakePermissionAdministrationService
         {
@@ -374,7 +374,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task OneImpatientPress_WritesExactlyOneChange()
+    public async Task ViewModel_PermissionsViewModelTests_OneImpatientPress_WritesExactlyOneChange()
     {
         var service = new FakePermissionAdministrationService()
             .SetFromRole(TargetUserId, PermissionKeys.SettingsHotWorkCenters, true);
@@ -397,7 +397,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task ASave_WritesOnePersonsWholeSet_AndAnotherPersonIsAnotherWrite()
+    public async Task ViewModel_PermissionsViewModelTests_ASave_WritesOnePersonsWholeSetAndAnotherPersonIsAnotherWrite()
     {
         var service = new FakePermissionAdministrationService()
             .SetFromRole(TargetUserId, PermissionKeys.SettingsHotWorkCenters, false)
@@ -430,7 +430,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task ASaveThatLanded_ShowsWhatTheStoreHolds_AndStopsTheRowBeingPending()
+    public async Task ViewModel_PermissionsViewModelTests_ASaveThatLanded_ShowsWhatTheStoreHoldsAndStopsTheRowBeingPending()
     {
         var viewModel = Build(service: new FakePermissionAdministrationService()
             .SetFromRole(TargetUserId, PermissionKeys.SettingsHotWorkCenters, true));
@@ -458,7 +458,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task ASaveThatLanded_AnnouncesTheCellsNewState_NotOnlyItsNewValue()
+    public async Task ViewModel_PermissionsViewModelTests_ASaveThatLanded_AnnouncesTheCellsNewStateNotOnlyItsNewValue()
     {
         var viewModel = Build(service: new FakePermissionAdministrationService()
             .SetFromRole(TargetUserId, PermissionKeys.SettingsHotWorkCenters, false));
@@ -487,7 +487,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task AValueThatMovedWhileThePageWasOpen_IsNamedAndNothingIsWritten()
+    public async Task ViewModel_PermissionsViewModelTests_AValueThatMovedWhileThePageWasOpen_IsNamedAndNothingIsWritten()
     {
         var service = new FakePermissionAdministrationService()
             .SetOwn(TargetUserId, PermissionKeys.SettingsHotWorkCenters, true);
@@ -521,7 +521,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task TheUndo_ReversesTheWholeSave_ForThePersonItWasWrittenFor()
+    public async Task ViewModel_PermissionsViewModelTests_TheUndo_ReversesTheWholeSaveForThePersonItWasWrittenFor()
     {
         var service = new FakePermissionAdministrationService()
             .SetOwn(TargetUserId, PermissionKeys.SettingsHotWorkCenters, false)
@@ -547,7 +547,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task AValueThatMoved_IsShownAndAskedAbout_BeforeItIsRestored()
+    public async Task ViewModel_PermissionsViewModelTests_AValueThatMoved_IsShownAndAskedAboutBeforeItIsRestored()
     {
         var service = new FakePermissionAdministrationService()
             .SetOwn(TargetUserId, PermissionKeys.SettingsHotWorkCenters, false);
@@ -588,7 +588,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task DecliningTheRestore_LeavesTheValueWhereItIs()
+    public async Task ViewModel_PermissionsViewModelTests_DecliningTheRestore_LeavesTheValueWhereItIs()
     {
         var service = new FakePermissionAdministrationService()
             .SetOwn(TargetUserId, PermissionKeys.SettingsHotWorkCenters, false);
@@ -614,7 +614,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task APersonAboveTheReadersRung_HasEveryCellLocked_WithTheReasonInWords()
+    public async Task ViewModel_PermissionsViewModelTests_APersonAboveTheReadersRung_HasEveryCellLockedWithTheReasonInWords()
     {
         var viewModel = Build(people: TwoPeople(), readerRoleCode: "setup");
 
@@ -644,7 +644,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task TheFixedCell_IsPresent_Locked_WithItsReason_AndClearableByNobody()
+    public async Task ViewModel_PermissionsViewModelTests_TheFixedCell_IsPresentLockedWithItsReasonAndClearableByNobody()
     {
         var viewModel = Build(service: new FakePermissionAdministrationService()
             .SetFromRole(TargetUserId, PermissionKeys.AdminPermissions, true));
@@ -668,7 +668,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task AReaderWithoutThePermission_IsToldSoRatherThanShownAWorkingScreen()
+    public async Task ViewModel_PermissionsViewModelTests_AReaderWithoutThePermission_IsToldSoRatherThanShownAWorkingScreen()
     {
         var viewModel = Build(entitled: false);
 
@@ -682,7 +682,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task AnUnreachableStore_IsStatedRatherThanShownAsAnEmptyMatrix()
+    public async Task ViewModel_PermissionsViewModelTests_AnUnreachableStore_IsStatedRatherThanShownAsAnEmptyMatrix()
     {
         var people = TwoPeople();
         people.ThrowOnPeopleRead = new InvalidOperationException("down");
@@ -699,7 +699,7 @@ public sealed class PermissionsViewModelTests
     }
 
     [TestMethod]
-    public async Task NobodyToShow_IsStatedDistinctlyFromAStoreThatFailed()
+    public async Task ViewModel_PermissionsViewModelTests_NobodyToShow_IsStatedDistinctlyFromAStoreThatFailed()
     {
         var viewModel = Build(people: new FakeUserManagementService());
 

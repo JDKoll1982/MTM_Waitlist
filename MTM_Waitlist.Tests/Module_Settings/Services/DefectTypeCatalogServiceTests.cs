@@ -11,7 +11,7 @@ namespace MTM_Waitlist.Tests.Module_Settings.Services;
 public sealed class DefectTypeCatalogServiceTests
 {
     [TestMethod]
-    public async Task CanManage_ReadsTheDeclaredPermission_AndAnswersItsValue()
+    public async Task Service_DefectTypeCatalogServiceTests_CanManage_ReadsTheDeclaredPermissionAndAnswersItsValue()
     {
         var holding = PermissionStub.Holding(PermissionKeys.SettingsDefectTypes);
         Assert.IsTrue(await new DefectTypeCatalogService(new StubMySqlHelperServer(), holding).CanManageAsync());
@@ -25,7 +25,7 @@ public sealed class DefectTypeCatalogServiceTests
     }
 
     [TestMethod]
-    public async Task CanManage_DoesNotAnswerFromAnyRoleName()
+    public async Task Service_DefectTypeCatalogServiceTests_CanManage_DoesNotAnswerFromAnyRoleName()
     {
         // The retired list admitted the display names Admin, administrator and Developer. None of them is read
         // any more, so a service that still decided from a role would have to be handed one to do it — and this
@@ -36,7 +36,7 @@ public sealed class DefectTypeCatalogServiceTests
     }
 
     [TestMethod]
-    public async Task GetActiveAsync_MapsRows()
+    public async Task Service_DefectTypeCatalogServiceTests_GetActiveAsync_MapsRows()
     {
         var helper = new StubMySqlHelperServer(new Dictionary<string, object?>[]
         {
@@ -62,7 +62,7 @@ public sealed class DefectTypeCatalogServiceTests
     }
 
     [TestMethod]
-    public async Task AddAsync_Denied_ReturnsFail_NoSpCall()
+    public async Task Service_DefectTypeCatalogServiceTests_AddAsync_DeniedReturnsFailNoSpCall()
     {
         var helper = new StubMySqlHelperServer();
         var service = new DefectTypeCatalogService(helper, PermissionStub.Holding());
@@ -74,7 +74,7 @@ public sealed class DefectTypeCatalogServiceTests
     }
 
     [TestMethod]
-    public async Task AddAsync_EmptyName_ReturnsFail_NoSpCall()
+    public async Task Service_DefectTypeCatalogServiceTests_AddAsync_EmptyNameReturnsFailNoSpCall()
     {
         var helper = new StubMySqlHelperServer();
         var service = new DefectTypeCatalogService(helper, PermissionStub.Holding(PermissionKeys.SettingsDefectTypes));
@@ -86,7 +86,7 @@ public sealed class DefectTypeCatalogServiceTests
     }
 
     [TestMethod]
-    public async Task AddAsync_Permitted_CallsInsertSp()
+    public async Task Service_DefectTypeCatalogServiceTests_AddAsync_PermittedCallsInsertSp()
     {
         var helper = new StubMySqlHelperServer(affectedRows: 1);
         var service = new DefectTypeCatalogService(helper, PermissionStub.Holding(PermissionKeys.SettingsDefectTypes));
@@ -100,7 +100,7 @@ public sealed class DefectTypeCatalogServiceTests
     }
 
     [TestMethod]
-    public async Task UpdateAsync_Denied_ReturnsFail_NoSpCall()
+    public async Task Service_DefectTypeCatalogServiceTests_UpdateAsync_DeniedReturnsFailNoSpCall()
     {
         var helper = new StubMySqlHelperServer();
         var service = new DefectTypeCatalogService(helper, PermissionStub.Holding());
@@ -112,7 +112,7 @@ public sealed class DefectTypeCatalogServiceTests
     }
 
     [TestMethod]
-    public async Task DeleteAsync_Permitted_CallsDeleteSp()
+    public async Task Service_DefectTypeCatalogServiceTests_DeleteAsync_PermittedCallsDeleteSp()
     {
         var helper = new StubMySqlHelperServer(affectedRows: 1);
         var service = new DefectTypeCatalogService(helper, PermissionStub.Holding(PermissionKeys.SettingsDefectTypes));
@@ -126,7 +126,7 @@ public sealed class DefectTypeCatalogServiceTests
     }
 
     [TestMethod]
-    public async Task DeleteAsync_NotFound_AffectedZero_ReturnsFail()
+    public async Task Service_DefectTypeCatalogServiceTests_DeleteAsync_NotFoundAffectedZeroReturnsFail()
     {
         var helper = new StubMySqlHelperServer(affectedRows: 0);
         var service = new DefectTypeCatalogService(helper, PermissionStub.Holding(PermissionKeys.SettingsDefectTypes));

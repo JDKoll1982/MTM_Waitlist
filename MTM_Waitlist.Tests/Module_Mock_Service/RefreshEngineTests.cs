@@ -40,7 +40,7 @@ public sealed class RefreshEngineTests
     ];
 
     [TestMethod]
-    public async Task RefreshShapeAsync_OnSuccess_RecordsTheRowsSwappedIn()
+    public async Task Service_RefreshEngineTests_RefreshShapeAsync_OnSuccessRecordsTheRowsSwappedIn()
     {
         var writer = new StubMirrorWriter { RowsToReport = 7 };
         var engine = CreateEngine(new StubPayloadSource(), writer);
@@ -55,7 +55,7 @@ public sealed class RefreshEngineTests
     }
 
     [TestMethod]
-    public async Task RefreshShapeAsync_WhenTheSourceIsUnreachable_SkipsAndLeavesTheSnapshotUntouched()
+    public async Task Service_RefreshEngineTests_RefreshShapeAsync_WhenTheSourceIsUnreachableSkipsAndLeavesTheSnapshotUntouched()
     {
         var writer = new StubMirrorWriter();
         var engine = CreateEngine(
@@ -73,7 +73,7 @@ public sealed class RefreshEngineTests
     }
 
     [TestMethod]
-    public async Task RefreshShapeAsync_WhenTheWriteFails_RecordsAFailureWithoutRethrowing()
+    public async Task Service_RefreshEngineTests_RefreshShapeAsync_WhenTheWriteFailsRecordsAFailureWithoutRethrowing()
     {
         var writer = new StubMirrorWriter { ExceptionToThrow = new InvalidOperationException("load rejected") };
         var engine = CreateEngine(new StubPayloadSource(), writer);
@@ -85,7 +85,7 @@ public sealed class RefreshEngineTests
     }
 
     [TestMethod]
-    public async Task RefreshShapeAsync_RedactsCredentialMaterialFromRecordedErrors()
+    public async Task Service_RefreshEngineTests_RefreshShapeAsync_RedactsCredentialMaterialFromRecordedErrors()
     {
         var engine = CreateEngine(
             new StubPayloadSource
@@ -104,7 +104,7 @@ public sealed class RefreshEngineTests
     }
 
     [TestMethod]
-    public async Task RefreshShapeAsync_RaisesRunCompleted()
+    public async Task Service_RefreshEngineTests_RefreshShapeAsync_RaisesRunCompleted()
     {
         var engine = CreateEngine(new StubPayloadSource(), new StubMirrorWriter());
         RefreshRunRecord? observed = null;
@@ -116,7 +116,7 @@ public sealed class RefreshEngineTests
     }
 
     [TestMethod]
-    public async Task RefreshCycleAsync_VisitsEveryRefreshableShape()
+    public async Task Service_RefreshEngineTests_RefreshCycleAsync_VisitsEveryRefreshableShape()
     {
         var writer = new StubMirrorWriter { RowsToReport = 1 };
         var engine = CreateEngine(new StubPayloadSource(), writer, TwoShapeCatalog);
@@ -130,7 +130,7 @@ public sealed class RefreshEngineTests
     }
 
     [TestMethod]
-    public async Task RefreshCycleAsync_SkipsShapesThatFailedCatalogValidation()
+    public async Task Service_RefreshEngineTests_RefreshCycleAsync_SkipsShapesThatFailedCatalogValidation()
     {
         var writer = new StubMirrorWriter();
         var catalogProvider = new RefreshShapeCatalogProvider(
@@ -153,7 +153,7 @@ public sealed class RefreshEngineTests
     }
 
     [TestMethod]
-    public void GetInterval_PrefersTheShapeOverrideOverTheGlobalDefault()
+    public void Service_RefreshEngineTests_GetInterval_PrefersTheShapeOverrideOverTheGlobalDefault()
     {
         var engine = CreateEngine(new StubPayloadSource(), new StubMirrorWriter(), TwoShapeCatalog, TimeSpan.FromMinutes(5));
         var withOverride = TwoShapeCatalog[0] with { RefreshIntervalOverride = TimeSpan.FromMinutes(1) };
@@ -163,7 +163,7 @@ public sealed class RefreshEngineTests
     }
 
     [TestMethod]
-    public async Task TryRunDueShapesAsync_RunsEveryShapeOnce_ThenWaitsForTheInterval()
+    public async Task Service_RefreshEngineTests_TryRunDueShapesAsync_RunsEveryShapeOnceThenWaitsForTheInterval()
     {
         var writer = new StubMirrorWriter { RowsToReport = 2 };
         var engine = CreateEngine(new StubPayloadSource(), writer, TwoShapeCatalog, TimeSpan.FromMinutes(30));
@@ -180,7 +180,7 @@ public sealed class RefreshEngineTests
     }
 
     [TestMethod]
-    public async Task TryRunDueShapesAsync_RerunsTheShapeOnceTheIntervalHasElapsed()
+    public async Task Service_RefreshEngineTests_TryRunDueShapesAsync_RerunsTheShapeOnceTheIntervalHasElapsed()
     {
         var now = DateTime.UtcNow;
         var writer = new StubMirrorWriter { RowsToReport = 1 };
@@ -194,7 +194,7 @@ public sealed class RefreshEngineTests
     }
 
     [TestMethod]
-    public async Task TryRunCycleAsync_WhileACycleIsRunning_IsRejectedInsteadOfOverlapped()
+    public async Task Service_RefreshEngineTests_TryRunCycleAsync_WhileACycleIsRunningIsRejectedInsteadOfOverlapped()
     {
         var gate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var writer = new StubMirrorWriter { RowsToReport = 1 };
@@ -216,7 +216,7 @@ public sealed class RefreshEngineTests
     }
 
     [TestMethod]
-    public async Task RunScheduledAsync_KeepsRefreshingAfterAnUnreachableSourceCycle()
+    public async Task Service_RefreshEngineTests_RunScheduledAsync_KeepsRefreshingAfterAnUnreachableSourceCycle()
     {
         var payloadSource = new StubPayloadSource
         {
@@ -261,7 +261,7 @@ public sealed class RefreshEngineTests
     }
 
     [TestMethod]
-    public async Task ScheduledRefresh_LandsOnTheThreeHourLocalScheduleAsync()
+    public async Task Service_RefreshEngineTests_ScheduledRefresh_LandsOnTheThreeHourLocalScheduleAsync()
     {
         // 04:30 local (UTC-6) -> the next grid slot is 06:00 local = 12:00 UTC.
         var zone = TimeZoneInfo.CreateCustomTimeZone("test-utc-minus-6", TimeSpan.FromHours(-6), "Test UTC-6", "Test UTC-6");
@@ -294,7 +294,7 @@ public sealed class RefreshEngineTests
     }
 
     [TestMethod]
-    public async Task ScheduledRefresh_UsesTheServicesGlobalIntervalWhenAShapeDoesNotOverrideItAsync()
+    public async Task Service_RefreshEngineTests_ScheduledRefresh_UsesTheServicesGlobalIntervalWhenAShapeDoesNotOverrideItAsync()
     {
         // A shape override is honoured as its own grid: 1 hour lands on the top of each hour.
         var zone = TimeZoneInfo.CreateCustomTimeZone("test-utc-minus-6", TimeSpan.FromHours(-6), "Test UTC-6", "Test UTC-6");

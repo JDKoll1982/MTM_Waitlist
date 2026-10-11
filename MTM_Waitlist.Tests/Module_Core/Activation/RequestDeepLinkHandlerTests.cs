@@ -22,7 +22,7 @@ public sealed class RequestDeepLinkHandlerTests
     public void RestoreAppLogSink() => AppLog.Configure(null);
 
     [TestMethod]
-    public void MappedArgument_OpensTheRequestDetailAndShowsNothing()
+    public void Service_RequestDeepLinkHandlerTests_MappedArgument_OpensTheRequestDetailAndShowsNothing()
     {
         var requestId = Guid.NewGuid();
         var navigation = new WaitlistTestNavigationService();
@@ -45,7 +45,7 @@ public sealed class RequestDeepLinkHandlerTests
     }
 
     [TestMethod]
-    public void UnmappedArgument_ShowsNothingRecordsTheArgumentAndComesForward()
+    public void Service_RequestDeepLinkHandlerTests_UnmappedArgument_ShowsNothingRecordsTheArgumentAndComesForward()
     {
         var log = new RecordingAppLogSink();
         AppLog.Configure(log);
@@ -68,7 +68,7 @@ public sealed class RequestDeepLinkHandlerTests
     }
 
     [TestMethod]
-    public void RepeatedActivation_ReachesTheSameOutcomeEachTime()
+    public void Service_RequestDeepLinkHandlerTests_RepeatedActivation_ReachesTheSameOutcomeEachTime()
     {
         var requestId = Guid.NewGuid();
         var navigation = new WaitlistTestNavigationService();
@@ -90,7 +90,7 @@ public sealed class RequestDeepLinkHandlerTests
     /// to either file.
     /// </summary>
     [TestMethod]
-    public void NoActivationPath_CanPresentADialogOrADeveloperMarker()
+    public void Service_RequestDeepLinkHandlerTests_NoActivationPath_CanPresentADialogOrADeveloperMarker()
     {
         (string RelativePath, string Description)[] activationPaths =
         [

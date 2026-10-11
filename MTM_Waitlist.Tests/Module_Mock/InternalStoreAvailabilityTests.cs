@@ -58,7 +58,7 @@ public sealed class InternalStoreAvailabilityTests
     }
 
     [TestMethod]
-    public void DefaultPolicy_AllowsThreeAttemptsWithOneTwoAndFourSecondDelays()
+    public void Service_InternalStoreAvailabilityTests_DefaultPolicy_AllowsThreeAttemptsWithOneTwoAndFourSecondDelays()
     {
         var policy = InternalStoreRetryPolicy.Default;
 
@@ -71,7 +71,7 @@ public sealed class InternalStoreAvailabilityTests
     }
 
     [TestMethod]
-    public async Task WhenTheStoreNeverAnswers_RetriesThreeTimesThenReportsUnavailable()
+    public async Task Service_InternalStoreAvailabilityTests_WhenTheStoreNeverAnswers_RetriesThreeTimesThenReportsUnavailable()
     {
         var tracker = new StoreAvailabilityTracker();
         var helper = CreateUnreachableHelper(tracker);
@@ -93,7 +93,7 @@ public sealed class InternalStoreAvailabilityTests
     }
 
     [TestMethod]
-    public async Task WhenTheStoreNeverAnswers_EveryAttemptIsMade()
+    public async Task Service_InternalStoreAvailabilityTests_WhenTheStoreNeverAnswers_EveryAttemptIsMade()
     {
         // The attempt count is observable through the policy: a policy with a single allowed attempt must
         // report zero retries, while the default reports two — proving the loop is bounded by the policy.
@@ -118,7 +118,7 @@ public sealed class InternalStoreAvailabilityTests
     }
 
     [TestMethod]
-    public async Task AnUnconfiguredStore_IsNotReportedAsUnavailable()
+    public async Task Service_InternalStoreAvailabilityTests_AnUnconfiguredStore_IsNotReportedAsUnavailable()
     {
         var tracker = new StoreAvailabilityTracker();
         var helper = new MySqlHelperServer(
@@ -139,7 +139,7 @@ public sealed class InternalStoreAvailabilityTests
     }
 
     [TestMethod]
-    public async Task CallerCancellation_IsPropagatedAndNotReportedAsUnavailable()
+    public async Task Service_InternalStoreAvailabilityTests_CallerCancellation_IsPropagatedAndNotReportedAsUnavailable()
     {
         var tracker = new StoreAvailabilityTracker();
         var helper = CreateUnreachableHelper(tracker);
@@ -159,7 +159,7 @@ public sealed class InternalStoreAvailabilityTests
     }
 
     [TestMethod]
-    public void Tracker_RaisesAChangeOnlyWhenTheStateChanges()
+    public void Service_InternalStoreAvailabilityTests_Tracker_RaisesAChangeOnlyWhenTheStateChanges()
     {
         var tracker = new StoreAvailabilityTracker();
         var notifications = 0;
@@ -180,7 +180,7 @@ public sealed class InternalStoreAvailabilityTests
     }
 
     [TestMethod]
-    public void PerScreenState_BecomesVisibleOnFailureAndClearsOnRecovery()
+    public void Service_InternalStoreAvailabilityTests_PerScreenState_BecomesVisibleOnFailureAndClearsOnRecovery()
     {
         var tracker = new StoreAvailabilityTracker();
         using var state = new InternalStoreUnavailableState(
@@ -205,7 +205,7 @@ public sealed class InternalStoreAvailabilityTests
     }
 
     [TestMethod]
-    public async Task ManualRetry_ReRunsTheScreensLoadAndClearsTheStateOnceTheStoreReturns()
+    public async Task Service_InternalStoreAvailabilityTests_ManualRetry_ReRunsTheScreensLoadAndClearsTheStateOnceTheStoreReturns()
     {
         var tracker = new StoreAvailabilityTracker();
         var loadCount = 0;
@@ -230,7 +230,7 @@ public sealed class InternalStoreAvailabilityTests
     }
 
     [TestMethod]
-    public async Task ManualRetry_ThatFailsAgain_LeavesTheStateVisibleWithFreshDetail()
+    public async Task Service_InternalStoreAvailabilityTests_ManualRetry_ThatFailsAgainLeavesTheStateVisibleWithFreshDetail()
     {
         var tracker = new StoreAvailabilityTracker();
         using var state = new InternalStoreUnavailableState(
@@ -250,7 +250,7 @@ public sealed class InternalStoreAvailabilityTests
     }
 
     [TestMethod]
-    public async Task ManualRetry_WhenTheLoadThrows_DoesNotEscapeFromTheCommand()
+    public async Task Service_InternalStoreAvailabilityTests_ManualRetry_WhenTheLoadThrowsDoesNotEscapeFromTheCommand()
     {
         var tracker = new StoreAvailabilityTracker();
         using var state = new InternalStoreUnavailableState(
@@ -268,7 +268,7 @@ public sealed class InternalStoreAvailabilityTests
     }
 
     [TestMethod]
-    public void PerScreenState_UnsubscribesFromTheTrackerOnDispose()
+    public void Service_InternalStoreAvailabilityTests_PerScreenState_UnsubscribesFromTheTrackerOnDispose()
     {
         var tracker = new StoreAvailabilityTracker();
         var state = new InternalStoreUnavailableState(

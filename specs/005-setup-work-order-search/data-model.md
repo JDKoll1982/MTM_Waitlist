@@ -175,6 +175,6 @@ because 5.7 has no window functions. Both take the pattern and the cap as **para
 |---|---|---|
 | A source's `ReadTarget` must resolve in the shape catalog | At construction of the reader — fails loudly | Prevents a registered source that silently serves nothing |
 | `ValueColumn` and every `DisplayColumns` name must be projected by the read | Registration-time assertion, mirrored by the projection-parity validation artifact | Prevents a column rename from turning the modal blank |
-| The pattern and the cap are never concatenated into a statement or a procedure name | `InlineSqlAuditTests` (statement-marker scan) + the `RawSqlSeamIsConfinedToItsReviewedAllowlist` scan | FR-018, SC-006 |
+| The pattern and the cap are never concatenated into a statement or a procedure name | `InlineSqlAuditTests` (statement-marker scan) + the `Audit_InlineSqlAuditTests_Audit_InlineSqlAuditTests_RawSqlSeamIsConfinedToItsReviewedAllowlist` scan | FR-018, SC-006 |
 | A mirrored row set is replaced as a complete snapshot, atomically | `sp_visual_work_order_search_refresh`'s truncate → load → validate → single-`RENAME` sequence | Spec 001 FR-006 |
 | A reachable-but-empty live result is returned as-is | `VisualReadFallback`'s `VisualQueryStatus.Ok` branch — no mirror read on that path | FR-019, SC-007 |

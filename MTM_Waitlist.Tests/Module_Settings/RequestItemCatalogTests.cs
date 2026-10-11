@@ -7,14 +7,14 @@ namespace MTM_Waitlist.Tests.Module_Settings;
 public sealed class RequestItemCatalogTests
 {
     [TestMethod]
-    public void Catalog_HasAllTwentyFourRows()
+    public void Service_RequestItemCatalogTests_Catalog_HasAllTwentyFourRows()
     {
         Assert.AreEqual(24, RequestItemCatalog.TotalCount);
         Assert.AreEqual(24, RequestItemCatalog.Items.Count);
     }
 
     [TestMethod]
-    public void Catalog_CountsPerCategory_MatchSpec()
+    public void Service_RequestItemCatalogTests_Catalog_CountsPerCategoryMatchSpec()
     {
         Assert.AreEqual(11, RequestItemCatalog.GetByCategory(RequestCategory.Pickup).Count);
         Assert.AreEqual(9, RequestItemCatalog.GetByCategory(RequestCategory.Deliver).Count);
@@ -23,7 +23,7 @@ public sealed class RequestItemCatalogTests
     }
 
     [TestMethod]
-    public void Catalog_PickupStartsWithPickupCoil_EndsWithHopper()
+    public void Service_RequestItemCatalogTests_Catalog_PickupStartsWithPickupCoilEndsWithHopper()
     {
         var pickup = RequestItemCatalog.GetByCategory(RequestCategory.Pickup);
         Assert.AreEqual("pickup-coil", pickup[0].Id);
@@ -31,7 +31,7 @@ public sealed class RequestItemCatalogTests
     }
 
     [TestMethod]
-    public void Catalog_IncludesLegacyOnlyRowsAdded20260908()
+    public void Service_RequestItemCatalogTests_Catalog_IncludesLegacyOnlyRowsAdded20260908()
     {
         // Wrong Coil / Wrong Flatstock (Deliver-correct + Pickup-wrong), scrap offal removal,
         // hopper pickup, and table remove were folded into the canonical catalog on 2026-09-08.
@@ -43,7 +43,7 @@ public sealed class RequestItemCatalogTests
     }
 
     [TestMethod]
-    public void Catalog_DeliverComponent_MirrorsThePickupComponentChoice()
+    public void Service_RequestItemCatalogTests_Catalog_DeliverComponentMirrorsThePickupComponentChoice()
     {
         // Added 2026-09-22: a job carrying a component is offered a Deliver component wherever Pickup offers
         // one, so the two families cannot drift apart again.
@@ -59,7 +59,7 @@ public sealed class RequestItemCatalogTests
     }
 
     [TestMethod]
-    public void Catalog_UmbrellaVerb_MapsToCategory()
+    public void Service_RequestItemCatalogTests_Catalog_UmbrellaVerbMapsToCategory()
     {
         // The die Items are the exception the catalog declares for themselves: their first line names the thing
         // being moved rather than the bare Category word (FR-053).
@@ -70,7 +70,7 @@ public sealed class RequestItemCatalogTests
     }
 
     [TestMethod]
-    public void Catalog_FindById_IsCaseInsensitive()
+    public void Service_RequestItemCatalogTests_Catalog_FindByIdIsCaseInsensitive()
     {
         Assert.IsNotNull(RequestItemCatalog.FindById("PICKUP-COIL"));
         Assert.IsNotNull(RequestItemCatalog.FindById("Other"));
@@ -78,7 +78,7 @@ public sealed class RequestItemCatalogTests
     }
 
     [TestMethod]
-    public void Catalog_UmbrellaVerb_OverridesTheWrongMaterialItems()
+    public void Service_RequestItemCatalogTests_Catalog_UmbrellaVerbOverridesTheWrongMaterialItems()
     {
         // The two wrong-material Items carry their own first line, pinned verbatim, rather than the
         // plain Category word (contract §2, FR-029); the die Items do the same (FR-053).
@@ -90,7 +90,7 @@ public sealed class RequestItemCatalogTests
     }
 
     [TestMethod]
-    public void Catalog_EveryItemDeclaresADisplayNameResourceKeyAndALine2Template()
+    public void Service_RequestItemCatalogTests_Catalog_EveryItemDeclaresADisplayNameResourceKeyAndALine2Template()
     {
         foreach (var item in RequestItemCatalog.Items)
         {
@@ -105,7 +105,7 @@ public sealed class RequestItemCatalogTests
     }
 
     [TestMethod]
-    public void Catalog_DieItems_DeclareTheirOwnTwoLines()
+    public void Service_RequestItemCatalogTests_Catalog_DieItemsDeclareTheirOwnTwoLines()
     {
         // Superseded 2026-09-14 (FR-053). The identifier used to be the language's one conditional — the die's
         // location at Home Location, otherwise its number. Both lines now carry what the handler needs in one

@@ -28,7 +28,7 @@ namespace MTM_Waitlist.Tests.Module_Mock_Service;
 public sealed class ServiceCapabilityGatingTests
 {
     [TestMethod]
-    public async Task GetCapabilitiesAsync_WhenInforVisualIsUnreachable_DisablesRefreshWithAReasonAsync()
+    public async Task Service_ServiceCapabilityGatingTests_GetCapabilitiesAsync_WhenInforVisualIsUnreachableDisablesRefreshWithAReasonAsync()
     {
         var probe = CreateProbe(visualConfigured: true, visualReachable: false);
 
@@ -40,7 +40,7 @@ public sealed class ServiceCapabilityGatingTests
     }
 
     [TestMethod]
-    public async Task GetCapabilitiesAsync_WhenInforVisualIsConfiguredAndAnswers_LeavesRefreshEnabledAsync()
+    public async Task Service_ServiceCapabilityGatingTests_GetCapabilitiesAsync_WhenInforVisualIsConfiguredAndAnswersLeavesRefreshEnabledAsync()
     {
         var probe = CreateProbe(visualConfigured: true, visualReachable: true);
 
@@ -51,7 +51,7 @@ public sealed class ServiceCapabilityGatingTests
     }
 
     [TestMethod]
-    public async Task GetCapabilitiesAsync_WhenInforVisualIsNotConfigured_DisablesNothingAsync()
+    public async Task Service_ServiceCapabilityGatingTests_GetCapabilitiesAsync_WhenInforVisualIsNotConfiguredDisablesNothingAsync()
     {
         // Not configured is "unknown", not "unreachable": disabling refresh here would hide a provisioning gap
         // behind a silent no-op, and the refresh cycle already reports an unreachable source as a normal skip.
@@ -63,7 +63,7 @@ public sealed class ServiceCapabilityGatingTests
     }
 
     [TestMethod]
-    public async Task GetCapabilitiesAsync_DisablesOnlyTheStoresThatCouldNotBeReachedAsync()
+    public async Task Service_ServiceCapabilityGatingTests_GetCapabilitiesAsync_DisablesOnlyTheStoresThatCouldNotBeReachedAsync()
     {
         var probe = CreateProbe(
             storeResults: new Dictionary<BackupStore, StoreProbeResult>
@@ -85,7 +85,7 @@ public sealed class ServiceCapabilityGatingTests
     }
 
     [TestMethod]
-    public async Task GetCapabilitiesAsync_WithinTheCacheLifetime_MeasuresOnceAsync()
+    public async Task Service_ServiceCapabilityGatingTests_GetCapabilitiesAsync_WithinTheCacheLifetimeMeasuresOnceAsync()
     {
         var clock = new TestTimeProvider(new DateTimeOffset(2026, 9, 12, 12, 0, 0, TimeSpan.Zero));
         var counter = new CountingStoreProbe();
@@ -101,7 +101,7 @@ public sealed class ServiceCapabilityGatingTests
     }
 
     [TestMethod]
-    public async Task GetCapabilitiesAsync_AfterTheCacheLifetime_MeasuresAgainSoAccessCanReturnAsync()
+    public async Task Service_ServiceCapabilityGatingTests_GetCapabilitiesAsync_AfterTheCacheLifetimeMeasuresAgainSoAccessCanReturnAsync()
     {
         var clock = new TestTimeProvider(new DateTimeOffset(2026, 9, 12, 12, 0, 0, TimeSpan.Zero));
         var visual = new StubVisualConnectivityProbe { IsReachable = false };
@@ -123,7 +123,7 @@ public sealed class ServiceCapabilityGatingTests
     }
 
     [TestMethod]
-    public async Task GetCapabilitiesAsync_WhenAskedToReprobe_IgnoresTheCachedVerdictAsync()
+    public async Task Service_ServiceCapabilityGatingTests_GetCapabilitiesAsync_WhenAskedToReprobeIgnoresTheCachedVerdictAsync()
     {
         var counter = new CountingStoreProbe();
         var probe = CreateProbe(storeProbe: counter);
@@ -136,7 +136,7 @@ public sealed class ServiceCapabilityGatingTests
     }
 
     [TestMethod]
-    public async Task GetCapabilitiesAsync_WhenTheProbeItselfFails_DisablesNothingAsync()
+    public async Task Service_ServiceCapabilityGatingTests_GetCapabilitiesAsync_WhenTheProbeItselfFailsDisablesNothingAsync()
     {
         // A probe that cannot run is not evidence of unreachability, so no work is disabled by it.
         var probe = CreateProbe(storeProbe: new ThrowingStoreProbe(), visualProbe: new ThrowingVisualProbe());
@@ -150,7 +150,7 @@ public sealed class ServiceCapabilityGatingTests
     }
 
     [TestMethod]
-    public void Current_BeforeAnyMeasurement_DisablesNothing()
+    public void Service_ServiceCapabilityGatingTests_Current_BeforeAnyMeasurementDisablesNothing()
     {
         var probe = CreateProbe();
 

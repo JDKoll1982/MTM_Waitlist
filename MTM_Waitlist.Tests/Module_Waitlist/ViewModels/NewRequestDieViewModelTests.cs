@@ -24,7 +24,7 @@ public sealed class NewRequestDieViewModelTests
     private const string SecondDie = "FGT0002001";
 
     [TestMethod]
-    public void OnNavigatedTo_BindsEveryDieTheJobCarries_WithItsHomeLocation()
+    public void ViewModel_NewRequestDieViewModelTests_OnNavigatedTo_BindsEveryDieTheJobCarriesWithItsHomeLocation()
     {
         var viewModel = CreateViewModel();
         viewModel.OnNavigatedTo(TwoDieState());
@@ -41,7 +41,7 @@ public sealed class NewRequestDieViewModelTests
     }
 
     [TestMethod]
-    public void SelectDie_TogglesTheCardRatherThanMovingOn()
+    public void ViewModel_NewRequestDieViewModelTests_SelectDie_TogglesTheCardRatherThanMovingOn()
     {
         // The dunnage step advances on a tap because one part is one answer. Here several dies are one answer
         // each, so a tap marks the card and the operator commits when they have finished choosing.
@@ -62,7 +62,7 @@ public sealed class NewRequestDieViewModelTests
     }
 
     [TestMethod]
-    public void SelectAll_ChoosesEveryDieTheJobCarries()
+    public void ViewModel_NewRequestDieViewModelTests_SelectAll_ChoosesEveryDieTheJobCarries()
     {
         var viewModel = CreateViewModel();
         viewModel.OnNavigatedTo(TwoDieState());
@@ -73,7 +73,7 @@ public sealed class NewRequestDieViewModelTests
     }
 
     [TestMethod]
-    public void Continue_WithNothingChosen_RefusesAndStaysOnTheStep()
+    public void ViewModel_NewRequestDieViewModelTests_Continue_WithNothingChosenRefusesAndStaysOnTheStep()
     {
         var navigation = new RecordingNavigationService();
         var viewModel = CreateViewModel(navigation);
@@ -91,7 +91,7 @@ public sealed class NewRequestDieViewModelTests
     }
 
     [TestMethod]
-    public void Continue_WithTwoChosen_RecordsBothDiesAndMovesOn()
+    public void ViewModel_NewRequestDieViewModelTests_Continue_WithTwoChosenRecordsBothDiesAndMovesOn()
     {
         var navigation = new RecordingNavigationService();
         var viewModel = CreateViewModel(navigation);
@@ -118,7 +118,7 @@ public sealed class NewRequestDieViewModelTests
     }
 
     [TestMethod]
-    public void OnNavigatedTo_ComingBackWithDiesChosen_ShowsThemMarkedAgain()
+    public void ViewModel_NewRequestDieViewModelTests_OnNavigatedTo_ComingBackWithDiesChosenShowsThemMarkedAgain()
     {
         var state = TwoDieState();
         state.SelectedDies = [Die(FirstDie, "DIE SHOP")];
@@ -133,7 +133,7 @@ public sealed class NewRequestDieViewModelTests
     }
 
     [TestMethod]
-    public void OnNavigatedTo_ForAJobWithNoDie_ReportsItAndDropsNoCards()
+    public void ViewModel_NewRequestDieViewModelTests_OnNavigatedTo_ForAJobWithNoDieReportsItAndDropsNoCards()
     {
         var noDie = TwoDieState();
         noDie.Availability = RequestJobPartAvailability.None;
@@ -146,7 +146,7 @@ public sealed class NewRequestDieViewModelTests
     }
 
     [TestMethod]
-    public void OnNavigatedTo_WithoutAState_LeavesTheStep()
+    public void ViewModel_NewRequestDieViewModelTests_OnNavigatedTo_WithoutAStateLeavesTheStep()
     {
         var navigation = new RecordingNavigationService();
         var viewModel = CreateViewModel(navigation);

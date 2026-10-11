@@ -174,7 +174,7 @@ exported so no integration case is gated out.
 | the same run filtered to `InlineSqlAuditTests` and `RetiredSymbolAuditTests` | 10 passed, 0 failed, per §6 gate 4 |
 
 **The four skips belong to another feature and cannot be un-gated here.** They are the Infor Visual live checks
-(`LookupWorkOrderQuery_ReturnsRows_WhenServerIsAvailable` and its three siblings). Their guard probes the Infor
+(`Service_InforVisualSqlQueryServiceTests_LookupWorkOrderQuery_ReturnsRowsWhenServerIsAvailable` and its three siblings). Their guard probes the Infor
 Visual SQL Server and reports inconclusive when it cannot be reached. `INFOR_VISUAL_SQL_USER` and
 `INFOR_VISUAL_SQL_PASSWORD` are set on this machine, so the skip is the unreachable server rather than a missing
 variable, and no MySQL connection can change it.
@@ -184,15 +184,15 @@ The eleven live cases §6 gate 2 names, and what carries each one:
 | The case | What carries it |
 | --- | --- |
 | Rank refusal | the two live cases in `UserManagementLiveIntegrationTests`, one for the role and one for a target who outranks the actor |
-| Self-lockout rejection | `UpdateAsync_DeactivatingTheActorsOwnAccount_IsRefusedByTheStore` and `UpdateAsync_RenamingTheActorsOwnSignInName_IsRefusedByTheStore` |
-| Transactional rollback | `CreateAsync_FailingAfterTheProfileIsWritten_RollsTheProfileAndTheRoleBackTogether` |
-| Duplicate-username typed result | `CreateAsync_ASignInNameAlreadyTaken_ArrivesAsOneTypedAnswerAndWritesNothing`, and `CreateUserViewModelTests` for the form's side of it |
-| Uppercase normalisation | `ASignInNameTypedInLowerCase_IsStoredUpperCase_AndSignsInEitherWay`, which creates with a lower-case name, reads the stored name back, and signs in with both spellings |
-| Employee-number non-uniqueness | `CreateUserViewModelTests.TwoPeopleSharingOneEmployeeNumber_AreBothCreatedAndBothListed` |
-| Search matching all four fields | `SearchAsync_MatchesEachOfTheFourFacts_AndNarrowsByRole`, one search per fact against the live roster, plus the role filter |
+| Self-lockout rejection | `Database_UserManagementLiveIntegrationTests_UpdateAsync_DeactivatingTheActorsOwnAccountIsRefusedByTheStore` and `Database_UserManagementLiveIntegrationTests_UpdateAsync_RenamingTheActorsOwnSignInNameIsRefusedByTheStore` |
+| Transactional rollback | `Database_UserManagementLiveIntegrationTests_CreateAsync_FailingAfterTheProfileIsWrittenRollsTheProfileAndTheRoleBackTogether` |
+| Duplicate-username typed result | `Database_UserManagementLiveIntegrationTests_CreateAsync_ASignInNameAlreadyTakenArrivesAsOneTypedAnswerAndWritesNothing`, and `CreateUserViewModelTests` for the form's side of it |
+| Uppercase normalisation | `Database_UserManagementLiveIntegrationTests_Database_UserManagementLiveIntegrationTests_ASignInNameTypedInLowerCase_IsStoredUpperCase_AndSignsInEitherWay`, which creates with a lower-case name, reads the stored name back, and signs in with both spellings |
+| Employee-number non-uniqueness | `CreateUserViewModelTests.ViewModel_CreateUserViewModelTests_TwoPeopleSharingOneEmployeeNumber_AreBothCreatedAndBothListed` |
+| Search matching all four fields | `Database_UserManagementLiveIntegrationTests_SearchAsync_MatchesEachOfTheFourFactsAndNarrowsByRole`, one search per fact against the live roster, plus the role filter |
 | UI-thread collection safety | **stated as a gap.** The roster's load resumes on the context it was started from, because the continuation that fills the bound collection is not detached, and every roster case reads that collection straight after awaiting the load. No case installs a synchronization context and asserts where the mutation happens, so this one is covered by construction and by the tests that read the collection, not by an assertion about the thread |
-| Deactivate without ending a session | `UpdateAsync_DeactivatingAPerson_LeavesTheirExistingSessionsAlone`, and `TemporaryCredentialLimitTests.ResetPassword_LeavesAnOpenSessionRunning` for the reset half |
-| Double-click Save writing exactly one row | `CreateUserViewModelTests.OnePress_CreatesExactlyOnePerson` and `PermissionsViewModelTests.OneImpatientPress_WritesExactlyOneChange` |
+| Deactivate without ending a session | `Database_UserManagementLiveIntegrationTests_UpdateAsync_DeactivatingAPersonLeavesTheirExistingSessionsAlone`, and `TemporaryCredentialLimitTests.ResetPassword_LeavesAnOpenSessionRunning` for the reset half |
+| Double-click Save writing exactly one row | `CreateUserViewModelTests.ViewModel_CreateUserViewModelTests_OnePress_CreatesExactlyOnePerson` and `PermissionsViewModelTests.ViewModel_PermissionsViewModelTests_OneImpatientPress_WritesExactlyOneChange` |
 | An audit row naming the actor and the time | the live create, save and reset cases, each of which asserts the acting user and the recorded time on the rows it wrote |
 
 ### T075: the walk through the running application

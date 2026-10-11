@@ -93,16 +93,23 @@
                     <TextBlock
                         Style="{ThemeResource BodyStrongTextBlockStyle}"
                         Text="{x:Bind ViewModel.IdentityHeadingText}" />
+                    <!-- The name is read from the computer and shown. It is drawn as text rather than as a field,
+                         so there is nothing for a person to type (FR-049). -->
+                    <TextBlock
+                        AutomationProperties.AutomationId="MachineSetupWindow_ComputerNameLabel"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind ViewModel.ComputerNameLabelText}" />
+                    <TextBlock
+                        x:Name="ComputerNameText"
+                        AutomationProperties.AutomationId="MachineSetupWindow_ComputerName"
+                        Style="{ThemeResource BodyStrongTextBlockStyle}"
+                        Text="{x:Bind ViewModel.ComputerName, Mode=OneWay}"
+                        TextWrapping="Wrap" />
                     <TextBox
-                        x:Name="DisplayNameBox"
-                        AutomationProperties.AutomationId="MachineSetupWindow_DisplayName"
-                        Header="{x:Bind ViewModel.DisplayNameLabelText}"
-                        Text="{x:Bind ViewModel.DisplayName, Mode=TwoWay}" />
-                    <TextBox
-                        x:Name="DescriptionBox"
-                        AutomationProperties.AutomationId="MachineSetupWindow_Description"
-                        Header="{x:Bind ViewModel.DescriptionLabelText}"
-                        Text="{x:Bind ViewModel.Description, Mode=TwoWay}" />
+                        x:Name="LocationBox"
+                        AutomationProperties.AutomationId="MachineSetupWindow_Location"
+                        Header="{x:Bind ViewModel.LocationLabelText}"
+                        Text="{x:Bind ViewModel.Location, Mode=TwoWay}" />
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>

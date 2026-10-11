@@ -41,7 +41,7 @@ public sealed class RefreshShapeCatalogProviderTests
     };
 
     [TestMethod]
-    public async Task ValidateAsync_WithAgreeingArtifacts_MarksEveryShapeValid()
+    public async Task Service_RefreshShapeCatalogProviderTests_ValidateAsync_WithAgreeingArtifactsMarksEveryShapeValid()
     {
         var provider = CreateProvider(key => Metadata(ColumnsFor(key)));
 
@@ -54,7 +54,7 @@ public sealed class RefreshShapeCatalogProviderTests
     }
 
     [TestMethod]
-    public async Task ValidateAsync_AcceptsTheSixShapeCatalogIncludingTheEmployeeByNumberShape()
+    public async Task Service_RefreshShapeCatalogProviderTests_ValidateAsync_AcceptsTheSixShapeCatalogIncludingTheEmployeeByNumberShape()
     {
         // The service's own startup validation, at the moment the catalog moved from five shapes to six
         // (FR-033): the new shape validates against its mirror, is refreshable, and does not push any other
@@ -84,7 +84,7 @@ public sealed class RefreshShapeCatalogProviderTests
     }
 
     [TestMethod]
-    public async Task ValidateAsync_WhenTheEmployeeMirrorDrifts_ReportsTheEmployeeShapeOnly()
+    public async Task Service_RefreshShapeCatalogProviderTests_ValidateAsync_WhenTheEmployeeMirrorDriftsReportsTheEmployeeShapeOnly()
     {
         // A drift in the sixth shape's own mirror projection is reported against that shape and no other, so a
         // half-deployed cache cannot take the five shipped shapes down with it (FR-020).
@@ -103,7 +103,7 @@ public sealed class RefreshShapeCatalogProviderTests
     }
 
     [TestMethod]
-    public async Task ValidateAsync_WhenArtifactsAreMissing_ReportsAndExcludesThatShapeOnly()
+    public async Task Service_RefreshShapeCatalogProviderTests_ValidateAsync_WhenArtifactsAreMissingReportsAndExcludesThatShapeOnly()
     {
         var provider = CreateProvider(
             key => Metadata(ColumnsFor(key)),
@@ -121,7 +121,7 @@ public sealed class RefreshShapeCatalogProviderTests
     }
 
     [TestMethod]
-    public async Task ValidateAsync_WhenTheMirrorProjectionDrifts_ReportsAColumnMismatch()
+    public async Task Service_RefreshShapeCatalogProviderTests_ValidateAsync_WhenTheMirrorProjectionDriftsReportsAColumnMismatch()
     {
         var provider = CreateProvider(
             key => key == "work_order_lookup"
@@ -136,7 +136,7 @@ public sealed class RefreshShapeCatalogProviderTests
     }
 
     [TestMethod]
-    public async Task ValidateAsync_WhenTheMetadataReadThrows_TreatsTheShapeAsInvalidInsteadOfCrashing()
+    public async Task Service_RefreshShapeCatalogProviderTests_ValidateAsync_WhenTheMetadataReadThrowsTreatsTheShapeAsInvalidInsteadOfCrashing()
     {
         var provider = CreateProvider(key => key == "disposition_input"
             ? throw new InvalidOperationException("cache unreachable")
@@ -151,7 +151,7 @@ public sealed class RefreshShapeCatalogProviderTests
     }
 
     [TestMethod]
-    public async Task ValidateAsync_WhenTheSourceScriptIsAbsent_ReportsTheMissingScript()
+    public async Task Service_RefreshShapeCatalogProviderTests_ValidateAsync_WhenTheSourceScriptIsAbsentReportsTheMissingScript()
     {
         var provider = CreateProvider(
             key => Metadata(ColumnsFor(key)),
@@ -173,7 +173,7 @@ public sealed class RefreshShapeCatalogProviderTests
     }
 
     [TestMethod]
-    public async Task ValidateAsync_ExcludesDisabledShapesFromTheRefreshableWorkList()
+    public async Task Service_RefreshShapeCatalogProviderTests_ValidateAsync_ExcludesDisabledShapesFromTheRefreshableWorkList()
     {
         var catalog = VisualReadShapeCatalog.Create()
             .Select(shape => shape.Key == "inventory_locations" ? shape with { IsEnabled = false } : shape)
@@ -190,7 +190,7 @@ public sealed class RefreshShapeCatalogProviderTests
     }
 
     [TestMethod]
-    public async Task ValidateAsync_ReportsNoEntriesBeforeValidationRuns()
+    public async Task Service_RefreshShapeCatalogProviderTests_ValidateAsync_ReportsNoEntriesBeforeValidationRuns()
     {
         var provider = CreateProvider(key => Metadata(ColumnsFor(key)));
 
@@ -203,7 +203,7 @@ public sealed class RefreshShapeCatalogProviderTests
     }
 
     [TestMethod]
-    public async Task ValidateAsync_WhenAShapeExistsInTheCacheWithoutACatalogEntry_ReportsItAsUnregistered()
+    public async Task Service_RefreshShapeCatalogProviderTests_ValidateAsync_WhenAShapeExistsInTheCacheWithoutACatalogEntryReportsItAsUnregistered()
     {
         // The "new read shape half-added" edge case: steps 2-3 of the playbook were done (tables and
         // procedures exist) but step 4 was skipped, so nothing ever refreshes it (FR-016/FR-020).
@@ -222,7 +222,7 @@ public sealed class RefreshShapeCatalogProviderTests
     }
 
     [TestMethod]
-    public async Task ValidateAsync_WhenTheCacheCannotBeEnumerated_DoesNotFailValidationOrReportFalseGaps()
+    public async Task Service_RefreshShapeCatalogProviderTests_ValidateAsync_WhenTheCacheCannotBeEnumeratedDoesNotFailValidationOrReportFalseGaps()
     {
         var reader = new ThrowingEnumerationMetadataReader();
 

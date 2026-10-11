@@ -17,7 +17,7 @@ public sealed class ReadStatusProviderTests
     private static readonly DateTime NowUtc = new(2026, 9, 10, 12, 0, 0, DateTimeKind.Utc);
 
     [TestMethod]
-    public void Current_InitiallyReportsUnknown()
+    public void Service_ReadStatusProviderTests_Current_InitiallyReportsUnknown()
     {
         var provider = CreateProvider(new FakeVisualConnectivityProbe());
 
@@ -26,7 +26,7 @@ public sealed class ReadStatusProviderTests
     }
 
     [TestMethod]
-    public async Task VisibilityRule_HoldsAtEveryStateTransition()
+    public async Task Service_ReadStatusProviderTests_VisibilityRule_HoldsAtEveryStateTransition()
     {
         var probe = new FakeVisualConnectivityProbe(true, false, false, true);
         var provider = CreateProvider(probe);
@@ -51,7 +51,7 @@ public sealed class ReadStatusProviderTests
     }
 
     [TestMethod]
-    public async Task RefreshAsync_ReportsCachedDataAge_FromTheMostRecentShapeRefresh()
+    public async Task Service_ReadStatusProviderTests_RefreshAsync_ReportsCachedDataAgeFromTheMostRecentShapeRefresh()
     {
         var freshness = new FakeVisualShapeFreshnessReader(
             new VisualShapeFreshness
@@ -80,7 +80,7 @@ public sealed class ReadStatusProviderTests
     }
 
     [TestMethod]
-    public async Task RefreshAsync_SeedOnlyContent_HasNoAgeAndIsReportedAsSeed()
+    public async Task Service_ReadStatusProviderTests_RefreshAsync_SeedOnlyContentHasNoAgeAndIsReportedAsSeed()
     {
         var freshness = new FakeVisualShapeFreshnessReader(
             new VisualShapeFreshness
@@ -101,7 +101,7 @@ public sealed class ReadStatusProviderTests
     }
 
     [TestMethod]
-    public async Task RefreshAsync_WhenTheCacheCannotBeRead_KeepsTheStateAndLeavesAgeUnknown()
+    public async Task Service_ReadStatusProviderTests_RefreshAsync_WhenTheCacheCannotBeReadKeepsTheStateAndLeavesAgeUnknown()
     {
         var provider = CreateProvider(new FakeVisualConnectivityProbe(true), new ThrowingVisualShapeFreshnessReader());
 
@@ -112,7 +112,7 @@ public sealed class ReadStatusProviderTests
     }
 
     [TestMethod]
-    public async Task Changed_IsRaisedWhenTheStateChanges()
+    public async Task Service_ReadStatusProviderTests_Changed_IsRaisedWhenTheStateChanges()
     {
         var provider = CreateProvider(new FakeVisualConnectivityProbe(false, false));
         var snapshots = new List<ReadStatusSnapshot>();
@@ -128,7 +128,7 @@ public sealed class ReadStatusProviderTests
     }
 
     [TestMethod]
-    public void NoPublicApiCanChangeTheReadMode()
+    public void Service_ReadStatusProviderTests_NoPublicApiCanChangeTheReadMode()
     {
         // The contract is deliberately read-only: the only members are a snapshot getter and a change
         // event, so nothing in the application can force cached or live reads (FR-003).

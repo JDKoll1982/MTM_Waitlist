@@ -37,7 +37,7 @@ public sealed class ImageStorageConfigurationResolverTests
     }
 
     [TestMethod]
-    public async Task GetSharedFolderPathAsync_WithNothingStored_UsesTheShippedDefault()
+    public async Task Service_ImageStorageConfigurationResolverTests_GetSharedFolderPathAsync_WithNothingStoredUsesTheShippedDefault()
     {
         Assert.AreEqual(AppsettingsPath, await _resolver.GetSharedFolderPathAsync());
     }
@@ -47,7 +47,7 @@ public sealed class ImageStorageConfigurationResolverTests
     /// captures one of its own, so nothing can disagree with it (FR-040).
     /// </summary>
     [TestMethod]
-    public async Task GetSharedFolderPathAsync_WithAPlantOverride_UsesThePlantOverride()
+    public async Task Service_ImageStorageConfigurationResolverTests_GetSharedFolderPathAsync_WithAPlantOverrideUsesThePlantOverride()
     {
         _configService.SetText(ConfigSettingKeys.ImageStorageSharedFolderPath, PlantPath);
 
@@ -55,16 +55,7 @@ public sealed class ImageStorageConfigurationResolverTests
     }
 
     [TestMethod]
-    public async Task GetKeysFolderPathAsync_WithNothingStored_UsesTheShippedDefault()
-    {
-        Assert.AreEqual(
-            AppStoragePaths.KeysFolderDefault,
-            await _resolver.GetKeysFolderPathAsync(),
-            "a plant that names no keys folder is left with the shipped one");
-    }
-
-    [TestMethod]
-    public async Task GetDunnageRootPathAsync_WithNothingStored_UsesTheShippedDefault()
+    public async Task Service_ImageStorageConfigurationResolverTests_GetDunnageRootPathAsync_WithNothingStoredUsesTheShippedDefault()
     {
         Assert.AreEqual(
             AppStoragePaths.DunnageRootDefault,
@@ -77,7 +68,7 @@ public sealed class ImageStorageConfigurationResolverTests
     /// (FR-040).
     /// </summary>
     [TestMethod]
-    public async Task GetDunnageRootPathAsync_WithAPlantOverride_UsesThePlantOverride()
+    public async Task Service_ImageStorageConfigurationResolverTests_GetDunnageRootPathAsync_WithAPlantOverrideUsesThePlantOverride()
     {
         _configService.SetText(ConfigSettingKeys.DunnageRootPath, @"\\server\dunnage");
 
@@ -85,7 +76,7 @@ public sealed class ImageStorageConfigurationResolverTests
     }
 
     [TestMethod]
-    public async Task GetSharedFolderPathAsync_WithDatabaseOverride_PrefersTheDatabaseValue()
+    public async Task Service_ImageStorageConfigurationResolverTests_GetSharedFolderPathAsync_WithDatabaseOverridePrefersTheDatabaseValue()
     {
         _configService.SetText(ConfigSettingKeys.ImageStorageSharedFolderPath, @"\\server\images");
 
@@ -93,7 +84,7 @@ public sealed class ImageStorageConfigurationResolverTests
     }
 
     [TestMethod]
-    public async Task GetSharedFolderPathAsync_CachesTheResolvedValue()
+    public async Task Service_ImageStorageConfigurationResolverTests_GetSharedFolderPathAsync_CachesTheResolvedValue()
     {
         await _resolver.GetSharedFolderPathAsync();
         await _resolver.GetSharedFolderPathAsync();
@@ -103,7 +94,7 @@ public sealed class ImageStorageConfigurationResolverTests
     }
 
     [TestMethod]
-    public async Task InvalidateCache_ForcesTheNextReadToConsultTheDatabaseAgain()
+    public async Task Service_ImageStorageConfigurationResolverTests_InvalidateCache_ForcesTheNextReadToConsultTheDatabaseAgain()
     {
         await _resolver.GetSharedFolderPathAsync();
         _resolver.InvalidateCache();
@@ -113,7 +104,7 @@ public sealed class ImageStorageConfigurationResolverTests
     }
 
     [TestMethod]
-    public async Task GetMaxFileSizeBytesAsync_WithDatabaseOverride_PrefersTheDatabaseValue()
+    public async Task Service_ImageStorageConfigurationResolverTests_GetMaxFileSizeBytesAsync_WithDatabaseOverridePrefersTheDatabaseValue()
     {
         _configService.SetInt(ConfigSettingKeys.ImageStorageMaxFileSizeBytes, 2048);
 
@@ -121,13 +112,13 @@ public sealed class ImageStorageConfigurationResolverTests
     }
 
     [TestMethod]
-    public async Task GetMaxFileSizeBytesAsync_WithNoOverride_UsesTheTenMegabyteDefault()
+    public async Task Service_ImageStorageConfigurationResolverTests_GetMaxFileSizeBytesAsync_WithNoOverrideUsesTheTenMegabyteDefault()
     {
         Assert.AreEqual(10 * 1024 * 1024, await _resolver.GetMaxFileSizeBytesAsync());
     }
 
     [TestMethod]
-    public async Task GetEnableArchiveVersioningAsync_WithDatabaseOverride_PrefersTheDatabaseValue()
+    public async Task Service_ImageStorageConfigurationResolverTests_GetEnableArchiveVersioningAsync_WithDatabaseOverridePrefersTheDatabaseValue()
     {
         _configService.SetBool(ConfigSettingKeys.ImageStorageEnableArchiveVersioning, false);
 
@@ -135,7 +126,7 @@ public sealed class ImageStorageConfigurationResolverTests
     }
 
     [TestMethod]
-    public async Task GetEffectiveConfigurationAsync_MergesDatabaseOverridesOverAppsettings()
+    public async Task Service_ImageStorageConfigurationResolverTests_GetEffectiveConfigurationAsync_MergesDatabaseOverridesOverAppsettings()
     {
         _configService.SetText(ConfigSettingKeys.ImageStorageSharedFolderPath, @"\\server\images");
         _configService.SetInt(ConfigSettingKeys.ImageStorageMaxFileSizeBytes, 4096);
@@ -150,7 +141,7 @@ public sealed class ImageStorageConfigurationResolverTests
     }
 
     [TestMethod]
-    public void Constructor_WithNullConfigService_Throws()
+    public void Service_ImageStorageConfigurationResolverTests_Constructor_WithNullConfigServiceThrows()
     {
         Assert.ThrowsException<ArgumentNullException>(() => new ImageStorageConfigurationResolver(
             NullLogger<ImageStorageConfigurationResolver>.Instance,

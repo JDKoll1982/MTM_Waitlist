@@ -18,7 +18,7 @@ namespace MTM_Waitlist.Tests.Module_Logging;
 public sealed class StoreLoggerProviderTests
 {
     [TestMethod]
-    public async Task Log_ILoggerErrorReachesTheStoreThroughTheSameSeam()
+    public async Task Service_StoreLoggerProviderTests_Log_ILoggerErrorReachesTheStoreThroughTheSameSeam()
     {
         // Arrange
         var store = new RecordingLogStore();
@@ -52,7 +52,7 @@ public sealed class StoreLoggerProviderTests
     }
 
     [TestMethod]
-    public async Task Log_StructuredProperties_LandInThePayloadRatherThanInTheMessage()
+    public async Task Service_StoreLoggerProviderTests_Log_StructuredPropertiesLandInThePayloadRatherThanInTheMessage()
     {
         // Arrange
         var store = new RecordingLogStore();
@@ -77,7 +77,7 @@ public sealed class StoreLoggerProviderTests
     }
 
     [TestMethod]
-    public async Task Log_LevelNone_IsNotRecordedAtAll()
+    public async Task Service_StoreLoggerProviderTests_Log_LevelNoneIsNotRecordedAtAll()
     {
         // Arrange
         var store = new RecordingLogStore();
@@ -96,7 +96,7 @@ public sealed class StoreLoggerProviderTests
     }
 
     [TestMethod]
-    public async Task Log_ACategoryLongerThanTheStoreHolds_IsCutWithAMarkerRatherThanLosingTheEntry()
+    public async Task Service_StoreLoggerProviderTests_Log_ACategoryLongerThanTheStoreHoldsIsCutWithAMarkerRatherThanLosingTheEntry()
     {
         // Arrange: a category longer than the column, built the way a deep namespace would be. Before the bound
         // existed the store refused such a write with "Data too long for column 'p_module'" and the entry was
@@ -127,7 +127,7 @@ public sealed class StoreLoggerProviderTests
     }
 
     [TestMethod]
-    public async Task Log_TheCategoryThatTheColumnUsedToRefuse_IsCarriedWhole()
+    public async Task Service_StoreLoggerProviderTests_Log_TheCategoryThatTheColumnUsedToRefuseIsCarriedWhole()
     {
         // The case that was found by hand on 2026-09-28: this category is 70 characters, the column and the
         // writer's parameter were 64, and every entry from this type was refused. It fits now, and it must arrive
@@ -148,7 +148,7 @@ public sealed class StoreLoggerProviderTests
     }
 
     [TestMethod]
-    public void MaximumModuleLength_IsNoWiderThanTheColumnTheTableDeclares()
+    public void Service_StoreLoggerProviderTests_MaximumModuleLength_IsNoWiderThanTheColumnTheTableDeclares()
     {
         // The bound and the column have to agree, or every entry from a long category is refused again. This is
         // the check that was missing when the table said 64 and the tree already held a 77-character category.
@@ -199,7 +199,7 @@ public sealed class StoreLoggerProviderTests
     /// not keep it, and the default is errors and warnings.
     /// </summary>
     [TestMethod]
-    public async Task StoreLoggerProvider_KeepsWhatTheThresholdKeeps()
+    public async Task Service_StoreLoggerProviderTests_StoreLoggerProvider_KeepsWhatTheThresholdKeeps()
     {
         // Arrange: the shipped default, which is what a host that configures nothing runs with.
         var store = new RecordingLogStore();

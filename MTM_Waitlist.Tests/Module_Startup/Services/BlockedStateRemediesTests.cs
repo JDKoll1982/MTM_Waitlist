@@ -23,7 +23,7 @@ public sealed class BlockedStateRemediesTests
     private const string ResourceFile = @"Strings/en-us/Resources.resw";
 
     [TestMethod]
-    public void Classify_WhenTheStoreCouldNotBeReached_IsTheStoreCause()
+    public void Service_BlockedStateRemediesTests_Classify_WhenTheStoreCouldNotBeReachedIsTheStoreCause()
     {
         var catalog = new LaunchStepCatalog();
 
@@ -33,7 +33,7 @@ public sealed class BlockedStateRemediesTests
     }
 
     [TestMethod]
-    public void Classify_WhenThisComputersConfigurationCouldNotBeWritten_IsTheConfigurationCause()
+    public void Service_BlockedStateRemediesTests_Classify_WhenThisComputersConfigurationCouldNotBeWrittenIsTheConfigurationCause()
     {
         var catalog = new LaunchStepCatalog();
 
@@ -43,7 +43,7 @@ public sealed class BlockedStateRemediesTests
     }
 
     [TestMethod]
-    public void Classify_WhenThisComputersConfigurationCouldNotBeRead_IsTheConfigurationCause()
+    public void Service_BlockedStateRemediesTests_Classify_WhenThisComputersConfigurationCouldNotBeReadIsTheConfigurationCause()
     {
         var catalog = new LaunchStepCatalog();
 
@@ -53,7 +53,7 @@ public sealed class BlockedStateRemediesTests
     }
 
     [TestMethod]
-    public void Classify_WhenTheFeedNamedNoFailure_IsTheStoreCause()
+    public void Service_BlockedStateRemediesTests_Classify_WhenTheFeedNamedNoFailureIsTheStoreCause()
     {
         // Nothing named the fault, so the answer is the one offering the least: a repeat and an ending, and no
         // reset that could throw away a configuration for a fault that was never about it (FR-017).
@@ -64,7 +64,7 @@ public sealed class BlockedStateRemediesTests
     }
 
     [TestMethod]
-    public void For_EveryCause_OffersARepeat()
+    public void Service_BlockedStateRemediesTests_For_EveryCauseOffersARepeat()
     {
         // FR-016: a stopped launch offers to repeat the failed work, whatever stopped it.
         foreach (var cause in Enum.GetValues<BlockedStateCause>())
@@ -76,7 +76,7 @@ public sealed class BlockedStateRemediesTests
     }
 
     [TestMethod]
-    public void For_WhenTheStoreCouldNotBeReached_OffersNoResetAndNoPreview()
+    public void Service_BlockedStateRemediesTests_For_WhenTheStoreCouldNotBeReachedOffersNoResetAndNoPreview()
     {
         // FR-017, SC-010, US4 scenario 1: the store cannot be reached, so nothing this computer's configuration
         // can be restored to could remove the cause and a reset is not offered at all.
@@ -88,7 +88,7 @@ public sealed class BlockedStateRemediesTests
     }
 
     [TestMethod]
-    public void For_WhenThisComputersConfigurationIsBroken_OffersAResetThatNamesEveryPartItWouldTouch()
+    public void Service_BlockedStateRemediesTests_For_WhenThisComputersConfigurationIsBrokenOffersAResetThatNamesEveryPartItWouldTouch()
     {
         // FR-018: the preview names exactly what will be reset before anything is reset. The sentence is composed
         // from the parts themselves, so it cannot name a set the reset does not restore.
@@ -107,15 +107,15 @@ public sealed class BlockedStateRemediesTests
     }
 
     [TestMethod]
-    public void ResetParts_EveryCause_NamesOnlyThisComputersOwnConfiguration()
+    public void Service_BlockedStateRemediesTests_ResetParts_EveryCauseNamesOnlyThisComputersOwnConfiguration()
     {
         // FR-018: a reset affects only this machine's configuration and never a person, a role or a permission.
         // Every token the table can produce is therefore one of the configuration parts' own.
         var thisMachinesOwn = new[]
         {
             MachineConfigurationParts.Configuration,
-            MachineConfigurationParts.DisplayName,
-            MachineConfigurationParts.Description,
+            MachineConfigurationParts.ComputerName,
+            MachineConfigurationParts.Location,
             MachineConfigurationParts.ScopedPreference,
         };
 
@@ -132,7 +132,7 @@ public sealed class BlockedStateRemediesTests
     }
 
     [TestMethod]
-    public void SilentRepairParts_AreThePartsTheScopeSupplies_AndNeverAChoiceThePersonMade()
+    public void Service_BlockedStateRemediesTests_SilentRepairParts_AreThePartsTheScopeSuppliesAndNeverAChoiceThePersonMade()
     {
         // FR-019: a fault put right without asking may not throw away anything the person decided. The display
         // name and the description are their decisions, so neither may be repaired quietly; the one part the
@@ -144,12 +144,12 @@ public sealed class BlockedStateRemediesTests
             silent.ToArray(),
             "only the part whose value comes from the scope may be repaired without asking (FR-019)");
 
-        CollectionAssert.DoesNotContain(silent.ToArray(), MachineConfigurationParts.DisplayName);
-        CollectionAssert.DoesNotContain(silent.ToArray(), MachineConfigurationParts.Description);
+        CollectionAssert.DoesNotContain(silent.ToArray(), MachineConfigurationParts.ComputerName);
+        CollectionAssert.DoesNotContain(silent.ToArray(), MachineConfigurationParts.Location);
     }
 
     [TestMethod]
-    public void SilentRepairParts_WhenTheStoreCouldNotBeReached_AreNone()
+    public void Service_BlockedStateRemediesTests_SilentRepairParts_WhenTheStoreCouldNotBeReachedAreNone()
     {
         // A store that cannot be reached has nothing this computer can repair on its own, so the person is asked
         // rather than a repair being attempted that could not succeed (FR-017, FR-019).
@@ -157,7 +157,7 @@ public sealed class BlockedStateRemediesTests
     }
 
     [TestMethod]
-    public void SilentRepairParts_AndTheRecoveryServicesOwnList_AreTheSameSet()
+    public void Service_BlockedStateRemediesTests_SilentRepairParts_AndTheRecoveryServicesOwnListAreTheSameSet()
     {
         // The table says which cause has a repair to make quietly and the recovery service says which parts such a
         // repair may touch. The two views of one rule are pinned together here, so neither can drift into
@@ -171,7 +171,7 @@ public sealed class BlockedStateRemediesTests
     }
 
     [TestMethod]
-    public void BlockedStateWording_ShipsAsLocalisedStrings()
+    public void Service_BlockedStateRemediesTests_BlockedStateWording_ShipsAsLocalisedStrings()
     {
         // The suite runs outside the application, so a resource lookup answers the key itself. The wording the
         // surface and the table draw is therefore checked where it lives, which is the resource file (S15: an
@@ -191,8 +191,8 @@ public sealed class BlockedStateRemediesTests
             "Startup_BlockedState.ResetPreviewCancel",
             "Startup_BlockedState.ResetRefused",
             "Startup_BlockedState.ResetFailed",
-            "Startup_BlockedState.PartDisplayName",
-            "Startup_BlockedState.PartDescription",
+            "Startup_BlockedState.PartComputerName",
+            "Startup_BlockedState.PartLocation",
             "Startup_BlockedState.PartScopedPreference",
         };
 
@@ -203,7 +203,7 @@ public sealed class BlockedStateRemediesTests
     }
 
     [TestMethod]
-    public void DescribePart_WhenTheTokenNamesNothingKnown_SaysTheTokenItself()
+    public void Service_BlockedStateRemediesTests_DescribePart_WhenTheTokenNamesNothingKnownSaysTheTokenItself()
     {
         // A preview that quietly dropped something would be a preview that did not name what the reset would
         // touch, which is the whole of FR-018.

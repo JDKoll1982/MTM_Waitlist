@@ -33,7 +33,7 @@ public sealed class RequestItemConfigurationServiceTests
     // ── The declared fields are data, read in declared order with their declared types and labels ───────
 
     [TestMethod]
-    public async Task GetConfigurationsAsync_ReadsTheDeclaredFieldsInDeclaredOrder_WithTheirTypesAndLabels()
+    public async Task Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_ReadsTheDeclaredFieldsInDeclaredOrderWithTheirTypesAndLabels()
     {
         // Declared out of order on purpose: the stored `order` is what the page must follow.
         var set = await ReadAsync(Row(
@@ -66,7 +66,7 @@ public sealed class RequestItemConfigurationServiceTests
     }
 
     [TestMethod]
-    public async Task GetConfigurationsAsync_ADifferentDeclaredFieldSet_IsReadInsteadOfTheOneBefore()
+    public async Task Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_ADifferentDeclaredFieldSetIsReadInsteadOfTheOneBefore()
     {
         // The negative half of the mechanism claim: swap the payload and the read follows it, with no code
         // change anywhere. This is what keeps the next field edit a data edit (FR-015, SC-006).
@@ -84,7 +84,7 @@ public sealed class RequestItemConfigurationServiceTests
     }
 
     [TestMethod]
-    public async Task GetConfigurationsAsync_OptionsJson_IsReadInDeclaredOrder()
+    public async Task Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_OptionsJsonIsReadInDeclaredOrder()
     {
         var set = await ReadAsync(Row(
             CataloguedItem,
@@ -98,7 +98,7 @@ public sealed class RequestItemConfigurationServiceTests
     }
 
     [TestMethod]
-    public async Task GetConfigurationsAsync_AnEmptyDeclaredFieldList_IsNoFieldsRatherThanAFault()
+    public async Task Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_AnEmptyDeclaredFieldListIsNoFieldsRatherThanAFault()
     {
         // An Item that asks nothing and shows nothing is a legitimate configuration, not a broken one.
         var set = await ReadAsync(Row(CataloguedItem, detailFieldsJson: "[]"));
@@ -121,7 +121,7 @@ public sealed class RequestItemConfigurationServiceTests
     [DataRow("[{\"label\":\"Part\",\"value_type\":\"string\",\"source\":\"job\"}]", DisplayName = "a declared field has no declared order")]
     [DataRow("[{\"label\":\"Part\",\"value_type\":\"string\",\"source\":\"job\",\"order\":0}]", DisplayName = "a declared field's order is out of range")]
     [DataRow("[{\"label\":\"Part\",\"value_type\":\"string\",\"source\":\"job\",\"order\":1},7]", DisplayName = "an entry in the field list is not an object")]
-    public async Task GetConfigurationsAsync_MalformedDetailFieldsJson_IsReportedAndNeverThrown(string payload)
+    public async Task Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_MalformedDetailFieldsJsonIsReportedAndNeverThrown(string payload)
     {
         var set = await ReadAsync(Row(CataloguedItem, detailFieldsJson: payload));
 
@@ -147,7 +147,7 @@ public sealed class RequestItemConfigurationServiceTests
     [DataRow("{\"Alpha\":true}", DisplayName = "options_json is not an array")]
     [DataRow("[\"Alpha\",\"\"]", DisplayName = "an option has no text")]
     [DataRow("[\"Alpha\",7]", DisplayName = "an option is not text")]
-    public async Task GetConfigurationsAsync_MalformedOptionsJson_IsReportedAndNeverThrown(string payload)
+    public async Task Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_MalformedOptionsJsonIsReportedAndNeverThrown(string payload)
     {
         var set = await ReadAsync(Row(CataloguedItem, optionsJson: payload, answerValueType: "enum"));
 
@@ -159,7 +159,7 @@ public sealed class RequestItemConfigurationServiceTests
     }
 
     [TestMethod]
-    public async Task GetConfigurationsAsync_AnItemThatAsksForAnAnswerWithNoUsableAnswerType_IsReportedAsAConfigurationProblem()
+    public async Task Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_AnItemThatAsksForAnAnswerWithNoUsableAnswerTypeIsReportedAsAConfigurationProblem()
     {
         // The wizard picks the input control from the declared answer type, so an Item that asks a question it
         // cannot express is a configuration fault, not something to render and hope (FR-013, FR-026).
@@ -176,7 +176,7 @@ public sealed class RequestItemConfigurationServiceTests
     }
 
     [TestMethod]
-    public async Task GetConfigurationsAsync_AnItemThatAsksForNothing_IgnoresAnUnusableAnswerTypeItNeverUses()
+    public async Task Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_AnItemThatAsksForNothingIgnoresAnUnusableAnswerTypeItNeverUses()
     {
         var set = await ReadAsync(Row(
             CataloguedItem,
@@ -189,7 +189,7 @@ public sealed class RequestItemConfigurationServiceTests
     // ── Both directions of disagreement ─────────────────────────────────────────────────────────────────
 
     [TestMethod]
-    public async Task GetConfigurationsAsync_CataloguedItemWithNoRow_IsReportedUnavailableInPlainLanguage()
+    public async Task Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_CataloguedItemWithNoRowIsReportedUnavailableInPlainLanguage()
     {
         var set = await ReadAsync(Row(CataloguedItem, detailFieldsJson: DetailFields(("Part", "string", "job", 1, false))));
 
@@ -205,7 +205,7 @@ public sealed class RequestItemConfigurationServiceTests
     }
 
     [TestMethod]
-    public async Task GetConfigurationsAsync_RowForAnItemThatIsNotCatalogued_IsIgnoredAndNeverOffered()
+    public async Task Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_RowForAnItemThatIsNotCataloguedIsIgnoredAndNeverOffered()
     {
         var set = await ReadAsync(
             Row(CataloguedItem, detailFieldsJson: DetailFields(("Part", "string", "job", 1, false))),
@@ -222,7 +222,7 @@ public sealed class RequestItemConfigurationServiceTests
     // ── Raisability: an enumerated answer must have choices to draw on (FR-035) ─────────────────────────
 
     [TestMethod]
-    public async Task GetConfigurationsAsync_EnumeratedAnswerWithNoConfiguredList_TakesItsChoicesFromTheJob()
+    public async Task Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_EnumeratedAnswerWithNoConfiguredListTakesItsChoicesFromTheJob()
     {
         // `pickup-component` is the shipped case: it declares an answer chosen from a list and is configured
         // with no list of its own, because its list arrives with the job snapshot. Its details step therefore
@@ -258,7 +258,7 @@ public sealed class RequestItemConfigurationServiceTests
     }
 
     [TestMethod]
-    public async Task GetConfigurationsAsync_AConfiguredList_WinsOverTheJob()
+    public async Task Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_AConfiguredListWinsOverTheJob()
     {
         // The same rule read the other way: a row that carries its own list uses it, so a fixed list is never
         // silently replaced by whatever the job happens to hold.
@@ -279,7 +279,7 @@ public sealed class RequestItemConfigurationServiceTests
     }
 
     [TestMethod]
-    public async Task GetConfigurationsAsync_AnAnswerTheRowDoesNotDeclare_AsksForNothing_SoNoChoicesAreInvented()
+    public async Task Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_AnAnswerTheRowDoesNotDeclareAsksForNothingSoNoChoicesAreInvented()
     {
         var set = await ReadAsync(Row(CataloguedItem, answerValueType: "enum", requiresAnswer: "1"));
 
@@ -293,7 +293,7 @@ public sealed class RequestItemConfigurationServiceTests
     }
 
     [TestMethod]
-    public void ShippedConfigurationSeed_PickupComponent_StillDeclaresAnEnumeratedAnswerWithNoListOfItsOwn()
+    public void Service_RequestItemConfigurationServiceTests_ShippedConfigurationSeed_PickupComponentStillDeclaresAnEnumeratedAnswerWithNoListOfItsOwn()
     {
         // The fixture above is only a proof about the shipped data while the shipped row still looks like it.
         // This is the source-side half: the row is enumerated, asks for an answer, and carries no options_json.
@@ -335,7 +335,7 @@ public sealed class RequestItemConfigurationServiceTests
     // ── Every operation goes through a stored procedure (FR-024) ────────────────────────────────────────
 
     [TestMethod]
-    public async Task GetConfigurationsAsync_ReadsThroughItsOwnStoredProcedure()
+    public async Task Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_ReadsThroughItsOwnStoredProcedure()
     {
         var helper = Stub(Row(CataloguedItem, detailFieldsJson: DetailFields(("Part", "string", "job", 1, false))));
 
@@ -349,7 +349,7 @@ public sealed class RequestItemConfigurationServiceTests
     }
 
     [TestMethod]
-    public async Task GetConfigurationAsync_ForAnItemWithNoRow_AnswersUnavailableRatherThanNull()
+    public async Task Service_RequestItemConfigurationServiceTests_GetConfigurationAsync_ForAnItemWithNoRowAnswersUnavailableRatherThanNull()
     {
         var helper = new FakeMySqlHelperServer();
         helper.EnqueueEmptyQueryResult();
@@ -364,7 +364,7 @@ public sealed class RequestItemConfigurationServiceTests
     // ── Which job list an enumerated answer names (FR-035, FR-050) ─────────────────────────────────────
 
     [TestMethod]
-    public async Task GetConfigurationsAsync_AnAnswerNamingTheDunnageList_TakesTheJobsAssignedDunnageParts()
+    public async Task Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_AnAnswerNamingTheDunnageListTakesTheJobsAssignedDunnageParts()
     {
         var set = await ReadAsync(Row(
             "pickup-dunnage",
@@ -390,7 +390,7 @@ public sealed class RequestItemConfigurationServiceTests
     }
 
     [TestMethod]
-    public async Task GetConfigurationsAsync_AnAnswerNamingTheComponentList_TakesTheJobsComponents()
+    public async Task Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_AnAnswerNamingTheComponentListTakesTheJobsComponents()
     {
         // The same mechanism read the other way: naming the list is what decides, so the two Items cannot be told
         // apart by anything but their rows (FR-013).
@@ -412,7 +412,7 @@ public sealed class RequestItemConfigurationServiceTests
     }
 
     [TestMethod]
-    public async Task GetConfigurationsAsync_AListNameNothingSupplies_YieldsNoChoicesRatherThanAPlausibleList()
+    public async Task Service_RequestItemConfigurationServiceTests_GetConfigurationsAsync_AListNameNothingSuppliesYieldsNoChoicesRatherThanAPlausibleList()
     {
         var set = await ReadAsync(Row(
             CataloguedItem,
@@ -432,7 +432,7 @@ public sealed class RequestItemConfigurationServiceTests
     }
 
     [TestMethod]
-    public void ShippedConfigurationSeed_BothDunnageRows_AskForTheJobsDunnageList()
+    public void Service_RequestItemConfigurationServiceTests_ShippedConfigurationSeed_BothDunnageRowsAskForTheJobsDunnageList()
     {
         // The mechanism above is only worth having while the shipped rows use it: both dunnage Items ask for an
         // answer, name the job's dunnage list, and carry no options_json of their own (FR-048, FR-050).

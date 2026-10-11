@@ -21,7 +21,7 @@ public sealed class DiagnosticContextTests
     private static readonly DateTime ProcessStarted = DateTime.UtcNow.AddMinutes(-3);
 
     [TestMethod]
-    public void Build_CarriesTheRuntimeTheSeamGathered_NotTheCaller()
+    public void Service_DiagnosticContextTests_Build_CarriesTheRuntimeTheSeamGatheredNotTheCaller()
     {
         // Arrange
         var entry = Entry();
@@ -42,7 +42,7 @@ public sealed class DiagnosticContextTests
     }
 
     [TestMethod]
-    public void Build_WhenTheCallerNamedAControl_CarriesItUnderTheViewContext()
+    public void Service_DiagnosticContextTests_Build_WhenTheCallerNamedAControlCarriesItUnderTheViewContext()
     {
         // Arrange
         var entry = Entry(target: "MachineSetupWindow/SaveButton");
@@ -57,7 +57,7 @@ public sealed class DiagnosticContextTests
     }
 
     [TestMethod]
-    public void Build_WhenTheFaultCameFromTheStore_CarriesTheProvidersOwnDiagnostics()
+    public void Service_DiagnosticContextTests_Build_WhenTheFaultCameFromTheStoreCarriesTheProvidersOwnDiagnostics()
     {
         // Arrange: a provider exception of the shape MySqlConnector raises.
         var fault = new StubProviderException("Duplicate entry for @p_display_name=Shop floor station")
@@ -79,7 +79,7 @@ public sealed class DiagnosticContextTests
     }
 
     [TestMethod]
-    public void Build_WhenTheFaultCameFromTheStore_RecordsNoStatementValues()
+    public void Service_DiagnosticContextTests_Build_WhenTheFaultCameFromTheStoreRecordsNoStatementValues()
     {
         // Arrange: a provider message carrying a statement's parameters.
         var fault = new StubProviderException("Near '@p_display_name=Shop floor station' at line 1");
@@ -101,7 +101,7 @@ public sealed class DiagnosticContextTests
     }
 
     [TestMethod]
-    public void Build_WhenAStructuredPropertyNamesASecret_DropsTheValue()
+    public void Service_DiagnosticContextTests_Build_WhenAStructuredPropertyNamesASecretDropsTheValue()
     {
         // Arrange
         var properties = new Dictionary<string, object?>
@@ -124,21 +124,7 @@ public sealed class DiagnosticContextTests
     }
 
     [TestMethod]
-    public void Build_WhenTheKeyFilePathIsTheOnlySecretAdjacentValue_WritesItRatherThanTheKey()
-    {
-        // Arrange: the shared key file's path is the one secret-adjacent value §6 permits, so it is recorded
-        // while nothing read out of it ever is.
-        var properties = new Dictionary<string, object?> { ["keyFilePath"] = @"\\mtmanu-fs01\Expo Drive\MTM_Application_Keys\MTM_AUTH_USER_SECRET_KEY.txt" };
-
-        // Act
-        var json = DiagnosticContext.Build(Entry(), null, properties, "mtm_waitlist", "sp_ops_startup_logs_insert", ProcessStarted);
-
-        // Assert: the path is what a support reader needs to see which key a decryption failure used.
-        StringAssert.Contains(json, "MTM_AUTH_USER_SECRET_KEY.txt");
-    }
-
-    [TestMethod]
-    public void Build_WhenTheProviderHidesABaseMemberOfTheSameName_CarriesTheDerivedOne()
+    public void Service_DiagnosticContextTests_Build_WhenTheProviderHidesABaseMemberOfTheSameNameCarriesTheDerivedOne()
     {
         // Arrange: MySqlConnector's own shape — MySqlException.ErrorCode hides DbException.ErrorCode with a
         // different type, which makes asking for the name outright throw AmbiguousMatchException. The read is

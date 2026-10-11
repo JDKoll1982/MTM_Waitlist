@@ -28,7 +28,7 @@ public sealed class NewRequestSummaryHonestyTests
     /// figure exists — the shape of the removed card, not just its two strings.
     /// </summary>
     [TestMethod]
-    public void ConfirmStepViewModel_ExposesNoQueueOrWaitEstimateMember()
+    public void ViewModel_NewRequestSummaryHonestyTests_ConfirmStepViewModel_ExposesNoQueueOrWaitEstimateMember()
     {
         var memberNames = typeof(NewRequestSummaryViewModel)
             .GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
@@ -49,7 +49,7 @@ public sealed class NewRequestSummaryHonestyTests
     /// And the page itself must carry no such figure as static markup.
     /// </summary>
     [TestMethod]
-    public void ConfirmStepPage_CarriesNoQueueOrWaitFigure()
+    public void ViewModel_NewRequestSummaryHonestyTests_ConfirmStepPage_CarriesNoQueueOrWaitFigure()
     {
         var markup = File.ReadAllText(ConfirmPagePath());
 
@@ -74,7 +74,7 @@ public sealed class NewRequestSummaryHonestyTests
     /// goes, the label with it.
     /// </summary>
     [TestMethod]
-    public void ConfirmStepPage_GatesTheAverageCoilWeightRowOnHavingAValue()
+    public void ViewModel_NewRequestSummaryHonestyTests_ConfirmStepPage_GatesTheAverageCoilWeightRowOnHavingAValue()
     {
         var document = XDocument.Load(ConfirmPagePath());
         var label = document
@@ -91,7 +91,7 @@ public sealed class NewRequestSummaryHonestyTests
     /// With no coil on the job, every coil field is empty — in every state, never a stand-in value.
     /// </summary>
     [TestMethod]
-    public void ConfirmStepViewModel_WithNoResolvedCoil_LeavesEveryCoilFieldEmpty()
+    public void ViewModel_NewRequestSummaryHonestyTests_ConfirmStepViewModel_WithNoResolvedCoilLeavesEveryCoilFieldEmpty()
     {
         var viewModel = BuildViewModel(new NoCoilAvailabilityService());
 
@@ -115,7 +115,7 @@ public sealed class NewRequestSummaryHonestyTests
     /// With a resolved coil, every value is the one the coil read returned.
     /// </summary>
     [TestMethod]
-    public void ConfirmStepViewModel_WithAResolvedCoil_ShowsTheResolvedValues()
+    public void ViewModel_NewRequestSummaryHonestyTests_ConfirmStepViewModel_WithAResolvedCoilShowsTheResolvedValues()
     {
         var coil = new WaitlistCoilInfo
         {
@@ -148,7 +148,7 @@ public sealed class NewRequestSummaryHonestyTests
     /// page flickered from right to wrong, and nothing about a die request concerns the job's coil.
     /// </remarks>
     [TestMethod]
-    public void ConfirmStep_DieRequestOnAJobCarryingACoil_ShowsNoCoilCard()
+    public void ViewModel_NewRequestSummaryHonestyTests_ConfirmStep_DieRequestOnAJobCarryingACoilShowsNoCoilCard()
     {
         var viewModel = BuildViewModel(new FixedCoilAvailabilityService(ResolvedCoil()));
 
@@ -160,7 +160,7 @@ public sealed class NewRequestSummaryHonestyTests
     }
 
     [TestMethod]
-    public void ConfirmStep_DieRequestOnAJobCarryingACoil_NeverReadsTheCoil()
+    public void ViewModel_NewRequestSummaryHonestyTests_ConfirmStep_DieRequestOnAJobCarryingACoilNeverReadsTheCoil()
     {
         // The card cannot appear later if the read never happens, which is what stops the page flickering from right
         // to wrong once the asynchronous read lands.
@@ -173,7 +173,7 @@ public sealed class NewRequestSummaryHonestyTests
     }
 
     [TestMethod]
-    public void ConfirmStep_CoilRequestOnAJobCarryingACoil_StillShowsTheCoilCard()
+    public void ViewModel_NewRequestSummaryHonestyTests_ConfirmStep_CoilRequestOnAJobCarryingACoilStillShowsTheCoilCard()
     {
         // The guard on the fix: the card is still drawn where it belongs.
         var viewModel = BuildViewModel(new FixedCoilAvailabilityService(ResolvedCoil()));
@@ -185,7 +185,7 @@ public sealed class NewRequestSummaryHonestyTests
     }
 
     [TestMethod]
-    public void ConfirmStep_CoilRequestOnAJobWithNoCoil_ShowsNoCoilCard()
+    public void ViewModel_NewRequestSummaryHonestyTests_ConfirmStep_CoilRequestOnAJobWithNoCoilShowsNoCoilCard()
     {
         var viewModel = BuildViewModel(new NoCoilAvailabilityService());
 

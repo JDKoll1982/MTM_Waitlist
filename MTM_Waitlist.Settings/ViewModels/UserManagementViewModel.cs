@@ -255,7 +255,7 @@ public partial class UserManagementViewModel : ObservableRecipient, INavigationA
 
     public string HiddenCountText => string.Format(
         System.Globalization.CultureInfo.CurrentCulture,
-        "UserManagement_Filter.HiddenCount.Text".GetLocalized(),
+        "UserManagement_Filter_HiddenCount.Text".GetLocalized(),
         HiddenCount);
 
     /// <summary>A roster with nobody in it and no filter, which is a different state from a filter matching nobody.</summary>

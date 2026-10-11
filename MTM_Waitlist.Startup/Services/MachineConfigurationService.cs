@@ -12,7 +12,7 @@ namespace MTM_Waitlist.Module_Startup.Services;
 /// <para>
 /// <b>This is the only code that writes this machine's rows.</b> The launch pipeline's setup step saves through
 /// <see cref="SaveAsync"/> and the recovery step drives a reset through <see cref="ResetToDefaultsAsync"/>, so
-/// there is one writer of the display name and the description rather than a second one beside it.
+/// there is one writer of this computer's name and its location rather than a second one beside it.
 /// </para>
 /// <para>
 /// <b>This machine's identity, and nothing about pictures.</b> Where its pictures come from is held once for the
@@ -73,8 +73,8 @@ public sealed class MachineConfigurationService : IMachineConfigurationService
             // "carry on" (FR-009), and the four reasons have to stay four (FR-004).
             return new MachineConfigurationState(
                 IsConfigured: false,
-                DisplayName: null,
-                Description: null,
+                ComputerName: null,
+                Location: null,
                 UnconfiguredReason: MachineConfigurationReasons.Unreadable);
         }
 
@@ -82,8 +82,8 @@ public sealed class MachineConfigurationService : IMachineConfigurationService
 
         return new MachineConfigurationState(
             IsConfigured: unconfiguredReason is null,
-            DisplayName: Normalize(registryRow?.DisplayName),
-            Description: Normalize(registryRow?.Description),
+            ComputerName: Normalize(registryRow?.DisplayName),
+            Location: Normalize(registryRow?.Location),
             UnconfiguredReason: unconfiguredReason);
     }
 
@@ -94,7 +94,7 @@ public sealed class MachineConfigurationService : IMachineConfigurationService
     {
         ArgumentNullException.ThrowIfNull(draft);
 
-        var displayName = draft.DisplayName?.Trim() ?? string.Empty;
+        var displayName = draft.ComputerName?.Trim() ?? string.Empty;
         if (displayName.Length == 0)
         {
             return Refused(MachineConfigurationRefusals.DisplayNameRequired);
@@ -111,11 +111,11 @@ public sealed class MachineConfigurationService : IMachineConfigurationService
             return Refused(MachineConfigurationRefusals.DisplayNameInUse);
         }
 
-        var description = string.IsNullOrWhiteSpace(draft.Description) ? null : draft.Description.Trim();
+        var location = string.IsNullOrWhiteSpace(draft.Location) ? null : draft.Location.Trim();
 
         var computerId = existing is null
-            ? await RegisterAsync(displayName, description, cancellationToken).ConfigureAwait(false)
-            : await UpdateAsync(existing, displayName, description, cancellationToken).ConfigureAwait(false);
+            ? await RegisterAsync(displayName, location, cancellationToken).ConfigureAwait(false)
+            : await UpdateAsync(existing, displayName, location, cancellationToken).ConfigureAwait(false);
 
         // Success is read back rather than inferred from a changed-row count (FR-041). The store reports zero
         // changed rows for a write that sets a column to the value it already holds, so counting rows would
@@ -162,7 +162,7 @@ public sealed class MachineConfigurationService : IMachineConfigurationService
             ? _machineFacts.Hostname
             : existing.ComputerName;
 
-        if (parts.DisplayName)
+        if (parts.ComputerName)
         {
             // Checked before anything is written, so a refused reset has changed nothing at all rather than
             // half of what was asked.
@@ -184,8 +184,8 @@ public sealed class MachineConfigurationService : IMachineConfigurationService
                     ["p_computer_id"] = existing.Id,
                     ["p_actor_user_id"] = null,
                     ["p_default_display_name"] = defaultDisplayName,
-                    ["p_reset_display_name"] = parts.DisplayName ? 1 : 0,
-                    ["p_reset_description"] = parts.Description ? 1 : 0,
+                    ["p_reset_display_name"] = parts.ComputerName ? 1 : 0,
+                    ["p_reset_location"] = parts.Location ? 1 : 0,
                     // The procedure still takes this flag, and this machine has no picture source of its own to
                     // reset: where its pictures come from is held once for the plant (FR-040). The rows an older
                     // store holds were withdrawn by Database/Seeds/seed_retire_computer_scope_picture_sources,
@@ -277,7 +277,7 @@ public sealed class MachineConfigurationService : IMachineConfigurationService
     /// </summary>
     private async Task<long> RegisterAsync(
         string displayName,
-        string? description,
+        string? location,
         CancellationToken cancellationToken)
     {
         await _mySqlHelperServer
@@ -291,7 +291,7 @@ public sealed class MachineConfigurationService : IMachineConfigurationService
                     // unreadable hardware identity is admitted (FR-015), and a machine must still be set up.
                     ["p_mac_address_normalized"] = _machineFacts.MacAddress ?? string.Empty,
                     ["p_display_name"] = displayName,
-                    ["p_description"] = description,
+                    ["p_location"] = location,
                 },
                 MySqlDatabaseTarget.MtmWaitlist,
                 cancellationToken)
@@ -308,7 +308,7 @@ public sealed class MachineConfigurationService : IMachineConfigurationService
     private async Task<long> UpdateAsync(
         ComputerRecord existing,
         string displayName,
-        string? description,
+        string? location,
         CancellationToken cancellationToken)
     {
         await _mySqlHelperServer
@@ -323,7 +323,7 @@ public sealed class MachineConfigurationService : IMachineConfigurationService
                     // holds. FR-015 admits the unreadable fact; it does not act on it.
                     ["p_mac_address_normalized"] = _machineFacts.MacAddress ?? existing.MacAddressNormalized,
                     ["p_display_name"] = displayName,
-                    ["p_description"] = description,
+                    ["p_location"] = location,
                     // Completing setup is what registers a machine, including one that had been retired: the
                     // person who reaches setup holds the machine-configuration permission (FR-007), and a save
                     // that left the machine retired would report success while configuring nothing usable.
@@ -346,8 +346,8 @@ public sealed class MachineConfigurationService : IMachineConfigurationService
     /// </summary>
     private static ResetParts ResolveParts(IReadOnlyList<string> whatIsBroken)
     {
-        var displayName = false;
-        var description = false;
+        var computerName = false;
+        var location = false;
         var scopedPreference = false;
 
         foreach (var part in whatIsBroken)
@@ -356,16 +356,16 @@ public sealed class MachineConfigurationService : IMachineConfigurationService
 
             if (MatchesPart(token, MachineConfigurationParts.Configuration))
             {
-                displayName = true;
-                description = true;
+                computerName = true;
+                location = true;
             }
-            else if (MatchesPart(token, MachineConfigurationParts.DisplayName))
+            else if (MatchesPart(token, MachineConfigurationParts.ComputerName))
             {
-                displayName = true;
+                computerName = true;
             }
-            else if (MatchesPart(token, MachineConfigurationParts.Description))
+            else if (MatchesPart(token, MachineConfigurationParts.Location))
             {
-                description = true;
+                location = true;
             }
             else if (MatchesPart(token, MachineConfigurationParts.ScopedPreference))
             {
@@ -373,7 +373,7 @@ public sealed class MachineConfigurationService : IMachineConfigurationService
             }
         }
 
-        return new ResetParts(displayName, description, scopedPreference);
+        return new ResetParts(computerName, location, scopedPreference);
     }
 
     private static bool MatchesPart(string token, string part) =>
@@ -384,7 +384,7 @@ public sealed class MachineConfigurationService : IMachineConfigurationService
         Id = ReadInt64(row, "id"),
         ComputerName = ReadString(row, "computer_name"),
         DisplayName = ReadString(row, "display_name"),
-        Description = ReadString(row, "description"),
+        Location = ReadString(row, "location"),
         MacAddressNormalized = ReadString(row, "mac_address_normalized"),
         IsRegistered = ReadInt64(row, "is_registered") == 1,
     };
@@ -432,12 +432,12 @@ public sealed class MachineConfigurationService : IMachineConfigurationService
 
     /// <summary>Which parts a reset was asked for.</summary>
     private readonly record struct ResetParts(
-        bool DisplayName,
-        bool Description,
+        bool ComputerName,
+        bool Location,
         bool ScopedPreference)
     {
         /// <summary>True when nothing was asked for, so the reset has nothing to do.</summary>
-        public bool IsNothing => !(DisplayName || Description || ScopedPreference);
+        public bool IsNothing => !(ComputerName || Location || ScopedPreference);
 
         /// <summary>
         /// The parts as the result names them, in the order the reset restores them rather than in the order the
@@ -447,14 +447,14 @@ public sealed class MachineConfigurationService : IMachineConfigurationService
         {
             get
             {
-                if (DisplayName)
+                if (ComputerName)
                 {
-                    yield return MachineConfigurationParts.DisplayName;
+                    yield return MachineConfigurationParts.ComputerName;
                 }
 
-                if (Description)
+                if (Location)
                 {
-                    yield return MachineConfigurationParts.Description;
+                    yield return MachineConfigurationParts.Location;
                 }
 
                 if (ScopedPreference)

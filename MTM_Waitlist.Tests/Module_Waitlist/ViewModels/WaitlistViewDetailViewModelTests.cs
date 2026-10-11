@@ -13,7 +13,7 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.ViewModels;
 public sealed class WaitlistViewDetailViewModelTests
 {
     [TestMethod]
-    public async Task OnNavigatedTo_WhenPassedASubmittedRequestId_LoadsMatchingItemAndTemplateSectionsAsync()
+    public async Task ViewModel_WaitlistViewDetailViewModelTests_OnNavigatedTo_WhenPassedASubmittedRequestIdLoadsMatchingItemAndTemplateSectionsAsync()
     {
         var requestService = new WaitlistRequestService();
         var request = await SubmitRequestAsync(requestService);
@@ -32,7 +32,7 @@ public sealed class WaitlistViewDetailViewModelTests
     }
 
     [TestMethod]
-    public async Task OnNavigatedTo_WhenPassedSessionRequestId_UsesTheCorrectRequestDetailTemplateAsync()
+    public async Task ViewModel_WaitlistViewDetailViewModelTests_OnNavigatedTo_WhenPassedSessionRequestIdUsesTheCorrectRequestDetailTemplateAsync()
     {
         var requestService = new WaitlistRequestService();
         var request = await SubmitRequestAsync(requestService, itemCode: "deliver-wrong-coil", inputValue: "Wrong material at press");
@@ -81,7 +81,7 @@ public sealed class WaitlistViewDetailViewModelTests
     }
 
     [TestMethod]
-    public void BackCommand_CallsNavigationGoBack()
+    public void ViewModel_WaitlistViewDetailViewModelTests_BackCommand_CallsNavigationGoBack()
     {
         var navigationService = new RecordingNavigationService();
         var viewModel = new WaitlistViewDetailViewModel(
@@ -94,7 +94,7 @@ public sealed class WaitlistViewDetailViewModelTests
     }
 
     [TestMethod]
-    public async Task OnNavigatedTo_RealSubmittedCoilRequest_ResolvesNonNullItemAsync()
+    public async Task ViewModel_WaitlistViewDetailViewModelTests_OnNavigatedTo_RealSubmittedCoilRequestResolvesNonNullItemAsync()
     {
         var requestService = new WaitlistRequestService();
         var draft = new WaitlistRequestDraft
@@ -128,7 +128,7 @@ public sealed class WaitlistViewDetailViewModelTests
     }
 
     [TestMethod]
-    public async Task OnNavigatedTo_CoilRequest_WorkOrderAndRequestShowsRealRequestValuesAsync()
+    public async Task ViewModel_WaitlistViewDetailViewModelTests_OnNavigatedTo_CoilRequestWorkOrderAndRequestShowsRealRequestValuesAsync()
     {
         var requestService = new WaitlistRequestService();
         var draft = new WaitlistRequestDraft
@@ -167,7 +167,7 @@ public sealed class WaitlistViewDetailViewModelTests
         => section.Fields.FirstOrDefault(field => string.Equals(field.Label, label, StringComparison.OrdinalIgnoreCase))?.Value;
 
     [TestMethod]
-    public void OnNavigatedTo_NoItemResolved_SetsFriendlyEmptyStateMessage()
+    public void ViewModel_WaitlistViewDetailViewModelTests_OnNavigatedTo_NoItemResolvedSetsFriendlyEmptyStateMessage()
     {
         var viewModel = new WaitlistViewDetailViewModel(
             new RecordingNavigationService(),
@@ -180,7 +180,7 @@ public sealed class WaitlistViewDetailViewModelTests
     }
 
     [TestMethod]
-    public async Task OnNavigatedTo_ItemResolved_ClearsEmptyStateMessageAsync()
+    public async Task ViewModel_WaitlistViewDetailViewModelTests_OnNavigatedTo_ItemResolvedClearsEmptyStateMessageAsync()
     {
         var requestService = new WaitlistRequestService();
         var request = await SubmitRequestAsync(requestService);

@@ -31,7 +31,7 @@ public sealed class AccountCreationServiceTests
         => new(employeeNumber, firstName, lastName, pin, confirmation);
 
     [TestMethod]
-    public async Task CreateAsync_Created_WritesOneCallAndAnswersTheStoreRow()
+    public async Task Service_AccountCreationServiceTests_CreateAsync_CreatedWritesOneCallAndAnswersTheStoreRow()
     {
         var store = new StubStore
         {
@@ -62,7 +62,7 @@ public sealed class AccountCreationServiceTests
     }
 
     [TestMethod]
-    public async Task CreateAsync_WritesTheAccountUnderTheEmployeeNumberAndANonTemporaryCredential()
+    public async Task Service_AccountCreationServiceTests_CreateAsync_WritesTheAccountUnderTheEmployeeNumberAndANonTemporaryCredential()
     {
         var store = new StubStore
         {
@@ -84,7 +84,7 @@ public sealed class AccountCreationServiceTests
     }
 
     [TestMethod]
-    public async Task CreateAsync_NeverSendsThePlainPin()
+    public async Task Service_AccountCreationServiceTests_CreateAsync_NeverSendsThePlainPin()
     {
         var store = new StubStore
         {
@@ -105,7 +105,7 @@ public sealed class AccountCreationServiceTests
     [TestMethod]
     [DataRow("123", DisplayName = "three characters is too short")]
     [DataRow("", DisplayName = "nothing is not a PIN")]
-    public async Task CreateAsync_PinShorterThanTheFloor_WritesNothing(string pin)
+    public async Task Service_AccountCreationServiceTests_CreateAsync_PinShorterThanTheFloorWritesNothing(string pin)
     {
         var store = new StubStore();
         var service = new AccountCreationService(store);
@@ -118,7 +118,7 @@ public sealed class AccountCreationServiceTests
     }
 
     [TestMethod]
-    public async Task CreateAsync_PinTypedTwoDifferentWays_WritesNothing()
+    public async Task Service_AccountCreationServiceTests_CreateAsync_PinTypedTwoDifferentWaysWritesNothing()
     {
         var store = new StubStore();
 
@@ -130,7 +130,7 @@ public sealed class AccountCreationServiceTests
     }
 
     [TestMethod]
-    public async Task CreateAsync_BlankConfirmedName_WritesNothing()
+    public async Task Service_AccountCreationServiceTests_CreateAsync_BlankConfirmedNameWritesNothing()
     {
         var store = new StubStore();
 
@@ -141,7 +141,7 @@ public sealed class AccountCreationServiceTests
     }
 
     [TestMethod]
-    public async Task CreateAsync_WhenTheStoreRefuses_LeavesNothingBehindAndSaysSo()
+    public async Task Service_AccountCreationServiceTests_CreateAsync_WhenTheStoreRefusesLeavesNothingBehindAndSaysSo()
     {
         var store = new StubStore { Throws = new InvalidOperationException("duplicate sign-in name") };
         var service = new AccountCreationService(store);
@@ -155,7 +155,7 @@ public sealed class AccountCreationServiceTests
     }
 
     [TestMethod]
-    public async Task CreateAsync_WhenTheStoreAnswersNoRow_ReportsNothingCreated()
+    public async Task Service_AccountCreationServiceTests_CreateAsync_WhenTheStoreAnswersNoRowReportsNothingCreated()
     {
         var store = new StubStore();
 

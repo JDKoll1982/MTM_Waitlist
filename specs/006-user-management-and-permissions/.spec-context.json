@@ -707,7 +707,7 @@
         "T015",
         "T020"
       ],
-      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::ASignInNameTypedInLowerCase_IsStoredUpperCase_AndSignsInEitherWay"
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::Database_UserManagementLiveIntegrationTests_Database_UserManagementLiveIntegrationTests_ASignInNameTypedInLowerCase_IsStoredUpperCase_AndSignsInEitherWay"
     },
     "FR-003": {
       "title": "Accounts whose sign-in name is not upper case are migrated to that rule.",
@@ -738,7 +738,7 @@
         "T011",
         "T072"
       ],
-      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::CreateAsync_AValidPerson_WritesTheProfileAndItsOneRoleAssignmentTogether,CreateAsync_FailingAfterTheProfileIsWritten_RollsTheProfileAndTheRoleBackTogether"
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::Database_UserManagementLiveIntegrationTests_CreateAsync_AValidPersonWritesTheProfileAndItsOneRoleAssignmentTogether,Database_UserManagementLiveIntegrationTests_CreateAsync_FailingAfterTheProfileIsWrittenRollsTheProfileAndTheRoleBackTogether"
     },
     "FR-007": {
       "title": "A new account is created active, and the create screen offers no active control.",
@@ -757,7 +757,7 @@
         "T053",
         "T072"
       ],
-      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::CreateAsync_ASignInNameAlreadyTaken_ArrivesAsOneTypedAnswerAndWritesNothing"
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::Database_UserManagementLiveIntegrationTests_CreateAsync_ASignInNameAlreadyTakenArrivesAsOneTypedAnswerAndWritesNothing"
     },
     "FR-009": {
       "title": "A person is created with exactly one role and nothing adds a second; the stored assignments still permit more, so readers take the highest-ranked live role.",
@@ -868,7 +868,7 @@
         "T048",
         "T053"
       ],
-      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::UpdateAsync_DeactivatingTheActorsOwnAccount_IsRefusedByTheStore"
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::Database_UserManagementLiveIntegrationTests_UpdateAsync_DeactivatingTheActorsOwnAccountIsRefusedByTheStore"
     },
     "FR-024": {
       "title": "A person cannot change the sign-in name of the account they are signed in as.",
@@ -877,7 +877,7 @@
         "T048",
         "T053"
       ],
-      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::UpdateAsync_RenamingTheActorsOwnSignInName_IsRefusedByTheStore"
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::Database_UserManagementLiveIntegrationTests_UpdateAsync_RenamingTheActorsOwnSignInNameIsRefusedByTheStore"
     },
     "FR-025": {
       "title": "The rank, self-lockout and sign-in-name rules are enforced where the change is written.",
@@ -890,7 +890,7 @@
         "T054",
         "T072"
       ],
-      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::CreateAsync_ARoleAboveTheActorsOwnRung_IsRefusedByTheStoreWithNoScreenInvolved,UpdateAsync_AnAccountThatOutranksTheActor_IsRefusedByTheStoreWithNoScreenInvolved"
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::Database_UserManagementLiveIntegrationTests_CreateAsync_ARoleAboveTheActorsOwnRungIsRefusedByTheStoreWithNoScreenInvolved,Database_UserManagementLiveIntegrationTests_UpdateAsync_AnAccountThatOutranksTheActorIsRefusedByTheStoreWithNoScreenInvolved"
     },
     "FR-026": {
       "title": "A refused change is reported plainly and writes no audit record, because nothing changed.",
@@ -933,7 +933,7 @@
         "T053",
         "T073"
       ],
-      "tests": "MTM_Waitlist.Tests/Module_Settings/ViewModels/PinRevealDialogViewModelTests.cs,MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::CreateAsync_AValidPerson_WritesTheProfileAndItsOneRoleAssignmentTogether"
+      "tests": "MTM_Waitlist.Tests/Module_Settings/ViewModels/PinRevealDialogViewModelTests.cs,MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::Database_UserManagementLiveIntegrationTests_CreateAsync_AValidPersonWritesTheProfileAndItsOneRoleAssignmentTogether"
     },
     "FR-031": {
       "title": "The value previously used for a reset stays recognised as a temporary value.",
@@ -970,7 +970,7 @@
         "T066",
         "T072"
       ],
-      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::UpdateAsync_DeactivatingAPerson_LeavesTheirExistingSessionsAlone,MTM_Waitlist.Tests/Module_Startup/Services/TemporaryCredentialLimitTests.cs::ResetPassword_LeavesAnOpenSessionRunning"
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::Database_UserManagementLiveIntegrationTests_UpdateAsync_DeactivatingAPersonLeavesTheirExistingSessionsAlone,MTM_Waitlist.Tests/Module_Startup/Services/TemporaryCredentialLimitTests.cs::ResetPassword_LeavesAnOpenSessionRunning"
     },
     "FR-036": {
       "title": "After five failed sign-in attempts an account holding a temporary value stops accepting it.",
@@ -1042,7 +1042,7 @@
       "tasks": [
         "T016"
       ],
-      "tests": "Module_Core/Permissions/PermissionRegistryTests.cs::Declaration_HoldsEveryPinnedKeyExactlyOnce"
+      "tests": "Module_Core/Permissions/PermissionRegistryTests.cs::Service_PermissionRegistryTests_Service_PermissionRegistryTests_Declaration_HoldsEveryPinnedKeyExactlyOnce"
     },
     "FR-046": {
       "title": "The application holds one declaration of every permission with its key, label, what it gates, the area, the shipped fallback and the gate sites, and it carries no per-role baseline.",
@@ -1052,7 +1052,7 @@
         "T036",
         "T060"
       ],
-      "tests": "Module_Core/Permissions/PermissionRegistryTests.cs::Declaration_DerivesEachKeysResourceNamesFromTheKeyItself,Declaration_ExposesNoPerRoleBaseline"
+      "tests": "Module_Core/Permissions/PermissionRegistryTests.cs::Service_PermissionRegistryTests_Service_PermissionRegistryTests_Declaration_DerivesEachKeysResourceNamesFromTheKeyItself,Service_PermissionRegistryTests_Service_PermissionRegistryTests_Declaration_ExposesNoPerRoleBaseline"
     },
     "FR-047": {
       "title": "A permission cannot exist without appearing on the page, nor appear without a baseline for every role; the declaration and the seeded baselines are checked in both directions.",
@@ -1062,7 +1062,7 @@
         "T036",
         "T060"
       ],
-      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::TheShippedBaselines_AndTheDeclaration_AgreeInBothDirections"
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::Service_PermissionBaselineParityTests_TheShippedBaselines_AndTheDeclarationAgreeInBothDirections"
     },
     "FR-048": {
       "title": "The shipped baselines are data rather than values fixed in code, so what a role may do can change without a code change.",
@@ -1081,7 +1081,7 @@
         "T018",
         "T025"
       ],
-      "tests": "Module_Core/Permissions/PermissionResolutionTests.cs::HasPermissionAsync_WithNoStoredRowOfTheirOwn_TakesTheRoleBaseline,HasPermissionAsync_APersonsOwnRowBeatsTheirRoleBaseline"
+      "tests": "Module_Core/Permissions/PermissionResolutionTests.cs::Service_PermissionResolutionTests_HasPermissionAsync_WithNoStoredRowOfTheirOwnTakesTheRoleBaseline,Service_PermissionResolutionTests_Service_PermissionResolutionTests_HasPermissionAsync_APersonsOwnRowBeatsTheirRoleBaseline"
     },
     "FR-050": {
       "title": "An unreachable store yields the shipped fallback rather than a refusal.",
@@ -1090,7 +1090,7 @@
         "T025",
         "T037"
       ],
-      "tests": "MTM_Waitlist.Tests/Core/Services/RequestActionPolicyTests.cs::CanViewerHandleRequestsAsync_NoPermissionService_AnswersFromTheShippedFallback"
+      "tests": "MTM_Waitlist.Tests/Core/Services/RequestActionPolicyTests.cs::Service_RequestActionPolicyTests_CanViewerHandleRequestsAsync_NoPermissionServiceAnswersFromTheShippedFallback"
     },
     "FR-051": {
       "title": "A new account starts from its role's baseline and holds nothing beyond it.",
@@ -1099,7 +1099,7 @@
         "T025",
         "T036"
       ],
-      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::TheShippedBaselines_StoreNoRowForAnybodyInParticular"
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::Service_PermissionBaselineParityTests_Service_PermissionBaselineParityTests_TheShippedBaselines_StoreNoRowForAnybodyInParticular"
     },
     "FR-052": {
       "title": "The shipped baselines reproduce exactly what each role is allowed today, so nobody's access changes on ship day.",
@@ -1109,7 +1109,7 @@
         "T036",
         "T072"
       ],
-      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::TheShippedBaselines_ReproduceEveryRetiredListExactly_ForEveryRoleAndEveryPermission,EveryPersonsEffectiveSetOnShipDay_EqualsExactlyWhatTheirRoleWasAllowedBefore"
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::Service_PermissionBaselineParityTests_TheShippedBaselines_ReproduceEveryRetiredListExactlyForEveryRoleAndEveryPermission,Service_PermissionBaselineParityTests_Service_PermissionBaselineParityTests_EveryPersonsEffectiveSetOnShipDay_EqualsExactlyWhatTheirRoleWasAllowedBefore"
     },
     "FR-053": {
       "title": "A person's own stored value beats a wider scope, and the order is corrected and shipped before any value is stored for an individual.",
@@ -1122,7 +1122,7 @@
         "T054",
         "T070"
       ],
-      "tests": "Module_Core/Services/SettingsScopeRankTests.cs::ShippedScopeRankFunction_PutsAPersonsOwnValueAboveEveryWiderScope"
+      "tests": "Module_Core/Services/SettingsScopeRankTests.cs::Service_SettingsScopeRankTests_Service_SettingsScopeRankTests_ShippedScopeRankFunction_PutsAPersonsOwnValueAboveEveryWiderScope"
     },
     "FR-054": {
       "title": "No gate decides access from a hand-written list of role names: all twelve lists the Context counts are removed, eleven replaced by their permission and the badge map re-keyed to role codes.",
@@ -1134,7 +1134,7 @@
         "T039",
         "T040"
       ],
-      "tests": "MTM_Waitlist.Tests/Core/Services/RequestActionPolicyTests.cs::CanViewerHandleRequestsAsync_AsksTheDeclaredKeyAndNothingElse"
+      "tests": "MTM_Waitlist.Tests/Core/Services/RequestActionPolicyTests.cs::Service_RequestActionPolicyTests_Service_RequestActionPolicyTests_CanViewerHandleRequestsAsync_AsksTheDeclaredKeyAndNothingElse"
     },
     "FR-055": {
       "title": "A gate is refused wherever the gated action is performed, not only where the control was drawn.",
@@ -1151,7 +1151,7 @@
         "T039",
         "T040"
       ],
-      "tests": "MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs::AcceptAsync_ViewerWithoutThePermission_RefusesAtTheAction"
+      "tests": "MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs::Service_WaitlistRequestServiceTests_AcceptAsync_ViewerWithoutThePermissionRefusesAtTheAction"
     },
     "FR-057": {
       "title": "Whatever the Settings cache-refresh control admits is also admitted by the service's cache-refresh permission.",
@@ -1159,7 +1159,7 @@
         "T034",
         "T038"
       ],
-      "tests": "MTM_Waitlist.Tests/Module_Mock_Service/ServiceOperatorPermissionTests.cs::TheShippedBaselines_AdmitToTheApiEveryRoleTheSettingsCacheRefreshGateAdmits"
+      "tests": "MTM_Waitlist.Tests/Module_Mock_Service/ServiceOperatorPermissionTests.cs::Service_ServiceOperatorPermissionTests_Service_ServiceOperatorPermissionTests_TheShippedBaselines_AdmitToTheApiEveryRoleTheSettingsCacheRefreshGateAdmits"
     },
     "FR-058": {
       "title": "The badge beside the signed-in name does not become a permission.",
@@ -1184,7 +1184,7 @@
         "T024",
         "T025"
       ],
-      "tests": "Module_Core/Permissions/PermissionResolutionTests.cs::HasPermissionAsync_ARoleWithNoBaselineRowAnswersFromTheShippedFallback"
+      "tests": "Module_Core/Permissions/PermissionResolutionTests.cs::Service_PermissionResolutionTests_Service_PermissionResolutionTests_HasPermissionAsync_ARoleWithNoBaselineRowAnswersFromTheShippedFallback"
     },
     "FR-061": {
       "title": "A gated action reading a permission the declaration does not hold is reported as a failure rather than shipping as a silent refusal.",
@@ -1193,7 +1193,7 @@
         "T024",
         "T035"
       ],
-      "tests": "Module_Core/Permissions/PermissionResolutionTests.cs::HasPermissionAsync_WithAnUndeclaredKey_ReportsAFailureRatherThanRefusingSilently"
+      "tests": "Module_Core/Permissions/PermissionResolutionTests.cs::Service_PermissionResolutionTests_HasPermissionAsync_WithAnUndeclaredKeyReportsAFailureRatherThanRefusingSilently"
     },
     "FR-062": {
       "title": "A permission the declaration holds that no gate reads is reported.",
@@ -1201,7 +1201,7 @@
         "T016",
         "T024"
       ],
-      "tests": "Module_Core/Permissions/PermissionRegistryTests.cs::Declaration_GivesEveryKeyANamedGateSiteThatReadsIt"
+      "tests": "Module_Core/Permissions/PermissionRegistryTests.cs::Service_PermissionRegistryTests_Service_PermissionRegistryTests_Declaration_GivesEveryKeyANamedGateSiteThatReadsIt"
     },
     "FR-063": {
       "title": "The permissions page shows one person at a time, is not a grid of roles against features, and changes no role's baseline.",
@@ -1210,7 +1210,7 @@
         "T056",
         "T057"
       ],
-      "tests": "PermissionsViewModelTests.cs::TheFiveCards_AreTheDeclarationAreas_AndEveryPermissionIsInExactlyOne,PermissionsViewModelTests.cs::TheRows_AreThePeople_OrderedByRungAndThenByName"
+      "tests": "PermissionsViewModelTests.cs::ViewModel_PermissionsViewModelTests_TheFiveCards_AreTheDeclarationAreasAndEveryPermissionIsInExactlyOne,PermissionsViewModelTests.cs::ViewModel_PermissionsViewModelTests_TheRows_AreThePeopleOrderedByRungAndThenByName"
     },
     "FR-064": {
       "title": "The permissions page is openable only by IT Department, Plant Manager and Developer.",
@@ -1224,7 +1224,7 @@
         "T055",
         "T056"
       ],
-      "tests": "PermissionsViewModelTests.cs::AChosenCell_AnInheritedCell_AndAnOffCell_AreThreeDifferentShapes,PermissionsViewModelTests.cs::EveryCell_SaysItsStateAndWhoseItIsInWords_BecauseAShapeCannotBeReadAloud"
+      "tests": "PermissionsViewModelTests.cs::ViewModel_PermissionsViewModelTests_AChosenCell_AnInheritedCellAndAnOffCellAreThreeDifferentShapes,PermissionsViewModelTests.cs::ViewModel_PermissionsViewModelTests_EveryCell_SaysItsStateAndWhoseItIsInWordsBecauseAShapeCannotBeReadAloud"
     },
     "FR-066": {
       "title": "A person whose role ranks above the reader's is selectable to view, with rows shown unavailable and the reason stated in words.",
@@ -1232,7 +1232,7 @@
         "T056",
         "T059"
       ],
-      "tests": "PermissionsViewModelTests.cs::APersonAboveTheReadersRung_HasEveryCellLocked_WithTheReasonInWords"
+      "tests": "PermissionsViewModelTests.cs::ViewModel_PermissionsViewModelTests_APersonAboveTheReadersRung_HasEveryCellLockedWithTheReasonInWords"
     },
     "FR-067": {
       "title": "Saving confirms what is changing and for whom, one sentence per changed row and a count when several change.",
@@ -1240,7 +1240,7 @@
         "T056",
         "T059"
       ],
-      "tests": "PermissionsViewModelTests.cs::TheConfirmation_NamesWhatChangesAndForWhom_AndCountsWhenSeveralChange"
+      "tests": "PermissionsViewModelTests.cs::ViewModel_PermissionsViewModelTests_TheConfirmation_NamesWhatChangesAndForWhomAndCountsWhenSeveralChange"
     },
     "FR-068": {
       "title": "Saving with nothing changed is unavailable and writes no history record.",
@@ -1268,7 +1268,7 @@
         "T058",
         "T059"
       ],
-      "tests": "PermissionsViewModelTests.cs::AValueThatMovedWhileThePageWasOpen_IsNamedAndNothingIsWritten,PermissionsViewModelTests.cs::AValueThatMoved_IsShownAndAskedAbout_BeforeItIsRestored"
+      "tests": "PermissionsViewModelTests.cs::ViewModel_PermissionsViewModelTests_ViewModel_PermissionsViewModelTests_AValueThatMovedWhileThePageWasOpen_IsNamedAndNothingIsWritten,PermissionsViewModelTests.cs::ViewModel_PermissionsViewModelTests_AValueThatMoved_IsShownAndAskedAboutBeforeItIsRestored"
     },
     "FR-071": {
       "title": "A reversal of a save that changed several rows reverses the whole save.",
@@ -1278,7 +1278,7 @@
         "T056",
         "T058"
       ],
-      "tests": "PermissionsViewModelTests.cs::ASave_WritesOnePersonsWholeSet_AndAnotherPersonIsAnotherWrite,PermissionsViewModelTests.cs::TheUndo_ReversesTheWholeSave_ForThePersonItWasWrittenFor"
+      "tests": "PermissionsViewModelTests.cs::ViewModel_PermissionsViewModelTests_ASave_WritesOnePersonsWholeSetAndAnotherPersonIsAnotherWrite,PermissionsViewModelTests.cs::ViewModel_PermissionsViewModelTests_TheUndo_ReversesTheWholeSaveForThePersonItWasWrittenFor"
     },
     "FR-072": {
       "title": "Every permission change writes one history record per changed permission naming the actor, the permission, the scope, both values and the time.",
@@ -1302,7 +1302,7 @@
         "T056",
         "T059"
       ],
-      "tests": "PermissionsViewModelTests.cs::TurningACellOver_MarksTheRowPending_AndTheWarningStatesTheCount,PermissionsViewModelTests.cs::ASaveThatLanded_AnnouncesTheCellsNewState_NotOnlyItsNewValue"
+      "tests": "PermissionsViewModelTests.cs::ViewModel_PermissionsViewModelTests_TurningACellOver_MarksTheRowPendingAndTheWarningStatesTheCount,PermissionsViewModelTests.cs::ViewModel_PermissionsViewModelTests_ASaveThatLanded_AnnouncesTheCellsNewStateNotOnlyItsNewValue"
     },
     "FR-075": {
       "title": "A second view answers which roles' baselines give a feature, taken from the seeded baselines the declaration's check ties to it rather than repeated.",
@@ -1398,7 +1398,7 @@
         "T044",
         "T046"
       ],
-      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::SearchAsync_MatchesEachOfTheFourFacts_AndNarrowsByRole"
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::Database_UserManagementLiveIntegrationTests_SearchAsync_MatchesEachOfTheFourFactsAndNarrowsByRole"
     },
     "FR-087": {
       "title": "The list is filterable by role.",
@@ -1577,7 +1577,7 @@
         "T011",
         "T012"
       ],
-      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::UpdateAsync_OneSaveChangingSeveralFields_SharesOneChangeIdentifierAcrossItsAuditRows"
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::Database_UserManagementLiveIntegrationTests_UpdateAsync_OneSaveChangingSeveralFieldsSharesOneChangeIdentifierAcrossItsAuditRows"
     },
     "FR-111": {
       "title": "A password reset is recorded as having happened with no value on either side.",
@@ -1585,7 +1585,7 @@
         "T013",
         "T072"
       ],
-      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::ResetPasswordAsync_WritesOneAuditRowWithNoValueOnEitherSide"
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::Database_UserManagementLiveIntegrationTests_Database_UserManagementLiveIntegrationTests_ResetPasswordAsync_WritesOneAuditRowWithNoValueOnEitherSide"
     },
     "FR-112": {
       "title": "Every label, title, field label, action and error message is localised through the application's resource mechanism.",
@@ -1645,7 +1645,7 @@
         "T041",
         "T072"
       ],
-      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::EveryPersonsEffectiveSetOnShipDay_EqualsExactlyWhatTheirRoleWasAllowedBefore"
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::Service_PermissionBaselineParityTests_Service_PermissionBaselineParityTests_EveryPersonsEffectiveSetOnShipDay_EqualsExactlyWhatTheirRoleWasAllowedBefore"
     },
     "SC-002": {
       "title": "Zero hand-written role lists remain in the application, and adding one back is reported as a failure.",
@@ -1753,7 +1753,7 @@
       "tasks": [
         "T072"
       ],
-      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::UpdateAsync_AnAccountThatOutranksTheActor_IsRefusedByTheStoreWithNoScreenInvolved"
+      "tests": "MTM_Waitlist.Tests/Module_Settings/Services/UserManagementLiveIntegrationTests.cs::Database_UserManagementLiveIntegrationTests_UpdateAsync_AnAccountThatOutranksTheActorIsRefusedByTheStoreWithNoScreenInvolved"
     },
     "SC-017": {
       "title": "Opening either Administration page and returning to Settings takes one Back press, and the search reaches both entries.",
@@ -2122,7 +2122,7 @@
     },
     "T037": {
       "status": "DONE",
-      "did": "Re-closed with the full change: the composition root now names the new permissionService parameter on WaitlistViewViewModel (WaitlistViewRegistrationTests.ListViewModelRegistration_NamesEveryConstructorParameter caught the omission, which is the guard working). Solution builds 0 errors; full suite 1282 total / 1244 passed / 38 skipped / 0 failed against the live MAMP store.",
+      "did": "Re-closed with the full change: the composition root now names the new permissionService parameter on WaitlistViewViewModel (WaitlistViewRegistrationTests.ViewModel_WaitlistViewRegistrationTests_ListViewModelRegistration_NamesEveryConstructorParameter caught the omission, which is the guard working). Solution builds 0 errors; full suite 1282 total / 1244 passed / 38 skipped / 0 failed against the live MAMP store.",
       "files": [
         "MTM_Waitlist.Core/Services/RequestActionPolicy.cs",
         "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
@@ -2474,7 +2474,7 @@
       "source": "derived",
       "exitCode": 0,
       "durationSeconds": 47.2,
-      "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1154, Skipped:    27, Total:  1181, Duration: 33 s - MTM_Waitlist.Tests.dll (net10.0)"
+      "result": "  Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_ReachesTheRealProcedureReportsTheLoadedRowCountAndSwapsAtomically [1 ms] ·   Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_WithAnEmptyPayloadIsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1154, Skipped:    27, Total:  1181, Duration: 33 s - MTM_Waitlist.Tests.dll (net10.0)"
     },
     {
       "what": "full test suite",
@@ -2482,7 +2482,7 @@
       "source": "derived",
       "exitCode": 0,
       "durationSeconds": 51.6,
-      "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1178, Skipped:    27, Total:  1205, Duration: 32 s - MTM_Waitlist.Tests.dll (net10.0)"
+      "result": "  Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_ReachesTheRealProcedureReportsTheLoadedRowCountAndSwapsAtomically [1 ms] ·   Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_WithAnEmptyPayloadIsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1178, Skipped:    27, Total:  1205, Duration: 32 s - MTM_Waitlist.Tests.dll (net10.0)"
     },
     {
       "what": "clean solution build",
@@ -2514,7 +2514,7 @@
       "source": "derived",
       "exitCode": 0,
       "durationSeconds": 46.4,
-      "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1229, Skipped:    38, Total:  1267, Duration: 31 s - MTM_Waitlist.Tests.dll (net10.0)"
+      "result": "  Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_ReachesTheRealProcedureReportsTheLoadedRowCountAndSwapsAtomically [1 ms] ·   Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_WithAnEmptyPayloadIsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1229, Skipped:    38, Total:  1267, Duration: 31 s - MTM_Waitlist.Tests.dll (net10.0)"
     },
     {
       "what": "solution build",
@@ -2546,7 +2546,7 @@
       "source": "derived",
       "exitCode": 0,
       "durationSeconds": 45.3,
-      "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1263, Skipped:    38, Total:  1301, Duration: 31 s - MTM_Waitlist.Tests.dll (net10.0)"
+      "result": "  Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_ReachesTheRealProcedureReportsTheLoadedRowCountAndSwapsAtomically [1 ms] ·   Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_WithAnEmptyPayloadIsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1263, Skipped:    38, Total:  1301, Duration: 31 s - MTM_Waitlist.Tests.dll (net10.0)"
     },
     {
       "what": "clean solution build, 0 warnings 0 errors",
@@ -2562,7 +2562,7 @@
       "source": "derived",
       "exitCode": 1,
       "durationSeconds": 55.0,
-      "result": "  Skipped GetSubordinatePartsQuery_ReturnsRows_WhenServerIsAvailable [< 1 ms] ·   Skipped EmployeeLookupQuery_ReturnsEmployeeStatus_WhenServerIsAvailable [< 1 ms] · Failed!  - Failed:     1, Passed:  1346, Skipped:     4, Total:  1351, Duration: 39 s - MTM_Waitlist.Tests.dll (net10.0)",
+      "result": "  Skipped Service_InforVisualSqlQueryServiceTests_GetSubordinatePartsQuery_ReturnsRowsWhenServerIsAvailable [< 1 ms] ·   Skipped Service_InforVisualSqlQueryServiceTests_EmployeeLookupQuery_ReturnsEmployeeStatusWhenServerIsAvailable [< 1 ms] · Failed!  - Failed:     1, Passed:  1346, Skipped:     4, Total:  1351, Duration: 39 s - MTM_Waitlist.Tests.dll (net10.0)",
       "warnings": [
         "exited 1"
       ]
@@ -2648,7 +2648,7 @@
       "source": "derived",
       "exitCode": 0,
       "durationSeconds": 51.7,
-      "result": "  Skipped GetSubordinatePartsQuery_ReturnsRows_WhenServerIsAvailable [< 1 ms] ·   Skipped EmployeeLookupQuery_ReturnsEmployeeStatus_WhenServerIsAvailable [1 ms] · Passed!  - Failed:     0, Passed:  1383, Skipped:     4, Total:  1387, Duration: 35 s - MTM_Waitlist.Tests.dll (net10.0)"
+      "result": "  Skipped Service_InforVisualSqlQueryServiceTests_GetSubordinatePartsQuery_ReturnsRowsWhenServerIsAvailable [< 1 ms] ·   Skipped Service_InforVisualSqlQueryServiceTests_EmployeeLookupQuery_ReturnsEmployeeStatusWhenServerIsAvailable [1 ms] · Passed!  - Failed:     0, Passed:  1383, Skipped:     4, Total:  1387, Duration: 35 s - MTM_Waitlist.Tests.dll (net10.0)"
     },
     {
       "what": "T076 narrowest-window pass, partial: the application's minimum window is 500x500 logical pixels (320x320 was asked for and the window manager clamped it to exactly 500x500 at DPI 96), matching MainWindow.xaml's MinWidth and MinHeight of 500",

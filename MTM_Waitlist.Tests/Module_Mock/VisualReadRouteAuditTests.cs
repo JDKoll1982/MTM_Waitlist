@@ -25,7 +25,7 @@ namespace MTM_Waitlist.Tests.Module_Mock;
 public sealed class VisualReadRouteAuditTests
 {
     [TestMethod]
-    public void EveryShippedShape_HasAFallbackThatCarriesTheSharedAlgorithm()
+    public void Audit_VisualReadRouteAuditTests_EveryShippedShape_HasAFallbackThatCarriesTheSharedAlgorithm()
     {
         var shapeCount = VisualReadShapeCatalog.Create().Count;
         var implementations = FindFallbackImplementations();
@@ -38,7 +38,7 @@ public sealed class VisualReadRouteAuditTests
     }
 
     [TestMethod]
-    public void EveryRegisteredFallback_DerivesFromTheSharedAlgorithm()
+    public void Audit_VisualReadRouteAuditTests_EveryRegisteredFallback_DerivesFromTheSharedAlgorithm()
     {
         var bypassing = FindFallbackImplementations()
             .Where(type => !DerivesFromSharedAlgorithm(type))

@@ -8,7 +8,7 @@ namespace MTM_Waitlist.Tests.Core.Services;
 public sealed class WaitlistRequestLinkTests
 {
     [TestMethod]
-    public void Build_ProducesOpenRequestQueryWithGuid()
+    public void Service_WaitlistRequestLinkTests_Build_ProducesOpenRequestQueryWithGuid()
     {
         var id = Guid.NewGuid();
         var arguments = WaitlistRequestLink.Build(id);
@@ -18,7 +18,7 @@ public sealed class WaitlistRequestLinkTests
     }
 
     [TestMethod]
-    public void TryParse_RoundTripsBuiltArguments()
+    public void Service_WaitlistRequestLinkTests_TryParse_RoundTripsBuiltArguments()
     {
         var id = Guid.NewGuid();
         var arguments = WaitlistRequestLink.Build(id);
@@ -28,14 +28,14 @@ public sealed class WaitlistRequestLinkTests
     }
 
     [TestMethod]
-    public void TryParse_RejectsWrongAction()
+    public void Service_WaitlistRequestLinkTests_TryParse_RejectsWrongAction()
     {
         Assert.IsFalse(WaitlistRequestLink.TryParse("action=settings", out _));
         Assert.IsFalse(WaitlistRequestLink.TryParse("action=openrequestx&request=" + Guid.NewGuid(), out _));
     }
 
     [TestMethod]
-    public void TryParse_RejectsMissingOrInvalidRequest()
+    public void Service_WaitlistRequestLinkTests_TryParse_RejectsMissingOrInvalidRequest()
     {
         Assert.IsFalse(WaitlistRequestLink.TryParse(null, out _));
         Assert.IsFalse(WaitlistRequestLink.TryParse(string.Empty, out _));

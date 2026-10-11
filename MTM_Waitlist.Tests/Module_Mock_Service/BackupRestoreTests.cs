@@ -113,7 +113,7 @@ public sealed class BackupRestoreTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenTheToolIsMissing_ReportsToolUnavailableAndRecordsNoArtifact()
+    public async Task Service_BackupRestoreTests_RunAsync_WhenTheToolIsMissingReportsToolUnavailableAndRecordsNoArtifact()
     {
         using var fixture = new StoreFixture();
         var engine = fixture.CreateEngine(mysqldumpPath: Path.Combine(fixture.Root, "no-such-tool.exe"));
@@ -129,7 +129,7 @@ public sealed class BackupRestoreTests
     }
 
     [TestMethod]
-    public async Task RunAsync_ForOneStore_LeavesEveryOtherStoreUntouched()
+    public async Task Service_BackupRestoreTests_RunAsync_ForOneStoreLeavesEveryOtherStoreUntouched()
     {
         using var fixture = new StoreFixture();
         var otherStoreArtifacts = await fixture.SeedAsync(BackupStore.MtmReceivingApplication, 2);
@@ -148,7 +148,7 @@ public sealed class BackupRestoreTests
     }
 
     [TestMethod]
-    public void BuildArguments_TargetsTheResolvedConnection_NotTheSettingsRecord()
+    public void Service_BackupRestoreTests_BuildArguments_TargetsTheResolvedConnectionNotTheSettingsRecord()
     {
         var arguments = BackupEngine.BuildArguments(
             "mtm_waitlist",
@@ -167,7 +167,7 @@ public sealed class BackupRestoreTests
     }
 
     [TestMethod]
-    public void BuildArguments_NeverPutsThePasswordOnTheCommandLine()
+    public void Service_BackupRestoreTests_BuildArguments_NeverPutsThePasswordOnTheCommandLine()
     {
         var arguments = BackupEngine.BuildArguments(
             "mtm_mock",
@@ -184,7 +184,7 @@ public sealed class BackupRestoreTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenTheResolvedConnectionSuppliesTheCredentials_DumpsAgainstThatHost()
+    public async Task Service_BackupRestoreTests_RunAsync_WhenTheResolvedConnectionSuppliesTheCredentialsDumpsAgainstThatHost()
     {
         using var fixture = new StoreFixture();
         var toolPath = fixture.CreateFakeMySqlDump();
@@ -228,7 +228,7 @@ public sealed class BackupRestoreTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenNoConnectionIsConfigured_ReportsTheDesignedReasonAndDumpsNothing()
+    public async Task Service_BackupRestoreTests_RunAsync_WhenNoConnectionIsConfiguredReportsTheDesignedReasonAndDumpsNothing()
     {
         using var fixture = new StoreFixture();
         var toolPath = fixture.CreateFakeMySqlDump();
@@ -249,7 +249,7 @@ public sealed class BackupRestoreTests
     }
 
     [TestMethod]
-    public async Task RequestRestore_RecordsTheIntentWithoutChangingAnything()
+    public async Task Service_BackupRestoreTests_RequestRestore_RecordsTheIntentWithoutChangingAnything()
     {
         using var fixture = new StoreFixture();
         var artifacts = await fixture.SeedAsync(BackupStore.MtmWaitlist, 1);
@@ -273,7 +273,7 @@ public sealed class BackupRestoreTests
     }
 
     [TestMethod]
-    public async Task ConfirmAndRestoreAsync_WhenTheSafetySnapshotCannotBeTaken_RefusesAndChangesNothing()
+    public async Task Service_BackupRestoreTests_ConfirmAndRestoreAsync_WhenTheSafetySnapshotCannotBeTakenRefusesAndChangesNothing()
     {
         using var fixture = new StoreFixture();
         var artifacts = await fixture.SeedAsync(BackupStore.MtmWaitlist, 1);
@@ -300,7 +300,7 @@ public sealed class BackupRestoreTests
     }
 
     [TestMethod]
-    public async Task ConfirmAndRestoreAsync_WithAnArtifactThatWasNotRequested_IsRejected()
+    public async Task Service_BackupRestoreTests_ConfirmAndRestoreAsync_WithAnArtifactThatWasNotRequestedIsRejected()
     {
         using var fixture = new StoreFixture();
         var artifacts = await fixture.SeedAsync(BackupStore.MtmWaitlist, 2);
@@ -313,7 +313,7 @@ public sealed class BackupRestoreTests
     }
 
     [TestMethod]
-    public async Task ConfirmAndRestoreAsync_WhenTheArtifactIsGone_IsRejected()
+    public async Task Service_BackupRestoreTests_ConfirmAndRestoreAsync_WhenTheArtifactIsGoneIsRejected()
     {
         using var fixture = new StoreFixture();
         var artifacts = await fixture.SeedAsync(BackupStore.MtmWaitlist, 1);

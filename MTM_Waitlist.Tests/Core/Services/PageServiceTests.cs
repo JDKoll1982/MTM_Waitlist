@@ -24,7 +24,7 @@ public sealed class PageServiceTests
     }
 
     [TestMethod]
-    public void GetPageType_ReturnsConfiguredPage()
+    public void Service_PageServiceTests_GetPageType_ReturnsConfiguredPage()
     {
         var service = new PageService();
         service.Configure<TestViewModelA, TestPageA>();
@@ -35,7 +35,7 @@ public sealed class PageServiceTests
     }
 
     [TestMethod]
-    public void GetPageType_ThrowsWhenNotConfigured()
+    public void Service_PageServiceTests_GetPageType_ThrowsWhenNotConfigured()
     {
         var service = new PageService();
 
@@ -45,7 +45,7 @@ public sealed class PageServiceTests
     }
 
     [TestMethod]
-    public void Configure_ThrowsOnDuplicateKey()
+    public void Service_PageServiceTests_Configure_ThrowsOnDuplicateKey()
     {
         var service = new PageService();
         service.Configure<TestViewModelA, TestPageA>();
@@ -56,7 +56,7 @@ public sealed class PageServiceTests
     }
 
     [TestMethod]
-    public void Configure_ThrowsWhenPageTypeAlreadyMapped()
+    public void Service_PageServiceTests_Configure_ThrowsWhenPageTypeAlreadyMapped()
     {
         var service = new PageService();
         service.Configure<TestViewModelA, TestPageA>();
@@ -67,7 +67,7 @@ public sealed class PageServiceTests
     }
 
     [TestMethod]
-    public void Configure_MultipleDistinctMappingsResolveIndependently()
+    public void Service_PageServiceTests_Configure_MultipleDistinctMappingsResolveIndependently()
     {
         var service = new PageService();
         service.Configure<TestViewModelA, TestPageA>();

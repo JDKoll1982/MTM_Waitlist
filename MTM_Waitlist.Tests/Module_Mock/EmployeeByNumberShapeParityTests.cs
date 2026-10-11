@@ -23,7 +23,7 @@ public sealed class EmployeeByNumberShapeParityTests
     private static readonly string[] ExpectedColumns = ["EmployeeNumber", "FirstName", "LastName"];
 
     [TestMethod]
-    public void TheCatalog_HoldsSixShapesIncludingTheEmployeeByNumber()
+    public void Service_EmployeeByNumberShapeParityTests_TheCatalog_HoldsSixShapesIncludingTheEmployeeByNumber()
     {
         var shapes = VisualReadShapeCatalog.Create();
 
@@ -35,7 +35,7 @@ public sealed class EmployeeByNumberShapeParityTests
     }
 
     [TestMethod]
-    public void TheEmployeeByNumberShape_TakesANumberAndAnswersTheThreeNames()
+    public void Service_EmployeeByNumberShapeParityTests_TheEmployeeByNumberShape_TakesANumberAndAnswersTheThreeNames()
     {
         var shape = VisualReadShapeCatalog.Create().Single(s => s.Key == ShapeKey);
 
@@ -50,7 +50,7 @@ public sealed class EmployeeByNumberShapeParityTests
     }
 
     [TestMethod]
-    public void TheLiveReadAndTheMirror_ProjectTheSameColumnsInTheSameOrder()
+    public void Service_EmployeeByNumberShapeParityTests_TheLiveReadAndTheMirror_ProjectTheSameColumnsInTheSameOrder()
     {
         var live = File.ReadAllText(RepoPath(
             "Database", "InforVisual", "Queues", "Module_Startup", "Queries", "GetEmployeeByNumber.sql"));
@@ -74,7 +74,7 @@ public sealed class EmployeeByNumberShapeParityTests
     [DataRow("Database/Mock/Tables/visual_employee_by_number_result_stage")]
     [DataRow("Database/Mock/StoredProcedures/sp_visual_employee_by_number_get")]
     [DataRow("Database/Mock/StoredProcedures/sp_visual_employee_by_number_refresh")]
-    public void EveryArtifactTheShapeNeeds_ShipsItsCreateAndItsRollback(string relativeFolder)
+    public void Service_EmployeeByNumberShapeParityTests_EveryArtifactTheShapeNeeds_ShipsItsCreateAndItsRollback(string relativeFolder)
     {
         var folder = RepoPath(relativeFolder.Split('/'));
 
@@ -83,7 +83,7 @@ public sealed class EmployeeByNumberShapeParityTests
     }
 
     [TestMethod]
-    public void TheShapeNamesItsLiveReadAndItsPopulationScript()
+    public void Service_EmployeeByNumberShapeParityTests_TheShapeNamesItsLiveReadAndItsPopulationScript()
     {
         var shape = VisualReadShapeCatalog.Create().Single(s => s.Key == ShapeKey);
 

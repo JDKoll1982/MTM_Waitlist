@@ -22,7 +22,7 @@ namespace MTM_Waitlist.Tests.Module_Setup.Models;
 public sealed class SetupActiveJobSnapshotDieTests
 {
     [TestMethod]
-    public void RealDies_ExcludesTheNoDiePlaceholder()
+    public void Model_SetupActiveJobSnapshotDieTests_RealDies_ExcludesTheNoDiePlaceholder()
     {
         var snapshot = Snapshot(
             Die("FGT0001-01", "No Die", string.Empty),
@@ -41,7 +41,7 @@ public sealed class SetupActiveJobSnapshotDieTests
     }
 
     [TestMethod]
-    public void RealDies_KeepsEveryRealDieTheJobCarries()
+    public void Model_SetupActiveJobSnapshotDieTests_RealDies_KeepsEveryRealDieTheJobCarries()
     {
         var snapshot = Snapshot(
             Die("FGT0002000", "Die 9003-A", "DIE SHOP"),
@@ -53,7 +53,7 @@ public sealed class SetupActiveJobSnapshotDieTests
     }
 
     [TestMethod]
-    public void RealDies_DropsAPlaceholderSittingBesideARealDie()
+    public void Model_SetupActiveJobSnapshotDieTests_RealDies_DropsAPlaceholderSittingBesideARealDie()
     {
         var snapshot = Snapshot(
             Die("FGT0001-01", "  no die  ", string.Empty),
@@ -64,7 +64,7 @@ public sealed class SetupActiveJobSnapshotDieTests
     }
 
     [TestMethod]
-    public void RealDies_DropsADieRowWithNoPartNumber()
+    public void Model_SetupActiveJobSnapshotDieTests_RealDies_DropsADieRowWithNoPartNumber()
     {
         var snapshot = Snapshot(Die(string.Empty, "Die 9003-A", "DIE SHOP"));
 
@@ -76,7 +76,7 @@ public sealed class SetupActiveJobSnapshotDieTests
     }
 
     [TestMethod]
-    public void Dies_FollowTheCategory_SoAnotherCategorysRowIsNeverADie()
+    public void Model_SetupActiveJobSnapshotDieTests_Dies_FollowTheCategorySoAnotherCategorysRowIsNeverADie()
     {
         var snapshot = Snapshot(
             Subordinate("Component", "FGT0002000", "Die 9003-A", "DIE SHOP"));

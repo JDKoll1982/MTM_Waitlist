@@ -47,7 +47,7 @@ public sealed class DatabaseAggregateRegistrationTests
     ];
 
     [TestMethod]
-    public void EveryArtifactWithACreateScript_IsRegisteredInItsAggregate()
+    public void Database_DatabaseAggregateRegistrationTests_EveryArtifactWithACreateScript_IsRegisteredInItsAggregate()
     {
         var repositoryRoot = RepositoryPatternScan.FindRepositoryRoot();
         var violations = new List<string>();

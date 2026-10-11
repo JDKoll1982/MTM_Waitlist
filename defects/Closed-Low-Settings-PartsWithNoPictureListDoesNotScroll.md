@@ -76,7 +76,7 @@ there because that page scrolls as a whole.
 
 | Item | Evidence |
 | --- | --- |
-| Guard added | `MTM_Waitlist.Tests/Module_Settings/PartPictureManagerPageMarkupTests.PartPictureLists_ScrollTheirOwnContent_InsteadOfGrowingPastTheWindow` — fails if either list has a vertical `StackPanel` in its ancestor chain, or does not ask for a vertical scroll bar |
+| Guard added | `MTM_Waitlist.Tests/Module_Settings/PartPictureManagerPageMarkupTests.UI_PartPictureManagerPageMarkupTests_PartPictureLists_ScrollTheirOwnContentInsteadOfGrowingPastTheWindow` — fails if either list has a vertical `StackPanel` in its ancestor chain, or does not ask for a vertical scroll bar |
 | **Fails before the fix** | The test was run against the reverted markup (`git stash push` of the page): **1 failed, 0 passed** — *"PartPictureManagerPage_ChangeRecord is measured inside a vertical StackPanel, which hands it unlimited height…"* |
 | Passes after the fix | Same test: **1 passed, 0 failed** |
 | Build | `dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false` — succeeded, no XAML errors |

@@ -79,9 +79,22 @@ foreach ($relative in $targetFiles) {
             }
         }
 
+        # A method carrying a test attribute is named by the test-method rule, not the Async rule: the two cannot
+        # both hold, because a test name ends in what it asserts rather than in "Async". The attribute is tracked
+        # here so the declaration that follows it can be told apart from every other method.
+        #
+        # Three segments are accepted as well as four: a test that covers a whole type names no method, so forcing
+        # a fourth segment would repeat what the third already says.
+        $pendingTestAttribute = $false
+        $testMethodPattern = '^(Database|UI|Model|ViewModel|Service|Helper|Audit|Converter)_[A-Za-z0-9]+_[A-Za-z0-9]+(_[A-Za-z0-9]+)?$'
+
         for ($i = 0; $i -lt $lines.Count; $i++) {
             $line = $lines[$i]
             $lineNo = $i + 1
+
+            if ($line -match '^[ \t]*\[(TestMethod|DataTestMethod)\]') {
+                $pendingTestAttribute = $true
+            }
 
             if ($line -match '^[ \t]*private[ \t]+static[ \t]+readonly[ \t]+[A-Za-z0-9_<>\[\],\.?]+[ \t]+([A-Za-z_][A-Za-z0-9_]*)\s*(?:=.*)?;\s*$') {
                 $name = $Matches[1]
@@ -96,7 +109,18 @@ foreach ($relative in $targetFiles) {
                 }
             }
 
-            if ($line -match '^[ \t]*(public|private|internal|protected)[ \t]+(?:async[ \t]+)?Task(?:<[^>]+>)?[ \t]+([A-Za-z_][A-Za-z0-9_]*)\s*\(') {
+            $isTestMethodDeclaration =
+                $pendingTestAttribute -and
+                ($line -match '^[ \t]*(public|private|internal|protected)[ \t]+(?:async[ \t]+)?(?:Task(?:<[^>]+>)?|void)[ \t]+([A-Za-z_][A-Za-z0-9_]*)\s*\(')
+
+            if ($isTestMethodDeclaration) {
+                $methodName = $Matches[2]
+                if ($methodName -notmatch $testMethodPattern) {
+                    Add-Error -File $relative -Line $lineNo -Message "Test method '$methodName' must be named Category_File_Method_TestName"
+                }
+                $pendingTestAttribute = $false
+            }
+            elseif ($line -match '^[ \t]*(public|private|internal|protected)[ \t]+(?:async[ \t]+)?Task(?:<[^>]+>)?[ \t]+([A-Za-z_][A-Za-z0-9_]*)\s*\(') {
                 $methodName = $Matches[2]
                 if ($line -match '\basync\b' -and -not $methodName.EndsWith('Async')) {
                     Add-Error -File $relative -Line $lineNo -Message "Async Task method '$methodName' must end with Async"

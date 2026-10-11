@@ -80,44 +80,6 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
     }
 
     /// <inheritdoc />
-    public async Task<string> GetKeysFolderPathAsync()
-    {
-        try
-        {
-            var cacheKey = ConfigSettingKeys.KeysFolderPath;
-
-            if (_cache.TryGetValue(cacheKey, out var cached) && cached.IsValid())
-            {
-                _logger.LogDebug("Using cached key-files folder path: {Source}", cached.Source);
-                return (string)cached.Value;
-            }
-
-            var dbValue = await _configService.GetSettingValueAsync(
-                ConfigSettingKeys.KeysFolderPath, "all_users");
-
-            if (dbValue != null && !string.IsNullOrWhiteSpace(dbValue.SettingValue))
-            {
-                _logger.LogInformation("Using database override for key-files folder path: {Path}",
-                                     dbValue.SettingValue);
-                CacheValue(cacheKey, dbValue.SettingValue, "database");
-                return dbValue.SettingValue;
-            }
-
-            var appsettingsValue = _appsettingsOptions.Value.KeysFolderPath;
-            _logger.LogInformation("Using the shipped default for key-files folder path: {Path}",
-                                 appsettingsValue);
-            CacheValue(cacheKey, appsettingsValue, "default");
-            return appsettingsValue;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to resolve the key-files folder configuration");
-            throw new InvalidOperationException(
-                "Failed to resolve the key-files folder configuration", ex);
-        }
-    }
-
-    /// <inheritdoc />
     public async Task<string> GetDunnageRootPathAsync()
     {
         try
@@ -360,7 +322,6 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
             _appsettingsOptions.Value.Validate();
 
             var sharedFolderPath = await GetSharedFolderPathAsync();
-            var keysFolderPath = await GetKeysFolderPathAsync();
             var cacheFolderPath = await GetImageCacheFolderPathAsync();
             var cacheEnabled = await GetImageCacheEnabledAsync();
             var maxFileSize = await GetMaxFileSizeBytesAsync();
@@ -370,7 +331,6 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
             var effectiveOptions = new ImageStorageOptions
             {
                 SharedFolderPath = sharedFolderPath,
-                KeysFolderPath = keysFolderPath,
                 CacheFolderPath = cacheFolderPath,
                 CacheEnabled = cacheEnabled,
                 MaxFileSizeBytes = maxFileSize,

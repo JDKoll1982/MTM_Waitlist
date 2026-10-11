@@ -33,7 +33,7 @@ public sealed class LaunchStepRunnerTests
     private static readonly TimeSpan s_tightBound = TimeSpan.FromMilliseconds(50);
 
     [TestMethod]
-    public async Task RunAsync_WhenTheStepRuns_TheStepIsAlreadyNamedOnTheFeed()
+    public async Task Service_LaunchStepRunnerTests_RunAsync_WhenTheStepRunsTheStepIsAlreadyNamedOnTheFeed()
     {
         // Arrange
         var feed = new LaunchActivityFeed();
@@ -61,7 +61,7 @@ public sealed class LaunchStepRunnerTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenTheStepThrowsImmediately_TheAnnouncementIsStillOnTheFeed()
+    public async Task Service_LaunchStepRunnerTests_RunAsync_WhenTheStepThrowsImmediatelyTheAnnouncementIsStillOnTheFeed()
     {
         // Arrange: the announcement has to survive the worst case, a step that fails before it awaits anything.
         var feed = new LaunchActivityFeed();
@@ -83,7 +83,7 @@ public sealed class LaunchStepRunnerTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenTheStepPassesItsStatedMaximum_ReportsFailedRatherThanWaitingOnIt()
+    public async Task Service_LaunchStepRunnerTests_RunAsync_WhenTheStepPassesItsStatedMaximumReportsFailedRatherThanWaitingOnIt()
     {
         // Arrange
         var feed = new LaunchActivityFeed();
@@ -107,7 +107,7 @@ public sealed class LaunchStepRunnerTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenABestEffortStepPassesItsStatedMaximum_IsSkippedAndStillRecorded()
+    public async Task Service_LaunchStepRunnerTests_RunAsync_WhenABestEffortStepPassesItsStatedMaximumIsSkippedAndStillRecorded()
     {
         // Arrange
         var feed = new LaunchActivityFeed();
@@ -130,7 +130,7 @@ public sealed class LaunchStepRunnerTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenABestEffortStepThrows_IsSkippedSoTheLaunchCarriesOn()
+    public async Task Service_LaunchStepRunnerTests_RunAsync_WhenABestEffortStepThrowsIsSkippedSoTheLaunchCarriesOn()
     {
         // Arrange
         var feed = new LaunchActivityFeed();
@@ -152,7 +152,7 @@ public sealed class LaunchStepRunnerTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenTheStepReportsFailure_ReturnsFailedWithTheStepsOwnDiagnosis()
+    public async Task Service_LaunchStepRunnerTests_RunAsync_WhenTheStepReportsFailureReturnsFailedWithTheStepsOwnDiagnosis()
     {
         // Arrange
         var feed = new LaunchActivityFeed();
@@ -174,7 +174,7 @@ public sealed class LaunchStepRunnerTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenTheStepSucceeds_RecordsCompletedWithASucceededOutcome()
+    public async Task Service_LaunchStepRunnerTests_RunAsync_WhenTheStepSucceedsRecordsCompletedWithASucceededOutcome()
     {
         // Arrange
         var feed = new LaunchActivityFeed();
@@ -190,7 +190,7 @@ public sealed class LaunchStepRunnerTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenTheStepReportsSkipped_RecordsAnEndWithoutAnOutcome()
+    public async Task Service_LaunchStepRunnerTests_RunAsync_WhenTheStepReportsSkippedRecordsAnEndWithoutAnOutcome()
     {
         // Arrange: a step whose work did not apply is not a failure, so it must not read as one.
         var feed = new LaunchActivityFeed();
@@ -210,7 +210,7 @@ public sealed class LaunchStepRunnerTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenTheStepDeclaresNoMaximum_IsRefused()
+    public async Task Service_LaunchStepRunnerTests_RunAsync_WhenTheStepDeclaresNoMaximumIsRefused()
     {
         // Arrange: the runner refuses to invent a bound, because an unbounded wait must never reach a launch.
         var feed = new LaunchActivityFeed();
@@ -225,7 +225,7 @@ public sealed class LaunchStepRunnerTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenTheLaunchIsAbandoned_DoesNotRecordTheStepAsFailed()
+    public async Task Service_LaunchStepRunnerTests_RunAsync_WhenTheLaunchIsAbandonedDoesNotRecordTheStepAsFailed()
     {
         // Arrange
         var feed = new LaunchActivityFeed();
@@ -250,7 +250,7 @@ public sealed class LaunchStepRunnerTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenTheStepDeclaresATarget_EveryLineTheStepWritesNamesIt()
+    public async Task Service_LaunchStepRunnerTests_RunAsync_WhenTheStepDeclaresATargetEveryLineTheStepWritesNamesIt()
     {
         // Arrange
         var feed = new LaunchActivityFeed();
@@ -270,7 +270,7 @@ public sealed class LaunchStepRunnerTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenTheStepDeclaresNoTarget_WritesNoTarget()
+    public async Task Service_LaunchStepRunnerTests_RunAsync_WhenTheStepDeclaresNoTargetWritesNoTarget()
     {
         // Arrange
         var feed = new LaunchActivityFeed();

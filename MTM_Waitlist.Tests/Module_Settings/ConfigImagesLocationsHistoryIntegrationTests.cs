@@ -115,7 +115,7 @@ public sealed class ConfigImagesLocationsHistoryIntegrationTests
     }
 
     [TestMethod]
-    public async Task AFirstPicture_RecordsOneChangeWithNothingBeforeIt()
+    public async Task Database_ConfigImagesLocationsHistoryIntegrationTests_AFirstPicture_RecordsOneChangeWithNothingBeforeIt()
     {
         var saved = await _pictureWriteService.SetPictureAsync(PartPictureSystem.Visual, _partNumber, _pictureA);
         Assert.IsTrue(saved.Success, saved.ErrorMessage);
@@ -129,7 +129,7 @@ public sealed class ConfigImagesLocationsHistoryIntegrationTests
     }
 
     [TestMethod]
-    public async Task AReplacement_RecordsWhatItReplacedAndReadsNewestFirst()
+    public async Task Database_ConfigImagesLocationsHistoryIntegrationTests_AReplacement_RecordsWhatItReplacedAndReadsNewestFirst()
     {
         var first = await _pictureWriteService.SetPictureAsync(PartPictureSystem.Visual, _partNumber, _pictureA);
         Assert.IsTrue(first.Success, first.ErrorMessage);
@@ -148,7 +148,7 @@ public sealed class ConfigImagesLocationsHistoryIntegrationTests
     }
 
     [TestMethod]
-    public async Task TheMove_ReportsTheRowsItRewroteAndReversesExactly()
+    public async Task Database_ConfigImagesLocationsHistoryIntegrationTests_TheMove_ReportsTheRowsItRewroteAndReversesExactly()
     {
         const string scope = "request_item";
         var originalPath = $"{_movePrefix}/picture.png";

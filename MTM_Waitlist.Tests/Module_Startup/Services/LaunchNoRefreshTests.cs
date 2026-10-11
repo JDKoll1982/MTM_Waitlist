@@ -23,7 +23,7 @@ public sealed class LaunchNoRefreshTests
     ];
 
     [TestMethod]
-    public void NoLaunchSource_NamesARefreshClientOrARefreshProcedure()
+    public void Service_LaunchNoRefreshTests_NoLaunchSource_NamesARefreshClientOrARefreshProcedure()
     {
         var root = RepoRoot();
         var scanned = 0;
@@ -63,7 +63,7 @@ public sealed class LaunchNoRefreshTests
     }
 
     [TestMethod]
-    public void TheApplicationNeverRefreshesTheMirrorItself()
+    public void Service_LaunchNoRefreshTests_TheApplicationNeverRefreshesTheMirrorItself()
     {
         // The only refresh client in the tree belongs to the settings surface, where a person asks for one; the
         // launch module must not resolve it, and the composition root must not hand it to a launch service.

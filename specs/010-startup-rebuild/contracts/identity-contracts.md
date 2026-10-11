@@ -80,8 +80,9 @@ public interface IMachineFacts
 ```
 
 `ComputerRecord` is the existing model at `MTM_Waitlist.Core/Models/ComputerRecord.cs`, reused rather than
-replaced. It already carries `Id`, `ComputerName`, `DisplayName`, `Description`, `MacAddressNormalized` and
-`IsRegistered`, which is every fact the machine-configuration screen and the shell badge need.
+replaced. It carries `Id`, `ComputerName`, `DisplayName`, `Description`, `MacAddressNormalized` and
+`IsRegistered`, which is every fact the machine-configuration stage and the shell badge need. `DisplayName` holds
+the name the computer reports for itself and `Description` holds its location (FR-049, FR-050).
 
 | Member | Source | Rule |
 |---|---|---|
@@ -108,6 +109,7 @@ Deliberately absent, and each for a stated reason:
 
 - No session state. Session validity is judged against the store's clock (FR-010) and lives in
   `LaunchSessionService`. Putting a mutable expiry on the identity contract is how the old object drifted.
-- No remember-me state. It is per person and per machine, and it has to survive sign-out.
+- No remember-me state, in this contract or anywhere else. It was withdrawn on 2026-10-10, so nothing here is
+  held per person and per machine beyond the session itself, which has to survive sign-out (FR-043).
 - No credentials, tokens or key material, in any form.
 - No temporary-credential attempt count. That is a store-side fact, not an identity fact.

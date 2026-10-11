@@ -812,7 +812,7 @@
       "note": "A hand-run move must set the session flag mtm_picture_layout_move on the same connection before calling sp_config_images_locations_paths_move, or the change record gains one row per pictured part. The paired seed does this; tools/Move-PartPictureLayout.ps1 (T023), which is not written yet, must too."
     },
     {
-      "note": "Two pre-existing tests were invalidated by this change and were updated rather than left failing: AppStoragePathsTests.AStoredPicturePathIsJoinedToTheRoot now asserts both recorded layouts, and PermissionBaselineParityTests declares the picture entitlement widening in a named table instead of editing the retired list it compares against."
+      "note": "Two pre-existing tests were invalidated by this change and were updated rather than left failing: AppStoragePathsTests.Helper_AppStoragePathsTests_AStoredPicturePathIsJoinedToTheRoot now asserts both recorded layouts, and PermissionBaselineParityTests declares the picture entitlement widening in a named table instead of editing the retired list it compares against."
     },
     {
       "note": "The bootstrap guard for config_images_locations_history is unverified at run time: no live MySQL store was available, so it is confirmed by reading against the existing auth_user_management_audit block rather than by execution."
@@ -1088,7 +1088,7 @@
       "source": "derived",
       "exitCode": 0,
       "durationSeconds": 33.1,
-      "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1397, Skipped:    48, Total:  1445, Duration: 17 s - MTM_Waitlist.Tests.dll (net10.0)"
+      "result": "  Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_ReachesTheRealProcedureReportsTheLoadedRowCountAndSwapsAtomically [1 ms] ·   Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_WithAnEmptyPayloadIsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1397, Skipped:    48, Total:  1445, Duration: 17 s - MTM_Waitlist.Tests.dll (net10.0)"
     },
     {
       "what": "solution builds with zero warnings and zero errors",
@@ -1115,7 +1115,7 @@
       "source": "derived",
       "exitCode": 0,
       "durationSeconds": 36.9,
-      "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1399, Skipped:    48, Total:  1447, Duration: 18 s - MTM_Waitlist.Tests.dll (net10.0)"
+      "result": "  Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_ReachesTheRealProcedureReportsTheLoadedRowCountAndSwapsAtomically [1 ms] ·   Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_WithAnEmptyPayloadIsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1399, Skipped:    48, Total:  1447, Duration: 18 s - MTM_Waitlist.Tests.dll (net10.0)"
     },
     {
       "what": "The three master lists carry every Database artifact verbatim and in folder order: 23 tables, 83 procedures and 12 seeds, checked by reading each aggregate and each create.sql rather than by eye"
@@ -1134,7 +1134,7 @@
       "source": "derived",
       "exitCode": 0,
       "durationSeconds": 36.6,
-      "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1399, Skipped:    48, Total:  1447, Duration: 18 s - MTM_Waitlist.Tests.dll (net10.0)"
+      "result": "  Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_ReachesTheRealProcedureReportsTheLoadedRowCountAndSwapsAtomically [1 ms] ·   Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_WithAnEmptyPayloadIsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  1399, Skipped:    48, Total:  1447, Duration: 18 s - MTM_Waitlist.Tests.dll (net10.0)"
     },
     {
       "what": "Solution builds with zero warnings and zero errors",
@@ -1150,7 +1150,7 @@
       "source": "derived",
       "exitCode": 0,
       "durationSeconds": 19.5,
-      "result": "  Skipped RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically [1 ms] ·   Skipped RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot [1 ms] · Passed!  - Failed:     0, Passed:  1468, Skipped:    51, Total:  1519, Duration: 18 s - MTM_Waitlist.Tests.dll (net10.0)"
+      "result": "  Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_ReachesTheRealProcedureReportsTheLoadedRowCountAndSwapsAtomically [1 ms] ·   Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_WithAnEmptyPayloadIsALegitimateEmptySnapshot [1 ms] · Passed!  - Failed:     0, Passed:  1468, Skipped:    51, Total:  1519, Duration: 18 s - MTM_Waitlist.Tests.dll (net10.0)"
     },
     {
       "what": "the solution builds with zero warnings and zero errors",
@@ -1174,17 +1174,17 @@
       "title": "Every part the application can name can carry a picture: the Infor Visual parts and the WIP floor parts.",
       "tasks": "T016,T041,T043,T044,T046,T049",
       "tests": [
-        "WipFloorInventoryServiceTests::GetInventoryPartNumbersAsync_ReturnsTheScriptsRowsThroughTheExistingSeam"
+        "WipFloorInventoryServiceTests::Service_WipFloorInventoryServiceTests_Service_WipFloorInventoryServiceTests_GetInventoryPartNumbersAsync_ReturnsTheScriptsRowsThroughTheExistingSeam"
       ]
     },
     "FR-002": {
       "title": "A Visual part and a WIP part are pictured separately even where they share a part number, and one system's picture is never drawn for the other.",
       "tasks": "T041,T045,T046",
       "tests": [
-        "PartPictureResolverSystemTests::EachSystemResolvesItsOwnPicture",
-        "PartPictureResolverSystemTests::TheUnpicturedSystemsPartDrawsNothing",
-        "PartPictureResolverSystemTests::ALocalCopyIsNotSharedBetweenTheTwoSystems",
-        "ImageCachePathsTests::TheTwoPartCollectionsKeepTheirOwnCacheFolders"
+        "PartPictureResolverSystemTests::Service_PartPictureResolverSystemTests_Service_PartPictureResolverSystemTests_EachSystemResolvesItsOwnPicture",
+        "PartPictureResolverSystemTests::Service_PartPictureResolverSystemTests_Service_PartPictureResolverSystemTests_TheUnpicturedSystemsPartDrawsNothing",
+        "PartPictureResolverSystemTests::Service_PartPictureResolverSystemTests_Service_PartPictureResolverSystemTests_ALocalCopyIsNotSharedBetweenTheTwoSystems",
+        "ImageCachePathsTests::Helper_ImageCachePathsTests_Helper_ImageCachePathsTests_TheTwoPartCollectionsKeepTheirOwnCacheFolders"
       ]
     },
     "FR-003": {
@@ -1239,7 +1239,7 @@
       "title": "No category or family artwork may stand in for a part that has no picture.",
       "tasks": "T029,T040,T084",
       "tests": [
-        "SetupReviewPageMarkupTests::GroupHeader_DrawsNoFamilyArtwork"
+        "SetupReviewPageMarkupTests::UI_SetupReviewPageMarkupTests_UI_SetupReviewPageMarkupTests_GroupHeader_DrawsNoFamilyArtwork"
       ]
     },
     "FR-016": {
@@ -1254,33 +1254,33 @@
       "title": "The Setup part list, the Setup review, the wizard's die card and the wizard's confirmation step each draw the part's picture beside its number.",
       "tasks": "T033,T034,T035,T037",
       "tests": [
-        "SetupReviewPageMarkupTests::SubordinatePartRow_DrawsThePartsPicture",
-        "NewRequestPartPictureMarkupTests::DieCard_DrawsThePartsPicture",
-        "NewRequestPartPictureMarkupTests::ConfirmationStep_DrawsThePartWithItsPicture",
+        "SetupReviewPageMarkupTests::UI_SetupReviewPageMarkupTests_UI_SetupReviewPageMarkupTests_SubordinatePartRow_DrawsThePartsPicture",
+        "NewRequestPartPictureMarkupTests::UI_NewRequestPartPictureMarkupTests_UI_NewRequestPartPictureMarkupTests_DieCard_DrawsThePartsPicture",
+        "NewRequestPartPictureMarkupTests::UI_NewRequestPartPictureMarkupTests_UI_NewRequestPartPictureMarkupTests_ConfirmationStep_DrawsThePartWithItsPicture",
         "NewRequestPartPictureMarkupTests::Preview_DrawsThePartWithItsPicture",
-        "SetupPartSelectionPageMarkupTests::PartListEntry_DrawsThePartsPicture"
+        "SetupPartSelectionPageMarkupTests::UI_SetupPartSelectionPageMarkupTests_UI_SetupPartSelectionPageMarkupTests_PartListEntry_DrawsThePartsPicture"
       ]
     },
     "FR-019": {
       "title": "The waitlist card draws the part's picture rather than the picture for the kind of request.",
       "tasks": "T039,T040",
       "tests": [
-        "WaitlistLineCardMarkupTests::Card_CarriesTheMaterialPartsPictureAndItsPlaceholderFallback",
-        "SampleOrderTests::SampleOrder_EffectiveImageIsTheMaterialPartsPictureAndThePlaceholderOtherwise"
+        "WaitlistLineCardMarkupTests::UI_WaitlistLineCardMarkupTests_UI_WaitlistLineCardMarkupTests_Card_CarriesTheMaterialPartsPictureAndItsPlaceholderFallback",
+        "SampleOrderTests::Model_SampleOrderTests_Model_SampleOrderTests_SampleOrder_EffectiveImageIsTheMaterialPartsPictureAndThePlaceholderOtherwise"
       ]
     },
     "FR-020": {
       "title": "A request whose material cannot be pictured shows the shared placeholder and never the family's picture as a stand-in.",
       "tasks": "T029,T039",
       "tests": [
-        "SampleOrderTests::SampleOrder_EffectiveImageIsTheMaterialPartsPictureAndThePlaceholderOtherwise"
+        "SampleOrderTests::Model_SampleOrderTests_Model_SampleOrderTests_SampleOrder_EffectiveImageIsTheMaterialPartsPictureAndThePlaceholderOtherwise"
       ]
     },
     "FR-021": {
       "title": "The lists that ask a person to choose by name present their entries as selectable cards.",
       "tasks": "T018,T026,T037,T068,T069,T070",
       "tests": [
-        "SetupPartSelectionPageMarkupTests::PartList_StillChoosesThePart"
+        "SetupPartSelectionPageMarkupTests::UI_SetupPartSelectionPageMarkupTests_UI_SetupPartSelectionPageMarkupTests_PartList_StillChoosesThePart"
       ]
     },
     "FR-022": {
@@ -1291,8 +1291,8 @@
       "title": "An entry with no picture is still offered as a card, drawing the shared placeholder.",
       "tasks": "T018,T066",
       "tests": [
-        "NewRequestPartPictureMarkupTests::EveryWizardPartSurface_FallsBackToTheOneSharedPlaceholder",
-        "SetupPartSelectionPageMarkupTests::PartListEntry_FallsBackToTheOneSharedPlaceholder"
+        "NewRequestPartPictureMarkupTests::UI_NewRequestPartPictureMarkupTests_UI_NewRequestPartPictureMarkupTests_EveryWizardPartSurface_FallsBackToTheOneSharedPlaceholder",
+        "SetupPartSelectionPageMarkupTests::UI_SetupPartSelectionPageMarkupTests_UI_SetupPartSelectionPageMarkupTests_PartListEntry_FallsBackToTheOneSharedPlaceholder"
       ]
     },
     "FR-024": {
@@ -1303,7 +1303,7 @@
       "title": "The picture entitlement covers IT Department, Developer, Setup Lead and Plant Manager.",
       "tasks": "T006,T020",
       "tests": [
-        "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::TheShippedBaselines_ReproduceEveryRetiredListExactly_ForEveryRoleAndEveryPermission"
+        "MTM_Waitlist.Tests/Module_Settings/Services/PermissionBaselineParityTests.cs::Service_PermissionBaselineParityTests_TheShippedBaselines_ReproduceEveryRetiredListExactlyForEveryRoleAndEveryPermission"
       ]
     },
     "FR-026": {
@@ -1373,8 +1373,8 @@
         "T023"
       ],
       "tests": [
-        "MTM_Waitlist.Tests/Module_Shared/Helpers/AppStoragePathsTests.cs::AStoredPicturePathIsJoinedToTheRoot",
-        "MTM_Waitlist.Tests/Module_Shared/Helpers/AppStoragePathsTests.cs::AnUnrecognisedLeadingFolderIsLeftWhereItIs"
+        "MTM_Waitlist.Tests/Module_Shared/Helpers/AppStoragePathsTests.cs::Helper_AppStoragePathsTests_Helper_AppStoragePathsTests_AStoredPicturePathIsJoinedToTheRoot",
+        "MTM_Waitlist.Tests/Module_Shared/Helpers/AppStoragePathsTests.cs::Helper_AppStoragePathsTests_Helper_AppStoragePathsTests_AnUnrecognisedLeadingFolderIsLeftWhereItIs"
       ]
     },
     "FR-037": {

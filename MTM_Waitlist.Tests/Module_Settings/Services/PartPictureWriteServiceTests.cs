@@ -57,7 +57,7 @@ public sealed class PartPictureWriteServiceTests
     }
 
     [TestMethod]
-    public async Task FirstSave_StoresThePictureUnderItsCollectionAndFamilyAndCreatesTheRow()
+    public async Task Service_PartPictureWriteServiceTests_FirstSave_StoresThePictureUnderItsCollectionAndFamilyAndCreatesTheRow()
     {
         var source = WriteSourcePicture("first.png");
 
@@ -74,7 +74,7 @@ public sealed class PartPictureWriteServiceTests
     }
 
     [TestMethod]
-    public async Task SecondSave_RepointsTheRowAndKeepsThePictureItReplaced()
+    public async Task Service_PartPictureWriteServiceTests_SecondSave_RepointsTheRowAndKeepsThePictureItReplaced()
     {
         var first = WriteSourcePicture("first.png");
         var second = WriteSourcePicture("second.png");
@@ -97,7 +97,7 @@ public sealed class PartPictureWriteServiceTests
     }
 
     [TestMethod]
-    public async Task ARefusedSave_WritesNeitherAFileNorARow()
+    public async Task Service_PartPictureWriteServiceTests_ARefusedSave_WritesNeitherAFileNorARow()
     {
         var source = WriteSourcePicture("first.png");
         var tooLong = new string('A', PartPictureLayout.MaxPartNumberLength + 1);
@@ -115,7 +115,7 @@ public sealed class PartPictureWriteServiceTests
     }
 
     [TestMethod]
-    public async Task APictureThatFailsValidation_WritesNeitherAFileNorARow()
+    public async Task Service_PartPictureWriteServiceTests_APictureThatFailsValidation_WritesNeitherAFileNorARow()
     {
         // Square and large enough is the acceptance rule; a strip is not a picture this application draws.
         var source = Path.Combine(_workingDirectory, "strip.png");
@@ -132,7 +132,7 @@ public sealed class PartPictureWriteServiceTests
     }
 
     [TestMethod]
-    public async Task ChangeRecord_ReadsWhatTheStoreRecordedNewestFirst()
+    public async Task Service_PartPictureWriteServiceTests_ChangeRecord_ReadsWhatTheStoreRecordedNewestFirst()
     {
         var helper = new FakeMySqlHelperServer();
         helper.EnqueueQueryResult(

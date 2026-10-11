@@ -60,8 +60,8 @@ parts rather than noise. The 2026-09-05 implementation note in
 `SetupLookupService` no longer injects or consults `IIgnoredLocationsService`, and every subordinate part the read
 returns is passed through as it came, location included. The ignored-locations setting is untouched and still governs
 the waitlist's inventory location lists, which is where it was meant to apply. The two tests that encoded the old
-behaviour were replaced: `SelectSequenceAsync_KeepsSubordinatePartsWhoseLocationIsAPlantCode` and
-`SelectSequenceAsync_KeepsTheJobsCoilAtItsWorkCentreLocation` (the second is the regression test for this defect,
+behaviour were replaced: `Service_SetupWorkflowServiceTests_Service_SetupWorkflowServiceTests_SelectSequenceAsync_KeepsSubordinatePartsWhoseLocationIsAPlantCode` and
+`Service_SetupWorkflowServiceTests_Service_SetupWorkflowServiceTests_SelectSequenceAsync_KeepsTheJobsCoilAtItsWorkCentreLocation` (the second is the regression test for this defect,
 carrying a coil at `WC` in the fixture).
 
 ## 5. Verification and what is left

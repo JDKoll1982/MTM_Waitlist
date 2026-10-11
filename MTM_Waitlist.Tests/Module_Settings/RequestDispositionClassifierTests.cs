@@ -10,7 +10,7 @@ public sealed class RequestDispositionClassifierTests
     // --- Outside Service takes precedence ---
 
     [TestMethod]
-    public void Classify_OutsideVendorOperation_ReturnsOutsideService()
+    public void Service_RequestDispositionClassifierTests_Classify_OutsideVendorOperationReturnsOutsideService()
     {
         var input = new RequestDispositionClassifier.DispositionInput(
             WorkOrderStatus: "R",
@@ -22,7 +22,7 @@ public sealed class RequestDispositionClassifierTests
     }
 
     [TestMethod]
-    public void Classify_OutsideVendorOperation_EvenWhenNoStock_ReturnsOutsideService()
+    public void Service_RequestDispositionClassifierTests_Classify_OutsideVendorOperationEvenWhenNoStockReturnsOutsideService()
     {
         var input = new RequestDispositionClassifier.DispositionInput(
             WorkOrderStatus: null,
@@ -36,7 +36,7 @@ public sealed class RequestDispositionClassifierTests
     // --- Finished Goods: closed status + on-hand, no open qty ---
 
     [TestMethod]
-    public void Classify_ClosedWithOnHand_ReturnsFinishedGoods()
+    public void Service_RequestDispositionClassifierTests_Classify_ClosedWithOnHandReturnsFinishedGoods()
     {
         var input = new RequestDispositionClassifier.DispositionInput(
             WorkOrderStatus: "C",
@@ -48,7 +48,7 @@ public sealed class RequestDispositionClassifierTests
     }
 
     [TestMethod]
-    public void Classify_OnHandButOpenStatus_ReturnsWorkInProcess()
+    public void Service_RequestDispositionClassifierTests_Classify_OnHandButOpenStatusReturnsWorkInProcess()
     {
         // Stock on hand but the order is still open (Released) => still being worked.
         var input = new RequestDispositionClassifier.DispositionInput(
@@ -61,7 +61,7 @@ public sealed class RequestDispositionClassifierTests
     }
 
     [TestMethod]
-    public void Classify_UnreleasedStatus_ReturnsWorkInProcess()
+    public void Service_RequestDispositionClassifierTests_Classify_UnreleasedStatusReturnsWorkInProcess()
     {
         // 'U' (Unreleased) is a confirmed open code (42k rows in WORK_ORDER).
         var input = new RequestDispositionClassifier.DispositionInput(
@@ -74,7 +74,7 @@ public sealed class RequestDispositionClassifierTests
     }
 
     [TestMethod]
-    public void Classify_CancelledStatusWithOnHand_ReturnsUnknownNotFinishedGoods()
+    public void Service_RequestDispositionClassifierTests_Classify_CancelledStatusWithOnHandReturnsUnknownNotFinishedGoods()
     {
         // 'X' (Cancelled) is deliberately in neither set: on-hand stock under a cancelled order must
         // not classify as Finished Goods (and with no open qty it is Unknown).
@@ -90,7 +90,7 @@ public sealed class RequestDispositionClassifierTests
     // --- Work In Process ---
 
     [TestMethod]
-    public void Classify_OpenQuantity_ReturnsWorkInProcess()
+    public void Service_RequestDispositionClassifierTests_Classify_OpenQuantityReturnsWorkInProcess()
     {
         var input = new RequestDispositionClassifier.DispositionInput(
             WorkOrderStatus: null,
@@ -102,7 +102,7 @@ public sealed class RequestDispositionClassifierTests
     }
 
     [TestMethod]
-    public void Classify_OpenStatusCode_ReturnsWorkInProcess()
+    public void Service_RequestDispositionClassifierTests_Classify_OpenStatusCodeReturnsWorkInProcess()
     {
         var input = new RequestDispositionClassifier.DispositionInput(
             WorkOrderStatus: "R",
@@ -116,7 +116,7 @@ public sealed class RequestDispositionClassifierTests
     // --- Unknown ---
 
     [TestMethod]
-    public void Classify_NoSignal_ReturnsUnknown()
+    public void Service_RequestDispositionClassifierTests_Classify_NoSignalReturnsUnknown()
     {
         var input = new RequestDispositionClassifier.DispositionInput(
             WorkOrderStatus: null,
@@ -130,7 +130,7 @@ public sealed class RequestDispositionClassifierTests
     // --- Status code matching is case-insensitive ---
 
     [TestMethod]
-    public void Classify_StatusCodeMatching_IsCaseInsensitive()
+    public void Service_RequestDispositionClassifierTests_Classify_StatusCodeMatchingIsCaseInsensitive()
     {
         var open = new RequestDispositionClassifier.DispositionInput(
             WorkOrderStatus: "r", FinishedGoodsQuantity: 0m, OpenWorkOrderQuantity: 0m, HasOutsideVendorOperation: false);

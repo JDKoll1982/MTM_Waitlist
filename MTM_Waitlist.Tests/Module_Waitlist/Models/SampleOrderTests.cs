@@ -13,7 +13,7 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.Models;
 public sealed class SampleOrderTests
 {
     [TestMethod]
-    public void SampleOrder_ExposesGenericBindingProperties()
+    public void Model_SampleOrderTests_SampleOrder_ExposesGenericBindingProperties()
     {
         var order = new SampleOrder
         {
@@ -37,7 +37,7 @@ public sealed class SampleOrderTests
     /// the card is one shape for every Item (FR-006).
     /// </summary>
     [TestMethod]
-    public void SampleOrder_CarriesTheTwoLinesThePictureAndTheFourMetadataRows()
+    public void Model_SampleOrderTests_SampleOrder_CarriesTheTwoLinesThePictureAndTheFourMetadataRows()
     {
         var order = new SampleOrder
         {
@@ -81,7 +81,7 @@ public sealed class SampleOrderTests
     /// list resolved for the material part.
     /// </remarks>
     [TestMethod]
-    public void SampleOrder_EffectiveImageIsTheMaterialPartsPictureAndThePlaceholderOtherwise()
+    public void Model_SampleOrderTests_SampleOrder_EffectiveImageIsTheMaterialPartsPictureAndThePlaceholderOtherwise()
     {
         // A request about a material, pictured.
         var pictured = new SampleOrder
@@ -129,7 +129,7 @@ public sealed class SampleOrderTests
     /// second line instead of showing a blank (FR-026).
     /// </summary>
     [TestMethod]
-    public void SampleOrder_ReportsAnUnresolvableIdentifierInsteadOfLeavingTheLineBlank()
+    public void Model_SampleOrderTests_SampleOrder_ReportsAnUnresolvableIdentifierInsteadOfLeavingTheLineBlank()
     {
         var order = new SampleOrder { Title = "Pickup", Subtitle = "Pickup Coil", Line2Problem = "Its configuration names a value it doesn't have." };
 
@@ -147,7 +147,7 @@ public sealed class SampleOrderTests
     /// draws, so the card needs no other source to decide what to offer.
     /// </summary>
     [TestMethod]
-    public void SampleOrder_ExposesTheSameActionAffordancesForEveryItem()
+    public void Model_SampleOrderTests_SampleOrder_ExposesTheSameActionAffordancesForEveryItem()
     {
         var accept = new NoOpCommand();
         var complete = new NoOpCommand();
@@ -190,7 +190,7 @@ public sealed class SampleOrderTests
     /// member is even shaped like one (a template, a selector, a variant, or a pre-built details control).
     /// </summary>
     [TestMethod]
-    public void SampleOrder_ExposesNoMemberThatSelectsALayoutByItem()
+    public void Model_SampleOrderTests_SampleOrder_ExposesNoMemberThatSelectsALayoutByItem()
     {
         var layoutShapedNames = new[] { "Template", "Selector", "Layout", "Variant", "DetailsContent", "CardView", "LineView" };
 
@@ -216,7 +216,7 @@ public sealed class SampleOrderTests
     /// A picture is a setting now, so no setting means the application's one no-image picture.
     /// </remarks>
     [TestMethod]
-    public void SampleOrder_WithNothingConfigured_DrawsTheNoImagePlaceholder()
+    public void Model_SampleOrderTests_SampleOrder_WithNothingConfiguredDrawsTheNoImagePlaceholder()
     {
         var order = new SampleOrder { Title = "Pickup", ItemCode = "pickup-wip" };
 
@@ -233,7 +233,7 @@ public sealed class SampleOrderTests
     /// paths a person configured, and they exist for the card to prefer.
     /// </summary>
     [TestMethod]
-    public void SampleOrder_CarriesNoBuiltInPictureMember()
+    public void Model_SampleOrderTests_SampleOrder_CarriesNoBuiltInPictureMember()
     {
         const string removedMember = "ImagePath";
 
@@ -245,7 +245,7 @@ public sealed class SampleOrderTests
     }
 
     [TestMethod]
-    public void RefreshTimeDerivedText_AdvancesTheWaitingAgeWhenTheMinuteChanges()
+    public void Model_SampleOrderTests_RefreshTimeDerivedText_AdvancesTheWaitingAgeWhenTheMinuteChanges()
     {
         var now = new DateTimeOffset(2026, 9, 11, 14, 0, 0, TimeSpan.Zero);
         var order = new SampleOrder
@@ -261,7 +261,7 @@ public sealed class SampleOrderTests
     }
 
     [TestMethod]
-    public void RefreshTimeDerivedText_IsSilentWhenTheMinuteHasNotChanged()
+    public void Model_SampleOrderTests_RefreshTimeDerivedText_IsSilentWhenTheMinuteHasNotChanged()
     {
         var now = new DateTimeOffset(2026, 9, 11, 14, 0, 0, TimeSpan.Zero);
         var order = new SampleOrder { RequestedUtc = now.AddMinutes(-35), TargetTimeUtc = now.AddMinutes(30) };
@@ -277,7 +277,7 @@ public sealed class SampleOrderTests
     }
 
     [TestMethod]
-    public void RefreshTimeDerivedText_NotifiesHasWaitingForAlongsideTheAge()
+    public void Model_SampleOrderTests_RefreshTimeDerivedText_NotifiesHasWaitingForAlongsideTheAge()
     {
         var now = new DateTimeOffset(2026, 9, 11, 14, 0, 0, TimeSpan.Zero);
         var order = new SampleOrder { RequestedUtc = now.AddMinutes(-3) };
@@ -293,7 +293,7 @@ public sealed class SampleOrderTests
     }
 
     [TestMethod]
-    public void RefreshTimeDerivedText_FlipsTheCountdownToOverdueWhenTheTargetPasses()
+    public void Model_SampleOrderTests_RefreshTimeDerivedText_FlipsTheCountdownToOverdueWhenTheTargetPasses()
     {
         var now = new DateTimeOffset(2026, 9, 11, 14, 0, 0, TimeSpan.Zero);
         var order = new SampleOrder
@@ -310,7 +310,7 @@ public sealed class SampleOrderTests
     }
 
     [TestMethod]
-    public void RefreshTimeDerivedText_KeepsAStoreSetOverdueFlag()
+    public void Model_SampleOrderTests_RefreshTimeDerivedText_KeepsAStoreSetOverdueFlag()
     {
         var now = new DateTimeOffset(2026, 9, 11, 14, 0, 0, TimeSpan.Zero);
         var order = new SampleOrder
@@ -329,7 +329,7 @@ public sealed class SampleOrderTests
     }
 
     [TestMethod]
-    public void RefreshTimeDerivedText_LeavesStaticRowsWithoutTimestampsUntouched()
+    public void Model_SampleOrderTests_RefreshTimeDerivedText_LeavesStaticRowsWithoutTimestampsUntouched()
     {
         var now = new DateTimeOffset(2026, 9, 11, 14, 0, 0, TimeSpan.Zero);
         var order = new SampleOrder { Title = "Static", RemainingTimeText = "New" };
@@ -340,7 +340,7 @@ public sealed class SampleOrderTests
     }
 
     [TestMethod]
-    public void TimeUntilNextMinute_AlignsTheFirstTickToTheMinuteBoundary()
+    public void Model_SampleOrderTests_TimeUntilNextMinute_AlignsTheFirstTickToTheMinuteBoundary()
     {
         var fifteenSecondsIn = new DateTimeOffset(2026, 9, 11, 14, 30, 15, TimeSpan.Zero);
         Assert.AreEqual(TimeSpan.FromSeconds(45), WaitlistViewViewModel.TimeUntilNextMinute(fifteenSecondsIn));

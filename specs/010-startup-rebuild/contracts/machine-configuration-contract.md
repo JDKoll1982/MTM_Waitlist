@@ -23,14 +23,17 @@ public interface IMachineConfigurationService
 
 public sealed record MachineConfigurationState(
     bool IsConfigured,
-    string? DisplayName,
-    string? Description,
+    string? ComputerName,
+    string? Location,
     string? UnconfiguredReason);
 
 public sealed record MachineConfigurationDraft(
-    string DisplayName,
-    string Description);
+    string ComputerName,
+    string Location);
 ```
+
+`ComputerName` is the name the computer reports for itself, read from the machine and shown rather than typed;
+`Location` is where the computer stands and is the only value a person supplies (FR-049).
 
 `UnconfiguredReason` distinguishes the four ways a machine can be unconfigured, because the diagnosis has to be
 specific to the cause (FR-004): never configured, configuration removed, configuration revoked, or
@@ -45,7 +48,8 @@ Rules drawn from requirements:
   carries the machine's identity and nothing else (FR-025, brief decision 23). This is
   the second reason the old log-folder prompt disappears: not only did logging move, a folder was never the
   destination in the first place.
-- `SaveAsync` refuses a display name already in use, and the screen asks for a different one.
+- `SaveAsync` refuses a computer name already held by another record, and the stage states that rather than
+  offering to change the name (FR-049).
 - **Where the pictures come from is not this machine's.** The shared pictures folder is held once for the whole
   plant and changed from the settings panel, so no computer captures one and the draft and the state carry no
   picture source at all (FR-040, FR-041). The per-computer rows an older store holds were withdrawn when the
@@ -105,7 +109,7 @@ as a crash. The message is localised: an unlocalised hard close is reported as i
 
 | May reset | Must never touch |
 |---|---|
-| This machine's configuration rows: display name and description | Any person, role or permission |
+| This computer's configuration rows: its own name and its location | Any person, role or permission |
 | A broken scoped preference row for this machine's scope | Another machine's configuration |
 | | Any session |
 | | Any log entry |

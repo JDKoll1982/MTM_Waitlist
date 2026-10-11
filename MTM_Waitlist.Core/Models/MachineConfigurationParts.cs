@@ -12,7 +12,7 @@ namespace MTM_Waitlist.Module_Core.Models;
 /// machine's configuration, a person, a role, a permission, a session or a log entry.
 /// </para>
 /// <para>
-/// <see cref="DisplayName"/> and <see cref="Description"/> are the machine's own configuration rows.
+/// <see cref="ComputerName"/> and <see cref="Location"/> are the machine's own configuration rows.
 /// <see cref="ScopedPreference"/> is the one setting that belongs to this machine's scope rather than to the
 /// plant: a preference row that cannot be repaired is reset to the value the scope resolves without it.
 /// </para>
@@ -24,16 +24,16 @@ namespace MTM_Waitlist.Module_Core.Models;
 public static class MachineConfigurationParts
 {
     /// <summary>
-    /// Every part of this machine's own configuration at once — its display name and its description. It is a
-    /// shorthand for naming those two, not a third thing to reset.
+    /// Every part of this machine's own configuration at once — the name it reports and the location it
+    /// stands in. It is a shorthand for naming those two, not a third thing to reset.
     /// </summary>
     public const string Configuration = "machine_configuration";
 
-    /// <summary>The machine's display name, restored to the default the store would give it.</summary>
-    public const string DisplayName = "display_name";
+    /// <summary>The machine's stored name, restored to the default the store would give it.</summary>
+    public const string ComputerName = "display_name";
 
-    /// <summary>The machine's description.</summary>
-    public const string Description = "description";
+    /// <summary>Where this machine stands.</summary>
+    public const string Location = "location";
 
     /// <summary>A broken preference row belonging to this machine's scope.</summary>
     public const string ScopedPreference = "scoped_preference";

@@ -31,7 +31,7 @@ public sealed class PersonIdentityServiceTests
     private const string RolesProcedure = "sp_auth_user_roles_get";
 
     [TestMethod]
-    public void ANewService_ReportsNobodySignedIn()
+    public void Service_PersonIdentityServiceTests_ANewService_ReportsNobodySignedIn()
     {
         var person = new PersonIdentityService(new StubMySqlHelperServer([]));
 
@@ -53,13 +53,13 @@ public sealed class PersonIdentityServiceTests
     [DataRow("", "", DisplayName = "empty stays empty")]
     [DataRow("   ", "", DisplayName = "blank collapses to empty")]
     [DataRow(null, "", DisplayName = "no role at all")]
-    public void NormalizeRoleCode_AnswersOneCodeForEverySpelling(string? input, string expected)
+    public void Service_PersonIdentityServiceTests_NormalizeRoleCode_AnswersOneCodeForEverySpelling(string? input, string expected)
     {
         Assert.AreEqual(expected, PersonIdentityService.NormalizeRoleCode(input));
     }
 
     [TestMethod]
-    public void Holds_AnswersTheSameForEverySpellingOfAHeldRole()
+    public void Service_PersonIdentityServiceTests_Holds_AnswersTheSameForEverySpellingOfAHeldRole()
     {
         var person = new PersonIdentityService(new StubMySqlHelperServer([]));
 
@@ -81,7 +81,7 @@ public sealed class PersonIdentityServiceTests
     }
 
     [TestMethod]
-    public void Apply_AlwaysHoldsTheRoleInForce_EvenWithNoSet()
+    public void Service_PersonIdentityServiceTests_Apply_AlwaysHoldsTheRoleInForceEvenWithNoSet()
     {
         var person = new PersonIdentityService(new StubMySqlHelperServer([]));
 
@@ -94,7 +94,7 @@ public sealed class PersonIdentityServiceTests
     }
 
     [TestMethod]
-    public void Apply_KeepsTheHeldSetToDistinctCodes()
+    public void Service_PersonIdentityServiceTests_Apply_KeepsTheHeldSetToDistinctCodes()
     {
         var person = new PersonIdentityService(new StubMySqlHelperServer([]));
 
@@ -104,7 +104,7 @@ public sealed class PersonIdentityServiceTests
     }
 
     [TestMethod]
-    public void Apply_TrimsWhatItIsGivenAndBlanksWhatTheStoreDoesNotHold()
+    public void Service_PersonIdentityServiceTests_Apply_TrimsWhatItIsGivenAndBlanksWhatTheStoreDoesNotHold()
     {
         var person = new PersonIdentityService(new StubMySqlHelperServer([]));
 
@@ -117,7 +117,7 @@ public sealed class PersonIdentityServiceTests
     }
 
     [TestMethod]
-    public void Clear_EndsTheIdentity()
+    public void Service_PersonIdentityServiceTests_Clear_EndsTheIdentity()
     {
         var person = new PersonIdentityService(new StubMySqlHelperServer([]));
         person.Apply(42L, "JOHN", "John K", "E-1042", "developer", ["setup lead"]);
@@ -136,7 +136,7 @@ public sealed class PersonIdentityServiceTests
     }
 
     [TestMethod]
-    public async Task ResolveAsync_BlankSignInName_EndsAnyIdentityWithoutReadingTheStore()
+    public async Task Service_PersonIdentityServiceTests_ResolveAsync_BlankSignInNameEndsAnyIdentityWithoutReadingTheStore()
     {
         var stub = new StubMySqlHelperServer([]);
         var person = new PersonIdentityService(stub);
@@ -158,7 +158,7 @@ public sealed class PersonIdentityServiceTests
     }
 
     [TestMethod]
-    public async Task ResolveAsync_Row_AppliesThePersonTheStoreReportsAndEveryHeldRole()
+    public async Task Service_PersonIdentityServiceTests_ResolveAsync_RowAppliesThePersonTheStoreReportsAndEveryHeldRole()
     {
         var stub = new StubMySqlHelperServer(
             [PersonRow("role:developer")],
@@ -187,7 +187,7 @@ public sealed class PersonIdentityServiceTests
     }
 
     [TestMethod]
-    public async Task ResolveAsync_WhenTheStoreHoldsNoAssignment_HoldsOnlyTheRoleInForce()
+    public async Task Service_PersonIdentityServiceTests_ResolveAsync_WhenTheStoreHoldsNoAssignmentHoldsOnlyTheRoleInForce()
     {
         // An inner-joined assignment read answers nothing for a person with no assignment, and the identity read
         // still puts one role in force. The gate must admit that role and nothing else.
@@ -203,7 +203,7 @@ public sealed class PersonIdentityServiceTests
     }
 
     [TestMethod]
-    public async Task ResolveAsync_IgnoresAnAssignmentRowWithNoRoleCode()
+    public async Task Service_PersonIdentityServiceTests_ResolveAsync_IgnoresAnAssignmentRowWithNoRoleCode()
     {
         var stub = new StubMySqlHelperServer(
             [PersonRow("role:developer")],
@@ -217,7 +217,7 @@ public sealed class PersonIdentityServiceTests
     }
 
     [TestMethod]
-    public async Task ResolveAsync_RowWithoutAnEmployeeIdentifier_LeavesItUnset()
+    public async Task Service_PersonIdentityServiceTests_ResolveAsync_RowWithoutAnEmployeeIdentifierLeavesItUnset()
     {
         var row = PersonRow("developer");
         row.Remove("employee_identifier");
@@ -229,7 +229,7 @@ public sealed class PersonIdentityServiceTests
     }
 
     [TestMethod]
-    public async Task ResolveAsync_NoRow_EndsAnyIdentityAndAnswersFalse()
+    public async Task Service_PersonIdentityServiceTests_ResolveAsync_NoRowEndsAnyIdentityAndAnswersFalse()
     {
         var stub = new StubMySqlHelperServer([]);
         var person = new PersonIdentityService(stub);

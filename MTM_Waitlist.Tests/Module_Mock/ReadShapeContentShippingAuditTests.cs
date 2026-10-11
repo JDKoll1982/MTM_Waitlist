@@ -51,7 +51,7 @@ public sealed class ReadShapeContentShippingAuditTests
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     [TestMethod]
-    public void EveryBinaryThatLoadsReadScripts_CopiesEveryShapeScriptItLoads()
+    public void Audit_ReadShapeContentShippingAuditTests_EveryBinaryThatLoadsReadScripts_CopiesEveryShapeScriptItLoads()
     {
         var repositoryRoot = RepositoryPatternScan.FindRepositoryRoot();
         var shapes = VisualReadShapeCatalog.Create();
@@ -99,7 +99,7 @@ public sealed class ReadShapeContentShippingAuditTests
     /// it, or the gate above would pass through its own blind spot rather than through the project.
     /// </summary>
     [TestMethod]
-    public void IsShipped_WithAPatternThatCoversAnotherModulesQueries_AnswersFalse()
+    public void Audit_ReadShapeContentShippingAuditTests_IsShipped_WithAPatternThatCoversAnotherModulesQueriesAnswersFalse()
     {
         string[] moduleSetupOnly = ["Database/InforVisual/Queues/Module_Setup/**/*.sql"];
 

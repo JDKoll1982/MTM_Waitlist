@@ -138,7 +138,7 @@ public partial class NewRequestComponentViewModel : ObservableRecipient, INaviga
         {
             IsUnavailableVisible = true;
             UnavailableMessage = LocalizeOrDefault(
-                "NewRequest_Component.NoComponents.Message",
+                "NewRequest_Component_NoComponents.Message",
                 "This job has no components saved on it, so there is no component to choose. Go back and choose a different item.");
         }
 
@@ -192,7 +192,7 @@ public partial class NewRequestComponentViewModel : ObservableRecipient, INaviga
             // than captured as an empty answer (FR-026).
             IsUnavailableVisible = true;
             UnavailableMessage = LocalizeOrDefault(
-                "NewRequest_Component.NoComponents.Message",
+                "NewRequest_Component_NoComponents.Message",
                 "This job has no components saved on it, so there is no component to choose. Go back and choose a different item.");
             return;
         }

@@ -19,7 +19,7 @@ public sealed class NewRequestFlowStateTests
         RequestItemCatalog.FindById("other") ?? throw new InvalidOperationException("The catalog must carry the 'other' Item.");
 
     [TestMethod]
-    public void ToDraft_MapsAccumulatedWizardState()
+    public void Model_NewRequestFlowStateTests_ToDraft_MapsAccumulatedWizardState()
     {
         var state = new NewRequestFlowState
         {
@@ -59,7 +59,7 @@ public sealed class NewRequestFlowStateTests
     }
 
     [TestMethod]
-    public void ToDraft_HandlesNoItemAndNoInputValue()
+    public void Model_NewRequestFlowStateTests_ToDraft_HandlesNoItemAndNoInputValue()
     {
         var state = new NewRequestFlowState
         {
@@ -84,7 +84,7 @@ public sealed class NewRequestFlowStateTests
     };
 
     [TestMethod]
-    public void GetNextStepType_ReturnsDetails_WhenTheConfigurationAsksForAnAnswer()
+    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsDetailsWhenTheConfigurationAsksForAnAnswer()
     {
         var state = StateWith(new RequestItemConfiguration
         {
@@ -100,7 +100,7 @@ public sealed class NewRequestFlowStateTests
     }
 
     [TestMethod]
-    public void GetNextStepType_ReturnsTheConfirmationStep_WhenTheConfigurationAsksForNothing()
+    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheConfirmationStepWhenTheConfigurationAsksForNothing()
     {
         var state = StateWith(new RequestItemConfiguration
         {
@@ -112,7 +112,7 @@ public sealed class NewRequestFlowStateTests
     }
 
     [TestMethod]
-    public void GetNextStepType_ReturnsTheConfirmationStep_OnceTheAnswerIsCaptured()
+    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheConfirmationStepOnceTheAnswerIsCaptured()
     {
         var state = StateWith(
             new RequestItemConfiguration
@@ -128,7 +128,7 @@ public sealed class NewRequestFlowStateTests
     }
 
     [TestMethod]
-    public void GetNextStepType_TreatsTheConfiguredControlFlowAsAnAnswerRequirement()
+    public void Model_NewRequestFlowStateTests_GetNextStepType_TreatsTheConfiguredControlFlowAsAnAnswerRequirement()
     {
         // A row that says "collect input" but leaves requires_answer unset still asks for an answer: the flow is a
         // property of the row, and the two columns must not be able to disagree into a skipped step.
@@ -143,7 +143,7 @@ public sealed class NewRequestFlowStateTests
     }
 
     [TestMethod]
-    public void GetNextStepType_ReturnsTheDieStep_WhenTheAnswerNamesTheDieList()
+    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheDieStepWhenTheAnswerNamesTheDieList()
     {
         // FR-054: both die Items ask which die, so the step that asks is chosen by the row exactly as the
         // dunnage step is. A die Item used to go straight to confirmation, which is why this is asserted.
@@ -153,7 +153,7 @@ public sealed class NewRequestFlowStateTests
     }
 
     [TestMethod]
-    public void GetNextStepType_ReturnsTheConfirmationStep_OnceTheDieAnswerIsCaptured()
+    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheConfirmationStepOnceTheDieAnswerIsCaptured()
     {
         var state = StateWith(ConfigurationNaming(RequestItemFieldDefinition.Lists.Die), inputValue: "FGT0002000");
 
@@ -161,7 +161,7 @@ public sealed class NewRequestFlowStateTests
     }
 
     [TestMethod]
-    public void GetNextStepType_ReturnsTheDunnageStep_WhenTheAnswerNamesTheDunnageList()
+    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheDunnageStepWhenTheAnswerNamesTheDunnageList()
     {
         // FR-050: which step asks for the answer is decided by what the ROW declares, never by the Item's code —
         // this row is deliberately not one of the two dunnage Items.
@@ -171,7 +171,7 @@ public sealed class NewRequestFlowStateTests
     }
 
     [TestMethod]
-    public void GetNextStepType_ReturnsTheComponentStep_WhenTheAnswerNamesTheComponentList()
+    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheComponentStepWhenTheAnswerNamesTheComponentList()
     {
         // The component list has a step of its own: the operator clicks a box for each component the job carries
         // instead of picking a part number out of a drop-down list on the details step. Which step asks is still
@@ -182,7 +182,7 @@ public sealed class NewRequestFlowStateTests
     }
 
     [TestMethod]
-    public void GetNextStepType_ReturnsTheConfirmationStep_OnceTheComponentAnswerIsCaptured()
+    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheConfirmationStepOnceTheComponentAnswerIsCaptured()
     {
         var state = StateWith(ConfigurationNaming(RequestItemFieldDefinition.Lists.Component), inputValue: "V-EMB-2");
 
@@ -190,7 +190,7 @@ public sealed class NewRequestFlowStateTests
     }
 
     [TestMethod]
-    public void GetNextStepType_ReturnsTheConfirmationStep_OnceTheDunnageAnswerIsCaptured()
+    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheConfirmationStepOnceTheDunnageAnswerIsCaptured()
     {
         var state = StateWith(ConfigurationNaming(RequestItemFieldDefinition.Lists.Dunnage), inputValue: "DN-STL-4");
 

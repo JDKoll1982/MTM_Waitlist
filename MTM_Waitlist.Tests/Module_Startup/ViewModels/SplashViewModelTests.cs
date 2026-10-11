@@ -20,7 +20,7 @@ namespace MTM_Waitlist.Tests.Module_Startup.ViewModels;
 public sealed class SplashViewModelTests
 {
     [TestMethod]
-    public void EntryAppended_BeforeTheSurfaceAppeared_LeavesTheWorkUnderWayOnItsSingleLine()
+    public void ViewModel_SplashViewModelTests_EntryAppended_BeforeTheSurfaceAppearedLeavesTheWorkUnderWayOnItsSingleLine()
     {
         // Arrange: a launch that is already under way when the window appears has lines the window never saw.
         var feed = new LaunchActivityFeed();
@@ -39,7 +39,7 @@ public sealed class SplashViewModelTests
     }
 
     [TestMethod]
-    public void EntryAppended_PutsTheWorkUnderWayOnTheLineBeforeItHasFinished()
+    public void ViewModel_SplashViewModelTests_EntryAppended_PutsTheWorkUnderWayOnTheLineBeforeItHasFinished()
     {
         // Arrange: the line a step's own announcement produces, with nothing after it yet. This is the shape a
         // stalled launch leaves behind, and it is the case the surface exists for (US1 scenario 1).
@@ -57,7 +57,7 @@ public sealed class SplashViewModelTests
     }
 
     [TestMethod]
-    public void Progress_IsDerived_SoItCannotDisagreeWithTheLinesBesideIt()
+    public void ViewModel_SplashViewModelTests_Progress_IsDerivedSoItCannotDisagreeWithTheLinesBesideIt()
     {
         // Arrange
         var catalog = new LaunchStepCatalog();
@@ -75,7 +75,7 @@ public sealed class SplashViewModelTests
     }
 
     [TestMethod]
-    public void Progress_CountsEachStepOnce_EvenWhenItWasRepeated()
+    public void ViewModel_SplashViewModelTests_Progress_CountsEachStepOnceEvenWhenItWasRepeated()
     {
         // Arrange: a retried step writes a second terminal line, and the progress must not run past the total.
         var catalog = new LaunchStepCatalog();
@@ -92,7 +92,7 @@ public sealed class SplashViewModelTests
     }
 
     [TestMethod]
-    public void IsWaitingOnSomethingRemote_WhileAStepReachesForSomethingElsewhere_IsTrue()
+    public void ViewModel_SplashViewModelTests_IsWaitingOnSomethingRemote_WhileAStepReachesForSomethingElsewhereIsTrue()
     {
         // Arrange: a step that names what it is about is one that waits on something this computer does not hold.
         var feed = new LaunchActivityFeed();
@@ -107,7 +107,7 @@ public sealed class SplashViewModelTests
     }
 
     [TestMethod]
-    public void IsWaitingOnSomethingRemote_ForAStepThatTouchesNothingElsewhere_IsFalse()
+    public void ViewModel_SplashViewModelTests_IsWaitingOnSomethingRemote_ForAStepThatTouchesNothingElsewhereIsFalse()
     {
         // Arrange: reading this computer's own name reaches nothing that can stall.
         var feed = new LaunchActivityFeed();
@@ -122,7 +122,7 @@ public sealed class SplashViewModelTests
     }
 
     [TestMethod]
-    public void IsWaitingOnSomethingRemote_OnceThatStepEnds_IsFalse()
+    public void ViewModel_SplashViewModelTests_IsWaitingOnSomethingRemote_OnceThatStepEndsIsFalse()
     {
         // Arrange
         var feed = new LaunchActivityFeed();
@@ -138,7 +138,7 @@ public sealed class SplashViewModelTests
     }
 
     [TestMethod]
-    public void IsWaitingOnSomethingRemote_WhenAnEarlierStepEnds_DoesNotEndTheStepUnderWay()
+    public void ViewModel_SplashViewModelTests_IsWaitingOnSomethingRemote_WhenAnEarlierStepEndsDoesNotEndTheStepUnderWay()
     {
         // Arrange: a completion line for a step that is no longer the one in flight must not stop the wait.
         var feed = new LaunchActivityFeed();
@@ -154,7 +154,7 @@ public sealed class SplashViewModelTests
     }
 
     [TestMethod]
-    public void Apply_WhenAStepFails_StatesItsCauseRatherThanAStepNumber()
+    public void ViewModel_SplashViewModelTests_Apply_WhenAStepFailsStatesItsCauseRatherThanAStepNumber()
     {
         // Arrange
         var feed = new LaunchActivityFeed();
@@ -178,7 +178,7 @@ public sealed class SplashViewModelTests
     }
 
     [TestMethod]
-    public void Apply_AfterAStop_KeepsTheCauseItFirstStated()
+    public void ViewModel_SplashViewModelTests_Apply_AfterAStopKeepsTheCauseItFirstStated()
     {
         // Arrange
         var feed = new LaunchActivityFeed();
@@ -194,7 +194,7 @@ public sealed class SplashViewModelTests
     }
 
     [TestMethod]
-    public void Apply_WhileTheLaunchIsGoing_OffersNoCauseAtAll()
+    public void ViewModel_SplashViewModelTests_Apply_WhileTheLaunchIsGoingOffersNoCauseAtAll()
     {
         // Arrange
         var feed = new LaunchActivityFeed();
@@ -209,7 +209,7 @@ public sealed class SplashViewModelTests
     }
 
     [TestMethod]
-    public void EntryAppended_IsHandedToTheSurfaceThread_ForEveryLine()
+    public void ViewModel_SplashViewModelTests_EntryAppended_IsHandedToTheSurfaceThreadForEveryLine()
     {
         // Arrange: a launch step's continuation runs off the surface's thread, so the surface's own marshaller is
         // the only thing standing between the feed and an update from the wrong thread.

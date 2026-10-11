@@ -8,7 +8,7 @@ namespace MTM_Waitlist.Tests.Core.Services;
 public sealed class RequestAlertGateTests
 {
     [TestMethod]
-    public void ShouldShowToast_OnlyWhenEnabledAndPackaged()
+    public void Service_RequestAlertGateTests_ShouldShowToast_OnlyWhenEnabledAndPackaged()
     {
         Assert.IsTrue(RequestAlertGate.ShouldShowToast(alertsEnabled: true, isPackaged: true));
         Assert.IsFalse(RequestAlertGate.ShouldShowToast(alertsEnabled: true, isPackaged: false));
@@ -17,7 +17,7 @@ public sealed class RequestAlertGateTests
     }
 
     [TestMethod]
-    public void ShouldNotifyOnCreated_RequiresSignalAndEnabledAndPackaged()
+    public void Service_RequestAlertGateTests_ShouldNotifyOnCreated_RequiresSignalAndEnabledAndPackaged()
     {
         Assert.IsTrue(RequestAlertGate.ShouldNotifyOnCreated(requestCreatedSignal: true, alertsEnabled: true, isPackaged: true));
         Assert.IsFalse(RequestAlertGate.ShouldNotifyOnCreated(requestCreatedSignal: false, alertsEnabled: true, isPackaged: true));

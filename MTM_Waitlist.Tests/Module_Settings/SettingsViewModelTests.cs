@@ -22,7 +22,7 @@ namespace MTM_Waitlist.Tests.Module_Settings;
 public sealed class SettingsViewModelIgnoredLocationsTests
 {
     [TestMethod]
-    public void DefaultSeed_PopulatesTheDefaultIgnoredLocations()
+    public void ViewModel_SettingsViewModelTests_DefaultSeed_PopulatesTheDefaultIgnoredLocations()
     {
         var viewModel = BuildViewModel(
             new InMemoryScopedPreferenceStore(),
@@ -38,7 +38,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     /// refusal is stated rather than silently ignored (FR-024, SC-012).
     /// </summary>
     [TestMethod]
-    public async Task TheEditor_IsReadOnly_ForEveryRoleButTheTwoThatMayChangeIt()
+    public async Task ViewModel_SettingsViewModelTests_TheEditor_IsReadOnlyForEveryRoleButTheTwoThatMayChangeIt()
     {
         var preferences = new InMemoryScopedPreferenceStore();
         var viewModel = BuildViewModel(preferences, [PermissionKeys.SettingsIgnoredLocations]);
@@ -63,7 +63,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     /// as well (FR-024).
     /// </summary>
     [TestMethod]
-    public async Task TheWrite_IsRefused_WhereItHappens_NotOnlyWhereTheControlIsDrawn()
+    public async Task ViewModel_SettingsViewModelTests_TheWrite_IsRefusedWhereItHappensNotOnlyWhereTheControlIsDrawn()
     {
         var preferences = new InMemoryScopedPreferenceStore();
         var service = new IgnoredLocationsService(
@@ -80,7 +80,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     /// T137. An authorised change is stored at plant scope, so one edit decides for every computer (FR-024).
     /// </summary>
     [TestMethod]
-    public async Task AnAuthorisedChange_IsStoredAtPlantScope()
+    public async Task ViewModel_SettingsViewModelTests_AnAuthorisedChange_IsStoredAtPlantScope()
     {
         var preferences = new InMemoryScopedPreferenceStore();
         var viewModel = BuildViewModel(
@@ -115,7 +115,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     /// happens (FR-029, SC-011).
     /// </summary>
     [TestMethod]
-    public async Task TheSessionLength_RefusesAnUnauthorisedChangeWithAStatedReason()
+    public async Task ViewModel_SettingsViewModelTests_TheSessionLength_RefusesAnUnauthorisedChangeWithAStatedReason()
     {
         var preferences = new InMemoryScopedPreferenceStore();
         var viewModel = BuildViewModel(preferences, [PermissionKeys.SettingsIgnoredLocations]);
@@ -137,7 +137,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     /// only on the computer it was made on (FR-029, SC-011).
     /// </summary>
     [TestMethod]
-    public async Task TheSessionLength_WhenAuthorised_IsStoredAtPlantScopeAndClamped()
+    public async Task ViewModel_SettingsViewModelTests_TheSessionLength_WhenAuthorisedIsStoredAtPlantScopeAndClamped()
     {
         var preferences = new InMemoryScopedPreferenceStore();
         var viewModel = BuildViewModel(preferences, [PermissionKeys.SettingsSessionLength]);
@@ -168,7 +168,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     }
 
     [TestMethod]
-    public void PersistenceRoundTrip_SeedsFromStoredInsteadOfDefaults()
+    public void ViewModel_SettingsViewModelTests_PersistenceRoundTrip_SeedsFromStoredInsteadOfDefaults()
     {
         var preferences = new InMemoryScopedPreferenceStore();
         preferences.SeedText(IgnoredLocationDefaults.SettingKey, PreferenceScope.Plant, "WC,SCRAP-1");
@@ -179,7 +179,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     }
 
     [TestMethod]
-    public void CanManageIgnoredLocations_FollowsTheEditKeyAndNothingElse()
+    public void ViewModel_SettingsViewModelTests_CanManageIgnoredLocations_FollowsTheEditKeyAndNothingElse()
     {
         Assert.IsFalse(
             BuildViewModel(new InMemoryScopedPreferenceStore()).CanManageIgnoredLocations,
@@ -202,7 +202,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     }
 
     [TestMethod]
-    public async Task OnNavigatedTo_ReadsTheScreensGates_AndTheyStayShutUntilTheAnswerArrives()
+    public async Task ViewModel_SettingsViewModelTests_OnNavigatedTo_ReadsTheScreensGatesAndTheyStayShutUntilTheAnswerArrives()
     {
         var viewModel = BuildViewModelWithoutLoading(
             new InMemoryScopedPreferenceStore(),
@@ -223,7 +223,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     }
 
     [TestMethod]
-    public void LocationCodeValidation_AcceptsCodePatternAndRejectsInvalid()
+    public void ViewModel_SettingsViewModelTests_LocationCodeValidation_AcceptsCodePatternAndRejectsInvalid()
     {
         Assert.IsTrue(SettingsViewModel.IsValidLocationCode("WC"));
         Assert.IsTrue(SettingsViewModel.IsValidLocationCode("NCM"));
@@ -240,14 +240,14 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     }
 
     [TestMethod]
-    public void NewRequestAlerts_DefaultsOff()
+    public void ViewModel_SettingsViewModelTests_NewRequestAlerts_DefaultsOff()
     {
         var viewModel = BuildViewModel(new InMemoryScopedPreferenceStore());
         Assert.IsFalse(viewModel.NewRequestAlertsEnabled);
     }
 
     [TestMethod]
-    public void NewRequestAlerts_PanelAndCategoryMatchSearch_AndTheChangeIsAnnounced()
+    public void ViewModel_SettingsViewModelTests_NewRequestAlerts_PanelAndCategoryMatchSearchAndTheChangeIsAnnounced()
     {
         var viewModel = BuildViewModel(new InMemoryScopedPreferenceStore());
         Assert.IsTrue(viewModel.IsNewRequestAlertsPanelVisible, "Panel visible with no search query.");
@@ -269,7 +269,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     }
 
     [TestMethod]
-    public async Task NewRequestAlerts_TogglePersistsOnlyWhenTheInstallationCanDeliver()
+    public async Task ViewModel_SettingsViewModelTests_NewRequestAlerts_TogglePersistsOnlyWhenTheInstallationCanDeliver()
     {
         var settings = new InMemoryScopedPreferenceStore();
         var viewModel = BuildViewModel(settings);
@@ -292,7 +292,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     }
 
     [TestMethod]
-    public void CanRequestCacheRefresh_AnswersFromTheSettingsPermissionOnly()
+    public void ViewModel_SettingsViewModelTests_CanRequestCacheRefresh_AnswersFromTheSettingsPermissionOnly()
     {
         // The gate is permission.settings.cache_refresh, and its shipped baseline is the same trio the Max
         // Allotted Time panel gates on. The subse rule that ties it to the service host's own permission is
@@ -312,7 +312,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     }
 
     [TestMethod]
-    public async Task RequestCacheRefresh_DoesNotReachTheService_WithoutThePermission()
+    public async Task ViewModel_SettingsViewModelTests_RequestCacheRefresh_DoesNotReachTheServiceWithoutThePermission()
     {
         var client = new FakeMockServiceRefreshClient();
         var viewModel = BuildViewModel(new InMemoryScopedPreferenceStore(), refreshClient: client);
@@ -324,7 +324,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     }
 
     [TestMethod]
-    public async Task RequestCacheRefresh_ReportsTheShapesThatRefreshed()
+    public async Task ViewModel_SettingsViewModelTests_RequestCacheRefresh_ReportsTheShapesThatRefreshed()
     {
         var client = new FakeMockServiceRefreshClient
         {
@@ -352,7 +352,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     }
 
     [TestMethod]
-    public async Task RequestCacheRefresh_NamesAShapeThatCouldNotRefresh()
+    public async Task ViewModel_SettingsViewModelTests_RequestCacheRefresh_NamesAShapeThatCouldNotRefresh()
     {
         var client = new FakeMockServiceRefreshClient
         {
@@ -377,7 +377,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     }
 
     [TestMethod]
-    public async Task RequestCacheRefresh_ReportsAnUnconfiguredOrAbsentService_WithoutThrowing()
+    public async Task ViewModel_SettingsViewModelTests_RequestCacheRefresh_ReportsAnUnconfiguredOrAbsentServiceWithoutThrowing()
     {
         var client = new FakeMockServiceRefreshClient
         {
@@ -395,7 +395,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     }
 
     [TestMethod]
-    public void NewRequestAlerts_ReportsTheInstallationCapability()
+    public void ViewModel_SettingsViewModelTests_NewRequestAlerts_ReportsTheInstallationCapability()
     {
         var viewModel = BuildViewModel(new InMemoryScopedPreferenceStore());
 
@@ -416,7 +416,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     }
 
     [TestMethod]
-    public async Task NewRequestAlerts_DoesNotPersistWhileTheInstallationCannotDeliver()
+    public async Task ViewModel_SettingsViewModelTests_NewRequestAlerts_DoesNotPersistWhileTheInstallationCannotDeliver()
     {
         var settings = new InMemoryScopedPreferenceStore();
         var viewModel = BuildViewModel(settings);
@@ -432,7 +432,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     }
 
     [TestMethod]
-    public void VersionDescription_IsNotEmptyOnAnUnpackagedBuild()
+    public void ViewModel_SettingsViewModelTests_VersionDescription_IsNotEmptyOnAnUnpackagedBuild()
     {
         // The About card's version value must say something on this build too, not only when the
         // packaged-only API is available (contract C4).
@@ -444,7 +444,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     }
 
     [TestMethod]
-    public void SearchQuery_ChangeAnnouncesEveryPanelThatConsumesTheTerm()
+    public void ViewModel_SettingsViewModelTests_SearchQuery_ChangeAnnouncesEveryPanelThatConsumesTheTerm()
     {
         var viewModel = BuildViewModel(new InMemoryScopedPreferenceStore());
 
@@ -470,7 +470,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     }
 
     [TestMethod]
-    public void SearchRegistration_CoversEveryPropertyThatConsumesTheTerm()
+    public void ViewModel_SettingsViewModelTests_SearchRegistration_CoversEveryPropertyThatConsumesTheTerm()
     {
         var declared = DeclaredSearchAwareProperties();
 
@@ -503,7 +503,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     }
 
     [TestMethod]
-    public void TheMinutesPanel_AndThePicturePanel_EachKeepTheirOwnGate()
+    public void ViewModel_SettingsViewModelTests_TheMinutesPanel_AndThePicturePanelEachKeepTheirOwnGate()
     {
         var minutesOnly = BuildViewModel(
             new InMemoryScopedPreferenceStore(),
@@ -530,7 +530,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     }
 
     [TestMethod]
-    public void SearchQuery_ReachesBothReKeyedConfigurationPanels()
+    public void ViewModel_SettingsViewModelTests_SearchQuery_ReachesBothReKeyedConfigurationPanels()
     {
         var viewModel = BuildViewModel(new InMemoryScopedPreferenceStore(), [PermissionKeys.SettingsPartPictures]);
 
@@ -594,7 +594,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     /// roles the folder this machine copies pictures from, which FR-017 keeps to IT Department and Developer.
     /// </remarks>
     [TestMethod]
-    public void ThePictureCacheIsOfferedOnlyOnTheStoragePermission()
+    public void ViewModel_SettingsViewModelTests_ThePictureCacheIsOfferedOnlyOnTheStoragePermission()
     {
         var settings = new InMemoryScopedPreferenceStore();
         var resolver = new FakeImageStorageConfigurationResolver();
@@ -617,7 +617,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     /// The storage folders are offered on the storage permission and on nothing else.
     /// </summary>
     [TestMethod]
-    public void TheStorageFoldersAreOfferedOnlyOnTheStoragePermission()
+    public void ViewModel_SettingsViewModelTests_TheStorageFoldersAreOfferedOnlyOnTheStoragePermission()
     {
         var resolver = new FakeImageStorageConfigurationResolver();
 
@@ -643,7 +643,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
 
     /// <summary>Both storage folders and the retention period are stored for every computer in one action.</summary>
     [TestMethod]
-    public void SavingTheStorageFoldersStoresAllFourValuesForEveryUser()
+    public void ViewModel_SettingsViewModelTests_SavingTheStorageFoldersStoresAllThreeValuesForEveryUser()
     {
         var configuration = new FakeConfigSettingsValueService();
         var viewModel = BuildViewModel(
@@ -653,14 +653,12 @@ public sealed class SettingsViewModelIgnoredLocationsTests
             imageStorageConfigurationResolver: new FakeImageStorageConfigurationResolver());
 
         viewModel.PictureFolderInput = @"\\share\pictures";
-        viewModel.KeysFolderInput = @"\\share\keys";
         viewModel.DunnageRootInput = @"\\share\dunnage";
         viewModel.ArchiveKeepDaysInput = 90;
         viewModel.SaveStoragePathsCommand.Execute(null);
 
         var saved = configuration.SavedValues.ToDictionary(value => value.SettingKey, StringComparer.Ordinal);
         Assert.AreEqual(@"\\share\pictures", saved[ConfigSettingKeys.ImageStorageSharedFolderPath].SettingValue);
-        Assert.AreEqual(@"\\share\keys", saved[ConfigSettingKeys.KeysFolderPath].SettingValue);
         Assert.AreEqual(
             @"\\share\dunnage",
             saved[ConfigSettingKeys.DunnageRootPath].SettingValue,
@@ -669,6 +667,10 @@ public sealed class SettingsViewModelIgnoredLocationsTests
         Assert.IsTrue(
             saved.Values.All(value => value.ScopeType == "all_users" && value.ScopeKey == "all_users"),
             "A person-scoped row would leave every other machine unchanged.");
+        Assert.AreEqual(
+            3,
+            saved.Count,
+            "Three values and no more: the key-files folder was withdrawn with remember-me, so nothing writes it.");
     }
 
     /// <summary>
@@ -679,7 +681,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     /// unregistered service.
     /// </remarks>
     [TestMethod]
-    public void WithoutACacheServiceTheSectionIsNotOffered()
+    public void ViewModel_SettingsViewModelTests_WithoutACacheServiceTheSectionIsNotOffered()
     {
         var viewModel = BuildViewModel(
             new InMemoryScopedPreferenceStore(),
@@ -692,7 +694,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     /// Turning the cache off stores it for every user, which is what makes it follow a person to another machine.
     /// </summary>
     [TestMethod]
-    public void TurningThePictureCacheOffStoresItForEveryUser()
+    public void ViewModel_SettingsViewModelTests_TurningThePictureCacheOffStoresItForEveryUser()
     {
         var configuration = new FakeConfigSettingsValueService();
         var viewModel = BuildViewModel(
@@ -712,7 +714,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
 
     /// <summary>The folder box is stored under its own key, so it does not collide with the toggle.</summary>
     [TestMethod]
-    public void SavingTheCacheFolderStoresThePathForEveryUser()
+    public void ViewModel_SettingsViewModelTests_SavingTheCacheFolderStoresThePathForEveryUser()
     {
         var configuration = new FakeConfigSettingsValueService();
         var viewModel = BuildViewModel(
@@ -739,7 +741,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
     /// problem worth acting on.
     /// </remarks>
     [TestMethod]
-    public async Task CopyingThePictureCacheNowReportsTheCountsAndAnyUnreachableRootAsync()
+    public async Task ViewModel_SettingsViewModelTests_CopyingThePictureCacheNowReportsTheCountsAndAnyUnreachableRootAsync()
     {
         var cache = new FakeImageCacheSyncService
         {

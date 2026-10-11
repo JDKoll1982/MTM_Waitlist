@@ -57,13 +57,38 @@
   what would still open the key once remember-me goes, the answer was to remove it, so neither the key file nor
   a copy of it is read or kept.
 
+### Session 2026-10-10
+
+The startup process changed after this feature shipped: `011-identifier-first-signin` replaced the sign-in and
+the window model. This specification was reviewed against the process that actually runs and reset, so the
+requirements below describe what ships rather than what was first written.
+
+- Q: The launch now runs several operations at once and the surface shows every one of them, while FR-039 asked
+  for a single line that is replaced. → A: Retire FR-039. The surface shows each operation that is running as
+  its own line, named before its work begins, and never presents a group behind one line (FR-047).
+- Q: FR-046 asked for the sign-in and the machine-setup surfaces to be laid out with cards, padding and margins.
+  → A: Retire FR-046. The current layout is accepted as it stands.
+- Q: Remember-me survived into the shipped process, and the shared key file is still read from its share. → A:
+  Withdraw it, as originally decided. Nothing reads, copies or keeps a key file, and the file named in Verbatim
+  Constraints is retired with it (FR-014, FR-043).
+- Q: Where does the last-six-people list go, now that it is built? → A: On the right-hand side of the sign-in
+  form, separated from it by a divider, and the sign-in stage is sized so the whole list is visible rather than
+  cut off (FR-048).
+- Q: The setup stage asked for a name people would recognise. → A: The computer's own name is read from the
+  computer, shown on the setup stage and never typed; the only value a person supplies is where the computer
+  stands, and the record's free-text note becomes that location (FR-049, FR-050).
+- Q: This specification still reads "password" where the application says PIN. → A: The application's word
+  wins. The credential is a PIN everywhere this specification states a requirement.
+
 ## User Scenarios & Testing
 
 ### User Story 1 - A launch that can be watched and diagnosed (Priority: P1)
 
-Someone opens the application. The launch window shows, in plain language, the piece of work it is on while it
-starts: reading its configuration, contacting the store, checking this computer, working out who is signed in,
-and preparing the first screen. If the launch stops, the window names the work that stopped it and why.
+Someone opens the application. One window appears and stays for the whole life of the application: the launch
+runs as stages inside it, and it becomes the shell when the launch hands over. While the launch runs, the window
+shows, in plain language, every piece of work that is running — reading its configuration, contacting the store,
+checking this computer, working out who is signed in, and preparing the first screen — several at once where the
+launch runs them at the same time. If the launch stops, the window names the work that stopped it and why.
 
 **Why this priority**: today a stopped launch is indistinguishable from a slow one. Support is told "it hangs",
 and nobody can say where. Making the launch readable turns every other fault in this feature from a report into
@@ -83,16 +108,15 @@ the last line.
    reports that and either carries on or stops with a cause. It never waits without end.
 4. **Given** the launch has an error to report, **When** the message appears, **Then** it appears in a strip at
    the bottom of the window and does not cover the list of work.
-5. **Given** the launch is under way, **When** it moves from one piece of work to the next, **Then** the window
-   replaces the line it is showing rather than adding to it, so the window states what is happening now and
-   keeps no history.
+5. **Given** the launch is under way, **When** several pieces of work run at the same time, **Then** each holds
+   its own line in the window, and no line stands for a group of work.
 
 ### User Story 2 - A new machine is configured deliberately, and cannot be skipped (Priority: P1)
 
 Someone takes delivery of a computer that has never run the application. Before anyone can use it, a person
-holding `IT Department` or `Developer` authority signs in, names the machine, points it at the shared picture
-sources, and saves. Only then does the machine become usable. If
-that person abandons setup, the application closes and says why.
+holding `IT Department` or `Developer` authority signs in, reads the computer's own name — which is shown, never
+typed — states where the computer stands, and saves. Only then does the machine become usable. If that person
+abandons setup, the application closes and says why.
 
 **Why this priority**: a machine that runs without its configuration is a machine nobody can support. This is
 also the step that replaces a settings file that used to live on the machine, so without it the application has
@@ -113,14 +137,20 @@ Then confirm that no combination of closing, cancelling or dismissing reaches th
    **Then** setup returns at the next check.
 5. **Given** a machine with no configuration, **When** any input sequence is tried, **Then** none of them
    reaches the main screens.
+6. **Given** machine setup is open, **When** the person looks at what has to be filled in, **Then** the
+   computer's own name is shown and cannot be typed, and the only value they supply is where the computer
+   stands.
 
 ### User Story 3 - Signing in identifies both the person and the machine (Priority: P2)
 
 A person signs in and the application decides three things: whether the store recognises them, whether their
-session is still good, and whether this machine is one it knows. A session is judged by the store's clock. An
-account still on a temporary credential is asked for that credential, allowed five tries, and then required to
-set a new password before it can carry on. The sign-in screen offers the last six people who signed in on this
-computer, and choosing one fills in the user name while the password is still required.
+session is still good, and whether this machine is one it knows. Sign-in comes in two stages: the person is
+asked who they are — a user name or a four-digit employee number — and only then for their PIN. A session is
+judged by the store's clock. An account still on a temporary credential is asked for that credential, allowed
+five tries, and then required to choose a new PIN before it can carry on; an account a person created for
+themselves on the set-up panel never passes through that state. Alongside the form, on its right and behind a
+divider, the sign-in stage lists the last six people who signed in on this computer; choosing one fills in the
+user name and nothing else, and the PIN is still required.
 
 **Why this priority**: every action on the shop floor is attributed to a person, and an attribution made on a
 half-checked identity is worse than no attribution at all.
@@ -135,13 +165,16 @@ refused even with the correct value, then restart and confirm it is still refuse
 2. **Given** an account holds a temporary credential, **When** five attempts have failed, **Then** a sixth
    attempt is refused even with the correct value, and it stays refused across a restart.
 3. **Given** a temporary credential has been accepted, **When** the person carries on, **Then** they are asked
-   to set a new password before anything else.
-4. **Given** a computer where several people have signed in, **When** the sign-in screen is shown, **Then** the
-   last six are offered as cards, choosing one fills in the user name only, and the password is still asked for.
+   to choose a new PIN before anything else.
+4. **Given** a computer where several people have signed in, **When** the sign-in stage is shown, **Then** the
+   last six are listed on its right-hand side behind a divider, choosing one fills in the user name only, and
+   the PIN is still asked for.
 5. **Given** a machine's hardware identity cannot be read, **When** the machine check runs, **Then** the person
    is admitted, because a fact that could not be read is not a failed check.
 6. **Given** a person signs out, **When** the application restarts, **Then** nothing about their session
    survives and they are asked to sign in again.
+7. **Given** the sign-in stage, **When** the list of the last six is shown, **Then** the window is sized so that
+   the whole list is visible rather than cut off.
 
 ### User Story 4 - A stop offers only the remedies that can help (Priority: P2)
 
@@ -213,7 +246,7 @@ computer carries the last person's choices.
 
 ### User Story 7 - The shared locations belong to the plant, and work carries on when the share does not (Priority: P2)
 
-An installer points a new computer at the store and gives it a name. Where the pictures and the keys live is the
+An installer points a new computer at the store and states where it stands. Where the pictures live is the
 plant's answer, already held by the settings panel, so the installer is not asked for it and two computers cannot
 disagree about it. When the file share cannot be reached the computer carries on from the copies it holds, and it
 says so rather than showing a copy as though it were the shared one.
@@ -222,14 +255,15 @@ says so rather than showing a copy as though it were the shared one.
 plant-wide answer, and a plant-wide answer with several owners drifts. A computer that shows yesterday's picture
 and says so is worth more than one that stops because a file server is down.
 
-**Independent Test**: Set a computer up and confirm the screen asks only for its name and note. Then make the
-share unreachable and confirm the application still starts, still draws pictures from the copies held on the
-computer, and states that those copies are what it is using.
+**Independent Test**: Set a computer up and confirm the stage shows the computer's own name and asks only for
+where it stands. Then make the share unreachable and confirm the application still starts, still draws pictures
+from the copies held on the computer, and states that those copies are what it is using.
 
 **Acceptance Scenarios**:
 
-1. **Given** a computer that has not been set up, **When** the setup screen is shown, **Then** it asks for the
-   computer's name and an optional note and offers nothing that would set a shared folder per computer.
+1. **Given** a computer that has not been set up, **When** the setup stage is shown, **Then** it shows the
+   computer's own name without offering to change it, asks for where the computer stands, and offers nothing
+   that would set a shared folder per computer.
 2. **Given** the shared pictures folder changed in the settings panel, **When** any computer next reads a
    picture, **Then** it reads from the changed folder without being set up again.
 3. **Given** a share that cannot be reached, **When** the launch runs, **Then** it finishes, pictures resolve
@@ -248,7 +282,10 @@ computer, and states that those copies are what it is using.
 - The share holding pictures cannot be reached: the launch records it, leaves existing copies in place, and
   carries on.
 - A machine's configuration is deleted while the application is running: setup returns at the next check.
-- The machine's display name is already in use: the save is refused and a different name is asked for.
+- A computer whose own name is already held by another record: the save is refused and the record is left as it
+  was, because a computer's name and its hardware address together are what identify it.
+- The location is left blank: the computer is still configured, because its name comes from the computer itself
+  and the location is optional.
 - The store cannot say who signed in last on this computer: the sign-in screen offers no names and the person
   types their user name.
 - A reset of a temporary credential happens while the person is signing in with the old one.
@@ -303,11 +340,11 @@ computer, and states that those copies are what it is using.
 - **FR-011**: A session MUST be cleared when the person signs out, before the application restarts.
 - **FR-012**: An account holding a temporary credential MUST be refused after five failed attempts, including
   attempts presenting the correct value, and the refusal MUST survive a restart.
-- **FR-013**: The set-a-new-password step MUST open only after the temporary credential has been accepted.
-- **FR-014**: The sign-in screen MUST offer the last six people who signed in on this computer as a list of
-  choices drawn from the store, and choosing one MUST fill in the user name only. The password MUST still be
-  entered, nothing about a person's sign-in MAY be kept on the computer to make that offer, and no sign-in MAY
-  be honoured without a password.
+- **FR-013**: The set-a-new-PIN step MUST open only after the temporary credential has been accepted.
+- **FR-014**: Sign-in MUST collect an identifier in one stage and a credential in a second stage, in that order,
+  and MUST offer the last six people who signed in on this computer as a list of choices drawn from the store.
+  Choosing one MUST fill in the user name only. The PIN MUST still be entered, nothing about a person's sign-in
+  MAY be kept on the computer to make that offer, and no sign-in MAY be honoured without a PIN.
 - **FR-015**: A computer whose hardware identity cannot be read MUST be admitted.
 - **FR-016**: A stopped launch MUST offer to repeat the failed work.
 - **FR-017**: Resetting MUST be offered only where resetting could remove the cause.
@@ -358,14 +395,16 @@ computer, and states that those copies are what it is using.
   currently listed, which the panel has already bounded — as plain text that can be pasted elsewhere, carrying
   for each entry everything the store holds for it: the fault in full with its chain, the recorded context, the
   store diagnostics and the entry's place in the chain. Copying MUST write nothing to the machine.
-- **FR-039**: The launch window MUST show the piece of work it is on as a single line that is replaced as the
-  launch moves on, so the window states the present rather than accumulating a history of what it has already
-  done.
+- **FR-039 — retired 2026-10-10**: it asked for one line, replaced as the launch moves on, so the window stated
+  the present rather than a history. The launch now runs several operations at once and the surface shows each
+  of them; FR-047 states what replaced it. The clause it carried — no accumulated history — survives in FR-047,
+  because a line is shown while its work runs and not afterwards.
 
 - **FR-040**: The shared pictures folder MUST be held once for the whole plant, changeable from the settings
   panel, and MUST NOT be captured per computer. There is no shared keys folder: nothing reads a key file.
 - **FR-041**: A computer MUST count as configured once the store holds its record and its name, and MUST NOT
-  require any folder to be set before it can be used.
+  require any folder to be set before it can be used. Its name MUST be read from the computer itself and shown,
+  never typed.
 - **FR-042**: When the configured shared folder cannot be reached, a picture MUST resolve under the local cache
   folder, and the launch MUST state that the copies held on this computer are the ones being used.
 - **FR-043**: No key file MUST be read, copied or kept. Withdrawing remember-me removes the only reader of the
@@ -373,8 +412,20 @@ computer, and states that those copies are what it is using.
 - **FR-044**: A picture whose copy is not held locally and whose share cannot be reached MUST be reported as
   missing rather than drawn from a stand-in, and MUST NOT stop the launch.
 - **FR-045**: The launch window MUST open centred on the screen.
-- **FR-046**: The sign-in that authorises machine setup, and the machine setup screen itself, MUST be laid out
-  with cards, padding and margins rather than as plain stacked fields.
+- **FR-046 — retired 2026-10-10**: it asked for the sign-in that authorises machine setup, and the machine
+  setup screen itself, to be laid out with cards, padding and margins rather than as plain stacked fields. The
+  surfaces it named have since been rebuilt as stages of one window and the layout is accepted as it stands.
+- **FR-047**: The launch window MUST show every operation that is running as its own line, named before its work
+  begins, and MUST NOT present a group of operations behind a single line. A line is shown while its work runs,
+  not afterwards, so the window states what is happening now.
+- **FR-048**: The list of the last six people who signed in on this computer MUST be shown on the right-hand side
+  of the sign-in form, separated from it by a divider, and the sign-in stage MUST be sized so that the whole list
+  is visible rather than cut off.
+- **FR-049**: The computer's own name MUST be read from the computer, shown on the machine-setup stage and MUST
+  NOT be typed by a person. The only value a person supplies at setup MUST be this computer's location.
+- **FR-050**: This computer's record MUST hold the location it stands in, in place of the free-text note it held
+  before, and the values already stored MUST be read as locations so that a computer set up earlier keeps
+  working without being set up again.
 
 ## Key Entities
 
@@ -382,9 +433,9 @@ computer, and states that those copies are what it is using.
   store and never editable from the application during a launch.
 - **Machine**: the computer the application is running on, identified by its name and a stable hardware address,
   with a display name and description that people recognise.
-- **Machine configuration**: what a machine needs before it may be used: its own identity — its name and the
-  description people recognise it by. Records are not part of it, because records live only in the store, and
-  neither is where its pictures come from, which is held once for the plant.
+- **Machine configuration**: what a machine needs before it may be used: its own identity — the name the
+  computer reports for itself and the location it stands in. Records are not part of it, because records live
+  only in the store, and neither is where its pictures come from, which is held once for the plant.
 - **Session**: a person's signed-in period on one machine, with an end time, judged against the store's clock.
 - **Previous sign-in**: the record that a person signed in on a computer, held in the store so the sign-in
   screen can offer them as a choice. It carries no password and no means of signing in without one.
@@ -434,14 +485,23 @@ computer, and states that those copies are what it is using.
   exception type, every exception in the chain, the machine, the action and the entry's chain link. Verified by
   raising a knowing fault, copying its entry and reading the pasted text.
 
-- **SC-018**: A new computer is set up by giving it a name and, optionally, a note. The setup screen asks for
-  nothing else, and no shared folder can be set from it.
+- **SC-018**: A new computer is set up by stating where it stands and nothing else. Its name is read from the
+  computer and shown rather than typed, the setup stage asks for no other value, and no shared folder can be set
+  from it.
 - **SC-019**: With the share unreachable, the application still starts and still draws pictures from the copies
   held on the computer, and the launch states that those copies are the ones being used.
 - **SC-020**: Changing the shared pictures folder in the settings panel changes where every computer reads its
   pictures from, with no computer set up again.
 - **SC-021**: A computer that already holds its own picture-source rows keeps working across this change, and
   its readings come from the plant-wide settings afterwards.
+- **SC-022**: The sign-in stage shows the last six people who signed in on this computer on its right-hand side,
+  behind a divider, with no entry cut off by the window.
+- **SC-023**: A launch shows every operation that is running as its own line, and no line stands for more than
+  one operation.
+- **SC-024**: After remember-me is withdrawn, the launch completes and the sign-in stage is usable with the
+  shared key file absent, and nothing anywhere reads, copies or keeps it.
+- **SC-025**: This computer's stored record holds a location, and a computer set up before the change keeps
+  working with what it stored read as its location.
 
 ## Assumptions
 
@@ -464,6 +524,10 @@ computer, and states that those copies are what it is using.
   folder cannot be reached.
 - The shared key file is retired along with remember-me. It was first kept as a fallback for an unreachable
   share, but once remember-me goes nothing opens it, so it is not read, not copied and not kept.
+- The last six people who signed in on this computer are read from the session records the store already holds.
+  Nothing new is kept on the computer for the list, and the list carries no credential and no way past the PIN.
+- This computer's free-text note becomes its location. The values already stored are read as locations, so a
+  computer set up before the change keeps working without being set up again.
 - Preferences belong to the person, except the list of locations to hide, which belongs to the plant. Every
   setting that is restricted to particular roles today keeps that same restriction.
 - The launch window is the only surface shown while a launch runs, except when machine setup is triggered: that
@@ -495,3 +559,56 @@ These were pinned by the request and must match exactly:
 - The records table reused for diagnostics: `ops_startup_logs`
 - The two roles that may configure a machine or change the plant-wide list: `IT Department` and `Developer`
 - The one reviewed deployment setting that may still remain on a machine: `MockServiceClient`
+
+## ADDED Requirements
+<!-- capability: startup-launch -->
+
+### Sign-in offers the last six people who signed in on this computer
+
+Sign-in offers the six people who most recently signed in on this computer. Choosing one fills in the user name
+and nothing else, so the PIN is still required and picking a name signs nobody in.
+
+#### Scenario: Somebody picks a person offered beside the form
+- **WHEN** a person picks one of the offered names
+- **THEN** the user name is filled in, the PIN stage opens with it, and the person is not signed in until the
+  PIN is given
+
+#### Scenario: The store cannot be read while somebody signs in
+- **WHEN** the offer cannot be read
+- **THEN** the form is shown on its own and the sign-in still works
+
+### The offer of previous people is shown whole beside the sign-in form
+
+The offer sits on the right-hand side of the form, separated from it by a divider, and the stage is sized so no
+name in it is cut off.
+
+#### Scenario: The offer is shown
+- **WHEN** the sign-in stage shows six people
+- **THEN** all six are visible, with none cut off by the window
+
+### Machine setup reads the computer's name from the computer
+
+The name a computer reports for itself is read from the computer and shown on the machine-setup stage. A person
+cannot type it.
+
+#### Scenario: The machine-setup stage opens
+- **WHEN** an authorised person reaches the setup stage
+- **THEN** the name the computer reports is shown and there is no field to type one
+
+### Machine setup asks only for where the computer stands
+
+Where a computer stands is the only value a person supplies at setup, and a computer that supplies nothing else
+is configured.
+
+#### Scenario: A computer with no record is set up
+- **WHEN** an authorised person gives the location and saves
+- **THEN** the computer is configured by the name it reports and that location, and no shared folder is captured
+
+### What a computer stored before the location existed is read as its location
+
+A record written before the location existed keeps working, so no computer is set up again to gain one.
+
+#### Scenario: A computer whose record predates the change starts the application
+- **WHEN** a computer whose record was written before the change starts the application
+- **THEN** it is configured, and the value it stored is read as the location it stands in
+

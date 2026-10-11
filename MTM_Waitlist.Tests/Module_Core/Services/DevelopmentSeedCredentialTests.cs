@@ -69,7 +69,7 @@ public sealed class DevelopmentSeedCredentialTests
     ];
 
     [TestMethod]
-    public void TheShippedSeed_CreatesTheDevelopmentAccountsItIsExpectedTo()
+    public void Service_DevelopmentSeedCredentialTests_TheShippedSeed_CreatesTheDevelopmentAccountsItIsExpectedTo()
     {
         var accounts = SeededAccounts();
 
@@ -80,7 +80,7 @@ public sealed class DevelopmentSeedCredentialTests
     }
 
     [TestMethod]
-    public void TheShippedSeed_GivesEveryAccountItCreatesACredentialTheApplicationConfirms()
+    public void Service_DevelopmentSeedCredentialTests_TheShippedSeed_GivesEveryAccountItCreatesACredentialTheApplicationConfirms()
     {
         var accounts = SeededAccounts();
 
@@ -104,7 +104,7 @@ public sealed class DevelopmentSeedCredentialTests
     }
 
     [TestMethod]
-    public void TheShippedSeed_DoesNotStoreTheRetiredPlaceholderMarkerAsAHash()
+    public void Service_DevelopmentSeedCredentialTests_TheShippedSeed_DoesNotStoreTheRetiredPlaceholderMarkerAsAHash()
     {
         // The marker itself is the defect: it is a four-character literal standing where a base64 digest belongs.
         foreach (var account in SeededAccounts())

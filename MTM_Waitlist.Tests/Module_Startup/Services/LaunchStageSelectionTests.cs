@@ -17,15 +17,15 @@ public sealed class LaunchStageSelectionTests
     [DataRow(LaunchOutcome.SignIn, LaunchStage.SignIn)]
     [DataRow(LaunchOutcome.MachineSetup, LaunchStage.MachineSetup)]
     [DataRow(LaunchOutcome.Blocked, LaunchStage.Blocked)]
-    public void For_EachOutcome_NamesExactlyOneStage(LaunchOutcome outcome, LaunchStage expected)
+    public void Service_LaunchStageSelectionTests_For_EachOutcomeNamesExactlyOneStage(LaunchOutcome outcome, LaunchStage expected)
         => Assert.AreEqual(expected, LaunchStageSelection.For(outcome));
 
     [TestMethod]
-    public void For_AnEnding_NamesNoStageBecauseTheProcessIsGoing()
+    public void Service_LaunchStageSelectionTests_For_AnEndingNamesNoStageBecauseTheProcessIsGoing()
         => Assert.IsNull(LaunchStageSelection.For(LaunchOutcome.Ended));
 
     [TestMethod]
-    public void TheShell_IsReachableOnlyFromTheMainScreensOutcome()
+    public void Service_LaunchStageSelectionTests_TheShell_IsReachableOnlyFromTheMainScreensOutcome()
     {
         // FR-022, FR-043: no other outcome may name the shell, which is what keeps a launch that did not reach
         // the main screens away from it.
@@ -44,7 +44,7 @@ public sealed class LaunchStageSelectionTests
     }
 
     [TestMethod]
-    public void TheNavigationPanel_IsShownForTheShellAndNoOtherStage()
+    public void Service_LaunchStageSelectionTests_TheNavigationPanel_IsShownForTheShellAndNoOtherStage()
     {
         // FR-018, FR-023: nothing in the shell may assume a signed-in person before the hand-over, so the panel
         // is absent everywhere except the shell.
@@ -58,7 +58,7 @@ public sealed class LaunchStageSelectionTests
     }
 
     [TestMethod]
-    public void TheWindow_MaximisesOnlyOnTheMoveToTheShell()
+    public void Service_LaunchStageSelectionTests_TheWindow_MaximisesOnlyOnTheMoveToTheShell()
     {
         // FR-019.
         foreach (var stage in Enum.GetValues<LaunchStage>())

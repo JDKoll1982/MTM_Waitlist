@@ -57,7 +57,7 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
             {
                 Success = false,
                 RequiresReplacementConfirmation = true,
-                Message = string.Format(LocalizeOrDefault("Setup_Review.Confirmation.ReplacePrompt", "Work center '{0}' already has an active setup. Replace it?"), request.WorkCenter)
+                Message = string.Format(LocalizeOrDefault("Setup_Review_Confirmation.ReplacePrompt", "Work center '{0}' already has an active setup. Replace it?"), request.WorkCenter)
             };
         }
 
@@ -300,7 +300,7 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
         return new SetupSaveResult
         {
             Success = affectedRows > 0,
-            Message = LocalizeOrDefault("Setup_Review.Status.Saved", "Setup was saved successfully.")
+            Message = LocalizeOrDefault("Setup_Review_Status.Saved", "Setup was saved successfully.")
         };
     }
 

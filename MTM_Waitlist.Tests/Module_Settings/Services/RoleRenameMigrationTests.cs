@@ -100,7 +100,7 @@ public sealed class RoleRenameMigrationTests
     }
 
     [TestMethod]
-    public async Task TheRun_AppliesTheRenameReversesItAndReappliesIt()
+    public async Task Service_RoleRenameMigrationTests_TheRun_AppliesTheRenameReversesItAndReappliesIt()
     {
         var helper = _helper!;
         var catalogue = new RoleCatalogService(helper);

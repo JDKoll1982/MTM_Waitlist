@@ -27,7 +27,7 @@ public sealed class LogExportFormatterTests
     private const string Filter = "window=last 30 day(s), severity=error, machine=MTMFG-161, page size=200";
 
     [TestMethod]
-    public void Format_CarriesTheExceptionChainTheContextAndTheChainLink_ExactlyAsTheStoreHoldsThem()
+    public void Service_LogExportFormatterTests_Format_CarriesTheExceptionChainTheContextAndTheChainLinkExactlyAsTheStoreHoldsThem()
     {
         // Arrange
         var entry = SampleEntry();
@@ -55,7 +55,7 @@ public sealed class LogExportFormatterTests
     }
 
     [TestMethod]
-    public void Format_NamesTheFilterItCameFrom()
+    public void Service_LogExportFormatterTests_Format_NamesTheFilterItCameFrom()
     {
         // Act
         var text = LogExportFormatter.Format(Filter, [SampleEntry()]);
@@ -65,7 +65,7 @@ public sealed class LogExportFormatterTests
     }
 
     [TestMethod]
-    public void Format_WhenTheFilterIsBlank_StillSaysWhereTheCopyCameFrom()
+    public void Service_LogExportFormatterTests_Format_WhenTheFilterIsBlankStillSaysWhereTheCopyCameFrom()
     {
         // Act
         var text = LogExportFormatter.Format(null, [SampleEntry()]);
@@ -75,7 +75,7 @@ public sealed class LogExportFormatterTests
     }
 
     [TestMethod]
-    public void Format_WhenTheTextWouldExceedTheCeiling_IsCutWithAnExplicitMarkerThatNamesTheCeiling()
+    public void Service_LogExportFormatterTests_Format_WhenTheTextWouldExceedTheCeilingIsCutWithAnExplicitMarkerThatNamesTheCeiling()
     {
         // Arrange: one entry whose message alone is several times the ceiling.
         var entry = SampleEntry() with { Message = new string('x', LogExportFormatter.CeilingCharacters * 3) };
@@ -95,7 +95,7 @@ public sealed class LogExportFormatterTests
     }
 
     [TestMethod]
-    public void Format_WhenTheTextIsShort_CarriesNoCutMarker()
+    public void Service_LogExportFormatterTests_Format_WhenTheTextIsShortCarriesNoCutMarker()
     {
         // Act
         var text = LogExportFormatter.Format(Filter, [SampleEntry()]);
@@ -107,7 +107,7 @@ public sealed class LogExportFormatterTests
     }
 
     [TestMethod]
-    public void Format_SeparatesTheEntries_AndSaysHowManyThereAre()
+    public void Service_LogExportFormatterTests_Format_SeparatesTheEntriesAndSaysHowManyThereAre()
     {
         // Act
         var text = LogExportFormatter.Format(Filter, [SampleEntry(), SampleEntry() with { Id = 43 }]);
@@ -120,7 +120,7 @@ public sealed class LogExportFormatterTests
     }
 
     [TestMethod]
-    public void Format_IntroducesNoNameTheStoreIsForbiddenToHold()
+    public void Service_LogExportFormatterTests_Format_IntroducesNoNameTheStoreIsForbiddenToHold()
     {
         // Act
         var text = LogExportFormatter.Format(Filter, [SampleEntry()]);
@@ -136,7 +136,7 @@ public sealed class LogExportFormatterTests
     }
 
     [TestMethod]
-    public void TheCeiling_IsTheNumberTheContractRecords()
+    public void Service_LogExportFormatterTests_TheCeiling_IsTheNumberTheContractRecords()
     {
         // Arrange: the contract is where this task fixes the value, because no artifact stated it before.
         var contract = Path.Combine(
@@ -156,7 +156,7 @@ public sealed class LogExportFormatterTests
     }
 
     [TestMethod]
-    public void ACopyTheClipboardRefuses_IsReportedRatherThanRaised()
+    public void Service_LogExportFormatterTests_ACopyTheClipboardRefuses_IsReportedRatherThanRaised()
     {
         // Arrange: a clipboard that answers false, which is what the options overload does when the process is
         // not in the foreground, where Clipboard.SetContent would throw instead (§7.1).

@@ -41,14 +41,14 @@ Stop the running app and clear `MTM_*` environment overrides before running the 
   buttons are gated, not merely present.
 - Every button in the action area carries a `ToolTipService.ToolTip` bound to the row's localized action
   text, so the action is named on hover as well as to a screen reader.
-- **Accept and Complete differ in both colour and glyph** (`Card_AcceptAndCompleteAreUnmistakablyDifferent`):
+- **Accept and Complete differ in both colour and glyph** (`UI_WaitlistLineCardMarkupTests_UI_WaitlistLineCardMarkupTests_Card_AcceptAndCompleteAreUnmistakablyDifferent`):
   green `SystemFillColorSuccessBrush` with `E8FB` versus accent `AccentFillColorDefaultBrush` with `E930`.
   They share one slot in two states, so a viewer switching between them has to see that the button changed.
 - The status pill still shows `StatusBadgeText` and is still gated on `HasStatusBadge`.
 - **The status badge has one colour per lifecycle state** (`RequestStatusPaletteTests`): each stored status
   reaches its own role, no two roles share a colour, both spellings of cancelled agree, an unrecognised status
   claims no badge, and every colour clears the WCAG AA 4.5:1 contrast ratio against the badge text.
-- The request detail page binds **none** of the four action commands (`RequestPage_DrawsNoActionButton`,
+- The request detail page binds **none** of the four action commands (`ViewModel_WaitlistViewDetailActionTests_ViewModel_WaitlistViewDetailActionTests_RequestPage_DrawsNoActionButton`,
   in `WaitlistViewDetailActionTests`), so exactly one surface decides what a viewer may do.
 
 The previous assertion that the card offers **no** Cancel or Accept control is revised, not deleted: it
@@ -66,7 +66,7 @@ this viewer, `Accepted` by someone else, `Completed`, `Canceled`):
 - `CanCompleteOrRelease` true **iff** `RequestActionPolicy.CanViewerCompleteOrRelease(...)` is true.
 - `CanCancelRequest` true **iff** the viewer is the requester of a `Pending` row **or** its assignee.
 - `CanAccept` and `CanCompleteOrRelease` are never both true — they are one button in two states
-  (`Card_ShowsCancelWheneverCompleteIsOffered`).
+  (`ViewModel_WaitlistViewViewModelActionTests_ViewModel_WaitlistViewViewModelActionTests_Card_ShowsCancelWheneverCompleteIsOffered`).
 - `CanCancelRequest` is true whenever `CanCompleteOrRelease` is.
 - The count of non-null action commands equals the count of true flags — a flag with no command, or a
   command with no flag, fails.
@@ -131,10 +131,10 @@ at the same available request:
 - An empty or whitespace-only note is not stored as an empty note and claims no history entry.
 - The detail view model exposes history rows after a load, one per audit entry.
 - **The history is read from the store**: a stub whose `LoadAuditTrailAsync` returns an entry this session
-  never created is rendered (`RequestPage_ReadsTheHistoryFromTheStore_NotJustThisSession`), and an empty read
-  is reported as empty rather than hidden (`RequestPage_WithNoHistory_SaysSoRatherThanHiding`).
-- Opening a request records its newest entry's time as seen (`RequestPage_OpeningIt_MarksTheRequestsActivitySeen`).
-- The refresh cadence is the stated 30 seconds (`RequestPage_RefreshIntervalIsThirtySeconds`).
+  never created is rendered (`ViewModel_WaitlistViewDetailActionTests_RequestPage_ReadsTheHistoryFromTheStoreNotJustThisSession`), and an empty read
+  is reported as empty rather than hidden (`ViewModel_WaitlistViewDetailActionTests_RequestPage_WithNoHistorySaysSoRatherThanHiding`).
+- Opening a request records its newest entry's time as seen (`ViewModel_WaitlistViewDetailActionTests_RequestPage_OpeningItMarksTheRequestsActivitySeen`).
+- The refresh cadence is the stated 30 seconds (`ViewModel_WaitlistViewDetailActionTests_ViewModel_WaitlistViewDetailActionTests_RequestPage_RefreshIntervalIsThirtySeconds`).
 - Every new visible string resolves through the resource mechanism: a test asserts each new key added
   to `Strings/en-us/Resources.resw` is referenced from the code or markup that shows it, and no new
   literal user-visible string is added to the card or detail markup.
@@ -198,32 +198,32 @@ last, which only the running application can prove.
 **Message box** — FR-012 (`WaitlistViewDetailActionTests`)
 
 - A click with text in the box stores it on the **first** click, without the box having to lose focus first.
-- An unsent draft survives a refresh (`RequestPage_ARefresh_KeepsAnUnsavedMessageOnScreen`).
+- An unsent draft survives a refresh (`ViewModel_WaitlistViewDetailActionTests_RequestPage_ARefreshKeepsAnUnsavedMessageOnScreen`).
 - A click with nothing to send is answered rather than silently swallowed.
-- Anyone signed in can send, not only a handler (`RequestPage_AnyoneSignedInCanSendAMessage`).
+- Anyone signed in can send, not only a handler (`ViewModel_WaitlistViewDetailActionTests_ViewModel_WaitlistViewDetailActionTests_RequestPage_AnyoneSignedInCanSendAMessage`).
 
 **History** — FR-013, FR-017 (`WaitlistViewDetailActionTests`)
 
 - Each row renders the **sender's full name**, not the internal event type
-  (`RequestPage_HistoryNamesTheSenderAndNotTheMessageType`).
-- An entry with no author is attributed to `System` (`HistoryEntry_WithNoAuthor_IsAttributedToTheSystem`).
+  (`ViewModel_WaitlistViewDetailActionTests_ViewModel_WaitlistViewDetailActionTests_RequestPage_HistoryNamesTheSenderAndNotTheMessageType`).
+- An entry with no author is attributed to `System` (`ViewModel_WaitlistViewDetailActionTests_HistoryEntry_WithNoAuthorIsAttributedToTheSystem`).
 - One note renders **once**, not twice, when the store's whole-second timestamp and the session's sub-second
   stamp describe the same entry (T043).
 
 **New-message indicator** — FR-027, FR-028 (`WaitlistViewViewModelActionTests`)
 
-- A lifecycle change with no message raises **no** marker (`Card_LifecycleChangeOnly_ShowsNoMessageMarker`).
+- A lifecycle change with no message raises **no** marker (`ViewModel_WaitlistViewViewModelActionTests_Card_LifecycleChangeOnlyShowsNoMessageMarker`).
 - A message the viewer has not read raises it; once read it clears
-  (`Card_MessageTheViewerHasNotRead_ShowsTheMarker`, `Card_MessageTheViewerHasAlreadyRead_ShowsNoMarker`).
+  (`ViewModel_WaitlistViewViewModelActionTests_Card_MessageTheViewerHasNotReadShowsTheMarker`, `ViewModel_WaitlistViewViewModelActionTests_Card_MessageTheViewerHasAlreadyReadShowsNoMarker`).
 - The compared value is `last_message_utc`, **verified against the live database**: `NULL` for a request
   accepted with no message, set for one that was written on.
 
 **Card chrome** — FR-029, FR-030 (`WaitlistLineCardMarkupTests`, `RequestStatusPaletteTests`)
 
-- Accept and Complete differ in both colour and glyph (`Card_AcceptAndCompleteAreUnmistakablyDifferent`),
+- Accept and Complete differ in both colour and glyph (`UI_WaitlistLineCardMarkupTests_UI_WaitlistLineCardMarkupTests_Card_AcceptAndCompleteAreUnmistakablyDifferent`),
   using `E8FB` and `E930`. The E0–E5 range is deprecated by the Segoe Fluent Icons list, so `E10B` is gone.
 - Every action button carries a tooltip drawn from the row, not a literal in markup
-  (`Card_ActionButtonsCarryATooltipFromTheRowNotFromALiteral`).
+  (`UI_WaitlistLineCardMarkupTests_UI_WaitlistLineCardMarkupTests_Card_ActionButtonsCarryATooltipFromTheRowNotFromALiteral`).
 - Every status reaches its own colour, no two share one, both cancelled spellings agree, an unrecognised status
   claims no badge, and every colour clears WCAG AA 4.5:1 against the badge text (`RequestStatusPaletteTests`).
 

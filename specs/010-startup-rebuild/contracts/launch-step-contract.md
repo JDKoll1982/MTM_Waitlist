@@ -67,14 +67,13 @@ rather than against the code that happens to implement it. The ceiling is 30 sec
 | read this computer's record | Machine | 10 s | |
 | read this computer's configuration | Machine | 10 s | |
 | save this computer's configuration | Machine | 30 s | |
-| read the remembered sign-in | Session | 10 s | |
 | resolve the person | Session | 15 s | |
 | resolve the person's roles | Session | 15 s | |
 | check the credential | Session | 30 s | |
 | judge the session | Session | 15 s | |
 | check this computer against the store | Session | 15 s | |
-| check whether a new password is needed | Session | 15 s | |
-| set a new password | Session | 30 s | |
+| check whether a new PIN is needed | Session | 15 s | |
+| set a new PIN | Session | 30 s | |
 | settle the external-system verdict | ExternalSystem | 5 s | yes |
 | hand over to the first screen | Shell | 10 s | |
 
@@ -90,6 +89,11 @@ which is unchanged (FR-024, FR-025). Independent entries also run at the same ti
 `check-computer-against-store` and `check-temporary-credential` (FR-026, FR-027). Each member still runs under
 its own maximum stated here, so the table remains the bound each operation is held to, and a group still cannot
 become an unbounded wait (FR-036). `visual-priming` deliberately stays last before the hand-over (FR-029).
+
+**The 2026-10-10 reconciliation.** One entry leaves the table: `read-remembered-sign-in`, which is withdrawn with
+remember-me (FR-043). The remaining sixteen keep the maximums above. The table is still the bound each operation
+is held to, and the catalog still validates itself against it, so removing the entry and removing it from
+`LaunchStepCatalog` are one change (T233).
 
 ## 2. Running one step
 

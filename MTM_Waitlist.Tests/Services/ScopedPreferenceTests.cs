@@ -27,7 +27,7 @@ namespace MTM_Waitlist.Tests.Services;
 public sealed class ScopedPreferenceTests
 {
     [TestMethod]
-    public async Task TheChosenTheme_ComesFromTheStoreAtPersonScope()
+    public async Task Service_ScopedPreferenceTests_TheChosenTheme_ComesFromTheStoreAtPersonScope()
     {
         var preferences = new InMemoryScopedPreferenceStore();
         preferences.SeedText(ThemeSelectorService.SettingsKey, PreferenceScope.Person, ElementTheme.Dark.ToString());
@@ -44,7 +44,7 @@ public sealed class ScopedPreferenceTests
     }
 
     [TestMethod]
-    public async Task TheWaitlistOrder_IsStoredAgainstThePersonAndComesBackOnAnotherComputer()
+    public async Task Service_ScopedPreferenceTests_TheWaitlistOrder_IsStoredAgainstThePersonAndComesBackOnAnotherComputer()
     {
         var preferences = new InMemoryScopedPreferenceStore();
         await new WaitlistSortPreferenceService(preferences).SetSortOrderAsync(WaitlistSortOrder.RequestedBy);
@@ -58,7 +58,7 @@ public sealed class ScopedPreferenceTests
     }
 
     [TestMethod]
-    public async Task TheNewRequestAlertSwitch_IsStoredAgainstThePersonAndComesBackOnAnotherComputer()
+    public async Task Service_ScopedPreferenceTests_TheNewRequestAlertSwitch_IsStoredAgainstThePersonAndComesBackOnAnotherComputer()
     {
         var preferences = new InMemoryScopedPreferenceStore();
         await new NewRequestAlertService(preferences).SetEnabledAsync(true);
@@ -72,7 +72,7 @@ public sealed class ScopedPreferenceTests
     }
 
     [TestMethod]
-    public async Task TheRequestsAlreadySeen_AreStoredAgainstThePersonAndComeBackOnAnotherComputer()
+    public async Task Service_ScopedPreferenceTests_TheRequestsAlreadySeen_AreStoredAgainstThePersonAndComeBackOnAnotherComputer()
     {
         var preferences = new InMemoryScopedPreferenceStore();
         var requestId = Guid.NewGuid();
@@ -89,7 +89,7 @@ public sealed class ScopedPreferenceTests
     }
 
     [TestMethod]
-    public async Task ThePartsWithoutPicturesChoice_IsStoredAgainstThePersonAndComesBackOnAnotherComputer()
+    public async Task Service_ScopedPreferenceTests_ThePartsWithoutPicturesChoice_IsStoredAgainstThePersonAndComesBackOnAnotherComputer()
     {
         var preferences = new InMemoryScopedPreferenceStore();
 
@@ -113,7 +113,7 @@ public sealed class ScopedPreferenceTests
     /// instead of the person, which is the fault this story removes.
     /// </summary>
     [TestMethod]
-    public async Task NoPersonPreferenceIsWrittenAtPlantScope()
+    public async Task Service_ScopedPreferenceTests_NoPersonPreferenceIsWrittenAtPlantScope()
     {
         var preferences = new InMemoryScopedPreferenceStore();
 

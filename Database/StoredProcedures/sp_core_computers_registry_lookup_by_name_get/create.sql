@@ -14,7 +14,7 @@
 --
 -- Contract:
 --   IN  p_name  VARCHAR(255)   a computer_name or a hostname_normalized value
---   OUT zero or one row: id, computer_name, hostname_normalized, display_name, description,
+--   OUT zero or one row: id, computer_name, hostname_normalized, display_name, location,
 --       mac_address_normalized, is_registered
 --
 --   The row is chosen by `ORDER BY CASE WHEN computer_name = p_name THEN 0 ELSE 1 END ... LIMIT 1`, so a name
@@ -38,7 +38,7 @@ SELECT
     computer_name,
     hostname_normalized,
     display_name,
-    description,
+    location,
     mac_address_normalized,
     is_registered
 FROM core_computers_registry

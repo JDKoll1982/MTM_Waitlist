@@ -75,8 +75,6 @@ internal sealed class FakeImageStorageConfigurationResolver : IImageStorageConfi
 {
     public string SharedFolderPath { get; set; } = Path.Combine(Path.GetTempPath(), "mtm-image-tests");
 
-    public string KeysFolderPath { get; set; } = Path.Combine(Path.GetTempPath(), "mtm-image-tests", "key-files");
-
     /// <summary>The root the dunnage pictures are read from for every computer (FR-040).</summary>
     public string DunnageRootPath { get; set; } = Path.Combine(Path.GetTempPath(), "mtm-image-tests", "dunnage");
 
@@ -93,8 +91,6 @@ internal sealed class FakeImageStorageConfigurationResolver : IImageStorageConfi
     public bool RequireSquareAspectRatio { get; set; } = true;
 
     public Task<string> GetSharedFolderPathAsync() => Task.FromResult(SharedFolderPath);
-
-    public Task<string> GetKeysFolderPathAsync() => Task.FromResult(KeysFolderPath);
 
     public Task<string> GetDunnageRootPathAsync() => Task.FromResult(DunnageRootPath);
 

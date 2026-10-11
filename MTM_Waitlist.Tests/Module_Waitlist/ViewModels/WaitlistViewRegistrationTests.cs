@@ -22,13 +22,13 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.ViewModels;
 public sealed class WaitlistViewRegistrationTests
 {
     [TestMethod]
-    public void ListViewModelRegistration_NamesEveryConstructorParameter()
+    public void ViewModel_WaitlistViewRegistrationTests_ListViewModelRegistration_NamesEveryConstructorParameter()
     {
         AssertRegistrationNamesEveryParameter(typeof(WaitlistViewViewModel));
     }
 
     [TestMethod]
-    public void DetailViewModelRegistration_NamesEveryConstructorParameter()
+    public void ViewModel_WaitlistViewRegistrationTests_DetailViewModelRegistration_NamesEveryConstructorParameter()
     {
         // Registered by convention this used to be safe, but the page needs the thread's dispatcher, which is
         // not a container service, so it moved to a factory. It gets the same named-argument guard as the list.

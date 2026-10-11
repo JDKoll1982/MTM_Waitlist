@@ -48,7 +48,7 @@ public sealed class PartPictureFileDropTests
     }
 
     [TestMethod]
-    public async Task AFileNamedAfterThePart_IsDrawnWithNoRowRecordedForIt()
+    public async Task Service_PartPictureFileDropTests_AFileNamedAfterThePart_IsDrawnWithNoRowRecordedForIt()
     {
         var dropped = DropSharePicture(PartPictureLayout.VisualCollection, PartPictureLayout.CoilFolder, ".png");
 
@@ -58,7 +58,7 @@ public sealed class PartPictureFileDropTests
     }
 
     [TestMethod]
-    public async Task EachAcceptedExtension_IsFound()
+    public async Task Service_PartPictureFileDropTests_EachAcceptedExtension_IsFound()
     {
         // One part per extension, because a part holding two of them must draw the same one every time and the
         // order that decides it is pinned by the resolver rather than by this test.
@@ -80,7 +80,7 @@ public sealed class PartPictureFileDropTests
     }
 
     [TestMethod]
-    public async Task APartHoldingTwoAcceptedExtensions_DrawsTheSameOneEveryTime()
+    public async Task Service_PartPictureFileDropTests_APartHoldingTwoAcceptedExtensions_DrawsTheSameOneEveryTime()
     {
         var png = DropSharePicture(PartPictureLayout.VisualCollection, PartPictureLayout.CoilFolder, ".png");
         DropSharePicture(PartPictureLayout.VisualCollection, PartPictureLayout.CoilFolder, ".jpg");
@@ -93,7 +93,7 @@ public sealed class PartPictureFileDropTests
     }
 
     [TestMethod]
-    public async Task ANumberNoPrefixRecognises_IsFoundInTheCatchAllFolder()
+    public async Task Service_PartPictureFileDropTests_ANumberNoPrefixRecognises_IsFoundInTheCatchAllFolder()
     {
         var dropped = DropSharePicture(PartPictureLayout.VisualCollection, PartPictureLayout.CatchAllFolder, ".png", "OTHER-1");
 
@@ -103,7 +103,7 @@ public sealed class PartPictureFileDropTests
     }
 
     [TestMethod]
-    public async Task AFileTheAcceptanceRuleRejects_IsIgnoredRatherThanReported()
+    public async Task Service_PartPictureFileDropTests_AFileTheAcceptanceRuleRejects_IsIgnoredRatherThanReported()
     {
         // A strip is not a picture this application draws, and placing one is not a fault to report.
         var rejected = Path.Combine(_sharePath, PartPictureLayout.VisualCollection, PartPictureLayout.CoilFolder, PartNumber + ".png");
@@ -115,7 +115,7 @@ public sealed class PartPictureFileDropTests
     }
 
     [TestMethod]
-    public async Task AnEmptyFolder_AnswersNothingRatherThanThrowing()
+    public async Task Service_PartPictureFileDropTests_AnEmptyFolder_AnswersNothingRatherThanThrowing()
     {
         var resolved = await _resolver.ResolvePartPicturePathAsync(PartPictureLayout.VisualPartScope, PartNumber);
 
@@ -123,7 +123,7 @@ public sealed class PartPictureFileDropTests
     }
 
     [TestMethod]
-    public async Task TheMachinesOwnCopyOfADroppedFile_IsDrawnBeforeTheShare()
+    public async Task Service_PartPictureFileDropTests_TheMachinesOwnCopyOfADroppedFile_IsDrawnBeforeTheShare()
     {
         DropSharePicture(PartPictureLayout.VisualCollection, PartPictureLayout.CoilFolder, ".png");
 

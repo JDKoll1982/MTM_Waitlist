@@ -40,7 +40,7 @@ public sealed class RoleCatalogServiceTests
     };
 
     [TestMethod]
-    public async Task GetRolesAsync_ReadsTheOneCatalogueProcedure()
+    public async Task Service_RoleCatalogServiceTests_GetRolesAsync_ReadsTheOneCatalogueProcedure()
     {
         var helper = new FakeMySqlHelperServer();
         helper.EnqueueQueryResult(Row(1, "developer", "Developer", 100));
@@ -54,7 +54,7 @@ public sealed class RoleCatalogServiceTests
     }
 
     [TestMethod]
-    public async Task GetRolesAsync_OrdersByRungDescendingThenCode()
+    public async Task Service_RoleCatalogServiceTests_GetRolesAsync_OrdersByRungDescendingThenCode()
     {
         var helper = new FakeMySqlHelperServer();
         helper.EnqueueQueryResult(
@@ -73,7 +73,7 @@ public sealed class RoleCatalogServiceTests
     }
 
     [TestMethod]
-    public async Task GetRolesAsync_ReadsTheCatalogueOnceForTheSessionAndAgainAfterInvalidation()
+    public async Task Service_RoleCatalogServiceTests_GetRolesAsync_ReadsTheCatalogueOnceForTheSessionAndAgainAfterInvalidation()
     {
         var helper = new FakeMySqlHelperServer();
         helper.EnqueueQueryResult(Row(1, "developer", "Developer", 100));
@@ -91,7 +91,7 @@ public sealed class RoleCatalogServiceTests
     }
 
     [TestMethod]
-    public async Task GetRolesAsync_WithACatalogueThatCannotBeReached_OffersNoRoleRatherThanFailing()
+    public async Task Service_RoleCatalogServiceTests_GetRolesAsync_WithACatalogueThatCannotBeReachedOffersNoRoleRatherThanFailing()
     {
         var service = new RoleCatalogService(new UnreachableMySqlHelperServer());
 
@@ -101,7 +101,7 @@ public sealed class RoleCatalogServiceTests
     }
 
     [TestMethod]
-    public async Task GetRolesAsync_AfterAFailedRead_AsksAgainRatherThanAnsweringEmptyForTheSession()
+    public async Task Service_RoleCatalogServiceTests_GetRolesAsync_AfterAFailedReadAsksAgainRatherThanAnsweringEmptyForTheSession()
     {
         var helper = new FlakyMySqlHelperServer();
         helper.EnqueueQueryResult(Row(1, "developer", "Developer", 100));
@@ -125,7 +125,7 @@ public sealed class RoleCatalogServiceTests
     }
 
     [TestMethod]
-    public async Task GetRolesAsync_IgnoresARowWithNoRoleCode()
+    public async Task Service_RoleCatalogServiceTests_GetRolesAsync_IgnoresARowWithNoRoleCode()
     {
         var helper = new FakeMySqlHelperServer();
         helper.EnqueueQueryResult(Row(1, string.Empty, string.Empty, 0), Row(2, "developer", "Developer", 100));
@@ -138,7 +138,7 @@ public sealed class RoleCatalogServiceTests
     }
 
     [TestMethod]
-    public void TheShippedCatalogueRead_ExcludesTheRetiredRoleCode()
+    public void Service_RoleCatalogServiceTests_TheShippedCatalogueRead_ExcludesTheRetiredRoleCode()
     {
         var procedure = File.ReadAllText(Path.Combine(
             RepositoryPatternScan.FindRepositoryRoot(),
@@ -167,7 +167,7 @@ public sealed class RoleCatalogServiceTests
     /// and never the retired code.
     /// </remarks>
     [TestMethod]
-    public async Task LiveCatalogue_ReturnsEveryCatalogueRoleExceptTheRetiredOne()
+    public async Task Service_RoleCatalogServiceTests_LiveCatalogue_ReturnsEveryCatalogueRoleExceptTheRetiredOne()
     {
         var connectionString = Environment.GetEnvironmentVariable(ConnectionStringVariable);
         if (string.IsNullOrWhiteSpace(connectionString))

@@ -45,7 +45,7 @@ public sealed class PartPictureFileDropIsolationTests
     }
 
     [TestMethod]
-    public async Task OneNumberDroppedUnderBothSystems_AnswersEachSystemsOwnFile()
+    public async Task Service_PartPictureFileDropIsolationTests_OneNumberDroppedUnderBothSystems_AnswersEachSystemsOwnFile()
     {
         var visual = Drop(PartPictureLayout.VisualCollection);
         var wip = Drop(PartPictureLayout.WipCollection);
@@ -59,7 +59,7 @@ public sealed class PartPictureFileDropIsolationTests
     }
 
     [TestMethod]
-    public async Task AFilePlacedUnderOneSystem_IsNotUsedForTheOther()
+    public async Task Service_PartPictureFileDropIsolationTests_AFilePlacedUnderOneSystem_IsNotUsedForTheOther()
     {
         Drop(PartPictureLayout.VisualCollection);
 
@@ -69,7 +69,7 @@ public sealed class PartPictureFileDropIsolationTests
     }
 
     [TestMethod]
-    public async Task ACopyHeldByOneSystem_IsNotUsedForTheOther()
+    public async Task Service_PartPictureFileDropIsolationTests_ACopyHeldByOneSystem_IsNotUsedForTheOther()
     {
         // The twin of the defect this feature already fixed once: the copy's folder must name the collection it
         // belongs to, or the two systems' copies collapse into one file.

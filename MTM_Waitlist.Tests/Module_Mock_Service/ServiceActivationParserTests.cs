@@ -17,7 +17,7 @@ namespace MTM_Waitlist.Tests.Module_Mock_Service;
 public sealed class ServiceActivationParserTests
 {
     [TestMethod]
-    public void NoArguments_RequestsNothing()
+    public void Service_ServiceActivationParserTests_NoArguments_RequestsNothing()
     {
         Assert.AreEqual(
             ServiceActivationParser.RequestedSurface.None,
@@ -34,7 +34,7 @@ public sealed class ServiceActivationParserTests
     }
 
     [TestMethod]
-    public void StatusSwitch_RequestsTheStatusSurface()
+    public void Service_ServiceActivationParserTests_StatusSwitch_RequestsTheStatusSurface()
     {
         Assert.AreEqual(
             ServiceActivationParser.RequestedSurface.Status,
@@ -42,7 +42,7 @@ public sealed class ServiceActivationParserTests
     }
 
     [TestMethod]
-    public void SettingsSwitch_RequestsTheSettingsSurface()
+    public void Service_ServiceActivationParserTests_SettingsSwitch_RequestsTheSettingsSurface()
     {
         Assert.AreEqual(
             ServiceActivationParser.RequestedSurface.Settings,
@@ -50,7 +50,7 @@ public sealed class ServiceActivationParserTests
     }
 
     [TestMethod]
-    public void Switch_IsCaseInsensitive()
+    public void Service_ServiceActivationParserTests_Switch_IsCaseInsensitive()
     {
         Assert.AreEqual(
             ServiceActivationParser.RequestedSurface.Status,
@@ -58,7 +58,7 @@ public sealed class ServiceActivationParserTests
     }
 
     [TestMethod]
-    public void Switch_IsFoundBesideOtherArguments()
+    public void Service_ServiceActivationParserTests_Switch_IsFoundBesideOtherArguments()
     {
         Assert.AreEqual(
             ServiceActivationParser.RequestedSurface.Settings,
@@ -66,7 +66,7 @@ public sealed class ServiceActivationParserTests
     }
 
     [TestMethod]
-    public void QuotedSwitch_IsRecognized()
+    public void Service_ServiceActivationParserTests_QuotedSwitch_IsRecognized()
     {
         // A shell may pass the switch as a quoted token.
         Assert.AreEqual(
@@ -75,7 +75,7 @@ public sealed class ServiceActivationParserTests
     }
 
     [TestMethod]
-    public void UnknownArguments_RequestNothing()
+    public void Service_ServiceActivationParserTests_UnknownArguments_RequestNothing()
     {
         Assert.AreEqual(
             ServiceActivationParser.RequestedSurface.None,
@@ -84,7 +84,7 @@ public sealed class ServiceActivationParserTests
     }
 
     [TestMethod]
-    public void SwitchNamesAreStable()
+    public void Service_ServiceActivationParserTests_SwitchNamesAreStable()
     {
         // The desktop shortcut carries these strings in its arguments, so renaming one silently would
         // leave the shortcut doing nothing at all.
@@ -93,7 +93,7 @@ public sealed class ServiceActivationParserTests
     }
 
     [TestMethod]
-    public void ProcessArguments_FindTheSwitchBesideTheExecutablePath()
+    public void Service_ServiceActivationParserTests_ProcessArguments_FindTheSwitchBesideTheExecutablePath()
     {
         // This is the path an unpackaged launch actually takes: the WinUI launch arguments do not
         // reliably carry the command line, so the process command line is read instead.
@@ -107,7 +107,7 @@ public sealed class ServiceActivationParserTests
     }
 
     [TestMethod]
-    public void ProcessArguments_WithoutASwitchRequestNothing()
+    public void Service_ServiceActivationParserTests_ProcessArguments_WithoutASwitchRequestNothing()
     {
         Assert.AreEqual(
             ServiceActivationParser.RequestedSurface.None,

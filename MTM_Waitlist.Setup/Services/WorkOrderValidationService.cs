@@ -26,7 +26,7 @@ public sealed class WorkOrderValidationService : IWorkOrderValidationService
         if (!match.Success)
         {
             normalizedWorkOrder = string.Empty;
-            validationMessage = "Setup_WorkOrder.Validation.InvalidFormat".GetLocalized();
+            validationMessage = "Setup_WorkOrder_Validation.InvalidFormat".GetLocalized();
             return false;
         }
 

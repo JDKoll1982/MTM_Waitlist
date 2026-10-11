@@ -56,7 +56,7 @@ public sealed partial class ComputerEditDialogViewModel : ObservableRecipient
     } = string.Empty;
 
     [ObservableProperty]
-    public partial string Description
+    public partial string Location
     {
         get; set;
     } = string.Empty;
@@ -88,7 +88,7 @@ public sealed partial class ComputerEditDialogViewModel : ObservableRecipient
         HostnameNormalized = detectedComputerName?.Trim() ?? string.Empty;
         MacAddressNormalized = detectedMacAddress?.Trim() ?? string.Empty;
         DisplayName = string.Empty;
-        Description = string.Empty;
+        Location = string.Empty;
         IsRegistered = true;
         ValidationError = string.Empty;
     }
@@ -102,7 +102,7 @@ public sealed partial class ComputerEditDialogViewModel : ObservableRecipient
         HostnameNormalized = record.ComputerName;
         MacAddressNormalized = record.MacAddressNormalized;
         DisplayName = record.DisplayName;
-        Description = record.Description;
+        Location = record.Location;
         IsRegistered = record.IsRegistered;
         ValidationError = string.Empty;
     }
@@ -147,7 +147,7 @@ public sealed partial class ComputerEditDialogViewModel : ObservableRecipient
                     HostnameNormalized,
                     MacAddressNormalized,
                     DisplayName,
-                    Description,
+                    Location,
                     IsRegistered).ConfigureAwait(true);
             }
             else
@@ -157,7 +157,7 @@ public sealed partial class ComputerEditDialogViewModel : ObservableRecipient
                     HostnameNormalized,
                     MacAddressNormalized,
                     DisplayName,
-                    Description).ConfigureAwait(true);
+                    Location).ConfigureAwait(true);
             }
         }
         catch (Exception ex)

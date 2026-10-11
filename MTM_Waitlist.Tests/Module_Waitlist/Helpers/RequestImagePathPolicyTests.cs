@@ -38,7 +38,7 @@ public sealed class RequestImagePathPolicyTests
     /// <see cref="APathThatCarriesNoPictureIsNotTaken"/> covers the other half, which is the file behind it.
     /// </summary>
     [TestMethod]
-    public void ARealResolvedPathIsUsed()
+    public void Helper_RequestImagePathPolicyTests_ARealResolvedPathIsUsed()
     {
         Assert.IsTrue(
             RequestImagePathPolicy.IsUsableResolvedPath(@"X:\Software Development\RequestTypes\ncm.png"),
@@ -49,7 +49,7 @@ public sealed class RequestImagePathPolicyTests
     }
 
     [TestMethod]
-    public void TheServicesOwnPlaceholderIsNotAnImage()
+    public void Helper_RequestImagePathPolicyTests_TheServicesOwnPlaceholderIsNotAnImage()
     {
         // The service answers with these when nothing is configured, which is not the same as an image.
         Assert.IsFalse(
@@ -61,7 +61,7 @@ public sealed class RequestImagePathPolicyTests
     }
 
     [TestMethod]
-    public void ThePlaceholderIsRecognisedWhateverTheSeparatorsOrCasing()
+    public void Helper_RequestImagePathPolicyTests_ThePlaceholderIsRecognisedWhateverTheSeparatorsOrCasing()
     {
         // The service hands back backslashes for its own defaults; a resolved catalog path uses forward slashes.
         // A comparison that missed that would let exactly the bug back in.
@@ -77,7 +77,7 @@ public sealed class RequestImagePathPolicyTests
     /// has been retired: a person now learns one picture as "no image".
     /// </summary>
     [TestMethod]
-    public void EveryScopeAnswersWithTheSameNoImagePlaceholder()
+    public void Helper_RequestImagePathPolicyTests_EveryScopeAnswersWithTheSameNoImagePlaceholder()
     {
         Assert.AreEqual(ImagePicturePolicy.NoImagePath, ImageLocationDefaults.NoImagePath);
         Assert.AreEqual(ImagePicturePolicy.NoImagePath, ImageLocationDefaults.WorkCenterDefaultPath);
@@ -86,7 +86,7 @@ public sealed class RequestImagePathPolicyTests
     }
 
     [TestMethod]
-    public void NothingAtAllIsNotUsableEither()
+    public void Helper_RequestImagePathPolicyTests_NothingAtAllIsNotUsableEither()
     {
         // Null and blank mean the resolver had nothing; the row keeps its own image in both cases.
         Assert.IsFalse(RequestImagePathPolicy.IsUsableResolvedPath(null));
@@ -95,7 +95,7 @@ public sealed class RequestImagePathPolicyTests
     }
 
     [TestMethod]
-    public void AnEmptyPathIsNotAPlaceholder()
+    public void Helper_RequestImagePathPolicyTests_AnEmptyPathIsNotAPlaceholder()
     {
         // Guard against the test above passing for the wrong reason: "nothing" and "the placeholder" are
         // different answers and are reported differently.
@@ -109,7 +109,7 @@ public sealed class RequestImagePathPolicyTests
     /// neither may be mistaken for a picture.
     /// </summary>
     [TestMethod]
-    public void TheItemAndCategoryPlaceholdersAreNotImages()
+    public void Helper_RequestImagePathPolicyTests_TheItemAndCategoryPlaceholdersAreNotImages()
     {
         Assert.IsFalse(
             RequestImagePathPolicy.IsUsableResolvedPath(ImageLocationDefaults.RequestItemDefaultPath),
@@ -127,7 +127,7 @@ public sealed class RequestImagePathPolicyTests
     /// is taken, as far as the path itself can say.
     /// </summary>
     [TestMethod]
-    public void EitherHopOfTheItemCascadeIsTakenWhenItResolvesARealImage()
+    public void Helper_RequestImagePathPolicyTests_EitherHopOfTheItemCascadeIsTakenWhenItResolvesARealImage()
     {
         Assert.IsTrue(RequestImagePathPolicy.IsUsableResolvedPath(@"X:\Shared\RequestItems\pickup-coil.png"));
         Assert.IsTrue(RequestImagePathPolicy.IsUsableResolvedPath(@"X:\Shared\RequestCategories\Pickup.png"));
@@ -139,7 +139,7 @@ public sealed class RequestImagePathPolicyTests
     /// file with no picture in it. Taking it blanked the card's tile the moment the image service was initialized.
     /// </summary>
     [TestMethod]
-    public void APathThatCarriesNoPictureIsNotTaken()
+    public void Helper_RequestImagePathPolicyTests_APathThatCarriesNoPictureIsNotTaken()
     {
         ImageHeaderFixtures.WriteShippedSinglePixelPng(_standInPath);
         Assert.IsFalse(
@@ -165,7 +165,7 @@ public sealed class RequestImagePathPolicyTests
     /// picture keeps it.
     /// </summary>
     [TestMethod]
-    public void APicturelessFileNeverReplacesAnImageTheRequestAlreadyResolves()
+    public void Helper_RequestImagePathPolicyTests_APicturelessFileNeverReplacesAnImageTheRequestAlreadyResolves()
     {
         var alreadyResolved = "Assets/pickup_wip.png";
         ImageHeaderFixtures.WriteShippedSinglePixelPng(_standInPath);
@@ -185,7 +185,7 @@ public sealed class RequestImagePathPolicyTests
     /// when the service answers "nothing configured", whatever hop that answer came from.
     /// </summary>
     [TestMethod]
-    public void ANothingConfiguredAnswerNeverReplacesAnImageTheRequestAlreadyResolves()
+    public void Helper_RequestImagePathPolicyTests_ANothingConfiguredAnswerNeverReplacesAnImageTheRequestAlreadyResolves()
     {
         var alreadyResolved = @"\\mtmanu-fs01\Expo Drive\MH_RESOURCE\Material_Handler\MTM Applications\MTM Waitlist Application\Images\request_item\pickup-coil.png";
 
@@ -231,7 +231,7 @@ public sealed class RequestImagePathPolicyTests
     /// that FR-014 forbids, behind a converter everything still goes through.
     /// </remarks>
     [TestMethod]
-    public void TheOnePlaceholderIsNeverBlank()
+    public void Helper_RequestImagePathPolicyTests_TheOnePlaceholderIsNeverBlank()
     {
         Assert.IsFalse(
             string.IsNullOrWhiteSpace(ImagePicturePolicy.NoImagePath),
@@ -260,7 +260,7 @@ public sealed class RequestImagePathPolicyTests
     /// </para>
     /// </remarks>
     [TestMethod]
-    public void EverySurfaceThatDrawsAPart_PassesItThroughThePlaceholderConverter()
+    public void Helper_RequestImagePathPolicyTests_EverySurfaceThatDrawsAPart_PassesItThroughThePlaceholderConverter()
     {
         var root = RepositoryPatternScan.FindRepositoryRoot();
         var markupFiles = EnumerateMarkup(root).ToArray();

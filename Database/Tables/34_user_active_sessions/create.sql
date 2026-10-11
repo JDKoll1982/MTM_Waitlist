@@ -17,9 +17,8 @@
 -- `fn_server_utc_now()` against `expires_utc`, and this table stores no "now" of its own. `fn_server_utc_now`
 -- is deliberately retained for exactly this reason (contracts/sql-contracts.md section 5).
 --
--- `source_label` records where the session came from in the caller's vocabulary (for example `sign_in`,
--- `remembered_sign_in`), which is what lets the support reader tell a remembered session from a typed one
--- without storing anything about the credential.
+-- `source_label` records where the session came from in the caller's vocabulary (`sign_in`), so a later source
+-- can be told apart without storing anything about the credential.
 --
 -- No row is ever hard-deleted by the application: a signed-out or expired row is the evidence that the session
 -- existed, and the retention of that evidence is not this table's decision to make.

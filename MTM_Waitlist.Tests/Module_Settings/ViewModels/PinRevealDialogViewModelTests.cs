@@ -22,7 +22,7 @@ namespace MTM_Waitlist.Tests.Module_Settings.ViewModels;
 public sealed class PinRevealDialogViewModelTests
 {
     [TestMethod]
-    public void Show_HoldsTheCredentialAndEveryFactTheWindowStates()
+    public void ViewModel_PinRevealDialogViewModelTests_Show_HoldsTheCredentialAndEveryFactTheWindowStates()
     {
         var viewModel = new PinRevealDialogViewModel(new PrinterStub());
         var issued = Issued();
@@ -39,7 +39,7 @@ public sealed class PinRevealDialogViewModelTests
     }
 
     [TestMethod]
-    public void Closed_DropsTheCredential_SoItIsReachableNowhereAfterwards()
+    public void ViewModel_PinRevealDialogViewModelTests_Closed_DropsTheCredentialSoItIsReachableNowhereAfterwards()
     {
         var viewModel = new PinRevealDialogViewModel(new PrinterStub());
         viewModel.Show(Issued());
@@ -57,7 +57,7 @@ public sealed class PinRevealDialogViewModelTests
     }
 
     [TestMethod]
-    public void ACloseThatDidNotComeFromTheWindowsOwnButton_IsRefused_AndTheWindowStaysOpen()
+    public void ViewModel_PinRevealDialogViewModelTests_ACloseThatDidNotComeFromTheWindowsOwnButton_IsRefusedAndTheWindowStaysOpen()
     {
         var viewModel = new PinRevealDialogViewModel(new PrinterStub());
         viewModel.Show(Issued());
@@ -75,7 +75,7 @@ public sealed class PinRevealDialogViewModelTests
     }
 
     [TestMethod]
-    public async Task APrintThatCannotStart_CostsNothing_AndLeavesTheCredentialOnScreen()
+    public async Task ViewModel_PinRevealDialogViewModelTests_APrintThatCannotStart_CostsNothingAndLeavesTheCredentialOnScreen()
     {
         var printer = new PrinterStub();
         var viewModel = new PinRevealDialogViewModel(printer);
@@ -92,7 +92,7 @@ public sealed class PinRevealDialogViewModelTests
     }
 
     [TestMethod]
-    public async Task PrintingWhileNoWindowIsOpen_DoesNothingRatherThanFailingLoudly()
+    public async Task ViewModel_PinRevealDialogViewModelTests_PrintingWhileNoWindowIsOpen_DoesNothingRatherThanFailingLoudly()
     {
         var printer = new PrinterStub();
         var viewModel = new PinRevealDialogViewModel(printer);
@@ -102,7 +102,7 @@ public sealed class PinRevealDialogViewModelTests
     }
 
     [TestMethod]
-    public void TheHandoverSlip_CarriesTheCredential_TheInstruction_AndTheSecondResetSentence()
+    public void ViewModel_PinRevealDialogViewModelTests_TheHandoverSlip_CarriesTheCredentialTheInstructionAndTheSecondResetSentence()
     {
         var viewModel = new PinRevealDialogViewModel(new PrinterStub());
         viewModel.Show(Issued());

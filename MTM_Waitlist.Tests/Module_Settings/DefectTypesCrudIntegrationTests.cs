@@ -51,7 +51,7 @@ public sealed class DefectTypesCrudIntegrationTests
     }
 
     [TestMethod]
-    public async Task CrudRoundTrip_InsertListUpdateDelete()
+    public async Task Database_DefectTypesCrudIntegrationTests_CrudRoundTrip_InsertListUpdateDelete()
     {
         // Insert via the SP.
         await _helper.ExecuteStoredProcedureNonQueryAsync(

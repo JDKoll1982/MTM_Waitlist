@@ -10,7 +10,7 @@ namespace MTM_Waitlist.Tests.Module_Setup.Services;
 public sealed class InforVisualSqlQueryServiceTests
 {
     [TestMethod]
-    public async Task LookupWorkOrderQuery_ReturnsRows_WhenServerIsAvailable()
+    public async Task Service_InforVisualSqlQueryServiceTests_LookupWorkOrderQuery_ReturnsRowsWhenServerIsAvailable()
     {
         await SkipIfServerUnavailableAsync();
 
@@ -27,7 +27,7 @@ public sealed class InforVisualSqlQueryServiceTests
     }
 
     [TestMethod]
-    public async Task GetSequencesQuery_ReturnsRows_WhenServerIsAvailable()
+    public async Task Service_InforVisualSqlQueryServiceTests_GetSequencesQuery_ReturnsRowsWhenServerIsAvailable()
     {
         await SkipIfServerUnavailableAsync();
 
@@ -45,7 +45,7 @@ public sealed class InforVisualSqlQueryServiceTests
     }
 
     [TestMethod]
-    public async Task GetSubordinatePartsQuery_ReturnsRows_WhenServerIsAvailable()
+    public async Task Service_InforVisualSqlQueryServiceTests_GetSubordinatePartsQuery_ReturnsRowsWhenServerIsAvailable()
     {
         await SkipIfServerUnavailableAsync();
 
@@ -64,7 +64,7 @@ public sealed class InforVisualSqlQueryServiceTests
     }
 
     [TestMethod]
-    public async Task EmployeeLookupQuery_ReturnsEmployeeStatus_WhenServerIsAvailable()
+    public async Task Service_InforVisualSqlQueryServiceTests_EmployeeLookupQuery_ReturnsEmployeeStatusWhenServerIsAvailable()
     {
         await SkipIfServerUnavailableAsync();
 

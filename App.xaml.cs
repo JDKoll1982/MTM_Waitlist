@@ -29,14 +29,8 @@ public partial class App : Application
     /// <summary>Whether the launch has handed over to the shell, after which the window closes normally.</summary>
     private static bool s_launchHandedOver;
 
-    /// <summary>How many faults this process has written down, so a fault inside a loop cannot fill the disk.</summary>
-    private static int s_recordedFaults;
-
     /// <summary>Whether the process has already been asked to end, so an ending is asked for and performed once.</summary>
     private static int s_exitRequested;
-
-    /// <summary>The most fault records one process writes, which is far more than any single fault needs.</summary>
-    private const int MaximumRecordedFaults = 25;
 
     public IHost Host
     {
@@ -507,7 +501,46 @@ public partial class App : Application
             AppLog.Info("UnhandledException", $"Unhandled exception message: {e.Message}");
         }
 
-        RecordFault("Unhandled", e.Exception is null ? e.Message : e.Exception.ToString());
+        TryFlushLogStore();
+    }
+
+    /// <summary>
+    /// Waits, within a stated bound, for the lines already raised to reach the store.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Why this exists rather than a file.</b> A fault raised on a background thread ends the process through a
+    /// route where the store queue would otherwise be dropped by the thread going away with it, so the account of
+    /// that death has to reach the store before the process goes. An earlier version of this wrote the fault to a
+    /// file under the application's own local folder instead, and that was wrong twice over: nothing may be kept on
+    /// a computer (FR-025), and a fault recorded on a computer is exactly what SC-016 says must not happen. It was
+    /// also written unredacted, so a message carrying a connection string or a statement's parameter value would
+    /// have reached the machine's disk where the seam would have dropped it.
+    /// </para>
+    /// <para>
+    /// <b>Best effort, and bounded.</b> The store write is the seam's own bounded wait, and the enclosing wait is
+    /// bounded again, because a process that is already ending must not be held by a store that will not answer.
+    /// A failure here is deliberately not reported: the fault it is recording has already been raised, and raising
+    /// a second one would hide it (FR-037).
+    /// </para>
+    /// </remarks>
+    private static void TryFlushLogStore()
+    {
+        try
+        {
+            if ((Current as App)?.Host.Services.GetService<ILogService>() is not { } log)
+            {
+                return;
+            }
+
+            // Off the caller's thread so this cannot deadlock on the interface thread's context, and bounded so a
+            // store that will not answer does not hold the process open.
+            Task.Run(() => log.FlushAsync(CancellationToken.None)).Wait(TimeSpan.FromSeconds(2));
+        }
+        catch (Exception)
+        {
+            // Recording the fault is best effort. Nothing is reported here, and nothing is written to the machine.
+        }
     }
 
     /// <summary>
@@ -517,9 +550,9 @@ public partial class App : Application
     /// <para>
     /// <b>This is the route a launch dies on without a word.</b> Every fault raised on the interface thread reaches
     /// <see cref="App_UnhandledException"/>; a fault raised anywhere else — a hosted service, a task the launch
-    /// does not await, a store callback — ends the process through this one instead, and the store log cannot
-    /// account for it because the queue is flushed by a thread that is going away with it. The record written here
-    /// is the only account of that death, so it is written before the process goes.
+    /// does not await, a store callback — ends the process through this one instead, and the store queue is
+    /// flushed by a thread that is going away with it. The record written here is the account of that death, so it
+    /// is written, and the queue is flushed, before the process goes.
     /// </para>
     /// <para>
     /// The fault is not handled, and it cannot be: the process is already ending. Nothing is swallowed here either,
@@ -528,47 +561,12 @@ public partial class App : Application
     /// </remarks>
     private static void CurrentDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
     {
-        var fault = e.ExceptionObject?.ToString() ?? "<the runtime supplied no exception object>";
-
         AppLog.Error(
             "UnhandledException",
             e.ExceptionObject as Exception,
             $"A fault on a thread that is not the interface thread is ending the process. Terminating={e.IsTerminating}.");
 
-        RecordFault("Unhandled (background thread)", $"Terminating={e.IsTerminating}{Environment.NewLine}{fault}");
-    }
-
-    /// <summary>Writes a fault to a file that outlives the process that recorded it.</summary>
-    /// <param name="where">Which handler recorded it, so a first-chance line is not mistaken for the fatal one.</param>
-    /// <param name="detail">The fault in full, including its stack.</param>
-    /// <remarks>
-    /// Best-effort: a fault that cannot be written down must not become a second fault on top of the one being
-    /// recorded, so nothing here is allowed to throw. The files accumulate under the application's own local
-    /// folder rather than being overwritten, because the fault before the last one is often the interesting one.
-    /// </remarks>
-    private static void RecordFault(string where, string detail)
-    {
-        if (Interlocked.Increment(ref s_recordedFaults) > MaximumRecordedFaults)
-        {
-            return;
-        }
-
-        try
-        {
-            var folder = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "MTM_Waitlist",
-                "faults");
-            Directory.CreateDirectory(folder);
-            var file = Path.Combine(folder, $"fault-{DateTime.Now:yyyyMMdd-HHmmss-fff}.txt");
-            File.WriteAllText(
-                file,
-                $"{DateTimeOffset.Now:O} {where}{Environment.NewLine}{detail}{Environment.NewLine}");
-        }
-        catch (Exception)
-        {
-            // Writing the record is best-effort, and a failure here is deliberately not reported anywhere.
-        }
+        TryFlushLogStore();
     }
 
     /// <summary>
@@ -649,11 +647,17 @@ public partial class App : Application
             if (liveStack.Contains("MTM_Waitlist", StringComparison.OrdinalIgnoreCase)
                 || (invalidOperationException.StackTrace ?? string.Empty).Contains("MTM_Waitlist", StringComparison.OrdinalIgnoreCase))
             {
-                AppLog.Error("FirstChance", invalidOperationException, "First-chance InvalidOperationException in MTM_Waitlist stack.");
-                RecordFault(
+                // The live stack travels in the message rather than in a file of its own: the seam truncates a
+                // message that is too long and drops anything that must never be written, and the store is the
+                // only place a record is kept (FR-021, FR-025). This is the hook's whole purpose — naming the
+                // throw site — so it has to reach the store, not the machine's disk.
+                AppLog.Error(
                     "FirstChance",
-                    $"{invalidOperationException}{Environment.NewLine}"
+                    invalidOperationException,
+                    $"First-chance InvalidOperationException in MTM_Waitlist stack.{Environment.NewLine}"
                     + $"--- the stack the throw was standing on ---{Environment.NewLine}{liveStack}");
+
+                TryFlushLogStore();
             }
         }
 

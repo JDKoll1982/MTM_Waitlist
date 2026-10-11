@@ -77,7 +77,7 @@ public sealed class PermissionGateSiteAuditTests
     ];
 
     [TestMethod]
-    public void TheThirteenSites_AreTheOnesTheSpecificationCounts()
+    public void Audit_PermissionGateSiteAuditTests_TheThirteenSites_AreTheOnesTheSpecificationCounts()
     {
         Assert.AreEqual(13, s_theThirteenSites.Length, "The specification's Context section counts thirteen gate sites.");
 
@@ -99,7 +99,7 @@ public sealed class PermissionGateSiteAuditTests
     }
 
     [TestMethod]
-    public void EverySiteThatDecidesAccess_IsNamedByTheDeclarationAsTheReaderOfItsKey()
+    public void Audit_PermissionGateSiteAuditTests_EverySiteThatDecidesAccess_IsNamedByTheDeclarationAsTheReaderOfItsKey()
     {
         foreach (var site in s_theThirteenSites.Where(site => site.PermissionKey is not null))
         {
@@ -114,7 +114,7 @@ public sealed class PermissionGateSiteAuditTests
     }
 
     [TestMethod]
-    public void EverySiteThatDecidesAccess_AsksForAKeyTheDeclarationHolds()
+    public void Audit_PermissionGateSiteAuditTests_EverySiteThatDecidesAccess_AsksForAKeyTheDeclarationHolds()
     {
         // The keys are read from the declaration, so a gate that invents a spelling fails here rather than
         // refusing everybody silently at run time (FR-061).
@@ -155,7 +155,7 @@ public sealed class PermissionGateSiteAuditTests
     }
 
     [TestMethod]
-    public void NoProductionFile_HoldsAHandWrittenListOfRoleNames()
+    public void Audit_PermissionGateSiteAuditTests_NoProductionFile_HoldsAHandWrittenListOfRoleNames()
     {
         var displayNames = CatalogueRoleDisplayNames();
         Assert.AreEqual(
@@ -187,7 +187,7 @@ public sealed class PermissionGateSiteAuditTests
     }
 
     [TestMethod]
-    public void TheRetiredRoleVocabulary_IsGoneFromTheApplication()
+    public void Audit_PermissionGateSiteAuditTests_TheRetiredRoleVocabulary_IsGoneFromTheApplication()
     {
         var offenders = new List<string>();
 
@@ -210,7 +210,7 @@ public sealed class PermissionGateSiteAuditTests
     }
 
     [TestMethod]
-    public void TheTwoSitesThatAreNotPermissions_DoNotBecomeOne()
+    public void Audit_PermissionGateSiteAuditTests_TheTwoSitesThatAreNotPermissions_DoNotBecomeOne()
     {
         var badge = ReadProductionFile("MTM_Waitlist.Core/Permissions/RoleBadgeCatalog.cs");
         var developerCheck = ReadProductionFile("MTM_Waitlist.Core/Contracts/Services/IPersonIdentity.cs");
@@ -246,7 +246,7 @@ public sealed class PermissionGateSiteAuditTests
     }
 
     [TestMethod]
-    public void TheThirteenSites_EachHaveTheirOwnRetiredListGone()
+    public void Audit_PermissionGateSiteAuditTests_TheThirteenSites_EachHaveTheirOwnRetiredListGone()
     {
         // A direct statement of the same claim from the other direction: for each of the eleven sites, none of the
         // declared field names a retired list used may survive beside its permission. The badge map and the
@@ -292,7 +292,7 @@ public sealed class PermissionGateSiteAuditTests
     {
         var resources = ReadProductionFile("Strings/en-us/Resources.resw");
 
-        return [.. Regex.Matches(resources, @"<data name=""Role_(?<code>[a-z_]+)""[^>]*>\s*<value>(?<name>[^<]+)</value>")
+        return [.. Regex.Matches(resources, @"<data name=""Role_(?<code>[a-z_]+)\.Text""[^>]*>\s*<value>(?<name>[^<]+)</value>")
             .Select(match => match.Groups["name"].Value.Trim())];
     }
 
@@ -358,7 +358,7 @@ public sealed class PermissionGateSiteAuditTests
     /// nothing is the failure a check of the gate alone would miss.
     /// </remarks>
     [TestMethod]
-    public void ThePictureCacheGate_ReadsTheStorageEntitlementAndNotThePictureOne()
+    public void Audit_PermissionGateSiteAuditTests_ThePictureCacheGate_ReadsTheStorageEntitlementAndNotThePictureOne()
     {
         var settings = ReadProductionFile("MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs");
 

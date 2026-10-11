@@ -24,6 +24,7 @@ namespace MTM_Waitlist.Tests.Module_Startup.ViewModels;
 public sealed class SignInViewModelTests
 {
     private const string CredentialReadProcedure = "sp_auth_user_credential_get";
+    private const string PreviousPeopleReadProcedure = "sp_auth_user_previous_sign_ins_list";
     private const string SignInName = "JKoll";
     private const string Pin = "8391";
 
@@ -31,7 +32,7 @@ public sealed class SignInViewModelTests
     private static readonly byte[] s_salt = PasswordSecretHasher.NewSalt();
 
     [TestMethod]
-    public void Hint_BeforeANameIsTyped_SaysTheNameIsWhatIsMissing()
+    public void ViewModel_SignInViewModelTests_Hint_BeforeANameIsTypedSaysTheNameIsWhatIsMissing()
     {
         // Arrange
         var viewModel = Build(new StubAccountStore(TemporaryAccount()));
@@ -44,7 +45,7 @@ public sealed class SignInViewModelTests
     }
 
     [TestMethod]
-    public void Hint_OnceANameIsTyped_SaysThePasswordIsWhatIsMissing()
+    public void ViewModel_SignInViewModelTests_Hint_OnceANameIsTypedSaysThePasswordIsWhatIsMissing()
     {
         // Arrange
         var viewModel = Build(new StubAccountStore(TemporaryAccount()));
@@ -57,7 +58,7 @@ public sealed class SignInViewModelTests
     }
 
     [TestMethod]
-    public async Task SignInCommand_WhenTheCredentialIsRefused_StatesItAndKeepsTheFormOpen()
+    public async Task ViewModel_SignInViewModelTests_SignInCommand_WhenTheCredentialIsRefusedStatesItAndKeepsTheFormOpen()
     {
         // Arrange
         var viewModel = Build(new StubAccountStore(TemporaryAccount()));
@@ -77,7 +78,7 @@ public sealed class SignInViewModelTests
     }
 
     [TestMethod]
-    public async Task SignInCommand_WhenTheTemporaryCredentialLimitIsSpent_SaysANewPasswordIsNeeded()
+    public async Task ViewModel_SignInViewModelTests_SignInCommand_WhenTheTemporaryCredentialLimitIsSpentSaysANewPasswordIsNeeded()
     {
         // Arrange: five failures already recorded against the account.
         var viewModel = Build(new StubAccountStore(TemporaryAccount(failedAttempts: 5)));
@@ -91,7 +92,7 @@ public sealed class SignInViewModelTests
     }
 
     [TestMethod]
-    public async Task SignInCommand_WhenTheCredentialIsAccepted_CarriesTheLaunchOnWithTheSignInHeld()
+    public async Task ViewModel_SignInViewModelTests_SignInCommand_WhenTheCredentialIsAcceptedCarriesTheLaunchOnWithTheSignInHeld()
     {
         // Arrange
         var viewModel = Build(new StubAccountStore(TemporaryAccount(requirePasswordChange: false)));
@@ -108,7 +109,7 @@ public sealed class SignInViewModelTests
     }
 
     [TestMethod]
-    public async Task SignInCommand_WhenATemporaryCredentialIsAccepted_OpensThePasswordChangeAndWaits()
+    public async Task ViewModel_SignInViewModelTests_SignInCommand_WhenATemporaryCredentialIsAcceptedOpensThePasswordChangeAndWaits()
     {
         // Arrange: the account is still on its temporary credential.
         var viewModel = Build(new StubAccountStore(TemporaryAccount()));
@@ -127,69 +128,95 @@ public sealed class SignInViewModelTests
     }
 
     [TestMethod]
-    public async Task UseRememberedSignInCommand_WhenNothingIsRemembered_TellsThePersonToTypeThePassword()
+    public async Task ViewModel_SignInViewModelTests_LoadPreviousPeopleCommand_WhenTheStoreHoldsThreePeopleOffersThemInTheOrderTheStoreSent()
     {
-        // Arrange: a key the service can read, and no remembered sign-in stored for this person and machine.
-        var viewModel = Build(new StubAccountStore(TemporaryAccount(requirePasswordChange: false)));
-        viewModel.SignInName = SignInName;
+        // Arrange: three people who signed in on this computer, most recent first, as the read returns them.
+        var store = new StubAccountStore(TemporaryAccount());
+        store.PreviousPeople.Add(Person("KSmith", "K. Smith"));
+        store.PreviousPeople.Add(Person("ABrown", "A. Brown"));
+        store.PreviousPeople.Add(Person(SignInName, "J. Koll"));
+        var viewModel = Build(store);
 
         // Act
-        await viewModel.UseRememberedSignInCommand.ExecuteAsync(null);
+        await viewModel.LoadPreviousPeopleAsync();
 
-        // Assert: the fall-back is stated rather than the button appearing to do nothing (FR-014).
-        Assert.AreEqual("Startup_SignIn.RememberedUnavailable".GetLocalized(), viewModel.Message);
+        // Assert: every one of them is offered, and it is the read's own order that is kept (FR-048).
+        Assert.AreEqual(3, viewModel.PreviousPeople.Count);
+        Assert.IsTrue(viewModel.HasPreviousPeople);
+        CollectionAssert.AreEqual(
+            new[] { "KSmith", "ABrown", SignInName },
+            viewModel.PreviousPeople.Select(person => person.SignInName).ToArray());
     }
 
     [TestMethod]
-    public void CanUseRememberedSignIn_UntilANameIsTyped_IsNotOffered()
+    public async Task ViewModel_SignInViewModelTests_LoadPreviousPeopleCommand_WhenTheStoreCannotAnswerShowsTheFormWithoutThem()
+    {
+        // Arrange: a store that is unreachable, which must not stop anybody signing in (FR-015).
+        var store = new StubAccountStore(TemporaryAccount()) { Fails = true };
+        var viewModel = Build(store);
+
+        // Act
+        await viewModel.LoadPreviousPeopleAsync();
+
+        // Assert: the list is empty and the form is untouched.
+        Assert.AreEqual(0, viewModel.PreviousPeople.Count);
+        Assert.IsFalse(viewModel.HasPreviousPeople);
+    }
+
+    [TestMethod]
+    public async Task ViewModel_SignInViewModelTests_LoadPreviousPeopleCommand_WhenThisComputerHasNoRecordAsksTheStoreNothing()
+    {
+        // Arrange: a machine the store has never held, so no sign-ins are recorded against it.
+        var store = new StubAccountStore(TemporaryAccount());
+        var viewModel = Build(store, identifierSignIn: null, recorded: false);
+
+        // Act
+        await viewModel.LoadPreviousPeopleAsync();
+
+        // Assert: there is nothing to ask about and no round trip is made (FR-048).
+        Assert.AreEqual(0, viewModel.PreviousPeople.Count);
+        CollectionAssert.DoesNotContain(store.CalledProcedures, "sp_auth_user_previous_sign_ins_list");
+    }
+
+    [TestMethod]
+    public async Task ViewModel_SignInViewModelTests_ChoosePreviousPersonCommand_WhenAPersonIsChosenFillsInTheUserNameAndNothingElse()
     {
         // Arrange
+        var store = new StubAccountStore(TemporaryAccount(requirePasswordChange: false));
+        store.PreviousPeople.Add(Person("KSmith", "K. Smith"));
+        store.PreviousPeople.Add(Person(SignInName, "J. Koll"));
+        var viewModel = Build(store, Identifier(new StubDirectory(), new StubPlant()));
+        var accepted = 0;
+        viewModel.SignInAccepted += (_, _) => accepted++;
+
+        await viewModel.LoadPreviousPeopleAsync();
+
+        // Act: the person picks somebody from the list beside the form.
+        viewModel.ChoosePreviousPersonCommand.Execute(viewModel.PreviousPeople[1]);
+
+        // Assert: the name is filled in, the PIN is still to be typed, and nobody has been signed in (FR-014).
+        Assert.AreEqual(SignInName, viewModel.SignInName);
+        Assert.IsTrue(viewModel.IsCredentialStage, "choosing a person moves to the PIN, not past it");
+        Assert.AreEqual(0, accepted, "choosing a name signs nobody in");
+        CollectionAssert.DoesNotContain(
+            store.CalledProcedures,
+            "sp_auth_user_credential_get",
+            "no credential is checked until one is typed");
+    }
+
+    [TestMethod]
+    public void ViewModel_SignInViewModelTests_ChoosePreviousPersonCommand_WithNothingBehindItChangesNothing()
+    {
         var viewModel = Build(new StubAccountStore(TemporaryAccount()));
 
-        // Act: the store keys a remembered sign-in by person, so there is nothing to ask about without a name.
-        var before = viewModel.CanUseRememberedSignIn;
-        viewModel.SignInName = SignInName;
+        viewModel.ChoosePreviousPersonCommand.Execute(null);
 
-        // Assert
-        Assert.IsFalse(before);
-        Assert.IsTrue(viewModel.CanUseRememberedSignIn);
+        Assert.AreEqual(string.Empty, viewModel.SignInName);
+        Assert.IsTrue(viewModel.IsIdentifierStage);
     }
 
     [TestMethod]
-    public async Task SignInCommand_WhenRememberMeIsNotChosen_ForgetsWhatThisMachineRemembered()
-    {
-        // Arrange: the person signs in with the box clear, which is how someone stops being remembered on a
-        // shared computer.
-        var store = new StubAccountStore(TemporaryAccount(requirePasswordChange: false));
-        var viewModel = Build(store);
-
-        // Act
-        await viewModel.SignInCommand.ExecuteAsync(new SignInCredentials(SignInName, Pin));
-
-        // Assert: the earlier choice cannot outlive the person changing their mind (FR-014).
-        CollectionAssert.Contains(
-            store.CalledProcedures,
-            "sp_auth_remembered_sign_ins_clear",
-            "signing in without the choice must forget what this machine held");
-    }
-
-    [TestMethod]
-    public async Task SignInCommand_WhenRememberMeIsChosen_StoresTheSignInAgainstThePerson()
-    {
-        // Arrange
-        var store = new StubAccountStore(TemporaryAccount(requirePasswordChange: false));
-        var viewModel = Build(store);
-        viewModel.RememberMe = true;
-
-        // Act
-        await viewModel.SignInCommand.ExecuteAsync(new SignInCredentials(SignInName, Pin));
-
-        // Assert
-        CollectionAssert.Contains(store.CalledProcedures, "sp_auth_remembered_sign_ins_upsert");
-    }
-
-    [TestMethod]
-    public async Task Enter_OnTheIdentifierStageWithAValue_ResolvesExactlyAsTheContinueButtonDoes()
+    public async Task ViewModel_SignInViewModelTests_Enter_OnTheIdentifierStageWithAValueResolvesExactlyAsTheContinueButtonDoes()
     {
         // Arrange: a user name the store holds.
         var store = new StubAccountStore(TemporaryAccount(requirePasswordChange: false));
@@ -206,7 +233,7 @@ public sealed class SignInViewModelTests
     }
 
     [TestMethod]
-    public async Task Enter_OnTheIdentifierStageWithABlankField_ShowsItsHint()
+    public async Task ViewModel_SignInViewModelTests_Enter_OnTheIdentifierStageWithABlankFieldShowsItsHint()
     {
         var viewModel = Build(
             new StubAccountStore(TemporaryAccount()),
@@ -219,7 +246,7 @@ public sealed class SignInViewModelTests
     }
 
     [TestMethod]
-    public async Task Enter_OnTheIdentifierStageForAnUnknownNumber_RefusesAndKeepsTheFormOpen()
+    public async Task ViewModel_SignInViewModelTests_Enter_OnTheIdentifierStageForAnUnknownNumberRefusesAndKeepsTheFormOpen()
     {
         var viewModel = Build(
             new StubAccountStore(TemporaryAccount()),
@@ -232,7 +259,7 @@ public sealed class SignInViewModelTests
     }
 
     [TestMethod]
-    public async Task ContinueWithIdentifier_WhenOnlyThePlantSystemKnowsTheNumber_AsksForSetUp()
+    public async Task ViewModel_SignInViewModelTests_ContinueWithIdentifier_WhenOnlyThePlantSystemKnowsTheNumberAsksForSetUp()
     {
         var directory = new StubDirectory();
         var plant = new StubPlant
@@ -252,7 +279,7 @@ public sealed class SignInViewModelTests
     }
 
     [TestMethod]
-    public async Task Enter_OnTheCredentialStageWithAValue_SubmitsExactlyAsTheButtonDoes()
+    public async Task ViewModel_SignInViewModelTests_Enter_OnTheCredentialStageWithAValueSubmitsExactlyAsTheButtonDoes()
     {
         var store = new StubAccountStore(TemporaryAccount(requirePasswordChange: false));
         var viewModel = Build(store, Identifier(new StubDirectory(), new StubPlant()));
@@ -266,7 +293,7 @@ public sealed class SignInViewModelTests
     }
 
     [TestMethod]
-    public async Task Enter_OnTheCredentialStageWithABlankField_ShowsItsHint()
+    public async Task ViewModel_SignInViewModelTests_Enter_OnTheCredentialStageWithABlankFieldShowsItsHint()
     {
         var viewModel = Build(
             new StubAccountStore(TemporaryAccount()),
@@ -307,13 +334,23 @@ public sealed class SignInViewModelTests
 
     private static SignInViewModel Build(StubAccountStore store) => Build(store, identifierSignIn: null);
 
-    private static SignInViewModel Build(StubAccountStore store, IdentifierSignInService? identifierSignIn) => new(
+    private static SignInViewModel Build(
+        StubAccountStore store,
+        IdentifierSignInService? identifierSignIn,
+        bool recorded = true) => new(
         new CredentialCheckService(store),
-        new RememberedSignInService(store, new StubKeySource()),
+        new PreviousSignInService(store),
         new PendingSignIn(),
         new SignInOutcome(),
-        new StubMachineFacts(),
+        new StubMachineFacts { Recorded = recorded },
         identifierSignIn);
+
+    /// <summary>One row of the previous-people read, in the column names that read returns.</summary>
+    private static Dictionary<string, object?> Person(string signInName, string displayName) => new()
+    {
+        ["username_normalized"] = signInName,
+        ["display_name"] = displayName,
+    };
 
     /// <summary>One account row in the column names the credential read returns.</summary>
     private static Dictionary<string, object?> TemporaryAccount(
@@ -330,30 +367,29 @@ public sealed class SignInViewModelTests
         ["temporary_credential_failed_attempts"] = failedAttempts,
     };
 
-    /// <summary>A key source that can always be read, since this class is about what the form does with an answer.</summary>
-    private sealed class StubKeySource : ISharedKeySource
-    {
-        public byte[]? ReadKey() => [.. Enumerable.Repeat((byte)11, SharedKeyFileSource.KeyLengthBytes)];
-    }
-
-    /// <summary>This computer as the form sees it: recorded, so a remembered sign-in has a machine to be keyed to.</summary>
+    /// <summary>This computer as the form sees it: recorded, so the offer has a machine to be drawn for.</summary>
     private sealed class StubMachineFacts : IMachineFacts
     {
+        /// <summary>Whether the store already holds this computer's record.</summary>
+        public bool Recorded { get; init; } = true;
+
         public string Hostname => "MTMFG-161";
 
         public string? MacAddress => "aa-bb-cc-dd-ee-ff";
 
-        public ComputerRecord? RegisteredComputer => new()
-        {
-            Id = 3L,
-            ComputerName = "MTMFG-161",
-            DisplayName = "Shop floor station",
-            Description = "a machine the test owns",
-            MacAddressNormalized = "aa-bb-cc-dd-ee-ff",
-            IsRegistered = true,
-        };
+        public ComputerRecord? RegisteredComputer => Recorded
+            ? new ComputerRecord
+            {
+                Id = 3L,
+                ComputerName = "MTMFG-161",
+                DisplayName = "Shop floor station",
+                Location = "a machine the test owns",
+                MacAddressNormalized = "aa-bb-cc-dd-ee-ff",
+                IsRegistered = true,
+            }
+            : null;
 
-        public bool IsRegistered => true;
+        public bool IsRegistered => Recorded;
 
         public bool HardwareIdentityReadable => true;
     }
@@ -371,6 +407,12 @@ public sealed class SignInViewModelTests
         /// <summary>Every procedure the store was asked for, so a claim about a call can be read back.</summary>
         public List<string> CalledProcedures { get; } = [];
 
+        /// <summary>The rows the previous-people read answers with, in the order the store would return them.</summary>
+        public List<Dictionary<string, object?>> PreviousPeople { get; } = [];
+
+        /// <summary>Whether every read fails, so a store outage can be exercised.</summary>
+        public bool Fails { get; init; }
+
         public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteStoredProcedureQueryAsync(
             string storedProcedureName,
             IReadOnlyDictionary<string, object?> parameters,
@@ -379,10 +421,18 @@ public sealed class SignInViewModelTests
         {
             CalledProcedures.Add(storedProcedureName);
 
+            if (Fails)
+            {
+                throw new InvalidOperationException("the store did not answer");
+            }
+
             return Task.FromResult<IReadOnlyList<Dictionary<string, object?>>>(
-                string.Equals(storedProcedureName, CredentialReadProcedure, StringComparison.Ordinal)
-                    ? [_account]
-                    : []);
+                storedProcedureName switch
+                {
+                    CredentialReadProcedure => [_account],
+                    PreviousPeopleReadProcedure => [.. PreviousPeople],
+                    _ => [],
+                });
         }
 
         public Task<int> ExecuteStoredProcedureNonQueryAsync(

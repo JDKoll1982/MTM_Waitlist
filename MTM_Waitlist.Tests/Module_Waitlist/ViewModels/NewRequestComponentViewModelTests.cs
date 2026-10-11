@@ -25,7 +25,7 @@ public sealed class NewRequestComponentViewModelTests
     private const string SecondComponent = "CMP0004455";
 
     [TestMethod]
-    public void OnNavigatedTo_BindsABoxForEveryComponentTheJobCarries_EachWithThePlaceholderPicture()
+    public void ViewModel_NewRequestComponentViewModelTests_OnNavigatedTo_BindsABoxForEveryComponentTheJobCarriesEachWithThePlaceholderPicture()
     {
         var viewModel = CreateViewModel();
         viewModel.OnNavigatedTo(TwoComponentState());
@@ -49,7 +49,7 @@ public sealed class NewRequestComponentViewModelTests
     }
 
     [TestMethod]
-    public void EveryBox_NamesItselfAndItsPictureBox_SoTheStandInCanBeFoundByAutomation()
+    public void ViewModel_NewRequestComponentViewModelTests_EveryBox_NamesItselfAndItsPictureBoxSoTheStandInCanBeFoundByAutomation()
     {
         var viewModel = CreateViewModel();
         viewModel.OnNavigatedTo(TwoComponentState());
@@ -72,7 +72,7 @@ public sealed class NewRequestComponentViewModelTests
     }
 
     [TestMethod]
-    public void OnNavigatedTo_AsksTheRowsOwnPrompt()
+    public void ViewModel_NewRequestComponentViewModelTests_OnNavigatedTo_AsksTheRowsOwnPrompt()
     {
         // The two component rows ask the question differently — one collects, one brings — and the step asks what
         // the ROW says rather than flattening both into one wording (FR-013).
@@ -86,7 +86,7 @@ public sealed class NewRequestComponentViewModelTests
     }
 
     [TestMethod]
-    public void OnNavigatedTo_WithNoConfiguredPrompt_AsksThroughTheResourceMechanism()
+    public void ViewModel_NewRequestComponentViewModelTests_OnNavigatedTo_WithNoConfiguredPromptAsksThroughTheResourceMechanism()
     {
         var state = TwoComponentState();
         state.ItemConfiguration = RowWithPrompt(null);
@@ -101,7 +101,7 @@ public sealed class NewRequestComponentViewModelTests
     }
 
     [TestMethod]
-    public void SelectComponent_RecordsThePartAndMovesOn()
+    public void ViewModel_NewRequestComponentViewModelTests_SelectComponent_RecordsThePartAndMovesOn()
     {
         var navigation = new RecordingNavigationService();
         var viewModel = CreateViewModel(navigation);
@@ -124,7 +124,7 @@ public sealed class NewRequestComponentViewModelTests
     }
 
     [TestMethod]
-    public void OnNavigatedTo_ComingBackWithAComponentChosen_ShowsItMarkedAgain()
+    public void ViewModel_NewRequestComponentViewModelTests_OnNavigatedTo_ComingBackWithAComponentChosenShowsItMarkedAgain()
     {
         var state = TwoComponentState();
         state.InputValue = FirstComponent;
@@ -138,7 +138,7 @@ public sealed class NewRequestComponentViewModelTests
     }
 
     [TestMethod]
-    public void OnNavigatedTo_ForAJobWithNoComponent_ReportsItAndDropsNoBoxes()
+    public void ViewModel_NewRequestComponentViewModelTests_OnNavigatedTo_ForAJobWithNoComponentReportsItAndDropsNoBoxes()
     {
         var noComponent = TwoComponentState();
         noComponent.Availability = RequestJobPartAvailability.None;
@@ -154,7 +154,7 @@ public sealed class NewRequestComponentViewModelTests
     }
 
     [TestMethod]
-    public void OnNavigatedTo_WithoutAState_LeavesTheStep()
+    public void ViewModel_NewRequestComponentViewModelTests_OnNavigatedTo_WithoutAStateLeavesTheStep()
     {
         var navigation = new RecordingNavigationService();
         var viewModel = CreateViewModel(navigation);

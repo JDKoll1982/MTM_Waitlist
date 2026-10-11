@@ -9,7 +9,7 @@ namespace MTM_Waitlist.Tests.Core.Models;
 public sealed class HeaderStepTests
 {
     [TestMethod]
-    public void HeaderStep_Defaults()
+    public void Model_HeaderStepTests_HeaderStep_Defaults()
     {
         var step = new HeaderStep();
 
@@ -22,7 +22,7 @@ public sealed class HeaderStepTests
     }
 
     [TestMethod]
-    public void HeaderStep_PropertiesAreSettable()
+    public void Model_HeaderStepTests_HeaderStep_PropertiesAreSettable()
     {
         var step = new HeaderStep
         {
@@ -43,7 +43,7 @@ public sealed class HeaderStepTests
     }
 
     [TestMethod]
-    public void HeaderStep_CanTransitionToComplete()
+    public void Model_HeaderStepTests_HeaderStep_CanTransitionToComplete()
     {
         var step = new HeaderStep { State = HeaderStepState.Complete };
 
@@ -51,14 +51,14 @@ public sealed class HeaderStepTests
     }
 
     [TestMethod]
-    public void HeaderStep_LeftConnectorVisibility_HiddenForFirstStep()
+    public void Model_HeaderStepTests_HeaderStep_LeftConnectorVisibilityHiddenForFirstStep()
     {
         Assert.AreEqual(Visibility.Collapsed, new HeaderStep { IsFirst = true }.LeftConnectorVisibility);
         Assert.AreEqual(Visibility.Visible, new HeaderStep { IsFirst = false }.LeftConnectorVisibility);
     }
 
     [TestMethod]
-    public void HeaderStep_RightConnectorVisibility_HiddenForLastStep()
+    public void Model_HeaderStepTests_HeaderStep_RightConnectorVisibilityHiddenForLastStep()
     {
         Assert.AreEqual(Visibility.Collapsed, new HeaderStep { IsLast = true }.RightConnectorVisibility);
         Assert.AreEqual(Visibility.Visible, new HeaderStep { IsLast = false }.RightConnectorVisibility);

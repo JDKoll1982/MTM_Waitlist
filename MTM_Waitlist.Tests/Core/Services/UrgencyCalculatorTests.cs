@@ -12,7 +12,7 @@ public sealed class UrgencyCalculatorTests
     private static readonly DateTimeOffset Now = new(2026, 9, 6, 12, 0, 0, TimeSpan.Zero);
 
     [TestMethod]
-    public void Compute_DueIsCreatedPlusAllotted_RemainingAndOverdue()
+    public void Service_UrgencyCalculatorTests_Compute_DueIsCreatedPlusAllottedRemainingAndOverdue()
     {
         var created = Now.AddMinutes(-30);
         var state = UrgencyCalculator.Compute(created, TimeSpan.FromMinutes(60), Now);
@@ -23,7 +23,7 @@ public sealed class UrgencyCalculatorTests
     }
 
     [TestMethod]
-    public void Compute_Overdue_WhenPastDue()
+    public void Service_UrgencyCalculatorTests_Compute_OverdueWhenPastDue()
     {
         var created = Now.AddMinutes(-120);
         var state = UrgencyCalculator.Compute(created, TimeSpan.FromMinutes(60), Now);
@@ -33,7 +33,7 @@ public sealed class UrgencyCalculatorTests
     }
 
     [TestMethod]
-    public void OrderMostUrgentFirst_OverdueFirst_ThenLeastRemaining()
+    public void Service_UrgencyCalculatorTests_OrderMostUrgentFirst_OverdueFirstThenLeastRemaining()
     {
         // a: overdue, b: 10 min left, c: 5 min left.
         var a = UrgencyCalculator.Compute(Now.AddMinutes(-70), TimeSpan.FromMinutes(60), Now);
@@ -51,7 +51,7 @@ public sealed class UrgencyCalculatorTests
     }
 
     [TestMethod]
-    public void RemainingLabel_OverdueVsMinutes()
+    public void Service_UrgencyCalculatorTests_RemainingLabel_OverdueVsMinutes()
     {
         var overdue = UrgencyCalculator.Compute(Now.AddMinutes(-70), TimeSpan.FromMinutes(60), Now);
         var ok = UrgencyCalculator.Compute(Now.AddMinutes(-30), TimeSpan.FromMinutes(60), Now);
@@ -63,7 +63,7 @@ public sealed class UrgencyCalculatorTests
     // ── US3: the five orders the list can be shown in (FR-010, FR-011, FR-012) ─────────────────────────
 
     [TestMethod]
-    public void OrderBy_MostUrgent_IsWhatNothingRememberedAndTheDefaultKeyBothGive()
+    public void Service_UrgencyCalculatorTests_OrderBy_MostUrgentIsWhatNothingRememberedAndTheDefaultKeyBothGive()
     {
         var rows = new[]
         {
@@ -88,7 +88,7 @@ public sealed class UrgencyCalculatorTests
     }
 
     [TestMethod]
-    public void OrderBy_LongestWaiting_LeadsWithTheOldestRequest()
+    public void Service_UrgencyCalculatorTests_OrderBy_LongestWaitingLeadsWithTheOldestRequest()
     {
         var rows = new[]
         {
@@ -104,7 +104,7 @@ public sealed class UrgencyCalculatorTests
     }
 
     [TestMethod]
-    public void OrderBy_Press_GroupsByWorkCentre_AndLeadsEachGroupWithItsMostUrgentRow()
+    public void Service_UrgencyCalculatorTests_OrderBy_PressGroupsByWorkCentreAndLeadsEachGroupWithItsMostUrgentRow()
     {
         var rows = new[]
         {
@@ -120,7 +120,7 @@ public sealed class UrgencyCalculatorTests
     }
 
     [TestMethod]
-    public void OrderBy_RequestedBy_GroupsByRequester_AndLeadsEachGroupWithItsMostUrgentRow()
+    public void Service_UrgencyCalculatorTests_OrderBy_RequestedByGroupsByRequesterAndLeadsEachGroupWithItsMostUrgentRow()
     {
         var rows = new[]
         {
@@ -136,7 +136,7 @@ public sealed class UrgencyCalculatorTests
     }
 
     [TestMethod]
-    public void OrderBy_Status_LeadsWithWorkStillWaitingToBeClaimed()
+    public void Service_UrgencyCalculatorTests_OrderBy_StatusLeadsWithWorkStillWaitingToBeClaimed()
     {
         var rows = new[]
         {
@@ -152,7 +152,7 @@ public sealed class UrgencyCalculatorTests
     }
 
     [TestMethod]
-    public void OrderBy_AnUnknownKey_FallsBackToTheDefault()
+    public void Service_UrgencyCalculatorTests_OrderBy_AnUnknownKeyFallsBackToTheDefault()
     {
         // A stored preference can outlive the key it names. The list must still come up ordered (FR-010).
         var rows = new[]
@@ -180,7 +180,7 @@ public sealed class UrgencyCalculatorTests
     [DataRow(WaitlistSortOrder.Press)]
     [DataRow(WaitlistSortOrder.RequestedBy)]
     [DataRow(WaitlistSortOrder.Status)]
-    public void OrderBy_EveryOrder_LeavesAnOverdueRowMarkedAndAheadOfItsPeers(string sortOrder)
+    public void Service_UrgencyCalculatorTests_OrderBy_EveryOrderLeavesAnOverdueRowMarkedAndAheadOfItsPeers(string sortOrder)
     {
         // The two rows carry identical work centre, requester and status, so under every order but the age one
         // they are separated by urgency alone — and an overdue row must lead either way (FR-012).
@@ -195,7 +195,7 @@ public sealed class UrgencyCalculatorTests
     }
 
     [TestMethod]
-    public void OrderBy_LongestWaitingAndMostUrgent_AreDifferentOrders_ForEqualWaitsWithDifferentAllotments()
+    public void Service_UrgencyCalculatorTests_OrderBy_LongestWaitingAndMostUrgentAreDifferentOrdersForEqualWaitsWithDifferentAllotments()
     {
         // Raised at the same instant, so equally waited, but the shorter window is the more urgent of the two.
         var urgent = RowWith("same-moment-urgent", Now.AddMinutes(-30), TimeSpan.FromMinutes(35));

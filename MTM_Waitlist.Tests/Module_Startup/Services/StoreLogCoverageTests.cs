@@ -48,7 +48,7 @@ public sealed class StoreLogCoverageTests
     public void DetachTheSeam() => AppLog.Configure(null);
 
     [TestMethod]
-    public void TheSeam_IsUnconditional_SoAReleaseBuildRecordsWhatADebugBuildWouldHaveCompiledOut()
+    public void Service_StoreLogCoverageTests_TheSeam_IsUnconditionalSoAReleaseBuildRecordsWhatADebugBuildWouldHaveCompiledOut()
     {
         // Arrange: every type the write path passes through, from the call site's façade to the seam.
         var types = new[] { typeof(AppLog), typeof(ILogService), typeof(LogService) };
@@ -70,7 +70,7 @@ public sealed class StoreLogCoverageTests
     }
 
     [TestMethod]
-    public async Task ALaunchThatEnds_RecordsItsOutcomeThroughTheSeam_AndTheStoreReceivesIt()
+    public async Task Service_StoreLogCoverageTests_ALaunchThatEnds_RecordsItsOutcomeThroughTheSeamAndTheStoreReceivesIt()
     {
         // Arrange
         var store = new RecordingLogStore();
@@ -101,7 +101,7 @@ public sealed class StoreLogCoverageTests
     }
 
     [TestMethod]
-    public void TheHost_RecordsTheLaunchsOutcomeThroughTheStaticSeam()
+    public void Service_StoreLogCoverageTests_TheHost_RecordsTheLaunchsOutcomeThroughTheStaticSeam()
     {
         // Arrange: the app host is the one place a launch's end is recorded, and it is a WinUI application class
         // that no unit test can instantiate, so its call site is read rather than run.
@@ -119,7 +119,7 @@ public sealed class StoreLogCoverageTests
     }
 
     [TestMethod]
-    public async Task AWriteTheStoreRefuses_LeavesNoLocalLogFileBehind()
+    public async Task Service_StoreLogCoverageTests_AWriteTheStoreRefuses_LeavesNoLocalLogFileBehind()
     {
         // Arrange: the store refuses every write, which is the outage SC-016 describes.
         var before = FilesUnder(LocalLogRoot);

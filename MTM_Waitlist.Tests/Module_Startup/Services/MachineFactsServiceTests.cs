@@ -36,7 +36,7 @@ public sealed class MachineFactsServiceTests
     private static readonly Regex s_storesForm = new("^[0-9a-f]{2}(-[0-9a-f]{2}){5}$", RegexOptions.Compiled);
 
     [TestMethod]
-    public void Hostname_IsThisMachinesName()
+    public void Service_MachineFactsServiceTests_Hostname_IsThisMachinesName()
     {
         var service = new MachineFactsService(new StubMySqlHelperServer([]));
 
@@ -45,7 +45,7 @@ public sealed class MachineFactsServiceTests
     }
 
     [TestMethod]
-    public void HardwareIdentityReadable_AgreesWithTheAddress()
+    public void Service_MachineFactsServiceTests_HardwareIdentityReadable_AgreesWithTheAddress()
     {
         var service = new MachineFactsService(new StubMySqlHelperServer([]));
 
@@ -54,7 +54,7 @@ public sealed class MachineFactsServiceTests
     }
 
     [TestMethod]
-    public void MacAddress_WhenReadable_IsHeldInTheStoresForm()
+    public void Service_MachineFactsServiceTests_MacAddress_WhenReadableIsHeldInTheStoresForm()
     {
         var service = new MachineFactsService(new StubMySqlHelperServer([]));
 
@@ -69,7 +69,7 @@ public sealed class MachineFactsServiceTests
     }
 
     [TestMethod]
-    public void RegisteredComputer_StartsUnknown()
+    public void Service_MachineFactsServiceTests_RegisteredComputer_StartsUnknown()
     {
         var service = new MachineFactsService(new StubMySqlHelperServer([]));
 
@@ -78,7 +78,7 @@ public sealed class MachineFactsServiceTests
     }
 
     [TestMethod]
-    public async Task RefreshAsync_ReadsTheRegistryByNameAndConfirmsTheAddress()
+    public async Task Service_MachineFactsServiceTests_RefreshAsync_ReadsTheRegistryByNameAndConfirmsTheAddress()
     {
         // The constructor reads this machine's own address and cannot be given one, so the store's answer is
         // built from what the machine reports rather than from a constant the test would have to keep in step.
@@ -105,7 +105,7 @@ public sealed class MachineFactsServiceTests
     }
 
     [TestMethod]
-    public async Task RefreshAsync_WhenTheRowCarriesAnotherMachinesAddress_IsNotThisMachinesRecord()
+    public async Task Service_MachineFactsServiceTests_RefreshAsync_WhenTheRowCarriesAnotherMachinesAddressIsNotThisMachinesRecord()
     {
         var stub = new StubMySqlHelperServer([RegistryRow(isRegistered: 1L, macAddress: "00-00-00-00-00-01")]);
         var service = new MachineFactsService(stub);
@@ -123,7 +123,7 @@ public sealed class MachineFactsServiceTests
     }
 
     [TestMethod]
-    public async Task RefreshAsync_RegisteredFlagSurfacedAsBoolean_CountsAsRegistered()
+    public async Task Service_MachineFactsServiceTests_RefreshAsync_RegisteredFlagSurfacedAsBooleanCountsAsRegistered()
     {
         // The driver surfaces a TINYINT(1) column as a bool, and reading it as a number would throw rather than
         // answer, so the registered flag is pinned in that form too.
@@ -142,7 +142,7 @@ public sealed class MachineFactsServiceTests
     }
 
     [TestMethod]
-    public async Task RefreshAsync_WhenTheStoreHoldsNoRow_LeavesTheMachineUnregistered()
+    public async Task Service_MachineFactsServiceTests_RefreshAsync_WhenTheStoreHoldsNoRowLeavesTheMachineUnregistered()
     {
         var stub = new StubMySqlHelperServer([]);
         var service = new MachineFactsService(stub);
@@ -163,7 +163,7 @@ public sealed class MachineFactsServiceTests
     }
 
     [TestMethod]
-    public void Apply_ReplacesTheResolvedRow()
+    public void Service_MachineFactsServiceTests_Apply_ReplacesTheResolvedRow()
     {
         var service = new MachineFactsService(new StubMySqlHelperServer([]));
 

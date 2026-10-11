@@ -8,7 +8,7 @@ namespace MTM_Waitlist.Tests.Services;
 public sealed class BuildingSelectionServiceTests
 {
     [TestMethod]
-    public void Constructor_SelectsFirstBuildingByDefault()
+    public void Service_BuildingSelectionServiceTests_Constructor_SelectsFirstBuildingByDefault()
     {
         var service = new BuildingSelectionService();
 
@@ -17,7 +17,7 @@ public sealed class BuildingSelectionServiceTests
     }
 
     [TestMethod]
-    public void SelectedBuilding_IgnoresWhitespaceAndDuplicateAssignments()
+    public void Service_BuildingSelectionServiceTests_SelectedBuilding_IgnoresWhitespaceAndDuplicateAssignments()
     {
         var service = new BuildingSelectionService();
         var changeCount = 0;
@@ -32,7 +32,7 @@ public sealed class BuildingSelectionServiceTests
     }
 
     [TestMethod]
-    public void SelectedBuilding_RaisesEventWhenChanged()
+    public void Service_BuildingSelectionServiceTests_SelectedBuilding_RaisesEventWhenChanged()
     {
         var service = new BuildingSelectionService();
         var changeCount = 0;

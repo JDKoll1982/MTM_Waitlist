@@ -29,7 +29,7 @@ public sealed class LaunchPipelineRetryTests
     private const string NewPinStepId = "set-new-password";
 
     [TestMethod]
-    public async Task RunAsync_WhenAStepFails_EndsBlocked() 
+    public async Task Service_LaunchPipelineRetryTests_RunAsync_WhenAStepFailsEndsBlocked() 
     {
         // Arrange
         var run = new LaunchRun().With(ReachabilityStepId, Failed("the store did not answer"));
@@ -42,7 +42,7 @@ public sealed class LaunchPipelineRetryTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenTheMachineIsUnconfigured_EndsAtMachineSetup()
+    public async Task Service_LaunchPipelineRetryTests_RunAsync_WhenTheMachineIsUnconfiguredEndsAtMachineSetup()
     {
         // Arrange: the readiness step answers, and what it found is that this computer has no configuration.
         var run = new LaunchRun().With(ReadinessStepId, Succeeded()).Unconfigured();
@@ -55,7 +55,7 @@ public sealed class LaunchPipelineRetryTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenNoSignInIsHeld_EndsAtSignIn()
+    public async Task Service_LaunchPipelineRetryTests_RunAsync_WhenNoSignInIsHeldEndsAtSignIn()
     {
         // Arrange: the machine is configured and nobody is signed in, so identity cannot be resolved without
         // asking (FR-014).
@@ -69,7 +69,7 @@ public sealed class LaunchPipelineRetryTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenThePersonIsSignedIn_EndsAtTheMainScreensAndRaisesShellReady()
+    public async Task Service_LaunchPipelineRetryTests_RunAsync_WhenThePersonIsSignedInEndsAtTheMainScreensAndRaisesShellReady()
     {
         // Arrange
         var run = new LaunchRun().With(ReadinessStepId, Succeeded()).SignedIn();
@@ -85,7 +85,7 @@ public sealed class LaunchPipelineRetryTests
     }
 
     [TestMethod]
-    public async Task RetryFromAsync_RepeatsTheNamedStepAndWhatFollowsIt_AndNothingBeforeIt()
+    public async Task Service_LaunchPipelineRetryTests_RetryFromAsync_RepeatsTheNamedStepAndWhatFollowsItAndNothingBeforeIt()
     {
         // Arrange
         var run = new LaunchRun()
@@ -107,7 +107,7 @@ public sealed class LaunchPipelineRetryTests
     }
 
     [TestMethod]
-    public async Task RetryFromAsync_WhenTheStepIsNotOneTheLaunchDeclares_IsRefused()
+    public async Task Service_LaunchPipelineRetryTests_RetryFromAsync_WhenTheStepIsNotOneTheLaunchDeclaresIsRefused()
     {
         // Arrange
         var run = new LaunchRun();
@@ -121,7 +121,7 @@ public sealed class LaunchPipelineRetryTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenASecondEntryArrivesWhileOneIsRunning_StartsNothing()
+    public async Task Service_LaunchPipelineRetryTests_RunAsync_WhenASecondEntryArrivesWhileOneIsRunningStartsNothing()
     {
         // Arrange: the first step never finishes, so the launch is still under way.
         var gate = new TaskCompletionSource<LaunchStepOutcome>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -143,7 +143,7 @@ public sealed class LaunchPipelineRetryTests
     }
 
     [TestMethod]
-    public void End_StatesTheReasonBeforeTheProcessGoes()
+    public void Service_LaunchPipelineRetryTests_End_StatesTheReasonBeforeTheProcessGoes()
     {
         // Arrange
         var run = new LaunchRun();
@@ -159,7 +159,7 @@ public sealed class LaunchPipelineRetryTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenTheNewPinHasBeenSet_StartsTheApplicationAgainAndEndsTheLaunch()
+    public async Task Service_LaunchPipelineRetryTests_RunAsync_WhenTheNewPinHasBeenSetStartsTheApplicationAgainAndEndsTheLaunch()
     {
         // Arrange: the machine is configured, the person is signed in, and the step that replaces a temporary
         // credential reports that the store took the PIN the person chose.
@@ -178,7 +178,7 @@ public sealed class LaunchPipelineRetryTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenTheApplicationCouldNotBeStartedAgain_CarriesOnToTheMainScreens()
+    public async Task Service_LaunchPipelineRetryTests_RunAsync_WhenTheApplicationCouldNotBeStartedAgainCarriesOnToTheMainScreens()
     {
         // Arrange: the relaunch cannot happen, so nothing may be taken away from the person.
         var run = new LaunchRun().With(ReadinessStepId, Succeeded()).With(NewPinStepId, Succeeded()).SignedIn();

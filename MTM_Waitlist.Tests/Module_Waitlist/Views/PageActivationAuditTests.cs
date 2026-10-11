@@ -64,7 +64,7 @@ public sealed class PageActivationAuditTests
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     [TestMethod]
-    public void EveryPageInTheViewsFolders_DeclaresAParameterlessConstructor()
+    public void Audit_PageActivationAuditTests_EveryPageInTheViewsFolders_DeclaresAParameterlessConstructor()
     {
         var repositoryRoot = RepositoryPatternScan.FindRepositoryRoot();
         var violations = new List<string>();
@@ -106,7 +106,7 @@ public sealed class PageActivationAuditTests
     }
 
     [TestMethod]
-    public void NewRequestWizardPages_AreAllCoveredByTheActivationAudit()
+    public void Audit_PageActivationAuditTests_NewRequestWizardPages_AreAllCoveredByTheActivationAudit()
     {
         var repositoryRoot = RepositoryPatternScan.FindRepositoryRoot();
         var discovered = EnumeratePageClasses(repositoryRoot)

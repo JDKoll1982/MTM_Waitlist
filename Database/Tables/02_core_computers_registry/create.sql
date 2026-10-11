@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS core_computers_registry (
     hostname_normalized VARCHAR(255) NOT NULL,
     mac_address_normalized VARCHAR(64) NOT NULL,
     display_name VARCHAR(128) NOT NULL,
-    description VARCHAR(255) NULL,
+    location VARCHAR(255) NULL,
     is_registered TINYINT(1) NOT NULL DEFAULT 1,
     created_utc DATETIME NOT NULL,
     updated_utc DATETIME NOT NULL,

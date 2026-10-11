@@ -75,7 +75,7 @@ Two further faults hid it, which is why it presented as "a few pictures store an
 4. **The refusal is recorded, not only shown.** `PictureCacheStep` records the destination failure through the log
    seam (`AppLog.Error`), so it reaches `ops_startup_logs` from every computer instead of dying with the feed.
 
-**The regression test failed first.** `AnUnwritableDestinationIsNotReportedAsAnUnreachableShare` was run against the
+**The regression test failed first.** `Service_ImageCacheSyncServiceTests_Service_ImageCacheSyncServiceTests_AnUnwritableDestinationIsNotReportedAsAnUnreachableShare` was run against the
 unfixed mirror and reported:
 
 ```text

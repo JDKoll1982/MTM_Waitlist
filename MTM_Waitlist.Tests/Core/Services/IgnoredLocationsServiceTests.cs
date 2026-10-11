@@ -11,7 +11,7 @@ namespace MTM_Waitlist.Tests.Core.Services;
 public sealed class IgnoredLocationsServiceTests
 {
     [TestMethod]
-    public async Task GetIgnoredLocationsAsync_WhenUnset_ReturnsDefaults()
+    public async Task Service_IgnoredLocationsServiceTests_GetIgnoredLocationsAsync_WhenUnsetReturnsDefaults()
     {
         var service = new IgnoredLocationsService(new InMemoryScopedPreferenceStore(), new AlwaysPermittingPermissionService());
 
@@ -21,7 +21,7 @@ public sealed class IgnoredLocationsServiceTests
     }
 
     [TestMethod]
-    public async Task GetIgnoredLocationsAsync_ReturnsStoredAndNormalized()
+    public async Task Service_IgnoredLocationsServiceTests_GetIgnoredLocationsAsync_ReturnsStoredAndNormalized()
     {
         var preferences = new InMemoryScopedPreferenceStore();
         preferences.SeedText(IgnoredLocationDefaults.SettingKey, PreferenceScope.Plant, "wc,SHIP ,scrap-1,wc");
@@ -33,7 +33,7 @@ public sealed class IgnoredLocationsServiceTests
     }
 
     [TestMethod]
-    public async Task IsLocationIgnoredAsync_IsCaseInsensitiveAgainstDefaults()
+    public async Task Service_IgnoredLocationsServiceTests_IsLocationIgnoredAsync_IsCaseInsensitiveAgainstDefaults()
     {
         var service = new IgnoredLocationsService(new InMemoryScopedPreferenceStore(), new AlwaysPermittingPermissionService());
 
@@ -45,7 +45,7 @@ public sealed class IgnoredLocationsServiceTests
     }
 
     [TestMethod]
-    public async Task IsLocationIgnoredAsync_HonorsStoredSet()
+    public async Task Service_IgnoredLocationsServiceTests_IsLocationIgnoredAsync_HonorsStoredSet()
     {
         var preferences = new InMemoryScopedPreferenceStore();
         preferences.SeedText(IgnoredLocationDefaults.SettingKey, PreferenceScope.Plant, "SCRAP-1");

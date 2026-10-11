@@ -206,7 +206,7 @@ public sealed class PermissionBaselineParityTests
     };
 
     [TestMethod]
-    public void TheShippedBaselines_ReproduceEveryRetiredListExactly_ForEveryRoleAndEveryPermission()
+    public void Service_PermissionBaselineParityTests_TheShippedBaselines_ReproduceEveryRetiredListExactlyForEveryRoleAndEveryPermission()
     {
         var baselines = ReadShippedBaselines();
 
@@ -237,7 +237,7 @@ public sealed class PermissionBaselineParityTests
     }
 
     [TestMethod]
-    public void TheShippedBaselines_GiveMaterialHandlerLeadItsStatedRowAndNothingMore()
+    public void Service_PermissionBaselineParityTests_TheShippedBaselines_GiveMaterialHandlerLeadItsStatedRowAndNothingMore()
     {
         var baselines = ReadShippedBaselines();
 
@@ -258,7 +258,7 @@ public sealed class PermissionBaselineParityTests
     }
 
     [TestMethod]
-    public void TheShippedBaselines_GiveTheKeysWithNoPredecessorTheirStatedSets()
+    public void Service_PermissionBaselineParityTests_TheShippedBaselines_GiveTheKeysWithNoPredecessorTheirStatedSets()
     {
         var baselines = ReadShippedBaselines();
 
@@ -277,7 +277,7 @@ public sealed class PermissionBaselineParityTests
     }
 
     [TestMethod]
-    public void TheShippedBaselines_AndTheDeclaration_AgreeInBothDirections()
+    public void Service_PermissionBaselineParityTests_TheShippedBaselines_AndTheDeclarationAgreeInBothDirections()
     {
         var baselines = ReadShippedBaselines();
 
@@ -312,7 +312,7 @@ public sealed class PermissionBaselineParityTests
     }
 
     [TestMethod]
-    public void TheShippedBaselines_StoreNoRowForAnybodyInParticular()
+    public void Service_PermissionBaselineParityTests_TheShippedBaselines_StoreNoRowForAnybodyInParticular()
     {
         var seed = ReadSeed();
 
@@ -328,7 +328,7 @@ public sealed class PermissionBaselineParityTests
     }
 
     [TestMethod]
-    public void TheSubsetRule_HoldsInTheShippedBaselines()
+    public void Service_PermissionBaselineParityTests_TheSubsetRule_HoldsInTheShippedBaselines()
     {
         var baselines = ReadShippedBaselines();
 
@@ -351,7 +351,7 @@ public sealed class PermissionBaselineParityTests
     }
 
     [TestMethod]
-    public void TheRetiredLists_ContainExactlyTheTwoEntriesThatMatchNoCatalogueRole()
+    public void Service_PermissionBaselineParityTests_TheRetiredLists_ContainExactlyTheTwoEntriesThatMatchNoCatalogueRole()
     {
         var unmatched = RetiredRoleListFixture.BySource
             .Where(pair => pair.Key != "ShellViewModel.GetUserPresentation")
@@ -381,7 +381,7 @@ public sealed class PermissionBaselineParityTests
     /// is absent rather than as passing.
     /// </remarks>
     [TestMethod]
-    public async Task EveryPersonsEffectiveSetOnShipDay_EqualsExactlyWhatTheirRoleWasAllowedBefore()
+    public async Task Service_PermissionBaselineParityTests_EveryPersonsEffectiveSetOnShipDay_EqualsExactlyWhatTheirRoleWasAllowedBefore()
     {
         var connectionString = Environment.GetEnvironmentVariable(LiveStoreConnectionStringVariable);
         if (string.IsNullOrWhiteSpace(connectionString))

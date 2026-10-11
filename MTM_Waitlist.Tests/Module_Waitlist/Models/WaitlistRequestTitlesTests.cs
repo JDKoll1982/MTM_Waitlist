@@ -15,7 +15,7 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.Models;
 public sealed class WaitlistRequestTitlesTests
 {
     [TestMethod]
-    public void ResolveLine1_IsTheItemsUmbrellaPhrase()
+    public void Model_WaitlistRequestTitlesTests_ResolveLine1_IsTheItemsUmbrellaPhrase()
     {
         Assert.AreEqual("Pickup", WaitlistRequestTitles.ResolveLine1(Find("pickup-coil")));
         Assert.AreEqual("Deliver", WaitlistRequestTitles.ResolveLine1(Find("deliver-coil")));
@@ -24,7 +24,7 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
-    public void ResolveLine1_UsesTheItemsOwnPhraseForTheWrongMaterialItems()
+    public void Model_WaitlistRequestTitlesTests_ResolveLine1_UsesTheItemsOwnPhraseForTheWrongMaterialItems()
     {
         // The two wrong-material first lines are pinned verbatim (contract §2).
         Assert.AreEqual("Wrong Coil Bring:", WaitlistRequestTitles.ResolveLine1(Find("deliver-wrong-coil")));
@@ -32,7 +32,7 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
-    public void ResolveLine1_IsEmptyWhenTheStoredCodeIsNotCatalogued()
+    public void Model_WaitlistRequestTitlesTests_ResolveLine1_IsEmptyWhenTheStoredCodeIsNotCatalogued()
     {
         // No legacy fallback: an Item the catalog does not describe gets no invented phrase.
         Assert.AreEqual(string.Empty, WaitlistRequestTitles.ResolveLine1(null));
@@ -40,7 +40,7 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
-    public void ResolveLine2_ResolvesAFixedIdentifier()
+    public void Model_WaitlistRequestTitlesTests_ResolveLine2_ResolvesAFixedIdentifier()
     {
         var riserTable = WaitlistRequestTitles.ResolveLine2(Find("pickup-riser-table"), new RequestItemLine2Context());
         Assert.IsTrue(riserTable.IsResolved);
@@ -51,7 +51,7 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
-    public void ResolveLine2_ResolvesTheCapturedAnswerForTheFreeTextItem()
+    public void Model_WaitlistRequestTitlesTests_ResolveLine2_ResolvesTheCapturedAnswerForTheFreeTextItem()
     {
         var result = WaitlistRequestTitles.ResolveLine2(
             Find("other"),
@@ -62,7 +62,7 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
-    public void ResolveLine2_PickupDie_ShowsTheDieTheRequestIsFor()
+    public void Model_WaitlistRequestTitlesTests_ResolveLine2_PickupDieShowsTheDieTheRequestIsFor()
     {
         // Superseded 2026-09-20 (FR-054, D22). The identifier used to switch between the die's location and its
         // number depending on the captured destination, and the destination question is retired. What shapes the
@@ -82,7 +82,7 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
-    public void ResolveLine2_DieRequestStoredUnderAnyEarlierSpelling_StillNamesItsOwnDie()
+    public void Model_WaitlistRequestTitlesTests_ResolveLine2_DieRequestStoredUnderAnyEarlierSpellingStillNamesItsOwnDie()
     {
         // The identifier has been composed three ways: `D-9001-PRESS BAY` (original), `D-9001 - (PRESS BAY)`
         // (2026-09-20, briefly) and `D-9001`, the number alone (2026-09-20, current). A request raised under any of
@@ -109,7 +109,7 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
-    public void ResolveLine2_DieRequestWithNoStoredDie_FallsBackToTheJobsOwnDie()
+    public void Model_WaitlistRequestTitlesTests_ResolveLine2_DieRequestWithNoStoredDieFallsBackToTheJobsOwnDie()
     {
         // A request raised before the picker learned to record its die still has to render, so the job's primary
         // die stands in rather than leaving the card blank or inventing an identifier (FR-005, FR-026).
@@ -124,7 +124,7 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
-    public void ResolveLine2_DieItems_ShowTheDieNumber()
+    public void Model_WaitlistRequestTitlesTests_ResolveLine2_DieItemsShowTheDieNumber()
     {
         foreach (var itemId in new[] { "pickup-die", "deliver-die" })
         {
@@ -143,7 +143,7 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
-    public void ResolveLine1_DieItems_NameTheRequestingJobsPartNumber()
+    public void Model_WaitlistRequestTitlesTests_ResolveLine1_DieItemsNameTheRequestingJobsPartNumber()
     {
         foreach (var (itemId, expected) in new[] { ("pickup-die", "Pickup Die: PART-9003"), ("deliver-die", "Deliver Die: PART-9003") })
         {
@@ -158,7 +158,7 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
-    public void ResolveLine1_DieItemWithNoJob_StillSaysWhatKindOfRequestItIs()
+    public void Model_WaitlistRequestTitlesTests_ResolveLine1_DieItemWithNoJobStillSaysWhatKindOfRequestItIs()
     {
         var request = new WaitlistRequest { Category = "Deliver", Item = "deliver-die" };
 
@@ -173,7 +173,7 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
-    public void ResolveContext_HandsJobValuesOnlyToTheItemsWhoseTemplatesNameThem()
+    public void Model_WaitlistRequestTitlesTests_ResolveContext_HandsJobValuesOnlyToTheItemsWhoseTemplatesNameThem()
     {
         // The die and job values are job data, and they are handed over only where a template asks for them — so
         // an Item that names none of them keeps the card it had (FR-053).
@@ -212,7 +212,7 @@ public sealed class WaitlistRequestTitlesTests
     };
 
     [TestMethod]
-    public void ResolveLine2_ComponentRequests_ShowThePartTheOperatorChose()
+    public void Model_WaitlistRequestTitlesTests_ResolveLine2_ComponentRequestsShowThePartTheOperatorChose()
     {
         // The component Items ask which component the operator needs, so the request carries the part they chose
         // and the card reads it back through `{component}` — the rule the dunnage Items already follow. Before
@@ -232,7 +232,7 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
-    public void ResolveLine2_MaterialRequests_NameThePartTheJobCarries()
+    public void Model_WaitlistRequestTitlesTests_ResolveLine2_MaterialRequestsNameThePartTheJobCarries()
     {
         // Every Item whose identifier names `{part_number}` names the part the request is about: the material the
         // job holds where the Item is about one, and the job's own part number where it is not. Before this, no
@@ -267,7 +267,7 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
-    public void ResolveLine2_MergedPickupCoil_NamesTheMaterialTheJobActuallyHolds()
+    public void Model_WaitlistRequestTitlesTests_ResolveLine2_MergedPickupCoilNamesTheMaterialTheJobActuallyHolds()
     {
         // The merged Pickup Item covers a coil or a flatstock (D21), so which material the job holds decides what
         // its second line says — a flatstock-only job must not be handed a coil it does not have.
@@ -283,7 +283,7 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
-    public void ResolveLine2_ScrapRequest_ShowsTheTypeTheJobAlreadyDecided()
+    public void Model_WaitlistRequestTitlesTests_ResolveLine2_ScrapRequestShowsTheTypeTheJobAlreadyDecided()
     {
         // FR-030: the scrap type is set on the job during Setup, so the card reads it rather than the Item's own
         // name. A job with no real decision is not offered the Scrap Item at all (FR-031), and this snapshot is the
@@ -320,7 +320,7 @@ public sealed class WaitlistRequestTitlesTests
     ]);
 
     [TestMethod]
-    public void ResolveLine2_ReadsWhatTheJobCarries()
+    public void Model_WaitlistRequestTitlesTests_ResolveLine2_ReadsWhatTheJobCarries()
     {
         var result = WaitlistRequestTitles.ResolveLine2(
             Find("pickup-coil"),
@@ -331,7 +331,7 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
-    public void ResolveLine2_DunnageRequest_ShowsThePartTheOperatorChose()
+    public void Model_WaitlistRequestTitlesTests_ResolveLine2_DunnageRequestShowsThePartTheOperatorChose()
     {
         // FR-048, FR-051: the request stores the part the operator ended on — one the job carried, or their
         // substitute — and the card reads it back through the template's `{dunnage_part}` token.
@@ -351,7 +351,7 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
-    public void ResolveLine2_DunnageRequestWithNoStoredPart_ShowsTheDisplayNameAndReportsTheProblem()
+    public void Model_WaitlistRequestTitlesTests_ResolveLine2_DunnageRequestWithNoStoredPartShowsTheDisplayNameAndReportsTheProblem()
     {
         var request = new WaitlistRequest { Category = "Pickup", Item = "pickup-dunnage" };
 
@@ -368,7 +368,7 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
-    public void ResolveContext_HandsTheDunnageTokenOnlyToAnItemThatAsksForIt()
+    public void Model_WaitlistRequestTitlesTests_ResolveContext_HandsTheDunnageTokenOnlyToAnItemThatAsksForIt()
     {
         // The mapping is keyed on the Item's own template, so a captured answer is never handed to a token that
         // Item does not use: pickup-coil's identifier is the job's part number, which this request does not hold.
@@ -382,7 +382,7 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
-    public void ResolveLine2_UnresolvableToken_RendersTheDisplayNameAndReportsTheProblem()
+    public void Model_WaitlistRequestTitlesTests_ResolveLine2_UnresolvableTokenRendersTheDisplayNameAndReportsTheProblem()
     {
         // A job-derived token the request does not carry is reported, never invented and never blank (FR-026).
         var result = WaitlistRequestTitles.ResolveLine2(Find("pickup-coil"), new RequestItemLine2Context());
@@ -400,7 +400,7 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
-    public void ResolveLine2_WithNoItem_ReportsTheProblemRatherThanInventingAnIdentifier()
+    public void Model_WaitlistRequestTitlesTests_ResolveLine2_WithNoItemReportsTheProblemRatherThanInventingAnIdentifier()
     {
         var result = WaitlistRequestTitles.ResolveLine2(null, new RequestItemLine2Context(Answer: "anything"));
 
@@ -410,7 +410,7 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
-    public void TheResolverExposesNoLegacyPairOverload()
+    public void Model_WaitlistRequestTitlesTests_TheResolverExposesNoLegacyPairOverload()
     {
         // FR-003/FR-023: no (requestType, subtype) entry point may exist for the card's lines.
         var overloads = typeof(WaitlistRequestTitles)

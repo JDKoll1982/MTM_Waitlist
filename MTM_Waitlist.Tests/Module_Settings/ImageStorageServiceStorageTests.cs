@@ -33,7 +33,7 @@ public sealed class ImageStorageServiceStorageTests
     }
 
     [TestMethod]
-    public async Task CopyImageToStorageAsync_UsesDeterministicNameSoTheActiveFileIsOverwritten()
+    public async Task Service_ImageStorageServiceStorageTests_CopyImageToStorageAsync_UsesDeterministicNameSoTheActiveFileIsOverwritten()
     {
         var source = Path.Combine(_workingDirectory, "source.png");
         TestPngWriter.Write(source, 64, 64);
@@ -55,7 +55,7 @@ public sealed class ImageStorageServiceStorageTests
     }
 
     [TestMethod]
-    public async Task CopyImageToStorageAsync_ArchivesTheReplacedFileWithADatedName()
+    public async Task Service_ImageStorageServiceStorageTests_CopyImageToStorageAsync_ArchivesTheReplacedFileWithADatedName()
     {
         var source = Path.Combine(_workingDirectory, "source.png");
         TestPngWriter.Write(source, 64, 64);
@@ -74,7 +74,7 @@ public sealed class ImageStorageServiceStorageTests
     }
 
     [TestMethod]
-    public async Task CopyImageToStorageAsync_IncrementsTheArchiveSequenceWithinTheSameDay()
+    public async Task Service_ImageStorageServiceStorageTests_CopyImageToStorageAsync_IncrementsTheArchiveSequenceWithinTheSameDay()
     {
         var source = Path.Combine(_workingDirectory, "source.png");
         TestPngWriter.Write(source, 64, 64);
@@ -89,7 +89,7 @@ public sealed class ImageStorageServiceStorageTests
     }
 
     [TestMethod]
-    public async Task CopyImageToStorageAsync_WhenArchivingDisabled_DoesNotCreateArchiveFolder()
+    public async Task Service_ImageStorageServiceStorageTests_CopyImageToStorageAsync_WhenArchivingDisabledDoesNotCreateArchiveFolder()
     {
         _resolver.EnableArchiveVersioning = false;
         var source = Path.Combine(_workingDirectory, "source.png");
@@ -102,7 +102,7 @@ public sealed class ImageStorageServiceStorageTests
     }
 
     [TestMethod]
-    public async Task CopyImageToStorageAsync_WhenShareIsUnreachable_FailsWithoutWriting()
+    public async Task Service_ImageStorageServiceStorageTests_CopyImageToStorageAsync_WhenShareIsUnreachableFailsWithoutWriting()
     {
         _resolver.SharedFolderPath = @"\\mtm-nonexistent-host-for-tests\share\images";
         var source = Path.Combine(_workingDirectory, "source.png");
@@ -116,7 +116,7 @@ public sealed class ImageStorageServiceStorageTests
     }
 
     [TestMethod]
-    public async Task CopyImageToStorageAsync_WhenValidationFails_DoesNotWriteToTheShare()
+    public async Task Service_ImageStorageServiceStorageTests_CopyImageToStorageAsync_WhenValidationFailsDoesNotWriteToTheShare()
     {
         var source = Path.Combine(_workingDirectory, "wide.png");
         TestPngWriter.Write(source, 128, 64);
@@ -129,7 +129,7 @@ public sealed class ImageStorageServiceStorageTests
     }
 
     [TestMethod]
-    public async Task CopyImageToStorageAsync_SanitisesScopeAndItemIdIntoTheStoredPath()
+    public async Task Service_ImageStorageServiceStorageTests_CopyImageToStorageAsync_SanitisesScopeAndItemIdIntoTheStoredPath()
     {
         var source = Path.Combine(_workingDirectory, "source.png");
         TestPngWriter.Write(source, 64, 64);
@@ -144,7 +144,7 @@ public sealed class ImageStorageServiceStorageTests
     }
 
     [TestMethod]
-    public async Task IsShareAccessibleAsync_WhenShareIsUnreachable_ReturnsFalse()
+    public async Task Service_ImageStorageServiceStorageTests_IsShareAccessibleAsync_WhenShareIsUnreachableReturnsFalse()
     {
         _resolver.SharedFolderPath = @"\\mtm-nonexistent-host-for-tests\share\images";
 
@@ -152,7 +152,7 @@ public sealed class ImageStorageServiceStorageTests
     }
 
     [TestMethod]
-    public async Task IsShareAccessibleAsync_WhenShareIsWritable_ReturnsTrue()
+    public async Task Service_ImageStorageServiceStorageTests_IsShareAccessibleAsync_WhenShareIsWritableReturnsTrue()
     {
         Assert.IsTrue(await _service.IsShareAccessibleAsync());
     }

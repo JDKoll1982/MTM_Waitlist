@@ -43,10 +43,10 @@ public sealed class UserListFilterOption
 
     private static string LabelFor(string roleCode, string roleName)
     {
-        var localized = $"Role_{roleCode}".GetLocalized();
+        var localized = $"Role_{roleCode}.Text".GetLocalized();
 
         // The resource mechanism returns the key when it holds no entry, and a key is never shown to a person.
-        return string.Equals(localized, $"Role_{roleCode}", StringComparison.Ordinal)
+        return string.Equals(localized, $"Role_{roleCode}.Text", StringComparison.Ordinal)
             ? roleName
             : localized;
     }

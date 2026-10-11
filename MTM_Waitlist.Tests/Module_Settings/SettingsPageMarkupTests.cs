@@ -21,7 +21,7 @@ public sealed class SettingsPageMarkupTests
     private static readonly XNamespace s_xaml = "http://schemas.microsoft.com/winfx/2006/xaml";
 
     [TestMethod]
-    public void SettingsPage_DeclaresEachXUidAtMostOnce()
+    public void UI_SettingsPageMarkupTests_SettingsPage_DeclaresEachXUidAtMostOnce()
     {
         var duplicates = DeclaredUids()
             .GroupBy(uid => uid, StringComparer.Ordinal)
@@ -38,7 +38,7 @@ public sealed class SettingsPageMarkupTests
     }
 
     [TestMethod]
-    public void SettingsPage_ResolvesEveryXUidToItsOwnResourceEntry()
+    public void UI_SettingsPageMarkupTests_SettingsPage_ResolvesEveryXUidToItsOwnResourceEntry()
     {
         var resourceKeys = ResourceKeys();
 
@@ -63,7 +63,7 @@ public sealed class SettingsPageMarkupTests
     /// picture entry point opens the <b>Item-keyed</b> dialog — not the retired subtype one.
     /// </summary>
     [TestMethod]
-    public void SettingsPage_ShowsTheConfiguredAndObservedValuesSeparately_AndKeepsTheMinutesGate()
+    public void UI_SettingsPageMarkupTests_SettingsPage_ShowsTheConfiguredAndObservedValuesSeparatelyAndKeepsTheMinutesGate()
     {
         var markup = PageMarkup();
 
@@ -82,7 +82,7 @@ public sealed class SettingsPageMarkupTests
     }
 
     [TestMethod]
-    public void SettingsPage_OpensTheItemKeyedPictureScreen()
+    public void UI_SettingsPageMarkupTests_SettingsPage_OpensTheItemKeyedPictureScreen()
     {
         var markup = PageMarkup();
 
@@ -109,7 +109,7 @@ public sealed class SettingsPageMarkupTests
     /// action away.
     /// </summary>
     [TestMethod]
-    public void TheTwoDunnageLists_AreCardsThatStillShowAndHideTheirType()
+    public void UI_SettingsPageMarkupTests_TheTwoDunnageLists_AreCardsThatStillShowAndHideTheirType()
     {
         var markup = PageMarkup();
 
@@ -141,7 +141,7 @@ public sealed class SettingsPageMarkupTests
     /// vertically-aligned <c>SettingsCard</c> gives it the card's own width instead.
     /// </remarks>
     [TestMethod]
-    public void TheDeveloperLogPanel_IsHostedWhereItsWrappingTextGetsABoundedWidth()
+    public void UI_SettingsPageMarkupTests_TheDeveloperLogPanel_IsHostedWhereItsWrappingTextGetsABoundedWidth()
     {
         var panel = XDocument.Parse(PageMarkup())
             .Descendants()
@@ -178,7 +178,7 @@ public sealed class SettingsPageMarkupTests
     /// wraps and makes the entry taller, and the list itself does the scrolling.
     /// </remarks>
     [TestMethod]
-    public void TheDeveloperLogPanel_PutsNoScrollerInsideAnEntry()
+    public void UI_SettingsPageMarkupTests_TheDeveloperLogPanel_PutsNoScrollerInsideAnEntry()
     {
         var document = XDocument.Load(PanelPath());
 
@@ -200,7 +200,7 @@ public sealed class SettingsPageMarkupTests
     /// entry is always measured against the list's own width.
     /// </summary>
     [TestMethod]
-    public void TheDeveloperLogPanel_ListsAreBoundedAndNeverScrollSideways()
+    public void UI_SettingsPageMarkupTests_TheDeveloperLogPanel_ListsAreBoundedAndNeverScrollSideways()
     {
         var document = XDocument.Load(PanelPath());
 
@@ -240,7 +240,7 @@ public sealed class SettingsPageMarkupTests
     /// stored exception chain runs to thousands of pixels when it is not allowed to wrap.
     /// </remarks>
     [TestMethod]
-    public void TheDeveloperLogPanel_WrapsEveryBoundTextBlock()
+    public void UI_SettingsPageMarkupTests_TheDeveloperLogPanel_WrapsEveryBoundTextBlock()
     {
         var document = XDocument.Load(PanelPath());
 
@@ -290,7 +290,7 @@ public sealed class SettingsPageMarkupTests
     /// is written inline.
     /// </remarks>
     [TestMethod]
-    public void SettingsCardsHoldingContentThatCanGrow_AlignItVertically()
+    public void UI_SettingsPageMarkupTests_SettingsCardsHoldingContentThatCanGrow_AlignItVertically()
     {
         string[] scrollingControls = ["ListView", "GridView", "ItemsControl", "ItemsRepeater", "ScrollViewer"];
         var violations = new List<string>();
@@ -367,7 +367,7 @@ public sealed class SettingsPageMarkupTests
     /// with a <c>Visibility</c> binding instead: that is a property binding and needs no name lookup.
     /// </remarks>
     [TestMethod]
-    public void NoElementInsideASettingsExpanderItems_CarriesXLoad()
+    public void UI_SettingsPageMarkupTests_NoElementInsideASettingsExpanderItems_CarriesXLoad()
     {
         var violations = new List<string>();
 
@@ -400,7 +400,7 @@ public sealed class SettingsPageMarkupTests
     /// resource key, and neither shown to a reader who cannot use it.
     /// </summary>
     [TestMethod]
-    public void TheAdministrationEntries_NavigateAndCarryTheirOwnLabels()
+    public void UI_SettingsPageMarkupTests_TheAdministrationEntries_NavigateAndCarryTheirOwnLabels()
     {
         var markup = PageMarkup();
 

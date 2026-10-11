@@ -25,7 +25,7 @@ public sealed class EditUserViewModelTests
     private const long OtherPersonId = 77;
 
     [TestMethod]
-    public async Task APersonAboveTheReadersRung_IsReadable_ButEverythingOnThePageIsUnavailableWithTheReason()
+    public async Task ViewModel_EditUserViewModelTests_APersonAboveTheReadersRung_IsReadableButEverythingOnThePageIsUnavailableWithTheReason()
     {
         // The reader stands at Setup on rung 10; the person is a Plant Manager on rung 80.
         var viewModel = Build(
@@ -47,7 +47,7 @@ public sealed class EditUserViewModelTests
     }
 
     [TestMethod]
-    public async Task APeer_IsEditable()
+    public async Task ViewModel_EditUserViewModelTests_APeer_IsEditable()
     {
         var viewModel = Build(
             account: Account(OtherPersonId, "slead", "Sam Lead", "setup_lead", 60),
@@ -63,7 +63,7 @@ public sealed class EditUserViewModelTests
     }
 
     [TestMethod]
-    public async Task AReaderWithoutThePermission_IsReadOnly_ForThatReasonRatherThanARankReason()
+    public async Task ViewModel_EditUserViewModelTests_AReaderWithoutThePermission_IsReadOnlyForThatReasonRatherThanARankReason()
     {
         var viewModel = Build(
             account: Account(OtherPersonId, "slead", "Sam Lead", "setup_lead", 60),
@@ -80,7 +80,7 @@ public sealed class EditUserViewModelTests
     }
 
     [TestMethod]
-    public async Task TheReadersOwnAccount_ShowsEverySelfLockoutRefusal_EachWithItsReason()
+    public async Task ViewModel_EditUserViewModelTests_TheReadersOwnAccount_ShowsEverySelfLockoutRefusalEachWithItsReason()
     {
         var service = new FakeUserManagementService(Account(SignedInUserId, "jsmith", "Jane Smith", "setup_lead", 60));
         var viewModel = Build(
@@ -123,7 +123,7 @@ public sealed class EditUserViewModelTests
     }
 
     [TestMethod]
-    public async Task TheDeactivationSentence_NamesBothHalves_AndIsStillOnThePageAfterTheConfirmation()
+    public async Task ViewModel_EditUserViewModelTests_TheDeactivationSentence_NamesBothHalvesAndIsStillOnThePageAfterTheConfirmation()
     {
         var viewModel = Build(
             account: Account(OtherPersonId, "slead", "Sam Lead", "setup_lead", 60),
@@ -136,11 +136,11 @@ public sealed class EditUserViewModelTests
         // The test host has no resource map, so the sentence comes back as its own key. What the requirement is
         // about is the shipped wording, so that is read from the resource file rather than from the lookup.
         Assert.AreEqual(
-            "EditUser_Deactivate.Explanation.Text".GetLocalized(),
+            "EditUser_Deactivate_Explanation.Text".GetLocalized(),
             sentence,
             "The sentence resolves through the resource map rather than being written into the page (FR-112).");
 
-        var shipped = ShippedResourceValue("EditUser_Deactivate.Explanation.Text");
+        var shipped = ShippedResourceValue("EditUser_Deactivate_Explanation.Text");
 
         StringAssert.Contains(shipped, "cannot sign in again", "The first half of what deactivation means (FR-102).");
         StringAssert.Contains(shipped, "stays open", "The second half: an open session is not ended (FR-102, FR-035).");
@@ -150,7 +150,7 @@ public sealed class EditUserViewModelTests
     }
 
     [TestMethod]
-    public async Task AnActionChosenWithUnsavedEdits_IsRefusedWithTheSaveOrDiscardInstruction()
+    public async Task ViewModel_EditUserViewModelTests_AnActionChosenWithUnsavedEdits_IsRefusedWithTheSaveOrDiscardInstruction()
     {
         var service = new FakeUserManagementService(Account(OtherPersonId, "slead", "Sam Lead", "setup_lead", 60));
         var viewModel = Build(service: service, readerRoleCode: "setup_lead");
@@ -176,7 +176,7 @@ public sealed class EditUserViewModelTests
     }
 
     [TestMethod]
-    public async Task ASaveThatFails_KeepsWhatTheReaderHad_AndStatesWhatFailed()
+    public async Task ViewModel_EditUserViewModelTests_ASaveThatFails_KeepsWhatTheReaderHadAndStatesWhatFailed()
     {
         var service = new FakeUserManagementService(Account(OtherPersonId, "slead", "Sam Lead", "setup_lead", 60))
         {
@@ -201,7 +201,7 @@ public sealed class EditUserViewModelTests
     }
 
     [TestMethod]
-    public async Task ASaveThatSucceeds_WritesOneCorrection_AndRebasesTheFormOnTheStore()
+    public async Task ViewModel_EditUserViewModelTests_ASaveThatSucceeds_WritesOneCorrectionAndRebasesTheFormOnTheStore()
     {
         var service = new FakeUserManagementService(Account(OtherPersonId, "slead", "Sam Lead", "setup_lead", 60));
         var viewModel = Build(service: service, readerRoleCode: "setup_lead");
@@ -218,7 +218,7 @@ public sealed class EditUserViewModelTests
     }
 
     [TestMethod]
-    public async Task TheSignInName_IsCorrectedThroughThisSamePage()
+    public async Task ViewModel_EditUserViewModelTests_TheSignInName_IsCorrectedThroughThisSamePage()
     {
         var service = new FakeUserManagementService(Account(OtherPersonId, "slead", "Sam Lead", "setup_lead", 60));
         var viewModel = Build(service: service, readerRoleCode: "setup_lead");
@@ -237,7 +237,7 @@ public sealed class EditUserViewModelTests
     }
 
     [TestMethod]
-    public async Task TheReset_IsNeitherOfferedNorAllowed_WithoutItsOwnPermission()
+    public async Task ViewModel_EditUserViewModelTests_TheReset_IsNeitherOfferedNorAllowedWithoutItsOwnPermission()
     {
         var service = new FakeUserManagementService(Account(OtherPersonId, "slead", "Sam Lead", "setup_lead", 60));
         var viewModel = Build(
@@ -256,7 +256,7 @@ public sealed class EditUserViewModelTests
     }
 
     [TestMethod]
-    public async Task TheReset_WithItsOwnPermission_IssuesAFourDigitCredential_ThatIsDroppedWhenDismissed()
+    public async Task ViewModel_EditUserViewModelTests_TheReset_WithItsOwnPermissionIssuesAFourDigitCredentialThatIsDroppedWhenDismissed()
     {
         var viewModel = Build(
             account: Account(OtherPersonId, "slead", "Sam Lead", "setup_lead", 60),
@@ -278,7 +278,7 @@ public sealed class EditUserViewModelTests
     }
 
     [TestMethod]
-    public async Task AStoreRefusal_ReachesTheReaderInItsOwnWords()
+    public async Task ViewModel_EditUserViewModelTests_AStoreRefusal_ReachesTheReaderInItsOwnWords()
     {
         var service = new FakeUserManagementService(Account(OtherPersonId, "slead", "Sam Lead", "setup_lead", 60))
         {
@@ -300,7 +300,7 @@ public sealed class EditUserViewModelTests
     }
 
     [TestMethod]
-    public async Task AnIdTheStoreDoesNotHold_IsStatedRatherThanShownAsABlankForm()
+    public async Task ViewModel_EditUserViewModelTests_AnIdTheStoreDoesNotHold_IsStatedRatherThanShownAsABlankForm()
     {
         var viewModel = Build(readerRoleCode: "setup_lead", service: new FakeUserManagementService(account: null));
 

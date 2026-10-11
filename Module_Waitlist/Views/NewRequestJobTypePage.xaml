@@ -16,7 +16,7 @@
 
         <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}">
             <TextBlock
-                x:Uid="NewRequest_Category.Title"
+                x:Uid="NewRequest_Category_Title"
                 Style="{StaticResource SetupPageTitleStyle}"
                 Text="New Request - Choose Category" />
             <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="{x:Bind ViewModel.WorkCenterText, Mode=OneWay}" />
@@ -107,7 +107,7 @@
         <StackPanel Grid.Row="2" Style="{StaticResource SetupActionBarStyle}">
             <Button
                 AutomationProperties.AutomationId="NewRequestJobTypePage_BackButton"
-                x:Uid="NewRequest_Category.BackButton"
+                x:Uid="NewRequest_Category_BackButton"
                 Content="Back"
                 Command="{x:Bind ViewModel.BackCommand}" />
         </StackPanel>

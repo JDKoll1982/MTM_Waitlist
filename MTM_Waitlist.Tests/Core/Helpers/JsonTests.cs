@@ -15,7 +15,7 @@ public sealed class JsonTests
     }
 
     [TestMethod]
-    public async Task StringifyAsync_SerializesObjectToJson()
+    public async Task Helper_JsonTests_StringifyAsync_SerializesObjectToJson()
     {
         var json = await Json.StringifyAsync(new Payload { Name = "Alpha", Count = 3 });
 
@@ -26,7 +26,7 @@ public sealed class JsonTests
     }
 
     [TestMethod]
-    public async Task ToObjectAsync_DeserializesJsonToObject()
+    public async Task Helper_JsonTests_ToObjectAsync_DeserializesJsonToObject()
     {
         var payload = await Json.ToObjectAsync<Payload>("""{"Name":"Beta","Count":7}""");
 
@@ -36,7 +36,7 @@ public sealed class JsonTests
     }
 
     [TestMethod]
-    public async Task RoundTrip_PreservesData()
+    public async Task Helper_JsonTests_RoundTrip_PreservesData()
     {
         var original = new Payload { Name = "Gamma", Count = 9 };
         var json = await Json.StringifyAsync(original);
@@ -48,7 +48,7 @@ public sealed class JsonTests
     }
 
     [TestMethod]
-    public async Task ToObjectAsync_Throws_ForInvalidJson()
+    public async Task Helper_JsonTests_ToObjectAsync_ThrowsForInvalidJson()
     {
         await Assert.ThrowsExceptionAsync<System.Text.Json.JsonException>(
             () => Json.ToObjectAsync<Payload>("not json"));

@@ -23,7 +23,7 @@ public sealed class SetupPartSelectionPageMarkupTests
 
     /// <summary>Each entry draws the part's own picture, through the application's one picture rule.</summary>
     [TestMethod]
-    public void PartListEntry_DrawsThePartsPicture()
+    public void UI_SetupPartSelectionPageMarkupTests_PartListEntry_DrawsThePartsPicture()
     {
         var image = LoadPage()
             .Descendants()
@@ -48,7 +48,7 @@ public sealed class SetupPartSelectionPageMarkupTests
     /// picture.
     /// </summary>
     [TestMethod]
-    public void PartListEntry_DrawsThePictureInAFixedSizeThumbnail()
+    public void UI_SetupPartSelectionPageMarkupTests_PartListEntry_DrawsThePictureInAFixedSizeThumbnail()
     {
         var image = LoadPage()
             .Descendants()
@@ -75,7 +75,7 @@ public sealed class SetupPartSelectionPageMarkupTests
     /// bound both ways, so converting the entry into a card did not turn the step into a display-only one.
     /// </summary>
     [TestMethod]
-    public void PartList_StillChoosesThePart()
+    public void UI_SetupPartSelectionPageMarkupTests_PartList_StillChoosesThePart()
     {
         var list = LoadPage()
             .Descendants(s_presentation + "ListView")
@@ -98,7 +98,7 @@ public sealed class SetupPartSelectionPageMarkupTests
     /// no-image picture rather than an empty source (FR-014, FR-023).
     /// </summary>
     [TestMethod]
-    public void PartListEntry_FallsBackToTheOneSharedPlaceholder()
+    public void UI_SetupPartSelectionPageMarkupTests_PartListEntry_FallsBackToTheOneSharedPlaceholder()
     {
         var entry = new SetupPartResult { PartNumber = "MMC0001000" };
 

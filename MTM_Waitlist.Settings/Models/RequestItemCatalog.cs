@@ -66,7 +66,7 @@ public static class RequestItemCatalog
     /// The resource key for an Item's display name. One convention, one place, so the resolver, the
     /// picker tile and the tests cannot drift apart (FR-022).
     /// </summary>
-    public static string DisplayNameResourceKeyFor(string itemId) => $"RequestItem.{itemId}.DisplayName";
+    public static string DisplayNameResourceKeyFor(string itemId) => $"RequestItem_{itemId.Replace('-', '_')}.DisplayName";
 
     /// <summary>
     /// The Item's umbrella phrase for card Line 1: the Category's own word, or an Item-specific phrase
@@ -93,7 +93,7 @@ public static class RequestItemCatalog
 
     /// <summary>The resource key for an Item's own first-line phrase, following the same one-convention rule the
     /// display name uses (FR-022).</summary>
-    public static string Line1ResourceKeyFor(string itemId) => $"RequestItem.{itemId}.Line1";
+    public static string Line1ResourceKeyFor(string itemId) => $"RequestItem_{itemId.Replace('-', '_')}.Line1";
 
     /// <summary>
     /// The name a person reads for a Category, resolved through the resource mechanism with a readable fallback

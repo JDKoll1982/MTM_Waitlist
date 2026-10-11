@@ -19,7 +19,7 @@ public sealed class UrgencyDeadlineServiceTests
         => new(new UrgencySettingsService(store));
 
     [TestMethod]
-    public async Task Compute_DueIsCreatedPlusTheItemsStoredAllotment()
+    public async Task Service_UrgencyDeadlineServiceTests_Compute_DueIsCreatedPlusTheItemsStoredAllotment()
     {
         var store = new FakeRequestItemAllottedMinutesStore();
         store.Configure("pickup-coil", 60);
@@ -33,7 +33,7 @@ public sealed class UrgencyDeadlineServiceTests
     }
 
     [TestMethod]
-    public async Task Compute_ForAnItemWithNoConfiguredAllotment_UsesTheLabelledDefault()
+    public async Task Service_UrgencyDeadlineServiceTests_Compute_ForAnItemWithNoConfiguredAllotmentUsesTheLabelledDefault()
     {
         var service = Build(new FakeRequestItemAllottedMinutesStore());
 
@@ -46,7 +46,7 @@ public sealed class UrgencyDeadlineServiceTests
     }
 
     [TestMethod]
-    public async Task GetMaxAllotted_ReturnsTheItemsStoredAllotmentOrDefault()
+    public async Task Service_UrgencyDeadlineServiceTests_GetMaxAllotted_ReturnsTheItemsStoredAllotmentOrDefault()
     {
         var store = new FakeRequestItemAllottedMinutesStore();
         store.Configure("pickup-coil", 45);

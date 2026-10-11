@@ -22,7 +22,7 @@ namespace MTM_Waitlist.Tests.Module_Core.Permissions;
 public sealed class PermissionResolutionTests
 {
     [TestMethod]
-    public async Task HasPermissionAsync_WithNoStoredRowOfTheirOwn_TakesTheRoleBaseline()
+    public async Task Service_PermissionResolutionTests_HasPermissionAsync_WithNoStoredRowOfTheirOwnTakesTheRoleBaseline()
     {
         var helper = new FakeMySqlHelperServer();
         helper.EnqueueQueryResult(Row(PermissionKeys.RequestsHandle, "role", "role:production", value: true));
@@ -32,7 +32,7 @@ public sealed class PermissionResolutionTests
     }
 
     [TestMethod]
-    public async Task HasPermissionAsync_WithNoStoredRowAtAll_FallsBackToTheShippedFallback()
+    public async Task Service_PermissionResolutionTests_HasPermissionAsync_WithNoStoredRowAtAllFallsBackToTheShippedFallback()
     {
         var helper = new FakeMySqlHelperServer();
         helper.EnqueueEmptyQueryResult();
@@ -46,7 +46,7 @@ public sealed class PermissionResolutionTests
     }
 
     [TestMethod]
-    public async Task HasPermissionAsync_APersonsOwnRowBeatsTheirRoleBaseline()
+    public async Task Service_PermissionResolutionTests_HasPermissionAsync_APersonsOwnRowBeatsTheirRoleBaseline()
     {
         var helper = new FakeMySqlHelperServer();
 
@@ -61,7 +61,7 @@ public sealed class PermissionResolutionTests
     }
 
     [TestMethod]
-    public async Task HasPermissionAsync_APersonsOwnRowBeatsTheirRoleBaseline_WhateverOrderTheRowsArriveIn()
+    public async Task Service_PermissionResolutionTests_HasPermissionAsync_APersonsOwnRowBeatsTheirRoleBaselineWhateverOrderTheRowsArriveIn()
     {
         var helper = new FakeMySqlHelperServer();
         helper.EnqueueQueryResult(
@@ -73,7 +73,7 @@ public sealed class PermissionResolutionTests
     }
 
     [TestMethod]
-    public async Task HasPermissionAsync_ARoleWithNoBaselineRowAnswersFromTheShippedFallback()
+    public async Task Service_PermissionResolutionTests_HasPermissionAsync_ARoleWithNoBaselineRowAnswersFromTheShippedFallback()
     {
         var helper = new FakeMySqlHelperServer();
         helper.EnqueueQueryResult(Row(PermissionKeys.RequestsHandle, "role", "role:production", value: true));
@@ -85,7 +85,7 @@ public sealed class PermissionResolutionTests
     }
 
     [TestMethod]
-    public async Task HasPermissionAsync_WhenTheStoreThrows_AnswersFromTheShippedFallbackRatherThanRefusing()
+    public async Task Service_PermissionResolutionTests_HasPermissionAsync_WhenTheStoreThrowsAnswersFromTheShippedFallbackRatherThanRefusing()
     {
         var service = CreateService(new ThrowingMySqlHelperServer());
 
@@ -96,7 +96,7 @@ public sealed class PermissionResolutionTests
     }
 
     [TestMethod]
-    public async Task HasPermissionAsync_WithAnUndeclaredKey_ReportsAFailureRatherThanRefusingSilently()
+    public async Task Service_PermissionResolutionTests_HasPermissionAsync_WithAnUndeclaredKeyReportsAFailureRatherThanRefusingSilently()
     {
         var service = CreateService(new FakeMySqlHelperServer());
 
@@ -106,7 +106,7 @@ public sealed class PermissionResolutionTests
     }
 
     [TestMethod]
-    public async Task HasPermissionsAsync_AsksTheStoreOnceForSeveralAnswers()
+    public async Task Service_PermissionResolutionTests_HasPermissionsAsync_AsksTheStoreOnceForSeveralAnswers()
     {
         var helper = new FakeMySqlHelperServer();
         helper.EnqueueEmptyQueryResult();
@@ -122,7 +122,7 @@ public sealed class PermissionResolutionTests
     }
 
     [TestMethod]
-    public async Task HasPermissionAsync_AnswersFromTheSessionCacheUntilItIsInvalidated()
+    public async Task Service_PermissionResolutionTests_HasPermissionAsync_AnswersFromTheSessionCacheUntilItIsInvalidated()
     {
         var helper = new FakeMySqlHelperServer();
         helper.EnqueueQueryResult(Row(PermissionKeys.AdminUsers, "role", "role:production", value: true));
@@ -142,7 +142,7 @@ public sealed class PermissionResolutionTests
     }
 
     [TestMethod]
-    public async Task HasPermissionAsync_AfterASignInResolvesADifferentPerson_ReadsAgain()
+    public async Task Service_PermissionResolutionTests_HasPermissionAsync_AfterASignInResolvesADifferentPersonReadsAgain()
     {
         var helper = new FakeMySqlHelperServer();
         helper.EnqueueQueryResult(Row(PermissionKeys.AdminUsers, "user", "user:7", value: true));
@@ -161,7 +161,7 @@ public sealed class PermissionResolutionTests
     }
 
     [TestMethod]
-    public async Task HasPermissionAsync_BeforeAnyAccountIsResolved_AnswersFromTheFallbackWithoutReading()
+    public async Task Service_PermissionResolutionTests_HasPermissionAsync_BeforeAnyAccountIsResolvedAnswersFromTheFallbackWithoutReading()
     {
         var helper = new FakeMySqlHelperServer();
         var service = CreateService(helper, userId: 0);

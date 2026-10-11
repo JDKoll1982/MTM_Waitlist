@@ -23,7 +23,7 @@ public sealed class UrgencySettingsServiceTests
     // ── The source of truth is the Item's stored configuration, not a local key ─────────────────────────
 
     [TestMethod]
-    public async Task GetMaxAllotted_ReadsTheItemsStoredConfiguration()
+    public async Task Service_UrgencySettingsServiceTests_GetMaxAllotted_ReadsTheItemsStoredConfiguration()
     {
         var store = new FakeRequestItemAllottedMinutesStore();
         store.Configure(Item, 45);
@@ -39,7 +39,7 @@ public sealed class UrgencySettingsServiceTests
     /// per-Windows-user local settings store: that mechanism is deleted outright rather than left unused (§D4).
     /// </summary>
     [TestMethod]
-    public void TheService_NoLongerTakesAPerWindowsUserLocalSettingsStore()
+    public void Service_UrgencySettingsServiceTests_TheService_NoLongerTakesAPerWindowsUserLocalSettingsStore()
     {
         var parameterTypeNames = typeof(UrgencySettingsService)
             .GetConstructors()
@@ -58,7 +58,7 @@ public sealed class UrgencySettingsServiceTests
     }
 
     [TestMethod]
-    public async Task GetAllottedMinutes_ReadsThroughTheExistingConfigurationRead()
+    public async Task Service_UrgencySettingsServiceTests_GetAllottedMinutes_ReadsThroughTheExistingConfigurationRead()
     {
         var helper = new FakeMySqlHelperServer();
         helper.EnqueueQueryResult(new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase)
@@ -86,7 +86,7 @@ public sealed class UrgencySettingsServiceTests
     // ── The write is the one writer of a configured allotment ───────────────────────────────────────────
 
     [TestMethod]
-    public async Task SetMaxAllotted_WritesThroughTheAllottedMinutesProcedure()
+    public async Task Service_UrgencySettingsServiceTests_SetMaxAllotted_WritesThroughTheAllottedMinutesProcedure()
     {
         var helper = new FakeMySqlHelperServer();
         helper.EnqueueNonQueryResult(1);
@@ -104,7 +104,7 @@ public sealed class UrgencySettingsServiceTests
     }
 
     [TestMethod]
-    public async Task SetMaxAllotted_IsClampedToThePositiveMinimumAndTheTwentyFourHourMaximum()
+    public async Task Service_UrgencySettingsServiceTests_SetMaxAllotted_IsClampedToThePositiveMinimumAndTheTwentyFourHourMaximum()
     {
         var store = new FakeRequestItemAllottedMinutesStore();
         var service = new UrgencySettingsService(store);
@@ -119,7 +119,7 @@ public sealed class UrgencySettingsServiceTests
     }
 
     [TestMethod]
-    public async Task SetMaxAllotted_WhenTheWriteFails_ReportsItRatherThanSwallowingIt()
+    public async Task Service_UrgencySettingsServiceTests_SetMaxAllotted_WhenTheWriteFailsReportsItRatherThanSwallowingIt()
     {
         var store = new FakeRequestItemAllottedMinutesStore
         {
@@ -133,7 +133,7 @@ public sealed class UrgencySettingsServiceTests
     // ── FR-017 / SC-007: the labelled 15-minute default, and the Item keeps its place in the order ──────
 
     [TestMethod]
-    public async Task GetMaxAllotted_ForAnItemWithNoConfiguredMinutes_UsesTheFifteenMinuteDefault()
+    public async Task Service_UrgencySettingsServiceTests_GetMaxAllotted_ForAnItemWithNoConfiguredMinutesUsesTheFifteenMinuteDefault()
     {
         var service = new UrgencySettingsService(new FakeRequestItemAllottedMinutesStore());
 
@@ -143,7 +143,7 @@ public sealed class UrgencySettingsServiceTests
     }
 
     [TestMethod]
-    public async Task GetMaxAllotted_WhenTheStoreCannotBeReached_StillAnswersTheLabelledDefault()
+    public async Task Service_UrgencySettingsServiceTests_GetMaxAllotted_WhenTheStoreCannotBeReachedStillAnswersTheLabelledDefault()
     {
         var store = new FakeRequestItemAllottedMinutesStore
         {
@@ -158,7 +158,7 @@ public sealed class UrgencySettingsServiceTests
     }
 
     [TestMethod]
-    public async Task AnItemWithNoConfiguredMinutes_KeepsItsPlaceInTheUrgencyOrder()
+    public async Task Service_UrgencySettingsServiceTests_AnItemWithNoConfiguredMinutes_KeepsItsPlaceInTheUrgencyOrder()
     {
         var service = new UrgencySettingsService(new FakeRequestItemAllottedMinutesStore());
         var created = new DateTimeOffset(2026, 9, 13, 8, 0, 0, TimeSpan.Zero);
@@ -175,7 +175,7 @@ public sealed class UrgencySettingsServiceTests
     }
 
     [TestMethod]
-    public async Task AnItemWithNoConfiguredMinutes_IsLabelledAsADefaultOnThePairTheScreenShows()
+    public async Task Service_UrgencySettingsServiceTests_AnItemWithNoConfiguredMinutes_IsLabelledAsADefaultOnThePairTheScreenShows()
     {
         var configurations = new FakeRequestItemConfigurationService();
         configurations.Configure(Item, null);

@@ -112,18 +112,6 @@ public static class ConfigSettingKeys
     public const string ImageStorageSharedFolderPath = "image_storage.shared_folder_path";
 
     /// <summary>
-    /// The folder holding the key files, one per key, named "{keyname}.txt".
-    /// Setting Key: "keys.folder_path"
-    /// Value Type: "text" (string path)
-    /// Scope: "all_users" (global setting)
-    /// Description: IT-configured path to the folder holding the application's key files. Nothing reads these
-    ///             files yet; the setting exists so the first feature that needs a key has one agreed place to
-    ///             read it from. When set, overrides the value from appsettings.json.
-    /// Default: \\mtmanu-fs01\Expo Drive\MH_RESOURCE\Material_Handler\MTM Applications\Keys - DO NOT EDIT FILES\MTM Waitlist Application
-    /// </summary>
-    public const string KeysFolderPath = "keys.folder_path";
-
-    /// <summary>
     /// The root the dunnage pictures sit under, one folder per dunnage type and part beneath it.
     /// Setting Key: "dunnage.root_path"
     /// Value Type: "text" (string path)

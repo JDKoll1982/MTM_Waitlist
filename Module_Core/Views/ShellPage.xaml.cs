@@ -227,7 +227,7 @@ public sealed partial class ShellPage : Page
         var dialog = new ContentDialog
         {
             XamlRoot = XamlRoot,
-            Title = "Shell_SignOut.Failed.Title".GetLocalized(),
+            Title = "Shell_SignOut_Failed.Title".GetLocalized(),
             Content = result.Message,
             CloseButtonText = "Shell_SignOut.Close".GetLocalized(),
         };

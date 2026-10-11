@@ -24,7 +24,7 @@ public sealed class SetUpPanelViewModelTests
         => new("6229", firstName, lastName, pin, confirmation);
 
     [TestMethod]
-    public async Task Enter_OnTheFirstName_AdvancesToTheLastName()
+    public async Task ViewModel_SetUpPanelViewModelTests_Enter_OnTheFirstNameAdvancesToTheLastName()
     {
         var panel = Build();
 
@@ -36,7 +36,7 @@ public sealed class SetUpPanelViewModelTests
     }
 
     [TestMethod]
-    public async Task Enter_OnABlankField_ShowsItsHintAndStays()
+    public async Task ViewModel_SetUpPanelViewModelTests_Enter_OnABlankFieldShowsItsHintAndStays()
     {
         var panel = Build();
 
@@ -49,7 +49,7 @@ public sealed class SetUpPanelViewModelTests
     }
 
     [TestMethod]
-    public async Task Enter_OnThePin_AdvancesToTheConfirmation()
+    public async Task ViewModel_SetUpPanelViewModelTests_Enter_OnThePinAdvancesToTheConfirmation()
     {
         var panel = Build();
 
@@ -60,7 +60,7 @@ public sealed class SetUpPanelViewModelTests
     }
 
     [TestMethod]
-    public async Task Enter_OnABlankPin_ShowsItsHintAndDoesNotSubmit()
+    public async Task ViewModel_SetUpPanelViewModelTests_Enter_OnABlankPinShowsItsHintAndDoesNotSubmit()
     {
         var store = new StubStore();
         var panel = Build(store);
@@ -73,7 +73,7 @@ public sealed class SetUpPanelViewModelTests
     }
 
     [TestMethod]
-    public async Task Enter_OnTheConfirmation_SubmitsExactlyAsTheButtonDoes()
+    public async Task ViewModel_SetUpPanelViewModelTests_Enter_OnTheConfirmationSubmitsExactlyAsTheButtonDoes()
     {
         var store = new StubStore
         {
@@ -93,7 +93,7 @@ public sealed class SetUpPanelViewModelTests
     }
 
     [TestMethod]
-    public async Task Enter_OnTheConfirmationWithAMismatchedPin_StatesTheReasonAndWritesNothing()
+    public async Task ViewModel_SetUpPanelViewModelTests_Enter_OnTheConfirmationWithAMismatchedPinStatesTheReasonAndWritesNothing()
     {
         var store = new StubStore();
         var panel = Build(store);
@@ -106,7 +106,7 @@ public sealed class SetUpPanelViewModelTests
     }
 
     [TestMethod]
-    public void LeavingThePanel_CreatesNothingAndRaisesCancelled()
+    public void ViewModel_SetUpPanelViewModelTests_LeavingThePanel_CreatesNothingAndRaisesCancelled()
     {
         var store = new StubStore();
         var panel = Build(store);
@@ -122,7 +122,7 @@ public sealed class SetUpPanelViewModelTests
     }
 
     [TestMethod]
-    public void OpeningThePanel_ShowsThePlantSystemsNamePrefilled()
+    public void ViewModel_SetUpPanelViewModelTests_OpeningThePanel_ShowsThePlantSystemsNamePrefilled()
     {
         var panel = Build();
 

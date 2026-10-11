@@ -10,7 +10,7 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.Services;
 public sealed class InventoryLocationFilteringTests
 {
     [TestMethod]
-    public void Apply_KeepsOnlyOnHandAtLeastOne_AndOmitsIgnoredLocations()
+    public void Service_InventoryLocationFilteringTests_Apply_KeepsOnlyOnHandAtLeastOneAndOmitsIgnoredLocations()
     {
         var ignored = IgnoredLocationDefaults.Locations; // WC, NCM, V-WC, NCM-VITS, SHIP
 
@@ -26,7 +26,7 @@ public sealed class InventoryLocationFilteringTests
     }
 
     [TestMethod]
-    public void Apply_WhenNothingIgnored_OnlyAppliesQuantityFilter()
+    public void Service_InventoryLocationFilteringTests_Apply_WhenNothingIgnoredOnlyAppliesQuantityFilter()
     {
         var result = InventoryLocationFiltering.Apply(
             MixedRows(),
@@ -40,7 +40,7 @@ public sealed class InventoryLocationFilteringTests
     }
 
     [TestMethod]
-    public void Apply_IsCaseInsensitiveOnLocationAndSortsByLocation()
+    public void Service_InventoryLocationFilteringTests_Apply_IsCaseInsensitiveOnLocationAndSortsByLocation()
     {
         var rows = new[]
         {
@@ -58,7 +58,7 @@ public sealed class InventoryLocationFilteringTests
     }
 
     [TestMethod]
-    public void Apply_HandlesNullRows()
+    public void Service_InventoryLocationFilteringTests_Apply_HandlesNullRows()
     {
         var result = InventoryLocationFiltering.Apply(null!, Array.Empty<string>());
         Assert.AreEqual(0, result.Count);

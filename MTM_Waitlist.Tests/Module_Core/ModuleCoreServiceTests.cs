@@ -10,7 +10,7 @@ namespace MTM_Waitlist.Tests.Module_Core;
 public class ModuleCoreServiceTests
 {
     [TestMethod]
-    public void AddCoreModuleServices_RegistersModuleCoreService()
+    public void Service_ModuleCoreServiceTests_AddCoreModuleServices_RegistersModuleCoreService()
     {
         var services = new ServiceCollection();
         services.AddCoreModuleServices(new ConfigurationBuilder().AddInMemoryCollection().Build());

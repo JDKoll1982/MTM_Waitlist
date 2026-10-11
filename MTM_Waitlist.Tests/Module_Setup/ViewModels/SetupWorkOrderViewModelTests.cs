@@ -22,7 +22,7 @@ namespace MTM_Waitlist.Tests.Module_Setup.ViewModels;
 public sealed class SetupWorkOrderViewModelTests
 {
     [TestMethod]
-    public async Task SearchAsync_PartialWorkOrderNumber_HandsTheLookupTheCanonicalKey()
+    public async Task ViewModel_SetupWorkOrderViewModelTests_SearchAsync_PartialWorkOrderNumberHandsTheLookupTheCanonicalKey()
     {
         var (viewModel, workflow) = CreateViewModel();
         viewModel.WorkOrderInput = "55691";
@@ -37,7 +37,7 @@ public sealed class SetupWorkOrderViewModelTests
     }
 
     [TestMethod]
-    public async Task SearchAsync_InputThatCannotBeCanonicalised_LeavesWhatTheOperatorTyped()
+    public async Task ViewModel_SetupWorkOrderViewModelTests_SearchAsync_InputThatCannotBeCanonicalisedLeavesWhatTheOperatorTyped()
     {
         var (viewModel, workflow) = CreateViewModel();
         viewModel.WorkOrderInput = "1234567";
@@ -52,7 +52,7 @@ public sealed class SetupWorkOrderViewModelTests
     }
 
     [TestMethod]
-    public async Task SearchAsync_WhileTheLookupIsInFlight_HoldsTheScreenSoASecondSearchCannotBeIssued()
+    public async Task ViewModel_SetupWorkOrderViewModelTests_SearchAsync_WhileTheLookupIsInFlightHoldsTheScreenSoASecondSearchCannotBeIssued()
     {
         var (viewModel, workflow) = CreateViewModel();
         bool? isIdleDuringSearch = null;
@@ -69,7 +69,7 @@ public sealed class SetupWorkOrderViewModelTests
     }
 
     [TestMethod]
-    public async Task ACommandThatOutlivesItsView_DoesNotNotifyBoundMembers()
+    public async Task ViewModel_SetupWorkOrderViewModelTests_ACommandThatOutlivesItsView_DoesNotNotifyBoundMembers()
     {
         var workflow = new RecordingSetupWorkflowService();
         var release = new TaskCompletionSource();

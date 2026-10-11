@@ -32,7 +32,7 @@ public sealed class PictureCacheStepTests
     private const string StepId = "picture-cache";
 
     [TestMethod]
-    public void Descriptor_IsTheCataloguesOwnEntry_AndIsBestEffortInsideTheCeiling()
+    public void Service_PictureCacheStepTests_Descriptor_IsTheCataloguesOwnEntryAndIsBestEffortInsideTheCeiling()
     {
         // Arrange
         var catalog = new LaunchStepCatalog();
@@ -48,7 +48,7 @@ public sealed class PictureCacheStepTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenASourceCannotBeRead_NamesItAndReportsAFailure()
+    public async Task Service_PictureCacheStepTests_RunAsync_WhenASourceCannotBeReadNamesItAndReportsAFailure()
     {
         // Arrange: the mirror reports that one share could not be read, which is the shape the real mirror
         // answers with rather than an exception.
@@ -74,7 +74,7 @@ public sealed class PictureCacheStepTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenASourceCannotBeRead_LeavesTheCopiesOnThisComputerAlone()
+    public async Task Service_PictureCacheStepTests_RunAsync_WhenASourceCannotBeReadLeavesTheCopiesOnThisComputerAlone()
     {
         // Arrange
         var cache = new RecordingPictureCache
@@ -94,7 +94,7 @@ public sealed class PictureCacheStepTests
     }
 
     [TestMethod]
-    public async Task RunAsync_ThroughTheRunner_WhenASourceCannotBeRead_DoesNotStopTheLaunch()
+    public async Task Service_PictureCacheStepTests_RunAsync_ThroughTheRunnerWhenASourceCannotBeReadDoesNotStopTheLaunch()
     {
         // Arrange
         var feed = new LaunchActivityFeed();
@@ -117,7 +117,7 @@ public sealed class PictureCacheStepTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenTheCopiesWereBroughtUpToDate_ReportsWhatChanged()
+    public async Task Service_PictureCacheStepTests_RunAsync_WhenTheCopiesWereBroughtUpToDateReportsWhatChanged()
     {
         // Arrange
         var cache = new RecordingPictureCache
@@ -142,7 +142,7 @@ public sealed class PictureCacheStepTests
     /// different remedies, and the line on the splash screen is the only clue the person reading it gets.
     /// </summary>
     [TestMethod]
-    public async Task RunAsync_WhenTheCopiesCannotBeWritten_NamesTheFolderRatherThanTheShare()
+    public async Task Service_PictureCacheStepTests_RunAsync_WhenTheCopiesCannotBeWrittenNamesTheFolderRatherThanTheShare()
     {
         // Arrange: the share was readable and the folder the copies go into could not be written.
         var cache = new RecordingPictureCache
@@ -174,7 +174,7 @@ public sealed class PictureCacheStepTests
     /// dies with the launch, so a fault that only ever reached the feed is a fault nobody can look back at.
     /// </summary>
     [TestMethod]
-    public async Task RunAsync_WhenTheCopiesCannotBeWritten_IsRecordedRatherThanOnlyShown()
+    public async Task Service_PictureCacheStepTests_RunAsync_WhenTheCopiesCannotBeWrittenIsRecordedRatherThanOnlyShown()
     {
         var sink = new RecordingAppLogSink();
         AppLog.Configure(sink);
@@ -206,7 +206,7 @@ public sealed class PictureCacheStepTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenThereWasNothingToDo_SaysTheCopiesWereAlreadyUpToDate()
+    public async Task Service_PictureCacheStepTests_RunAsync_WhenThereWasNothingToDoSaysTheCopiesWereAlreadyUpToDate()
     {
         // Arrange
         var cache = new RecordingPictureCache { Result = ImageCacheSyncResult.NothingToDo };
@@ -221,7 +221,7 @@ public sealed class PictureCacheStepTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenTheMirrorThrows_IsReportedRatherThanEscapingTheStep()
+    public async Task Service_PictureCacheStepTests_RunAsync_WhenTheMirrorThrowsIsReportedRatherThanEscapingTheStep()
     {
         // Arrange: the mirror is written never to throw, so this is the seam being wrong rather than a case the
         // application expects. It still must not reach the person as an unattributed crash (FR-004).

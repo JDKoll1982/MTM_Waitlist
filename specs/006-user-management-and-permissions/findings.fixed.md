@@ -245,10 +245,10 @@ the owner between the review and this run, which is what makes the path resolvab
   covers the third refusal: the reset is not offered, the action is refused in the same words, no credential is
   issued and no window is raised.
 - `MTM_Waitlist.Tests/Module_Settings/ViewModels/PermissionsViewModelTests.cs` — the fake gained `ApplyThrows`,
-  and `ASaveThatCannotReachTheStore_IsStatedOnThePage_InsteadOfFaultingOutOfTheCommand` proves the save reports the
+  and `ViewModel_PermissionsViewModelTests_ASaveThatCannotReachTheStore_IsStatedOnThePageInsteadOfFaultingOutOfTheCommand` proves the save reports the
   unavailable state, attempts the write once, and leaves the change pending.
 - `MTM_Waitlist.Tests/Module_Settings/Services/RoleCatalogServiceTests.cs` — a new `FlakyMySqlHelperServer` and
-  `GetRolesAsync_AfterAFailedRead_AsksAgainRatherThanAnsweringEmptyForTheSession` prove the failed read is not
+  `Service_RoleCatalogServiceTests_GetRolesAsync_AfterAFailedReadAsksAgainRatherThanAnsweringEmptyForTheSession` prove the failed read is not
   cached and the retry answers from the store.
 
 ### Findings deferred

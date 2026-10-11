@@ -41,11 +41,10 @@ public sealed class PreSignInStepsTests
         "read-computer-record",
         "read-machine-configuration",
         "save-machine-configuration",
-        "read-remembered-sign-in",
     ];
 
     [TestMethod]
-    public void Descriptor_EveryPreSignInStep_IsTheCataloguesOwnEntryForItsId()
+    public void Service_PreSignInStepsTests_Descriptor_EveryPreSignInStepIsTheCataloguesOwnEntryForItsId()
     {
         // Arrange
         var catalog = new LaunchStepCatalog();
@@ -70,7 +69,7 @@ public sealed class PreSignInStepsTests
     }
 
     [TestMethod]
-    public async Task RunAsync_EveryPreSignInStep_AnnouncesNothingOfItsOwn()
+    public async Task Service_PreSignInStepsTests_RunAsync_EveryPreSignInStepAnnouncesNothingOfItsOwn()
     {
         // Arrange: the runner names each step before it runs, so a step that named itself would write the line
         // twice (FR-002). Running every step straight, with no runner, is what isolates that claim.
@@ -90,7 +89,7 @@ public sealed class PreSignInStepsTests
     }
 
     [TestMethod]
-    public async Task ConfigurationStep_RunAsync_WhenTheSavedSettingsNameAStore_ReportsSucceeded()
+    public async Task Service_PreSignInStepsTests_ConfigurationStep_RunAsyncWhenTheSavedSettingsNameAStoreReportsSucceeded()
     {
         // Arrange
         var settings = Options.Create(new WaitlistDatabaseOptions { ConnectionString = "Server=localhost;Database=mtm_waitlist;" });
@@ -105,7 +104,7 @@ public sealed class PreSignInStepsTests
     }
 
     [TestMethod]
-    public async Task ConfigurationStep_RunAsync_WhenTheSavedSettingsNameNoStore_ReportsWhatItFoundRatherThanFailing()
+    public async Task Service_PreSignInStepsTests_ConfigurationStep_RunAsyncWhenTheSavedSettingsNameNoStoreReportsWhatItFoundRatherThanFailing()
     {
         // Arrange: this computer keeps no connection of its own, which is the state of a machine reached from the
         // environment. The read still happened, and the store itself is what the next step consults.
@@ -120,7 +119,7 @@ public sealed class PreSignInStepsTests
     }
 
     [TestMethod]
-    public async Task ConfigurationStep_RunAsync_WhenTheSavedSettingsCannotBeRead_ReportsFailedRatherThanThrowing()
+    public async Task Service_PreSignInStepsTests_ConfigurationStep_RunAsyncWhenTheSavedSettingsCannotBeReadReportsFailedRatherThanThrowing()
     {
         // Arrange
         var step = new ConfigurationStep(new LaunchStepCatalog(), new UnreadableSavedSettings());
@@ -137,7 +136,7 @@ public sealed class PreSignInStepsTests
     }
 
     [TestMethod]
-    public async Task StoreReachabilityStep_RunAsync_WhenTheStoreAnswers_ReadsOneStoredProcedureAndReportsSucceeded()
+    public async Task Service_PreSignInStepsTests_StoreReachabilityStep_RunAsyncWhenTheStoreAnswersReadsOneStoredProcedureAndReportsSucceeded()
     {
         // Arrange
         var store = new StubMySqlHelperServer();
@@ -156,7 +155,7 @@ public sealed class PreSignInStepsTests
     }
 
     [TestMethod]
-    public async Task StoreReachabilityStep_RunAsync_WhenTheStoreDoesNotAnswer_ReportsFailedWithARetryAndNoReset()
+    public async Task Service_PreSignInStepsTests_StoreReachabilityStep_RunAsyncWhenTheStoreDoesNotAnswerReportsFailedWithARetryAndNoReset()
     {
         // Arrange
         var step = new StoreReachabilityStep(new LaunchStepCatalog(), new StubMySqlHelperServer(throwOnQuery: true));
@@ -173,7 +172,7 @@ public sealed class PreSignInStepsTests
     }
 
     [TestMethod]
-    public async Task ReadHardwareIdentityStep_RunAsync_ReportsThisComputersOwnName()
+    public async Task Service_PreSignInStepsTests_ReadHardwareIdentityStep_RunAsyncReportsThisComputersOwnName()
     {
         // Arrange: the step reads the machine from its context, so the machine the case is about can be stated
         // rather than borrowed from whichever host the suite happens to run on.
@@ -189,7 +188,7 @@ public sealed class PreSignInStepsTests
     }
 
     [TestMethod]
-    public async Task ReadHardwareIdentityStep_RunAsync_WhenTheAddressCouldNotBeRead_ReportsTheWorkLeftUndone()
+    public async Task Service_PreSignInStepsTests_ReadHardwareIdentityStep_RunAsyncWhenTheAddressCouldNotBeReadReportsTheWorkLeftUndone()
     {
         // Arrange: a machine that presents no usable hardware address, which is the branch this case is about.
         var step = new ReadHardwareIdentityStep(new LaunchStepCatalog());
@@ -205,7 +204,7 @@ public sealed class PreSignInStepsTests
     }
 
     [TestMethod]
-    public async Task ReadComputerRecordStep_RunAsync_WhenTheStoreHoldsTheRow_ReportsSucceeded()
+    public async Task Service_PreSignInStepsTests_ReadComputerRecordStep_RunAsyncWhenTheStoreHoldsTheRowReportsSucceeded()
     {
         // Arrange: the address is read from this machine and cannot be given one, so the store's answer is built
         // from what the machine reports rather than from a constant the test would have to keep in step.
@@ -228,7 +227,7 @@ public sealed class PreSignInStepsTests
     }
 
     [TestMethod]
-    public async Task ReadComputerRecordStep_RunAsync_WhenTheStoreHoldsNoRow_ReportsWhatItFoundRatherThanFailing()
+    public async Task Service_PreSignInStepsTests_ReadComputerRecordStep_RunAsyncWhenTheStoreHoldsNoRowReportsWhatItFoundRatherThanFailing()
     {
         // Arrange
         var probe = new MachineFactsService(new StubMySqlHelperServer());
@@ -249,7 +248,7 @@ public sealed class PreSignInStepsTests
     }
 
     [TestMethod]
-    public async Task ReadComputerRecordStep_RunAsync_WhenTheStoreThrows_ReportsFailedRatherThanThrowing()
+    public async Task Service_PreSignInStepsTests_ReadComputerRecordStep_RunAsyncWhenTheStoreThrowsReportsFailedRatherThanThrowing()
     {
         // Arrange
         var probe = new MachineFactsService(new StubMySqlHelperServer());
@@ -274,7 +273,7 @@ public sealed class PreSignInStepsTests
     }
 
     [TestMethod]
-    public async Task MachineReadinessStep_RunAsync_WhenTheMachineIsConfigured_ReportsSucceededNamingIt()
+    public async Task Service_PreSignInStepsTests_MachineReadinessStep_RunAsyncWhenTheMachineIsConfiguredReportsSucceededNamingIt()
     {
         // Arrange
         var step = new MachineReadinessStep(new LaunchStepCatalog(), new StubMachineConfigurationService(Configured()));
@@ -288,7 +287,7 @@ public sealed class PreSignInStepsTests
     }
 
     [TestMethod]
-    public async Task MachineReadinessStep_RunAsync_WhenTheMachineIsUnconfigured_ReportsSucceededNamingTheReason()
+    public async Task Service_PreSignInStepsTests_MachineReadinessStep_RunAsyncWhenTheMachineIsUnconfiguredReportsSucceededNamingTheReason()
     {
         // Arrange
         var state = Unconfigured(MachineConfigurationReasons.NeverConfigured);
@@ -304,7 +303,7 @@ public sealed class PreSignInStepsTests
     }
 
     [TestMethod]
-    public async Task MachineReadinessStep_RunAsync_WhenTheStoreCouldNotBeRead_ReportsFailedWithARetryAndNoReset()
+    public async Task Service_PreSignInStepsTests_MachineReadinessStep_RunAsyncWhenTheStoreCouldNotBeReadReportsFailedWithARetryAndNoReset()
     {
         // Arrange
         var state = Unconfigured(MachineConfigurationReasons.Unreadable);
@@ -321,7 +320,7 @@ public sealed class PreSignInStepsTests
     }
 
     [TestMethod]
-    public async Task SaveMachineConfigurationStep_RunAsync_WhenADraftIsWaiting_SavesItOnceAndReportsItSaved()
+    public async Task Service_PreSignInStepsTests_SaveMachineConfigurationStep_RunAsyncWhenADraftIsWaitingSavesItOnceAndReportsItSaved()
     {
         // Arrange
         var configuration = new StubMachineConfigurationService(Unconfigured(MachineConfigurationReasons.NeverConfigured));
@@ -336,13 +335,13 @@ public sealed class PreSignInStepsTests
         // is no longer waiting.
         Assert.AreEqual(LaunchStepStatus.Succeeded, outcome.Status);
         Assert.AreEqual(1, configuration.SaveCallCount);
-        Assert.AreEqual("Shop floor station", configuration.LastDraft!.DisplayName);
+        Assert.AreEqual("Shop floor station", configuration.LastDraft!.ComputerName);
         Assert.IsNull(pending.Pending);
         StringAssert.Contains(outcome.Diagnosis!, "Shop floor station");
     }
 
     [TestMethod]
-    public async Task SaveMachineConfigurationStep_RunAsync_WhenTheMachineIsAlreadyConfigured_SavesNothing()
+    public async Task Service_PreSignInStepsTests_SaveMachineConfigurationStep_RunAsyncWhenTheMachineIsAlreadyConfiguredSavesNothing()
     {
         // Arrange
         var configuration = new StubMachineConfigurationService(Configured());
@@ -361,7 +360,7 @@ public sealed class PreSignInStepsTests
     }
 
     [TestMethod]
-    public async Task SaveMachineConfigurationStep_RunAsync_WhenNoDraftIsWaiting_SavesNothing()
+    public async Task Service_PreSignInStepsTests_SaveMachineConfigurationStep_RunAsyncWhenNoDraftIsWaitingSavesNothing()
     {
         // Arrange
         var configuration = new StubMachineConfigurationService(Unconfigured(MachineConfigurationReasons.NeverConfigured));
@@ -376,7 +375,7 @@ public sealed class PreSignInStepsTests
     }
 
     [TestMethod]
-    public async Task SaveMachineConfigurationStep_RunAsync_WhenTheStoreRefusesTheName_ReportsFailedAndKeepsTheDraft()
+    public async Task Service_PreSignInStepsTests_SaveMachineConfigurationStep_RunAsyncWhenTheStoreRefusesTheNameReportsFailedAndKeepsTheDraft()
     {
         // Arrange: a display name another machine holds is refused by the service rather than raised, so the
         // refusal has to be turned into something the person can act on (FR-004).
@@ -397,7 +396,7 @@ public sealed class PreSignInStepsTests
     }
 
     [TestMethod]
-    public async Task SaveMachineConfigurationStep_RunAsync_WhenTheStoreThrows_ReportsFailedRatherThanThrowing()
+    public async Task Service_PreSignInStepsTests_SaveMachineConfigurationStep_RunAsyncWhenTheStoreThrowsReportsFailedRatherThanThrowing()
     {
         // Arrange
         var configuration = new StubMachineConfigurationService(
@@ -416,23 +415,7 @@ public sealed class PreSignInStepsTests
         Assert.IsNotNull(pending.Pending, "a draft that was never written stays waiting");
     }
 
-    [TestMethod]
-    public async Task ReadRememberedSignInStep_RunAsync_ReportsTheWorkLeftUndoneRatherThanAReadItDidNotMake()
-    {
-        // Arrange: the read against the store and the unlock through the shared key file belong to the
-        // remembered-sign-in service, so until that service exists the honest report is that nothing was read.
-        var step = new ReadRememberedSignInStep(new LaunchStepCatalog());
-
-        // Act
-        var outcome = await step.RunAsync(Context(new LaunchActivityFeed()), CancellationToken.None);
-
-        // Assert: a step that read nothing must not report success, and it must never stop the launch, because an
-        // unreadable remembered sign-in falls back to the ordinary form (FR-014).
-        Assert.AreEqual(LaunchStepStatus.Skipped, outcome.Status);
-        StringAssert.Contains(outcome.Diagnosis!, "sign-in form will ask");
-    }
-
-    /// <summary>The seven pre-sign-in steps, each over a dependency that answers.</summary>
+    /// <summary>The six pre-sign-in steps, each over a dependency that answers.</summary>
     private static ILaunchStep[] AllSteps(LaunchStepCatalog catalog) =>
     [
         new ConfigurationStep(
@@ -443,7 +426,6 @@ public sealed class PreSignInStepsTests
         new ReadComputerRecordStep(catalog, new MachineFactsService(new StubMySqlHelperServer())),
         new MachineReadinessStep(catalog, new StubMachineConfigurationService(Configured())),
         new SaveMachineConfigurationStep(catalog, new StubMachineConfigurationService(Configured()), new PendingMachineConfiguration()),
-        new ReadRememberedSignInStep(catalog),
     ];
 
     /// <summary>What a step is handed: no person before sign-in, this machine's facts, and the feed.</summary>

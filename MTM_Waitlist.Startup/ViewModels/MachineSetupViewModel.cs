@@ -9,16 +9,17 @@ using MTM_Waitlist.Module_Startup.Services;
 namespace MTM_Waitlist.Module_Startup.ViewModels;
 
 /// <summary>
-/// The machine-setup screen's state: it unlocks on an authorised sign-in, captures what this computer is called —
-/// its name and its note — and saves that through the one service that writes it
-/// (`contracts/machine-configuration-contract.md` sections 1 and 2; FR-007, FR-009, FR-018, FR-040).
+/// The machine-setup screen's state: it unlocks on an authorised sign-in, shows the name this computer reports for
+/// itself, captures where it stands and saves that through the one service that writes it
+/// (`contracts/machine-configuration-contract.md` sections 1 and 2; FR-007, FR-009, FR-018, FR-049, FR-050).
 /// </summary>
 /// <remarks>
 /// <para>
-/// <b>This screen asks for the computer's name and its note, and for nothing else</b> (FR-040, FR-041). Where
-/// pictures come from is held once for the plant and changed from the settings panel, so nothing here captures a
-/// folder and the draft this screen saves carries no picture source. A machine counts as configured once the
-/// store holds its record and its name, which is why a save that changed nothing is still a save that succeeded.
+/// <b>This screen asks for the location and for nothing else</b> (FR-049). The name is read from the computer and
+/// shown; it has no input control bound to it, so there is nothing to type. Where pictures come from is held once
+/// for the plant and changed from the settings panel, so nothing here captures a folder and the draft this screen
+/// saves carries no picture source. A machine counts as configured once the store holds its record and its name,
+/// which is why a save that changed nothing is still a save that succeeded.
 /// </para>
 /// <para>
 /// <b>One writer, and this screen never writes rows itself.</b> The draft it captures goes to
@@ -37,28 +38,36 @@ namespace MTM_Waitlist.Module_Startup.ViewModels;
 /// property for it, so there is nothing to leak into a log or a binding (FR-025).
 /// </para>
 /// <para>
-/// <b>A refused name is asked for again rather than ending the launch.</b> The save reports a display name
-/// another computer already holds, and the screen stays open so a different name can be given. That is what
-/// separates a refusal from an abort: a refusal keeps setup open, and only closing it ends the process (FR-008).
+/// <b>A refused name is stated rather than offered for changing.</b> The name is the computer's own and cannot be
+/// typed, so the one refusal the save can raise about it — another record already holds it — is said in those
+/// words, and the screen stays open so the location can still be corrected. That is what separates a refusal from
+/// an abort: a refusal keeps setup open, and only closing it ends the process (FR-008, FR-049).
 /// </para>
 /// </remarks>
 internal sealed partial class MachineSetupViewModel : ObservableObject
 {
     private readonly IMachineSetupGate _gate;
     private readonly IMachineConfigurationService _configuration;
+    private readonly IMachineFacts _machine;
 
     /// <summary>The authorisation this screen's save is allowed by, or <c>null</c> before anybody signs in.</summary>
     private MachineSetupAuthorization? _authorization;
 
-    /// <summary>Creates the setup screen's state over the gate that unlocks it and the service that writes it.</summary>
+    /// <summary>The name this computer reports for itself, kept behind a property with no setter (FR-049).</summary>
+    private string _computerName = string.Empty;
+
+    /// <summary>Creates the setup screen's state over the gate that unlocks it, the service that writes it and this computer's facts.</summary>
     /// <param name="gate">The gate that authenticates an authorised person and authorises configuration only.</param>
     /// <param name="configuration">The one writer of this computer's configuration rows.</param>
+    /// <param name="machine">This computer's facts, which are where the name the screen shows is read from.</param>
     public MachineSetupViewModel(
         IMachineSetupGate gate,
-        IMachineConfigurationService configuration)
+        IMachineConfigurationService configuration,
+        IMachineFacts machine)
     {
         _gate = gate ?? throw new ArgumentNullException(nameof(gate));
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        _machine = machine ?? throw new ArgumentNullException(nameof(machine));
     }
 
     /// <summary>
@@ -71,14 +80,19 @@ internal sealed partial class MachineSetupViewModel : ObservableObject
     [ObservableProperty]
     public partial string SignInName { get; set; } = string.Empty;
 
-    /// <summary>What this computer is to be called, which the store holds uniquely (FR-009).</summary>
-    [ObservableProperty]
-    public partial string DisplayName { get; set; } = string.Empty;
+    /// <summary>
+    /// This computer's own name, read from the computer and shown. It has no setter and no input controls are bound
+    /// to it, so a person cannot type it (FR-049).
+    /// </summary>
+    public string ComputerName
+    {
+        get => _computerName;
+        private set => SetProperty(ref _computerName, value);
+    }
 
-    /// <summary>A short note about this computer. It may be blank.</summary>
+    /// <summary>Where this computer stands, which is the only value a person supplies here (FR-049, FR-050).</summary>
     [ObservableProperty]
-    public partial string Description { get; set; } = string.Empty;
-
+    public partial string Location { get; set; } = string.Empty;
     /// <summary>
     /// Whether the gate has authorised a person to configure this computer. It is what offers the capture form,
     /// and the save checks it again before writing (FR-007).
@@ -132,9 +146,9 @@ internal sealed partial class MachineSetupViewModel : ObservableObject
 
     public string IdentityHeadingText => "Startup_MachineSetup.IdentityHeading".GetLocalized();
 
-    public string DisplayNameLabelText => "Startup_MachineSetup.DisplayNameLabel".GetLocalized();
+    public string ComputerNameLabelText => "Startup_MachineSetup.ComputerNameLabel".GetLocalized();
 
-    public string DescriptionLabelText => "Startup_MachineSetup.DescriptionLabel".GetLocalized();
+    public string LocationLabelText => "Startup_MachineSetup.LocationLabel".GetLocalized();
 
     /// <summary>What the sign-in name field says while it is empty, so what belongs in it is never in doubt.</summary>
     public string SignInNameHintText => "Startup_MachineSetup.SignInNameHint".GetLocalized();
@@ -220,12 +234,13 @@ internal sealed partial class MachineSetupViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Fills the capture form from what the store already holds for this computer.
+    /// Fills the capture form: this computer's own name as the computer reports it, and where it stands from what
+    /// the store already holds.
     /// </summary>
     /// <remarks>
-    /// The store is the first answer for both fields, because a machine whose configuration is being corrected
-    /// should start from what it currently has rather than from what the application would pick. Nothing is
-    /// invented over a value that exists, and a field the store holds nothing for is left for the person to type.
+    /// The name is read from the computer rather than from the store, because that is what FR-049 says the name
+    /// is. The store's record fills the location, so a computer being corrected starts from what it currently has
+    /// rather than from a blank field. Nothing is invented over a value that exists.
     /// </remarks>
     private async Task FillSuggestedIdentityAsync()
     {
@@ -233,14 +248,18 @@ internal sealed partial class MachineSetupViewModel : ObservableObject
         {
             var state = await _configuration.GetStateAsync(CancellationToken.None).ConfigureAwait(true);
 
-            DisplayName = FirstNonBlank(state.DisplayName, DisplayName);
-            Description = FirstNonBlank(state.Description, Description);
+            // A computer that reports no name of its own falls back to what the store holds for it, so the
+            // read-only line is never blank for a machine that already has a record.
+            ComputerName = FirstNonBlank(_machine.Hostname, state.ComputerName);
+            Location = FirstNonBlank(state.Location, Location);
         }
         catch (Exception exception)
         {
-            // A store that cannot be read leaves the form empty rather than refusing to show it: the person is
-            // there to type the values, and a suggested value is a convenience rather than a requirement.
-            AppLog.Error("MachineSetup", exception, "What this computer already holds could not be read, so the setup form was left empty.");
+            // A store that cannot be read leaves the location empty rather than refusing to show the form: the
+            // name still comes from the computer, and a suggested location is a convenience rather than a
+            // requirement.
+            ComputerName = FirstNonBlank(_machine.Hostname, ComputerName);
+            AppLog.Error("MachineSetup", exception, "What this computer already holds could not be read, so the setup form was left without a suggested location.");
         }
     }
 
@@ -293,15 +312,15 @@ internal sealed partial class MachineSetupViewModel : ObservableObject
     }
 
     /// <summary>
-    /// The draft the store is written with: this computer's identity, which is all this screen captures.
+    /// The draft the store is written with: the name this computer reports and the location it stands in.
     /// </summary>
     /// <remarks>
     /// There is no folder here because there is none to capture: where pictures come from is held once for the
     /// plant and changed from the settings panel (FR-040), and the draft carries no picture source at all.
     /// </remarks>
     private MachineConfigurationDraft BuildDraft() => new(
-        DisplayName?.Trim() ?? string.Empty,
-        Description?.Trim() ?? string.Empty);
+        ComputerName.Trim(),
+        Location?.Trim() ?? string.Empty);
 
     /// <summary>Why the sign-in was refused, in the reader's own words (FR-007).</summary>
     private static string DescribeRefusal(string? refusalReason) => refusalReason switch

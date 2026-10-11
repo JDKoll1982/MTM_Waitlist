@@ -34,11 +34,11 @@ public sealed class IdentifierSignInServiceTests
     [DataRow("433a", IdentifierKind.UserName, DisplayName = "a trailing letter is not")]
     [DataRow("johnk", IdentifierKind.UserName, DisplayName = "a name is a user name")]
     [DataRow("", IdentifierKind.UserName, DisplayName = "blank is a user name, never an employee number")]
-    public void Classify_AnswersTheWholeShapeAndNothingElse(string identifier, IdentifierKind expected)
+    public void Service_IdentifierSignInServiceTests_Classify_AnswersTheWholeShapeAndNothingElse(string identifier, IdentifierKind expected)
         => Assert.AreEqual(expected, IdentifierSignInService.Classify(identifier));
 
     [TestMethod]
-    public async Task ResolveAsync_BlankIdentifier_IsRefusedBeforeAnythingIsAsked()
+    public async Task Service_IdentifierSignInServiceTests_ResolveAsync_BlankIdentifierIsRefusedBeforeAnythingIsAsked()
     {
         var world = new World();
 
@@ -50,7 +50,7 @@ public sealed class IdentifierSignInServiceTests
     }
 
     [TestMethod]
-    public async Task ResolveAsync_UserNameTheStoreHolds_ResolvesInStoreForTheCredentialStage()
+    public async Task Service_IdentifierSignInServiceTests_ResolveAsync_UserNameTheStoreHoldsResolvesInStoreForTheCredentialStage()
     {
         var world = new World().WithAccount(42);
         var service = new IdentifierSignInService(world.Directory, world.CredentialCheck, world.Plant);
@@ -66,7 +66,7 @@ public sealed class IdentifierSignInServiceTests
     }
 
     [TestMethod]
-    public async Task ResolveAsync_UserNameTheStoreDoesNotHold_IsRefusedInPlainWords()
+    public async Task Service_IdentifierSignInServiceTests_ResolveAsync_UserNameTheStoreDoesNotHoldIsRefusedInPlainWords()
     {
         var world = new World();
         var service = new IdentifierSignInService(world.Directory, world.CredentialCheck, world.Plant);
@@ -79,7 +79,7 @@ public sealed class IdentifierSignInServiceTests
     }
 
     [TestMethod]
-    public async Task ResolveAsync_EmployeeNumberTheStoreHolds_ResolvesToTheAccountsOwnSignInName()
+    public async Task Service_IdentifierSignInServiceTests_ResolveAsync_EmployeeNumberTheStoreHoldsResolvesToTheAccountsOwnSignInName()
     {
         var world = new World().WithEmployee("6229", userName: "JKOLL", isActive: true);
         var service = new IdentifierSignInService(world.Directory, world.CredentialCheck, world.Plant);
@@ -97,7 +97,7 @@ public sealed class IdentifierSignInServiceTests
     }
 
     [TestMethod]
-    public async Task ResolveAsync_EmployeeNumberTheStoreHoldsInactive_EndsResolutionWithoutOfferingSetUp()
+    public async Task Service_IdentifierSignInServiceTests_ResolveAsync_EmployeeNumberTheStoreHoldsInactiveEndsResolutionWithoutOfferingSetUp()
     {
         // The plant system also knows this number, which is the case the clarification names: an inactive store
         // account must not become a second account.
@@ -114,7 +114,7 @@ public sealed class IdentifierSignInServiceTests
     }
 
     [TestMethod]
-    public async Task ResolveAsync_EmployeeNumberOnlyThePlantSystemHolds_OffersSetUpWithTheNameItAnswered()
+    public async Task Service_IdentifierSignInServiceTests_ResolveAsync_EmployeeNumberOnlyThePlantSystemHoldsOffersSetUpWithTheNameItAnswered()
     {
         var world = new World().WithPlantEmployee("6229", "John", "Koll");
         var service = new IdentifierSignInService(world.Directory, world.CredentialCheck, world.Plant);
@@ -129,7 +129,7 @@ public sealed class IdentifierSignInServiceTests
     }
 
     [TestMethod]
-    public async Task ResolveAsync_EmployeeNumberInNeitherSource_IsRefusedAndThePlantSystemWasReadable()
+    public async Task Service_IdentifierSignInServiceTests_ResolveAsync_EmployeeNumberInNeitherSourceIsRefusedAndThePlantSystemWasReadable()
     {
         var world = new World().WithPlantNotHeld();
         var service = new IdentifierSignInService(world.Directory, world.CredentialCheck, world.Plant);
@@ -141,7 +141,7 @@ public sealed class IdentifierSignInServiceTests
     }
 
     [TestMethod]
-    public async Task ResolveAsync_PlantSystemUnreachableAndMirrorNeverHeldTheNumber_SaysItCannotBeDoneNow()
+    public async Task Service_IdentifierSignInServiceTests_ResolveAsync_PlantSystemUnreachableAndMirrorNeverHeldTheNumberSaysItCannotBeDoneNow()
     {
         var world = new World().WithPlantUnreadable();
         var service = new IdentifierSignInService(world.Directory, world.CredentialCheck, world.Plant);
@@ -158,7 +158,7 @@ public sealed class IdentifierSignInServiceTests
     }
 
     [TestMethod]
-    public async Task ResolveAsync_TwoPeopleShareTheNumber_ResolvesTheStoreAnswerItWasGiven()
+    public async Task Service_IdentifierSignInServiceTests_ResolveAsync_TwoPeopleShareTheNumberResolvesTheStoreAnswerItWasGiven()
     {
         // The active-first ordering is the store's, inside the procedure. This proves the service does not
         // re-decide it: whichever account the store answered is the account that is signed in.
@@ -172,7 +172,7 @@ public sealed class IdentifierSignInServiceTests
     }
 
     [TestMethod]
-    public void TheStoresEmployeeNumberRead_OrdersTheActiveAccountFirst()
+    public void Service_IdentifierSignInServiceTests_TheStoresEmployeeNumberRead_OrdersTheActiveAccountFirst()
     {
         // The ordering the clarification calls for lives in the procedure, not in application code, so this
         // proves the shipped text carries it rather than the service re-sorting what it is given.
@@ -185,7 +185,7 @@ public sealed class IdentifierSignInServiceTests
     }
 
     [TestMethod]
-    public void TheStoresEmployeeNumberRead_ShipsItsRollback()
+    public void Service_IdentifierSignInServiceTests_TheStoresEmployeeNumberRead_ShipsItsRollback()
     {
         // The schema-artifact rule (constitution III): every artifact ships create and rollback in the same change.
         Assert.IsTrue(File.Exists(RepoPath("Database", "StoredProcedures", "sp_core_employee_by_identifier_get", "rollback.sql")));

@@ -2,7 +2,7 @@ namespace MTM_Waitlist.Module_Shared.Helpers;
 
 /// <summary>
 /// The canonical locations the application reads and writes outside its own folder: where a configured picture
-/// lives, and where the key files live.
+/// lives, and the dunnage pictures beneath the shared root.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -29,17 +29,6 @@ public static class AppStoragePaths
     /// </remarks>
     public const string ImagesRootDefault =
         @"\\mtmanu-fs01\Expo Drive\MH_RESOURCE\Material_Handler\MTM Applications\MTM Waitlist Application\Images";
-
-    /// <summary>
-    /// The folder holding the key files, one per key, named <c>{keyname}.txt</c>.
-    /// </summary>
-    /// <remarks>
-    /// Nothing reads these files yet: the application takes its secrets from <c>appsettings.json</c> and the
-    /// environment. The folder is a setting now so that the first feature which needs a key reads it from one
-    /// agreed place rather than inventing a second one.
-    /// </remarks>
-    public const string KeysFolderDefault =
-        @"\\mtmanu-fs01\Expo Drive\MH_RESOURCE\Material_Handler\MTM Applications\Keys - DO NOT EDIT FILES\MTM Waitlist Application";
 
     /// <summary>
     /// The root the dunnage pictures sit under, one folder per dunnage type and part beneath it.

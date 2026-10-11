@@ -12,7 +12,7 @@ public sealed class NewRequestPickerServiceTests
         => new(new RequestItemCatalogService());
 
     [TestMethod]
-    public void GetCategoriesInOrder_IsPickupDeliverAssistOther()
+    public void Service_NewRequestPickerServiceTests_GetCategoriesInOrder_IsPickupDeliverAssistOther()
     {
         var service = CreateService();
         CollectionAssert.AreEqual(
@@ -21,7 +21,7 @@ public sealed class NewRequestPickerServiceTests
     }
 
     [TestMethod]
-    public void GetItems_AreOrderedWithinCategory()
+    public void Service_NewRequestPickerServiceTests_GetItems_AreOrderedWithinCategory()
     {
         var service = CreateService();
         var pickup = service.GetItems(RequestCategory.Pickup);
@@ -31,7 +31,7 @@ public sealed class NewRequestPickerServiceTests
     }
 
     [TestMethod]
-    public void GetVisibleItems_FiltersByAvailability_AndKeepsOrder()
+    public void Service_NewRequestPickerServiceTests_GetVisibleItems_FiltersByAvailabilityAndKeepsOrder()
     {
         var service = CreateService();
         var availability = RequestJobPartAvailability.All with
@@ -53,7 +53,7 @@ public sealed class NewRequestPickerServiceTests
     }
 
     [TestMethod]
-    public void GetAllVisible_FlattensCategoriesInOrder_FilteringHidden()
+    public void Service_NewRequestPickerServiceTests_GetAllVisible_FlattensCategoriesInOrderFilteringHidden()
     {
         var service = CreateService();
         var availability = RequestJobPartAvailability.None;
@@ -89,7 +89,7 @@ public sealed class NewRequestPickerServiceTests
     ];
 
     [TestMethod]
-    public void GetVisibleItems_IsNeverEmpty_ForAJobWithNoParts()
+    public void Service_NewRequestPickerServiceTests_GetVisibleItems_IsNeverEmptyForAJobWithNoParts()
     {
         var service = CreateService();
         var noParts = RequestJobPartAvailability.All with
@@ -118,7 +118,7 @@ public sealed class NewRequestPickerServiceTests
     }
 
     [TestMethod]
-    public void GetVisibleItems_IsNeverEmpty_ForAWorkCentreWithNoActiveJob()
+    public void Service_NewRequestPickerServiceTests_GetVisibleItems_IsNeverEmptyForAWorkCentreWithNoActiveJob()
     {
         var service = CreateService();
 
@@ -132,7 +132,7 @@ public sealed class NewRequestPickerServiceTests
     }
 
     [TestMethod]
-    public void GetVisibleCategories_DoesNotOfferAssist_OnAJobWithNoParts()
+    public void Service_NewRequestPickerServiceTests_GetVisibleCategories_DoesNotOfferAssistOnAJobWithNoParts()
     {
         var service = CreateService();
         var noParts = RequestJobPartAvailability.All with
@@ -158,7 +158,7 @@ public sealed class NewRequestPickerServiceTests
     }
 
     [TestMethod]
-    public void GetVisibleCategories_OffersAssist_WhenTheJobHasAPart()
+    public void Service_NewRequestPickerServiceTests_GetVisibleCategories_OffersAssistWhenTheJobHasAPart()
     {
         var service = CreateService();
 
@@ -168,7 +168,7 @@ public sealed class NewRequestPickerServiceTests
     }
 
     [TestMethod]
-    public void GetVisibleItems_AbsentItemsAreNotInTheBuiltCollection_NotMerelyHidden()
+    public void Service_NewRequestPickerServiceTests_GetVisibleItems_AbsentItemsAreNotInTheBuiltCollectionNotMerelyHidden()
     {
         var service = CreateService();
         var onlyFlatstock = RequestJobPartAvailability.All with

@@ -57,7 +57,7 @@ public sealed class PermissionHolderRow
         get
         {
             var status = IsSwitchedOff ? $", {SwitchedOffText}" : string.Empty;
-            return $"{DisplayName}, {RoleText}, {MarkText}{status}. {"Permissions_Holders.People.Heading".GetLocalized()}";
+            return $"{DisplayName}, {RoleText}, {MarkText}{status}. {"Permissions_Holders_People.Heading".GetLocalized()}";
         }
     }
 }

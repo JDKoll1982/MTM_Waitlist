@@ -974,7 +974,7 @@ request, and **US2** owns the card's action surface. The handling outcomes are *
   seed. The re-point T120 landed was not survivable in practice: work centre `100-03` had already been overwritten
   by a live Setup save for `WO-060954`, which made `Seeded100_3_CoilOnly_NormalisesToCoil` red for a reason that
   was not a defect. The shapes asserted are unchanged (the same seven situations through the same deserializer),
-  and `Retired900Fixtures_ResolveToNoActiveJob` still reads live rows because its subject is an absence. ·
+  and `Service_ActiveJobSeedRoundTripTests_Service_ActiveJobSeedRoundTripTests_Retired900Fixtures_ResolveToNoActiveJob` still reads live rows because its subject is an absence. ·
   `MTM_Waitlist.Tests/Module_Setup/Services/ActiveJobSeedRoundTripTests.cs`
 - [x] **T121** [P] [US1] Add the raisability check (FR-035): every in-scope Item with `requires_answer = 1` and
   `answer_value_type = 'enum'` yields at least one choice, resolved from the configuration row and the job snapshot
@@ -1827,7 +1827,7 @@ change, and no reinstall for this. Recorded as `spec.md`'s "Decision of record (
   configuration row asks where the die is going, both die rows ask which die from the job's own list, both die rows
   list the location the job records). The two named tests moved with the question:
   `ResolveLine2_PickupDie_ShowsTheDieNumberAndLocationWhateverTheChosenDestination` is now
-  `ResolveLine2_PickupDie_ShowsTheDieTheRequestIsFor` in `WaitlistRequestTitlesTests.cs`, and
+  `Model_WaitlistRequestTitlesTests_ResolveLine2_PickupDieShowsTheDieTheRequestIsFor` in `WaitlistRequestTitlesTests.cs`, and
   `RequestItemConfigurationServiceTests.cs` carries no `Die Shop` / `Home Location` / destination fixture any more.
 - [x] **T181** [US1] **Carry the chosen die on the request and retire the destination question in the same change**
   (FR-054, D22): `input_value` carries the chosen die, and the retirement moves every artifact at once — the
@@ -1937,7 +1937,7 @@ change, and no reinstall for this. Recorded as `spec.md`'s "Decision of record (
   *"This will raise 2 requests — one for each die you chose."* **Why the old tests missed it, which is the part worth
   keeping:** `NewRequestOneRequestPerDieTests` asserted the count **text** and stayed green while the page rendered
   nothing at all, so the new checks read the XAML — `PreviewPage_RendersTheDetailAsARepeatingList`,
-  `ConfirmPage_RendersTheDetailAsARepeatingList` and `ConfirmPage_ShowsTheRequestCountItComputed` — and the single
+  `ViewModel_NewRequestReviewShowsEveryDieTests_ViewModel_NewRequestReviewShowsEveryDieTests_ConfirmPage_RendersTheDetailAsARepeatingList` and `ViewModel_NewRequestReviewShowsEveryDieTests_ViewModel_NewRequestReviewShowsEveryDieTests_ConfirmPage_ShowsTheRequestCountItComputed` — and the single
   `ViewModel.Detail` binding they forbid cannot come back. The 3 markup cases were **red against the unfixed view and
   green after**; the full suite is **1149 passed / 0 failed / 27 skipped (1176)** and the solution builds with 0
   warnings and 0 errors. Evidence: `%TEMP%\die-walk\27-preview-fixed.txt`, `28-confirm-fixed.txt`; the 8
@@ -2548,10 +2548,10 @@ its second line reading the Item's own name, which is the second task below and 
   with no `RequiredJobPart` arm falls through to `RequestJobPartKind.None`, which `IsVisible` reads as *always
   offered*: the row **alone** would have put a Deliver Component on every job, including a job with no components at
   all. `RequiredJobPart` now maps both component Items to `RequestJobPartKind.Component`, and
-  `DeliverComponent_IsGatedOnAJobComponent_LikeItsPickupTwin` asserts the two are gated alike, so the pairing cannot
+  `Service_RequestItemPickerRulesTests_DeliverComponent_IsGatedOnAJobComponentLikeItsPickupTwin` asserts the two are gated alike, so the pairing cannot
   rot. The visible-set matrix gains the Item in exactly the two configurations that carry a component (`100-18` and
   `V100-33`) and in no other, and the Item's own row is pinned by
-  `Catalog_DeliverComponent_MirrorsThePickupComponentChoice`. **Evidence (run 2026-09-22 on this workstation):**
+  `Service_RequestItemCatalogTests_Catalog_DeliverComponentMirrorsThePickupComponentChoice`. **Evidence (run 2026-09-22 on this workstation):**
   `dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false` → *Build succeeded*, no warnings and
   no errors; the full suite → **1290 passed, 0 failed**. The design-time spreadsheet still parses to
   **24 rows, Pickup 11 / Deliver 9 / Assist 3 / Other 1**. **Not verified, and stated as such:** no live
@@ -2577,10 +2577,10 @@ its second line reading the Item's own name, which is the second task below and 
   `specs/004-unified-card-item-picker/contracts/card-and-identifier.md`
   **Evidence (run 2026-09-22 on this workstation):** the solution builds with no warnings and no errors; the full
   suite → **1382 passed, 0 failed, 48 skipped (1430 total)**; and the four new cases —
-  `ResolveLine2_ComponentRequests_ShowThePartTheOperatorChose`,
-  `ResolveLine2_MaterialRequests_NameThePartTheJobCarries`,
-  `ResolveLine2_MergedPickupCoil_NamesTheMaterialTheJobActuallyHolds` and
-  `ResolveLine2_ScrapRequest_ShowsTheTypeTheJobAlreadyDecided` — pass. **Not verified, and stated as such:** no card
+  `Model_WaitlistRequestTitlesTests_ResolveLine2_ComponentRequestsShowThePartTheOperatorChose`,
+  `Model_WaitlistRequestTitlesTests_ResolveLine2_MaterialRequestsNameThePartTheJobCarries`,
+  `Model_WaitlistRequestTitlesTests_ResolveLine2_MergedPickupCoilNamesTheMaterialTheJobActuallyHolds` and
+  `Model_WaitlistRequestTitlesTests_ResolveLine2_ScrapRequestShowsTheTypeTheJobAlreadyDecided` — pass. **Not verified, and stated as such:** no card
   has been seen on screen; the walk needs the reinstall below. **Left deliberately, and named here so it is not
   mistaken for done:** the request page's own declared *job* rows (its `Coil number` and `Scrap type` labels) still
   resolve to nothing, so those rows are omitted rather than drawn wrong — `RequestJobFieldValues` is unchanged, and

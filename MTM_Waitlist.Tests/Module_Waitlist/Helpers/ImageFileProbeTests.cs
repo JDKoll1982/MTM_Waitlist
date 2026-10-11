@@ -29,7 +29,7 @@ public sealed class ImageFileProbeTests
     /// The artifact this rule exists for: the shipped 68-byte stand-in reports one pixel by one pixel.
     /// </summary>
     [TestMethod]
-    public void TheShippedSinglePixelStandInCarriesNoPicture()
+    public void Helper_ImageFileProbeTests_TheShippedSinglePixelStandInCarriesNoPicture()
     {
         ImageHeaderFixtures.WriteShippedSinglePixelPng(_filePath);
 
@@ -43,7 +43,7 @@ public sealed class ImageFileProbeTests
     /// dimensions alone, and a small-but-real picture is refused for being smaller than the app accepts.
     /// </summary>
     [TestMethod]
-    public void APictureBelowTheApplicationsMinimumIsNotUsable()
+    public void Helper_ImageFileProbeTests_APictureBelowTheApplicationsMinimumIsNotUsable()
     {
         ImageHeaderFixtures.WritePng(_filePath, 1, 1);
         Assert.IsFalse(ImageFileProbe.CarriesPicture(_filePath), "A one-pixel picture must be refused.");
@@ -55,7 +55,7 @@ public sealed class ImageFileProbeTests
     }
 
     [TestMethod]
-    public void APictureAtOrAboveTheMinimumIsUsable()
+    public void Helper_ImageFileProbeTests_APictureAtOrAboveTheMinimumIsUsable()
     {
         ImageHeaderFixtures.WritePng(_filePath, ImageFileProbe.MinimumPixels, ImageFileProbe.MinimumPixels);
         Assert.IsTrue(ImageFileProbe.CarriesPicture(_filePath), "The smallest accepted picture is a picture.");
@@ -69,7 +69,7 @@ public sealed class ImageFileProbeTests
     /// EXIF block large enough to matter.
     /// </summary>
     [TestMethod]
-    public void AJpegsDimensionsAreFoundBehindItsMetadata()
+    public void Helper_ImageFileProbeTests_AJpegsDimensionsAreFoundBehindItsMetadata()
     {
         ImageHeaderFixtures.WriteJpegHeader(_filePath, 96, 96);
         Assert.IsTrue(ImageFileProbe.CarriesPicture(_filePath), "A JPEG's frame header carries its dimensions.");
@@ -82,7 +82,7 @@ public sealed class ImageFileProbeTests
     }
 
     [TestMethod]
-    public void AGifAndABmpCarryTheirDimensionsInTheirHeads()
+    public void Helper_ImageFileProbeTests_AGifAndABmpCarryTheirDimensionsInTheirHeads()
     {
         var gifPath = Path.Combine(_directory, "picture.gif");
         ImageHeaderFixtures.WriteGifHeader(gifPath, 96, 96);
@@ -98,7 +98,7 @@ public sealed class ImageFileProbeTests
     /// no kind of picture.
     /// </summary>
     [TestMethod]
-    public void NothingThereIsNotAPicture()
+    public void Helper_ImageFileProbeTests_NothingThereIsNotAPicture()
     {
         Assert.IsFalse(ImageFileProbe.CarriesPicture(null), "No path is no picture.");
         Assert.IsFalse(ImageFileProbe.CarriesPicture(string.Empty), "A blank path is no picture.");
@@ -118,7 +118,7 @@ public sealed class ImageFileProbeTests
     /// not about where the test happens to run.
     /// </summary>
     [TestMethod]
-    public void AnApplicationRelativePathIsResolvedAgainstTheApplicationDirectory()
+    public void Helper_ImageFileProbeTests_AnApplicationRelativePathIsResolvedAgainstTheApplicationDirectory()
     {
         var relativeDirectory = Path.Combine(AppContext.BaseDirectory, "image-probe-tests", Guid.NewGuid().ToString("N"));
         var relativePath = Path.Combine("image-probe-tests", Path.GetFileName(relativeDirectory), "picture.png");
@@ -147,7 +147,7 @@ public sealed class ImageFileProbeTests
     /// a picture of the wrong shape is refused and the surface draws the no-image placeholder instead.
     /// </summary>
     [TestMethod]
-    public void APictureOfTheWrongShapeIsNotUsable()
+    public void Helper_ImageFileProbeTests_APictureOfTheWrongShapeIsNotUsable()
     {
         ImageHeaderFixtures.WritePng(_filePath, 96, 96);
         Assert.IsTrue(ImageFileProbe.IsUsablePicture(_filePath), "A square picture at the accepted size is usable.");
@@ -169,7 +169,7 @@ public sealed class ImageFileProbeTests
     /// refused whatever its shape.
     /// </summary>
     [TestMethod]
-    public void TheUsablePictureFloorIsTheApplicationsOwn()
+    public void Helper_ImageFileProbeTests_TheUsablePictureFloorIsTheApplicationsOwn()
     {
         ImageHeaderFixtures.WritePng(_filePath, ImageFileProbe.MinimumPixels - 1, ImageFileProbe.MinimumPixels - 1);
         Assert.IsFalse(ImageFileProbe.IsUsablePicture(_filePath), "A picture under the floor is refused.");
@@ -183,7 +183,7 @@ public sealed class ImageFileProbeTests
     /// and a file that is no kind of picture.
     /// </summary>
     [TestMethod]
-    public void NothingThereIsNotAUsablePicture()
+    public void Helper_ImageFileProbeTests_NothingThereIsNotAUsablePicture()
     {
         Assert.IsFalse(ImageFileProbe.IsUsablePicture(null), "No path is no picture.");
         Assert.IsFalse(ImageFileProbe.IsUsablePicture(string.Empty), "A blank path is no picture.");

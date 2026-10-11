@@ -15,7 +15,7 @@ public sealed class LogStoreLevelServiceTests
 {
     /// <summary>Nothing stored means the shipped default is in force, and it must never read as "keep nothing".</summary>
     [TestMethod]
-    public async Task WithNothingStored_TheShippedDefaultIsInForce()
+    public async Task Service_LogStoreLevelServiceTests_WithNothingStored_TheShippedDefaultIsInForce()
     {
         var settings = new FakeConfigSettingsValueService();
         var level = new LogStoreLevel(LogSeverity.Debug);
@@ -30,7 +30,7 @@ public sealed class LogStoreLevelServiceTests
 
     /// <summary>A stored level is read and adopted, so the launch keeps what the plant decided.</summary>
     [TestMethod]
-    public async Task AStoredLevel_IsReadAndAdopted()
+    public async Task Service_LogStoreLevelServiceTests_AStoredLevel_IsReadAndAdopted()
     {
         var settings = new FakeConfigSettingsValueService();
         settings.SetText(ConfigSettingKeys.LogStoreMinimumLevel, "info");
@@ -46,7 +46,7 @@ public sealed class LogStoreLevelServiceTests
 
     /// <summary>A level the store cannot read answers the default and never the widest option.</summary>
     [TestMethod]
-    public async Task AStoredLevelThatNamesNoSeverity_AnswersTheDefault()
+    public async Task Service_LogStoreLevelServiceTests_AStoredLevelThatNamesNoSeverity_AnswersTheDefault()
     {
         var settings = new FakeConfigSettingsValueService();
         settings.SetText(ConfigSettingKeys.LogStoreMinimumLevel, "chatty");
@@ -61,7 +61,7 @@ public sealed class LogStoreLevelServiceTests
     /// change apply without a restart.
     /// </summary>
     [TestMethod]
-    public async Task SavingALevel_WritesOnePlantWideRow_AndAdoptsIt()
+    public async Task Service_LogStoreLevelServiceTests_SavingALevel_WritesOnePlantWideRowAndAdoptsIt()
     {
         var settings = new FakeConfigSettingsValueService();
         var level = new LogStoreLevel();

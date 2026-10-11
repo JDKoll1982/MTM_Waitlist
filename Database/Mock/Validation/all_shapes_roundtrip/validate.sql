@@ -3,7 +3,7 @@
 -- Database:   mtm_mock
 -- Engine:     MySQL 5.7 (verified on 9.6)
 -- Feature:    001-module-mock-visual-fallback
--- Proves:     FR-004 / FR-006 / FR-017 — every one of the five shapes refreshes and reads back
+-- Proves:     FR-004 / FR-006 / FR-017 — every one of the six shapes refreshes and reads back
 --             with an identical result shape, and the get procedures return complete sets.
 -- Run:        mysql -h <host> -u <user> mtm_mock < this_file
 -- ============================================================
@@ -60,25 +60,48 @@ SELECT '5. disposition_input' AS shape;
 CALL sp_visual_disposition_input_get('VAL-WO', 'VAL-P1');
 
 -- ------------------------------------------------------------
+-- Shape 6: employee_by_number
+-- ------------------------------------------------------------
+CALL sp_visual_employee_by_number_refresh(
+    '[{"EmployeeNumber":"VAL-E1","FirstName":"Validation","LastName":"Operator"},
+      {"EmployeeNumber":"VAL-E2","FirstName":"Validation","LastName":"Inactive"}]');
+SELECT '6. employee_by_number' AS shape;
+CALL sp_visual_employee_by_number_get('VAL-E1');
+
+-- ------------------------------------------------------------
 -- Cross-shape assertions
 -- ------------------------------------------------------------
-SELECT '6. every mirror is a complete snapshot (a get on an unknown key returns 0 rows, not an error)' AS shape;
-SELECT COUNT(*) AS unknown_key_rows FROM visual_work_order_lookup_result WHERE normalized_work_order = 'NO-SUCH-WO';
+SELECT '7. every mirror is a complete snapshot (a get on an unknown key returns 0 rows, not an error)' AS shape;
+SELECT
+    (SELECT COUNT(*) FROM visual_work_order_lookup_result  WHERE normalized_work_order = 'NO-SUCH-WO') AS wo_unknown_key_rows,
+    (SELECT COUNT(*) FROM visual_employee_by_number_result WHERE employee_number     = 'NO-SUCH-EMPLOYEE') AS employee_unknown_key_rows;
 
-SELECT '7. no refreshed mirror still carries seed content' AS shape;
+SELECT '8. no refreshed mirror still carries seed content' AS shape;
 SELECT
     (SELECT COUNT(*) FROM visual_work_order_lookup_result       WHERE is_seed_content = 1) AS s1,
     (SELECT COUNT(*) FROM visual_operation_sequences_result     WHERE is_seed_content = 1) AS s2,
     (SELECT COUNT(*) FROM visual_subordinate_parts_result       WHERE is_seed_content = 1) AS s3,
     (SELECT COUNT(*) FROM visual_inventory_locations_result     WHERE is_seed_content = 1) AS s4,
-    (SELECT COUNT(*) FROM visual_disposition_input_result       WHERE is_seed_content = 1) AS s5;
+    (SELECT COUNT(*) FROM visual_disposition_input_result       WHERE is_seed_content = 1) AS s5,
+    (SELECT COUNT(*) FROM visual_employee_by_number_result      WHERE is_seed_content = 1) AS s6;
 
-SELECT '8. no transient _prev table persists for any shape' AS shape;
+SELECT '9. no transient _prev table persists for any shape' AS shape;
 SELECT COUNT(*) AS prev_table_count
 FROM information_schema.tables
 WHERE table_schema = 'mtm_mock' AND table_name LIKE '%\_prev';
 
-SELECT '9. all ten procedures are registered in mtm_mock' AS shape;
-SELECT COUNT(*) AS procedure_count
-FROM information_schema.routines
-WHERE routine_schema = 'mtm_mock' AND routine_type = 'PROCEDURE' AND routine_name LIKE 'sp_visual%';
+SELECT '10. every shape procedure is registered, plus the two catalog procedures' AS shape;
+-- Counted by explicit exclusion rather than a LIKE pattern. Two traps here: inside a MySQL string literal
+-- '\_' loses its backslash, so 'sp\_visual%\_get' degenerates to a single-char wildcard; and the catalog
+-- procedures are themselves named '..._get'. Both make a naive count return 14. The shape procedures are
+-- the twelve that do not start with 'sp_visual_read_shape_'.
+SELECT
+    (SELECT COUNT(*) FROM information_schema.routines
+      WHERE routine_schema = 'mtm_mock' AND routine_type = 'PROCEDURE'
+        AND LEFT(routine_name, 10) = 'sp_visual_'
+        AND LEFT(routine_name, 21) <> 'sp_visual_read_shape_'
+        AND SUBSTRING_INDEX(routine_name, '_', -1) IN ('get', 'refresh')) AS shape_procedure_count,
+    (SELECT COUNT(*) FROM information_schema.routines
+      WHERE routine_schema = 'mtm_mock' AND routine_type = 'PROCEDURE'
+        AND LEFT(routine_name, 21) = 'sp_visual_read_shape_') AS catalog_procedure_count;
+-- Expected: 12 shape procedures (six shapes x get + refresh) and 2 catalog procedures.

@@ -12,7 +12,7 @@ namespace MTM_Waitlist.Tests.Module_Setup.Services;
 public sealed class SetupDunnageWorkflowServiceTests
 {
     [TestMethod]
-    public async Task AddDunnageTypeAsync_WithoutThePermission_ReturnsFailure()
+    public async Task Service_SetupDunnageWorkflowServiceTests_AddDunnageTypeAsync_WithoutThePermissionReturnsFailure()
     {
         var service = CreateService();
 
@@ -23,7 +23,7 @@ public sealed class SetupDunnageWorkflowServiceTests
     }
 
     [TestMethod]
-    public async Task AddDunnagePartAsync_WithoutThePermission_ReturnsFailure()
+    public async Task Service_SetupDunnageWorkflowServiceTests_AddDunnagePartAsync_WithoutThePermissionReturnsFailure()
     {
         var service = CreateService();
 
@@ -34,7 +34,7 @@ public sealed class SetupDunnageWorkflowServiceTests
     }
 
     [TestMethod]
-    public async Task TheQuickAddGate_ReadsTheDeclaredPermissionAndNothingElse()
+    public async Task Service_SetupDunnageWorkflowServiceTests_TheQuickAddGate_ReadsTheDeclaredPermissionAndNothingElse()
     {
         var holdingNothing = PermissionStub.Holding();
         var refused = await new DunnageWorkflowService(new MySqlHelperServer(), permissionService: holdingNothing)

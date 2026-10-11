@@ -605,7 +605,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             LastMessageUtc = existing.LastMessageUtc,
         };
 
-        var applied = await PersistHandlerActionAsync(requestId, existing.Status, updated, "Accepted", handler, handlerEmployeeName, "Waitlist_History.Event.Accepted".GetLocalized(), cancellationToken).ConfigureAwait(false);
+        var applied = await PersistHandlerActionAsync(requestId, existing.Status, updated, "Accepted", handler, handlerEmployeeName, "Waitlist_History_Event.Accepted".GetLocalized(), cancellationToken).ConfigureAwait(false);
         if (!applied)
         {
             // Another handler got there first: the store refused the transition, so this handler did not take
@@ -665,7 +665,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             LastMessageUtc = existing.LastMessageUtc,
         };
 
-        var applied = await PersistHandlerActionAsync(requestId, existing.Status, updated, "Completed", handler, handlerEmployeeName, "Waitlist_History.Event.Completed".GetLocalized(), cancellationToken).ConfigureAwait(false);
+        var applied = await PersistHandlerActionAsync(requestId, existing.Status, updated, "Completed", handler, handlerEmployeeName, "Waitlist_History_Event.Completed".GetLocalized(), cancellationToken).ConfigureAwait(false);
         if (!applied)
         {
             return null;
@@ -725,7 +725,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             LastMessageUtc = existing.LastMessageUtc,
         };
 
-        var applied = await PersistHandlerActionAsync(requestId, existing.Status, updated, "Released", handler, handlerEmployeeName, "Waitlist_History.Event.Released".GetLocalized(), cancellationToken).ConfigureAwait(false);
+        var applied = await PersistHandlerActionAsync(requestId, existing.Status, updated, "Released", handler, handlerEmployeeName, "Waitlist_History_Event.Released".GetLocalized(), cancellationToken).ConfigureAwait(false);
         if (!applied)
         {
             return null;
@@ -993,9 +993,9 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
 
         try
         {
-            var title = "NewRequestAlert_Title".GetLocalized();
+            var title = "NewRequestAlert_Title.Text".GetLocalized();
             var body = string.Format(
-                "NewRequestAlert_Body".GetLocalized(),
+                "NewRequestAlert_Body.Text".GetLocalized(),
                 request.WorkCenter,
                 WaitlistRequestTitles.ResolveLine1(request.ItemDefinition));
             await _newRequestAlertNotifier

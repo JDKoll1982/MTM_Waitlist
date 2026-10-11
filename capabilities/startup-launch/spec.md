@@ -98,10 +98,9 @@ credential is allowed five attempts and is then required to set a new password.
 - **THEN** the running application carries on to the main screens rather than ending, and the new PIN is still the
   one in the store
 
-#### Scenario: An unreadable key file falls back to the ordinary form
-- **WHEN** what is needed to honour a remembered sign-in cannot be read
-- **THEN** the ordinary sign-in form is offered, the fault is recorded, and nothing is kept on the machine in its
-  place
+#### Scenario: Nothing opens the plant's shared key file
+- **WHEN** a launch runs and a person signs in
+- **THEN** no key file is read, copied or kept, and nothing about the sign-in is left on the machine
 
 #### Scenario: A fact that could not be read is not a failed check
 - **WHEN** this machine's hardware identity cannot be read
@@ -228,3 +227,52 @@ describes. No launch path refreshes the cached plant data.
 **Accepted risk (recorded, not fixed).** Two-stage sign-in reveals whether an identifier exists. This is accepted
 for an internal application. Hiding the navigation panel means nothing in the shell may assume a signed-in person
 before the hand-over. Re-centring on resize is only smooth if resizes happen at the big phases.
+
+### Sign-in offers the last six people who signed in on this computer
+
+Sign-in offers the six people who most recently signed in on this computer. Choosing one fills in the user name
+and nothing else, so the PIN is still required and picking a name signs nobody in.
+
+#### Scenario: Somebody picks a person offered beside the form
+- **WHEN** a person picks one of the offered names
+- **THEN** the user name is filled in, the PIN stage opens with it, and the person is not signed in until the
+  PIN is given
+
+#### Scenario: The store cannot be read while somebody signs in
+- **WHEN** the offer cannot be read
+- **THEN** the form is shown on its own and the sign-in still works
+
+### The offer of previous people is shown whole beside the sign-in form
+
+The offer sits on the right-hand side of the form, separated from it by a divider, and the stage is sized so no
+name in it is cut off.
+
+#### Scenario: The offer is shown
+- **WHEN** the sign-in stage shows six people
+- **THEN** all six are visible, with none cut off by the window
+
+### Machine setup reads the computer's name from the computer
+
+The name a computer reports for itself is read from the computer and shown on the machine-setup stage. A person
+cannot type it.
+
+#### Scenario: The machine-setup stage opens
+- **WHEN** an authorised person reaches the setup stage
+- **THEN** the name the computer reports is shown and there is no field to type one
+
+### Machine setup asks only for where the computer stands
+
+Where a computer stands is the only value a person supplies at setup, and a computer that supplies nothing else
+is configured.
+
+#### Scenario: A computer with no record is set up
+- **WHEN** an authorised person gives the location and saves
+- **THEN** the computer is configured by the name it reports and that location, and no shared folder is captured
+
+### What a computer stored before the location existed is read as its location
+
+A record written before the location existed keeps working, so no computer is set up again to gain one.
+
+#### Scenario: A computer whose record predates the change starts the application
+- **WHEN** a computer whose record was written before the change starts the application
+- **THEN** it is configured, and the value it stored is read as the location it stands in

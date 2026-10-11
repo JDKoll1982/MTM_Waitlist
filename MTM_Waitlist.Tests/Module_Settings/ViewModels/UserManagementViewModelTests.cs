@@ -25,7 +25,7 @@ public sealed class UserManagementViewModelTests
     private const long SignedInUserId = 42;
 
     [TestMethod]
-    public async Task EveryoneIsListed_WithTheSwitchedOffPeopleMarked()
+    public async Task ViewModel_UserManagementViewModelTests_EveryoneIsListed_WithTheSwitchedOffPeopleMarked()
     {
         var viewModel = Build(rows: [Row(1, "JSMITH", "Jane Smith", "6229", "developer", "Developer", true),
             Row(2, "BTAYLOR", "Bob Taylor", "6230", "setup", "Setup", false)]);
@@ -44,7 +44,7 @@ public sealed class UserManagementViewModelTests
     }
 
     [TestMethod]
-    public async Task AnEmptyRoster_HasItsOwnSentence_WhichIsNotTheFilteresSentence()
+    public async Task ViewModel_UserManagementViewModelTests_AnEmptyRoster_HasItsOwnSentenceWhichIsNotTheFilteresSentence()
     {
         var viewModel = Build(rows: []);
 
@@ -59,7 +59,7 @@ public sealed class UserManagementViewModelTests
     }
 
     [TestMethod]
-    public async Task AFilterThatMatchesNobody_SaysSo_RatherThanShowingAnEmptyRoster()
+    public async Task ViewModel_UserManagementViewModelTests_AFilterThatMatchesNobody_SaysSoRatherThanShowingAnEmptyRoster()
     {
         var service = new FakeUserManagementService(rows: [Row(1, "JSMITH", "Jane Smith", "6229", "developer", "Developer", true)]);
         var viewModel = Build(service: service);
@@ -78,7 +78,7 @@ public sealed class UserManagementViewModelTests
     }
 
     [TestMethod]
-    public async Task TheSearchTerm_IsPassedToTheStore_AndTheRoleFilterNarrowsIt()
+    public async Task ViewModel_UserManagementViewModelTests_TheSearchTerm_IsPassedToTheStoreAndTheRoleFilterNarrowsIt()
     {
         var service = new FakeUserManagementService(rows: [Row(1, "JSMITH", "Jane Smith", "6229", "developer", "Developer", true)]);
         var viewModel = Build(service: service);
@@ -103,7 +103,7 @@ public sealed class UserManagementViewModelTests
     }
 
     [TestMethod]
-    public async Task ASavedFilter_IsAppliedOnReturn_AndNamedWithHowManyItHides()
+    public async Task ViewModel_UserManagementViewModelTests_ASavedFilter_IsAppliedOnReturnAndNamedWithHowManyItHides()
     {
         var stored = new FakeConfigSettingsValueService();
         stored.SetText(UserListFilter.SettingKey, new UserListFilter("smith", string.Empty).ToStoredValue());
@@ -119,7 +119,7 @@ public sealed class UserManagementViewModelTests
     }
 
     [TestMethod]
-    public async Task ASavedFilterThatCannotBeRead_FallsBackToEveryoneAndSaysSo()
+    public async Task ViewModel_UserManagementViewModelTests_ASavedFilterThatCannotBeRead_FallsBackToEveryoneAndSaysSo()
     {
         var stored = new FakeConfigSettingsValueService();
         stored.SetText(UserListFilter.SettingKey, "{ this is not a filter");
@@ -140,7 +140,7 @@ public sealed class UserManagementViewModelTests
     }
 
     [TestMethod]
-    public async Task ASavedFilterNamingARoleThatIsGone_FallsBackToEveryoneAndSaysSo()
+    public async Task ViewModel_UserManagementViewModelTests_ASavedFilterNamingARoleThatIsGone_FallsBackToEveryoneAndSaysSo()
     {
         var stored = new FakeConfigSettingsValueService();
         stored.SetText(UserListFilter.SettingKey, new UserListFilter(string.Empty, "a_retired_role").ToStoredValue());
@@ -156,7 +156,7 @@ public sealed class UserManagementViewModelTests
     }
 
     [TestMethod]
-    public async Task AnUnreachableStore_ShowsTheUnavailableStateWithARetry_AndNeverAnEmptyList()
+    public async Task ViewModel_UserManagementViewModelTests_AnUnreachableStore_ShowsTheUnavailableStateWithARetryAndNeverAnEmptyList()
     {
         var service = new FakeUserManagementService(rows: []) { ThrowOnRead = new InvalidOperationException("store down") };
         var viewModel = Build(service: service);
@@ -179,7 +179,7 @@ public sealed class UserManagementViewModelTests
     }
 
     [TestMethod]
-    public async Task ARowOpensThatPerson_AndTheEntitlementIsReCheckedOnEveryArrival()
+    public async Task ViewModel_UserManagementViewModelTests_ARowOpensThatPerson_AndTheEntitlementIsReCheckedOnEveryArrival()
     {
         var navigation = new RecordingNavigationService();
         var permissions = PermissionStub.Holding("permission.admin.users");
@@ -208,7 +208,7 @@ public sealed class UserManagementViewModelTests
     }
 
     [TestMethod]
-    public async Task ShowEveryone_ClearsTheFilter_SavesIt_AndLoadsEverybody()
+    public async Task ViewModel_UserManagementViewModelTests_ShowEveryone_ClearsTheFilterSavesItAndLoadsEverybody()
     {
         var stored = new FakeConfigSettingsValueService();
         stored.SetText(UserListFilter.SettingKey, new UserListFilter("smith", "setup").ToStoredValue());
@@ -236,7 +236,7 @@ public sealed class UserManagementViewModelTests
     }
 
     [TestMethod]
-    public async Task TheRoster_OpensOnItsFirstPage_WithTheRestBehindIt()
+    public async Task ViewModel_UserManagementViewModelTests_TheRoster_OpensOnItsFirstPageWithTheRestBehindIt()
     {
         var viewModel = Build(rows: People(20));
 
@@ -265,7 +265,7 @@ public sealed class UserManagementViewModelTests
     }
 
     [TestMethod]
-    public async Task APage_IsCutFromTheFilteredRoster_SoNoPageShowsAPersonTheFilterHid()
+    public async Task ViewModel_UserManagementViewModelTests_APage_IsCutFromTheFilteredRosterSoNoPageShowsAPersonTheFilterHid()
     {
         var service = new FakeUserManagementService(rows: People(20));
         var viewModel = Build(service: service);
@@ -285,7 +285,7 @@ public sealed class UserManagementViewModelTests
     }
 
     [TestMethod]
-    public async Task AColumnHeader_OrdersTheRoster_AndClickingItAgainReversesIt()
+    public async Task ViewModel_UserManagementViewModelTests_AColumnHeader_OrdersTheRosterAndClickingItAgainReversesIt()
     {
         var viewModel = Build(rows: [
             Row(1, "BETA", "A Person", "1", "developer", "Developer", true),
@@ -319,7 +319,7 @@ public sealed class UserManagementViewModelTests
     }
 
     [TestMethod]
-    public async Task OrderingAndADifferentPageSize_EachReturnToTheFirstPage()
+    public async Task ViewModel_UserManagementViewModelTests_OrderingAndADifferentPageSize_EachReturnToTheFirstPage()
     {
         var viewModel = Build(rows: People(20));
 
@@ -338,7 +338,7 @@ public sealed class UserManagementViewModelTests
     }
 
     [TestMethod]
-    public async Task NobodyListed_LeavesTheFooterWithNothingToSay()
+    public async Task ViewModel_UserManagementViewModelTests_NobodyListed_LeavesTheFooterWithNothingToSay()
     {
         var viewModel = Build(rows: []);
 

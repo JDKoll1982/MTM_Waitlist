@@ -21,7 +21,7 @@ namespace MTM_Waitlist.Tests.Module_Settings.ViewModels;
 public sealed class PermissionHoldersViewModelTests
 {
     [TestMethod]
-    public async Task TheRolesComeFromTheBaselinesReadFromTheStore_RatherThanFromASecondCopy()
+    public async Task ViewModel_PermissionHoldersViewModelTests_TheRolesComeFromTheBaselinesReadFromTheStore_RatherThanFromASecondCopy()
     {
         var service = new FakePermissionAdministrationService
         {
@@ -46,7 +46,7 @@ public sealed class PermissionHoldersViewModelTests
     }
 
     [TestMethod]
-    public async Task OnlyThePeopleWhoDiffer_AreNamedIndividually()
+    public async Task ViewModel_PermissionHoldersViewModelTests_OnlyThePeopleWhoDiffer_AreNamedIndividually()
     {
         var service = new FakePermissionAdministrationService
         {
@@ -67,7 +67,7 @@ public sealed class PermissionHoldersViewModelTests
     }
 
     [TestMethod]
-    public async Task APersonWhoDiffersInTheDeniedDirection_IsNamedAndMarked()
+    public async Task ViewModel_PermissionHoldersViewModelTests_APersonWhoDiffersInTheDeniedDirection_IsNamedAndMarked()
     {
         var service = new FakePermissionAdministrationService
         {
@@ -88,7 +88,7 @@ public sealed class PermissionHoldersViewModelTests
     }
 
     [TestMethod]
-    public async Task ASwitchedOffHolder_IsListedAndMarked()
+    public async Task ViewModel_PermissionHoldersViewModelTests_ASwitchedOffHolder_IsListedAndMarked()
     {
         var service = new FakePermissionAdministrationService
         {
@@ -109,7 +109,7 @@ public sealed class PermissionHoldersViewModelTests
     }
 
     [TestMethod]
-    public async Task AFeatureNobodyHolds_IsStatedInWords()
+    public async Task ViewModel_PermissionHoldersViewModelTests_AFeatureNobodyHolds_IsStatedInWords()
     {
         var service = new FakePermissionAdministrationService { Holders = new PermissionHolders([], []) };
 
@@ -125,7 +125,7 @@ public sealed class PermissionHoldersViewModelTests
     }
 
     [TestMethod]
-    public async Task NobodyHoldsIt_IsDistinctFromNobodyDiffering()
+    public async Task ViewModel_PermissionHoldersViewModelTests_NobodyHoldsIt_IsDistinctFromNobodyDiffering()
     {
         // A feature several roles hold, with no exceptions: nobody DIFFERS, but people hold it.
         var service = new FakePermissionAdministrationService
@@ -144,7 +144,7 @@ public sealed class PermissionHoldersViewModelTests
     }
 
     [TestMethod]
-    public async Task TheView_WritesNothingAtAll()
+    public async Task ViewModel_PermissionHoldersViewModelTests_TheView_WritesNothingAtAll()
     {
         var service = new FakePermissionAdministrationService
         {
@@ -165,7 +165,7 @@ public sealed class PermissionHoldersViewModelTests
     }
 
     [TestMethod]
-    public async Task ChoosingADifferingPerson_OpensTheirOwnPage()
+    public async Task ViewModel_PermissionHoldersViewModelTests_ChoosingADifferingPerson_OpensTheirOwnPage()
     {
         var navigation = new RecordingNavigationService();
         var service = new FakePermissionAdministrationService
@@ -189,7 +189,7 @@ public sealed class PermissionHoldersViewModelTests
     }
 
     [TestMethod]
-    public async Task TheFeaturePicker_OffersEveryDeclaredPermission()
+    public async Task ViewModel_PermissionHoldersViewModelTests_TheFeaturePicker_OffersEveryDeclaredPermission()
     {
         var viewModel = Build(service: new FakePermissionAdministrationService());
         viewModel.LoadFeatures();
@@ -202,7 +202,7 @@ public sealed class PermissionHoldersViewModelTests
     }
 
     [TestMethod]
-    public async Task AnUnreachableStore_IsStatedRatherThanShownAsNobodyHoldingIt()
+    public async Task ViewModel_PermissionHoldersViewModelTests_AnUnreachableStore_IsStatedRatherThanShownAsNobodyHoldingIt()
     {
         var service = new FakePermissionAdministrationService { ThrowOnHolderRead = new InvalidOperationException("down") };
 

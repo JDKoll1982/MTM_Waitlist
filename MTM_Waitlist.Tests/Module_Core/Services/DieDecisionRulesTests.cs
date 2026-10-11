@@ -14,7 +14,7 @@ namespace MTM_Waitlist.Tests.Module_Core.Services;
 public sealed class DieDecisionRulesTests
 {
     [TestMethod]
-    public void IsNoDiePlaceholder_RecognisesTheMarker_WhateverTheCasingOrPadding()
+    public void Service_DieDecisionRulesTests_IsNoDiePlaceholder_RecognisesTheMarkerWhateverTheCasingOrPadding()
     {
         Assert.IsTrue(DieDecisionRules.IsNoDiePlaceholder("No Die"));
         Assert.IsTrue(DieDecisionRules.IsNoDiePlaceholder("no die"));
@@ -22,7 +22,7 @@ public sealed class DieDecisionRulesTests
     }
 
     [TestMethod]
-    public void HasRealDie_IsFalseForThePlaceholder_WhateverPartNumberTheRowCarries()
+    public void Service_DieDecisionRulesTests_HasRealDie_IsFalseForThePlaceholderWhateverPartNumberTheRowCarries()
     {
         // The query gives the placeholder the default FGT number, so the number alone cannot decide this.
         Assert.IsFalse(
@@ -31,7 +31,7 @@ public sealed class DieDecisionRulesTests
     }
 
     [TestMethod]
-    public void HasRealDie_IsFalseForARowWithNoPartNumber()
+    public void Service_DieDecisionRulesTests_HasRealDie_IsFalseForARowWithNoPartNumber()
     {
         // The die's FGT number is what every card and every stored request shows.
         Assert.IsFalse(DieDecisionRules.HasRealDie(string.Empty, "Die 9003-A"));
@@ -40,7 +40,7 @@ public sealed class DieDecisionRulesTests
     }
 
     [TestMethod]
-    public void HasRealDie_IsTrueForADieWithANumber_EvenWithNothingElseSet()
+    public void Service_DieDecisionRulesTests_HasRealDie_IsTrueForADieWithANumberEvenWithNothingElseSet()
     {
         Assert.IsTrue(DieDecisionRules.HasRealDie("FGT0002000", "Die 9003-A"));
         Assert.IsTrue(DieDecisionRules.HasRealDie("FGT0002000", string.Empty), "A die with no description is still a die.");
@@ -48,7 +48,7 @@ public sealed class DieDecisionRulesTests
     }
 
     [TestMethod]
-    public void IsNoDiePlaceholder_IsFalseForAbsentOrOrdinaryDescriptions()
+    public void Service_DieDecisionRulesTests_IsNoDiePlaceholder_IsFalseForAbsentOrOrdinaryDescriptions()
     {
         Assert.IsFalse(DieDecisionRules.IsNoDiePlaceholder(null));
         Assert.IsFalse(DieDecisionRules.IsNoDiePlaceholder(string.Empty));

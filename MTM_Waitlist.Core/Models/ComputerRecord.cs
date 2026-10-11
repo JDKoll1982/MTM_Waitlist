@@ -8,7 +8,7 @@ public sealed class ComputerRecord
 
     public string DisplayName { get; init; } = string.Empty;
 
-    public string Description { get; init; } = string.Empty;
+    public string Location { get; init; } = string.Empty;
 
     public string MacAddressNormalized { get; init; } = string.Empty;
 

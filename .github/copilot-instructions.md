@@ -141,6 +141,19 @@ When executing complex, cross-file architectural edits, you must strictly move t
 - For whole-repo exploration or validation (e.g., "validate all tasks in `<checklist>`", "summarize all docs"), delegate read-only research to the `Explore` subagent instead of reading many files into the main context.
 - Work in small, verifiable steps and state progress as you go. If a long operation fails or is interrupted, explicitly say what completed and resume from that point rather than restarting from scratch.
 
+## Subagent Model (owner instruction, 2026-10-10)
+- **Every background/subagent task MUST run on DeepSeek V4 Flash** — pass `model: "deepseek/deepseek-v4-flash"`
+  on the `task` call. The owner named it "DeepSeek V4.1 Flash", which is that model identifier in this client;
+  there is no separate `v4.1` entry, so use `deepseek/deepseek-v4-flash`.
+- This **overrides** the usual "leave `model` unset and let the runtime resolve `/subagents` preferences" default,
+  because the owner has explicitly required a specific model for this repo's subagents.
+- It applies to every agent type that accepts a model override — `Explore`, `task`, `general-purpose`,
+  `code-review`, `research`, and the custom agents registered for this repo.
+- Do **not** substitute a GitHub-hosted model (Claude, GPT, Gemini, Grok, Kimi, MAI) on a `task` call, and do not
+  fall back to one because a DeepSeek call failed. If DeepSeek V4 Flash is unavailable, say so and stop rather
+  than silently using a different provider.
+- `reasoning_effort` and `context_tier` stay unset unless the request in hand names them.
+
 ## Workstation Elevation (this environment)
 - **The normal loop needs no elevation.** `dotnet build`, `dotnet test`, launching the unpackaged `MTM_Waitlist.exe`,
   running `MTM_Waitlist.Mock.Service.exe` from a user-writable folder, and the service's per-user

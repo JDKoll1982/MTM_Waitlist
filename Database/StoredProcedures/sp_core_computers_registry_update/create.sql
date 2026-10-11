@@ -11,7 +11,7 @@
 --   IN  p_hostname_normalized      VARCHAR(255)
 --   IN  p_mac_address_normalized   VARCHAR(64)
 --   IN  p_display_name             VARCHAR(128)
---   IN  p_description              VARCHAR(255)   NULL when the caller has no description
+--   IN  p_location                 VARCHAR(255)   NULL when the caller has no location
 --   IN  p_is_registered            TINYINT(1)     0 or 1 — an operator may retire a machine without deleting it
 --
 -- This is the one path where the MAC *is* rewritten (an operator correcting a mistyped address), which is why
@@ -28,7 +28,7 @@ CREATE PROCEDURE sp_core_computers_registry_update(
     IN p_hostname_normalized VARCHAR(255),
     IN p_mac_address_normalized VARCHAR(64),
     IN p_display_name VARCHAR(128),
-    IN p_description VARCHAR(255),
+    IN p_location VARCHAR(255),
     IN p_is_registered TINYINT
 )
 UPDATE core_computers_registry
@@ -36,7 +36,7 @@ SET computer_name = p_computer_name,
     hostname_normalized = p_hostname_normalized,
     mac_address_normalized = p_mac_address_normalized,
     display_name = p_display_name,
-    description = p_description,
+    location = p_location,
     is_registered = p_is_registered,
     updated_utc = UTC_TIMESTAMP()
 WHERE id = p_id;

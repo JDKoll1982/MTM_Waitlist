@@ -22,7 +22,7 @@ namespace MTM_Waitlist.Tests.Module_Startup.Services;
 public sealed class ExceptionCaptureTests
 {
     [TestMethod]
-    public void Serialize_WhenAFaultHasAnInnerFault_KeepsEveryExceptionWithItsDepthAndIndex()
+    public void Service_ExceptionCaptureTests_Serialize_WhenAFaultHasAnInnerFaultKeepsEveryExceptionWithItsDepthAndIndex()
     {
         // Arrange
         var fault = new InvalidOperationException(
@@ -46,7 +46,7 @@ public sealed class ExceptionCaptureTests
     }
 
     [TestMethod]
-    public void Serialize_WhenTheFaultIsAnAggregate_ContributesEveryIndependentFailure()
+    public void Service_ExceptionCaptureTests_Serialize_WhenTheFaultIsAnAggregateContributesEveryIndependentFailure()
     {
         // Arrange: three failures that are not one another's cause; reducing this to the first is what FR-032
         // forbids.
@@ -68,7 +68,7 @@ public sealed class ExceptionCaptureTests
     }
 
     [TestMethod]
-    public void Serialize_WhenTheChainIsLongerThanTheNodeCeiling_IsTruncatedWithItsMarker()
+    public void Service_ExceptionCaptureTests_Serialize_WhenTheChainIsLongerThanTheNodeCeilingIsTruncatedWithItsMarker()
     {
         // Arrange: one more exception than the ceiling allows.
         var fault = new InvalidOperationException("level 0");
@@ -88,7 +88,7 @@ public sealed class ExceptionCaptureTests
     }
 
     [TestMethod]
-    public void Serialize_WhenTheFaultIsShort_CarriesNoTruncationMarker()
+    public void Service_ExceptionCaptureTests_Serialize_WhenTheFaultIsShortCarriesNoTruncationMarker()
     {
         // Arrange
         var fault = new InvalidOperationException("a short fault");
@@ -101,7 +101,7 @@ public sealed class ExceptionCaptureTests
     }
 
     [TestMethod]
-    public void Serialize_WhenAMemberThrowsOnRead_ReplacesItRatherThanLosingTheEntry()
+    public void Service_ExceptionCaptureTests_Serialize_WhenAMemberThrowsOnReadReplacesItRatherThanLosingTheEntry()
     {
         // Arrange: a fault whose own message cannot be read.
         var fault = new HostileException();
@@ -114,14 +114,14 @@ public sealed class ExceptionCaptureTests
     }
 
     [TestMethod]
-    public void Serialize_WhenThereIsNoFault_AnswersNothing()
+    public void Service_ExceptionCaptureTests_Serialize_WhenThereIsNoFaultAnswersNothing()
     {
         // Assert: an entry raised without an exception carries no chain (`contracts/logging-contract.md` §1.1).
         Assert.IsNull(ExceptionDetailSerializer.Serialize(null));
     }
 
     [TestMethod]
-    public void Serialize_WhenAMessageCarriesAParameterValue_DoesNotWriteTheValue()
+    public void Service_ExceptionCaptureTests_Serialize_WhenAMessageCarriesAParameterValueDoesNotWriteTheValue()
     {
         // Arrange: the shape a provider uses when it puts a statement's parameters into its message.
         var fault = new InvalidOperationException(
@@ -139,7 +139,7 @@ public sealed class ExceptionCaptureTests
     }
 
     [TestMethod]
-    public async Task FlushAsync_WhenTheStoreRefusesEveryWrite_AbsorbsItAndRaisesNoSecondDiagnostic()
+    public async Task Service_ExceptionCaptureTests_FlushAsync_WhenTheStoreRefusesEveryWriteAbsorbsItAndRaisesNoSecondDiagnostic()
     {
         // Arrange: the store is the fault being recorded.
         var store = new RefusingMySqlHelperServer();

@@ -38,7 +38,7 @@ public sealed class MachineSetupNoBypassTests
     private const string ResourceFile = @"Strings\en-us\Resources.resw";
 
     [TestMethod]
-    public async Task RunAsync_WhenTheMachineHasNoConfiguration_EndsAtMachineSetupAndNeverHandsOverTheMainScreens()
+    public async Task Service_MachineSetupNoBypassTests_RunAsync_WhenTheMachineHasNoConfigurationEndsAtMachineSetupAndNeverHandsOverTheMainScreens()
     {
         var run = new LaunchRun().Unconfigured();
         var handed = new List<LaunchOutcome>();
@@ -54,7 +54,7 @@ public sealed class MachineSetupNoBypassTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenTheMachinesConfigurationCannotBeRead_StopsWithoutHandingOverTheMainScreens()
+    public async Task Service_MachineSetupNoBypassTests_RunAsync_WhenTheMachinesConfigurationCannotBeReadStopsWithoutHandingOverTheMainScreens()
     {
         var run = new LaunchRun().WithConfiguration(
             new MachineConfigurationState(false, null, null, MachineConfigurationReasons.Unreadable));
@@ -68,7 +68,7 @@ public sealed class MachineSetupNoBypassTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenAStepFailsBeforeTheMachineIsChecked_StopsWithoutHandingOverTheMainScreens()
+    public async Task Service_MachineSetupNoBypassTests_RunAsync_WhenAStepFailsBeforeTheMachineIsCheckedStopsWithoutHandingOverTheMainScreens()
     {
         var run = new LaunchRun().With(ReachabilityStepId, Failed());
         var handed = new List<LaunchOutcome>();
@@ -81,7 +81,7 @@ public sealed class MachineSetupNoBypassTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenTheMachineIsConfiguredButNobodyIsSignedIn_EndsAtSignInInsteadOfTheShell()
+    public async Task Service_MachineSetupNoBypassTests_RunAsync_WhenTheMachineIsConfiguredButNobodyIsSignedInEndsAtSignInInsteadOfTheShell()
     {
         var run = new LaunchRun();
         var handed = new List<LaunchOutcome>();
@@ -94,7 +94,7 @@ public sealed class MachineSetupNoBypassTests
     }
 
     [TestMethod]
-    public async Task RunAsync_FromAnUnconfiguredMachineInAnyOrderOfAttempts_NeverHandsOverTheMainScreens()
+    public async Task Service_MachineSetupNoBypassTests_RunAsync_FromAnUnconfiguredMachineInAnyOrderOfAttemptsNeverHandsOverTheMainScreens()
     {
         // Every sequence a person could drive from an unconfigured machine, run to its end, and the shell is not
         // among the surfaces any of them reaches (SC-004).
@@ -128,7 +128,7 @@ public sealed class MachineSetupNoBypassTests
     }
 
     [TestMethod]
-    public void Abort_EveryRouteOutOfMachineSetup_EndsTheProcessWithItsReasonStatedFirst()
+    public void Service_MachineSetupNoBypassTests_Abort_EveryRouteOutOfMachineSetupEndsTheProcessWithItsReasonStatedFirst()
     {
         foreach (var route in MachineSetupAbortRoutes.All)
         {
@@ -147,7 +147,7 @@ public sealed class MachineSetupNoBypassTests
     }
 
     [TestMethod]
-    public void Abort_EveryRouteOutOfMachineSetup_StatesAReasonOfItsOwnThatShipsAsAString()
+    public void Service_MachineSetupNoBypassTests_Abort_EveryRouteOutOfMachineSetupStatesAReasonOfItsOwnThatShipsAsAString()
     {
         var statements = MachineSetupAbortRoutes.All
             .Select(MachineSetupAbortRoutes.StatementFor)
@@ -175,7 +175,7 @@ public sealed class MachineSetupNoBypassTests
     }
 
     [TestMethod]
-    public void Abort_ADismissalRouteTheScreenDoesNotKnowAbout_CannotReachTheShellEither()
+    public void Service_MachineSetupNoBypassTests_Abort_ADismissalRouteTheScreenDoesNotKnowAboutCannotReachTheShellEither()
     {
         // The last row of the contract's table: the screen is the invitation and the pipeline is the gate, so a
         // route nobody wired up still ends the process rather than carrying on.
@@ -191,7 +191,7 @@ public sealed class MachineSetupNoBypassTests
     }
 
     [TestMethod]
-    public void MachineSetupWindow_AnswersEveryDeclaredAbortRoute()
+    public void Service_MachineSetupNoBypassTests_MachineSetupWindow_AnswersEveryDeclaredAbortRoute()
     {
         // Every route the contract's table names has to be wired to the one ending, so a route added to the set
         // without being handled fails here rather than in a live session.

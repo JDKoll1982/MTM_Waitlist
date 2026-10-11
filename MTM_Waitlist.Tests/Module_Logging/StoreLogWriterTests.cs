@@ -20,7 +20,7 @@ public sealed class StoreLogWriterTests
     private static readonly TimeSpan s_callerObservationWindow = TimeSpan.FromSeconds(10);
 
     [TestMethod]
-    public async Task Enqueue_SlowStore_CallerIsNotDelayed()
+    public async Task Service_StoreLogWriterTests_Enqueue_SlowStoreCallerIsNotDelayed()
     {
         // Arrange
         var store = new RecordingLogStore();
@@ -52,7 +52,7 @@ public sealed class StoreLogWriterTests
     }
 
     [TestMethod]
-    public async Task Enqueue_QueueIsFull_DropsTheOldestEntry()
+    public async Task Service_StoreLogWriterTests_Enqueue_QueueIsFullDropsTheOldestEntry()
     {
         // Arrange
         var store = new RecordingLogStore();
@@ -78,7 +78,7 @@ public sealed class StoreLogWriterTests
     }
 
     [TestMethod]
-    public async Task Enqueue_MoreEntriesThanTheDefaultCapacity_KeepsTheNewestOnes()
+    public async Task Service_StoreLogWriterTests_Enqueue_MoreEntriesThanTheDefaultCapacityKeepsTheNewestOnes()
     {
         // Arrange: the default capacity is large, so the drop is driven by filling it rather than by a small queue.
         var store = new RecordingLogStore();
@@ -106,7 +106,7 @@ public sealed class StoreLogWriterTests
     }
 
     [TestMethod]
-    public async Task FlushAsync_StoreIsStillStalled_ReturnsWithoutWaitingForIt()
+    public async Task Service_StoreLogWriterTests_FlushAsync_StoreIsStillStalledReturnsWithoutWaitingForIt()
     {
         // Arrange
         var store = new RecordingLogStore();
@@ -129,7 +129,7 @@ public sealed class StoreLogWriterTests
     }
 
     [TestMethod]
-    public async Task StopAsync_EntriesAreQueued_WritesThemBeforeItReturns()
+    public async Task Service_StoreLogWriterTests_StopAsync_EntriesAreQueuedWritesThemBeforeItReturns()
     {
         // Arrange
         var store = new RecordingLogStore();
@@ -150,7 +150,7 @@ public sealed class StoreLogWriterTests
     }
 
     [TestMethod]
-    public async Task Write_StoreRefusesEveryWrite_ProducesNoSecondDiagnostic()
+    public async Task Service_StoreLogWriterTests_Write_StoreRefusesEveryWriteProducesNoSecondDiagnostic()
     {
         // Arrange
         var store = new RecordingLogStore
@@ -175,7 +175,7 @@ public sealed class StoreLogWriterTests
     }
 
     [TestMethod]
-    public async Task Enqueue_HealthyStore_WritesInTheOrderTheEntriesWereRaised()
+    public async Task Service_StoreLogWriterTests_Enqueue_HealthyStoreWritesInTheOrderTheEntriesWereRaised()
     {
         // Arrange
         var store = new RecordingLogStore();

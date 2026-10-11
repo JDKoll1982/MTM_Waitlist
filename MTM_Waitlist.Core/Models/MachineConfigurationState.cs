@@ -8,13 +8,14 @@ namespace MTM_Waitlist.Module_Core.Models;
 /// True only when the store holds this machine's record and its name. A machine that is not configured does not
 /// reach the main screens by any route (FR-006, FR-041).
 /// </param>
-/// <param name="DisplayName">
-/// The machine's <c>core_computers_registry.display_name</c>, or <c>null</c> when no row was read. It is reported
-/// even when the verdict is unconfigured, because what was read is a fact about the machine either way.
+/// <param name="ComputerName">
+/// The name the computer reports for itself, held in <c>core_computers_registry.display_name</c>, or <c>null</c>
+/// when no row was read. It is reported even when the verdict is unconfigured, because what was read is a fact
+/// about the machine either way.
 /// </param>
-/// <param name="Description">
-/// The machine's <c>core_computers_registry.description</c>, or <c>null</c> when the store holds none or no row
-/// was read.
+/// <param name="Location">
+/// Where this computer stands, held in <c>core_computers_registry.location</c>, or <c>null</c> when the store
+/// holds none or no row was read.
 /// </param>
 /// <param name="UnconfiguredReason">
 /// One of <see cref="MachineConfigurationReasons"/>, or <c>null</c> when <paramref name="IsConfigured"/> is true.
@@ -26,6 +27,6 @@ namespace MTM_Waitlist.Module_Core.Models;
 /// </remarks>
 public sealed record MachineConfigurationState(
     bool IsConfigured,
-    string? DisplayName,
-    string? Description,
+    string? ComputerName,
+    string? Location,
     string? UnconfiguredReason);

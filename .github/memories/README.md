@@ -25,6 +25,9 @@ so those are machine-local and will NOT be committed when you push.
   `Documents/Development/InforVisual/Phase6-Disposition-StatusCodes-Research.md`.
 - `repo/tasks-md-id-allocation.md` — how task IDs are allocated in `tasks.md` so they stay unique and
   stable across phases.
+- `repo/subagent-models.md` — the owner's 2026-10-10 rule that **all background/subagent work runs on
+  DeepSeek V4 Flash** (`deepseek/deepseek-v4-flash`), the naming caveat around "V4.1", and the prohibition on
+  substituting a GitHub-hosted model.
 - `repo/workstation-elevation.md` — which account to use when administrator rights are needed on this
   workstation, when elevation is *not* needed, and the owner-approved exception that lets it name a password.
 - `repo/workstation-secrets.md` — the `MTM_Waitlist.Mock.Service` host's per-user environment variables,

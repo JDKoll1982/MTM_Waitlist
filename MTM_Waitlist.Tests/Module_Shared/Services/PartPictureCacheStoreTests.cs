@@ -66,7 +66,7 @@ public sealed class PartPictureCacheStoreTests
     }
 
     [TestMethod]
-    public void TheFirstDrawCopiesThePictureOntoThisComputer()
+    public void Service_PartPictureCacheStoreTests_TheFirstDrawCopiesThePictureOntoThisComputer()
     {
         var shared = WriteSharedPicture();
 
@@ -78,7 +78,7 @@ public sealed class PartPictureCacheStoreTests
     }
 
     [TestMethod]
-    public void AnUnchangedCopyIsNotCopiedAgain()
+    public void Service_PartPictureCacheStoreTests_AnUnchangedCopyIsNotCopiedAgain()
     {
         var shared = WriteSharedPicture();
         var copy = _store.EnsureLocalCopy(CollectionFolder, PictureBelowCollection, shared);
@@ -94,7 +94,7 @@ public sealed class PartPictureCacheStoreTests
     }
 
     [TestMethod]
-    public void AChangedSourceReplacesTheCopy()
+    public void Service_PartPictureCacheStoreTests_AChangedSourceReplacesTheCopy()
     {
         var shared = WriteSharedPicture();
         _store.EnsureLocalCopy(CollectionFolder, PictureBelowCollection, shared);
@@ -112,7 +112,7 @@ public sealed class PartPictureCacheStoreTests
     }
 
     [TestMethod]
-    public void AReplyFromASourceThatHasGoneLeavesTheCopyThatIsAlreadyHere()
+    public void Service_PartPictureCacheStoreTests_AReplyFromASourceThatHasGoneLeavesTheCopyThatIsAlreadyHere()
     {
         var shared = WriteSharedPicture();
         var copy = _store.EnsureLocalCopy(CollectionFolder, PictureBelowCollection, shared);
@@ -128,7 +128,7 @@ public sealed class PartPictureCacheStoreTests
     }
 
     [TestMethod]
-    public void ASourceThatHasGoneAndNoCopyAnswersNothing()
+    public void Service_PartPictureCacheStoreTests_ASourceThatHasGoneAndNoCopyAnswersNothing()
     {
         var missing = Path.Combine(_shareRoot, "not-there.png");
 
@@ -139,7 +139,7 @@ public sealed class PartPictureCacheStoreTests
     }
 
     [TestMethod]
-    public void AnEmptySourceRemovesNothing()
+    public void Service_PartPictureCacheStoreTests_AnEmptySourceRemovesNothing()
     {
         var shared = WriteSharedPicture();
         var copy = _store.EnsureLocalCopy(CollectionFolder, PictureBelowCollection, shared);
@@ -155,7 +155,7 @@ public sealed class PartPictureCacheStoreTests
     }
 
     [TestMethod]
-    public void TheTwoSystemsKeepTheirOwnCopyOfTheSameFileName()
+    public void Service_PartPictureCacheStoreTests_TheTwoSystemsKeepTheirOwnCopyOfTheSameFileName()
     {
         var shared = WriteSharedPicture();
 

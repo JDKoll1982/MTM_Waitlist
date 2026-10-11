@@ -31,7 +31,7 @@ public sealed class ShapeAdditionNoDowntimeTests
     ];
 
     [TestMethod]
-    public void ShippedCatalog_ContainsExactlyTheSixPublishedShapeKeys()
+    public void Service_ShapeAdditionNoDowntimeTests_ShippedCatalog_ContainsExactlyTheSixPublishedShapeKeys()
     {
         var keys = VisualReadShapeCatalog.Create().Select(shape => shape.Key).ToArray();
 
@@ -43,7 +43,7 @@ public sealed class ShapeAdditionNoDowntimeTests
     }
 
     [TestMethod]
-    public void AddingAShape_LeavesEveryExistingShapeDefinitionUnchanged()
+    public void Service_ShapeAdditionNoDowntimeTests_AddingAShape_LeavesEveryExistingShapeDefinitionUnchanged()
     {
         var existing = VisualReadShapeCatalog.Create();
         var before = existing.Select(Describe).ToArray();
@@ -91,7 +91,7 @@ public sealed class ShapeAdditionNoDowntimeTests
     }
 
     [TestMethod]
-    public void EveryShippedShape_HasItsMirrorTwinProceduresAndPopulationReadArtifactsOnDisk()
+    public void Service_ShapeAdditionNoDowntimeTests_EveryShippedShape_HasItsMirrorTwinProceduresAndPopulationReadArtifactsOnDisk()
     {
         var repositoryRoot = FindRepositoryRoot();
         var missing = new List<string>();
@@ -141,7 +141,7 @@ public sealed class ShapeAdditionNoDowntimeTests
     /// forever — the failure the identifier-only sign-in would have shown as an unreachable plant system.
     /// </remarks>
     [TestMethod]
-    public void TheMirrorSchema_HoldsExactlyTheCatalogDerivedTablesAndNothingElse()
+    public void Service_ShapeAdditionNoDowntimeTests_TheMirrorSchema_HoldsExactlyTheCatalogDerivedTablesAndNothingElse()
     {
         var repositoryRoot = FindRepositoryRoot();
 
@@ -163,7 +163,7 @@ public sealed class ShapeAdditionNoDowntimeTests
     }
 
     [TestMethod]
-    public void EveryShippedShape_HasAnInAppFallbackRegistered()
+    public void Service_ShapeAdditionNoDowntimeTests_EveryShippedShape_HasAnInAppFallbackRegistered()
     {
         var registrationPath = Path.Combine(
             FindRepositoryRoot(),

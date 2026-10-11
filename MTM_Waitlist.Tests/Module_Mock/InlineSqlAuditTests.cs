@@ -84,7 +84,7 @@ public sealed class InlineSqlAuditTests
     /// Fails when any MySQL statement marker survives in application code (SC-013).
     /// </summary>
     [TestMethod]
-    public void NoMySqlStatementTextRemainsInApplicationCode()
+    public void Audit_InlineSqlAuditTests_NoMySqlStatementTextRemainsInApplicationCode()
     {
         var repositoryRoot = FindRepositoryRoot();
         var violations = new List<string>();
@@ -119,7 +119,7 @@ public sealed class InlineSqlAuditTests
     /// which is what keeps a DML statement out of the row-returning helper (the wrong-helper-for-DML shape).
     /// </summary>
     [TestMethod]
-    public void RawSqlSeamIsConfinedToItsReviewedAllowlist()
+    public void Audit_InlineSqlAuditTests_RawSqlSeamIsConfinedToItsReviewedAllowlist()
     {
         var repositoryRoot = FindRepositoryRoot();
         var violations = new List<string>();
@@ -156,7 +156,7 @@ public sealed class InlineSqlAuditTests
     /// linger after the call site it describes is gone.
     /// </summary>
     [TestMethod]
-    public void EveryRawSqlSeamAllowlistEntryIsStillAccurate()
+    public void Audit_InlineSqlAuditTests_EveryRawSqlSeamAllowlistEntryIsStillAccurate()
     {
         var repositoryRoot = FindRepositoryRoot();
         var stale = new List<string>();

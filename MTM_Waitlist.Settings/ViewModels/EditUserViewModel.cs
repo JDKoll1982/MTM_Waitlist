@@ -249,10 +249,10 @@ public partial class EditUserViewModel : ObservableRecipient, INavigationAware
     /// open stays open until they close the application (FR-102). It sits on the page as well as in the
     /// confirmation, so it is findable after the confirmation is gone.
     /// </summary>
-    public string DeactivateExplanationText => "EditUser_Deactivate.Explanation.Text".GetLocalized();
+    public string DeactivateExplanationText => "EditUser_Deactivate_Explanation.Text".GetLocalized();
 
     /// <summary>The sentence a reactivation gives: access returns from the next sign-in.</summary>
-    public string ReactivateExplanationText => "EditUser_Reactivate.Explanation.Text".GetLocalized();
+    public string ReactivateExplanationText => "EditUser_Reactivate_Explanation.Text".GetLocalized();
 
     /// <summary>What an action chosen with unsaved edits says (FR-100).</summary>
     public string ActionNeedsSaveText => "EditUser_Unsaved.ActionNeedsSave".GetLocalized();

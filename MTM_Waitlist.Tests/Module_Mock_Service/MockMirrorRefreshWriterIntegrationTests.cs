@@ -146,7 +146,7 @@ public sealed class MockMirrorRefreshWriterIntegrationTests
     }
 
     [TestMethod]
-    public async Task RefreshAsync_ReachesTheRealProcedure_ReportsTheLoadedRowCount_AndSwapsAtomically()
+    public async Task Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_ReachesTheRealProcedureReportsTheLoadedRowCountAndSwapsAtomically()
     {
         var runId = Guid.NewGuid().ToString("N")[..8];
         var previousSnapshot = await ReadSnapshotAsync(MirrorTable).ConfigureAwait(false);
@@ -204,7 +204,7 @@ public sealed class MockMirrorRefreshWriterIntegrationTests
     }
 
     [TestMethod]
-    public async Task RefreshAsync_WithAnEmptyPayload_IsALegitimateEmptySnapshot()
+    public async Task Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_WithAnEmptyPayloadIsALegitimateEmptySnapshot()
     {
         // An empty result set is a real answer from Infor Visual (FR-024) and must be storable, not rejected.
         var reportedRowCount = await _writer.RefreshAsync(_shape, "[]").ConfigureAwait(false);

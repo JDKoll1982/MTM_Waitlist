@@ -13,7 +13,7 @@ public sealed class RequestActionPolicyTests
     private const string Creator = "EMP-9";
 
     [TestMethod]
-    public void CanViewerAccept_OnlyWhenAvailableAndViewerCanHandle()
+    public void Service_RequestActionPolicyTests_CanViewerAccept_OnlyWhenAvailableAndViewerCanHandle()
     {
         Assert.IsTrue(RequestActionPolicy.CanViewerAccept("Pending", viewerCanHandleRequests: true));
         Assert.IsFalse(RequestActionPolicy.CanViewerAccept("Pending", viewerCanHandleRequests: false));
@@ -22,7 +22,7 @@ public sealed class RequestActionPolicyTests
     }
 
     [TestMethod]
-    public void AssignedToViewer_IsCaseInsensitive_OnlyWhenTaken()
+    public void Service_RequestActionPolicyTests_AssignedToViewer_IsCaseInsensitiveOnlyWhenTaken()
     {
         Assert.IsTrue(RequestActionPolicy.IsAssignedToViewer("In Progress", "emp-1", Handler));
         Assert.IsFalse(RequestActionPolicy.IsAssignedToViewer("Pending", "emp-1", Handler));
@@ -30,7 +30,7 @@ public sealed class RequestActionPolicyTests
     }
 
     [TestMethod]
-    public void CanViewerCompleteOrRelease_OnlyAssignedHandlerAndNotDone()
+    public void Service_RequestActionPolicyTests_CanViewerCompleteOrRelease_OnlyAssignedHandlerAndNotDone()
     {
         Assert.IsTrue(RequestActionPolicy.CanViewerCompleteOrRelease("In Progress", Handler, Handler));
         Assert.IsFalse(RequestActionPolicy.CanViewerCompleteOrRelease("In Progress", Creator, Handler)); // someone else took it
@@ -38,7 +38,7 @@ public sealed class RequestActionPolicyTests
     }
 
     [TestMethod]
-    public void IsDone_RecognizesTerminalStatuses()
+    public void Service_RequestActionPolicyTests_IsDone_RecognizesTerminalStatuses()
     {
         Assert.IsTrue(RequestActionPolicy.IsDone("done"));
         Assert.IsTrue(RequestActionPolicy.IsDone("Cancelled"));
@@ -46,7 +46,7 @@ public sealed class RequestActionPolicyTests
     }
 
     [TestMethod]
-    public async Task CanViewerHandleRequestsAsync_AsksTheDeclaredKeyAndNothingElse()
+    public async Task Service_RequestActionPolicyTests_CanViewerHandleRequestsAsync_AsksTheDeclaredKeyAndNothingElse()
     {
         var permissions = new RecordingPermissionService(holds: true);
 
@@ -59,7 +59,7 @@ public sealed class RequestActionPolicyTests
     }
 
     [TestMethod]
-    public async Task CanViewerHandleRequestsAsync_ServiceRefuses_Refuses()
+    public async Task Service_RequestActionPolicyTests_CanViewerHandleRequestsAsync_ServiceRefusesRefuses()
     {
         Assert.IsFalse(
             await RequestActionPolicy.CanViewerHandleRequestsAsync(new RecordingPermissionService(holds: false)),
@@ -67,7 +67,7 @@ public sealed class RequestActionPolicyTests
     }
 
     [TestMethod]
-    public async Task CanViewerHandleRequestsAsync_NoPermissionService_AnswersFromTheShippedFallback()
+    public async Task Service_RequestActionPolicyTests_CanViewerHandleRequestsAsync_NoPermissionServiceAnswersFromTheShippedFallback()
     {
         // A host with no permission service cannot ask the question. Answering "no" would silently stop the shop
         // floor, so the shipped fallback answers instead, and it is read from the declaration rather than

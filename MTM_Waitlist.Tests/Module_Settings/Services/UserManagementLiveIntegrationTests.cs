@@ -142,7 +142,7 @@ public sealed class UserManagementLiveIntegrationTests
     }
 
     [TestMethod]
-    public async Task CreateAsync_AValidPerson_WritesTheProfileAndItsOneRoleAssignmentTogether()
+    public async Task Database_UserManagementLiveIntegrationTests_CreateAsync_AValidPersonWritesTheProfileAndItsOneRoleAssignmentTogether()
     {
         var signInName = $"{OwnedSignInPrefix}{_runId}.NEW";
         var result = await _actingHigh!
@@ -198,7 +198,7 @@ public sealed class UserManagementLiveIntegrationTests
     }
 
     [TestMethod]
-    public async Task CreateAsync_ASignInNameAlreadyTaken_ArrivesAsOneTypedAnswerAndWritesNothing()
+    public async Task Database_UserManagementLiveIntegrationTests_CreateAsync_ASignInNameAlreadyTakenArrivesAsOneTypedAnswerAndWritesNothing()
     {
         var result = await _actingHigh!
             .CreateAsync(new UserAccountEdit(_peerSignInName, "Tess", "Target", "6229", LowRoleCode))
@@ -219,7 +219,7 @@ public sealed class UserManagementLiveIntegrationTests
     }
 
     [TestMethod]
-    public async Task CreateAsync_FailingAfterTheProfileIsWritten_RollsTheProfileAndTheRoleBackTogether()
+    public async Task Database_UserManagementLiveIntegrationTests_CreateAsync_FailingAfterTheProfileIsWrittenRollsTheProfileAndTheRoleBackTogether()
     {
         // The catalogue the cases name must be the catalogue this store holds, or an outranks case would pass
         // for the wrong reason.
@@ -298,7 +298,7 @@ public sealed class UserManagementLiveIntegrationTests
     }
 
     [TestMethod]
-    public async Task SearchAsync_MatchesEachOfTheFourFacts_AndNarrowsByRole()
+    public async Task Database_UserManagementLiveIntegrationTests_SearchAsync_MatchesEachOfTheFourFactsAndNarrowsByRole()
     {
         // The four facts the roster searches are the sign-in name, the display name, the employee number and the
         // role's own name, and the store is where they are matched (FR-086, §6 gate 2).
@@ -315,7 +315,7 @@ public sealed class UserManagementLiveIntegrationTests
     }
 
     [TestMethod]
-    public async Task ASignInNameTypedInLowerCase_IsStoredUpperCase()
+    public async Task Database_UserManagementLiveIntegrationTests_ASignInNameTypedInLowerCase_IsStoredUpperCase()
     {
         var typedName = $"{OwnedSignInPrefix}{_runId}.lowercase";
 
@@ -333,7 +333,7 @@ public sealed class UserManagementLiveIntegrationTests
     }
 
     [TestMethod]
-    public async Task CreateAsync_ARoleAboveTheActorsOwnRung_IsRefusedByTheStoreWithNoScreenInvolved()
+    public async Task Database_UserManagementLiveIntegrationTests_CreateAsync_ARoleAboveTheActorsOwnRungIsRefusedByTheStoreWithNoScreenInvolved()
     {
         var signInName = $"{OwnedSignInPrefix}{_runId}.TOOHIGH";
         var result = await _actingLow!
@@ -348,7 +348,7 @@ public sealed class UserManagementLiveIntegrationTests
     }
 
     [TestMethod]
-    public async Task UpdateAsync_AnAccountThatOutranksTheActor_IsRefusedByTheStoreWithNoScreenInvolved()
+    public async Task Database_UserManagementLiveIntegrationTests_UpdateAsync_AnAccountThatOutranksTheActorIsRefusedByTheStoreWithNoScreenInvolved()
     {
         var result = await _actingLow!
             .UpdateAsync(
@@ -372,7 +372,7 @@ public sealed class UserManagementLiveIntegrationTests
     }
 
     [TestMethod]
-    public async Task UpdateAsync_DeactivatingTheActorsOwnAccount_IsRefusedByTheStore()
+    public async Task Database_UserManagementLiveIntegrationTests_UpdateAsync_DeactivatingTheActorsOwnAccountIsRefusedByTheStore()
     {
         var result = await _actingLow!
             .UpdateAsync(
@@ -393,7 +393,7 @@ public sealed class UserManagementLiveIntegrationTests
     }
 
     [TestMethod]
-    public async Task UpdateAsync_RenamingTheActorsOwnSignInName_IsRefusedByTheStore()
+    public async Task Database_UserManagementLiveIntegrationTests_UpdateAsync_RenamingTheActorsOwnSignInNameIsRefusedByTheStore()
     {
         var before = await AuditRowCountAsync(_lowUserId).ConfigureAwait(false);
 
@@ -420,7 +420,7 @@ public sealed class UserManagementLiveIntegrationTests
     }
 
     [TestMethod]
-    public async Task ResetPasswordAsync_WritesOneAuditRowWithNoValueOnEitherSide()
+    public async Task Database_UserManagementLiveIntegrationTests_ResetPasswordAsync_WritesOneAuditRowWithNoValueOnEitherSide()
     {
         var before = await AuditRowCountAsync(_peerUserId).ConfigureAwait(false);
 
@@ -458,7 +458,7 @@ public sealed class UserManagementLiveIntegrationTests
     /// the store does.
     /// </remarks>
     [TestMethod]
-    public async Task UpdateAsync_DeactivatingAPerson_LeavesTheirExistingSessionsAlone()
+    public async Task Database_UserManagementLiveIntegrationTests_UpdateAsync_DeactivatingAPersonLeavesTheirExistingSessionsAlone()
     {
         await InsertSessionAsync(_peerUserId).ConfigureAwait(false);
 
@@ -487,7 +487,7 @@ public sealed class UserManagementLiveIntegrationTests
     }
 
     [TestMethod]
-    public async Task UpdateAsync_OneSaveChangingSeveralFields_SharesOneChangeIdentifierAcrossItsAuditRows()
+    public async Task Database_UserManagementLiveIntegrationTests_UpdateAsync_OneSaveChangingSeveralFieldsSharesOneChangeIdentifierAcrossItsAuditRows()
     {
         var lastIdBefore = await MaxAuditIdAsync().ConfigureAwait(false);
         var wrote = new Dictionary<string, object?> { ["p_user_id"] = _peerUserId, ["p_last_id"] = lastIdBefore };

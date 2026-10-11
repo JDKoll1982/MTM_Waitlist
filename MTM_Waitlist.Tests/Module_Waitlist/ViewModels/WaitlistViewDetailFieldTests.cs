@@ -53,7 +53,7 @@ public sealed class WaitlistViewDetailFieldTests
         RequestItemCatalog.Items.Select(item => item.Id).ToArray();
 
     [TestMethod]
-    public void FieldValue_ExposesNoFallbackDefault()
+    public void ViewModel_WaitlistViewDetailFieldTests_FieldValue_ExposesNoFallbackDefault()
     {
         var helper = typeof(WaitlistViewDetailViewModel)
             .GetMethod("FieldValue", BindingFlags.NonPublic | BindingFlags.Static);
@@ -68,7 +68,7 @@ public sealed class WaitlistViewDetailFieldTests
     }
 
     [TestMethod]
-    public void LoadedSections_RenderNoInventedAttributeAndNoAbsencePlaceholder()
+    public void ViewModel_WaitlistViewDetailFieldTests_LoadedSections_RenderNoInventedAttributeAndNoAbsencePlaceholder()
     {
         foreach (var itemCode in EveryDetailShape)
         {
@@ -101,7 +101,7 @@ public sealed class WaitlistViewDetailFieldTests
     }
 
     [TestMethod]
-    public void LoadedSections_CarryNoFieldWithoutAValue()
+    public void ViewModel_WaitlistViewDetailFieldTests_LoadedSections_CarryNoFieldWithoutAValue()
     {
         foreach (var itemCode in EveryDetailShape)
         {

@@ -131,8 +131,8 @@ No test method is removed.
 | Unit | Kind | Start | Stop | Disposition | Why |
 |---|---|---|---|---|---|
 | `AddAndRemove_PersistToLocalSettings` | test method | 36 | 55 | **Remove** | Asserts the local key `Feature.IgnoredLocations` through the local double. T146 deletes the duplicate local read and calls the service instead; the store-backed behaviour is asserted by T137 |
-| `DefaultSeed_PopulatesTheDefaultIgnoredLocations` | test method | 24 | 33 | Re-point | Only the constructor plumbing changes (line 27); the assertion stays |
-| `PersistenceRoundTrip_SeedsFromStoredInsteadOfDefaults` | test method | 58 | 66 | Re-point | Seeds the local key at line 60; must seed the store seam instead |
+| `ViewModel_SettingsViewModelTests_ViewModel_SettingsViewModelTests_DefaultSeed_PopulatesTheDefaultIgnoredLocations` | test method | 24 | 33 | Re-point | Only the constructor plumbing changes (line 27); the assertion stays |
+| `ViewModel_SettingsViewModelTests_ViewModel_SettingsViewModelTests_PersistenceRoundTrip_SeedsFromStoredInsteadOfDefaults` | test method | 58 | 66 | Re-point | Seeds the local key at line 60; must seed the store seam instead |
 | `AddRejectsInvalidCode_WhenThePermissionIsNotHeld` | test method | 69 | 79 | Re-point | Line 73's comment and gate name the old `permission.settings.ignored_locations`; T146 moves the write gate to the new edit key |
 | `CanManageIgnoredLocations_FollowsThePermissionAndNothingElse` | test method | 82 | 97 | Re-point | Lines 89 and 94 use `PermissionKeys.SettingsIgnoredLocations`; the manage gate becomes `SettingsIgnoredLocationsEdit` under T146 |
 | `RecordingLocalSettingsService` | test double | 856 | 889 | Remove | Implements `ILocalSettingsService`; passed by the two `BuildViewModel` helpers |

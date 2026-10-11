@@ -14,7 +14,7 @@ namespace MTM_Waitlist.Tests.Module_Startup.ViewModels;
 public sealed class PasswordChangeViewModelTests
 {
     [TestMethod]
-    public void SubmitCommand_WhenNothingWasTyped_StatesItAndHandsNothingOn()
+    public void ViewModel_PasswordChangeViewModelTests_SubmitCommand_WhenNothingWasTypedStatesItAndHandsNothingOn()
     {
         // Arrange
         var outcome = new SignInOutcome();
@@ -31,7 +31,7 @@ public sealed class PasswordChangeViewModelTests
     }
 
     [TestMethod]
-    public void SubmitCommand_WhenThePasswordIsTooShort_StatesItAndHandsNothingOn()
+    public void ViewModel_PasswordChangeViewModelTests_SubmitCommand_WhenThePasswordIsTooShortStatesItAndHandsNothingOn()
     {
         // Arrange
         var outcome = new SignInOutcome();
@@ -46,7 +46,7 @@ public sealed class PasswordChangeViewModelTests
     }
 
     [TestMethod]
-    public void SubmitCommand_WhenTheTwoValuesDiffer_StatesItAndHandsNothingOn()
+    public void ViewModel_PasswordChangeViewModelTests_SubmitCommand_WhenTheTwoValuesDifferStatesItAndHandsNothingOn()
     {
         // Arrange
         var outcome = new SignInOutcome();
@@ -61,7 +61,7 @@ public sealed class PasswordChangeViewModelTests
     }
 
     [TestMethod]
-    public void SubmitCommand_WhenThePasswordIsAccepted_HoldsItAndRaisesTheChoice()
+    public void ViewModel_PasswordChangeViewModelTests_SubmitCommand_WhenThePasswordIsAcceptedHoldsItAndRaisesTheChoice()
     {
         // Arrange
         var outcome = new SignInOutcome();

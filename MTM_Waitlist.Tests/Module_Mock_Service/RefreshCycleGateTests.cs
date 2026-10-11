@@ -19,7 +19,7 @@ namespace MTM_Waitlist.Tests.Module_Mock_Service;
 public sealed class RefreshCycleGateTests
 {
     [TestMethod]
-    public async Task TryRunShapesAsync_WhileACycleIsRunning_RefusesTheSecondCallInsteadOfOverlapping()
+    public async Task Service_RefreshCycleGateTests_TryRunShapesAsync_WhileACycleIsRunningRefusesTheSecondCallInsteadOfOverlapping()
     {
         using var fixture = new EngineFixture();
         var shape = fixture.RefreshableShapes[0];
@@ -41,7 +41,7 @@ public sealed class RefreshCycleGateTests
     }
 
     [TestMethod]
-    public async Task TryRunShapesAsync_OnceTheCycleFinished_RunsAgain()
+    public async Task Service_RefreshCycleGateTests_TryRunShapesAsync_OnceTheCycleFinishedRunsAgain()
     {
         using var fixture = new EngineFixture();
         var shape = fixture.RefreshableShapes[0];
@@ -56,7 +56,7 @@ public sealed class RefreshCycleGateTests
     }
 
     [TestMethod]
-    public async Task TryRunShapesAsync_OnlyRunsTheRequestedShapes()
+    public async Task Service_RefreshCycleGateTests_TryRunShapesAsync_OnlyRunsTheRequestedShapes()
     {
         using var fixture = new EngineFixture();
 
@@ -72,7 +72,7 @@ public sealed class RefreshCycleGateTests
     }
 
     [TestMethod]
-    public async Task Recorder_PersistsEveryCompletedRun_SoLastRunStatusIsReal()
+    public async Task Service_RefreshCycleGateTests_Recorder_PersistsEveryCompletedRunSoLastRunStatusIsReal()
     {
         using var fixture = new EngineFixture();
         var shape = fixture.RefreshableShapes[0];
@@ -101,7 +101,7 @@ public sealed class RefreshCycleGateTests
     }
 
     [TestMethod]
-    public async Task Recorder_StopsRecordingOnceDisposed()
+    public async Task Service_RefreshCycleGateTests_Recorder_StopsRecordingOnceDisposed()
     {
         using var fixture = new EngineFixture();
         var shape = fixture.RefreshableShapes[0];

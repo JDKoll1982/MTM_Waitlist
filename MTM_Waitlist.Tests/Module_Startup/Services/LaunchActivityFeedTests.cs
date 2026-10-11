@@ -31,7 +31,7 @@ public sealed class LaunchActivityFeedTests
     };
 
     [TestMethod]
-    public void FeedSourceScope_CoversTheFeedSource()
+    public void Service_LaunchActivityFeedTests_FeedSourceScope_CoversTheFeedSource()
     {
         // A scan whose scope resolves to nothing finds nothing, so the structural check below would pass without
         // ever reading a file. This proves the scope reaches the feed before that check is believed.
@@ -43,7 +43,7 @@ public sealed class LaunchActivityFeedTests
     }
 
     [TestMethod]
-    public void Append_OneLineAfterAnother_KeepsTheOrderTheyHappened()
+    public void Service_LaunchActivityFeedTests_Append_OneLineAfterAnotherKeepsTheOrderTheyHappened()
     {
         // Arrange
         var feed = new LaunchActivityFeed();
@@ -61,7 +61,7 @@ public sealed class LaunchActivityFeedTests
     }
 
     [TestMethod]
-    public void Append_AnEntry_IsTheSameEntryTheReaderGetsBack()
+    public void Service_LaunchActivityFeedTests_Append_AnEntryIsTheSameEntryTheReaderGetsBack()
     {
         // Arrange
         var feed = new LaunchActivityFeed();
@@ -76,7 +76,7 @@ public sealed class LaunchActivityFeedTests
     }
 
     [TestMethod]
-    public void Append_LaterLines_NeverTakeAnEarlierLineAway()
+    public void Service_LaunchActivityFeedTests_Append_LaterLinesNeverTakeAnEarlierLineAway()
     {
         // Arrange
         var feed = new LaunchActivityFeed();
@@ -94,7 +94,7 @@ public sealed class LaunchActivityFeedTests
     }
 
     [TestMethod]
-    public void Entries_AreAReadOnlyView_CannotBeAddedToClearedOrShortened()
+    public void Service_LaunchActivityFeedTests_Entries_AreAReadOnlyViewCannotBeAddedToClearedOrShortened()
     {
         // Arrange
         var feed = new LaunchActivityFeed();
@@ -111,7 +111,7 @@ public sealed class LaunchActivityFeedTests
     }
 
     [TestMethod]
-    public void Append_EveryLine_RaisesEntryAppendedOnceInOrder()
+    public void Service_LaunchActivityFeedTests_Append_EveryLineRaisesEntryAppendedOnceInOrder()
     {
         // Arrange
         var feed = new LaunchActivityFeed();
@@ -128,7 +128,7 @@ public sealed class LaunchActivityFeedTests
     }
 
     [TestMethod]
-    public void FeedSource_HasNoMemberThatRemovesOrRewritesALine()
+    public void Service_LaunchActivityFeedTests_FeedSource_HasNoMemberThatRemovesOrRewritesALine()
     {
         // Arrange
         var patterns = new List<(string Description, string Pattern)>

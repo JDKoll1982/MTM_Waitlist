@@ -21,7 +21,7 @@ public sealed class ImageOverrideReadServiceTests
     }
 
     [TestMethod]
-    public async Task GetOverrideAsync_WhenRowExists_MapsEveryColumn()
+    public async Task Service_ImageOverrideReadServiceTests_GetOverrideAsync_WhenRowExistsMapsEveryColumn()
     {
         _helper.EnqueueQueryResult(FakeMySqlHelperServer.OverrideRow(
             "request_item", "abc-123", @"\\server\images\rt.png", id: 7, publicId: "11111111-1111-1111-1111-111111111111"));
@@ -43,7 +43,7 @@ public sealed class ImageOverrideReadServiceTests
     /// the artifact and the live server, not here.
     /// </summary>
     [TestMethod]
-    public async Task GetOverrideAsync_AsksTheProcedureForTheScopeItemKey()
+    public async Task Service_ImageOverrideReadServiceTests_GetOverrideAsync_AsksTheProcedureForTheScopeItemKey()
     {
         _helper.EnqueueEmptyQueryResult();
 
@@ -56,7 +56,7 @@ public sealed class ImageOverrideReadServiceTests
     }
 
     [TestMethod]
-    public async Task GetOverrideAsync_WhenNoRow_ReturnsNull()
+    public async Task Service_ImageOverrideReadServiceTests_GetOverrideAsync_WhenNoRowReturnsNull()
     {
         _helper.EnqueueEmptyQueryResult();
 
@@ -67,7 +67,7 @@ public sealed class ImageOverrideReadServiceTests
     [DataRow("request_item")]
     [DataRow("request_category")]
     [DataRow("work_center")]
-    public async Task GetOverrideAsync_AcceptsEveryValidScope(string scope)
+    public async Task Service_ImageOverrideReadServiceTests_GetOverrideAsync_AcceptsEveryValidScope(string scope)
     {
         _helper.EnqueueEmptyQueryResult();
 
@@ -77,21 +77,21 @@ public sealed class ImageOverrideReadServiceTests
     }
 
     [TestMethod]
-    public async Task GetOverrideAsync_WithUnknownScope_Throws()
+    public async Task Service_ImageOverrideReadServiceTests_GetOverrideAsync_WithUnknownScopeThrows()
     {
         await Assert.ThrowsExceptionAsync<ArgumentException>(
             () => _service.GetOverrideAsync("building", "1"));
     }
 
     [TestMethod]
-    public async Task GetOverrideAsync_WithEmptyScopeItemId_Throws()
+    public async Task Service_ImageOverrideReadServiceTests_GetOverrideAsync_WithEmptyScopeItemIdThrows()
     {
         await Assert.ThrowsExceptionAsync<ArgumentNullException>(
             () => _service.GetOverrideAsync("request_item", " "));
     }
 
     [TestMethod]
-    public async Task GetOverridesByScopeAsync_ReturnsEveryRow()
+    public async Task Service_ImageOverrideReadServiceTests_GetOverridesByScopeAsync_ReturnsEveryRow()
     {
         _helper.EnqueueQueryResult(
             FakeMySqlHelperServer.OverrideRow("work_center", "1", "a.png", id: 1),
@@ -104,7 +104,7 @@ public sealed class ImageOverrideReadServiceTests
     }
 
     [TestMethod]
-    public async Task HasOverrideAsync_ReflectsWhetherARowWasReturned()
+    public async Task Service_ImageOverrideReadServiceTests_HasOverrideAsync_ReflectsWhetherARowWasReturned()
     {
         _helper.EnqueueQueryResult(FakeMySqlHelperServer.OverrideRow("request_item", "abc", "a.png"));
         Assert.IsTrue(await _service.HasOverrideAsync("request_item", "abc"));
@@ -118,7 +118,7 @@ public sealed class ImageOverrideReadServiceTests
     /// stored-procedure invocation, and each one names the artifact that holds the statement.
     /// </summary>
     [TestMethod]
-    public async Task EveryRead_RoutesThroughItsProcedure_AndCarriesNoInlineStatement()
+    public async Task Service_ImageOverrideReadServiceTests_EveryRead_RoutesThroughItsProcedureAndCarriesNoInlineStatement()
     {
         _helper.EnqueueEmptyQueryResult();
         await _service.GetOverrideAsync("work_center", "1");
@@ -167,7 +167,7 @@ public sealed class ImageOverrideReadServiceTests
     /// is the reason this one read needed a procedure at all. It is a bound parameter now.
     /// </summary>
     [TestMethod]
-    public async Task GetRecentlyUpdatedOverridesAsync_BindsTheCap_InsteadOfInterpolatingIt()
+    public async Task Service_ImageOverrideReadServiceTests_GetRecentlyUpdatedOverridesAsync_BindsTheCapInsteadOfInterpolatingIt()
     {
         _helper.EnqueueEmptyQueryResult();
 
@@ -183,7 +183,7 @@ public sealed class ImageOverrideReadServiceTests
     /// procedure has to be proven wired.
     /// </summary>
     [TestMethod]
-    public async Task DetectOrphanedOverridesAsync_ChecksWorkCenterExistenceThroughItsProcedure()
+    public async Task Service_ImageOverrideReadServiceTests_DetectOrphanedOverridesAsync_ChecksWorkCenterExistenceThroughItsProcedure()
     {
         _helper.EnqueueQueryResult(FakeMySqlHelperServer.OverrideRow("work_center", "1", "a.png"));
         _helper.EnqueueEmptyQueryResult();

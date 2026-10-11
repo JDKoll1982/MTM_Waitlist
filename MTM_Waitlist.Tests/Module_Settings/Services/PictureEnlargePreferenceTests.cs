@@ -17,7 +17,7 @@ public sealed class PictureEnlargePreferenceTests
     private const long SignedInUserId = 7;
 
     [TestMethod]
-    public async Task LoadAsync_NothingStored_KeepsTheShippedDefaultOn()
+    public async Task Service_PictureEnlargePreferenceTests_LoadAsync_NothingStoredKeepsTheShippedDefaultOn()
     {
         var preference = Build(new FakeConfigSettingsValueService(), SignedInUserId);
 
@@ -27,7 +27,7 @@ public sealed class PictureEnlargePreferenceTests
     }
 
     [TestMethod]
-    public async Task LoadAsync_StoredOff_AnswersOff()
+    public async Task Service_PictureEnlargePreferenceTests_LoadAsync_StoredOffAnswersOff()
     {
         var stored = new FakeConfigSettingsValueService();
         stored.SetBool(ConfigSettingKeys.EnlargePicturesOnClick, false);
@@ -40,7 +40,7 @@ public sealed class PictureEnlargePreferenceTests
     }
 
     [TestMethod]
-    public async Task LoadAsync_StoreUnreachable_KeepsTheShippedDefaultOn()
+    public async Task Service_PictureEnlargePreferenceTests_LoadAsync_StoreUnreachableKeepsTheShippedDefaultOn()
     {
         var preference = Build(new UnreachableSettingsValueService(), SignedInUserId);
 
@@ -54,7 +54,7 @@ public sealed class PictureEnlargePreferenceTests
     /// same shape the user list's saved filter uses, and the reason two people sharing a computer can disagree.
     /// </summary>
     [TestMethod]
-    public async Task SetEnabledAsync_SignedInPerson_StoresAgainstThatAccount()
+    public async Task Service_PictureEnlargePreferenceTests_SetEnabledAsync_SignedInPersonStoresAgainstThatAccount()
     {
         var stored = new FakeConfigSettingsValueService();
         var preference = Build(stored, SignedInUserId);
@@ -73,7 +73,7 @@ public sealed class PictureEnlargePreferenceTests
     }
 
     [TestMethod]
-    public async Task SetEnabledAsync_StoreRefuses_StillAppliesForThisSession()
+    public async Task Service_PictureEnlargePreferenceTests_SetEnabledAsync_StoreRefusesStillAppliesForThisSession()
     {
         var preference = Build(new UnreachableSettingsValueService(), SignedInUserId);
 
@@ -87,7 +87,7 @@ public sealed class PictureEnlargePreferenceTests
     /// afterwards still gets their stored answer rather than the default.
     /// </summary>
     [TestMethod]
-    public async Task LoadAsync_NobodySignedIn_LeavesTheReadForLater()
+    public async Task Service_PictureEnlargePreferenceTests_LoadAsync_NobodySignedInLeavesTheReadForLater()
     {
         var stored = new FakeConfigSettingsValueService();
         stored.SetBool(ConfigSettingKeys.EnlargePicturesOnClick, false);

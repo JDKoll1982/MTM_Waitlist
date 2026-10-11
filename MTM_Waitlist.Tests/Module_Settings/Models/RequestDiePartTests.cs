@@ -11,7 +11,7 @@ namespace MTM_Waitlist.Tests.Module_Settings.Models;
 public sealed class RequestDiePartTests
 {
     [TestMethod]
-    public void Label_IsTheDieNumberAlone()
+    public void Model_RequestDiePartTests_Label_IsTheDieNumberAlone()
     {
         var die = new RequestDiePart { PartNumber = "FGT0002000", Location = "DIE SHOP" };
 
@@ -19,7 +19,7 @@ public sealed class RequestDiePartTests
     }
 
     [TestMethod]
-    public void Label_NeverCarriesTheLocation_WhateverTheJobRecords()
+    public void Model_RequestDiePartTests_Label_NeverCarriesTheLocationWhateverTheJobRecords()
     {
         // Where the die lives is a separate fact that the request page lists for itself (FR-057), so it must not be
         // folded into the name in any form: not hyphen-joined, not bracketed, and not as a dangling separator. An
@@ -33,7 +33,7 @@ public sealed class RequestDiePartTests
     }
 
     [TestMethod]
-    public void Label_TrimsTheNumber()
+    public void Model_RequestDiePartTests_Label_TrimsTheNumber()
     {
         var die = new RequestDiePart { PartNumber = "  FGT0002000  ", Location = "  DIE SHOP  " };
 
@@ -41,7 +41,7 @@ public sealed class RequestDiePartTests
     }
 
     [TestMethod]
-    public void ComposeLabel_YieldsNothingWithoutADieNumber()
+    public void Model_RequestDiePartTests_ComposeLabel_YieldsNothingWithoutADieNumber()
     {
         // A row with no die number is not usable as a die: there is nothing to show the handler.
         foreach (var number in new[] { null, string.Empty, "   " })
@@ -54,7 +54,7 @@ public sealed class RequestDiePartTests
     }
 
     [TestMethod]
-    public void ComposeLabel_IsTheSameRuleTheValueUses()
+    public void Model_RequestDiePartTests_ComposeLabel_IsTheSameRuleTheValueUses()
     {
         // One rule, so a card built from a stored request and one built from the live job agree.
         Assert.AreEqual(
@@ -63,7 +63,7 @@ public sealed class RequestDiePartTests
     }
 
     [TestMethod]
-    public void Summary_ReportsWhatTheDieHas_RatherThanNothing()
+    public void Model_RequestDiePartTests_Summary_ReportsWhatTheDieHasRatherThanNothing()
     {
         var described = new RequestDiePart { PartNumber = "FGT0002000", Location = "DIE SHOP", Description = "Die 9003-A" };
         var locationOnly = new RequestDiePart { PartNumber = "FGT0002000", Location = "DIE SHOP" };

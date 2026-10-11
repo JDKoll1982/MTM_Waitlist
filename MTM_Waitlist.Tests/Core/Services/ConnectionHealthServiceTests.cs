@@ -10,7 +10,7 @@ namespace MTM_Waitlist.Tests.Core.Services;
 public sealed class ConnectionHealthServiceTests
 {
     [TestMethod]
-    public async Task CheckAsync_UnconfiguredSource_ReturnsUnreachable()
+    public async Task Service_ConnectionHealthServiceTests_CheckAsync_UnconfiguredSourceReturnsUnreachable()
     {
         var service = new ConnectionHealthService(new StubProvider());
 
@@ -22,7 +22,7 @@ public sealed class ConnectionHealthServiceTests
     }
 
     [TestMethod]
-    public void GetLastKnown_BeforeAnyCheck_ReturnsUnknown()
+    public void Service_ConnectionHealthServiceTests_GetLastKnown_BeforeAnyCheckReturnsUnknown()
     {
         var service = new ConnectionHealthService(new StubProvider());
 
@@ -32,7 +32,7 @@ public sealed class ConnectionHealthServiceTests
     }
 
     [TestMethod]
-    public async Task CheckAllAsync_ReturnsBothSources_WithUnreachableWhenNotConfigured()
+    public async Task Service_ConnectionHealthServiceTests_CheckAllAsync_ReturnsBothSourcesWithUnreachableWhenNotConfigured()
     {
         var service = new ConnectionHealthService(new StubProvider());
 

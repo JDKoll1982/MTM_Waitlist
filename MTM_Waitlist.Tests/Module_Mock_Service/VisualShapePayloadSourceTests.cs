@@ -21,7 +21,7 @@ namespace MTM_Waitlist.Tests.Module_Mock_Service;
 public sealed class VisualShapePayloadSourceTests
 {
     [TestMethod]
-    public async Task BuildRefreshPayloadAsync_ReadsTheShapesPopulationScript_NotItsPerKeyScript()
+    public async Task Service_VisualShapePayloadSourceTests_BuildRefreshPayloadAsync_ReadsTheShapesPopulationScriptNotItsPerKeyScript()
     {
         var executor = new StubExecutor(Row(("NormalizedWorkOrder", "WO-1"), ("PartNumber", "P-1"), ("Description", "Ring"), ("WorkCenter", "WC-1")));
         var source = new VisualShapePayloadSource(executor, NullLogger<VisualShapePayloadSource>.Instance);
@@ -35,7 +35,7 @@ public sealed class VisualShapePayloadSourceTests
     }
 
     [TestMethod]
-    public async Task BuildRefreshPayloadAsync_KeysThePayloadByInputsThenOutputs_InCatalogOrder()
+    public async Task Service_VisualShapePayloadSourceTests_BuildRefreshPayloadAsync_KeysThePayloadByInputsThenOutputsInCatalogOrder()
     {
         // Deliberately supply the columns in a different order than the catalog declares.
         var executor = new StubExecutor(Row(
@@ -57,7 +57,7 @@ public sealed class VisualShapePayloadSourceTests
     }
 
     [TestMethod]
-    public async Task BuildRefreshPayloadAsync_EncodesABitColumnAsOneOrZero()
+    public async Task Service_VisualShapePayloadSourceTests_BuildRefreshPayloadAsync_EncodesABitColumnAsOneOrZero()
     {
         // The procedures read a flag with CAST(JSON_UNQUOTE(...) AS SIGNED), where a JSON boolean would
         // become 0 — so a true flag must be serialized as the number 1.
@@ -82,7 +82,7 @@ public sealed class VisualShapePayloadSourceTests
     }
 
     [TestMethod]
-    public async Task BuildRefreshPayloadAsync_AFlagThatIsFalse_IsZero()
+    public async Task Service_VisualShapePayloadSourceTests_BuildRefreshPayloadAsync_AFlagThatIsFalseIsZero()
     {
         var executor = new StubExecutor(Row(
             ("WorkOrder", "WO-1"),
@@ -100,7 +100,7 @@ public sealed class VisualShapePayloadSourceTests
     }
 
     [TestMethod]
-    public async Task BuildRefreshPayloadAsync_WhenAColumnIsMissing_ReportsASchemaMismatch()
+    public async Task Service_VisualShapePayloadSourceTests_BuildRefreshPayloadAsync_WhenAColumnIsMissingReportsASchemaMismatch()
     {
         var executor = new StubExecutor(Row(("NormalizedWorkOrder", "WO-1"), ("PartNumber", "P-1"), ("Description", "Ring")));
         var source = new VisualShapePayloadSource(executor, NullLogger<VisualShapePayloadSource>.Instance);
@@ -112,7 +112,7 @@ public sealed class VisualShapePayloadSourceTests
     }
 
     [TestMethod]
-    public async Task BuildRefreshPayloadAsync_WhenTheSourceAddsAColumn_ReportsASchemaMismatch()
+    public async Task Service_VisualShapePayloadSourceTests_BuildRefreshPayloadAsync_WhenTheSourceAddsAColumnReportsASchemaMismatch()
     {
         var executor = new StubExecutor(Row(
             ("NormalizedWorkOrder", "WO-1"),
@@ -130,7 +130,7 @@ public sealed class VisualShapePayloadSourceTests
     }
 
     [TestMethod]
-    public async Task BuildRefreshPayloadAsync_WithNoRows_ProducesAnEmptyArray()
+    public async Task Service_VisualShapePayloadSourceTests_BuildRefreshPayloadAsync_WithNoRowsProducesAnEmptyArray()
     {
         var executor = new StubExecutor();
         var source = new VisualShapePayloadSource(executor, NullLogger<VisualShapePayloadSource>.Instance);
@@ -141,7 +141,7 @@ public sealed class VisualShapePayloadSourceTests
     }
 
     [TestMethod]
-    public async Task BuildRefreshPayloadAsync_WhenTheSourceIsUnreachable_RaisesUnreachable()
+    public async Task Service_VisualShapePayloadSourceTests_BuildRefreshPayloadAsync_WhenTheSourceIsUnreachableRaisesUnreachable()
     {
         var executor = new StubExecutor { Unreachable = "connection timed out" };
         var source = new VisualShapePayloadSource(executor, NullLogger<VisualShapePayloadSource>.Instance);
@@ -153,7 +153,7 @@ public sealed class VisualShapePayloadSourceTests
     }
 
     [TestMethod]
-    public async Task BuildRefreshPayloadAsync_WhenTheQueryGenuinelyFails_SurfacesItInsteadOfSkipping()
+    public async Task Service_VisualShapePayloadSourceTests_BuildRefreshPayloadAsync_WhenTheQueryGenuinelyFailsSurfacesItInsteadOfSkipping()
     {
         var executor = new StubExecutor { Failure = "Invalid column name 'PART_ID'" };
         var source = new VisualShapePayloadSource(executor, NullLogger<VisualShapePayloadSource>.Instance);
@@ -164,7 +164,7 @@ public sealed class VisualShapePayloadSourceTests
     }
 
     [TestMethod]
-    public async Task BuildRefreshPayloadAsync_WhenAShapeHasNoPopulationRead_ReportsASchemaMismatch()
+    public async Task Service_VisualShapePayloadSourceTests_BuildRefreshPayloadAsync_WhenAShapeHasNoPopulationReadReportsASchemaMismatch()
     {
         var executor = new StubExecutor(Row(("NormalizedWorkOrder", "WO-1"), ("PartNumber", "P-1"), ("Description", "Ring"), ("WorkCenter", "WC-1")));
         var source = new VisualShapePayloadSource(executor, NullLogger<VisualShapePayloadSource>.Instance);

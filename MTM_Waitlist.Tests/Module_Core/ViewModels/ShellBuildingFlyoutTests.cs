@@ -18,7 +18,7 @@ namespace MTM_Waitlist.Tests.Module_Core.ViewModels;
 public sealed class ShellBuildingFlyoutTests
 {
     [TestMethod]
-    public void TheShell_BuildsTheBuildingListAsCards()
+    public void ViewModel_ShellBuildingFlyoutTests_TheShell_BuildsTheBuildingListAsCards()
     {
         var markup = Markup();
 
@@ -30,7 +30,7 @@ public sealed class ShellBuildingFlyoutTests
     }
 
     [TestMethod]
-    public void TheShell_NoLongerOffersADropDownForTheBuilding()
+    public void ViewModel_ShellBuildingFlyoutTests_TheShell_NoLongerOffersADropDownForTheBuilding()
     {
         var markup = Markup();
 
@@ -41,7 +41,7 @@ public sealed class ShellBuildingFlyoutTests
     }
 
     [TestMethod]
-    public void TheBuildingInEffect_IsNotAmongTheCards()
+    public void ViewModel_ShellBuildingFlyoutTests_TheBuildingInEffect_IsNotAmongTheCards()
     {
         var source = ViewModelSource();
 
@@ -54,7 +54,7 @@ public sealed class ShellBuildingFlyoutTests
     }
 
     [TestMethod]
-    public void ABuildingWithNoPicture_IsStillOfferedAsASelectableCard()
+    public void ViewModel_ShellBuildingFlyoutTests_ABuildingWithNoPicture_IsStillOfferedAsASelectableCard()
     {
         var card = new BuildingCardOption("Expo Drive", "ShellPage_FacilityCard");
 

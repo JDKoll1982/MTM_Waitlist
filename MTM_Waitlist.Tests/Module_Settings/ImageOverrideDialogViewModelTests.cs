@@ -77,7 +77,7 @@ public sealed class ImageOverrideDialogViewModelTests
         viewModel.Groups.SelectMany(g => g.Rows);
 
     [TestMethod]
-    public async Task Dialog_HydratesExistingOverridesIntoTheEditableColumn()
+    public async Task ViewModel_ImageOverrideDialogViewModelTests_Dialog_HydratesExistingOverridesIntoTheEditableColumn()
     {
         var first = RequestItemCatalog.Items[0];
         _readService.AddOverride("request_item", first.Id, @"\\share\custom.png");
@@ -92,7 +92,7 @@ public sealed class ImageOverrideDialogViewModelTests
     }
 
     [TestMethod]
-    public async Task SearchFiltersRowsByDisplayName()
+    public async Task ViewModel_ImageOverrideDialogViewModelTests_SearchFiltersRowsByDisplayName()
     {
         var viewModel = CreateItemViewModel();
         await viewModel.LoadAsync();
@@ -103,7 +103,7 @@ public sealed class ImageOverrideDialogViewModelTests
     }
 
     [TestMethod]
-    public async Task CustomOnlyToggleHidesRowsWithoutAnOverride()
+    public async Task ViewModel_ImageOverrideDialogViewModelTests_CustomOnlyToggleHidesRowsWithoutAnOverride()
     {
         var first = RequestItemCatalog.Items[0];
         _readService.AddOverride("request_item", first.Id, "custom.png");
@@ -118,7 +118,7 @@ public sealed class ImageOverrideDialogViewModelTests
     }
 
     [TestMethod]
-    public async Task ResetRowClearsTheOverrideButLeavesItUncommitted()
+    public async Task ViewModel_ImageOverrideDialogViewModelTests_ResetRowClearsTheOverrideButLeavesItUncommitted()
     {
         var first = RequestItemCatalog.Items[0];
         _readService.AddOverride("request_item", first.Id, "custom.png");
@@ -135,7 +135,7 @@ public sealed class ImageOverrideDialogViewModelTests
     }
 
     [TestMethod]
-    public async Task ResetAllClearsEveryRow()
+    public async Task ViewModel_ImageOverrideDialogViewModelTests_ResetAllClearsEveryRow()
     {
         foreach (var item in RequestItemCatalog.Items)
         {
@@ -152,7 +152,7 @@ public sealed class ImageOverrideDialogViewModelTests
     }
 
     [TestMethod]
-    public async Task CancelDiscardsEveryPendingEdit()
+    public async Task ViewModel_ImageOverrideDialogViewModelTests_CancelDiscardsEveryPendingEdit()
     {
         var first = RequestItemCatalog.Items[0];
         _readService.AddOverride("request_item", first.Id, "original.png");
@@ -171,7 +171,7 @@ public sealed class ImageOverrideDialogViewModelTests
     }
 
     [TestMethod]
-    public async Task SaveWithNoChangesWritesNothing()
+    public async Task ViewModel_ImageOverrideDialogViewModelTests_SaveWithNoChangesWritesNothing()
     {
         var viewModel = CreateItemViewModel();
         await viewModel.LoadAsync();
@@ -181,7 +181,7 @@ public sealed class ImageOverrideDialogViewModelTests
     }
 
     [TestMethod]
-    public async Task SaveWhenShareIsUnreachableWritesNothingAndReportsTheError()
+    public async Task ViewModel_ImageOverrideDialogViewModelTests_SaveWhenShareIsUnreachableWritesNothingAndReportsTheError()
     {
         _resolver.SharedFolderPath = @"\\mtm-nonexistent-host-for-tests\share";
 
@@ -200,7 +200,7 @@ public sealed class ImageOverrideDialogViewModelTests
     }
 
     [TestMethod]
-    public async Task SaveCopiesTheImageAndPersistsTheStoredPath()
+    public async Task ViewModel_ImageOverrideDialogViewModelTests_SaveCopiesTheImageAndPersistsTheStoredPath()
     {
         var source = Path.Combine(_workingDirectory, "source.png");
         TestPngWriter.Write(source, 64, 64);
@@ -225,7 +225,7 @@ public sealed class ImageOverrideDialogViewModelTests
     }
 
     [TestMethod]
-    public async Task SaveRejectsANonSquareImageAndKeepsTheDialogOpen()
+    public async Task ViewModel_ImageOverrideDialogViewModelTests_SaveRejectsANonSquareImageAndKeepsTheDialogOpen()
     {
         var source = Path.Combine(_workingDirectory, "wide.png");
         TestPngWriter.Write(source, 128, 64);
@@ -239,7 +239,7 @@ public sealed class ImageOverrideDialogViewModelTests
     }
 
     [TestMethod]
-    public async Task WorkCenterDialog_GroupsRowsByBuilding()
+    public async Task ViewModel_ImageOverrideDialogViewModelTests_WorkCenterDialog_GroupsRowsByBuilding()
     {
         _catalog.Catalog = new WorkCenterCatalogResult
         {
@@ -261,7 +261,7 @@ public sealed class ImageOverrideDialogViewModelTests
     }
 
     [TestMethod]
-    public async Task WorkCenterDialog_WhenTheCatalogIsUnavailable_ShowsAnErrorAndDisablesSave()
+    public async Task ViewModel_ImageOverrideDialogViewModelTests_WorkCenterDialog_WhenTheCatalogIsUnavailableShowsAnErrorAndDisablesSave()
     {
         // No rows queued, so the catalog lookup yields nothing and the loader reports failure.
         _catalog.Catalog = new WorkCenterCatalogResult { ComputerName = "test" };
@@ -275,7 +275,7 @@ public sealed class ImageOverrideDialogViewModelTests
     }
 
     [TestMethod]
-    public async Task WorkCenterDialog_DetectsOverridesForWorkCentersThatNoLongerExist()
+    public async Task ViewModel_ImageOverrideDialogViewModelTests_WorkCenterDialog_DetectsOverridesForWorkCentersThatNoLongerExist()
     {
         _catalog.Catalog = new WorkCenterCatalogResult
         {

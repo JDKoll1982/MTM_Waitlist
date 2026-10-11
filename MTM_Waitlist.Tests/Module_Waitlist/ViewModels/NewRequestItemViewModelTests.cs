@@ -20,7 +20,7 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.ViewModels;
 public sealed class NewRequestItemViewModelTests
 {
     [TestMethod]
-    public void OnNavigatedTo_BindsVisibleItemsInCatalogOrder()
+    public void ViewModel_NewRequestItemViewModelTests_OnNavigatedTo_BindsVisibleItemsInCatalogOrder()
     {
         var viewModel = CreateViewModel(availability: RequestJobPartAvailability.All);
         var state = CreateState(RequestCategory.Pickup, RequestJobPartAvailability.All);
@@ -37,7 +37,7 @@ public sealed class NewRequestItemViewModelTests
     }
 
     [TestMethod]
-    public void OnNavigatedTo_BindsTheCategoryItWasGiven()
+    public void ViewModel_NewRequestItemViewModelTests_OnNavigatedTo_BindsTheCategoryItWasGiven()
     {
         var viewModel = CreateViewModel(availability: RequestJobPartAvailability.All);
 
@@ -52,7 +52,7 @@ public sealed class NewRequestItemViewModelTests
     }
 
     [TestMethod]
-    public void SelectItem_WithNoConfigurationRow_StopsTheFlowWithAPlainLanguageReport()
+    public void ViewModel_NewRequestItemViewModelTests_SelectItem_WithNoConfigurationRowStopsTheFlowWithAPlainLanguageReport()
     {
         var navigation = new RecordingNavigationService();
         var configuredOnly = RequestItemCatalog.Items
@@ -78,7 +78,7 @@ public sealed class NewRequestItemViewModelTests
     }
 
     [TestMethod]
-    public void SelectItem_WithAConfigurationRow_CapturesTheItemAndItsAnswerRequirement()
+    public void ViewModel_NewRequestItemViewModelTests_SelectItem_WithAConfigurationRowCapturesTheItemAndItsAnswerRequirement()
     {
         var viewModel = CreateViewModel(availability: RequestJobPartAvailability.All);
         var state = CreateState(RequestCategory.Other, RequestJobPartAvailability.All);
@@ -97,7 +97,7 @@ public sealed class NewRequestItemViewModelTests
     }
 
     [TestMethod]
-    public void SelectItem_WithAUsableConfiguration_AdvancesTheFlowImmediately()
+    public void ViewModel_NewRequestItemViewModelTests_SelectItem_WithAUsableConfigurationAdvancesTheFlowImmediately()
     {
         var navigation = new RecordingNavigationService();
         var viewModel = CreateViewModel(navigation: navigation, availability: RequestJobPartAvailability.All);
@@ -111,7 +111,7 @@ public sealed class NewRequestItemViewModelTests
     }
 
     [TestMethod]
-    public void ItemStep_DeclaresNoContinueCommand()
+    public void ViewModel_NewRequestItemViewModelTests_ItemStep_DeclaresNoContinueCommand()
     {
         // The step has exactly one way out. A Continue path reappearing on the view model would put the redundant
         // action back in front of the person the moment something binds it again.

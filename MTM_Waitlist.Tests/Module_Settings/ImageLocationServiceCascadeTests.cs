@@ -58,7 +58,7 @@ public sealed class ImageLocationServiceCascadeTests
     //    Category, which is what the second read below is keyed on.
 
     [TestMethod]
-    public async Task ResolveRequestItemImagePathAsync_KeysTheOverrideByItemCode()
+    public async Task Service_ImageLocationServiceCascadeTests_ResolveRequestItemImagePathAsync_KeysTheOverrideByItemCode()
     {
         var overridePath = CreateImageFile("item-override.png");
         _overrides.AddOverride("request_item", "pickup-coil", overridePath);
@@ -77,7 +77,7 @@ public sealed class ImageLocationServiceCascadeTests
     /// is away (FR-042).
     /// </summary>
     [TestMethod]
-    public async Task ResolveRequestItemImagePathAsync_WithTheShareUnreachable_UsesTheCopyHeldOnThisComputer()
+    public async Task Service_ImageLocationServiceCascadeTests_ResolveRequestItemImagePathAsync_WithTheShareUnreachableUsesTheCopyHeldOnThisComputer()
     {
         var cacheRoot = Path.Combine(Path.GetTempPath(), "mtm-image-tests", Guid.NewGuid().ToString("N"));
         var cachedCopy = Path.Combine(cacheRoot, "waitlist", "Waitlist", "request_item", "pickup-coil.png");
@@ -118,7 +118,7 @@ public sealed class ImageLocationServiceCascadeTests
     /// stop a launch.
     /// </summary>
     [TestMethod]
-    public async Task ResolveRequestItemImagePathAsync_WithNeitherTheShareNorACopy_AnswersTheNoPictureState()
+    public async Task Service_ImageLocationServiceCascadeTests_ResolveRequestItemImagePathAsync_WithNeitherTheShareNorACopyAnswersTheNoPictureState()
     {
         ImageCachePaths.SetCacheRoot(Path.Combine(Path.GetTempPath(), "mtm-image-tests", Guid.NewGuid().ToString("N")));
 
@@ -143,7 +143,7 @@ public sealed class ImageLocationServiceCascadeTests
     /// The Item's own picture wins over its Category's family: the cascade is a preference order, not a merge.
     /// </summary>
     [TestMethod]
-    public async Task ResolveRequestItemImagePathAsync_ItemOverrideWinsOverTheCategoryFamily()
+    public async Task Service_ImageLocationServiceCascadeTests_ResolveRequestItemImagePathAsync_ItemOverrideWinsOverTheCategoryFamily()
     {
         var itemPath = CreateImageFile("item-override.png");
         var familyPath = CreateImageFile("family-override.png");
@@ -160,7 +160,7 @@ public sealed class ImageLocationServiceCascadeTests
     /// which is the four-member Category vocabulary rather than the retired eight-entry request-type one.
     /// </summary>
     [TestMethod]
-    public async Task ResolveRequestItemImagePathAsync_WithNoItemOverride_InheritsTheCategoryFamilyImage()
+    public async Task Service_ImageLocationServiceCascadeTests_ResolveRequestItemImagePathAsync_WithNoItemOverrideInheritsTheCategoryFamilyImage()
     {
         var familyPath = CreateImageFile("family-override.png");
         _overrides.AddOverride("request_category", "Pickup", familyPath);
@@ -178,7 +178,7 @@ public sealed class ImageLocationServiceCascadeTests
     /// catalog, so a Deliver Item cannot be handed the Pickup family.
     /// </summary>
     [TestMethod]
-    public async Task ResolveRequestItemImagePathAsync_InheritsOnlyItsOwnCategoryFamily()
+    public async Task Service_ImageLocationServiceCascadeTests_ResolveRequestItemImagePathAsync_InheritsOnlyItsOwnCategoryFamily()
     {
         var pickupFamilyPath = CreateImageFile("pickup-family.png");
         _overrides.AddOverride("request_category", "Pickup", pickupFamilyPath);
@@ -193,7 +193,7 @@ public sealed class ImageLocationServiceCascadeTests
     /// card refuses to take as a picture (FR-021).
     /// </summary>
     [TestMethod]
-    public async Task ResolveRequestItemImagePathAsync_WithNoOverrideAnywhere_ReturnsTheRequestItemPlaceholder()
+    public async Task Service_ImageLocationServiceCascadeTests_ResolveRequestItemImagePathAsync_WithNoOverrideAnywhereReturnsTheRequestItemPlaceholder()
     {
         var resolved = await _service.ResolveRequestItemImagePathAsync("pickup-coil");
 
@@ -209,7 +209,7 @@ public sealed class ImageLocationServiceCascadeTests
     }
 
     [TestMethod]
-    public async Task ResolveRequestItemImagePathAsync_WhenTheOverrideFileIsMissing_FallsBackToThePlaceholder()
+    public async Task Service_ImageLocationServiceCascadeTests_ResolveRequestItemImagePathAsync_WhenTheOverrideFileIsMissingFallsBackToThePlaceholder()
     {
         _overrides.AddOverride("request_item", "pickup-coil", Path.Combine(_workingDirectory, "deleted.png"));
 
@@ -223,7 +223,7 @@ public sealed class ImageLocationServiceCascadeTests
     /// family overrides are all present, which is what makes this a check rather than a coincidence.
     /// </summary>
     [TestMethod]
-    public async Task ResolveRequestItemImagePathAsync_WithAnUncataloguedItem_DoesNotBorrowAFamily()
+    public async Task Service_ImageLocationServiceCascadeTests_ResolveRequestItemImagePathAsync_WithAnUncataloguedItemDoesNotBorrowAFamily()
     {
         foreach (var category in new[] { "Pickup", "Deliver", "Assist", "Other" })
         {
@@ -239,7 +239,7 @@ public sealed class ImageLocationServiceCascadeTests
     }
 
     [TestMethod]
-    public async Task ResolveRequestItemImagePathAsync_WithAnEmptyItemCode_Throws()
+    public async Task Service_ImageLocationServiceCascadeTests_ResolveRequestItemImagePathAsync_WithAnEmptyItemCodeThrows()
     {
         await Assert.ThrowsExceptionAsync<ArgumentException>(
             () => _service.ResolveRequestItemImagePathAsync("   "));
@@ -253,14 +253,14 @@ public sealed class ImageLocationServiceCascadeTests
         };
 
     [TestMethod]
-    public async Task ResolveWorkCenterImagePathAsync_WithNonNumericId_Throws()
+    public async Task Service_ImageLocationServiceCascadeTests_ResolveWorkCenterImagePathAsync_WithNonNumericIdThrows()
     {
         await Assert.ThrowsExceptionAsync<ArgumentException>(
             () => _service.ResolveWorkCenterImagePathAsync("abc"));
     }
 
     [TestMethod]
-    public async Task ResolveRequestItemImagePathAsync_BeforeInitialization_Throws()
+    public async Task Service_ImageLocationServiceCascadeTests_ResolveRequestItemImagePathAsync_BeforeInitializationThrows()
     {
         using var uninitialised = new ImageLocationService(
             NullLogger<ImageLocationService>.Instance,
@@ -274,7 +274,7 @@ public sealed class ImageLocationServiceCascadeTests
     }
 
     [TestMethod]
-    public async Task RaiseImageLocationUpdated_NotifiesSubscribers()
+    public async Task Service_ImageLocationServiceCascadeTests_RaiseImageLocationUpdated_NotifiesSubscribers()
     {
         ImageLocationChangedEventArgs? received = null;
         using var subscription = _service.SubscribeToImageLocationChanges(args => received = args);
@@ -288,7 +288,7 @@ public sealed class ImageLocationServiceCascadeTests
     }
 
     [TestMethod]
-    public void RaiseImageLocationUpdated_AfterDisposal_DoesNotNotify()
+    public void Service_ImageLocationServiceCascadeTests_RaiseImageLocationUpdated_AfterDisposalDoesNotNotify()
     {
         var notifications = 0;
         var subscription = _service.SubscribeToImageLocationChanges(_ => notifications++);

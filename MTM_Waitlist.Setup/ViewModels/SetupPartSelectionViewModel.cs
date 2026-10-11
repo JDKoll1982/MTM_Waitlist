@@ -109,7 +109,7 @@ public partial class SetupPartSelectionViewModel : ObservableRecipient, INavigat
     {
         if (SelectedPart is null)
         {
-            StatusMessage = "Setup_Part.Validation.SelectPart".GetLocalized();
+            StatusMessage = "Setup_Part_Validation.SelectPart".GetLocalized();
             return;
         }
 

@@ -17,7 +17,7 @@ namespace MTM_Waitlist.Tests.Module_Startup.Services;
 public sealed class ExceptionFingerprintTests
 {
     [TestMethod]
-    public void ComputeFingerprint_WhenTheSameFaultIsRaisedTwice_ProducesTheSameValue()
+    public void Service_ExceptionFingerprintTests_ComputeFingerprint_WhenTheSameFaultIsRaisedTwiceProducesTheSameValue()
     {
         // Arrange: the same fault raised on two machines, at two times, with two values.
         var first = ExceptionDetailSerializer.ComputeFingerprint(
@@ -37,7 +37,7 @@ public sealed class ExceptionFingerprintTests
     }
 
     [TestMethod]
-    public void ComputeFingerprint_WhenTheMessageDiffersInMoreThanItsValues_ProducesADifferentValue()
+    public void Service_ExceptionFingerprintTests_ComputeFingerprint_WhenTheMessageDiffersInMoreThanItsValuesProducesADifferentValue()
     {
         // Arrange
         var refusedName = ExceptionDetailSerializer.ComputeFingerprint(
@@ -56,7 +56,7 @@ public sealed class ExceptionFingerprintTests
     }
 
     [TestMethod]
-    public void ComputeFingerprint_WhenOnlyTheModuleOrTheTypeDiffers_ProducesADifferentValue()
+    public void Service_ExceptionFingerprintTests_ComputeFingerprint_WhenOnlyTheModuleOrTheTypeDiffersProducesADifferentValue()
     {
         // Arrange
         const string message = "The store did not answer";
@@ -70,7 +70,7 @@ public sealed class ExceptionFingerprintTests
     }
 
     [TestMethod]
-    public void ComputeFingerprint_WhenAParameterValueIsInTheMessage_DoesNotCarryTheValue()
+    public void Service_ExceptionFingerprintTests_ComputeFingerprint_WhenAParameterValueIsInTheMessageDoesNotCarryTheValue()
     {
         // Arrange: the same fault twice, differing only in the value a provider put in the message.
         var first = ExceptionDetailSerializer.ComputeFingerprint(
@@ -89,14 +89,14 @@ public sealed class ExceptionFingerprintTests
     }
 
     [TestMethod]
-    public void ComputeFingerprint_WhenThereIsNoFault_CarriesNone()
+    public void Service_ExceptionFingerprintTests_ComputeFingerprint_WhenThereIsNoFaultCarriesNone()
     {
         // Assert: an entry raised without an exception is grouped with nothing (`contracts/logging-contract.md` §1.2).
         Assert.IsNull(ExceptionDetailSerializer.ComputeFingerprint(null, "Startup", "launch", "the launch carried on"));
     }
 
     [TestMethod]
-    public void RedactMessage_WhenNoParameterIsPresent_LeavesTheMessageWhole()
+    public void Service_ExceptionFingerprintTests_RedactMessage_WhenNoParameterIsPresentLeavesTheMessageWhole()
     {
         // Arrange
         const string message = "The store did not answer";
@@ -106,7 +106,7 @@ public sealed class ExceptionFingerprintTests
     }
 
     [TestMethod]
-    public void RedactMessage_WhenAParameterCarriesAValue_CutsAtTheEqualsAndNamesTheParameter()
+    public void Service_ExceptionFingerprintTests_RedactMessage_WhenAParameterCarriesAValueCutsAtTheEqualsAndNamesTheParameter()
     {
         // Arrange
         const string message = "Duplicate entry for @p_display_name=Shop floor station rejected";

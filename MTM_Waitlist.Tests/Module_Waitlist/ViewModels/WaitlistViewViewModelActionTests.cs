@@ -55,7 +55,7 @@ public sealed class WaitlistViewViewModelActionTests
     [DataRow(HandlerRole, "Pending", "requester", true, false, true, DisplayName = "the requester who is also a handler may accept and cancel")]
     [DataRow(NonHandlerRole, "Pending", "requester", false, false, true, DisplayName = "a non-handler requester may still withdraw their own waiting request")]
     [DataRow(NonHandlerRole, "Accepted", "requester", false, false, false, DisplayName = "a requester may not cancel once the request is taken by someone else")]
-    public async Task Gates_MatchThePolicyForEveryViewerAndState(
+    public async Task ViewModel_WaitlistViewViewModelActionTests_Gates_MatchThePolicyForEveryViewerAndState(
         string role,
         string status,
         string assignee,
@@ -100,7 +100,7 @@ public sealed class WaitlistViewViewModelActionTests
     [DataRow(HandlerRole, "Accepted", "self", DisplayName = "request taken by the viewer")]
     [DataRow(HandlerRole, "Accepted", "other", DisplayName = "request taken by someone else")]
     [DataRow(NonHandlerRole, "Pending", "requester", DisplayName = "own waiting request as a non-handler")]
-    public async Task Gates_EveryTrueFlagCarriesACommandAndNoFlagCarriesNone(string role, string status, string assignee)
+    public async Task ViewModel_WaitlistViewViewModelActionTests_Gates_EveryTrueFlagCarriesACommandAndNoFlagCarriesNone(string role, string status, string assignee)
     {
         var viewerEmployeeNumber = assignee == "requester" ? RequesterEmployeeNumber : HandlerEmployeeNumber;
         var assigneeNumber = assignee switch
@@ -136,7 +136,7 @@ public sealed class WaitlistViewViewModelActionTests
     }
 
     [TestMethod]
-    public async Task Card_ShowsCancelWheneverCompleteIsOffered()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_Card_ShowsCancelWheneverCompleteIsOffered()
     {
         // The pairing the card is designed around: once the viewer has claimed a request, refusing it is as
         // available as finishing it.
@@ -155,7 +155,7 @@ public sealed class WaitlistViewViewModelActionTests
     // ── The give-back surface (FR-047, superseding `action-contracts.md` C7's "Release — not drawn") ──
 
     [TestMethod]
-    public async Task GiveBack_IsOfferedToTheAssigneeAndCarriesTheListsOwnReleaseCommand()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_GiveBack_IsOfferedToTheAssigneeAndCarriesTheListsOwnReleaseCommand()
     {
         // The command is read off the view model rather than assumed by name: [RelayCommand] strips the
         // trailing "Async" from ReleaseRequestAsync, so the generated member is ReleaseRequestCommand and a
@@ -182,7 +182,7 @@ public sealed class WaitlistViewViewModelActionTests
     }
 
     [TestMethod]
-    public async Task GiveBack_ReachesTheReleasePathOnceAsTheSignedInHandler()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_GiveBack_ReachesTheReleasePathOnceAsTheSignedInHandler()
     {
         var request = BuildRequest(TakenByViewerRequestId, "Accepted", assignee: HandlerEmployeeNumber, RequesterEmployeeNumber);
         var service = new RecordingRequestService(request);
@@ -200,7 +200,7 @@ public sealed class WaitlistViewViewModelActionTests
     }
 
     [TestMethod]
-    public async Task GiveBack_IsNotOfferedToAViewerTheGateExcludes()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_GiveBack_IsNotOfferedToAViewerTheGateExcludes()
     {
         // The card offers only what the service would allow: a handler looking at somebody else's claim, and a
         // viewer who is not a handler at all, are both offered no Give back.
@@ -226,7 +226,7 @@ public sealed class WaitlistViewViewModelActionTests
     // ── G5: the commands reach the service with the signed-in identity ───────────────────────────────
 
     [TestMethod]
-    public async Task Complete_CallsTheServiceWithTheSignedInAssignee()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_Complete_CallsTheServiceWithTheSignedInAssignee()
     {
         var request = BuildRequest(TakenByViewerRequestId, "Accepted", assignee: HandlerEmployeeNumber, RequesterEmployeeNumber);
         var service = new RecordingRequestService(request);
@@ -245,7 +245,7 @@ public sealed class WaitlistViewViewModelActionTests
     }
 
     [TestMethod]
-    public async Task CompleteAndRelease_AreNotOfferedToAHandlerTheRequestIsNotAssignedTo()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_CompleteAndRelease_AreNotOfferedToAHandlerTheRequestIsNotAssignedTo()
     {
         var request = BuildRequest(TakenByOtherRequestId, "Accepted", assignee: OtherHandlerEmployeeNumber, RequesterEmployeeNumber);
         var service = new RecordingRequestService(request);
@@ -263,7 +263,7 @@ public sealed class WaitlistViewViewModelActionTests
     // ── G7: the list leads with the most urgent work ──────────────────────────────────────────────────
 
     [TestMethod]
-    public async Task List_LeadsWithTheMostOverdueRowThenTheLeastRemainingTime()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_List_LeadsWithTheMostOverdueRowThenTheLeastRemainingTime()
     {
         var overdueId = Guid.Parse("a0000000-0000-0000-0000-000000000001");
         var soonId = Guid.Parse("a0000000-0000-0000-0000-000000000002");
@@ -295,7 +295,7 @@ public sealed class WaitlistViewViewModelActionTests
     }
 
     [TestMethod]
-    public async Task List_OrderNeverContradictsTheCountdownOnEachCard()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_List_OrderNeverContradictsTheCountdownOnEachCard()
     {
         var a = Guid.Parse("b0000000-0000-0000-0000-000000000001");
         var b = Guid.Parse("b0000000-0000-0000-0000-000000000002");
@@ -326,7 +326,7 @@ public sealed class WaitlistViewViewModelActionTests
     // ── US3: the order the viewer remembers (FR-010, FR-011, FR-012) ─────────────────────────────
 
     [TestMethod]
-    public async Task List_NothingRemembered_LeadsWithTheMostUrgentRow()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_List_NothingRememberedLeadsWithTheMostUrgentRow()
     {
         var overdueId = Guid.Parse("c0000000-0000-0000-0000-000000000001");
         var calmId = Guid.Parse("c0000000-0000-0000-0000-000000000002");
@@ -347,7 +347,7 @@ public sealed class WaitlistViewViewModelActionTests
     }
 
     [TestMethod]
-    public async Task List_AppliesTheRememberedOrder_OnLoad()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_List_AppliesTheRememberedOrderOnLoad()
     {
         var overdueId = Guid.Parse("d0000000-0000-0000-0000-000000000001");
         var calmId = Guid.Parse("d0000000-0000-0000-0000-000000000002");
@@ -367,7 +367,7 @@ public sealed class WaitlistViewViewModelActionTests
     }
 
     [TestMethod]
-    public async Task ApplySortOrder_SwitchingTheOrder_KeepsEveryAffordanceAndTheOverdueMarking()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_ApplySortOrder_SwitchingTheOrderKeepsEveryAffordanceAndTheOverdueMarking()
     {
         var overdueId = Guid.Parse("e0000000-0000-0000-0000-000000000001");
         var claimedId = Guid.Parse("e0000000-0000-0000-0000-000000000002");
@@ -404,7 +404,7 @@ public sealed class WaitlistViewViewModelActionTests
     }
 
     [TestMethod]
-    public async Task ApplySortOrder_ChoosingTheOrderAlreadyInForce_LeavesTheRowsInPlace()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_ApplySortOrder_ChoosingTheOrderAlreadyInForceLeavesTheRowsInPlace()
     {
         var request = BuildRequest(PendingRequestId, "Pending", null, RequesterEmployeeNumber);
         var viewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, new RecordingRequestService(request));
@@ -418,7 +418,7 @@ public sealed class WaitlistViewViewModelActionTests
     }
 
     [TestMethod]
-    public async Task Accept_CallsTheServiceWithTheSignedInHandlerAndTheRowsRequestId()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_Accept_CallsTheServiceWithTheSignedInHandlerAndTheRowsRequestId()
     {
         var request = BuildRequest(PendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
         var service = new RecordingRequestService(request);
@@ -434,7 +434,7 @@ public sealed class WaitlistViewViewModelActionTests
     }
 
     [TestMethod]
-    public async Task Accept_WhenTheStoreRefuses_ReportsItAndWarnsTheHandler()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_Accept_WhenTheStoreRefusesReportsItAndWarnsTheHandler()
     {
         var request = BuildRequest(PendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
         var service = new RecordingRequestService(request) { AcceptResult = null };
@@ -446,7 +446,7 @@ public sealed class WaitlistViewViewModelActionTests
 
         Assert.IsTrue(viewModel.HasActionRefusalMessage, "A refused accept that says nothing is the failure mode this feature removes.");
         Assert.AreEqual(
-            "Waitlist_Action.Refused.AcceptTaken".GetLocalized(),
+            "Waitlist_Action_Refused.AcceptTaken".GetLocalized(),
             viewModel.ActionRefusalMessage,
             "The refusal must come from the resource mechanism rather than being a literal written into the view model.");
         Assert.AreEqual(1, prompt.WarningCallCount, "A refused claim must warn the handler, not just set a message they may never see.");
@@ -454,7 +454,7 @@ public sealed class WaitlistViewViewModelActionTests
     }
 
     [TestMethod]
-    public async Task Accept_WhenTheRequestLeftTheList_TellsTheHandlerToChooseSomethingElse()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_Accept_WhenTheRequestLeftTheListTellsTheHandlerToChooseSomethingElse()
     {
         // The store has no such request at all, so "another handler took it" would be the wrong thing to say.
         var request = BuildRequest(PendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
@@ -470,14 +470,14 @@ public sealed class WaitlistViewViewModelActionTests
         await viewModel.AcceptRequestCommand.ExecuteAsync(SingleRow(viewModel)).ConfigureAwait(false);
 
         Assert.AreEqual(
-            "Waitlist_Action.Refused.AcceptGone".GetLocalized(),
+            "Waitlist_Action_Refused.AcceptGone".GetLocalized(),
             viewModel.ActionRefusalMessage,
             "A request that is gone must be reported as gone, not as taken by someone else.");
         Assert.AreEqual(1, prompt.WarningCallCount, "The handler must be warned either way.");
     }
 
     [TestMethod]
-    public async Task Accept_TwoHandlersRaceForTheSameRequest_FirstWinsAndSecondIsWarned()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_Accept_TwoHandlersRaceForTheSameRequestFirstWinsAndSecondIsWarned()
     {
         // One shared store, two handlers, both looking at the same available request. This is the only test
         // where the store arbitrates, so the winner is decided by the store and not by either screen.
@@ -511,7 +511,7 @@ public sealed class WaitlistViewViewModelActionTests
         Assert.AreEqual(0, winnerPrompt.WarningCallCount, "The winner must not be warned.");
 
         Assert.AreEqual(
-            "Waitlist_Action.Refused.AcceptTaken".GetLocalized(),
+            "Waitlist_Action_Refused.AcceptTaken".GetLocalized(),
             loser.ActionRefusalMessage,
             "The handler who lost the race must be told the request was already taken.");
         Assert.AreEqual(1, loserPrompt.WarningCallCount, "The handler who lost the race must be warned in a dialog they have to acknowledge.");
@@ -522,7 +522,7 @@ public sealed class WaitlistViewViewModelActionTests
     }
 
     [TestMethod]
-    public void LostClaimWarning_SaysAnotherHandlerTookItAndToChooseSomethingElse()
+    public void ViewModel_WaitlistViewViewModelActionTests_LostClaimWarning_SaysAnotherHandlerTookItAndToChooseSomethingElse()
     {
         // The wording is a product requirement, not an implementation detail: it is pinned here so a later
         // edit to the copy has to be deliberate. The dialog and the inline refusal share this one string.
@@ -537,7 +537,7 @@ public sealed class WaitlistViewViewModelActionTests
         var document = System.Xml.Linq.XDocument.Load(resourcePath);
         var value = document
             .Descendants("data")
-            .Where(data => (string?)data.Attribute("name") == "Waitlist_Action.Refused.AcceptTaken")
+            .Where(data => (string?)data.Attribute("name") == "Waitlist_Action_Refused.AcceptTaken")
             .Select(data => (string?)data.Element("value") ?? string.Empty)
             .FirstOrDefault();
 
@@ -551,7 +551,7 @@ public sealed class WaitlistViewViewModelActionTests
     }
 
     [TestMethod]
-    public async Task Accept_WhenTheViewerIsNotAHandler_IsNotOfferedAndNeverCallsTheService()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_Accept_WhenTheViewerIsNotAHandlerIsNotOfferedAndNeverCallsTheService()
     {
         var request = BuildRequest(PendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
         var service = new RecordingRequestService(request);
@@ -566,7 +566,7 @@ public sealed class WaitlistViewViewModelActionTests
     // ── Requester cancel: confirmation and reason come first ─────────────────────────────────────────
 
     [TestMethod]
-    public async Task Cancel_CallsTheServiceWithTheRequesterIdentityAndThePromptedReason()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_Cancel_CallsTheServiceWithTheRequesterIdentityAndThePromptedReason()
     {
         var request = BuildRequest(PendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
         var service = new RecordingRequestService(request);
@@ -585,7 +585,7 @@ public sealed class WaitlistViewViewModelActionTests
     }
 
     [TestMethod]
-    public async Task Cancel_WhenThePromptIsDismissed_PerformsNoActionAndSaysNothing()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_Cancel_WhenThePromptIsDismissedPerformsNoActionAndSaysNothing()
     {
         var request = BuildRequest(PendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
         var service = new RecordingRequestService(request);
@@ -601,7 +601,7 @@ public sealed class WaitlistViewViewModelActionTests
     }
 
     [TestMethod]
-    public async Task Cancel_WithAnEmptyReason_IsStillAConfirmedCancellation()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_Cancel_WithAnEmptyReasonIsStillAConfirmedCancellation()
     {
         var request = BuildRequest(PendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
         var service = new RecordingRequestService(request);
@@ -616,7 +616,7 @@ public sealed class WaitlistViewViewModelActionTests
     }
 
     [TestMethod]
-    public async Task Cancel_WhenTheStoreRefuses_ReportsItInPlainLanguage()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_Cancel_WhenTheStoreRefusesReportsItInPlainLanguage()
     {
         var request = BuildRequest(PendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
         var service = new RecordingRequestService(request)
@@ -630,7 +630,7 @@ public sealed class WaitlistViewViewModelActionTests
         await viewModel.CancelRequestCommand.ExecuteAsync(SingleRow(viewModel)).ConfigureAwait(false);
 
         Assert.AreEqual(
-            "Waitlist_Action.Refused.Cancel".GetLocalized(),
+            "Waitlist_Action_Refused.Cancel".GetLocalized(),
             viewModel.ActionRefusalMessage,
             "A refused cancellation must say why rather than appearing to work.");
     }
@@ -767,7 +767,7 @@ public sealed class WaitlistViewViewModelActionTests
     // ── The new-message marker answers to messages, not to lifecycle changes ──────────────────────────
 
     [TestMethod]
-    public async Task Card_LifecycleChangeOnly_ShowsNoMessageMarker()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_Card_LifecycleChangeOnlyShowsNoMessageMarker()
     {
         // Job created, accepted, completed and canceled are things the system recorded. Flagging them turned
         // every routine transition into an unread message, which is exactly what the floor complained about.
@@ -785,7 +785,7 @@ public sealed class WaitlistViewViewModelActionTests
     }
 
     [TestMethod]
-    public async Task Card_MessageTheViewerHasNotRead_ShowsTheMarker()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_Card_MessageTheViewerHasNotReadShowsTheMarker()
     {
         var written = Now.AddMinutes(-5);
         var request = BuildRequest(PendingRequestId, "Pending", null, RequesterEmployeeNumber, lastMessageUtc: written);
@@ -803,7 +803,7 @@ public sealed class WaitlistViewViewModelActionTests
     }
 
     [TestMethod]
-    public async Task Card_MessageTheViewerHasAlreadyRead_ShowsNoMarker()
+    public async Task ViewModel_WaitlistViewViewModelActionTests_Card_MessageTheViewerHasAlreadyReadShowsNoMarker()
     {
         var written = Now.AddMinutes(-5);
         var request = BuildRequest(PendingRequestId, "Pending", null, RequesterEmployeeNumber, lastMessageUtc: written);

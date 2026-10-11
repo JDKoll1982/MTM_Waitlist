@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Startup.Models;
 using MTM_Waitlist.Module_Startup.Services;
 using MTM_Waitlist.Module_Startup.ViewModels;
 
@@ -64,6 +65,10 @@ internal sealed partial class SignInPage : Page, ILaunchStageSurface
 
         DrawStages();
 
+        // The people who signed in here before are read for the stage that shows them, and a store that cannot
+        // answer simply leaves the form on its own (FR-048, FR-015).
+        _ = ViewModel.LoadPreviousPeopleAsync();
+
         Unloaded += OnUnloaded;
     }
 
@@ -90,9 +95,17 @@ internal sealed partial class SignInPage : Page, ILaunchStageSurface
     private async void OnSignInClick(object sender, RoutedEventArgs e)
         => await ViewModel.EnterAsync(SignInField.Credential, CredentialBox.Password).ConfigureAwait(true);
 
-    /// <summary>Signs the person in with the sign-in this machine remembers for them, where it can read it.</summary>
-    private async void OnUseRememberedSignInClick(object sender, RoutedEventArgs e)
-        => await ViewModel.UseRememberedSignInCommand.ExecuteAsync(null).ConfigureAwait(true);
+    /// <summary>
+    /// Takes one of the people offered beside the form and fills in the user name only, so the PIN is still to be
+    /// typed (FR-014, FR-048).
+    /// </summary>
+    private void OnPreviousPersonClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: PreviousSignIn person })
+        {
+            ViewModel.ChoosePreviousPersonCommand.Execute(person);
+        }
+    }
 
     /// <summary>Hands the new PIN the person chose to the launch, which writes it.</summary>
     private async void OnSubmitPasswordClick(object sender, RoutedEventArgs e)

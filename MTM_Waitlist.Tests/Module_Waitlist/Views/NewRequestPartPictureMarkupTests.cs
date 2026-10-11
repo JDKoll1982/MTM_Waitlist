@@ -27,7 +27,7 @@ public sealed class NewRequestPartPictureMarkupTests
 
     /// <summary>The die card is no longer text only: it draws the die's own picture.</summary>
     [TestMethod]
-    public void DieCard_DrawsThePartsPicture()
+    public void UI_NewRequestPartPictureMarkupTests_DieCard_DrawsThePartsPicture()
     {
         var image = ImageBoundTo("ImagePath", "NewRequestDiePage.xaml");
 
@@ -39,7 +39,7 @@ public sealed class NewRequestPartPictureMarkupTests
 
     /// <summary>The confirmation step draws the part being asked for, with its picture.</summary>
     [TestMethod]
-    public void ConfirmationStep_DrawsThePartWithItsPicture()
+    public void UI_NewRequestPartPictureMarkupTests_ConfirmationStep_DrawsThePartWithItsPicture()
     {
         var image = ImageBoundTo("PartPicturePath", "NewRequestSummaryPage.xaml");
 
@@ -55,7 +55,7 @@ public sealed class NewRequestPartPictureMarkupTests
     /// <summary>The die card draws its picture as a fixed-size thumbnail. A frame bounded only by Min* is measured
     /// against the picture's own natural size, so a large picture is drawn full size inside the card.</summary>
     [TestMethod]
-    public void DieCard_DrawsThePictureInAFixedSizeThumbnail()
+    public void UI_NewRequestPartPictureMarkupTests_DieCard_DrawsThePictureInAFixedSizeThumbnail()
     {
         AssertPictureFrameIsBounded("NewRequestDiePage.xaml");
     }
@@ -66,7 +66,7 @@ public sealed class NewRequestPartPictureMarkupTests
     /// number aside.
     /// </summary>
     [TestMethod]
-    public void ConfirmationStep_DrawsThePictureInAFixedSizeThumbnail()
+    public void UI_NewRequestPartPictureMarkupTests_ConfirmationStep_DrawsThePictureInAFixedSizeThumbnail()
     {
         AssertPictureFrameIsBounded("NewRequestSummaryPage.xaml");
     }
@@ -76,7 +76,7 @@ public sealed class NewRequestPartPictureMarkupTests
     /// shared no-image picture rather than an empty source. A surface added without one fails here (FR-014).
     /// </summary>
     [TestMethod]
-    public void EveryWizardPartSurface_FallsBackToTheOneSharedPlaceholder()
+    public void UI_NewRequestPartPictureMarkupTests_EveryWizardPartSurface_FallsBackToTheOneSharedPlaceholder()
     {
         Assert.AreEqual(
             ImagePicturePolicy.NoImagePath,

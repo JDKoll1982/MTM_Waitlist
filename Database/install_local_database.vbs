@@ -201,8 +201,7 @@ appScripts = Array( _
     "Validation\startup_schema\validate.sql", _
     "Validation\settings_schema\validate.sql", _
     "Validation\user_management_schema\validate.sql", _
-    "Validation\user_active_sessions_schema\validate.sql", _
-    "Validation\auth_remembered_sign_ins_schema\validate.sql" _
+    "Validation\user_active_sessions_schema\validate.sql" _
 )
 
 ' Dependency order for the cache database (see the header of

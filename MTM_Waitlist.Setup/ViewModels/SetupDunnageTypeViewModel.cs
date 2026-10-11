@@ -85,7 +85,7 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
 
     /// <summary>Inline notification shown next to the scrap picker when no decision has been made.</summary>
     public string ScrapSelectionMessage => LocalizeOrDefault(
-        "Setup_DunnagePair.ScrapSelection.Message",
+        "Setup_DunnagePair_ScrapSelection.Message",
         "Choose a scrap type or select \"No Scrap\" to continue.");
 
     public string SelectedScrapType
@@ -116,7 +116,7 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
     public string ProgressText => "Setup_Progress.Step4".GetLocalized();
 
     public string CurrentSelectionSummary => State.SelectedDunnageParts.Count == 0
-        ? LocalizeOrDefault("Setup_Dunnage.Selection.None", "No dunnage selected")
+        ? LocalizeOrDefault("Setup_Dunnage_Selection.None", "No dunnage selected")
         : State.SelectedDunnageSummary;
 
     public SetupDunnageTypeViewModel(

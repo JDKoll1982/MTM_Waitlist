@@ -16,7 +16,7 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.Helpers;
 public sealed class RequestStatusPaletteTests
 {
     [TestMethod]
-    public void EveryLifecycleStateGetsItsOwnRole()
+    public void Helper_RequestStatusPaletteTests_EveryLifecycleStateGetsItsOwnRole()
     {
         Assert.AreEqual(RequestStatusBadgeRole.Waiting, RequestStatusPalette.RoleFor("Pending"));
         Assert.AreEqual(RequestStatusBadgeRole.InProgress, RequestStatusPalette.RoleFor("Accepted"));
@@ -25,7 +25,7 @@ public sealed class RequestStatusPaletteTests
     }
 
     [TestMethod]
-    public void BothSpellingsOfCancelledReachTheSameRole()
+    public void Helper_RequestStatusPaletteTests_BothSpellingsOfCancelledReachTheSameRole()
     {
         // The store holds one L; the English copy uses two. A colour that depended on the spelling would be a
         // behaviour the data can silently change.
@@ -36,7 +36,7 @@ public sealed class RequestStatusPaletteTests
     }
 
     [TestMethod]
-    public void StatusesAreRecognisedRegardlessOfCaseOrSurroundingSpace()
+    public void Helper_RequestStatusPaletteTests_StatusesAreRecognisedRegardlessOfCaseOrSurroundingSpace()
     {
         foreach (var spelling in new[] { "pending", "PENDING", "  Pending  " })
         {
@@ -48,7 +48,7 @@ public sealed class RequestStatusPaletteTests
     }
 
     [TestMethod]
-    public void NoStatusMeansNoBadge()
+    public void Helper_RequestStatusPaletteTests_NoStatusMeansNoBadge()
     {
         // The card hides the badge on HasStatusBadge, so an unrecognised status must not paint one either — a
         // transparent pill behind white text would be an empty shape.
@@ -66,7 +66,7 @@ public sealed class RequestStatusPaletteTests
     }
 
     [TestMethod]
-    public void NoTwoStatusesShareAColour()
+    public void Helper_RequestStatusPaletteTests_NoTwoStatusesShareAColour()
     {
         // The point of the change: four states have to be tellable apart at a glance, so no two may share a
         // colour, and the transport states must not be near-duplicates either.
@@ -91,7 +91,7 @@ public sealed class RequestStatusPaletteTests
     }
 
     [TestMethod]
-    public void EveryStatusBadgeIsReadable()
+    public void Helper_RequestStatusPaletteTests_EveryStatusBadgeIsReadable()
     {
         // This is why the badge does not use the SystemFillColor* theme tokens despite their being the obvious
         // choice: those are built to carry a dark glyph (FCE100 caution yellow among them), so white text on
@@ -109,7 +109,7 @@ public sealed class RequestStatusPaletteTests
     }
 
     [TestMethod]
-    public void TheBadgeTextIsNotPaintedPerStatus_SoEveryRoleSharesOneForeground()
+    public void Helper_RequestStatusPaletteTests_TheBadgeTextIsNotPaintedPerStatus_SoEveryRoleSharesOneForeground()
     {
         // A per-status foreground would be a second thing to keep in step with the backgrounds. One white is
         // enough because the backgrounds are chosen around it, which the contrast test above holds them to.

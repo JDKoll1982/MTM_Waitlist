@@ -41,7 +41,7 @@ public sealed class ShellViewModelTests
     [DataTestMethod]
     [DataRow("ShellPage_CurrentUserButton", DisplayName = "the badge in the header template")]
     [DataRow("ShellPage_CurrentUserButtonDefault", DisplayName = "the badge in the live (Default) header template")]
-    public void TheSignedInBadge_OffersSignOut(string badgeAutomationId)
+    public void ViewModel_ShellViewModelTests_TheSignedInBadge_OffersSignOut(string badgeAutomationId)
     {
         var badge = BadgeMarkup(badgeAutomationId);
 
@@ -63,7 +63,7 @@ public sealed class ShellViewModelTests
     }
 
     [TestMethod]
-    public void TheSignedInBadge_CarriesAnAutomationId_SoTheEntryCanBeAddressed()
+    public void ViewModel_ShellViewModelTests_TheSignedInBadge_CarriesAnAutomationIdSoTheEntryCanBeAddressed()
     {
         // The UI-automation recipe addresses controls by AutomationId; a renamed one silently breaks the
         // sign-out gate in tasks.md T138.
@@ -78,7 +78,7 @@ public sealed class ShellViewModelTests
     // ── Choosing it invokes the sign-out path (FR-034) ──────────────────────────────────────────────────
 
     [TestMethod]
-    public void SignOut_ReachesTheSignOutService_AndDoesNotMerelyClearTheDisplayedName()
+    public void ViewModel_ShellViewModelTests_SignOut_ReachesTheSignOutServiceAndDoesNotMerelyClearTheDisplayedName()
     {
         var source = ReadSource(ShellViewModelPath);
         var command = SignOutCommandBody(source);
@@ -98,7 +98,7 @@ public sealed class ShellViewModelTests
     }
 
     [TestMethod]
-    public void SignOut_ReportsARefusedRelaunch_InPlainLanguage()
+    public void ViewModel_ShellViewModelTests_SignOut_ReportsARefusedRelaunchInPlainLanguage()
     {
         var source = ReadSource(ShellViewModelPath);
         var command = SignOutCommandBody(source);
@@ -128,7 +128,7 @@ public sealed class ShellViewModelTests
     // ── The service is registered and named by the resource mechanism ───────────────────────────────────
 
     [TestMethod]
-    public void TheSignOutService_IsRegisteredInTheCompositionRoot()
+    public void ViewModel_ShellViewModelTests_TheSignOutService_IsRegisteredInTheCompositionRoot()
     {
         // The rebuilt sign-out service is the startup module's, so its registration lives with the module rather
         // than in the app's own service extensions: the retired IAppProcessRestarter and ISignOutService entries
@@ -143,7 +143,7 @@ public sealed class ShellViewModelTests
     [DataRow("Shell_SignOut.Label", DisplayName = "the Sign out label")]
     [DataRow("Shell_SignOut.Tooltip", DisplayName = "the Sign out tooltip")]
     [DataRow("Shell_SignOut.RestartFailed", DisplayName = "the refused-relaunch report")]
-    public void EveryStringThisCapabilityShows_ComesFromTheResourceMechanism(string key)
+    public void ViewModel_ShellViewModelTests_EveryStringThisCapabilityShows_ComesFromTheResourceMechanism(string key)
     {
         StringAssert.Contains(
             ReadSource(ResourcesPath),
@@ -154,7 +154,7 @@ public sealed class ShellViewModelTests
     // ── The badge is keyed on the role code through the one lookup (FR-105, FR-107) ────────────────────
 
     [TestMethod]
-    public void TheBadge_TakesItsGlyphAndColourFromTheRoleBadgeLookup()
+    public void ViewModel_ShellViewModelTests_TheBadge_TakesItsGlyphAndColourFromTheRoleBadgeLookup()
     {
         StringAssert.Contains(
             ReadSource(ShellViewModelPath),
@@ -169,7 +169,7 @@ public sealed class ShellViewModelTests
     [DataRow("\"quality inspector\"")]
     [DataRow("Setup Tech")]
     [DataRow("\"material handler\"")]
-    public void TheBadge_HoldsNoBranchForTheRetiredVocabularyOrForDisplayNames(string retired)
+    public void ViewModel_ShellViewModelTests_TheBadge_HoldsNoBranchForTheRetiredVocabularyOrForDisplayNames(string retired)
     {
         // The old lookup matched display names, which is why five of the eight roles fell to the grey default and
         // why the retired vocabulary survived. Both are gone: the switch arms moved into RoleBadgeCatalog, which

@@ -93,7 +93,7 @@ public sealed class ConfigImagesLocationsIntegrationTests
     }
 
     [TestMethod]
-    public async Task CreateThenRead_RoundTripsTheOverride()
+    public async Task Database_ConfigImagesLocationsIntegrationTests_CreateThenRead_RoundTripsTheOverride()
     {
         var created = await _writeService.CreateOverrideAsync("request_item", _scopeItemId, @"\\share\images\rt.png");
         Assert.IsTrue(created.Success, created.ErrorMessage);
@@ -109,7 +109,7 @@ public sealed class ConfigImagesLocationsIntegrationTests
     }
 
     [TestMethod]
-    public async Task CreateTwice_IsRejectedByTheUniqueScopeItemKey()
+    public async Task Database_ConfigImagesLocationsIntegrationTests_CreateTwice_IsRejectedByTheUniqueScopeItemKey()
     {
         var first = await _writeService.CreateOverrideAsync("request_item", _scopeItemId, "first.png");
         Assert.IsTrue(first.Success, first.ErrorMessage);
@@ -128,7 +128,7 @@ public sealed class ConfigImagesLocationsIntegrationTests
     }
 
     [TestMethod]
-    public async Task TheSameScopeItemIdIsAllowedUnderADifferentScope()
+    public async Task Database_ConfigImagesLocationsIntegrationTests_TheSameScopeItemIdIsAllowedUnderADifferentScope()
     {
         var asRequestType = await _writeService.CreateOverrideAsync("request_item", _scopeItemId, "rt.png");
         var asSubtype = await _writeService.CreateOverrideAsync("request_category", _scopeItemId, "st.png");
@@ -141,7 +141,7 @@ public sealed class ConfigImagesLocationsIntegrationTests
     }
 
     [TestMethod]
-    public async Task UpdateOverride_PersistsTheNewPath()
+    public async Task Database_ConfigImagesLocationsIntegrationTests_UpdateOverride_PersistsTheNewPath()
     {
         await _writeService.CreateOverrideAsync("work_center", _scopeItemId, "old.png");
 
@@ -153,7 +153,7 @@ public sealed class ConfigImagesLocationsIntegrationTests
     }
 
     [TestMethod]
-    public async Task DeleteOverride_SoftDeletesSoTheReadPathStopsReturningIt()
+    public async Task Database_ConfigImagesLocationsIntegrationTests_DeleteOverride_SoftDeletesSoTheReadPathStopsReturningIt()
     {
         await _writeService.CreateOverrideAsync("work_center", _scopeItemId, "wc.png");
 
@@ -172,7 +172,7 @@ public sealed class ConfigImagesLocationsIntegrationTests
     }
 
     [TestMethod]
-    public async Task CreateAfterDelete_ReactivatesTheExistingRow()
+    public async Task Database_ConfigImagesLocationsIntegrationTests_CreateAfterDelete_ReactivatesTheExistingRow()
     {
         await _writeService.CreateOverrideAsync("work_center", _scopeItemId, "first.png");
         await _writeService.DeleteOverrideAsync("work_center", _scopeItemId);
@@ -194,7 +194,7 @@ public sealed class ConfigImagesLocationsIntegrationTests
     }
 
     [TestMethod]
-    public async Task DeleteOverride_WhenNothingExists_ReturnsNotFound()
+    public async Task Database_ConfigImagesLocationsIntegrationTests_DeleteOverride_WhenNothingExistsReturnsNotFound()
     {
         var result = await _writeService.DeleteOverrideAsync("work_center", _scopeItemId);
 
@@ -203,7 +203,7 @@ public sealed class ConfigImagesLocationsIntegrationTests
     }
 
     [TestMethod]
-    public async Task GetOverridesByScopeAsync_IncludesTheCreatedRow()
+    public async Task Database_ConfigImagesLocationsIntegrationTests_GetOverridesByScopeAsync_IncludesTheCreatedRow()
     {
         await _writeService.CreateOverrideAsync("request_category", _scopeItemId, "st.png");
 

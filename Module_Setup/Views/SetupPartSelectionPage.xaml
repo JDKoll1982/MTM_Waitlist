@@ -17,7 +17,7 @@
 
         <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}">
             <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind ViewModel.State.NormalizedWorkOrder, Mode=OneWay}" />
-            <TextBlock x:Uid="Setup_Part.FoundPartsLabel" Style="{StaticResource SetupPageTitleStyle}" Text="Matching parts" />
+            <TextBlock x:Uid="Setup_Part_FoundPartsLabel" Style="{StaticResource SetupPageTitleStyle}" Text="Matching parts" />
             <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" TextWrapping="Wrap" />
         </StackPanel>
 
@@ -66,8 +66,8 @@
         </ListView>
 
         <StackPanel Grid.Row="2" Style="{StaticResource SetupActionBarStyle}">
-            <Button AutomationProperties.AutomationId="SetupPartSelectionPage_BackButton" x:Uid="Setup_Action.Back" Content="Back" Command="{x:Bind ViewModel.BackCommand}" />
-            <Button AutomationProperties.AutomationId="SetupPartSelectionPage_ContinueButton" x:Uid="Setup_Action.Continue" Content="Continue" Command="{x:Bind ViewModel.ContinueCommand}" />
+            <Button AutomationProperties.AutomationId="SetupPartSelectionPage_BackButton" x:Uid="Setup_Action_Back" Content="Back" Command="{x:Bind ViewModel.BackCommand}" />
+            <Button AutomationProperties.AutomationId="SetupPartSelectionPage_ContinueButton" x:Uid="Setup_Action_Continue" Content="Continue" Command="{x:Bind ViewModel.ContinueCommand}" />
         </StackPanel>
     </Grid>
 </Page>

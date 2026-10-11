@@ -127,10 +127,10 @@ public class NavigationViewService : INavigationViewService
 
         var dialog = new ContentDialog
         {
-            Title = LocalizeOrDefault("Setup_Navigation.LeaveSetup.Title", "Leave Work Center Setup?"),
-            Content = LocalizeOrDefault("Setup_Navigation.LeaveSetup.Message", "All unsaved setup data will be lost. Continue?"),
-            PrimaryButtonText = LocalizeOrDefault("Setup_Navigation.LeaveSetup.Confirm", "Yes"),
-            CloseButtonText = LocalizeOrDefault("Setup_Navigation.LeaveSetup.Cancel", "No"),
+            Title = LocalizeOrDefault("Setup_Navigation_LeaveSetup.Title", "Leave Work Center Setup?"),
+            Content = LocalizeOrDefault("Setup_Navigation_LeaveSetup.Message", "All unsaved setup data will be lost. Continue?"),
+            PrimaryButtonText = LocalizeOrDefault("Setup_Navigation_LeaveSetup.Confirm", "Yes"),
+            CloseButtonText = LocalizeOrDefault("Setup_Navigation_LeaveSetup.Cancel", "No"),
             DefaultButton = ContentDialogButton.Close,
             XamlRoot = sender.XamlRoot,
         };

@@ -11,7 +11,7 @@ namespace MTM_Waitlist.Tests.Core.Services;
 public sealed class NewRequestAlertNotifierTests
 {
     [TestMethod]
-    public async Task Notify_WhenToggleOnAndPackaged_ShowsToastWithDeepLink()
+    public async Task Service_NewRequestAlertNotifierTests_Notify_WhenToggleOnAndPackagedShowsToastWithDeepLink()
     {
         var preferences = new InMemoryScopedPreferenceStore();
         preferences.SeedFlag(NewRequestAlertService.SettingKeyName, PreferenceScope.Person, true);
@@ -33,7 +33,7 @@ public sealed class NewRequestAlertNotifierTests
     }
 
     [TestMethod]
-    public async Task Notify_WhenToggleOff_ShowsNothing()
+    public async Task Service_NewRequestAlertNotifierTests_Notify_WhenToggleOffShowsNothing()
     {
         var preferences = new InMemoryScopedPreferenceStore(); // toggle absent -> OFF
         var notifications = new RecordingNotificationService();
@@ -48,7 +48,7 @@ public sealed class NewRequestAlertNotifierTests
     }
 
     [TestMethod]
-    public async Task Notify_WhenUnpackaged_ShowsNothingEvenWhenToggleOn()
+    public async Task Service_NewRequestAlertNotifierTests_Notify_WhenUnpackagedShowsNothingEvenWhenToggleOn()
     {
         var preferences = new InMemoryScopedPreferenceStore();
         preferences.SeedFlag(NewRequestAlertService.SettingKeyName, PreferenceScope.Person, true);
@@ -64,7 +64,7 @@ public sealed class NewRequestAlertNotifierTests
     }
 
     [TestMethod]
-    public void BuildToastXml_EmbedsEscapedLaunchArguments()
+    public void Service_NewRequestAlertNotifierTests_BuildToastXml_EmbedsEscapedLaunchArguments()
     {
         var xml = NewRequestAlertNotifier.BuildToastXml("Title <&>", "Body \"x\"", "action=openrequest&request=abc");
 

@@ -10,7 +10,7 @@ namespace MTM_Waitlist.Tests.Module_Settings.Services;
 public sealed class RequestItemPickerRulesTests
 {
     [TestMethod]
-    public void EveryDeliverItem_IsDeliverDestinationWorkCenter()
+    public void Service_RequestItemPickerRulesTests_EveryDeliverItem_IsDeliverDestinationWorkCenter()
     {
         var deliver = RequestItemCatalog.GetByCategory(RequestCategory.Deliver);
         Assert.AreEqual(9, deliver.Count);
@@ -21,14 +21,14 @@ public sealed class RequestItemPickerRulesTests
     }
 
     [TestMethod]
-    public void NonDeliverItem_IsNotDeliverDestinationWorkCenter()
+    public void Service_RequestItemPickerRulesTests_NonDeliverItem_IsNotDeliverDestinationWorkCenter()
     {
         var pickupCoil = RequestItemCatalog.FindById("pickup-coil")!;
         Assert.IsFalse(RequestItemPickerRules.IsDeliverDestinationWorkCenter(pickupCoil));
     }
 
     [TestMethod]
-    public void JobPartItem_VisibleOnlyWhenJobHasThatPart()
+    public void Service_RequestItemPickerRulesTests_JobPartItem_VisibleOnlyWhenJobHasThatPart()
     {
         var empty = RequestJobPartAvailability.None;
         var withCoil = RequestJobPartAvailability.All with { HasFlatstock = false, HasDie = false, HasComponent = false, HasDunnage = false };
@@ -44,7 +44,7 @@ public sealed class RequestItemPickerRulesTests
     }
 
     [TestMethod]
-    public void DieItems_AreNotOfferedWhenTheJobHasNoDie()
+    public void Service_RequestItemPickerRulesTests_DieItems_AreNotOfferedWhenTheJobHasNoDie()
     {
         // The picker reads HasDie (FR-055). A job whose only die row is the query's 'No Die' placeholder has no
         // die: the composition root derives HasDie from SetupActiveJobSnapshot.RealDies, whose rule is pinned by
@@ -58,7 +58,7 @@ public sealed class RequestItemPickerRulesTests
     }
 
     [TestMethod]
-    public void FlatstockAndDieAndDunnage_EvaluateIndependently()
+    public void Service_RequestItemPickerRulesTests_FlatstockAndDieAndDunnage_EvaluateIndependently()
     {
         var onlyFlatstock = RequestJobPartAvailability.All with
         {
@@ -74,7 +74,7 @@ public sealed class RequestItemPickerRulesTests
     }
 
     [TestMethod]
-    public void ManualEquipment_AlwaysVisible_EvenWithNoJobParts()
+    public void Service_RequestItemPickerRulesTests_ManualEquipment_AlwaysVisibleEvenWithNoJobParts()
     {
         var empty = RequestJobPartAvailability.None;
         foreach (var id in new[] { "pickup-riser-table", "deliver-riser-table", "pickup-hopper", "deliver-hopper" })
@@ -86,7 +86,7 @@ public sealed class RequestItemPickerRulesTests
     }
 
     [TestMethod]
-    public void ScrapItem_IsGatedOnARealScrapDecision_ThreeWaysPlusUnset()
+    public void Service_RequestItemPickerRulesTests_ScrapItem_IsGatedOnARealScrapDecisionThreeWaysPlusUnset()
     {
         var scrap = RequestItemCatalog.FindById("pickup-scrap")!;
 
@@ -107,7 +107,7 @@ public sealed class RequestItemPickerRulesTests
     }
 
     [TestMethod]
-    public void OutOfScopeItems_AreNeverOffered_ButStayInTheCatalog()
+    public void Service_RequestItemPickerRulesTests_OutOfScopeItems_AreNeverOfferedButStayInTheCatalog()
     {
         string[] outOfScope = ["pickup-fg", "pickup-ncm", "pickup-wip", "pickup-outside-service"];
 
@@ -147,7 +147,7 @@ public sealed class RequestItemPickerRulesTests
     /// driven through the rules rather than through a snapshot of expected strings.
     /// </summary>
     [TestMethod]
-    public void EightJobConfigurations_OfferTheExactVisibleItemSet()
+    public void Service_RequestItemPickerRulesTests_EightJobConfigurations_OfferTheExactVisibleItemSet()
     {
         var jobIndependent = new[]
         {
@@ -222,7 +222,7 @@ public sealed class RequestItemPickerRulesTests
     }
 
     [TestMethod]
-    public void MergedPickupCoil_IsOfferedForAFlatstockOnlyJob()
+    public void Service_RequestItemPickerRulesTests_MergedPickupCoil_IsOfferedForAFlatstockOnlyJob()
     {
         // The second half of FR-002, and what SC-004 measures: a flatstock-only job must still be offered the
         // merged Pickup Item.
@@ -239,7 +239,7 @@ public sealed class RequestItemPickerRulesTests
     }
 
     [TestMethod]
-    public void DeliverComponent_IsGatedOnAJobComponent_LikeItsPickupTwin()
+    public void Service_RequestItemPickerRulesTests_DeliverComponent_IsGatedOnAJobComponentLikeItsPickupTwin()
     {
         // Added 2026-09-22 with the Deliver counterpart: the choice is asked for on the same jobs as the Pickup
         // choice, so a job with no component is never offered either of them.
@@ -258,7 +258,7 @@ public sealed class RequestItemPickerRulesTests
     }
 
     [TestMethod]
-    public void DeadPickupFlatstockArm_IsGone()
+    public void Service_RequestItemPickerRulesTests_DeadPickupFlatstockArm_IsGone()
     {
         // 'pickup-flatstock' is not one of the twenty-four pinned codes and is not in the catalog, so the
         // rule that advertised it must not come back.
@@ -305,7 +305,7 @@ public sealed class RequestItemPickerRulesTests
     }
 
     [TestMethod]
-    public void AssistTableItems_VisibleWhenAnySubordinatePartPresent()
+    public void Service_RequestItemPickerRulesTests_AssistTableItems_VisibleWhenAnySubordinatePartPresent()
     {
         var noParts = RequestJobPartAvailability.None;
         var withComponent = RequestJobPartAvailability.All with
@@ -325,7 +325,7 @@ public sealed class RequestItemPickerRulesTests
     }
 
     [TestMethod]
-    public void EveryCatalogItem_HasARuleWithoutThrowing()
+    public void Service_RequestItemPickerRulesTests_EveryCatalogItem_HasARuleWithoutThrowing()
     {
         // Regression guard: the RequiredJobPart/IsVisible rules must handle all 24 canonical rows.
         foreach (var item in RequestItemCatalog.Items)

@@ -224,7 +224,7 @@ tokens were read from the WinUI theme resources in the SDK's own `generic.xaml` 
 
 No button may be drawn in this area without a `Command`, a `Visibility` gate and a tooltip.
 
-The **request detail page must draw none of these buttons** (FR-025). `RequestPage_DrawsNoActionButton`
+The **request detail page must draw none of these buttons** (FR-025). `ViewModel_WaitlistViewDetailActionTests_ViewModel_WaitlistViewDetailActionTests_RequestPage_DrawsNoActionButton`
 scans `Module_Waitlist/Views/WaitlistViewDetailPage.xaml` for a binding to any of the four commands and
 fails if one appears.
 

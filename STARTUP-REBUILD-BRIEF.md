@@ -34,8 +34,8 @@ longer reach the shell, the old logic is gone. Only then is the new module built
 | 14 | `StartupState` is replaced by **two narrow contracts**: person identity, and machine facts. |
 | 15 | Startup keeps: the picture-cache refresh, the Infor Visual verdict priming, the forced password change, and the computer-registration gate. |
 | 16 | The log-folder prompt is gone entirely. |
-| 17 | Remember-me survives, stored in the store against the person, encrypted. |
-| 18 | The encryption key is read from a pre-existing shared key file, addressed by its UNC path (S8.3). |
+| 17 | ~~Remember-me survives, stored in the store against the person, encrypted.~~ **Withdrawn 2026-10-10**: remember-me is withdrawn, and the sign-in stage offers the last six people who signed in on this computer, on the right of the form behind a divider, read from the session records the store already holds (FR-014, FR-043, FR-048). |
+| 18 | ~~The encryption key is read from a pre-existing shared key file, addressed by its UNC path (S8.3).~~ **Withdrawn 2026-10-10**: nothing reads, copies or keeps a key file, because withdrawing remember-me removes the only thing that ever opened one (FR-025, FR-043). |
 | 19 | The session lives in a new **`user_active_sessions`** table. |
 | 20 | Every deployed table, procedure, function and view is audited for dead weight; dead SQL files are deleted. |
 | 21 | How long a session lasts is a setting, changeable from the settings panel by IT Department or Developer only. |
@@ -145,11 +145,20 @@ body; it is rewritten against the new contracts.
   IT Department or Developer only (S2 row 21).
 
 ### S8.2 Remember-me
+
+**Withdrawn 2026-10-10.** The bullets below are what was asked for; the owner has since withdrawn remember-me, so
+no payload is stored, nothing is decrypted and no key is read. What replaced it is the last six people who signed
+in on this computer, offered on the right of the sign-in form behind a divider and read from the session records
+the store already holds. The text is kept as the record of what was originally requested.
+
 - Stored in the store against the person, never in a local file.
 - **Encrypted, not hashed** — it must be decryptable. See S8.3 for the key.
 - A failed decrypt falls back to the normal sign-in form and records the fault; it never blocks startup.
 
 ### S8.3 The key file
+
+**Withdrawn 2026-10-10.** Nothing reads this file: withdrawing remember-me removed the only reader, and nothing
+takes its place. The resolution of its path below is kept as the record of what was once relied on.
 
 - **Path, resolved and verified 2026-09-25:**
   `\\mtmanu-fs01\Expo Drive\Software Development\Live Applications\MTM_Application_Keys\MTM_AUTH_USER_SECRET_KEY.txt`
@@ -169,9 +178,10 @@ body; it is rewritten against the new contracts.
   `Security Engineer`.
 
 ### S8.4 Local state that may remain
-Only the connection strings used to reach the store. Everything else — theme, remember-me, waitlist sort
-order, ignored locations, new-request alerts, waitlist message-seen — moves into the store. A double pass
-(S11.4) must prove nothing else is left.
+Only the connection strings used to reach the store. Everything else — theme, waitlist sort
+order, ignored locations, new-request alerts, waitlist message-seen — moves into the store. Remember-me was the
+seventh and was withdrawn rather than moved: nothing about a sign-in is kept anywhere (FR-025, FR-043). A double
+pass (S11.4) must prove nothing else is left.
 
 ## S9. Logging
 
@@ -243,10 +253,12 @@ in Phase 2.
   sign-in**.
 - It is unlocked by an **IT Department or Developer** sign-in, which authorises configuration only and does
   not open the shell.
-- It captures the machine's display name and description and the shared picture sources. **There is no record
-  destination to capture**, because records live only in the store (S2 row 23). The old prompt for a log folder
-  therefore disappears for a second reason: not just because logging moved, but because a folder was never the
-  destination in the first place.
+- It captures the machine's own name and its location. **Withdrawn 2026-10-10**: the name is read from the
+  computer itself and shown rather than typed, and the location is the only value a person supplies (FR-049);
+  the shared picture sources it once captured were withdrawn in Phase 11 and are held once for the plant
+  (FR-040). **There is no record destination to capture**, because records live only in the store (S2 row 23).
+  The old prompt for a log folder therefore disappears for a second reason: not just because logging moved, but
+  because a folder was never the destination in the first place.
 - The privilege surface must be updated in the same change: new permission keys in the permission catalogue,
   the Settings privileges page, the role baselines, and the seeds. The user expects the Settings page to
   break without this work.
@@ -450,29 +462,34 @@ is stated rather than papered over.
 
 | # | Case | Group | Disposition |
 |---|---|---|---|
-| 1 | The store cannot be reached at launch | 2 | Covered: `LaunchEdgeCaseTests.TheStoreCannotBeReachedAtLaunch_StopsWithItsOwnStatementAndOffersNoReset` |
+| 1 | The store cannot be reached at launch | 2 | Covered: `LaunchEdgeCaseTests.Service_LaunchEdgeCaseTests_TheStoreCannotBeReachedAtLaunch_StopsWithItsOwnStatementAndOffersNoReset` |
 | 2 | The share holding pictures cannot be reached | 8 | Covered: `PictureCacheStepTests` |
-| 3 | A machine's configuration is deleted while running, so setup returns | 1 | Covered: `LaunchEdgeCaseTests.AConfigurationWithdrawnWhileTheApplicationRuns_ReturnsSetupAtTheNextCheck` |
-| 4 | The machine's display name is already in use | 5 | Covered: `MachineSetupViewModelTests` |
-| 5 | A remembered sign-in that cannot be read falls back to the form | 4 | Covered: `RememberedSignInServiceTests` |
-| 6 | A temporary-credential reset meets a sign-in already under way | 4 | Covered: `LaunchEdgeCaseTests.ATemporaryCredentialResetWhileThePersonSignsIn_TheOldValueMeetsTheReset` |
-| 7 | The launch window is closed while a launch is running | 6 | Covered: `LaunchEdgeCaseTests.TheLaunchWindowIsClosedWhileALaunchIsRunning_LeavesNoStepReadingAsFailed` |
-| 8 | The machine has no readable hardware address | 5 | Covered: `ReadHardwareIdentityStep_RunAsync_WhenTheAddressCouldNotBeRead_ReportsTheWorkLeftUndone` and `MachineGateServiceTests` |
-| 9 | A sign-out whose restart fails | 11 | Covered: `LaunchEdgeCaseTests.ASignOutWhoseRestartFails_EndsTheSessionAndTellsThePersonToOpenTheApplicationAgain` |
-| 10 | Two copies launched on one computer | 6 | Covered: `LaunchPipelineRetryTests.RunAsync_WhenASecondEntryArrivesWhileOneIsRunning_StartsNothing` |
-| 11 | The store answers in seconds rather than milliseconds | 2 | Covered: `LaunchStepRunnerTests.RunAsync_WhenTheStepPassesItsStatedMaximum_ReportsFailedRatherThanWaitingOnIt` and the pipeline's bounded routing read |
-| 12 | The picture copy takes longer than the launch allows | 8 | Covered: `PictureCacheStepTests` |
-| 13 | A person signs out at a shared computer, leaving nothing behind | 11 | Covered: `LaunchSessionServiceTests` |
-| 14 | Somebody without the two roles tries to change the session length | 7 | Covered: `SettingsViewModelTests` |
-| 15 | The launch window's saved size cannot be applied | 6 | **Read-verified only.** The window still opens and the launch carries on; a sizing failure is not a launch failure. Nothing in the suite constructs a `WindowEx`, so this case is asserted by reading the window's code-behind rather than by a run |
-| 16 | An account still holding the legacy temporary value signs in | 4 | Covered: `LaunchEdgeCaseTests.AnAccountStillHoldingTheLegacyTemporaryValue_SignsInAndIsAskedToReplaceIt` |
-| 17 | A credential reset issued while the person is signed in elsewhere | 4 | Covered: `LaunchEdgeCaseTests.ACredentialResetIssuedElsewhere_EndsNoSessionAlreadyRunning` |
-| 18 | A fault carries more detail than the store's ceiling | 9 | Covered: `ExceptionCaptureTests.Serialize_WhenTheChainIsLongerThanTheNodeCeiling_IsTruncatedWithItsMarker` |
-| 19 | A fault happens while the application is already recording one | 9 | Covered: `ExceptionCaptureTests.FlushAsync_WhenTheStoreRefusesEveryWrite_AbsorbsItAndRaisesNoSecondDiagnostic` |
-| 20 | An aggregate fault holds several independent failures | 9 | Covered: `ExceptionCaptureTests.Serialize_WhenTheFaultIsAnAggregate_ContributesEveryIndependentFailure` |
-| 21 | A fault's message contains a credential, a token or a parameter value | 9 | Covered: `ExceptionFingerprintTests.RedactMessage_WhenAParameterCarriesAValue_CutsAtTheEqualsAndNamesTheParameter` and `DiagnosticContextTests.Build_WhenAStructuredPropertyNamesASecret_DropsTheValue` |
-| 22 | The store refuses the write | 9 | Covered: `DiagnosticContextTests` and `ExceptionCaptureTests` |
-| 23 | The clipboard refuses a copy | 9 | Covered: `LogExportFormatterTests` |
+| 3 | A machine's configuration is deleted while running, so setup returns | 1 | Covered: `LaunchEdgeCaseTests.Service_LaunchEdgeCaseTests_AConfigurationWithdrawnWhileTheApplicationRuns_ReturnsSetupAtTheNextCheck` |
+| 4 | The computer's own name is already held by another record | 5 | Covered: `MachineSetupViewModelTests`. Restated 2026-10-10: the name is read from the computer, so the refusal stands and the stage does not offer to change it (FR-049) |
+| 5 | The location is left blank | 5 | Covered: `MachineConfigurationServiceTests.Service_MachineConfigurationServiceTests_SaveAsync_WithALocationAndNoNoteOfItsOwnConfiguresThisComputer`. Added 2026-10-10 with FR-050: a computer is configured by its own name, so a blank location is written as no location rather than refused (SC-018) |
+| 6 | The store cannot say who signed in last on this computer | 3 | Covered: `SignInViewModelTests.ViewModel_SignInViewModelTests_LoadPreviousPeopleCommand_WhenTheStoreCannotAnswerShowsTheFormWithoutThem`. Added 2026-10-10 with FR-014/FR-048: the form is offered without the list and the person types their user name |
+| 7 | A temporary-credential reset meets a sign-in already under way | 4 | Covered: `LaunchEdgeCaseTests.Service_LaunchEdgeCaseTests_ATemporaryCredentialResetWhileThePersonSignsIn_TheOldValueMeetsTheReset` |
+| 8 | The launch window is closed while a launch is running | 6 | Covered: `LaunchEdgeCaseTests.Service_LaunchEdgeCaseTests_TheLaunchWindowIsClosedWhileALaunchIsRunning_LeavesNoStepReadingAsFailed` |
+| 9 | The machine has no readable hardware address | 5 | Covered: `Service_PreSignInStepsTests_ReadHardwareIdentityStep_RunAsyncWhenTheAddressCouldNotBeReadReportsTheWorkLeftUndone` and `MachineFactsServiceTests.Service_MachineFactsServiceTests_HardwareIdentityReadable_AgreesWithTheAddress`. Corrected 2026-10-10: the second citation named `MachineGateServiceTests`, which has never existed |
+| 10 | A sign-out whose restart fails | 11 | Covered: `LaunchEdgeCaseTests.Service_LaunchEdgeCaseTests_ASignOutWhoseRestartFails_EndsTheSessionAndTellsThePersonToOpenTheApplicationAgain` |
+| 11 | Two copies launched on one computer | 6 | Covered: `LaunchPipelineRetryTests.Service_LaunchPipelineRetryTests_RunAsync_WhenASecondEntryArrivesWhileOneIsRunningStartsNothing` |
+| 12 | The store answers in seconds rather than milliseconds | 2 | Covered: `LaunchStepRunnerTests.Service_LaunchStepRunnerTests_RunAsync_WhenTheStepPassesItsStatedMaximumReportsFailedRatherThanWaitingOnIt` and the pipeline's bounded routing read |
+| 13 | The picture copy takes longer than the launch allows | 8 | Covered: `PictureCacheStepTests` |
+| 14 | A person signs out at a shared computer, leaving nothing behind | 11 | Covered: `LaunchSessionServiceTests` |
+| 15 | Somebody without the two roles tries to change how long a session lasts | 7 | Covered: `SettingsViewModelIgnoredLocationsTests.ViewModel_SettingsViewModelTests_TheSessionLength_RefusesAnUnauthorisedChangeWithAStatedReason`. Corrected 2026-10-10: the citation named `SettingsViewModelTests`, which is the file rather than a class in it |
+| 16 | The launch window's saved size cannot be applied | 6 | **Read-verified only.** The window still opens and the launch carries on; a sizing failure is not a launch failure. Nothing in the suite constructs a `WindowEx`, so this case is asserted by reading the window's code-behind rather than by a run |
+| 17 | An account still holding the legacy temporary value signs in | 4 | Covered: `LaunchEdgeCaseTests.Service_LaunchEdgeCaseTests_AnAccountStillHoldingTheLegacyTemporaryValue_SignsInAndIsAskedToReplaceIt` |
+| 18 | A credential reset issued while the person is signed in elsewhere | 4 | Covered: `LaunchEdgeCaseTests.Service_LaunchEdgeCaseTests_ACredentialResetIssuedElsewhere_EndsNoSessionAlreadyRunning` |
+| 19 | A fault carries more detail than the store's ceiling | 9 | Covered: `ExceptionCaptureTests.Service_ExceptionCaptureTests_Serialize_WhenTheChainIsLongerThanTheNodeCeilingIsTruncatedWithItsMarker` |
+| 20 | A fault happens while the application is already recording one | 9 | Covered: `ExceptionCaptureTests.Service_ExceptionCaptureTests_FlushAsync_WhenTheStoreRefusesEveryWriteAbsorbsItAndRaisesNoSecondDiagnostic` |
+| 21 | An aggregate fault holds several independent failures | 9 | Covered: `ExceptionCaptureTests.Service_ExceptionCaptureTests_Serialize_WhenTheFaultIsAnAggregateContributesEveryIndependentFailure` |
+| 22 | A fault's message contains a credential, a token or a parameter value | 9 | Covered: `ExceptionFingerprintTests.Service_ExceptionFingerprintTests_RedactMessage_WhenAParameterCarriesAValueCutsAtTheEqualsAndNamesTheParameter` and `DiagnosticContextTests.Service_DiagnosticContextTests_Build_WhenAStructuredPropertyNamesASecretDropsTheValue` |
+| 23 | The store refuses the write | 9 | Covered: `DiagnosticContextTests` and `ExceptionCaptureTests` |
+| 24 | The clipboard refuses a copy | 9 | Covered: `LogExportFormatterTests` |
+| 25 | ~~A remembered sign-in that cannot be read falls back to the form~~ **Retired 2026-10-10** | 4 | No longer applies: remember-me is withdrawn and nothing reads a key file, so there is nothing to fall back from. The sign-in stage offers the last six people who signed in here instead (FR-014, FR-043). **Placed last 2026-10-10** so that rows 1 to 24 stay in the specification's own order and a reader can line the two lists up |
+
+**Rows 1 to 24 are the specification's twenty-four edge cases, in its order.** `AcceptanceSurfaceTests` holds that
+mapping and fails if the specification gains a case that the catalogue does not account for (FR-031, SC-013).
 
 ### S13.2 Cases that no longer apply
 
@@ -489,7 +506,7 @@ than left untested and unexplained:
 
 Two cases are **new** rather than changed, and both are covered: every abort route out of machine configuration
 ends the process (`LaunchEdgeCaseTests`, `MachineSetupNoBypassTests`), and the pipeline rather than the screen
-refuses to continue without configuration (`LaunchPipelineRetryTests.RunAsync_WhenTheMachineIsUnconfigured_EndsAtMachineSetup`).
+refuses to continue without configuration (`LaunchPipelineRetryTests.Service_LaunchPipelineRetryTests_RunAsync_WhenTheMachineIsUnconfiguredEndsAtMachineSetup`).
 
 ### S13.3 Cases whose branch depends on the host
 

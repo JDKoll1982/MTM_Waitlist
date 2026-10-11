@@ -47,16 +47,16 @@ public sealed class WaitlistViewDetailActionTests
         "Waitlist_Action.CancelRequest",
         "Waitlist_Action.AcceptRefusedTitle",
         "Waitlist_Action.Dismiss",
-        "Waitlist_Action.Cancel.DialogTitle",
-        "Waitlist_Action.Cancel.DialogMessage",
-        "Waitlist_Action.Cancel.Confirm",
-        "Waitlist_Action.Cancel.Dismiss",
-        "Waitlist_Action.Cancel.ReasonPlaceholder",
-        "Waitlist_Action.Refused.AcceptTaken",
-        "Waitlist_Action.Refused.AcceptGone",
-        "Waitlist_Action.Refused.CompleteOrRelease",
-        "Waitlist_Action.Refused.Cancel",
-        "Waitlist_Action.Refused.Unexpected",
+        "Waitlist_Action_Cancel.DialogTitle",
+        "Waitlist_Action_Cancel.DialogMessage",
+        "Waitlist_Action_Cancel.Confirm",
+        "Waitlist_Action_Cancel.Dismiss",
+        "Waitlist_Action_Cancel.ReasonPlaceholder",
+        "Waitlist_Action_Refused.AcceptTaken",
+        "Waitlist_Action_Refused.AcceptGone",
+        "Waitlist_Action_Refused.CompleteOrRelease",
+        "Waitlist_Action_Refused.Cancel",
+        "Waitlist_Action_Refused.Unexpected",
         "Waitlist_Note.Label",
         "Waitlist_Note.Placeholder",
         "Waitlist_Note.Save",
@@ -65,9 +65,9 @@ public sealed class WaitlistViewDetailActionTests
         "Waitlist_Note.Unchanged",
         "Waitlist_Note.Refused",
         "Waitlist_History.SystemActor",
-        "Waitlist_History.Event.Accepted",
-        "Waitlist_History.Event.Completed",
-        "Waitlist_History.Event.Released",
+        "Waitlist_History_Event.Accepted",
+        "Waitlist_History_Event.Completed",
+        "Waitlist_History_Event.Released",
         "Waitlist_History.Title",
         "Waitlist_History.Summary",
         "Waitlist_History.Empty",
@@ -77,7 +77,7 @@ public sealed class WaitlistViewDetailActionTests
     // ── The page offers no actions ───────────────────────────────────────────────────────────────────
 
     [TestMethod]
-    public void RequestPage_DrawsNoActionButton()
+    public void ViewModel_WaitlistViewDetailActionTests_RequestPage_DrawsNoActionButton()
     {
         // The actions moved to the list card. A button left behind here would be a second place that decides
         // who may do what, which is exactly what the two screens must never do.
@@ -101,7 +101,7 @@ public sealed class WaitlistViewDetailActionTests
     // ── The note ─────────────────────────────────────────────────────────────────────────────────────
 
     [TestMethod]
-    public async Task RequestPage_SavingANote_StoresItAndRecordsItInTheHistory()
+    public async Task ViewModel_WaitlistViewDetailActionTests_RequestPage_SavingANoteStoresItAndRecordsItInTheHistory()
     {
         var (viewModel, service) = BuildLoadedViewModelWithService();
 
@@ -139,7 +139,7 @@ public sealed class WaitlistViewDetailActionTests
     }
 
     [TestMethod]
-    public async Task RequestPage_SendingAnEmptyMessage_SaysThereIsNothingToSend()
+    public async Task ViewModel_WaitlistViewDetailActionTests_RequestPage_SendingAnEmptyMessageSaysThereIsNothingToSend()
     {
         // A click must always answer. The old behaviour returned in silence, which is what made the first click
         // on the page look like a broken button.
@@ -161,7 +161,7 @@ public sealed class WaitlistViewDetailActionTests
     }
 
     [TestMethod]
-    public async Task RequestPage_SendingTheSameMessageTwice_ReportsThatItIsAlreadyThere()
+    public async Task ViewModel_WaitlistViewDetailActionTests_RequestPage_SendingTheSameMessageTwiceReportsThatItIsAlreadyThere()
     {
         // The service treats an identical message as no change and writes nothing, so reporting a send here
         // would promise a history row that never appears — the exact confusion this page was reported for.
@@ -188,7 +188,7 @@ public sealed class WaitlistViewDetailActionTests
     }
 
     [TestMethod]
-    public async Task RequestPage_ARefresh_KeepsAnUnsavedMessageOnScreen()
+    public async Task ViewModel_WaitlistViewDetailActionTests_RequestPage_ARefreshKeepsAnUnsavedMessageOnScreen()
     {
         // The page reloads every 30 seconds. Seeding the box from the store unconditionally meant a tick could
         // erase what the viewer was typing — which is how a message came to be lost before it was ever sent.
@@ -204,7 +204,7 @@ public sealed class WaitlistViewDetailActionTests
     }
 
     [TestMethod]
-    public async Task RequestPage_ARefreshAfterSending_LeavesTheSentMessageInPlace()
+    public async Task ViewModel_WaitlistViewDetailActionTests_RequestPage_ARefreshAfterSendingLeavesTheSentMessageInPlace()
     {
         var (viewModel, _) = BuildLoadedViewModelWithService();
 
@@ -218,7 +218,7 @@ public sealed class WaitlistViewDetailActionTests
     // ── The history attributes every row ─────────────────────────────────────────────────────────────
 
     [TestMethod]
-    public async Task RequestPage_HistoryNamesTheSenderAndNotTheMessageType()
+    public async Task ViewModel_WaitlistViewDetailActionTests_RequestPage_HistoryNamesTheSenderAndNotTheMessageType()
     {
         // The user asked for who sent it, and explicitly not the event type.
         var page = LoadPage();
@@ -236,7 +236,7 @@ public sealed class WaitlistViewDetailActionTests
     }
 
     [TestMethod]
-    public void HistoryEntry_WithNoAuthor_IsAttributedToTheSystem()
+    public void ViewModel_WaitlistViewDetailActionTests_HistoryEntry_WithNoAuthorIsAttributedToTheSystem()
     {
         // Job created, accepted, completed and canceled are recorded with no actor. A blank where a name belongs
         // reads as missing data; naming the system reads as the truth.
@@ -250,7 +250,7 @@ public sealed class WaitlistViewDetailActionTests
     // ── Anyone can send a message ───────────────────────────────────────────────────────────────────
 
     [TestMethod]
-    public async Task RequestPage_AnyoneSignedInCanSendAMessage()
+    public async Task ViewModel_WaitlistViewDetailActionTests_RequestPage_AnyoneSignedInCanSendAMessage()
     {
         // The message box is how the floor talks to whoever picks the request up, so it is not gated on the
         // handler role the way the card's actions are.
@@ -272,7 +272,7 @@ public sealed class WaitlistViewDetailActionTests
     // ── The history comes from the store ─────────────────────────────────────────────────────────────
 
     [TestMethod]
-    public async Task RequestPage_ReadsTheHistoryFromTheStore_NotJustThisSession()
+    public async Task ViewModel_WaitlistViewDetailActionTests_RequestPage_ReadsTheHistoryFromTheStoreNotJustThisSession()
     {
         // The store's read is what makes the history cover activity from before the app started. A stub returns
         // an entry this session never created, and the page must render it.
@@ -295,7 +295,7 @@ public sealed class WaitlistViewDetailActionTests
     }
 
     [TestMethod]
-    public async Task RequestPage_WithNoHistory_SaysSoRatherThanHiding()
+    public async Task ViewModel_WaitlistViewDetailActionTests_RequestPage_WithNoHistorySaysSoRatherThanHiding()
     {
         // "Nothing has happened yet" must stay distinguishable from "the history could not be read".
         var service = new StubRequestService(BuildRequest()) { AuditTrail = [] };
@@ -314,7 +314,7 @@ public sealed class WaitlistViewDetailActionTests
     // ── Keeping the page current ─────────────────────────────────────────────────────────────────────
 
     [TestMethod]
-    public void RequestPage_RefreshIntervalIsThirtySeconds()
+    public void ViewModel_WaitlistViewDetailActionTests_RequestPage_RefreshIntervalIsThirtySeconds()
     {
         Assert.AreEqual(
             TimeSpan.FromSeconds(30),
@@ -323,7 +323,7 @@ public sealed class WaitlistViewDetailActionTests
     }
 
     [TestMethod]
-    public async Task RequestPage_OpeningIt_MarksTheRequestsActivitySeen()
+    public async Task ViewModel_WaitlistViewDetailActionTests_RequestPage_OpeningItMarksTheRequestsActivitySeen()
     {
         // Reading the request's history is what clears its new-message indicator on the card. The marker is the
         // newest entry, so anything that arrives afterwards re-flags the card.
@@ -346,7 +346,7 @@ public sealed class WaitlistViewDetailActionTests
     // ── Localization ─────────────────────────────────────────────────────────────────────────────────
 
     [TestMethod]
-    public void EveryNewString_ResolvesThroughTheResourceFileAndIsReferencedWhereItIsShown()
+    public void ViewModel_WaitlistViewDetailActionTests_EveryNewString_ResolvesThroughTheResourceFileAndIsReferencedWhereItIsShown()
     {
         var root = RepositoryPatternScan.FindRepositoryRoot();
         var resourcePath = Path.Combine(root, "Strings", "en-us", "Resources.resw");

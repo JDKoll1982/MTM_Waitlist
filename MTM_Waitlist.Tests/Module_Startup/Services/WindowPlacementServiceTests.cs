@@ -13,11 +13,11 @@ namespace MTM_Waitlist.Tests.Module_Startup.Services;
 public sealed class WindowPlacementServiceTests
 {
     [TestMethod]
-    public void ShouldRecentre_ForAResizeTheLaunchMade_AnswersTrue()
+    public void Service_WindowPlacementServiceTests_ShouldRecentre_ForAResizeTheLaunchMadeAnswersTrue()
         => Assert.IsTrue(WindowPlacementService.ShouldRecentre(WindowResizeCause.Launch));
 
     [TestMethod]
-    public void ShouldRecentre_ForAResizeThePersonPerformed_AnswersFalse()
+    public void Service_WindowPlacementServiceTests_ShouldRecentre_ForAResizeThePersonPerformedAnswersFalse()
     {
         // FR-020: re-centring applies only to resizes the launch makes, so a person who has just placed the
         // window is not moved under their own hands.
@@ -25,7 +25,7 @@ public sealed class WindowPlacementServiceTests
     }
 
     [TestMethod]
-    public void CentreWithin_PutsTheWindowInTheMiddleOfTheDisplayItIsOn()
+    public void Service_WindowPlacementServiceTests_CentreWithin_PutsTheWindowInTheMiddleOfTheDisplayItIsOn()
     {
         var display = new WindowRect(1920, 0, 1920, 1080);
         var window = new WindowRect(0, 0, 800, 600);
@@ -39,7 +39,7 @@ public sealed class WindowPlacementServiceTests
     }
 
     [TestMethod]
-    public void CentreWithin_KeepsAWindowBiggerThanTheDisplayInsideIt()
+    public void Service_WindowPlacementServiceTests_CentreWithin_KeepsAWindowBiggerThanTheDisplayInsideIt()
     {
         var display = new WindowRect(0, 0, 1280, 720);
         var window = new WindowRect(50, 50, 1600, 900);
@@ -53,7 +53,7 @@ public sealed class WindowPlacementServiceTests
     }
 
     [TestMethod]
-    public void CentreWithin_WithADisplayThatAnsweredNothing_LeavesTheWindowWhereItIs()
+    public void Service_WindowPlacementServiceTests_CentreWithin_WithADisplayThatAnsweredNothingLeavesTheWindowWhereItIs()
     {
         var window = new WindowRect(100, 200, 800, 600);
 

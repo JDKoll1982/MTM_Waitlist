@@ -61,10 +61,10 @@ public sealed class UserSummary
     {
         get
         {
-            var localized = $"Role_{RoleCode}".GetLocalized();
+            var localized = $"Role_{RoleCode}.Text".GetLocalized();
 
             // The resource mechanism returns the key when it has no entry, which is never shown to a person.
-            return string.Equals(localized, $"Role_{RoleCode}", StringComparison.Ordinal)
+            return string.Equals(localized, $"Role_{RoleCode}.Text", StringComparison.Ordinal)
                 ? RoleName
                 : localized;
         }

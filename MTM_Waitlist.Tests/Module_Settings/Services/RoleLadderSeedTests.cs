@@ -48,7 +48,7 @@ public sealed class RoleLadderSeedTests
         "create.sql");
 
     [TestMethod]
-    public void TheShippedSeed_GivesEveryLiveRoleItHoldsTheDeclaredRung()
+    public void Service_RoleLadderSeedTests_TheShippedSeed_GivesEveryLiveRoleItHoldsTheDeclaredRung()
     {
         var ranked = RankedRoleRows(ReadSeed());
 
@@ -64,7 +64,7 @@ public sealed class RoleLadderSeedTests
     }
 
     [TestMethod]
-    public void TheShippedSeed_AddsMaterialHandlerLeadAsARoleInItsOwnRight()
+    public void Service_RoleLadderSeedTests_TheShippedSeed_AddsMaterialHandlerLeadAsARoleInItsOwnRight()
     {
         var seed = ReadSeed();
 
@@ -77,7 +77,7 @@ public sealed class RoleLadderSeedTests
     }
 
     [TestMethod]
-    public void TheShippedSeed_WritesTheRetiredRoleWithoutARankSoItHoldsTheColumnDefault()
+    public void Service_RoleLadderSeedTests_TheShippedSeed_WritesTheRetiredRoleWithoutARankSoItHoldsTheColumnDefault()
     {
         var seed = ReadSeed();
 
@@ -110,7 +110,7 @@ public sealed class RoleLadderSeedTests
     }
 
     [TestMethod]
-    public void TheShippedSeed_LeavesTheRenameEntirelyToItsOwnSeed()
+    public void Service_RoleLadderSeedTests_TheShippedSeed_LeavesTheRenameEntirelyToItsOwnSeed()
     {
         // Comments may name the thing this seed deliberately does not do; only statements count.
         var statements = StatementsOnly(ReadSeed());
@@ -129,7 +129,7 @@ public sealed class RoleLadderSeedTests
     }
 
     [TestMethod]
-    public void TheShippedSeed_LeavesRoomBetweenItsRungs()
+    public void Service_RoleLadderSeedTests_TheShippedSeed_LeavesRoomBetweenItsRungs()
     {
         var ranks = ExpectedLiveRungs.Values.Distinct().OrderBy(rank => rank).ToArray();
 
@@ -142,7 +142,7 @@ public sealed class RoleLadderSeedTests
     }
 
     [TestMethod]
-    public void TheShippedSeed_LeavesTheWorkerRolesAtOneRung()
+    public void Service_RoleLadderSeedTests_TheShippedSeed_LeavesTheWorkerRolesAtOneRung()
     {
         var ranked = RankedRoleRows(ReadSeed());
         var workerRanks = new[] { "material_handler", "production", "setup" }

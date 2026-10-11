@@ -31,7 +31,7 @@ USE mtm_mock;
 -- Content
 -- -------
 -- Captured 2026-09-12 from the live `mtm_mock` mirror on the shared host, so a fresh install
--- starts from real Infor Visual reads rather than hand-written samples. All five shapes are
+-- starts from real Infor Visual reads rather than hand-written samples. Five of the six shapes are
 -- covered:  83,224 rows total.
 --
 --     work_order_lookup     694
@@ -39,6 +39,13 @@ USE mtm_mock;
 --     subordinate_parts    1,732
 --     inventory_locations  79,218
 --     disposition_input     694
+--
+--     employee_by_number      -    NOT covered: this shape arrived with 011-identifier-first-signin
+--                                  after the capture above. Capturing it means reading EMPLOYEE on the
+--                                  Infor Visual host, so until that is done a fresh `mtm_mock` serves
+--                                  an empty set for an employee-by-number fallback read. Do not hand-
+--                                  write rows here to close the gap: invented employee data in the
+--                                  mirror is worse than a missing baseline.
 --
 -- Every row carries `is_seed_content = 1`
 -- --------------------------------------

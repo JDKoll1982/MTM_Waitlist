@@ -27,7 +27,7 @@ public sealed class SettingsScopeRankTests
     private const string ScopeRankFunctionPath = "Database/Functions/fn_config_settings_scope_rank/create.sql";
 
     [TestMethod]
-    public void ShippedScopeRankFunction_DeclaresEveryScopeAtItsCorrectedRung()
+    public void Service_SettingsScopeRankTests_ShippedScopeRankFunction_DeclaresEveryScopeAtItsCorrectedRung()
     {
         var createScript = ReadScopeRankFunction();
 
@@ -40,7 +40,7 @@ public sealed class SettingsScopeRankTests
     }
 
     [TestMethod]
-    public void ShippedScopeRankFunction_PutsAPersonsOwnValueAboveEveryWiderScope()
+    public void Service_SettingsScopeRankTests_ShippedScopeRankFunction_PutsAPersonsOwnValueAboveEveryWiderScope()
     {
         var createScript = ReadScopeRankFunction();
 
@@ -53,7 +53,7 @@ public sealed class SettingsScopeRankTests
     }
 
     [TestMethod]
-    public void ShippedScopeRankFunction_AnswersZeroForAScopeItDoesNotKnow()
+    public void Service_SettingsScopeRankTests_ShippedScopeRankFunction_AnswersZeroForAScopeItDoesNotKnow()
     {
         var createScript = ReadScopeRankFunction();
 

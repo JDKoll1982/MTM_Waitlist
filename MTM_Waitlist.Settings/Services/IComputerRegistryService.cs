@@ -42,7 +42,7 @@ public interface IComputerRegistryService
     /// <param name="hostnameNormalized">The normalized hostname the machine reports.</param>
     /// <param name="macAddressNormalized">The normalized hardware address, lowercase and hyphen separated.</param>
     /// <param name="displayName">The name a person reads. The store refuses one already in use.</param>
-    /// <param name="description">An optional note.</param>
+    /// <param name="location">Where this computer stands, or <c>null</c> for none.</param>
     /// <param name="cancellationToken">Cancels the write and the read that follows it.</param>
     /// <returns>The saved row, re-read from the store.</returns>
     Task<ComputerRecord> UpsertComputerAsync(
@@ -50,7 +50,7 @@ public interface IComputerRegistryService
         string hostnameNormalized,
         string macAddressNormalized,
         string displayName,
-        string? description,
+        string? location,
         CancellationToken cancellationToken = default);
 
     /// <summary>Updates one registry row by its id.</summary>
@@ -59,7 +59,7 @@ public interface IComputerRegistryService
     /// <param name="hostnameNormalized">The normalized hostname the machine reports.</param>
     /// <param name="macAddressNormalized">The normalized hardware address.</param>
     /// <param name="displayName">The name a person reads.</param>
-    /// <param name="description">An optional note.</param>
+    /// <param name="location">Where this computer stands, or <c>null</c> for none.</param>
     /// <param name="isRegistered">Whether the machine is admitted to the fleet.</param>
     /// <param name="cancellationToken">Cancels the write and the read that follows it.</param>
     /// <returns>The updated row, re-read from the store.</returns>
@@ -69,7 +69,7 @@ public interface IComputerRegistryService
         string hostnameNormalized,
         string macAddressNormalized,
         string displayName,
-        string? description,
+        string? location,
         bool isRegistered,
         CancellationToken cancellationToken = default);
 

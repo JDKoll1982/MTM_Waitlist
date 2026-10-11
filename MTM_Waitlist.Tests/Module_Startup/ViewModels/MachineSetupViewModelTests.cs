@@ -5,14 +5,15 @@ using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Startup.Services;
 using MTM_Waitlist.Module_Startup.ViewModels;
+using MTM_Waitlist.Tests.Module_Mock;
 
 namespace MTM_Waitlist.Tests.Module_Startup.ViewModels;
 
 /// <summary>
 /// The machine-setup screen's state (`contracts/machine-configuration-contract.md` sections 1 and 2; FR-007,
-/// FR-009, FR-018, FR-040): a refused sign-in is stated and keeps the capture closed, a refused display name is
-/// stated and asks for a different one, and an accepted save writes this computer's name and its note, which is
-/// everything the screen asks for.
+/// FR-009, FR-018, FR-049, FR-050): a refused sign-in is stated and keeps the capture closed, the name is the one
+/// the computer reports and is shown rather than typed, and an accepted save writes that name and the location,
+/// which is the only value the screen asks for.
 /// </summary>
 /// <remarks>
 /// The gate and the configuration service are hand-written doubles, so what is pinned is the screen's own
@@ -23,7 +24,7 @@ namespace MTM_Waitlist.Tests.Module_Startup.ViewModels;
 public sealed class MachineSetupViewModelTests
 {
     [TestMethod]
-    public async Task SignInAsync_WhenTheGateAuthorises_OpensTheCaptureFormForThatPerson()
+    public async Task ViewModel_MachineSetupViewModelTests_SignInAsync_WhenTheGateAuthorisesOpensTheCaptureFormForThatPerson()
     {
         var viewModel = Build();
 
@@ -38,7 +39,7 @@ public sealed class MachineSetupViewModelTests
     }
 
     [TestMethod]
-    public async Task SignInAsync_WhenTheGateRefuses_StatesTheRefusalAndKeepsTheCaptureClosed()
+    public async Task ViewModel_MachineSetupViewModelTests_SignInAsync_WhenTheGateRefusesStatesTheRefusalAndKeepsTheCaptureClosed()
     {
         var viewModel = Build(gate: new StubGate(MachineSetupRefusals.NotPermitted));
 
@@ -51,7 +52,7 @@ public sealed class MachineSetupViewModelTests
     }
 
     [TestMethod]
-    public async Task SignInAsync_WhenTheGateCouldNotConfirmTheCredential_StatesThatRefusalInItsOwnWords()
+    public async Task ViewModel_MachineSetupViewModelTests_SignInAsync_WhenTheGateCouldNotConfirmTheCredentialStatesThatRefusalInItsOwnWords()
     {
         var viewModel = Build(gate: new StubGate(MachineSetupRefusals.CredentialRefused));
 
@@ -61,15 +62,15 @@ public sealed class MachineSetupViewModelTests
     }
 
     [TestMethod]
-    public async Task SignInAsync_WhenTheMachineAlreadyHoldsANameAndNote_FillsThemInForCorrection()
+    public async Task ViewModel_MachineSetupViewModelTests_SignInAsync_WhenTheComputerHasAStoreRecordShowsTheComputersOwnNameAndItsStoredLocation()
     {
-        // A machine whose configuration is being corrected starts from what it already holds rather than from a
-        // blank form, so nobody retypes a name the store is holding for them.
+        // The name is read from the computer, and the store's record fills the location, so a computer whose
+        // configuration is being corrected starts from where it stands rather than from a blank field.
         var configuration = new StubConfigurationService
         {
             State = new MachineConfigurationState(
                 false,
-                "MTMFG-161",
+                "MTMFG-160",
                 "the shop floor",
                 MachineConfigurationReasons.Removed),
         };
@@ -78,12 +79,40 @@ public sealed class MachineSetupViewModelTests
 
         await viewModel.SignInCommand.ExecuteAsync(new MachineSetupCredentials("JKoll", "8391"));
 
-        Assert.AreEqual("MTMFG-161", viewModel.DisplayName);
-        Assert.AreEqual("the shop floor", viewModel.Description);
+        Assert.AreEqual(MachineHostname, viewModel.ComputerName, "the name is the computer's own, not the store's");
+        Assert.AreEqual("the shop floor", viewModel.Location);
     }
 
     [TestMethod]
-    public async Task SaveAsync_WhenNobodyHasSignedIn_RefusesAndWritesNothing()
+    public void ViewModel_MachineSetupViewModelTests_ComputerName_HasNoSetterAndNoFieldBindsToIt()
+    {
+        // T239, FR-049: the name is shown and never typed. Both halves are asserted, because a screen that drew a
+        // field for it would let a person type one even with a read-only property behind it.
+        var viewModel = Build();
+
+        Assert.IsNull(
+            typeof(MachineSetupViewModel).GetProperty(nameof(MachineSetupViewModel.ComputerName))!.GetSetMethod(),
+            "the name is read from the computer, so nothing outside the screen may write it");
+
+        var markup = File.ReadAllText(
+            Path.Combine(
+                RepositoryPatternScan.FindRepositoryRoot(),
+                "Module_Startup",
+                "Views",
+                "MachineSetupPage.xaml"));
+
+        StringAssert.Contains(
+            markup,
+            "AutomationProperties.AutomationId=\"MachineSetupWindow_ComputerName\"",
+            "the setup stage must show the name the computer reports");
+
+        Assert.IsFalse(
+            markup.Contains("ViewModel.ComputerName, Mode=TwoWay", StringComparison.Ordinal),
+            "no input control may be bound to the name: it is shown, never typed (FR-049)");
+    }
+
+    [TestMethod]
+    public async Task ViewModel_MachineSetupViewModelTests_SaveAsync_WhenNobodyHasSignedInRefusesAndWritesNothing()
     {
         var configuration = new StubConfigurationService();
         var viewModel = Build(configuration: configuration);
@@ -95,7 +124,7 @@ public sealed class MachineSetupViewModelTests
     }
 
     [TestMethod]
-    public async Task SaveAsync_WhenTheStoreRefusesTheDisplayName_StatesItAndDoesNotReportTheComputerSaved()
+    public async Task ViewModel_MachineSetupViewModelTests_SaveAsync_WhenAnotherRecordHoldsTheNameStatesItAndDoesNotReportTheComputerSaved()
     {
         var configuration = new StubConfigurationService
         {
@@ -107,16 +136,16 @@ public sealed class MachineSetupViewModelTests
         viewModel.ConfigurationSaved += (_, _) => savedCues++;
 
         await viewModel.SignInCommand.ExecuteAsync(new MachineSetupCredentials("JKoll", "8391"));
-        viewModel.DisplayName = "MTMFG-161";
         await viewModel.SaveCommand.ExecuteAsync(null);
 
         Assert.AreEqual("Startup_MachineSetup.SaveNameInUse".GetLocalized(), viewModel.Message);
         Assert.AreEqual(0, savedCues, "a refused save does not carry the launch on");
-        Assert.IsTrue(viewModel.ShowConfigurationForm, "the form stays open so a different name can be given");
+        Assert.IsNull(configuration.Saved, "a refusal leaves this computer's record as it was");
+        Assert.IsTrue(viewModel.ShowConfigurationForm, "the form stays open so the location can still be corrected");
     }
 
     [TestMethod]
-    public async Task SaveAsync_WhenTheStoreAcceptsIt_WritesThisComputersIdentityAndItsNote()
+    public async Task ViewModel_MachineSetupViewModelTests_SaveAsync_WhenTheStoreAcceptsItWritesTheNameTheComputerReportsAndTheLocation()
     {
         var configuration = new StubConfigurationService();
         var viewModel = Build(configuration: configuration);
@@ -125,20 +154,37 @@ public sealed class MachineSetupViewModelTests
 
         await viewModel.SignInCommand.ExecuteAsync(new MachineSetupCredentials("JKoll", "8391"));
 
-        viewModel.DisplayName = "  MTMFG-161  ";
-        viewModel.Description = "  the shop floor  ";
+        viewModel.Location = "  the shop floor  ";
 
         await viewModel.SaveCommand.ExecuteAsync(null);
 
         Assert.IsNotNull(configuration.Saved, "the screen saves through the one writer of these rows");
-        Assert.AreEqual("MTMFG-161", configuration.Saved!.DisplayName, "the name is written trimmed");
-        Assert.AreEqual("the shop floor", configuration.Saved.Description, "the note is written trimmed");
+        Assert.AreEqual(MachineHostname, configuration.Saved!.ComputerName, "the name written is the computer's own");
+        Assert.AreEqual("the shop floor", configuration.Saved.Location, "the location is written trimmed");
         Assert.AreEqual(1, savedCues, "an accepted save carries the launch on exactly once");
         Assert.IsNull(viewModel.Message);
     }
 
     [TestMethod]
-    public async Task SaveAsync_WhenTheStoreAcceptedIt_OffersTheSaveAgainOnlyWhileTheScreenIsBusy()
+    public async Task ViewModel_MachineSetupViewModelTests_SaveAsync_WithNoLocationGivenStillConfiguresTheComputer()
+    {
+        // SC-018: where this computer stands is the only value asked for, and it is not required — a computer
+        // that supplies a name and nothing else is configured.
+        var configuration = new StubConfigurationService();
+        var viewModel = Build(configuration: configuration);
+
+        await viewModel.SignInCommand.ExecuteAsync(new MachineSetupCredentials("JKoll", "8391"));
+        viewModel.Location = string.Empty;
+
+        await viewModel.SaveCommand.ExecuteAsync(null);
+
+        Assert.IsNotNull(configuration.Saved);
+        Assert.AreEqual(string.Empty, configuration.Saved!.Location);
+        Assert.AreEqual(MachineHostname, configuration.Saved.ComputerName);
+    }
+
+    [TestMethod]
+    public async Task ViewModel_MachineSetupViewModelTests_SaveAsync_WhenTheStoreAcceptedItOffersTheSaveAgainOnlyWhileTheScreenIsBusy()
     {
         var viewModel = Build();
 
@@ -156,7 +202,25 @@ public sealed class MachineSetupViewModelTests
         StubConfigurationService? configuration = null)
         => new(
             gate ?? new StubGate(null),
-            configuration ?? new StubConfigurationService());
+            configuration ?? new StubConfigurationService(),
+            new StubMachineFacts());
+
+    /// <summary>The name this computer reports for itself, which is what the screen shows (FR-049).</summary>
+    private const string MachineHostname = "MTMFG-161";
+
+    /// <summary>This computer's own facts, which are where the name the screen shows is read from.</summary>
+    private sealed class StubMachineFacts : IMachineFacts
+    {
+        public string Hostname => MachineHostname;
+
+        public string? MacAddress => "aa-bb-cc-dd-ee-ff";
+
+        public ComputerRecord? RegisteredComputer => null;
+
+        public bool IsRegistered => true;
+
+        public bool HardwareIdentityReadable => true;
+    }
 
     /// <summary>The gate, answering what the case states and recording what it was asked.</summary>
     private sealed class StubGate : IMachineSetupGate

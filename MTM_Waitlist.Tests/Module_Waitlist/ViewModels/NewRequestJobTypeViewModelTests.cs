@@ -19,7 +19,7 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.ViewModels;
 public sealed class NewRequestJobTypeViewModelTests
 {
     [TestMethod]
-    public async Task OnNavigatedTo_BindsTheVisibleCategoriesInCanonicalOrder()
+    public async Task ViewModel_NewRequestJobTypeViewModelTests_OnNavigatedTo_BindsTheVisibleCategoriesInCanonicalOrder()
     {
         var viewModel = CreateViewModel(availability: RequestJobPartAvailability.All);
 
@@ -38,7 +38,7 @@ public sealed class NewRequestJobTypeViewModelTests
     }
 
     [TestMethod]
-    public async Task OnNavigatedTo_JobWithNoParts_OffersNoCategoryThatWouldOpenAnEmptyStep()
+    public async Task ViewModel_NewRequestJobTypeViewModelTests_OnNavigatedTo_JobWithNoPartsOffersNoCategoryThatWouldOpenAnEmptyStep()
     {
         var viewModel = CreateViewModel(availability: RequestJobPartAvailability.None);
 
@@ -62,7 +62,7 @@ public sealed class NewRequestJobTypeViewModelTests
     }
 
     [TestMethod]
-    public async Task OnNavigatedTo_ResolvesTheAvailabilitySnapshotAndKeepsItOnTheState()
+    public async Task ViewModel_NewRequestJobTypeViewModelTests_OnNavigatedTo_ResolvesTheAvailabilitySnapshotAndKeepsItOnTheState()
     {
         var viewModel = CreateViewModel(availability: RequestJobPartAvailability.All);
         var state = new NewRequestFlowState { WorkCenter = "100-03" };
@@ -76,7 +76,7 @@ public sealed class NewRequestJobTypeViewModelTests
     }
 
     [TestMethod]
-    public async Task OnNavigatedTo_JobHasCoil_ShowsCoilBanner()
+    public async Task ViewModel_NewRequestJobTypeViewModelTests_OnNavigatedTo_JobHasCoilShowsCoilBanner()
     {
         var viewModel = CreateViewModel(coil: new WaitlistCoilInfo { HasCoil = true, CoilNumber = "COIL-204", QuantityOnHand = "18 coils", Description = "galvanized", AverageWeight = "1,240 lb" });
 
@@ -89,7 +89,7 @@ public sealed class NewRequestJobTypeViewModelTests
     }
 
     [TestMethod]
-    public async Task OnNavigatedTo_JobHasNoCoil_ShowsNoCoilBanner()
+    public async Task ViewModel_NewRequestJobTypeViewModelTests_OnNavigatedTo_JobHasNoCoilShowsNoCoilBanner()
     {
         var viewModel = CreateViewModel(coil: new WaitlistCoilInfo { HasCoil = false });
 
@@ -102,7 +102,7 @@ public sealed class NewRequestJobTypeViewModelTests
     }
 
     [TestMethod]
-    public async Task SelectCategory_RecordsTheCategoryAndOpensTheItemStep()
+    public async Task ViewModel_NewRequestJobTypeViewModelTests_SelectCategory_RecordsTheCategoryAndOpensTheItemStep()
     {
         var navigation = new RecordingNavigationService();
         var viewModel = CreateViewModel(navigation: navigation, availability: RequestJobPartAvailability.All);
@@ -121,7 +121,7 @@ public sealed class NewRequestJobTypeViewModelTests
     }
 
     [TestMethod]
-    public async Task SelectCategory_LeavesNoTypeOrSubtypeBehind()
+    public async Task ViewModel_NewRequestJobTypeViewModelTests_SelectCategory_LeavesNoTypeOrSubtypeBehind()
     {
         var viewModel = CreateViewModel(availability: RequestJobPartAvailability.All);
         var state = new NewRequestFlowState { WorkCenter = "100-03" };
@@ -147,7 +147,7 @@ public sealed class NewRequestJobTypeViewModelTests
     }
 
     [TestMethod]
-    public async Task Back_LeavesTheStep()
+    public async Task ViewModel_NewRequestJobTypeViewModelTests_Back_LeavesTheStep()
     {
         var navigation = new RecordingNavigationService();
         var viewModel = CreateViewModel(navigation: navigation, availability: RequestJobPartAvailability.All);

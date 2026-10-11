@@ -28,13 +28,13 @@ public sealed class RequestItemObservedTimeServiceTests
     // ── The procedure's rules, read from the artifact that ships ────────────────────────────────────────
 
     [TestMethod]
-    public void TheObservedAverage_CountsCompletedRequestsOnly()
+    public void Service_RequestItemObservedTimeServiceTests_TheObservedAverage_CountsCompletedRequestsOnly()
     {
         StringAssert.Contains(ProcedureBody(), "status = 'Completed'");
     }
 
     [TestMethod]
-    public void TheObservedAverage_MeasuresFromAcceptanceToCompletion()
+    public void Service_RequestItemObservedTimeServiceTests_TheObservedAverage_MeasuresFromAcceptanceToCompletion()
     {
         var body = ProcedureBody();
 
@@ -47,7 +47,7 @@ public sealed class RequestItemObservedTimeServiceTests
     }
 
     [TestMethod]
-    public void TheObservedAverage_ExcludesARequestMissingEitherEndpoint()
+    public void Service_RequestItemObservedTimeServiceTests_TheObservedAverage_ExcludesARequestMissingEitherEndpoint()
     {
         var body = ProcedureBody();
 
@@ -56,7 +56,7 @@ public sealed class RequestItemObservedTimeServiceTests
     }
 
     [TestMethod]
-    public void TheObservedAverage_CountsAReleasedThenCompletedRequestExactlyOnce()
+    public void Service_RequestItemObservedTimeServiceTests_TheObservedAverage_CountsAReleasedThenCompletedRequestExactlyOnce()
     {
         var body = ProcedureBody();
 
@@ -73,7 +73,7 @@ public sealed class RequestItemObservedTimeServiceTests
     }
 
     [TestMethod]
-    public void TheObservedAverage_AppliesNoTimeWindow()
+    public void Service_RequestItemObservedTimeServiceTests_TheObservedAverage_AppliesNoTimeWindow()
     {
         var body = ProcedureBody();
 
@@ -88,7 +88,7 @@ public sealed class RequestItemObservedTimeServiceTests
     // ── The composition the screen consumes ────────────────────────────────────────────────────────────
 
     [TestMethod]
-    public async Task GetObservedTimesAsync_ReadsTheObservedAverageProcedure()
+    public async Task Service_RequestItemObservedTimeServiceTests_GetObservedTimesAsync_ReadsTheObservedAverageProcedure()
     {
         var helper = new FakeMySqlHelperServer();
         helper.EnqueueEmptyQueryResult();
@@ -104,7 +104,7 @@ public sealed class RequestItemObservedTimeServiceTests
     }
 
     [TestMethod]
-    public async Task GetObservedTimesAsync_ShowsTheConfiguredMinutesBesideTheObservedAverage()
+    public async Task Service_RequestItemObservedTimeServiceTests_GetObservedTimesAsync_ShowsTheConfiguredMinutesBesideTheObservedAverage()
     {
         var configurations = new FakeRequestItemConfigurationService();
         configurations.Configure(Item, 30);
@@ -125,7 +125,7 @@ public sealed class RequestItemObservedTimeServiceTests
     }
 
     [TestMethod]
-    public async Task GetObservedTimesAsync_ForAnItemWithNoCompletedRequest_YieldsNoValueRatherThanAZero()
+    public async Task Service_RequestItemObservedTimeServiceTests_GetObservedTimesAsync_ForAnItemWithNoCompletedRequestYieldsNoValueRatherThanAZero()
     {
         var helper = new FakeMySqlHelperServer();
         helper.EnqueueQueryResult(Row(Item, completedCount: 4, averageSeconds: 80 * 60));
@@ -139,7 +139,7 @@ public sealed class RequestItemObservedTimeServiceTests
     }
 
     [TestMethod]
-    public async Task GetObservedTimesAsync_IsARead_ItNeverWritesTheObservedValueBack()
+    public async Task Service_RequestItemObservedTimeServiceTests_GetObservedTimesAsync_IsAReadItNeverWritesTheObservedValueBack()
     {
         var helper = new FakeMySqlHelperServer();
         helper.EnqueueQueryResult(Row(Item, completedCount: 4, averageSeconds: 80 * 60));
@@ -153,7 +153,7 @@ public sealed class RequestItemObservedTimeServiceTests
     }
 
     [TestMethod]
-    public async Task GetObservedTimesAsync_ReturnsOneRowPerCataloguedItemInCatalogOrder()
+    public async Task Service_RequestItemObservedTimeServiceTests_GetObservedTimesAsync_ReturnsOneRowPerCataloguedItemInCatalogOrder()
     {
         var helper = new FakeMySqlHelperServer();
         helper.EnqueueEmptyQueryResult();
@@ -166,7 +166,7 @@ public sealed class RequestItemObservedTimeServiceTests
     }
 
     [TestMethod]
-    public async Task GetObservedTimesAsync_NamesEachRowThroughTheResourceMechanism()
+    public async Task Service_RequestItemObservedTimeServiceTests_GetObservedTimesAsync_NamesEachRowThroughTheResourceMechanism()
     {
         var helper = new FakeMySqlHelperServer();
         helper.EnqueueEmptyQueryResult();

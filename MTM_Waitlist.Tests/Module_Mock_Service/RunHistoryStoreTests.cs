@@ -37,14 +37,14 @@ public sealed class RunHistoryStoreTests
     }
 
     [TestMethod]
-    public void FileName_IsTheOneTheMeasurementToolLooksFor()
+    public void Service_RunHistoryStoreTests_FileName_IsTheOneTheMeasurementToolLooksFor()
     {
         Assert.AreEqual("run-history.jsonl", RunHistoryStore.FileName);
         Assert.AreEqual(RunHistoryStore.FileName, CreateStore().FilePath.Split(Path.DirectorySeparatorChar)[^1]);
     }
 
     [TestMethod]
-    public async Task AppendRefreshAsync_WritesThePropertyNamesTheMeasurementToolReads()
+    public async Task Service_RunHistoryStoreTests_AppendRefreshAsync_WritesThePropertyNamesTheMeasurementToolReads()
     {
         var store = CreateStore();
 
@@ -63,7 +63,7 @@ public sealed class RunHistoryStoreTests
     }
 
     [TestMethod]
-    public async Task AppendRefreshAsync_OmitsTheMembersThatDoNotApplyToARefresh()
+    public async Task Service_RunHistoryStoreTests_AppendRefreshAsync_OmitsTheMembersThatDoNotApplyToARefresh()
     {
         var store = CreateStore();
 
@@ -85,7 +85,7 @@ public sealed class RunHistoryStoreTests
     [DataRow(RefreshRunOutcome.FailedLoad, "Failed", "loadFailed")]
     [DataRow(RefreshRunOutcome.FailedUnknown, "Failed", "unexpectedError")]
     [DataRow(RefreshRunOutcome.Pending, "Pending", null)]
-    public async Task AppendRefreshAsync_MapsEachOutcomeOntoTheVocabularyTheCriteriaAreWrittenIn(
+    public async Task Service_RunHistoryStoreTests_AppendRefreshAsync_MapsEachOutcomeOntoTheVocabularyTheCriteriaAreWrittenIn(
         RefreshRunOutcome outcome,
         string expectedOutcome,
         string? expectedReason)
@@ -101,7 +101,7 @@ public sealed class RunHistoryStoreTests
     }
 
     [TestMethod]
-    public async Task AppendRefreshAsync_OnlyClaimsRowsForASuccess()
+    public async Task Service_RunHistoryStoreTests_AppendRefreshAsync_OnlyClaimsRowsForASuccess()
     {
         var store = CreateStore();
 
@@ -119,7 +119,7 @@ public sealed class RunHistoryStoreTests
     }
 
     [TestMethod]
-    public async Task AppendRefreshAsync_GivesEveryShapeOfOneCycleTheSameCycleInstant()
+    public async Task Service_RunHistoryStoreTests_AppendRefreshAsync_GivesEveryShapeOfOneCycleTheSameCycleInstant()
     {
         var store = CreateStore();
         var cycle = new DateTime(2026, 9, 12, 3, 0, 0, DateTimeKind.Utc);
@@ -136,7 +136,7 @@ public sealed class RunHistoryStoreTests
     }
 
     [TestMethod]
-    public async Task AppendRefreshAsync_KeepsAnOnDemandRunOutOfTheScheduledReading()
+    public async Task Service_RunHistoryStoreTests_AppendRefreshAsync_KeepsAnOnDemandRunOutOfTheScheduledReading()
     {
         var store = CreateStore();
 
@@ -150,7 +150,7 @@ public sealed class RunHistoryStoreTests
     }
 
     [TestMethod]
-    public async Task AppendRefreshAsync_AppendsRatherThanReplacingThePreviousRun()
+    public async Task Service_RunHistoryStoreTests_AppendRefreshAsync_AppendsRatherThanReplacingThePreviousRun()
     {
         var store = CreateStore();
 
@@ -163,7 +163,7 @@ public sealed class RunHistoryStoreTests
     }
 
     [TestMethod]
-    public async Task AppendRefreshAsync_WhenTheInstantIsLocal_WritesTheUtcDesignator()
+    public async Task Service_RunHistoryStoreTests_AppendRefreshAsync_WhenTheInstantIsLocalWritesTheUtcDesignator()
     {
         var store = CreateStore();
         var local = new DateTime(2026, 9, 12, 5, 0, 0, DateTimeKind.Local);
@@ -180,7 +180,7 @@ public sealed class RunHistoryStoreTests
     }
 
     [TestMethod]
-    public async Task AppendRefreshAsync_WhenTheInstantCarriesNoKind_TreatsItAsUtc()
+    public async Task Service_RunHistoryStoreTests_AppendRefreshAsync_WhenTheInstantCarriesNoKindTreatsItAsUtc()
     {
         var store = CreateStore();
         var unspecified = new DateTime(2026, 9, 12, 5, 0, 0, DateTimeKind.Unspecified);
@@ -192,7 +192,7 @@ public sealed class RunHistoryStoreTests
     }
 
     [TestMethod]
-    public async Task AppendRefreshAsync_RedactsCredentialShapedTextFromTheDetail()
+    public async Task Service_RunHistoryStoreTests_AppendRefreshAsync_RedactsCredentialShapedTextFromTheDetail()
     {
         var store = CreateStore();
         var record = SucceededRefresh("work_order_lookup", DateTime.UtcNow) with
@@ -208,7 +208,7 @@ public sealed class RunHistoryStoreTests
     }
 
     [TestMethod]
-    public async Task AppendBackupAsync_WritesTheArtifactOfASuccessfulRun()
+    public async Task Service_RunHistoryStoreTests_AppendBackupAsync_WritesTheArtifactOfASuccessfulRun()
     {
         var store = CreateStore();
         var window = new DateTime(2026, 9, 12, 2, 0, 0, DateTimeKind.Utc);
@@ -236,7 +236,7 @@ public sealed class RunHistoryStoreTests
     }
 
     [TestMethod]
-    public async Task AppendBackupAsync_WhenTheArtifactObjectIsAbsent_FallsBackToTheRecordsOwnPath()
+    public async Task Service_RunHistoryStoreTests_AppendBackupAsync_WhenTheArtifactObjectIsAbsentFallsBackToTheRecordsOwnPath()
     {
         var store = CreateStore();
 
@@ -254,7 +254,7 @@ public sealed class RunHistoryStoreTests
     [DataRow(BackupRunOutcome.Never, "Pending", "neverRun")]
     [DataRow(BackupRunOutcome.ToolUnavailable, "Failed", "mysqldumpUnavailable")]
     [DataRow(BackupRunOutcome.Failed, "Failed", "mysqldumpFailed")]
-    public async Task AppendBackupAsync_MapsEachOutcomeOntoTheVocabularyTheCriteriaAreWrittenIn(
+    public async Task Service_RunHistoryStoreTests_AppendBackupAsync_MapsEachOutcomeOntoTheVocabularyTheCriteriaAreWrittenIn(
         BackupRunOutcome outcome,
         string expectedOutcome,
         string? expectedReason)
@@ -271,7 +271,7 @@ public sealed class RunHistoryStoreTests
     }
 
     [TestMethod]
-    public async Task AppendBackupAsync_NamesEachStoreTheWayItsDatabaseIsNamed()
+    public async Task Service_RunHistoryStoreTests_AppendBackupAsync_NamesEachStoreTheWayItsDatabaseIsNamed()
     {
         var store = CreateStore();
 
@@ -287,7 +287,7 @@ public sealed class RunHistoryStoreTests
     }
 
     [TestMethod]
-    public async Task ReadAsync_ReturnsEveryEntryInTheOrderItWasWritten()
+    public async Task Service_RunHistoryStoreTests_ReadAsync_ReturnsEveryEntryInTheOrderItWasWritten()
     {
         var store = CreateStore();
 
@@ -303,13 +303,13 @@ public sealed class RunHistoryStoreTests
     }
 
     [TestMethod]
-    public async Task ReadAsync_WhenTheFileDoesNotExist_ReturnsNothing()
+    public async Task Service_RunHistoryStoreTests_ReadAsync_WhenTheFileDoesNotExistReturnsNothing()
     {
         Assert.AreEqual(0, (await CreateStore().ReadAsync()).Count);
     }
 
     [TestMethod]
-    public async Task ReadAsync_WhenOneLineIsCorrupt_KeepsTheRest()
+    public async Task Service_RunHistoryStoreTests_ReadAsync_WhenOneLineIsCorruptKeepsTheRest()
     {
         var store = CreateStore();
         await store.AppendRefreshAsync(SucceededRefresh("work_order_lookup", DateTime.UtcNow));
@@ -324,7 +324,7 @@ public sealed class RunHistoryStoreTests
     }
 
     [TestMethod]
-    public async Task AppendAsync_DropsEntriesOlderThanTheRetentionWindow()
+    public async Task Service_RunHistoryStoreTests_AppendAsync_DropsEntriesOlderThanTheRetentionWindow()
     {
         var now = new DateTime(2026, 9, 20, 6, 0, 0, DateTimeKind.Utc);
         var store = CreateStore(now);
@@ -338,7 +338,7 @@ public sealed class RunHistoryStoreTests
     }
 
     [TestMethod]
-    public async Task AppendAsync_WhenAnEntryIsExactlyAtTheCutoff_KeepsIt()
+    public async Task Service_RunHistoryStoreTests_AppendAsync_WhenAnEntryIsExactlyAtTheCutoffKeepsIt()
     {
         var now = new DateTime(2026, 9, 20, 6, 0, 0, DateTimeKind.Utc);
         var store = CreateStore(now);
@@ -352,7 +352,7 @@ public sealed class RunHistoryStoreTests
     }
 
     [TestMethod]
-    public async Task AppendAsync_WhenALineCannotBeDated_KeepsIt()
+    public async Task Service_RunHistoryStoreTests_AppendAsync_WhenALineCannotBeDatedKeepsIt()
     {
         var now = new DateTime(2026, 9, 20, 6, 0, 0, DateTimeKind.Utc);
         var store = CreateStore(now);
@@ -368,7 +368,7 @@ public sealed class RunHistoryStoreTests
     }
 
     [TestMethod]
-    public void Retention_OutlivesTheWindowTheCriteriaAreMeasuredOver()
+    public void Service_RunHistoryStoreTests_Retention_OutlivesTheWindowTheCriteriaAreMeasuredOver()
     {
         Assert.IsTrue(
             RunHistoryStore.RetentionDays > ReliabilityCriteria.MeasuredWindowDays,
@@ -377,7 +377,7 @@ public sealed class RunHistoryStoreTests
     }
 
     [TestMethod]
-    public void BackupRetention_OutlivesTheWindowTheCriteriaAreMeasuredOver()
+    public void Service_RunHistoryStoreTests_BackupRetention_OutlivesTheWindowTheCriteriaAreMeasuredOver()
     {
         Assert.IsTrue(
             ReliabilityCriteria.BackupRetentionCount >= ReliabilityCriteria.MeasuredWindowDays,
@@ -388,7 +388,7 @@ public sealed class RunHistoryStoreTests
     }
 
     [TestMethod]
-    public void DiagnosticLogRetention_OutlivesTheWindowTheCriteriaAreMeasuredOver()
+    public void Service_RunHistoryStoreTests_DiagnosticLogRetention_OutlivesTheWindowTheCriteriaAreMeasuredOver()
     {
         Assert.IsTrue(
             ServiceLog.RetentionDays > ReliabilityCriteria.MeasuredWindowDays,

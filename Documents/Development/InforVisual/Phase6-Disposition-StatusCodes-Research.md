@@ -64,6 +64,6 @@ Observed in use (`SELECT STATUS, COUNT(*) FROM WORK_ORDER GROUP BY STATUS`; tota
   - `X` (Cancelled) is intentionally in neither set; header documents the confirmed codes + derivations.
 - `MTM_Waitlist.Tests/Module_Settings/RequestDispositionClassifierTests.cs`
   - Existing `"O"` placeholder cases updated to confirmed codes (`R`/`U`/`C`).
-  - Added `Classify_UnreleasedStatus_ReturnsWorkInProcess` and
-    `Classify_CancelledStatusWithOnHand_ReturnsUnknownNotFinishedGoods`.
+  - Added `Service_RequestDispositionClassifierTests_Classify_UnreleasedStatusReturnsWorkInProcess` and
+    `Service_RequestDispositionClassifierTests_Classify_CancelledStatusWithOnHandReturnsUnknownNotFinishedGoods`.
   - Result: 10/10 classifier tests green.

@@ -16,7 +16,7 @@ public sealed class PageServiceTests
     private sealed class AnotherPage { }
 
     [TestMethod]
-    public void GetPageType_ReturnsConfiguredPageTypes()
+    public void Service_PageServiceTests_GetPageType_ReturnsConfiguredPageTypes()
     {
         var service = new PageService();
         service.Configure<FakeViewModel, FakePage>();
@@ -27,7 +27,7 @@ public sealed class PageServiceTests
     }
 
     [TestMethod]
-    public void GetPageType_ThrowsForUnknownKey()
+    public void Service_PageServiceTests_GetPageType_ThrowsForUnknownKey()
     {
         var service = new PageService();
 

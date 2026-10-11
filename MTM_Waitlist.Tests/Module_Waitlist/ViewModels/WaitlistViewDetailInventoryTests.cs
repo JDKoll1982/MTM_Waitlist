@@ -11,7 +11,7 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.ViewModels;
 public sealed class WaitlistViewDetailInventoryTests
 {
     [TestMethod]
-    public async Task LoadInventoryAsync_PopulatesRowsAndClearsEmptyFlag()
+    public async Task ViewModel_WaitlistViewDetailInventoryTests_LoadInventoryAsync_PopulatesRowsAndClearsEmptyFlag()
     {
         var inventory = new StubInventoryService(
             new InventoryLocationRow { PartNumber = "P1", Location = "Rack A1", OnHandQuantity = 18m },
@@ -26,7 +26,7 @@ public sealed class WaitlistViewDetailInventoryTests
     }
 
     [TestMethod]
-    public async Task LoadInventoryAsync_WhenNoRows_SetsEmptyFlag()
+    public async Task ViewModel_WaitlistViewDetailInventoryTests_LoadInventoryAsync_WhenNoRowsSetsEmptyFlag()
     {
         var inventory = new StubInventoryService();
         var viewModel = CreateViewModel(inventory);
@@ -38,7 +38,7 @@ public sealed class WaitlistViewDetailInventoryTests
     }
 
     [TestMethod]
-    public async Task LoadInventoryAsync_EmptyPartOrNoService_LeavesEmpty()
+    public async Task ViewModel_WaitlistViewDetailInventoryTests_LoadInventoryAsync_EmptyPartOrNoServiceLeavesEmpty()
     {
         var viewModel = CreateViewModel(new StubInventoryService());
         await viewModel.LoadInventoryAsync("   ");
@@ -51,7 +51,7 @@ public sealed class WaitlistViewDetailInventoryTests
     }
 
     [TestMethod]
-    public async Task SortInventoryBy_SortsAndTogglesDirection()
+    public async Task ViewModel_WaitlistViewDetailInventoryTests_SortInventoryBy_SortsAndTogglesDirection()
     {
         var inventory = new StubInventoryService(
             new InventoryLocationRow { PartNumber = "P1", Location = "Rack B2", OnHandQuantity = 6m },
@@ -81,7 +81,7 @@ public sealed class WaitlistViewDetailInventoryTests
     }
 
     [TestMethod]
-    public void ResolveInventoryPartNumber_PrefersPartNumberThenFallsBackToRequestedCoil()
+    public void ViewModel_WaitlistViewDetailInventoryTests_ResolveInventoryPartNumber_PrefersPartNumberThenFallsBackToRequestedCoil()
     {
         var withPart = new SampleOrder();
         withPart.Fields.Add(new WaitlistField { Label = "Part number", Value = "MMC0001000" });

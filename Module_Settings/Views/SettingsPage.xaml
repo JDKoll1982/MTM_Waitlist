@@ -265,14 +265,6 @@
                                 Text="{x:Bind ViewModel.PictureFolderInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         </wct:SettingsCard>
 
-                        <wct:SettingsCard Header="{x:Bind ViewModel.StoragePathsKeysFolderLabel}">
-                            <TextBox
-                                AutomationProperties.AutomationId="SettingsPage_StoragePaths_KeysFolderBox"
-                                AutomationProperties.Name="{x:Bind ViewModel.StoragePathsKeysFolderLabel}"
-                                MinWidth="420"
-                                Text="{x:Bind ViewModel.KeysFolderInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        </wct:SettingsCard>
-
                         <wct:SettingsCard Header="{x:Bind ViewModel.StoragePathsDunnageRootLabel}">
                             <TextBox
                                 AutomationProperties.AutomationId="SettingsPage_StoragePaths_DunnageRootBox"

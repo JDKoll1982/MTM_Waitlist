@@ -10,7 +10,7 @@ namespace MTM_Waitlist.Tests.Core.Services;
 public sealed class NewRequestAlertServiceTests
 {
     [TestMethod]
-    public async Task GetEnabled_DefaultsOff_WhenNeverSet()
+    public async Task Service_NewRequestAlertServiceTests_GetEnabled_DefaultsOffWhenNeverSet()
     {
         var preferences = new InMemoryScopedPreferenceStore();
         var service = new NewRequestAlertService(preferences);
@@ -23,7 +23,7 @@ public sealed class NewRequestAlertServiceTests
     }
 
     [TestMethod]
-    public async Task GetEnabled_ReturnsStoredValue()
+    public async Task Service_NewRequestAlertServiceTests_GetEnabled_ReturnsStoredValue()
     {
         var preferences = new InMemoryScopedPreferenceStore();
         preferences.SeedFlag(NewRequestAlertService.SettingKeyName, PreferenceScope.Person, true);
@@ -33,7 +33,7 @@ public sealed class NewRequestAlertServiceTests
     }
 
     [TestMethod]
-    public async Task Set_PersistsUnderSettingKey()
+    public async Task Service_NewRequestAlertServiceTests_Set_PersistsUnderSettingKey()
     {
         var preferences = new InMemoryScopedPreferenceStore();
         var service = new NewRequestAlertService(preferences);
@@ -44,7 +44,7 @@ public sealed class NewRequestAlertServiceTests
     }
 
     [TestMethod]
-    public async Task ShouldNotifyOnCreated_RequiresSignalEnabledAndPackaged()
+    public async Task Service_NewRequestAlertServiceTests_ShouldNotifyOnCreated_RequiresSignalEnabledAndPackaged()
     {
         var preferences = new InMemoryScopedPreferenceStore();
         preferences.SeedFlag(NewRequestAlertService.SettingKeyName, PreferenceScope.Person, true);
@@ -56,7 +56,7 @@ public sealed class NewRequestAlertServiceTests
     }
 
     [TestMethod]
-    public async Task ShouldNotifyOnCreated_RespectsOffToggle()
+    public async Task Service_NewRequestAlertServiceTests_ShouldNotifyOnCreated_RespectsOffToggle()
     {
         // Never set -> defaults OFF, so even when a request is created in a packaged app, no toast.
         var preferences = new InMemoryScopedPreferenceStore();

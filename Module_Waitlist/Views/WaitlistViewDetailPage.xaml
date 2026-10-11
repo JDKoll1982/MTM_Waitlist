@@ -474,7 +474,7 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <TextBlock
-                            x:Uid="Waitlist_Detail.DeclaredFields.Title"
+                            x:Uid="Waitlist_Detail_DeclaredFields.Title"
                             Grid.Row="0"
                             Style="{ThemeResource SubtitleTextBlockStyle}"
                             Text="{x:Bind ViewModel.DeclaredFieldsTitle, Mode=OneWay}" />

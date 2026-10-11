@@ -39,7 +39,7 @@ public sealed class RefreshRunRecordStoreTests
     }
 
     [TestMethod]
-    public async Task RecordAsync_PersistsTheLastRunPerShape_AndReloadsItAsync()
+    public async Task Service_RefreshRunRecordStoreTests_RecordAsync_PersistsTheLastRunPerShapeAndReloadsItAsync()
     {
         var store = new RefreshRunRecordStore(_root);
         var startedUtc = new DateTime(2026, 9, 10, 12, 0, 0, DateTimeKind.Utc);
@@ -81,7 +81,7 @@ public sealed class RefreshRunRecordStoreTests
     }
 
     [TestMethod]
-    public async Task RecordAsync_ReplacesTheEarlierRunForTheSameShapeAsync()
+    public async Task Service_RefreshRunRecordStoreTests_RecordAsync_ReplacesTheEarlierRunForTheSameShapeAsync()
     {
         var store = new RefreshRunRecordStore(_root);
         var startedUtc = new DateTime(2026, 9, 10, 12, 0, 0, DateTimeKind.Utc);
@@ -110,7 +110,7 @@ public sealed class RefreshRunRecordStoreTests
     }
 
     [TestMethod]
-    public async Task RecordAsync_RedactsCredentialShapedErrorTextAsync()
+    public async Task Service_RefreshRunRecordStoreTests_RecordAsync_RedactsCredentialShapedErrorTextAsync()
     {
         var store = new RefreshRunRecordStore(_root);
 
@@ -132,7 +132,7 @@ public sealed class RefreshRunRecordStoreTests
     }
 
     [TestMethod]
-    public async Task LoadAsync_WhenTheFileIsCorrupt_IsEmptyRatherThanThrowingAsync()
+    public async Task Service_RefreshRunRecordStoreTests_LoadAsync_WhenTheFileIsCorruptIsEmptyRatherThanThrowingAsync()
     {
         var store = new RefreshRunRecordStore(_root);
         await File.WriteAllTextAsync(store.FilePath, "{ this is not valid json");
@@ -154,7 +154,7 @@ public sealed class RefreshRunRecordStoreTests
     }
 
     [TestMethod]
-    public async Task LoadAsync_WhenNothingHasRunYet_IsEmptyAndDoesNotThrowAsync()
+    public async Task Service_RefreshRunRecordStoreTests_LoadAsync_WhenNothingHasRunYetIsEmptyAndDoesNotThrowAsync()
     {
         var store = new RefreshRunRecordStore(_root);
 

@@ -46,7 +46,7 @@ public sealed class DocumentInputAuditTests
     /// cannot pass merely because nothing was scanned.
     /// </summary>
     [TestMethod]
-    public void DesignDocumentScan_ReachesAFixtureThatReferencesThem()
+    public void Audit_DocumentInputAuditTests_DesignDocumentScan_ReachesAFixtureThatReferencesThem()
     {
         var scope = new RepositoryScanScope
         {
@@ -70,7 +70,7 @@ public sealed class DocumentInputAuditTests
     /// FR-027: no shipped file may name either design document.
     /// </summary>
     [TestMethod]
-    public void NoShippedFileReferencesTheDesignDocuments()
+    public void Audit_DocumentInputAuditTests_NoShippedFileReferencesTheDesignDocuments()
     {
         var scope = new RepositoryScanScope
         {

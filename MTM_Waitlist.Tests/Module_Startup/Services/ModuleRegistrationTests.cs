@@ -31,7 +31,7 @@ namespace MTM_Waitlist.Tests.Module_Startup.Services;
 public sealed class ModuleRegistrationTests
 {
     [TestMethod]
-    public void EveryStartupRegistration_HasAConstructorTheContainerCanUse()
+    public void Service_ModuleRegistrationTests_EveryStartupRegistration_HasAConstructorTheContainerCanUse()
     {
         // Arrange: the module's own registrations, into a bare collection.
         var services = new ServiceCollection();

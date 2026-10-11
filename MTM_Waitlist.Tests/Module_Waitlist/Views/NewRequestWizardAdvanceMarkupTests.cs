@@ -31,7 +31,7 @@ public sealed class NewRequestWizardAdvanceMarkupTests
     ];
 
     [TestMethod]
-    public void ChoiceSteps_DeclareNoContinueButton()
+    public void UI_NewRequestWizardAdvanceMarkupTests_ChoiceSteps_DeclareNoContinueButton()
     {
         foreach (var step in s_choiceSteps)
         {
@@ -44,7 +44,7 @@ public sealed class NewRequestWizardAdvanceMarkupTests
     }
 
     [TestMethod]
-    public void ItemStep_AdvanceIsWiredToTheTileClick()
+    public void UI_NewRequestWizardAdvanceMarkupTests_ItemStep_AdvanceIsWiredToTheTileClick()
     {
         var markup = ReadMarkup("NewRequestItemPage.xaml");
 
@@ -57,7 +57,7 @@ public sealed class NewRequestWizardAdvanceMarkupTests
     }
 
     [TestMethod]
-    public void DetailsStep_TypedAnswerAdvancesOnEnter()
+    public void UI_NewRequestWizardAdvanceMarkupTests_DetailsStep_TypedAnswerAdvancesOnEnter()
     {
         var markup = ReadMarkup("NewRequestDetailsPage.xaml");
 
@@ -70,7 +70,7 @@ public sealed class NewRequestWizardAdvanceMarkupTests
     }
 
     [TestMethod]
-    public void DetailsStep_ListedAnswerAdvancesWhenItIsPicked()
+    public void UI_NewRequestWizardAdvanceMarkupTests_DetailsStep_ListedAnswerAdvancesWhenItIsPicked()
     {
         var markup = ReadMarkup("NewRequestDetailsPage.xaml");
 

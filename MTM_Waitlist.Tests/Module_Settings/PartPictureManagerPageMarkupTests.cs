@@ -23,7 +23,7 @@ public sealed class PartPictureManagerPageMarkupTests
     /// list inside one is never the thing that scrolls.
     /// </summary>
     [TestMethod]
-    public void PartPictureLists_ScrollTheirOwnContent_InsteadOfGrowingPastTheWindow()
+    public void UI_PartPictureManagerPageMarkupTests_PartPictureLists_ScrollTheirOwnContentInsteadOfGrowingPastTheWindow()
     {
         foreach (var listId in new[] { "PartPictureManagerPage_ChangeRecord", "PartPictureManagerPage_MissingList" })
         {

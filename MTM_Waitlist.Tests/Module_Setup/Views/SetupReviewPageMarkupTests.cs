@@ -26,7 +26,7 @@ public sealed class SetupReviewPageMarkupTests
     /// which is what this feature removes.
     /// </summary>
     [TestMethod]
-    public void SubordinatePartRow_DrawsThePartsPicture()
+    public void UI_SetupReviewPageMarkupTests_SubordinatePartRow_DrawsThePartsPicture()
     {
         var image = SubordinatePartRowImage();
 
@@ -44,7 +44,7 @@ public sealed class SetupReviewPageMarkupTests
     /// picture.
     /// </summary>
     [TestMethod]
-    public void SubordinatePartRow_DrawsThePictureInAFixedSizeThumbnail()
+    public void UI_SetupReviewPageMarkupTests_SubordinatePartRow_DrawsThePictureInAFixedSizeThumbnail()
     {
         var frame = SubordinatePartRowImage().Parent;
 
@@ -64,7 +64,7 @@ public sealed class SetupReviewPageMarkupTests
     /// artwork offered in place of a part's picture, which FR-015 forbids.
     /// </summary>
     [TestMethod]
-    public void GroupHeader_DrawsNoFamilyArtwork()
+    public void UI_SetupReviewPageMarkupTests_GroupHeader_DrawsNoFamilyArtwork()
     {
         var header = LoadPage()
             .Descendants(s_presentation + "TextBlock")
@@ -84,7 +84,7 @@ public sealed class SetupReviewPageMarkupTests
     /// picture rather than an empty source. This is the check that fails if a new surface is added without one.
     /// </summary>
     [TestMethod]
-    public void SubordinatePartRow_FallsBackToTheOneSharedPlaceholder()
+    public void UI_SetupReviewPageMarkupTests_SubordinatePartRow_FallsBackToTheOneSharedPlaceholder()
     {
         Assert.AreEqual(
             ImagePicturePolicy.NoImagePath,

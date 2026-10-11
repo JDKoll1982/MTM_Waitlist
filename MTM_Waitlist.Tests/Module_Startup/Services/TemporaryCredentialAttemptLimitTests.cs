@@ -36,7 +36,7 @@ public sealed class TemporaryCredentialAttemptLimitTests
     private static readonly byte[] s_salt = PasswordSecretHasher.NewSalt();
 
     [TestMethod]
-    public async Task CheckAsync_AfterFiveFailedAttempts_RefusesTheSixthEvenWithTheCorrectValue()
+    public async Task Service_TemporaryCredentialAttemptLimitTests_CheckAsync_AfterFiveFailedAttemptsRefusesTheSixthEvenWithTheCorrectValue()
     {
         // Arrange: five failures have already been recorded against the account.
         var store = new StubAccountStore(TemporaryAccount(failedAttempts: 5));
@@ -54,7 +54,7 @@ public sealed class TemporaryCredentialAttemptLimitTests
     }
 
     [TestMethod]
-    public async Task CheckAsync_AfterARestart_StillRefusesTheSixthAttempt()
+    public async Task Service_TemporaryCredentialAttemptLimitTests_CheckAsync_AfterARestartStillRefusesTheSixthAttempt()
     {
         // Arrange: five failures, then a brand-new service over the same account, which is what a restart is.
         var account = TemporaryAccount();
@@ -74,7 +74,7 @@ public sealed class TemporaryCredentialAttemptLimitTests
     }
 
     [TestMethod]
-    public async Task CheckAsync_WhenATemporaryCredentialIsRefused_RaisesTheCountAgainstTheAccount()
+    public async Task Service_TemporaryCredentialAttemptLimitTests_CheckAsync_WhenATemporaryCredentialIsRefusedRaisesTheCountAgainstTheAccount()
     {
         // Arrange
         var account = TemporaryAccount();
@@ -89,7 +89,7 @@ public sealed class TemporaryCredentialAttemptLimitTests
     }
 
     [TestMethod]
-    public async Task CheckAsync_WhenATemporaryCredentialIsAccepted_ClearsTheCount()
+    public async Task Service_TemporaryCredentialAttemptLimitTests_CheckAsync_WhenATemporaryCredentialIsAcceptedClearsTheCount()
     {
         // Arrange: four failures behind it, so the fifth attempt is still compared.
         var account = TemporaryAccount(failedAttempts: 4);
@@ -104,7 +104,7 @@ public sealed class TemporaryCredentialAttemptLimitTests
     }
 
     [TestMethod]
-    public async Task CheckAsync_OnAnOrdinaryCredential_DoesNotCountAFailedAttempt()
+    public async Task Service_TemporaryCredentialAttemptLimitTests_CheckAsync_OnAnOrdinaryCredentialDoesNotCountAFailedAttempt()
     {
         // Arrange: the same account, no longer on a temporary credential.
         var account = TemporaryAccount();
@@ -122,7 +122,7 @@ public sealed class TemporaryCredentialAttemptLimitTests
     }
 
     [TestMethod]
-    public async Task CheckAsync_OnAnOrdinaryCredential_AcceptsAndAsksForNoNewPassword()
+    public async Task Service_TemporaryCredentialAttemptLimitTests_CheckAsync_OnAnOrdinaryCredentialAcceptsAndAsksForNoNewPassword()
     {
         // Arrange
         var account = TemporaryAccount();
@@ -139,7 +139,7 @@ public sealed class TemporaryCredentialAttemptLimitTests
     }
 
     [TestMethod]
-    public async Task CheckAsync_WithAMixedCaseSignInName_SendsItUpperCasedToTheStore()
+    public async Task Service_TemporaryCredentialAttemptLimitTests_CheckAsync_WithAMixedCaseSignInNameSendsItUpperCasedToTheStore()
     {
         // Arrange: sign-in names are stored and compared upper case, so the check normalises before it asks.
         var store = new StubAccountStore(TemporaryAccount());

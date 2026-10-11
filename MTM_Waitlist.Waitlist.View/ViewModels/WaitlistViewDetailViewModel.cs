@@ -93,10 +93,10 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     }
 
     /// <summary>Localized explanation shown in place of the sections whose read failed.</summary>
-    public string SectionFailureMessage => "Waitlist_Detail.BlockFailed.Message".GetLocalized();
+    public string SectionFailureMessage => "Waitlist_Detail_BlockFailed.Message".GetLocalized();
 
     /// <summary>Localized label for the section-failure retry action.</summary>
-    public string SectionFailureRetryText => "Waitlist_Detail.BlockFailed.Retry".GetLocalized();
+    public string SectionFailureRetryText => "Waitlist_Detail_BlockFailed.Retry".GetLocalized();
 
     /// <summary>
     /// Re-runs the read that failed and rebuilds the sections. Bound to the retry action on the failure
@@ -172,7 +172,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     public bool IsDeclaredFieldsSectionVisible => HasDeclaredFields || HasDeclaredFieldsReport;
 
     /// <summary>Localized heading of the declared-field grid (FR-022).</summary>
-    public string DeclaredFieldsTitle => "Waitlist_Detail.DeclaredFields.Title".GetLocalized();
+    public string DeclaredFieldsTitle => "Waitlist_Detail_DeclaredFields.Title".GetLocalized();
 
     public WaitlistViewDetailViewModel(
         INavigationService navigationService,

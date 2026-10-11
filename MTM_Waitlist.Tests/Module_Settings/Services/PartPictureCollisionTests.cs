@@ -56,7 +56,7 @@ public sealed class PartPictureCollisionTests
     }
 
     [TestMethod]
-    public async Task ANumberPastTheStorageLimit_IsRefusedWithTheLimitStated()
+    public async Task Service_PartPictureCollisionTests_ANumberPastTheStorageLimit_IsRefusedWithTheLimitStated()
     {
         var tooLong = new string('M', PartPictureLayout.MaxPartNumberLength + 5);
 
@@ -71,7 +71,7 @@ public sealed class PartPictureCollisionTests
     }
 
     [TestMethod]
-    public async Task ANameAnotherPartHolds_IsRefusedNamingThatPart()
+    public async Task Service_PartPictureCollisionTests_ANameAnotherPartHolds_IsRefusedNamingThatPart()
     {
         // Two different numbers whose characters a file name cannot hold are replaced into one name.
         _readService.AddOverride("visual_part", "MMC/0001", "Visual/MMC/MMC_0001.png");
@@ -92,7 +92,7 @@ public sealed class PartPictureCollisionTests
     }
 
     [TestMethod]
-    public async Task TwoNumbersDifferingOnlyByCase_AreRefusedRatherThanSharingOneFile()
+    public async Task Service_PartPictureCollisionTests_TwoNumbersDifferingOnlyByCase_AreRefusedRatherThanSharingOneFile()
     {
         _readService.AddOverride("visual_part", "MMC0001000", "Visual/MMC/MMC0001000.png");
         _writer.Seed("visual_part", "MMC0001000", "Visual/MMC/MMC0001000.png");
@@ -105,7 +105,7 @@ public sealed class PartPictureCollisionTests
     }
 
     [TestMethod]
-    public async Task TheSameNumberUnderTheOtherSystem_IsNotACollision()
+    public async Task Service_PartPictureCollisionTests_TheSameNumberUnderTheOtherSystem_IsNotACollision()
     {
         _readService.AddOverride("visual_part", "MMC0001000", "Visual/MMC/MMC0001000.png");
         _writer.Seed("visual_part", "MMC0001000", "Visual/MMC/MMC0001000.png");
@@ -118,7 +118,7 @@ public sealed class PartPictureCollisionTests
     }
 
     [TestMethod]
-    public async Task ThePartsAlreadyPicturedCannotBeRead_SavesNothing()
+    public async Task Service_PartPictureCollisionTests_ThePartsAlreadyPicturedCannotBeRead_SavesNothing()
     {
         _readService.FailScopeReads = new InvalidOperationException("the store is unreachable");
 

@@ -42,7 +42,6 @@ public sealed class LaunchStepCatalogTests
         "read-computer-record",
         "read-machine-configuration",
         "save-machine-configuration",
-        "read-remembered-sign-in",
         "resolve-person",
         "resolve-roles",
         "check-credential",
@@ -79,7 +78,7 @@ public sealed class LaunchStepCatalogTests
     };
 
     [TestMethod]
-    public void CatalogSourceScope_CoversTheCatalogueSource()
+    public void Service_LaunchStepCatalogTests_CatalogSourceScope_CoversTheCatalogueSource()
     {
         // A scan whose scope resolves to nothing finds nothing, so the derived-count check would pass without
         // reading a file. This proves the scope reaches the catalogue before that check is believed.
@@ -91,7 +90,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void Steps_EveryStep_DeclaresAStatedMaximum()
+    public void Service_LaunchStepCatalogTests_Steps_EveryStepDeclaresAStatedMaximum()
     {
         // Act / Assert: no wait on the launch path may be unbounded (FR-003).
         Assert.IsTrue(_catalog.Steps.Count > 0, "an empty sequence would make every check below vacuous");
@@ -105,7 +104,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void Steps_NoStep_WaitsPastTheCeiling()
+    public void Service_LaunchStepCatalogTests_Steps_NoStepWaitsPastTheCeiling()
     {
         // Act / Assert: 30 seconds is the ceiling for any single wait (FR-003, SC-002).
         foreach (var step in _catalog.Steps)
@@ -117,7 +116,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void Steps_TheTwoBestEffortSteps_AreBoundedMoreTightlyThanTheCeiling()
+    public void Service_LaunchStepCatalogTests_Steps_TheTwoBestEffortStepsAreBoundedMoreTightlyThanTheCeiling()
     {
         // Arrange
         var bestEffort = _catalog.Steps.Where(step => step.IsBestEffort).ToArray();
@@ -133,7 +132,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void Steps_TheBestEffortSteps_AreThePictureRefreshAndTheExternalSystemPriming()
+    public void Service_LaunchStepCatalogTests_Steps_TheBestEffortStepsAreThePictureRefreshAndTheExternalSystemPriming()
     {
         // Act
         var bestEffort = _catalog.Steps.Where(step => step.IsBestEffort).ToArray();
@@ -148,7 +147,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void Steps_EveryStep_CarriesAStableIdANameAndAPlainLanguageDescription()
+    public void Service_LaunchStepCatalogTests_Steps_EveryStepCarriesAStableIdANameAndAPlainLanguageDescription()
     {
         // Act / Assert: the name and the description are what the launch window shows before the work runs
         // (FR-002), and the id is what a retry resumes at (FR-020).
@@ -169,7 +168,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void Steps_EveryCategoryTheContractDeclares_IsRepresented()
+    public void Service_LaunchStepCatalogTests_Steps_EveryCategoryTheContractDeclaresIsRepresented()
     {
         // Act
         var unrepresented = Enum.GetValues<LaunchStepCategory>()
@@ -184,7 +183,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void Steps_EveryIndividualOperationTheLaunchProcesses_HasItsOwnEntry()
+    public void Service_LaunchStepCatalogTests_Steps_EveryIndividualOperationTheLaunchProcessesHasItsOwnEntry()
     {
         // Act / Assert: one entry per operation, not one per phase. The set is pinned so a later edit cannot
         // quietly re-bundle two operations behind a single line and hide which of them stalled.
@@ -195,7 +194,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void Steps_TheOperationsThatRoundTripToTheStore_AllNameTheStore()
+    public void Service_LaunchStepCatalogTests_Steps_TheOperationsThatRoundTripToTheStoreAllNameTheStore()
     {
         // Act / Assert: the store is the target a reader would most want named, and eleven entries read it or
         // write it, so a missing target there would leave most of the feed unattributable.
@@ -210,7 +209,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void Steps_TheTwoBestEffortOperations_NameWhatTheyReachFor()
+    public void Service_LaunchStepCatalogTests_Steps_TheTwoBestEffortOperationsNameWhatTheyReachFor()
     {
         // Act / Assert: the two best-effort entries are the ones that reach outside this computer, so each names
         // what it reaches for (FR-026, FR-027).
@@ -219,7 +218,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void Steps_AnOperationThatTouchesNothingOutsideThisComputer_DeclaresNoTarget()
+    public void Service_LaunchStepCatalogTests_Steps_AnOperationThatTouchesNothingOutsideThisComputerDeclaresNoTarget()
     {
         // Act / Assert: reading this computer's own settings and name, and opening the screen, touch nothing a
         // person could name, so those entries declare no target rather than an invented one.
@@ -229,7 +228,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void Steps_EveryDeclaredTarget_IsPlainLanguageAndNotPadded()
+    public void Service_LaunchStepCatalogTests_Steps_EveryDeclaredTargetIsPlainLanguageAndNotPadded()
     {
         // Act / Assert: a padded or blank target reads as a mistake on the feed rather than as a name.
         foreach (var step in _catalog.Steps.Where(step => step.Target is not null))
@@ -240,7 +239,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void Steps_NoTwoOperations_ShareANameOrADescription()
+    public void Service_LaunchStepCatalogTests_Steps_NoTwoOperationsShareANameOrADescription()
     {
         // Act / Assert: two entries reading the same on the splash would be indistinguishable, which is exactly
         // what one-entry-per-operation is supposed to fix.
@@ -253,7 +252,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void TotalCount_IsTheLengthOfTheStepList()
+    public void Service_LaunchStepCatalogTests_TotalCount_IsTheLengthOfTheStepList()
     {
         // Act / Assert: the displayed total is derived, which is what stops it going stale when the list changes.
         Assert.AreEqual(_catalog.Steps.Count, _catalog.TotalCount);
@@ -261,7 +260,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void Find_WithAnIdTheCatalogueHolds_ReturnsThatStep()
+    public void Service_LaunchStepCatalogTests_Find_WithAnIdTheCatalogueHoldsReturnsThatStep()
     {
         var step = _catalog.Find("store-reachability");
 
@@ -270,7 +269,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void CompletedCount_CountsEachStepThatReachedAnEndOnce()
+    public void Service_LaunchStepCatalogTests_CompletedCount_CountsEachStepThatReachedAnEndOnce()
     {
         // Arrange: two steps have ended, one of them through a failure, and a third has only been announced.
         var feed = new LaunchActivityFeed();
@@ -289,7 +288,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void CompletedCount_ForAStepThatFailedThenSucceeded_CountsItOnce()
+    public void Service_LaunchStepCatalogTests_CompletedCount_ForAStepThatFailedThenSucceededCountsItOnce()
     {
         // Arrange: a repeated step is one step, however many lines it took.
         var feed = new LaunchActivityFeed();
@@ -304,7 +303,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void CompletedCount_IgnoresLinesForStepsTheCatalogueDoesNotHold()
+    public void Service_LaunchStepCatalogTests_CompletedCount_IgnoresLinesForStepsTheCatalogueDoesNotHold()
     {
         // Arrange: a stray id must not push the progress past the total.
         var feed = new LaunchActivityFeed();
@@ -318,7 +317,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void Validate_WithTheShippedSequence_IsAccepted()
+    public void Service_LaunchStepCatalogTests_Validate_WithTheShippedSequenceIsAccepted()
     {
         // Act / Assert: the rule below is exercised by the shipped data, not only by the broken samples.
         Assert.IsTrue(_catalog.Steps.Count > 0);
@@ -326,7 +325,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void Validate_WithAnUnboundedStep_IsRefused()
+    public void Service_LaunchStepCatalogTests_Validate_WithAnUnboundedStepIsRefused()
     {
         // Arrange
         LaunchStep[] steps = [Step("configuration", TimeSpan.Zero, bestEffort: false)];
@@ -336,7 +335,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void Validate_WithABestEffortStepAtTheCeiling_IsRefused()
+    public void Service_LaunchStepCatalogTests_Validate_WithABestEffortStepAtTheCeilingIsRefused()
     {
         // Arrange: a best-effort step at the ceiling could hold the launch open, which FR-026 forbids.
         LaunchStep[] steps = [Step("picture-cache", LaunchStepCatalog.Ceiling, bestEffort: true)];
@@ -346,7 +345,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void Validate_WithAStepPastTheCeiling_IsRefused()
+    public void Service_LaunchStepCatalogTests_Validate_WithAStepPastTheCeilingIsRefused()
     {
         // Arrange
         LaunchStep[] steps = [Step("store-reachability", LaunchStepCatalog.Ceiling + TimeSpan.FromSeconds(1), bestEffort: false)];
@@ -356,7 +355,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void Validate_WithARepeatedId_IsRefused()
+    public void Service_LaunchStepCatalogTests_Validate_WithARepeatedIdIsRefused()
     {
         // Arrange
         LaunchStep[] steps =
@@ -370,7 +369,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void Validate_WithABlankTarget_IsRefused()
+    public void Service_LaunchStepCatalogTests_Validate_WithABlankTargetIsRefused()
     {
         // Arrange: a declared-but-blank target would leave a line naming nothing where the point is that it names
         // what the operation is about.
@@ -391,7 +390,7 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void Validate_WithAStepThatHasNoName_IsRefused()
+    public void Service_LaunchStepCatalogTests_Validate_WithAStepThatHasNoNameIsRefused()
     {
         // Arrange
         LaunchStep[] steps =
@@ -404,14 +403,14 @@ public sealed class LaunchStepCatalogTests
     }
 
     [TestMethod]
-    public void Validate_WithAnEmptySequence_IsRefused()
+    public void Service_LaunchStepCatalogTests_Validate_WithAnEmptySequenceIsRefused()
     {
         // Act / Assert
         Assert.ThrowsException<InvalidOperationException>(() => LaunchStepCatalog.Validate([]));
     }
 
     [TestMethod]
-    public void CatalogSource_DeclaresTheDisplayedCountAsADerivedProperty()
+    public void Service_LaunchStepCatalogTests_CatalogSource_DeclaresTheDisplayedCountAsADerivedProperty()
     {
         // Arrange
         var derived = new List<(string Description, string Pattern)>

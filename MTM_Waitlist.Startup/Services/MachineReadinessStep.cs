@@ -64,7 +64,7 @@ public sealed class MachineReadinessStep : ILaunchStep
         {
             return new LaunchStepOutcome(
                 LaunchStepStatus.Succeeded,
-                $"This computer is configured as '{state.DisplayName}'.",
+                $"This computer is configured as '{state.ComputerName}'.",
                 LaunchRemedySet.None);
         }
 
@@ -292,7 +292,7 @@ internal sealed class SaveMachineConfigurationStep : ILaunchStep
         {
             return new LaunchStepOutcome(
                 LaunchStepStatus.Skipped,
-                $"This computer is already saved as '{state.DisplayName}', so there is nothing left to save.",
+                $"This computer is already saved as '{state.ComputerName}', so there is nothing left to save.",
                 LaunchRemedySet.None);
         }
 
@@ -302,7 +302,7 @@ internal sealed class SaveMachineConfigurationStep : ILaunchStep
         {
             return new LaunchStepOutcome(
                 LaunchStepStatus.Skipped,
-                "This computer has not been given a name yet, so there is nothing to save until setup captures it.",
+                "This computer has no name stored yet, so there is nothing to save until setup records it.",
                 LaunchRemedySet.None);
         }
 
@@ -322,7 +322,7 @@ internal sealed class SaveMachineConfigurationStep : ILaunchStep
 
         return new LaunchStepOutcome(
             LaunchStepStatus.Succeeded,
-            $"This computer was saved as '{draft.DisplayName}'.",
+            $"This computer was saved as '{draft.ComputerName}'.",
             LaunchRemedySet.None);
     }
 

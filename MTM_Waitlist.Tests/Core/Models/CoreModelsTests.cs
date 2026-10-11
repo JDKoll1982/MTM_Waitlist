@@ -8,27 +8,27 @@ namespace MTM_Waitlist.Tests.Core.Models;
 public sealed class CoreModelsTests
 {
     [TestMethod]
-    public void ComputerRecord_Defaults()
+    public void Model_CoreModelsTests_ComputerRecord_Defaults()
     {
         var record = new ComputerRecord();
 
         Assert.AreEqual(0L, record.Id);
         Assert.AreEqual(string.Empty, record.ComputerName);
         Assert.AreEqual(string.Empty, record.DisplayName);
-        Assert.AreEqual(string.Empty, record.Description);
+        Assert.AreEqual(string.Empty, record.Location);
         Assert.AreEqual(string.Empty, record.MacAddressNormalized);
         Assert.IsFalse(record.IsRegistered);
     }
 
     [TestMethod]
-    public void ComputerRecord_CanBeInitialized()
+    public void Model_CoreModelsTests_ComputerRecord_CanBeInitialized()
     {
         var record = new ComputerRecord
         {
             Id = 5,
             ComputerName = "johnspc",
             DisplayName = "John's Computer",
-            Description = "Press 100-03",
+            Location = "Press 100-03",
             MacAddressNormalized = "AA:BB:CC",
             IsRegistered = true
         };
@@ -36,13 +36,13 @@ public sealed class CoreModelsTests
         Assert.AreEqual(5, record.Id);
         Assert.AreEqual("johnspc", record.ComputerName);
         Assert.AreEqual("John's Computer", record.DisplayName);
-        Assert.AreEqual("Press 100-03", record.Description);
+        Assert.AreEqual("Press 100-03", record.Location);
         Assert.AreEqual("AA:BB:CC", record.MacAddressNormalized);
         Assert.IsTrue(record.IsRegistered);
     }
 
     [TestMethod]
-    public void ComputerGateCheck_StoresStatusAndOptionalRecord()
+    public void Model_CoreModelsTests_ComputerGateCheck_StoresStatusAndOptionalRecord()
     {
         var check = new ComputerGateCheck(ComputerGateStatus.Missing);
 
@@ -51,7 +51,7 @@ public sealed class CoreModelsTests
     }
 
     [TestMethod]
-    public void ComputerGateCheck_CanCarryExistingComputer()
+    public void Model_CoreModelsTests_ComputerGateCheck_CanCarryExistingComputer()
     {
         var record = new ComputerRecord { ComputerName = "johnspc" };
         var check = new ComputerGateCheck(ComputerGateStatus.RenamedMachine, record);
@@ -61,7 +61,7 @@ public sealed class CoreModelsTests
     }
 
     [TestMethod]
-    public void PrintableReport_Defaults()
+    public void Model_CoreModelsTests_PrintableReport_Defaults()
     {
         var report = new PrintableReport();
 
@@ -72,7 +72,7 @@ public sealed class CoreModelsTests
     }
 
     [TestMethod]
-    public void PrintableReport_CanBePopulated()
+    public void Model_CoreModelsTests_PrintableReport_CanBePopulated()
     {
         var report = new PrintableReport
         {

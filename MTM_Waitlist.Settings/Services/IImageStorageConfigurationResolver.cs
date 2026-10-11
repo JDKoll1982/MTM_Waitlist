@@ -22,17 +22,6 @@ public interface IImageStorageConfigurationResolver
     Task<string> GetSharedFolderPathAsync();
 
     /// <summary>
-    /// Gets the effective key-files folder path with database override support.
-    /// Resolution order:
-    /// 1. Database override from config_settings_values (if set and not null)
-    /// 2. appsettings.json ImageStorage.KeysFolderPath
-    /// 3. Hard-coded default from <c>AppStoragePaths.KeysFolderDefault</c>
-    /// </summary>
-    /// <returns>The effective key-files folder path</returns>
-    /// <exception cref="InvalidOperationException">If configuration cannot be resolved</exception>
-    Task<string> GetKeysFolderPathAsync();
-
-    /// <summary>
     /// Gets the effective dunnage-picture root, which is held once for the plant like the picture folder.
     /// Resolution order:
     /// 1. Database override from config_settings_values (if set and not null)

@@ -20,7 +20,7 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.ViewModels;
 public sealed class NewRequestOneRequestPerDieTests
 {
     [TestMethod]
-    public void ToDrafts_WithTwoDiesChosen_IsOneDraftPerDie()
+    public void ViewModel_NewRequestOneRequestPerDieTests_ToDrafts_WithTwoDiesChosenIsOneDraftPerDie()
     {
         var state = DieState(("FGT0002000", "DIE SHOP"), ("FGT0002001", "PRESS BAY"));
 
@@ -38,7 +38,7 @@ public sealed class NewRequestOneRequestPerDieTests
     }
 
     [TestMethod]
-    public void ToDrafts_WithNoDieChosen_IsTheSingleRequestTheWizardAlwaysRaised()
+    public void ViewModel_NewRequestOneRequestPerDieTests_ToDrafts_WithNoDieChosenIsTheSingleRequestTheWizardAlwaysRaised()
     {
         // An Item that asks nothing, or a request raised before the die step existed, still produces exactly one
         // request — the change adds requests, it does not replace the single-request path.
@@ -57,7 +57,7 @@ public sealed class NewRequestOneRequestPerDieTests
     }
 
     [TestMethod]
-    public void ToDraft_IsTheFirstOfTheDrafts()
+    public void ViewModel_NewRequestOneRequestPerDieTests_ToDraft_IsTheFirstOfTheDrafts()
     {
         // The single-draft entry point is what the rest of the wizard reads; it must not disagree with the list.
         var state = DieState(("FGT0002000", "DIE SHOP"), ("FGT0002001", "PRESS BAY"));
@@ -66,7 +66,7 @@ public sealed class NewRequestOneRequestPerDieTests
     }
 
     [TestMethod]
-    public async Task ConfirmStep_RaisesOneRequestForEachDieTheOperatorChose()
+    public async Task ViewModel_NewRequestOneRequestPerDieTests_ConfirmStep_RaisesOneRequestForEachDieTheOperatorChose()
     {
         var requests = new RecordingRequestService();
         var viewModel = new NewRequestSummaryViewModel(new WaitlistTestNavigationService(), requests, new NoCoilService());
@@ -82,7 +82,7 @@ public sealed class NewRequestOneRequestPerDieTests
     }
 
     [TestMethod]
-    public async Task ConfirmStep_WithSeveralDies_ReportsHowManyWereRaised()
+    public async Task ViewModel_NewRequestOneRequestPerDieTests_ConfirmStep_WithSeveralDiesReportsHowManyWereRaised()
     {
         var requests = new RecordingRequestService();
         var viewModel = new NewRequestSummaryViewModel(new WaitlistTestNavigationService(), requests, new NoCoilService());
@@ -100,7 +100,7 @@ public sealed class NewRequestOneRequestPerDieTests
     }
 
     [TestMethod]
-    public async Task ConfirmStep_WithOneDie_SaysNothingAboutSeveral()
+    public async Task ViewModel_NewRequestOneRequestPerDieTests_ConfirmStep_WithOneDieSaysNothingAboutSeveral()
     {
         var requests = new RecordingRequestService();
         var viewModel = new NewRequestSummaryViewModel(new WaitlistTestNavigationService(), requests, new NoCoilService());

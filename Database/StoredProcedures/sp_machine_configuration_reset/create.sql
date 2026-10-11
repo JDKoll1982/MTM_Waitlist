@@ -10,7 +10,7 @@
 --   IN  p_actor_user_id           BIGINT        the person driving the reset; NULL when there is none
 --   IN  p_default_display_name    VARCHAR(128)  the name a reset display name is restored to
 --   IN  p_reset_display_name      TINYINT       1 to restore the display name, 0 to leave it
---   IN  p_reset_description       TINYINT       1 to clear the description, 0 to leave it
+--   IN  p_reset_location       TINYINT       1 to clear the location, 0 to leave it
 --   IN  p_reset_picture_sources   TINYINT       1 to withdraw this machine's picture sources, 0 to leave them
 --   IN  p_reset_scoped_preferences TINYINT      1 to remove this machine's scoped preference rows, 0 to leave them
 --   OUT the affected-row count, through the non-query seam. A reset that matched nothing is a successful no-op,
@@ -30,14 +30,14 @@
 -- What it may never touch, enforced by the WHERE clauses and not by convention
 -- -------------------------------------------------------------------------
 -- Every statement below is filtered to `p_computer_id`:
---   * `core_computers_registry` by `id`, so no other machine's name or description can be reached;
+--   * `core_computers_registry` by `id`, so no other machine's name or location can be reached;
 --   * `config_images_locations` by `computer_id` (and `scope = 'computer'`, so a future scope carrying a machine
 --     id cannot be caught), so no other machine's folders are withdrawn;
 --   * `config_settings_values` by `computer_id`, so no other machine's preference — and no person-scoped or
 --     role-scoped row, which carry a NULL `computer_id` — is removed.
 -- Nothing here reads or writes a person, a role, a permission, a session or a log entry. In particular it does
--- not delete the registry row itself: that row is also referenced by `user_active_sessions` and
--- `auth_remembered_sign_ins` through foreign keys that would refuse the delete, and clearing either of those is
+-- not delete the registry row itself: that row is also referenced by `user_active_sessions` through a foreign
+-- key that would refuse the delete, and clearing a session is
 -- explicitly outside what a reset may do (section 4, "must never touch … any session").
 --
 -- Why the display name is restored rather than emptied
@@ -80,7 +80,7 @@ CREATE PROCEDURE sp_machine_configuration_reset(
     IN p_actor_user_id BIGINT,
     IN p_default_display_name VARCHAR(128),
     IN p_reset_display_name TINYINT,
-    IN p_reset_description TINYINT,
+    IN p_reset_location TINYINT,
     IN p_reset_picture_sources TINYINT,
     IN p_reset_scoped_preferences TINYINT
 )
@@ -107,15 +107,15 @@ BEGIN
           AND is_active = 1;
     END IF;
 
-    IF p_reset_display_name = 1 OR p_reset_description = 1 THEN
+    IF p_reset_display_name = 1 OR p_reset_location = 1 THEN
         UPDATE core_computers_registry
         SET display_name = CASE
                 WHEN p_reset_display_name = 1 THEN p_default_display_name
                 ELSE display_name
             END,
-            description = CASE
-                WHEN p_reset_description = 1 THEN NULL
-                ELSE description
+            location = CASE
+                WHEN p_reset_location = 1 THEN NULL
+                ELSE location
             END,
             updated_utc = v_now_utc
         WHERE id = p_computer_id;

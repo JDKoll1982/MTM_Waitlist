@@ -32,11 +32,32 @@ external reads are cached).
 
 - File-scoped namespaces; `Nullable` and `ImplicitUsings` enabled
 - `[TestClass] public sealed class <Subject>Tests`; each case is `[TestMethod] public void` or `public async Task`
-- **The name is the specification**: `<Method>_<Scenario>_<Expectation>` — for example
-  `Constructor_SelectsFirstBuildingByDefault`, `AcceptAsync_NotAvailable_ReturnsNull`,
-  `SelectSequenceAsync_KeepsTheJobsCoilAtItsWorkCentreLocation`,
-  `WaitlistViewViewModel_RefreshesActiveList_WhenRequestIsSubmitted`. A test whose scenario needs a comment to
-  explain it is misnamed
+- **The name is the specification**: `<Category>_<File>_<Method>_<TestName>` — for example
+  `Service_BuildingSelectionServiceTests_Constructor_SelectsFirstBuildingByDefault`,
+  `ViewModel_ShellBuildingFlyoutTests_TheShell_BuildsTheBuildingListAsCards`,
+  `UI_PartPictureManagerPageMarkupTests_PartPictureLists_ScrollTheirOwnContentInsteadOfGrowingPastTheWindow`,
+  `Model_CoreModelsTests_ComputerRecord_Defaults`. A test whose scenario needs a comment to explain it is misnamed
+- **The four segments, and what each holds:**
+  - `<Category>` is what kind of thing the test exercises. It is read from the test class's own name first — a
+    class names its subject — and from the folder it sits in second, which is why the folder matters: a flat
+    folder such as `Module_Settings` says nothing about what one file inside it tests.
+  - `<File>` is the test **file**'s name without its extension, not the class name. Where the two differ the file
+    wins; the two files in this repository where they differ are pre-existing violations of the rule below.
+  - `<Method>` is the operation under test, or the subject when a test covers a whole type. It is the first word
+    of the name as it was written before this rule.
+  - `<TestName>` is everything the test says after that, with its underscores removed by camel-casing:
+    `_WhenTheStepPassesItsStatedMaximum_ReportsFailedRatherThanWaitingOnIt` becomes
+    `WhenTheStepPassesItsStatedMaximumReportsFailedRatherThanWaitingOnIt`. The three underscores that separate
+    the four segments are the only underscores left in a test name.
+- **This rule outranks the `Async` suffix rule.** The naming guard requires an `async Task` method to end in
+  `Async`, and a test method named this way cannot. `[TestMethod]` and `[DataTestMethod]` methods are therefore
+  exempt from the `Async` suffix check, and the guard enforces this format on them in its place.
+- **The category vocabulary is closed**, because a set that grows ad hoc stops being sortable:
+  `Database`, `UI`, `Model`, `ViewModel`, `Service`, `Helper`, `Audit`, `Converter`. A new category is added to
+  the naming rules before a test uses it.
+- **A test that covers a whole type carries three segments, not four**:
+  `Audit_RetiredSymbolAuditTests_NoRetiredSymbolRemainsInCodeOrDatabaseArtifacts`. There is no method under test
+  to put in the `<Method>` slot, and repeating the test name to fill it would say nothing twice.
 - Arrange / Act / Assert with one behavioural claim per test. No assertion-free tests, no tests that merely
   construct an object
 - Comments explain a non-obvious constraint (thread affinity, a machine-specific quirk, why a guard exists) —

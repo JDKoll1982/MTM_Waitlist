@@ -206,7 +206,7 @@ public sealed class ActiveJobSeedRoundTripTests
     }
 
     [TestMethod]
-    public async Task CoilOnlyJob_NormalisesToCoil()
+    public async Task Service_ActiveJobSeedRoundTripTests_CoilOnlyJob_NormalisesToCoil()
     {
         var snapshot = await ResolveOwnedAsync(_coilOnly);
 
@@ -217,7 +217,7 @@ public sealed class ActiveJobSeedRoundTripTests
     }
 
     [TestMethod]
-    public async Task FlatstockOnlyJob_IsNormalisedByThePartNumberPrefix()
+    public async Task Service_ActiveJobSeedRoundTripTests_FlatstockOnlyJob_IsNormalisedByThePartNumberPrefix()
     {
         // The row is deliberately stored with Category 'Component'; the MMF prefix is authoritative, so the
         // real read path must land it in Flatstock. This is the job that proves a flatstock-only job is
@@ -230,7 +230,7 @@ public sealed class ActiveJobSeedRoundTripTests
     }
 
     [TestMethod]
-    public async Task DieOnlyJob_NormalisesToDie()
+    public async Task Service_ActiveJobSeedRoundTripTests_DieOnlyJob_NormalisesToDie()
     {
         var snapshot = await ResolveOwnedAsync(_dieOnly);
 
@@ -239,7 +239,7 @@ public sealed class ActiveJobSeedRoundTripTests
     }
 
     [TestMethod]
-    public async Task ComponentOnlyJob_KeepsTheStoredCategory()
+    public async Task Service_ActiveJobSeedRoundTripTests_ComponentOnlyJob_KeepsTheStoredCategory()
     {
         var snapshot = await ResolveOwnedAsync(_componentOnly);
 
@@ -249,7 +249,7 @@ public sealed class ActiveJobSeedRoundTripTests
     }
 
     [TestMethod]
-    public async Task DunnageOnlyJob_HasNoSubordinatePart()
+    public async Task Service_ActiveJobSeedRoundTripTests_DunnageOnlyJob_HasNoSubordinatePart()
     {
         var snapshot = await ResolveOwnedAsync(_dunnageOnly);
 
@@ -258,7 +258,7 @@ public sealed class ActiveJobSeedRoundTripTests
     }
 
     [TestMethod]
-    public async Task EverythingAtOnceJob_NormalisesEveryCategory()
+    public async Task Service_ActiveJobSeedRoundTripTests_EverythingAtOnceJob_NormalisesEveryCategory()
     {
         var snapshot = await ResolveOwnedAsync(_everythingAtOnce);
 
@@ -270,7 +270,7 @@ public sealed class ActiveJobSeedRoundTripTests
     }
 
     [TestMethod]
-    public async Task EmptySubordinateArray_ResolvesWithNothingPresent()
+    public async Task Service_ActiveJobSeedRoundTripTests_EmptySubordinateArray_ResolvesWithNothingPresent()
     {
         var snapshot = await ResolveOwnedAsync(_noSubordinatePart);
 
@@ -279,7 +279,7 @@ public sealed class ActiveJobSeedRoundTripTests
     }
 
     [TestMethod]
-    public async Task WorkCentreWithNoRow_ReadsAsNoActiveJob()
+    public async Task Service_ActiveJobSeedRoundTripTests_WorkCentreWithNoRow_ReadsAsNoActiveJob()
     {
         // The eighth configuration is realised by the ABSENCE of a row, and "no active job" is what the
         // resolver must answer for it.
@@ -289,7 +289,7 @@ public sealed class ActiveJobSeedRoundTripTests
     }
 
     [TestMethod]
-    public async Task Retired900Fixtures_ResolveToNoActiveJob()
+    public async Task Service_ActiveJobSeedRoundTripTests_Retired900Fixtures_ResolveToNoActiveJob()
     {
         // FR-039 / SC-016: the seven fixture stations have retired and their situations moved to real work
         // centres. This is the data-side half of that claim — a fixture name resolving to a job would mean a
@@ -303,7 +303,7 @@ public sealed class ActiveJobSeedRoundTripTests
     }
 
     [TestMethod]
-    public async Task ScrapValues_CoverTheWholeThreeWayGate()
+    public async Task Service_ActiveJobSeedRoundTripTests_ScrapValues_CoverTheWholeThreeWayGate()
     {
         // A real type (coil only), the placeholder (die only) and 'No Scrap' (component only) — the input
         // FR-031 is written against — must survive the round trip verbatim, because the picker's scrap gate

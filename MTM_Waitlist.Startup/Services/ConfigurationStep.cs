@@ -73,57 +73,7 @@ public sealed class ConfigurationStep : ILaunchStep
 }
 
 /// <summary>
-/// The pre-sign-in read of the sign-in this computer was asked to remember, answering for the catalogue's
-/// <c>read-remembered-sign-in</c> entry (`contracts/launch-step-contract.md` §1.1, S8.2; FR-002, FR-014).
-/// </summary>
-/// <remarks>
-/// <para>
-/// <b>Nothing is read, and nothing is invented.</b> The read against the store — and the unlock through the shared
-/// key file — belongs to the remembered-sign-in service (T113), and until that service exists the honest answer is
-/// that no remembered sign-in was read and the ordinary sign-in form will ask. This step deliberately does not
-/// stand in for that service: a placeholder that answered as though it had decrypted something would report a
-/// fact the launch does not have.
-/// </para>
-/// <para>
-/// <b>It cannot block the launch.</b> A remembered sign-in that cannot be read is a fall-back to the ordinary
-/// form, never a stop (FR-014), so the step reports itself left undone and the launch carries on.
-/// </para>
-/// </remarks>
-internal sealed class ReadRememberedSignInStep : ILaunchStep
-{
-    /// <summary>The catalogue entry this step answers for.</summary>
-    private const string StepId = "read-remembered-sign-in";
-
-    private readonly LaunchStep _descriptor;
-
-    /// <summary>Creates the step over the sequence it takes its descriptor from.</summary>
-    /// <param name="catalog">The sequence, which is where the step takes its descriptor from rather than restating it.</param>
-    public ReadRememberedSignInStep(LaunchStepCatalog catalog)
-        => _descriptor = LaunchStepSupport.DescriptorFor(catalog, StepId);
-
-    /// <inheritdoc />
-    public LaunchStep Descriptor => _descriptor;
-
-    /// <inheritdoc />
-    public Task<LaunchStepOutcome> RunAsync(LaunchStepContext context, CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(context);
-        cancellationToken.ThrowIfCancellationRequested();
-
-        // Nothing is held: the read and its unlock belong to the remembered-sign-in service (T113). The pipeline
-        // reads the holder rather than this step's prose, so the step may not answer as though it had decrypted
-        // something, and a step that held a sign-in it had not decrypted would let the launch past the form
-        // without asking (FR-014).
-        return Task.FromResult(new LaunchStepOutcome(
-            LaunchStepStatus.Skipped,
-            "No remembered sign-in is read yet, so the sign-in form will ask for the name and the PIN.",
-            LaunchRemedySet.None));
-    }
-}
-
-/// <summary>
-/// The sign-in the launch holds: what the remembered-sign-in read found, and what the sign-in surface captured
-/// when it had to ask.
+/// The sign-in the launch holds: what the sign-in surface captured when it had to ask.
 /// </summary>
 /// <remarks>
 /// <para>

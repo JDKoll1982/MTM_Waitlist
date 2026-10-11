@@ -84,7 +84,7 @@ public sealed class RequestItemImagesDialogViewModelTests
     // ── The screen is keyed by Item (§D10) ──────────────────────────────────────────────────────────────
 
     [TestMethod]
-    public async Task Load_KeysOneEditableRowByEachItemsCode()
+    public async Task ViewModel_RequestItemImagesDialogViewModelTests_Load_KeysOneEditableRowByEachItemsCode()
     {
         var viewModel = CreateViewModel();
 
@@ -99,7 +99,7 @@ public sealed class RequestItemImagesDialogViewModelTests
     }
 
     [TestMethod]
-    public void Scope_IsTheItemScope_NotTheRetiredSubtypeScope()
+    public void ViewModel_RequestItemImagesDialogViewModelTests_Scope_IsTheItemScopeNotTheRetiredSubtypeScope()
     {
         var viewModel = CreateViewModel();
 
@@ -111,7 +111,7 @@ public sealed class RequestItemImagesDialogViewModelTests
     }
 
     [TestMethod]
-    public async Task Load_GroupsEveryRowUnderItsOwnCategory()
+    public async Task ViewModel_RequestItemImagesDialogViewModelTests_Load_GroupsEveryRowUnderItsOwnCategory()
     {
         var viewModel = CreateViewModel();
 
@@ -130,7 +130,7 @@ public sealed class RequestItemImagesDialogViewModelTests
     }
 
     [TestMethod]
-    public async Task Load_MarksARowWithNoOverrideOfItsOwnAsInherited()
+    public async Task ViewModel_RequestItemImagesDialogViewModelTests_Load_MarksARowWithNoOverrideOfItsOwnAsInherited()
     {
         var viewModel = CreateViewModel();
 
@@ -144,7 +144,7 @@ public sealed class RequestItemImagesDialogViewModelTests
     // ── FR-021: "nothing configured" never overwrites an image the request already resolves ─────────────
 
     [TestMethod]
-    public async Task ResolveEffectivePath_WhenNothingIsConfiguredForTheItem_KeepsTheInheritedCategoryImage()
+    public async Task ViewModel_RequestItemImagesDialogViewModelTests_ResolveEffectivePath_WhenNothingIsConfiguredForTheItemKeepsTheInheritedCategoryImage()
     {
         var familyImage = Path.Combine(_resolver.SharedFolderPath, "pickup-family.png");
         TestPngWriter.Write(familyImage, 64, 64);
@@ -170,7 +170,7 @@ public sealed class RequestItemImagesDialogViewModelTests
     }
 
     [TestMethod]
-    public async Task ResolveEffectivePath_WhenTheItemHasItsOwnPicture_ShowsIt()
+    public async Task ViewModel_RequestItemImagesDialogViewModelTests_ResolveEffectivePath_WhenTheItemHasItsOwnPictureShowsIt()
     {
         var itemImage = Path.Combine(_resolver.SharedFolderPath, "pickup-coil.png");
         TestPngWriter.Write(itemImage, 64, 64);
@@ -188,7 +188,7 @@ public sealed class RequestItemImagesDialogViewModelTests
     // ── FR-020: two gates, still two ────────────────────────────────────────────────────────────────────
 
     [TestMethod]
-    public void ThePictureScreensGate_IsADifferentPermissionFromTheMinutesEditors()
+    public void ViewModel_RequestItemImagesDialogViewModelTests_ThePictureScreensGate_IsADifferentPermissionFromTheMinutesEditors()
     {
         var pictures = PermissionRegistry.Find(PermissionKeys.SettingsPartPictures);
         var minutes = PermissionRegistry.Find(PermissionKeys.SettingsUrgencyMinutes);

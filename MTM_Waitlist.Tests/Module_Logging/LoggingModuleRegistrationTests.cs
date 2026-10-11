@@ -19,7 +19,7 @@ namespace MTM_Waitlist.Tests.Module_Logging;
 public sealed class LoggingModuleRegistrationTests
 {
     [TestMethod]
-    public void AddLoggingModuleServices_RegistersOneSeamBehindBothSurfaces()
+    public void Service_LoggingModuleRegistrationTests_AddLoggingModuleServices_RegistersOneSeamBehindBothSurfaces()
     {
         // Arrange
         var services = BuildContainer(out _);
@@ -36,7 +36,7 @@ public sealed class LoggingModuleRegistrationTests
     }
 
     [TestMethod]
-    public void AddLoggingModuleServices_RegistersTheWriterAsAHostedService()
+    public void Service_LoggingModuleRegistrationTests_AddLoggingModuleServices_RegistersTheWriterAsAHostedService()
     {
         // Arrange
         var services = BuildContainer(out _);
@@ -51,7 +51,7 @@ public sealed class LoggingModuleRegistrationTests
     }
 
     [TestMethod]
-    public async Task AddLoggingModuleServices_ResolvedILogger_WritesToTheStore()
+    public async Task Service_LoggingModuleRegistrationTests_AddLoggingModuleServices_ResolvedILoggerWritesToTheStore()
     {
         // Arrange
         var services = BuildContainer(out var store);

@@ -47,7 +47,7 @@ public sealed class ImageCachePathsTests
     }
 
     [TestMethod]
-    public void APictureThisComputerHasCopiedIsReadFromTheLocalCopy()
+    public void Helper_ImageCachePathsTests_APictureThisComputerHasCopiedIsReadFromTheLocalCopy()
     {
         var cached = WriteCachedPicture(@"request_item\pickup-coil.png");
         var shared = Path.Combine(_shareRoot, @"request_item\pickup-coil.png");
@@ -56,7 +56,7 @@ public sealed class ImageCachePathsTests
     }
 
     [TestMethod]
-    public void APictureThisComputerHasNotCopiedIsReadFromTheShare()
+    public void Helper_ImageCachePathsTests_APictureThisComputerHasNotCopiedIsReadFromTheShare()
     {
         var shared = Path.Combine(_shareRoot, @"request_item\pickup-coil.png");
 
@@ -66,7 +66,7 @@ public sealed class ImageCachePathsTests
     }
 
     [TestMethod]
-    public void ARelativePathIsLookedUpUnderTheSameFolders()
+    public void Helper_ImageCachePathsTests_ARelativePathIsLookedUpUnderTheSameFolders()
     {
         var cached = WriteCachedPicture(@"work_center\100-03.png");
 
@@ -74,7 +74,7 @@ public sealed class ImageCachePathsTests
     }
 
     [TestMethod]
-    public void APictureOutsideItsRootHasNoLocalCopy()
+    public void Helper_ImageCachePathsTests_APictureOutsideItsRootHasNoLocalCopy()
     {
         WriteCachedPicture(@"request_item\pickup-coil.png");
 
@@ -86,7 +86,7 @@ public sealed class ImageCachePathsTests
     }
 
     [TestMethod]
-    public void WithNoCacheFolderThereIsNothingToPointAt()
+    public void Helper_ImageCachePathsTests_WithNoCacheFolderThereIsNothingToPointAt()
     {
         var shared = Path.Combine(_shareRoot, @"request_item\pickup-coil.png");
 
@@ -95,14 +95,14 @@ public sealed class ImageCachePathsTests
     }
 
     [TestMethod]
-    public void WithNoPictureThereIsNothingToLookUp()
+    public void Helper_ImageCachePathsTests_WithNoPictureThereIsNothingToLookUp()
     {
         Assert.IsNull(ImageCachePaths.TryGetCachedCopy(_shareRoot, _cacheRoot, path: null));
         Assert.IsNull(ImageCachePaths.TryGetCachedCopy(_shareRoot, _cacheRoot, "  "));
     }
 
     [TestMethod]
-    public void TheCachedCopyKeepsTheFoldersAPictureHasOnTheShare()
+    public void Helper_ImageCachePathsTests_TheCachedCopyKeepsTheFoldersAPictureHasOnTheShare()
     {
         var path = ImageCachePaths.CachePathFor(@"C:\cache", @"request_item\sub\picture.png");
 
@@ -110,7 +110,7 @@ public sealed class ImageCachePathsTests
     }
 
     [TestMethod]
-    public void AConfiguredFolderWrittenWithAnEnvironmentVariable_IsResolvedRatherThanTakenLiterally()
+    public void Helper_ImageCachePathsTests_AConfiguredFolderWrittenWithAnEnvironmentVariable_IsResolvedRatherThanTakenLiterally()
     {
         try
         {
@@ -131,7 +131,7 @@ public sealed class ImageCachePathsTests
     }
 
     [TestMethod]
-    public void AConfiguredFolderThatIsNotAbsolute_FallsBackToTheShippedDefault()
+    public void Helper_ImageCachePathsTests_AConfiguredFolderThatIsNotAbsolute_FallsBackToTheShippedDefault()
     {
         try
         {
@@ -150,7 +150,7 @@ public sealed class ImageCachePathsTests
     }
 
     [TestMethod]
-    public void AConfiguredAbsoluteFolder_IsAdoptedAsWritten()
+    public void Helper_ImageCachePathsTests_AConfiguredAbsoluteFolder_IsAdoptedAsWritten()
     {
         var chosen = Path.Combine(_workingDirectory, "chosen");
 
@@ -170,7 +170,7 @@ public sealed class ImageCachePathsTests
     }
 
     [TestMethod]
-    public void AFolderThatIsNotThereIsNotWritable()
+    public void Helper_ImageCachePathsTests_AFolderThatIsNotThereIsNotWritable()
     {
         Assert.IsFalse(ImageCachePaths.IsFolderWritable(Path.Combine(_workingDirectory, "no-such-folder")));
         Assert.IsFalse(ImageCachePaths.IsFolderWritable(null));
@@ -178,7 +178,7 @@ public sealed class ImageCachePathsTests
     }
 
     [TestMethod]
-    public void APathThatIsAFileIsNotAFolderThatCanBeWrittenTo()
+    public void Helper_ImageCachePathsTests_APathThatIsAFileIsNotAFolderThatCanBeWrittenTo()
     {
         var filePath = Path.Combine(_workingDirectory, "pickup-coil.png");
         File.WriteAllBytes(filePath, [1]);
@@ -187,7 +187,7 @@ public sealed class ImageCachePathsTests
     }
 
     [TestMethod]
-    public void AFolderThisAccountMayWriteInIsWritable()
+    public void Helper_ImageCachePathsTests_AFolderThisAccountMayWriteInIsWritable()
     {
         Directory.CreateDirectory(_cacheRoot);
 
@@ -195,7 +195,7 @@ public sealed class ImageCachePathsTests
     }
 
     [TestMethod]
-    public void PreparingACacheFolder_MakesItAndAnswersWhetherCopiesCanGoIn()
+    public void Helper_ImageCachePathsTests_PreparingACacheFolder_MakesItAndAnswersWhetherCopiesCanGoIn()
     {
         var folder = Path.Combine(_cacheRoot, ImageCachePaths.DunnageFolderName);
 
@@ -217,7 +217,7 @@ public sealed class ImageCachePathsTests
     /// copy written into it fails.
     /// </summary>
     [TestMethod]
-    public void TheDunnageCacheIsAlwaysAFolderThisAccountCanWriteTo()
+    public void Helper_ImageCachePathsTests_TheDunnageCacheIsAlwaysAFolderThisAccountCanWriteTo()
     {
         var chosen = ImageCachePaths.ResolveDunnageCacheFolder();
         var ourOwn = Path.Combine(ImageCachePaths.LocalCacheRoot, ImageCachePaths.DunnageFolderName);
@@ -242,7 +242,7 @@ public sealed class ImageCachePathsTests
     /// (FR-002, FR-030).
     /// </summary>
     [TestMethod]
-    public void TheTwoPartCollectionsKeepTheirOwnCacheFolders()
+    public void Helper_ImageCachePathsTests_TheTwoPartCollectionsKeepTheirOwnCacheFolders()
     {
         var visual = ImageCachePaths.PartCollectionCacheFolder(PartPictureLayout.VisualCollection);
         var wip = ImageCachePaths.PartCollectionCacheFolder(PartPictureLayout.WipCollection);

@@ -37,7 +37,7 @@ public sealed class NewRequestReviewShowsEveryDieTests
     private static readonly XNamespace s_presentation = "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
 
     [TestMethod]
-    public void ConfirmStep_WithTwoDiesChosen_ShowsOneRowPerDie()
+    public void ViewModel_NewRequestReviewShowsEveryDieTests_ConfirmStep_WithTwoDiesChosenShowsOneRowPerDie()
     {
         var viewModel = BuildSummaryViewModel();
 
@@ -51,7 +51,7 @@ public sealed class NewRequestReviewShowsEveryDieTests
     }
 
     [TestMethod]
-    public void ConfirmStep_ListsExactlyWhatWillBeRaised()
+    public void ViewModel_NewRequestReviewShowsEveryDieTests_ConfirmStep_ListsExactlyWhatWillBeRaised()
     {
         // The invariant, rather than a count: whatever the submission will raise is what the operator was shown.
         var state = DieState(
@@ -68,7 +68,7 @@ public sealed class NewRequestReviewShowsEveryDieTests
     }
 
     [TestMethod]
-    public void ConfirmStep_WithOneAnswer_IsThatOneRow()
+    public void ViewModel_NewRequestReviewShowsEveryDieTests_ConfirmStep_WithOneAnswerIsThatOneRow()
     {
         // The ordinary single-request wizard is untouched by the list.
         var state = new NewRequestFlowState
@@ -87,7 +87,7 @@ public sealed class NewRequestReviewShowsEveryDieTests
     }
 
     [TestMethod]
-    public void ConfirmStep_WithNothingToShow_ShowsNoLabelledEmptyRow()
+    public void ViewModel_NewRequestReviewShowsEveryDieTests_ConfirmStep_WithNothingToShowShowsNoLabelledEmptyRow()
     {
         var state = new NewRequestFlowState
         {
@@ -105,7 +105,7 @@ public sealed class NewRequestReviewShowsEveryDieTests
     }
 
     [TestMethod]
-    public void ConfirmPage_RendersTheDetailAsARepeatingList()
+    public void ViewModel_NewRequestReviewShowsEveryDieTests_ConfirmPage_RendersTheDetailAsARepeatingList()
     {
         var markup = File.ReadAllText(PagePath("NewRequestSummaryPage.xaml"));
 
@@ -113,7 +113,7 @@ public sealed class NewRequestReviewShowsEveryDieTests
     }
 
     [TestMethod]
-    public void ConfirmPage_ShowsTheRequestCountItComputed()
+    public void ViewModel_NewRequestReviewShowsEveryDieTests_ConfirmPage_ShowsTheRequestCountItComputed()
     {
         // The step computed "this will raise N requests" and bound it to nothing, which is how the operator was
         // left looking at one die while two requests were about to be raised. The binding is the fix.

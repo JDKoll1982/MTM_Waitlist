@@ -78,7 +78,7 @@ public sealed class ServiceApiTests
     }
 
     [TestMethod]
-    public async Task EveryRoutedEndpoint_RefusesARequestThatNamesNoOperator()
+    public async Task Service_ServiceApiTests_EveryRoutedEndpoint_RefusesARequestThatNamesNoOperator()
     {
         var fixture = await GetFixtureAsync();
 
@@ -99,7 +99,7 @@ public sealed class ServiceApiTests
     }
 
     [TestMethod]
-    public async Task EveryRoutedEndpoint_RefusesAUserWithoutTheOperatorPermission()
+    public async Task Service_ServiceApiTests_EveryRoutedEndpoint_RefusesAUserWithoutTheOperatorPermission()
     {
         var fixture = await GetFixtureAsync();
 
@@ -118,7 +118,7 @@ public sealed class ServiceApiTests
     }
 
     [TestMethod]
-    public async Task EveryRoutedEndpoint_RefusesAUserNameTheStoreDoesNotKnow()
+    public async Task Service_ServiceApiTests_EveryRoutedEndpoint_RefusesAUserNameTheStoreDoesNotKnow()
     {
         var fixture = await GetFixtureAsync();
 
@@ -131,7 +131,7 @@ public sealed class ServiceApiTests
     }
 
     [TestMethod]
-    public async Task Status_WithAnApprovedOperator_ReportsTheSurfaceWithoutAnySecret()
+    public async Task Service_ServiceApiTests_Status_WithAnApprovedOperatorReportsTheSurfaceWithoutAnySecret()
     {
         var fixture = await GetFixtureAsync();
 
@@ -162,7 +162,7 @@ public sealed class ServiceApiTests
     }
 
     [TestMethod]
-    public async Task Refresh_WithAnApprovedOperator_ReturnsPerShapeOutcomes()
+    public async Task Service_ServiceApiTests_Refresh_WithAnApprovedOperatorReturnsPerShapeOutcomes()
     {
         var fixture = await GetFixtureAsync();
 
@@ -200,7 +200,7 @@ public sealed class ServiceApiTests
     }
 
     [TestMethod]
-    public async Task Refresh_WithAnUnknownShape_IsRefusedWithTheFieldTheOperatorTyped()
+    public async Task Service_ServiceApiTests_Refresh_WithAnUnknownShapeIsRefusedWithTheFieldTheOperatorTyped()
     {
         var fixture = await GetFixtureAsync();
 
@@ -215,7 +215,7 @@ public sealed class ServiceApiTests
     }
 
     [TestMethod]
-    public async Task Restore_IsNotReachableOverTheNetwork_EvenForAnApprovedOperator()
+    public async Task Service_ServiceApiTests_Restore_IsNotReachableOverTheNetworkEvenForAnApprovedOperator()
     {
         var fixture = await GetFixtureAsync();
 

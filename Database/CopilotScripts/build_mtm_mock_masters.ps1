@@ -30,6 +30,19 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# Windows PowerShell 5.1 decodes this BOM-less script with the ANSI codepage, so the em dash in the generated
+# header above becomes mojibake, and its `-Encoding utf8` writes a BOM. `-Check` cannot catch either, because
+# it mangles both sides of its comparison identically and reports a false "up to date". Refuse rather than
+# silently rewrite 80,000-line generated files with corrupted text; the examples above already call for pwsh.
+if ($PSVersionTable.PSVersion.Major -lt 6) {
+    [Console]::Error.WriteLine(
+        "build_mtm_mock_masters.ps1 must run under PowerShell 7+ (pwsh), not Windows PowerShell " +
+        "$($PSVersionTable.PSVersion). Under 5.1 it would rewrite the master lists with a BOM and mojibake " +
+        "text, and -Check would still report them up to date. Re-run with:" +
+        [Environment]::NewLine + "  pwsh -NoProfile -File $PSCommandPath")
+    exit 2
+}
+
 # This script lives in <repo>/Database/CopilotScripts.
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $mockRoot = Join-Path $repoRoot 'Database/Mock'
@@ -45,7 +58,7 @@ function Get-ArtifactBodies {
         if (Test-Path $create) {
             [pscustomobject]@{
                 Name = $_.Name
-                Body = (Get-Content -LiteralPath $create -Raw).TrimEnd()
+                Body = (Get-Content -LiteralPath $create -Raw -Encoding utf8).TrimEnd()
             }
         }
     }
@@ -86,21 +99,25 @@ $targets = @(
 $stale = @()
 foreach ($target in $targets) {
     $full = Join-Path $mockRoot $target.Path
-    $existing = if (Test-Path $full) { Get-Content -LiteralPath $full -Raw } else { $null }
+    # Read and written as explicit UTF-8 *without* a BOM. Without the explicit encoding Windows PowerShell 5.1
+    # decodes these BOM-less files with the ANSI codepage (turning an em dash into mojibake) and its
+    # `-Encoding utf8` writes a BOM back, so a 5.1 run silently rewrote all three masters. `-Check` could not
+    # catch that, because it mangles both sides of the comparison identically and reports "up to date".
+    $existing = if (Test-Path $full) { Get-Content -LiteralPath $full -Raw -Encoding utf8 } else { $null }
 
     if ($Check) {
         if ($existing -ne $target.Content) { $stale += $target.Path }
         continue
     }
 
-    Set-Content -LiteralPath $full -Value $target.Content -NoNewline -Encoding utf8
+    [System.IO.File]::WriteAllText($full, $target.Content, (New-Object System.Text.UTF8Encoding($false)))
     Write-Host "wrote $($target.Path)" -ForegroundColor Green
 }
 
 if ($Check) {
     if ($stale.Count -gt 0) {
         Write-Host "Master lists are out of date: $($stale -join ', ')" -ForegroundColor Red
-        Write-Host 'Run tools/build_mtm_mock_masters.ps1 to regenerate.'
+        Write-Host 'Run pwsh -NoProfile -File Database/CopilotScripts/build_mtm_mock_masters.ps1 to regenerate.'
         exit 1
     }
     Write-Host 'Master lists are up to date.' -ForegroundColor Green

@@ -34,7 +34,7 @@ public sealed class VisualVerdictPrimingStepTests
     private const string StepId = "visual-priming";
 
     [TestMethod]
-    public void Descriptor_IsTheCataloguesOwnEntry_AndIsBestEffortInsideTheCeiling()
+    public void Service_VisualVerdictPrimingStepTests_Descriptor_IsTheCataloguesOwnEntryAndIsBestEffortInsideTheCeiling()
     {
         // Arrange
         var catalog = new LaunchStepCatalog();
@@ -49,7 +49,7 @@ public sealed class VisualVerdictPrimingStepTests
     }
 
     [TestMethod]
-    public void Descriptor_ThePrimingRunsBeforeTheFirstScreenOpens()
+    public void Service_VisualVerdictPrimingStepTests_Descriptor_ThePrimingRunsBeforeTheFirstScreenOpens()
     {
         // Arrange
         var catalog = new LaunchStepCatalog();
@@ -66,7 +66,7 @@ public sealed class VisualVerdictPrimingStepTests
     }
 
     [TestMethod]
-    public async Task RunAsync_AsksTheProbeOwnerExactlyOnce_AndWithoutCancellingIt()
+    public async Task Service_VisualVerdictPrimingStepTests_RunAsync_AsksTheProbeOwnerExactlyOnceAndWithoutCancellingIt()
     {
         // Arrange
         var primer = new RecordingVerdictPrimer();
@@ -83,7 +83,7 @@ public sealed class VisualVerdictPrimingStepTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WaitsForTheAnswer_RatherThanLeavingTheVerdictToChance()
+    public async Task Service_VisualVerdictPrimingStepTests_RunAsync_WaitsForTheAnswerRatherThanLeavingTheVerdictToChance()
     {
         // Arrange
         var primer = new RecordingVerdictPrimer();
@@ -98,7 +98,7 @@ public sealed class VisualVerdictPrimingStepTests
     }
 
     [TestMethod]
-    public async Task RunAsync_WhenTheProbeOwnerThrows_IsReportedRatherThanEscapingTheStep()
+    public async Task Service_VisualVerdictPrimingStepTests_RunAsync_WhenTheProbeOwnerThrowsIsReportedRatherThanEscapingTheStep()
     {
         // Arrange: the primer is written never to throw, so this is the seam being wrong rather than a case the
         // application expects. It still must not reach the person as an unattributed crash (FR-004).
@@ -114,7 +114,7 @@ public sealed class VisualVerdictPrimingStepTests
     }
 
     [TestMethod]
-    public async Task RunAsync_ThroughTheRunner_WhenABestEffortStepIgnoresItsBound_TheLaunchIsNotHeld()
+    public async Task Service_VisualVerdictPrimingStepTests_RunAsync_ThroughTheRunnerWhenABestEffortStepIgnoresItsBoundTheLaunchIsNotHeld()
     {
         // Arrange: a best-effort step that never honours its token, which is the worst a step can do to the
         // launch. Its own bound is milliseconds so the claim costs the suite nothing.

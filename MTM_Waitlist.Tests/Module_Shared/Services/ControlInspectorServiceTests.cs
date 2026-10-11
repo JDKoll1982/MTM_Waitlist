@@ -12,7 +12,7 @@ namespace MTM_Waitlist.Tests.Module_Shared.Services;
 public sealed class ControlInspectorServiceTests
 {
     [TestMethod]
-    public void TryOpenActiveDetail_WhenNotDeveloper_ReturnsFalse()
+    public void Service_ControlInspectorServiceTests_TryOpenActiveDetail_WhenNotDeveloperReturnsFalse()
     {
         var navigation = new RecordingNavigationService();
         var service = CreateService("Operator", navigation);
@@ -24,7 +24,7 @@ public sealed class ControlInspectorServiceTests
     }
 
     [TestMethod]
-    public void TryOpenActiveDetail_WhenDeveloperWithoutHover_ReturnsFalse()
+    public void Service_ControlInspectorServiceTests_TryOpenActiveDetail_WhenDeveloperWithoutHoverReturnsFalse()
     {
         var navigation = new RecordingNavigationService();
         var service = CreateService("Developer", navigation);
@@ -37,7 +37,7 @@ public sealed class ControlInspectorServiceTests
     }
 
     [TestMethod]
-    public void ClearActiveElement_DisablesShortcutUntilHoverReturns()
+    public void Service_ControlInspectorServiceTests_ClearActiveElement_DisablesShortcutUntilHoverReturns()
     {
         var navigation = new RecordingNavigationService();
         var service = CreateService("Developer", navigation);
@@ -50,7 +50,7 @@ public sealed class ControlInspectorServiceTests
     }
 
     [TestMethod]
-    public void InspectorNavigationTarget_UsesControlInspectorDetailViewModelKey()
+    public void Service_ControlInspectorServiceTests_InspectorNavigationTarget_UsesControlInspectorDetailViewModelKey()
     {
         var navigation = new RecordingNavigationService();
         var detail = new ControlInspectorDetail
@@ -73,7 +73,7 @@ public sealed class ControlInspectorServiceTests
     }
 
     [TestMethod]
-    public void ResolvePresentation_AndDetailModel_CarryAssociatedFiles()
+    public void Service_ControlInspectorServiceTests_ResolvePresentation_AndDetailModelCarryAssociatedFiles()
     {
         var tooltipService = new TooltipService(new FakePersonIdentity { CurrentRoleCode = "developer" });
         var presentation = tooltipService.ResolvePresentation(
@@ -95,7 +95,7 @@ public sealed class ControlInspectorServiceTests
     }
 
     [TestMethod]
-    public void ExpandAssociatedFiles_IncludesModelsConvertersSharedAndCoreSupportFiles()
+    public void Service_ControlInspectorServiceTests_ExpandAssociatedFiles_IncludesModelsConvertersSharedAndCoreSupportFiles()
     {
         var expanded = ControlInspectorService.ExpandAssociatedFiles(
             element: null,
@@ -119,7 +119,7 @@ public sealed class ControlInspectorServiceTests
     }
 
     [TestMethod]
-    public void FilterAssociatedFiles_WhenHideTooltipRelated_RemovesTooltipInfrastructureOnly()
+    public void Service_ControlInspectorServiceTests_FilterAssociatedFiles_WhenHideTooltipRelatedRemovesTooltipInfrastructureOnly()
     {
         var files = new[]
         {

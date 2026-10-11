@@ -20,7 +20,7 @@ public sealed class ServiceSettingsSearchTests
     private const string Description = "The MySQL server that holds the application stores and the cache.";
 
     [TestMethod]
-    public void NoSearch_KeepsEveryGroupVisible()
+    public void Service_ServiceSettingsSearchTests_NoSearch_KeepsEveryGroupVisible()
     {
         var group = CreateGroup();
 
@@ -30,7 +30,7 @@ public sealed class ServiceSettingsSearchTests
     }
 
     [TestMethod]
-    public void WhiteSpaceSearch_KeepsEveryGroupVisible()
+    public void Service_ServiceSettingsSearchTests_WhiteSpaceSearch_KeepsEveryGroupVisible()
     {
         var group = CreateGroup();
 
@@ -40,7 +40,7 @@ public sealed class ServiceSettingsSearchTests
     }
 
     [TestMethod]
-    public void Search_MatchesTheHeading()
+    public void Service_ServiceSettingsSearchTests_Search_MatchesTheHeading()
     {
         var group = CreateGroup();
 
@@ -50,7 +50,7 @@ public sealed class ServiceSettingsSearchTests
     }
 
     [TestMethod]
-    public void Search_MatchesTheNote()
+    public void Service_ServiceSettingsSearchTests_Search_MatchesTheNote()
     {
         var group = CreateGroup();
 
@@ -60,7 +60,7 @@ public sealed class ServiceSettingsSearchTests
     }
 
     [TestMethod]
-    public void Search_MatchesAKeywordThatIsNotOnTheCard()
+    public void Service_ServiceSettingsSearchTests_Search_MatchesAKeywordThatIsNotOnTheCard()
     {
         // "mysqldump" names the setting inside this group but appears in neither the heading nor the note,
         // which is exactly what the keyword list is for.
@@ -72,7 +72,7 @@ public sealed class ServiceSettingsSearchTests
     }
 
     [TestMethod]
-    public void Search_IgnoresCase()
+    public void Service_ServiceSettingsSearchTests_Search_IgnoresCase()
     {
         var group = CreateGroup();
 
@@ -82,7 +82,7 @@ public sealed class ServiceSettingsSearchTests
     }
 
     [TestMethod]
-    public void Search_RequiresEveryTypedWordToMatch()
+    public void Service_ServiceSettingsSearchTests_Search_RequiresEveryTypedWordToMatch()
     {
         // "mysql port" must narrow rather than widen: one word matches the heading, and "port" is only in
         // the keyword list, so the group stays; adding a word that matches nothing hides it.
@@ -96,7 +96,7 @@ public sealed class ServiceSettingsSearchTests
     }
 
     [TestMethod]
-    public void Search_ThatMatchesNothing_HidesTheGroup()
+    public void Service_ServiceSettingsSearchTests_Search_ThatMatchesNothingHidesTheGroup()
     {
         var group = CreateGroup();
 
@@ -106,7 +106,7 @@ public sealed class ServiceSettingsSearchTests
     }
 
     [TestMethod]
-    public void Search_OpensTheCardsItMatched()
+    public void Service_ServiceSettingsSearchTests_Search_OpensTheCardsItMatched()
     {
         var group = CreateGroup();
 
@@ -116,7 +116,7 @@ public sealed class ServiceSettingsSearchTests
     }
 
     [TestMethod]
-    public void Search_LeavesTheCardClosedWhenItDidNotMatch()
+    public void Service_ServiceSettingsSearchTests_Search_LeavesTheCardClosedWhenItDidNotMatch()
     {
         var group = CreateGroup();
 
@@ -126,7 +126,7 @@ public sealed class ServiceSettingsSearchTests
     }
 
     [TestMethod]
-    public void ClearingTheSearch_DoesNotCollapseOrHideTheCards()
+    public void Service_ServiceSettingsSearchTests_ClearingTheSearch_DoesNotCollapseOrHideTheCards()
     {
         var group = CreateGroup();
         group.IsExpanded = true;
@@ -139,7 +139,7 @@ public sealed class ServiceSettingsSearchTests
     }
 
     [TestMethod]
-    public void Group_CarriesItsOwnHeadingAndNote()
+    public void Service_ServiceSettingsSearchTests_Group_CarriesItsOwnHeadingAndNote()
     {
         var group = CreateGroup();
 

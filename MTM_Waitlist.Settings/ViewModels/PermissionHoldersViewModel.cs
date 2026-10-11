@@ -89,11 +89,11 @@ public partial class PermissionHoldersViewModel : ObservableObject
 
     public string HeadingText => "Permissions_Holders.Heading".GetLocalized();
 
-    public string FeatureLabelText => "Permissions_Holders.Feature.Label".GetLocalized();
+    public string FeatureLabelText => "Permissions_Holders_Feature.Label".GetLocalized();
 
-    public string RolesHeadingText => "Permissions_Holders.Roles.Heading".GetLocalized();
+    public string RolesHeadingText => "Permissions_Holders_Roles.Heading".GetLocalized();
 
-    public string PeopleHeadingText => "Permissions_Holders.People.Heading".GetLocalized();
+    public string PeopleHeadingText => "Permissions_Holders_People.Heading".GetLocalized();
 
     /// <summary>What a feature nobody holds is told with, rather than an empty region (FR-078).</summary>
     public string NobodyText => "Permissions_Holders.Nobody".GetLocalized();

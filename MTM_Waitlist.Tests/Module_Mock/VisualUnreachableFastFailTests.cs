@@ -79,7 +79,7 @@ public sealed class VisualUnreachableFastFailTests
     }
 
     [TestMethod]
-    public void Resolve_WithACompleteConnectionStringInTheEnvironment_DisablesTheBlindConnectRetry()
+    public void Service_VisualUnreachableFastFailTests_Resolve_WithACompleteConnectionStringInTheEnvironmentDisablesTheBlindConnectRetry()
     {
         Environment.SetEnvironmentVariable(
             ConnectionStringEnvironmentVariable,
@@ -94,7 +94,7 @@ public sealed class VisualUnreachableFastFailTests
     }
 
     [TestMethod]
-    public void Resolve_WithACompleteConnectionStringThatAsksForRetries_StillDisablesThem()
+    public void Service_VisualUnreachableFastFailTests_Resolve_WithACompleteConnectionStringThatAsksForRetriesStillDisablesThem()
     {
         Environment.SetEnvironmentVariable(
             ConnectionStringEnvironmentVariable,
@@ -106,7 +106,7 @@ public sealed class VisualUnreachableFastFailTests
     }
 
     [TestMethod]
-    public void Resolve_WithAnUnparseableConnectionStringInTheEnvironment_ReturnsItUnchangedWithoutThrowing()
+    public void Service_VisualUnreachableFastFailTests_Resolve_WithAnUnparseableConnectionStringInTheEnvironmentReturnsItUnchangedWithoutThrowing()
     {
         const string Unparseable = "Server=VISUAL;NotAKeywordThisProviderKnows=1";
         Environment.SetEnvironmentVariable(ConnectionStringEnvironmentVariable, Unparseable);
@@ -128,7 +128,7 @@ public sealed class VisualUnreachableFastFailTests
     }
 
     [TestMethod]
-    public void Resolve_FromConfiguration_DisablesTheBlindConnectRetryAndKeepsTheConfiguredTimeout()
+    public void Service_VisualUnreachableFastFailTests_Resolve_FromConfigurationDisablesTheBlindConnectRetryAndKeepsTheConfiguredTimeout()
     {
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
@@ -148,7 +148,7 @@ public sealed class VisualUnreachableFastFailTests
     }
 
     [TestMethod]
-    public void BuildProbeConnectionString_DisablesTheBlindConnectRetry()
+    public void Service_VisualUnreachableFastFailTests_BuildProbeConnectionString_DisablesTheBlindConnectRetry()
     {
         var prepared = new SqlConnectionStringBuilder(
             VisualConnectivityProbe.BuildProbeConnectionString(
@@ -159,7 +159,7 @@ public sealed class VisualUnreachableFastFailTests
     }
 
     [TestMethod]
-    public void BuildProbeConnectionString_ShortensALongerConnectTimeoutToTheProbeBound()
+    public void Service_VisualUnreachableFastFailTests_BuildProbeConnectionString_ShortensALongerConnectTimeoutToTheProbeBound()
     {
         var prepared = new SqlConnectionStringBuilder(
             VisualConnectivityProbe.BuildProbeConnectionString(
@@ -172,7 +172,7 @@ public sealed class VisualUnreachableFastFailTests
     }
 
     [TestMethod]
-    public void BuildProbeConnectionString_KeepsAShorterCallerConnectTimeout()
+    public void Service_VisualUnreachableFastFailTests_BuildProbeConnectionString_KeepsAShorterCallerConnectTimeout()
     {
         var prepared = new SqlConnectionStringBuilder(
             VisualConnectivityProbe.BuildProbeConnectionString(
@@ -182,7 +182,7 @@ public sealed class VisualUnreachableFastFailTests
     }
 
     [TestMethod]
-    public void BoundConnectAttempt_ShortensALongerConfiguredTimeoutToTheProbeBound()
+    public void Service_VisualUnreachableFastFailTests_BoundConnectAttempt_ShortensALongerConfiguredTimeoutToTheProbeBound()
     {
         var prepared = new SqlConnectionStringBuilder(
             VisualQueryExecutor.BoundConnectAttempt(
@@ -195,7 +195,7 @@ public sealed class VisualUnreachableFastFailTests
     }
 
     [TestMethod]
-    public void BoundConnectAttempt_KeepsAShorterCallerConnectTimeout()
+    public void Service_VisualUnreachableFastFailTests_BoundConnectAttempt_KeepsAShorterCallerConnectTimeout()
     {
         var prepared = new SqlConnectionStringBuilder(
             VisualQueryExecutor.BoundConnectAttempt(
@@ -205,7 +205,7 @@ public sealed class VisualUnreachableFastFailTests
     }
 
     [TestMethod]
-    public void BoundConnectAttempt_WithAnUnparseableValue_IsReturnedUnchangedRatherThanThrowing()
+    public void Service_VisualUnreachableFastFailTests_BoundConnectAttempt_WithAnUnparseableValueIsReturnedUnchangedRatherThanThrowing()
     {
         const string Unparseable = "Server=VISUAL;NotAKeywordThisProviderKnows=1";
 
@@ -216,7 +216,7 @@ public sealed class VisualUnreachableFastFailTests
     }
 
     [TestMethod]
-    public async Task ExecuteAsync_WithAnUnreachableHost_GivesUpWithinTheReadBound()
+    public async Task Service_VisualUnreachableFastFailTests_ExecuteAsync_WithAnUnreachableHostGivesUpWithinTheReadBound()
     {
         Environment.SetEnvironmentVariable(
             ConnectionStringEnvironmentVariable,
@@ -240,7 +240,7 @@ public sealed class VisualUnreachableFastFailTests
     }
 
     [TestMethod]
-    public async Task ProbeAsync_WithNoConnectionConfigured_ReturnsFalse()
+    public async Task Service_VisualUnreachableFastFailTests_ProbeAsync_WithNoConnectionConfiguredReturnsFalse()
     {
         var probe = new VisualConnectivityProbe(new VisualConnectionStringProvider());
 
@@ -248,7 +248,7 @@ public sealed class VisualUnreachableFastFailTests
     }
 
     [TestMethod]
-    public async Task ProbeAsync_WithAnUnreachableHost_GivesUpWithinTheProbeBound()
+    public async Task Service_VisualUnreachableFastFailTests_ProbeAsync_WithAnUnreachableHostGivesUpWithinTheProbeBound()
     {
         Environment.SetEnvironmentVariable(
             ConnectionStringEnvironmentVariable,

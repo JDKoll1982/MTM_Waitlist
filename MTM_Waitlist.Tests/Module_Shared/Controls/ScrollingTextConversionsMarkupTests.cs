@@ -92,7 +92,7 @@ public sealed class ScrollingTextConversionsMarkupTests
     /// <c>TextBlock</c> had, so the surface keeps reading from the same model property.
     /// </summary>
     [TestMethod]
-    public void EveryConvertedValue_IsDrawnByTheScrollingControl()
+    public void UI_ScrollingTextConversionsMarkupTests_EveryConvertedValue_IsDrawnByTheScrollingControl()
     {
         var missing = new List<string>();
 
@@ -119,7 +119,7 @@ public sealed class ScrollingTextConversionsMarkupTests
     /// is that the wrap and the ellipsis are gone from these lines.
     /// </summary>
     [TestMethod]
-    public void NoConvertedValue_IsDrawnByATextBlockAnyMore()
+    public void UI_ScrollingTextConversionsMarkupTests_NoConvertedValue_IsDrawnByATextBlockAnyMore()
     {
         var left = new List<string>();
 

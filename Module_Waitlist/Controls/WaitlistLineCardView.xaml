@@ -114,7 +114,7 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock
-                        x:Uid="Waitlist_Card.RequestedBy"
+                        x:Uid="Waitlist_Card_RequestedBy"
                         FontWeight="SemiBold"
                         Text="Requested by" />
                     <TextBlock
@@ -124,7 +124,7 @@
                         TextTrimming="CharacterEllipsis" />
 
                     <TextBlock
-                        x:Uid="Waitlist_Card.Press"
+                        x:Uid="Waitlist_Card_Press"
                         Grid.Row="1"
                         FontWeight="SemiBold"
                         Text="Press" />
@@ -136,7 +136,7 @@
                         TextTrimming="CharacterEllipsis" />
 
                     <TextBlock
-                        x:Uid="Waitlist_Card.RemainingTime"
+                        x:Uid="Waitlist_Card_RemainingTime"
                         Grid.Row="2"
                         FontWeight="SemiBold"
                         Text="Remaining time" />
@@ -149,7 +149,7 @@
                         TextTrimming="CharacterEllipsis" />
 
                     <TextBlock
-                        x:Uid="Waitlist_Card.Waiting"
+                        x:Uid="Waitlist_Card_Waiting"
                         Grid.Row="3"
                         FontWeight="SemiBold"
                         Text="Waiting"

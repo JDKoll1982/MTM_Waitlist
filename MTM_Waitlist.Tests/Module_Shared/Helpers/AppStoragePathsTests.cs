@@ -17,22 +17,18 @@ public sealed class AppStoragePathsTests
     /// mapping, and every machine reads these.
     /// </summary>
     [TestMethod]
-    public void TheDefaults_NameTheShareRatherThanADriveLetter()
+    public void Helper_AppStoragePathsTests_TheDefaults_NameTheShareRatherThanADriveLetter()
     {
         Assert.AreEqual(
             @"\\mtmanu-fs01\Expo Drive\MH_RESOURCE\Material_Handler\MTM Applications\MTM Waitlist Application\Images",
             AppStoragePaths.ImagesRootDefault);
 
-        Assert.AreEqual(
-            @"\\mtmanu-fs01\Expo Drive\MH_RESOURCE\Material_Handler\MTM Applications\Keys - DO NOT EDIT FILES\MTM Waitlist Application",
-            AppStoragePaths.KeysFolderDefault);
-
         Assert.IsTrue(
             AppStoragePaths.ImagesRootDefault.StartsWith(@"\\", StringComparison.Ordinal),
             "The picture root must be a share name, not a drive letter.");
         Assert.IsTrue(
-            AppStoragePaths.KeysFolderDefault.StartsWith(@"\\", StringComparison.Ordinal),
-            "The key-files folder must be a share name, not a drive letter.");
+            AppStoragePaths.DunnageRootDefault.StartsWith(@"\\", StringComparison.Ordinal),
+            "The dunnage root must be a share name, not a drive letter.");
     }
 
     /// <summary>
@@ -45,7 +41,7 @@ public sealed class AppStoragePathsTests
     /// place. The two resolve to the same file, which is what makes the move safe to interrupt.
     /// </remarks>
     [TestMethod]
-    public void AStoredPicturePathIsJoinedToTheRoot()
+    public void Helper_AppStoragePathsTests_AStoredPicturePathIsJoinedToTheRoot()
     {
         Assert.AreEqual(
             Path.Combine(AppStoragePaths.ImagesRootDefault, "Waitlist", "request_item", "pickup-coil.png"),
@@ -74,7 +70,7 @@ public sealed class AppStoragePathsTests
     /// reader looks.
     /// </summary>
     [TestMethod]
-    public void AnUnrecognisedLeadingFolderIsLeftWhereItIs()
+    public void Helper_AppStoragePathsTests_AnUnrecognisedLeadingFolderIsLeftWhereItIs()
     {
         Assert.AreEqual(
             Path.Combine(AppStoragePaths.ImagesRootDefault, "something-else", "pickup-coil.png"),
@@ -88,7 +84,7 @@ public sealed class AppStoragePathsTests
     /// on today's root would move an operator's picture onto a file that is not there.
     /// </summary>
     [TestMethod]
-    public void AnAbsoluteStoredPathIsTakenAsItStands()
+    public void Helper_AppStoragePathsTests_AnAbsoluteStoredPathIsTakenAsItStands()
     {
         const string Absolute = @"X:\Software Development\Live Applications\MTM_Waitlist\Images\request_item_pickup-coil.png";
 
@@ -98,7 +94,7 @@ public sealed class AppStoragePathsTests
     }
 
     [TestMethod]
-    public void NothingToResolveAnswersNothing()
+    public void Helper_AppStoragePathsTests_NothingToResolveAnswersNothing()
     {
         Assert.IsNull(AppStoragePaths.ResolvePicturePath(AppStoragePaths.ImagesRootDefault, null));
         Assert.IsNull(AppStoragePaths.ResolvePicturePath(AppStoragePaths.ImagesRootDefault, "   "));
@@ -109,7 +105,7 @@ public sealed class AppStoragePathsTests
 
     /// <summary>The key file naming convention is declared once, so a reader cannot invent a second one.</summary>
     [TestMethod]
-    public void AKeyIsReadFromItsOwnTextFile()
+    public void Helper_AppStoragePathsTests_AKeyIsReadFromItsOwnTextFile()
     {
         Assert.AreEqual("db-connection.txt", AppStoragePaths.KeyFileName("db-connection"));
     }

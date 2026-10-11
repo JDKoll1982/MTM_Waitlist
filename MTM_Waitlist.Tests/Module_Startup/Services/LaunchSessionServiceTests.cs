@@ -35,7 +35,7 @@ public sealed class LaunchSessionServiceTests
     private const long ComputerId = 3L;
 
     [TestMethod]
-    public async Task ValidateAsync_WhenTheStoreSaysTheSessionNoLongerStands_ReportsItAsNotValid()
+    public async Task Service_LaunchSessionServiceTests_ValidateAsync_WhenTheStoreSaysTheSessionNoLongerStandsReportsItAsNotValid()
     {
         // Arrange
         var store = new StubSessionStore().WithSession(isValid: false);
@@ -52,7 +52,7 @@ public sealed class LaunchSessionServiceTests
     }
 
     [TestMethod]
-    public async Task ValidateAsync_WhenTheExpiryIsPastOnThisComputerButLiveInTheStore_TrustsTheStore()
+    public async Task Service_LaunchSessionServiceTests_ValidateAsync_WhenTheExpiryIsPastOnThisComputerButLiveInTheStoreTrustsTheStore()
     {
         // Arrange: the store holds the session as live, and the expiry it computed is years before this
         // computer's idea of now. Comparing that expiry here would report the session as gone (FR-010).
@@ -72,7 +72,7 @@ public sealed class LaunchSessionServiceTests
     }
 
     [TestMethod]
-    public async Task ValidateAsync_BeforeAnySessionWasIssued_ReportsNoStoredSessionWithoutReadingTheStore()
+    public async Task Service_LaunchSessionServiceTests_ValidateAsync_BeforeAnySessionWasIssuedReportsNoStoredSessionWithoutReadingTheStore()
     {
         // Arrange
         var store = new StubSessionStore();
@@ -87,7 +87,7 @@ public sealed class LaunchSessionServiceTests
     }
 
     [TestMethod]
-    public async Task IssueAsync_SendsTheSessionLengthTheSettingHolds()
+    public async Task Service_LaunchSessionServiceTests_IssueAsync_SendsTheSessionLengthTheSettingHolds()
     {
         // Arrange
         var store = new StubSessionStore { SessionLengthMinutes = 120 };
@@ -103,7 +103,7 @@ public sealed class LaunchSessionServiceTests
     }
 
     [TestMethod]
-    public async Task IssueAsync_WhenTheStoreHoldsNoOverride_UsesTheDeclaredEightHourDefault()
+    public async Task Service_LaunchSessionServiceTests_IssueAsync_WhenTheStoreHoldsNoOverrideUsesTheDeclaredEightHourDefault()
     {
         // Arrange: no session-length row at all, which is a store nobody has configured.
         var store = new StubSessionStore();
@@ -118,7 +118,7 @@ public sealed class LaunchSessionServiceTests
     }
 
     [TestMethod]
-    public async Task IssueAsync_AfterTheSessionLengthChanges_UsesTheNewValueAtTheNextSignIn()
+    public async Task Service_LaunchSessionServiceTests_IssueAsync_AfterTheSessionLengthChangesUsesTheNewValueAtTheNextSignIn()
     {
         // Arrange
         var store = new StubSessionStore { SessionLengthMinutes = 480 };
@@ -139,7 +139,7 @@ public sealed class LaunchSessionServiceTests
     }
 
     [TestMethod]
-    public async Task ClearAsync_WhenASessionStands_EndsItAndForgetsTheIssuedDigest()
+    public async Task Service_LaunchSessionServiceTests_ClearAsync_WhenASessionStandsEndsItAndForgetsTheIssuedDigest()
     {
         // Arrange
         var store = new StubSessionStore().WithSession(isValid: true);
@@ -165,7 +165,7 @@ public sealed class LaunchSessionServiceTests
     }
 
     [TestMethod]
-    public async Task ClearAsync_WhenTheStoreHoldsNothingToEnd_ReportsNothingEndedRatherThanAFailure()
+    public async Task Service_LaunchSessionServiceTests_ClearAsync_WhenTheStoreHoldsNothingToEndReportsNothingEndedRatherThanAFailure()
     {
         // Arrange: the pair has no live row, which is what a second sign-out looks like.
         var store = new StubSessionStore { ClearAffectsNoRows = true };
@@ -179,7 +179,7 @@ public sealed class LaunchSessionServiceTests
     }
 
     [TestMethod]
-    public async Task ClearAsync_WithoutAPersonOrAMachine_WritesNothingAtAll()
+    public async Task Service_LaunchSessionServiceTests_ClearAsync_WithoutAPersonOrAMachineWritesNothingAtAll()
     {
         // Arrange
         var store = new StubSessionStore();
@@ -193,7 +193,7 @@ public sealed class LaunchSessionServiceTests
     }
 
     [TestMethod]
-    public async Task IssueAsync_WithoutAPersonOrAMachine_RefusesToWriteASession()
+    public async Task Service_LaunchSessionServiceTests_IssueAsync_WithoutAPersonOrAMachineRefusesToWriteASession()
     {
         // Arrange
         var store = new StubSessionStore();
@@ -206,7 +206,7 @@ public sealed class LaunchSessionServiceTests
     }
 
     [TestMethod]
-    public async Task IssueAsync_WhenTheStoreAcceptsNoRow_ReportsThatNoSessionWasIssued()
+    public async Task Service_LaunchSessionServiceTests_IssueAsync_WhenTheStoreAcceptsNoRowReportsThatNoSessionWasIssued()
     {
         // Arrange: the store answers the write with zero affected rows, which is a write that did not land.
         var store = new StubSessionStore { UpsertAffectsNoRows = true };

@@ -171,7 +171,7 @@ public sealed class MachineFactsService : IMachineFacts
             Id = ReadInt64(row, "id"),
             ComputerName = ReadString(row, "computer_name"),
             DisplayName = ReadString(row, "display_name"),
-            Description = ReadString(row, "description"),
+            Location = ReadString(row, "location"),
             MacAddressNormalized = ReadString(row, "mac_address_normalized"),
             IsRegistered = ReadInt64(row, "is_registered") == 1,
         };

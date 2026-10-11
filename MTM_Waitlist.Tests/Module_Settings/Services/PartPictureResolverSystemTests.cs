@@ -46,7 +46,7 @@ public sealed class PartPictureResolverSystemTests
     /// Both parts are pictured: each resolves its own file, and neither answers with the other's.
     /// </summary>
     [TestMethod]
-    public void EachSystemResolvesItsOwnPicture()
+    public void Service_PartPictureResolverSystemTests_EachSystemResolvesItsOwnPicture()
     {
         var visualFile = WriteSharePicture(PartPictureLayout.VisualCollection, SharedPartNumber);
         var wipFile = WriteSharePicture(PartPictureLayout.WipCollection, SharedPartNumber);
@@ -63,7 +63,7 @@ public sealed class PartPictureResolverSystemTests
     /// Only one system is pictured: the other draws nothing, which is what the shared placeholder stands for.
     /// </summary>
     [TestMethod]
-    public void TheUnpicturedSystemsPartDrawsNothing()
+    public void Service_PartPictureResolverSystemTests_TheUnpicturedSystemsPartDrawsNothing()
     {
         var visualFile = WriteSharePicture(PartPictureLayout.VisualCollection, SharedPartNumber);
 
@@ -82,7 +82,7 @@ public sealed class PartPictureResolverSystemTests
     /// no more shareable between the two systems than the file on the share is (FR-030).
     /// </summary>
     [TestMethod]
-    public void ALocalCopyIsNotSharedBetweenTheTwoSystems()
+    public void Service_PartPictureResolverSystemTests_ALocalCopyIsNotSharedBetweenTheTwoSystems()
     {
         var visualFile = WriteSharePicture(PartPictureLayout.VisualCollection, SharedPartNumber);
 
@@ -113,7 +113,7 @@ public sealed class PartPictureResolverSystemTests
     /// rather than a path to a file that is not there.
     /// </summary>
     [TestMethod]
-    public void TheApplicationOwnScopeResolvesItsKindFolderAndNothingWhenThereIsNoFile()
+    public void Service_PartPictureResolverSystemTests_TheApplicationOwnScopeResolvesItsKindFolderAndNothingWhenThereIsNoFile()
     {
         WriteSharePicture(PartPictureLayout.VisualCollection, SharedPartNumber);
 

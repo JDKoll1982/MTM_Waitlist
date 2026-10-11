@@ -125,7 +125,9 @@ public sealed partial class MainWindow : WindowEx
     /// </summary>
     private static SizeInt32 SizeFor(LaunchStage stage) => stage switch
     {
-        LaunchStage.SignIn => new SizeInt32(460, 500),
+        // The sign-in stage holds two columns: the form, and a rule, and the six people who signed in here
+        // before. The size is what that reads at, so all six are visible rather than cut off (FR-048, SC-022).
+        LaunchStage.SignIn => new SizeInt32(780, 640),
         LaunchStage.MachineSetup => new SizeInt32(520, 560),
         LaunchStage.Blocked => new SizeInt32(480, 420),
         LaunchStage.Splash => ConfiguredLaunchSize(),

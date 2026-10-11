@@ -27,7 +27,7 @@ namespace MTM_Waitlist.Tests.Module_Settings.ViewModels;
 public sealed class DeveloperLogPanelViewModelTests
 {
     [TestMethod]
-    public async Task LoadAsync_WhenMachineAndErrorKindAreChosen_AsksForBothAndListsWhatCameBack()
+    public async Task ViewModel_DeveloperLogPanelViewModelTests_LoadAsync_WhenMachineAndErrorKindAreChosenAsksForBothAndListsWhatCameBack()
     {
         // Arrange
         var store = new RecordingLogReader();
@@ -49,7 +49,7 @@ public sealed class DeveloperLogPanelViewModelTests
     }
 
     [TestMethod]
-    public async Task LoadAsync_WhenSeverityAndMachineAreChosen_AsksForBoth()
+    public async Task ViewModel_DeveloperLogPanelViewModelTests_LoadAsync_WhenSeverityAndMachineAreChosenAsksForBoth()
     {
         // Arrange
         var store = new RecordingLogReader();
@@ -69,7 +69,7 @@ public sealed class DeveloperLogPanelViewModelTests
     }
 
     [TestMethod]
-    public async Task LoadAsync_AlwaysBoundsTheReadByATimeWindowAndAPageSize()
+    public async Task ViewModel_DeveloperLogPanelViewModelTests_LoadAsync_AlwaysBoundsTheReadByATimeWindowAndAPageSize()
     {
         // Arrange: a reader has asked for far more than the panel or the store will return.
         var store = new RecordingLogReader();
@@ -97,7 +97,7 @@ public sealed class DeveloperLogPanelViewModelTests
     }
 
     [TestMethod]
-    public async Task LoadAsync_KeepsTheNewestFirstOrderTheStoreReturned()
+    public async Task ViewModel_DeveloperLogPanelViewModelTests_LoadAsync_KeepsTheNewestFirstOrderTheStoreReturned()
     {
         // Arrange
         var store = new RecordingLogReader();
@@ -117,7 +117,7 @@ public sealed class DeveloperLogPanelViewModelTests
     }
 
     [TestMethod]
-    public async Task LoadAsync_WhenThePanelIsNotPermitted_ReadsNothingAtAllAndSaysSo()
+    public async Task ViewModel_DeveloperLogPanelViewModelTests_LoadAsync_WhenThePanelIsNotPermittedReadsNothingAtAllAndSaysSo()
     {
         // Arrange: the gate is answered before anything is read, which is what makes it a gate rather than a
         // hidden control (plan D11).
@@ -134,7 +134,7 @@ public sealed class DeveloperLogPanelViewModelTests
     }
 
     [TestMethod]
-    public async Task LoadPermissionAsync_AsksTheStoreForTheOneKeyThePanelIsGatedOn()
+    public async Task ViewModel_DeveloperLogPanelViewModelTests_LoadPermissionAsync_AsksTheStoreForTheOneKeyThePanelIsGatedOn()
     {
         // Arrange
         var permissions = new RecordingPermissionStub();
@@ -149,7 +149,7 @@ public sealed class DeveloperLogPanelViewModelTests
     }
 
     [TestMethod]
-    public async Task GroupByFingerprint_ReadsTheGroupedViewRatherThanTheFlatOne()
+    public async Task ViewModel_DeveloperLogPanelViewModelTests_GroupByFingerprint_ReadsTheGroupedViewRatherThanTheFlatOne()
     {
         // Arrange: one fault raised eleven times is one signal with a count, not eleven rows (SC-014).
         var store = new RecordingLogReader();
@@ -170,7 +170,7 @@ public sealed class DeveloperLogPanelViewModelTests
     }
 
     [TestMethod]
-    public async Task LoadAsync_WhenTheStoreFails_ShowsTheUnavailableStateRatherThanAnEmptyAnswer()
+    public async Task ViewModel_DeveloperLogPanelViewModelTests_LoadAsync_WhenTheStoreFailsShowsTheUnavailableStateRatherThanAnEmptyAnswer()
     {
         // Arrange: a store that refuses the read is a stated cause, never a silently empty list (FR-021, FR-001).
         var store = new RecordingLogReader { Failure = new InvalidOperationException("the store did not answer") };
@@ -187,7 +187,7 @@ public sealed class DeveloperLogPanelViewModelTests
     }
 
     [TestMethod]
-    public void CopyEntry_HandsTheFormattersTextToTheClipboardAndSaysSo()
+    public void ViewModel_DeveloperLogPanelViewModelTests_CopyEntry_HandsTheFormattersTextToTheClipboardAndSaysSo()
     {
         // Arrange
         string? handedOver = null;
@@ -211,7 +211,7 @@ public sealed class DeveloperLogPanelViewModelTests
     }
 
     [TestMethod]
-    public async Task CopyList_HandsEveryListedEntryToTheClipboardAsOneCopy()
+    public async Task ViewModel_DeveloperLogPanelViewModelTests_CopyList_HandsEveryListedEntryToTheClipboardAsOneCopy()
     {
         // Arrange
         string? handedOver = null;
@@ -239,7 +239,7 @@ public sealed class DeveloperLogPanelViewModelTests
     }
 
     [TestMethod]
-    public void CopyEntry_WhenThePanelIsNotPermitted_HandsNothingToTheClipboard()
+    public void ViewModel_DeveloperLogPanelViewModelTests_CopyEntry_WhenThePanelIsNotPermittedHandsNothingToTheClipboard()
     {
         // Arrange
         var handedOver = 0;
@@ -260,7 +260,7 @@ public sealed class DeveloperLogPanelViewModelTests
     }
 
     [TestMethod]
-    public async Task LoadAsync_WhenTheStoreReturnsNothing_StatesItRatherThanShowingAnEmptyRegion()
+    public async Task ViewModel_DeveloperLogPanelViewModelTests_LoadAsync_WhenTheStoreReturnsNothingStatesItRatherThanShowingAnEmptyRegion()
     {
         // Arrange
         var viewModel = Build(new RecordingLogReader());
@@ -275,7 +275,7 @@ public sealed class DeveloperLogPanelViewModelTests
     }
 
     [TestMethod]
-    public void LoadSeverityOptions_OffersTheOneVocabularyTheStoreHolds()
+    public void ViewModel_DeveloperLogPanelViewModelTests_LoadSeverityOptions_OffersTheOneVocabularyTheStoreHolds()
     {
         // Arrange
         var viewModel = Build(new RecordingLogReader());
@@ -291,7 +291,7 @@ public sealed class DeveloperLogPanelViewModelTests
     }
 
     [TestMethod]
-    public void ThePanel_IsRegisteredWithTheSettingsModule()
+    public void ViewModel_DeveloperLogPanelViewModelTests_ThePanel_IsRegisteredWithTheSettingsModule()
     {
         // Arrange: the settings module's own registration, plus the two seams the panel's factory needs.
         var services = new ServiceCollection();

@@ -240,7 +240,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         catch (Exception ex)
         {
             AppLog.Error("Waitlist", ex, "Claiming the request failed; the row is unchanged.");
-            ActionRefusalMessage = "Waitlist_Action.Refused.Unexpected".GetLocalized();
+            ActionRefusalMessage = "Waitlist_Action_Refused.Unexpected".GetLocalized();
             return;
         }
 
@@ -254,8 +254,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         // The store refused the claim. Either another handler got there first, or the request has left the
         // list; both leave this handler needing to choose something else.
         var message = _waitlistRequestService.GetRequest(requestId) is null
-            ? "Waitlist_Action.Refused.AcceptGone".GetLocalized()
-            : "Waitlist_Action.Refused.AcceptTaken".GetLocalized();
+            ? "Waitlist_Action_Refused.AcceptGone".GetLocalized()
+            : "Waitlist_Action_Refused.AcceptTaken".GetLocalized();
 
         ActionRefusalMessage = message;
         await ShowActionWarningAsync("Waitlist_Action.AcceptRefusedTitle".GetLocalized(), message);
@@ -297,7 +297,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
         await RunHandlerActionAsync(
             requestId,
-            "Waitlist_Action.Refused.CompleteOrRelease".GetLocalized(),
+            "Waitlist_Action_Refused.CompleteOrRelease".GetLocalized(),
             () => _waitlistRequestService.CompleteAsync(requestId, _currentRequesterEmployeeNumber, _currentEmployeeName));
     }
 
@@ -324,7 +324,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
         await RunHandlerActionAsync(
             requestId,
-            "Waitlist_Action.Refused.CompleteOrRelease".GetLocalized(),
+            "Waitlist_Action_Refused.CompleteOrRelease".GetLocalized(),
             () => _waitlistRequestService.ReleaseAsync(requestId, _currentRequesterEmployeeNumber, _currentEmployeeName));
     }
 
@@ -349,7 +349,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         catch (Exception ex)
         {
             AppLog.Error("Waitlist", ex, "A waitlist request action failed; the row is unchanged.");
-            ActionRefusalMessage = "Waitlist_Action.Refused.Unexpected".GetLocalized();
+            ActionRefusalMessage = "Waitlist_Action_Refused.Unexpected".GetLocalized();
         }
     }
 
@@ -371,7 +371,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         {
             // No prompt to ask with means no confirmation can be obtained, so the action must not run and
             // must not pass silently either.
-            ActionRefusalMessage = "Waitlist_Action.Refused.Unexpected".GetLocalized();
+            ActionRefusalMessage = "Waitlist_Action_Refused.Unexpected".GetLocalized();
             return;
         }
 
@@ -379,15 +379,15 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         try
         {
             reason = await _actionPrompt.RequestCancellationReasonAsync(
-                "Waitlist_Action.Cancel.DialogTitle".GetLocalized(),
-                "Waitlist_Action.Cancel.DialogMessage".GetLocalized(),
-                "Waitlist_Action.Cancel.Confirm".GetLocalized(),
-                "Waitlist_Action.Cancel.Dismiss".GetLocalized());
+                "Waitlist_Action_Cancel.DialogTitle".GetLocalized(),
+                "Waitlist_Action_Cancel.DialogMessage".GetLocalized(),
+                "Waitlist_Action_Cancel.Confirm".GetLocalized(),
+                "Waitlist_Action_Cancel.Dismiss".GetLocalized());
         }
         catch (Exception ex)
         {
             AppLog.Error("Waitlist", ex, "The cancel confirmation could not be shown; nothing was cancelled.");
-            ActionRefusalMessage = "Waitlist_Action.Refused.Unexpected".GetLocalized();
+            ActionRefusalMessage = "Waitlist_Action_Refused.Unexpected".GetLocalized();
             return;
         }
 
@@ -419,7 +419,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
             ActionRefusalMessage = cancelled
                 ? string.Empty
-                : "Waitlist_Action.Refused.Cancel".GetLocalized();
+                : "Waitlist_Action_Refused.Cancel".GetLocalized();
 
             if (cancelled)
             {
@@ -429,7 +429,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         catch (Exception ex)
         {
             AppLog.Error("Waitlist", ex, "Cancelling the request failed; the request is unchanged.");
-            ActionRefusalMessage = "Waitlist_Action.Refused.Unexpected".GetLocalized();
+            ActionRefusalMessage = "Waitlist_Action_Refused.Unexpected".GetLocalized();
         }
     }
 

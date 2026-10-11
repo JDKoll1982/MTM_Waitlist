@@ -16,7 +16,7 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}" Spacing="8">
-            <TextBlock x:Uid="Setup_DunnagePair.PageLabel" Style="{StaticResource SetupPageTitleStyle}" Text="Dunnage &amp; Scrap" />
+            <TextBlock x:Uid="Setup_DunnagePair_PageLabel" Style="{StaticResource SetupPageTitleStyle}" Text="Dunnage &amp; Scrap" />
             <Grid ColumnSpacing="12" RowSpacing="12">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -30,35 +30,35 @@
 
                 <Border Style="{StaticResource SetupSectionCardStyle}">
                     <StackPanel Spacing="4">
-                        <TextBlock x:Uid="Setup_DunnagePair.Header.WorkStation" Style="{StaticResource SetupFieldLabelStyle}" Text="WORK CENTER" />
+                        <TextBlock x:Uid="Setup_DunnagePair_Header_WorkStation" Style="{StaticResource SetupFieldLabelStyle}" Text="WORK CENTER" />
                         <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.SelectedWorkCenter, Mode=OneWay}" />
                     </StackPanel>
                 </Border>
 
                 <Border Grid.Column="1" Style="{StaticResource SetupSectionCardStyle}">
                     <StackPanel Spacing="4">
-                        <TextBlock x:Uid="Setup_DunnagePair.Header.WorkOrder" Style="{StaticResource SetupFieldLabelStyle}" Text="WORK ORDER" />
+                        <TextBlock x:Uid="Setup_DunnagePair_Header_WorkOrder" Style="{StaticResource SetupFieldLabelStyle}" Text="WORK ORDER" />
                         <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.NormalizedWorkOrder, Mode=OneWay}" />
                     </StackPanel>
                 </Border>
 
                 <Border Grid.Row="1" Style="{StaticResource SetupSectionCardStyle}">
                     <StackPanel Spacing="4">
-                        <TextBlock x:Uid="Setup_DunnagePair.Header.PartNumber" Style="{StaticResource SetupFieldLabelStyle}" Text="PART NUMBER" />
+                        <TextBlock x:Uid="Setup_DunnagePair_Header_PartNumber" Style="{StaticResource SetupFieldLabelStyle}" Text="PART NUMBER" />
                         <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.SelectedPartNumber, Mode=OneWay}" />
                     </StackPanel>
                 </Border>
 
                 <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource SetupSectionCardStyle}">
                     <StackPanel Spacing="4">
-                        <TextBlock x:Uid="Setup_DunnagePair.Header.Sequence" Style="{StaticResource SetupFieldLabelStyle}" Text="SEQUENCE" />
+                        <TextBlock x:Uid="Setup_DunnagePair_Header_Sequence" Style="{StaticResource SetupFieldLabelStyle}" Text="SEQUENCE" />
                         <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.SelectedSequence, Mode=OneWay}" />
                     </StackPanel>
                 </Border>
 
                 <Border Grid.Row="2" Grid.ColumnSpan="2" Style="{StaticResource SetupSectionCardStyle}">
                     <StackPanel Spacing="8">
-                        <TextBlock x:Uid="Setup_DunnagePair.ScrapType.Header" Style="{StaticResource SetupFieldLabelStyle}" Text="SCRAP TYPE" />
+                        <TextBlock x:Uid="Setup_DunnagePair_ScrapType_Header" Style="{StaticResource SetupFieldLabelStyle}" Text="SCRAP TYPE" />
                         <Grid ColumnSpacing="8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
@@ -69,7 +69,7 @@
                             <ComboBox
                                 AutomationProperties.AutomationId="SetupDunnageTypePage_ScrapTypeCombo"
                                 Grid.Column="0"
-                                x:Uid="Setup_DunnagePair.ScrapType.ComboBox"
+                                x:Uid="Setup_DunnagePair_ScrapType_ComboBox"
                                 PlaceholderText="Select scrap type"
                                 ItemsSource="{x:Bind ViewModel.DisplayScrapTypes, Mode=OneWay}"
                                 SelectedItem="{x:Bind ViewModel.SelectedScrapType, Mode=TwoWay}" />
@@ -116,13 +116,13 @@
                         <TextBlock
                             Grid.Column="0"
                             VerticalAlignment="Center"
-                            x:Uid="Setup_DunnagePair.CurrentAssignments"
+                            x:Uid="Setup_DunnagePair_CurrentAssignments"
                             Style="{ThemeResource BodyStrongTextBlockStyle}"
                             Text="Current Dunnage" />
                         <Button
                             AutomationProperties.AutomationId="SetupDunnageTypePage_AddDunnageButton"
                             Grid.Column="1"
-                            x:Uid="Setup_Action.AddDunnage"
+                            x:Uid="Setup_Action_AddDunnage"
                             Content="Add Dunnage"
                             Command="{x:Bind ViewModel.AddDunnageCommand}" />
                     </Grid>
@@ -155,9 +155,9 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Button AutomationProperties.AutomationId="SetupDunnageTypePage_ClearAllButton" Grid.Column="1" x:Uid="Setup_Action.ClearAllForPair" Content="Clear All" Click="OnClearAllForPairClick" />
-            <Button AutomationProperties.AutomationId="SetupDunnageTypePage_BackButton" Grid.Column="2" x:Uid="Setup_Action.Back" Content="Back" Command="{x:Bind ViewModel.BackCommand}" />
-            <Button AutomationProperties.AutomationId="SetupDunnageTypePage_ContinueButton" Grid.Column="3" x:Uid="Setup_Action.Continue" Content="Continue" Command="{x:Bind ViewModel.ContinueToReviewCommand}" IsEnabled="{x:Bind ViewModel.CanContinue, Mode=OneWay}" />
+            <Button AutomationProperties.AutomationId="SetupDunnageTypePage_ClearAllButton" Grid.Column="1" x:Uid="Setup_Action_ClearAllForPair" Content="Clear All" Click="OnClearAllForPairClick" />
+            <Button AutomationProperties.AutomationId="SetupDunnageTypePage_BackButton" Grid.Column="2" x:Uid="Setup_Action_Back" Content="Back" Command="{x:Bind ViewModel.BackCommand}" />
+            <Button AutomationProperties.AutomationId="SetupDunnageTypePage_ContinueButton" Grid.Column="3" x:Uid="Setup_Action_Continue" Content="Continue" Command="{x:Bind ViewModel.ContinueToReviewCommand}" IsEnabled="{x:Bind ViewModel.CanContinue, Mode=OneWay}" />
         </Grid>
     </Grid>
 </Page>

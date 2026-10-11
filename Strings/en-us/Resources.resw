@@ -88,256 +88,256 @@
   <data name="Setup_Progress.Step5" xml:space="preserve">
     <value>Step 5/5 · 100% complete</value>
   </data>
-  <data name="Setup_WorkOrder.EnterTitle.Text" xml:space="preserve">
+  <data name="Setup_WorkOrder_EnterTitle.Text" xml:space="preserve">
     <value>Start Setup</value>
   </data>
-  <data name="Setup_WorkOrder.Input.Header" xml:space="preserve">
+  <data name="Setup_WorkOrder_Input.Header" xml:space="preserve">
     <value>Work Order</value>
   </data>
-  <data name="Setup_WorkOrder.Input.PlaceholderText" xml:space="preserve">
+  <data name="Setup_WorkOrder_Input.PlaceholderText" xml:space="preserve">
     <value>Enter work order (for example 76951, 076951, or WO-076951)</value>
   </data>
-  <data name="Setup_WorkOrder.Validation.InvalidFormat" xml:space="preserve">
+  <data name="Setup_WorkOrder_Validation.InvalidFormat" xml:space="preserve">
     <value>Enter a valid work order with 5 or 6 digits (for example 76951, 076951, or WO-076951).</value>
   </data>
-  <data name="Setup_WorkOrder.Validation.NoMatchingParts" xml:space="preserve">
+  <data name="Setup_WorkOrder_Validation.NoMatchingParts" xml:space="preserve">
     <value>No parts were found for this work order.</value>
   </data>
   <data name="Setup_Part.Title" xml:space="preserve">
     <value>Choose Part</value>
   </data>
-  <data name="Setup_Part.FoundPartsLabel.Text" xml:space="preserve">
+  <data name="Setup_Part_FoundPartsLabel.Text" xml:space="preserve">
     <value>Matching parts</value>
   </data>
-  <data name="Setup_Part.Validation.SelectPart" xml:space="preserve">
+  <data name="Setup_Part_Validation.SelectPart" xml:space="preserve">
     <value>Choose a part to continue.</value>
   </data>
   <data name="Setup_Sequence.Title" xml:space="preserve">
     <value>Choose Operation</value>
   </data>
-  <data name="Setup_Sequence.AvailableLabel.Text" xml:space="preserve">
+  <data name="Setup_Sequence_AvailableLabel.Text" xml:space="preserve">
     <value>Available operations</value>
   </data>
-  <data name="Setup_Sequence.Validation.SelectSequence" xml:space="preserve">
+  <data name="Setup_Sequence_Validation.SelectSequence" xml:space="preserve">
     <value>Choose an operation to continue.</value>
   </data>
-  <data name="Setup_Sequence.Validation.NoMatchingSequences" xml:space="preserve">
+  <data name="Setup_Sequence_Validation.NoMatchingSequences" xml:space="preserve">
     <value>No operations were found for the selected part.</value>
   </data>
   <data name="Setup_DunnageType.Title" xml:space="preserve">
     <value>Choose Dunnage Type</value>
   </data>
-  <data name="Setup_DunnageType.PageLabel.Text" xml:space="preserve">
+  <data name="Setup_DunnageType_PageLabel.Text" xml:space="preserve">
     <value>Choose a dunnage type</value>
   </data>
-  <data name="Setup_DunnageType.Validation.SelectType" xml:space="preserve">
+  <data name="Setup_DunnageType_Validation.SelectType" xml:space="preserve">
     <value>Choose a dunnage type to continue.</value>
   </data>
   <data name="Setup_DunnagePart.Title" xml:space="preserve">
     <value>Choose Dunnage Option</value>
   </data>
-  <data name="Setup_DunnagePart.PageLabel.Text" xml:space="preserve">
+  <data name="Setup_DunnagePart_PageLabel.Text" xml:space="preserve">
     <value>Choose a dunnage option</value>
   </data>
-  <data name="Setup_DunnagePart.Validation.SelectPart" xml:space="preserve">
+  <data name="Setup_DunnagePart_Validation.SelectPart" xml:space="preserve">
     <value>Choose a dunnage option to continue.</value>
   </data>
-  <data name="Setup_DunnagePart.NoImageFallback.Text" xml:space="preserve">
+  <data name="Setup_DunnagePart_NoImageFallback.Text" xml:space="preserve">
     <value>Image preview unavailable</value>
   </data>
-  <data name="Setup_DunnagePart.Filter.PlaceholderText" xml:space="preserve">
+  <data name="Setup_DunnagePart_Filter.PlaceholderText" xml:space="preserve">
     <value>Search by part number, name, or details</value>
   </data>
-  <data name="Setup_Dunnage.Selection.None" xml:space="preserve">
+  <data name="Setup_Dunnage_Selection.None" xml:space="preserve">
     <value>No dunnage selected</value>
   </data>
-  <data name="Setup_Dunnage.SelectionSummaryLabel.Text" xml:space="preserve">
+  <data name="Setup_Dunnage_SelectionSummaryLabel.Text" xml:space="preserve">
     <value>Selected dunnage</value>
   </data>
   <data name="Setup_Review.Title" xml:space="preserve">
     <value>Review Setup</value>
   </data>
-  <data name="Setup_Review.PageLabel.Text" xml:space="preserve">
+  <data name="Setup_Review_PageLabel.Text" xml:space="preserve">
     <value>Review Setup</value>
   </data>
-  <data name="Setup_Review.Header.WorkOrder.Text" xml:space="preserve">
+  <data name="Setup_Review_Header_WorkOrder.Text" xml:space="preserve">
     <value>Work Order</value>
   </data>
-  <data name="Setup_Review.Header.Part.Text" xml:space="preserve">
+  <data name="Setup_Review_Header_Part.Text" xml:space="preserve">
     <value>Part</value>
   </data>
-  <data name="Setup_Review.Header.Sequence.Text" xml:space="preserve">
+  <data name="Setup_Review_Header_Sequence.Text" xml:space="preserve">
     <value>Sequence</value>
   </data>
-  <data name="Setup_Review.Header.Dunnage.Text" xml:space="preserve">
+  <data name="Setup_Review_Header_Dunnage.Text" xml:space="preserve">
     <value>Dunnage &amp; Scrap</value>
   </data>
-  <data name="Setup_Review.SubordinatePartsTitle.Text" xml:space="preserve">
+  <data name="Setup_Review_SubordinatePartsTitle.Text" xml:space="preserve">
     <value>Subordinate Parts</value>
   </data>
-  <data name="Setup_Review.Group.CategoryLabel.Text" xml:space="preserve">
+  <data name="Setup_Review_Group_CategoryLabel.Text" xml:space="preserve">
     <value>Category</value>
   </data>
-  <data name="Setup_Review.Group.CountLabel.Text" xml:space="preserve">
+  <data name="Setup_Review_Group_CountLabel.Text" xml:space="preserve">
     <value>Count</value>
   </data>
-  <data name="Setup_Review.Part.PartNumberLabel.Text" xml:space="preserve">
+  <data name="Setup_Review_Part_PartNumberLabel.Text" xml:space="preserve">
     <value>Part Number</value>
   </data>
-  <data name="Setup_Review.Part.DescriptionLabel.Text" xml:space="preserve">
+  <data name="Setup_Review_Part_DescriptionLabel.Text" xml:space="preserve">
     <value>Description</value>
   </data>
-  <data name="Setup_Review.Part.LocationLabel.Text" xml:space="preserve">
+  <data name="Setup_Review_Part_LocationLabel.Text" xml:space="preserve">
     <value>Location</value>
   </data>
-  <data name="Setup_Review.Part.TypeLabel.Text" xml:space="preserve">
+  <data name="Setup_Review_Part_TypeLabel.Text" xml:space="preserve">
     <value>Type</value>
   </data>
-  <data name="Setup_Review.Part.OnHandLabel.Text" xml:space="preserve">
+  <data name="Setup_Review_Part_OnHandLabel.Text" xml:space="preserve">
     <value>On Hand</value>
   </data>
-  <data name="Setup_Review.SelectedDunnageTitle.Text" xml:space="preserve">
+  <data name="Setup_Review_SelectedDunnageTitle.Text" xml:space="preserve">
     <value>Dunnage Selection</value>
   </data>
-  <data name="Setup_Review.ReplacePromptTitle.Text" xml:space="preserve">
+  <data name="Setup_Review_ReplacePromptTitle.Text" xml:space="preserve">
     <value>Replace Active Job?</value>
   </data>
-  <data name="Setup_Review.Confirmation.ReplacePrompt" xml:space="preserve">
+  <data name="Setup_Review_Confirmation.ReplacePrompt" xml:space="preserve">
     <value>{0} already has an active job. Replace it with this setup?</value>
   </data>
-  <data name="Setup_Review.Status.Saved" xml:space="preserve">
+  <data name="Setup_Review_Status.Saved" xml:space="preserve">
     <value>Setup saved successfully.</value>
   </data>
   <data name="Setup_Error.LookupUnavailable" xml:space="preserve">
     <value>The lookup service is currently unavailable. Please try again.</value>
   </data>
-  <data name="Setup_Action.Cancel.Content" xml:space="preserve">
+  <data name="Setup_Action_Cancel.Content" xml:space="preserve">
     <value>Cancel</value>
   </data>
-  <data name="Setup_Action.Search.Content" xml:space="preserve">
+  <data name="Setup_Action_Search.Content" xml:space="preserve">
     <value>Search</value>
   </data>
-  <data name="Setup_Action.Next.Content" xml:space="preserve">
+  <data name="Setup_Action_Next.Content" xml:space="preserve">
     <value>Next</value>
   </data>
-  <data name="Setup_Action.Back.Content" xml:space="preserve">
+  <data name="Setup_Action_Back.Content" xml:space="preserve">
     <value>Back</value>
   </data>
-  <data name="Setup_Action.Continue.Content" xml:space="preserve">
+  <data name="Setup_Action_Continue.Content" xml:space="preserve">
     <value>Continue</value>
   </data>
-  <data name="Setup_Action.Review.Content" xml:space="preserve">
+  <data name="Setup_Action_Review.Content" xml:space="preserve">
     <value>Continue to Review</value>
   </data>
-  <data name="Setup_Action.BackToTypes.Content" xml:space="preserve">
+  <data name="Setup_Action_BackToTypes.Content" xml:space="preserve">
     <value>Back to Dunnage Types</value>
   </data>
-  <data name="Setup_Action.Edit.Content" xml:space="preserve">
+  <data name="Setup_Action_Edit.Content" xml:space="preserve">
     <value>Edit</value>
   </data>
-  <data name="Setup_Action.Confirm.Content" xml:space="preserve">
+  <data name="Setup_Action_Confirm.Content" xml:space="preserve">
     <value>Confirm</value>
   </data>
-  <data name="Setup_Action.Replace.Content" xml:space="preserve">
+  <data name="Setup_Action_Replace.Content" xml:space="preserve">
     <value>Replace</value>
   </data>
   <data name="Setup_DunnagePart.EmptyAvailable" xml:space="preserve">
     <value>No receiving dunnage parts are currently available for this type. Use Add New Part if you have the required role.</value>
   </data>
-  <data name="Setup_DunnagePart.Validation.SelectTypeFirst" xml:space="preserve">
+  <data name="Setup_DunnagePart_Validation.SelectTypeFirst" xml:space="preserve">
     <value>Select a dunnage type first.</value>
   </data>
-  <data name="Setup_DunnageType.Header.PairContext.Text" xml:space="preserve">
+  <data name="Setup_DunnageType_Header_PairContext.Text" xml:space="preserve">
     <value>Part/Sequence Context</value>
   </data>
-  <data name="Setup_DunnagePart.Header.SelectedType.Text" xml:space="preserve">
+  <data name="Setup_DunnagePart_Header_SelectedType.Text" xml:space="preserve">
     <value>Selected Type</value>
   </data>
-  <data name="Setup_DunnagePart.AssignedTitle.Text" xml:space="preserve">
+  <data name="Setup_DunnagePart_AssignedTitle.Text" xml:space="preserve">
     <value>Assigned to This Part/Sequence</value>
   </data>
-  <data name="Setup_Action.QuickAddType.Label.Text" xml:space="preserve">
+  <data name="Setup_Action_QuickAddType_Label.Text" xml:space="preserve">
     <value>Add New Type</value>
   </data>
-  <data name="Setup_Action.QuickAddPart.Label.Text" xml:space="preserve">
+  <data name="Setup_Action_QuickAddPart_Label.Text" xml:space="preserve">
     <value>Add New Part</value>
   </data>
-  <data name="Setup_Action.RemoveAllForType.Label.Text" xml:space="preserve">
+  <data name="Setup_Action_RemoveAllForType_Label.Text" xml:space="preserve">
     <value>Remove All for Type</value>
   </data>
-  <data name="Setup_Action.ClearAllForPair.Label.Text" xml:space="preserve">
+  <data name="Setup_Action_ClearAllForPair_Label.Text" xml:space="preserve">
     <value>Clear All for Pair</value>
   </data>
-  <data name="Setup_Action.AddSelectedToPair.Label.Text" xml:space="preserve">
+  <data name="Setup_Action_AddSelectedToPair_Label.Text" xml:space="preserve">
     <value>Add Selected to Pair</value>
   </data>
-  <data name="Setup_Action.RemoveAssigned.Content" xml:space="preserve">
+  <data name="Setup_Action_RemoveAssigned.Content" xml:space="preserve">
     <value>Remove</value>
   </data>
-  <data name="Setup_Action.QuickAddType.Content" xml:space="preserve">
+  <data name="Setup_Action_QuickAddType.Content" xml:space="preserve">
     <value>Add New Type</value>
   </data>
-  <data name="Setup_Action.QuickAddPart.Content" xml:space="preserve">
+  <data name="Setup_Action_QuickAddPart.Content" xml:space="preserve">
     <value>Add New Part</value>
   </data>
-  <data name="Setup_Action.RemoveAllForType.Content" xml:space="preserve">
+  <data name="Setup_Action_RemoveAllForType.Content" xml:space="preserve">
     <value>Remove All for Type</value>
   </data>
-  <data name="Setup_Action.ClearAllForPair.Content" xml:space="preserve">
+  <data name="Setup_Action_ClearAllForPair.Content" xml:space="preserve">
     <value>Clear All for Pair</value>
   </data>
-  <data name="Setup_Action.AddSelectedToPair.Content" xml:space="preserve">
+  <data name="Setup_Action_AddSelectedToPair.Content" xml:space="preserve">
     <value>Add Selected to Pair</value>
   </data>
-  <data name="Setup_Review.Tab.JobContext.Header" xml:space="preserve">
+  <data name="Setup_Review_Tab_JobContext.Header" xml:space="preserve">
     <value>Job Context</value>
   </data>
-  <data name="Setup_Review.Tab.SubordinateParts.Header" xml:space="preserve">
+  <data name="Setup_Review_Tab_SubordinateParts.Header" xml:space="preserve">
     <value>Subordinate Parts</value>
   </data>
-  <data name="Setup_Review.Tab.DunnageAssignments.Header" xml:space="preserve">
+  <data name="Setup_Review_Tab_DunnageAssignments.Header" xml:space="preserve">
     <value>Dunnage &amp; Scrap Assignments</value>
   </data>
-  <data name="Setup_DunnagePair.PageLabel.Text" xml:space="preserve">
+  <data name="Setup_DunnagePair_PageLabel.Text" xml:space="preserve">
     <value>Dunnage &amp; Scrap</value>
   </data>
-  <data name="Setup_DunnagePair.CurrentAssignments.Text" xml:space="preserve">
+  <data name="Setup_DunnagePair_CurrentAssignments.Text" xml:space="preserve">
     <value>Current Dunnage</value>
   </data>
-  <data name="Setup_DunnagePair.AvailableTypes.Text" xml:space="preserve">
+  <data name="Setup_DunnagePair_AvailableTypes.Text" xml:space="preserve">
     <value>Available Dunnage Types</value>
   </data>
-  <data name="Setup_AddDunnage.TypeSelection.Title" xml:space="preserve">
+  <data name="Setup_AddDunnage_TypeSelection.Title" xml:space="preserve">
     <value>Select Dunnage Type</value>
   </data>
-  <data name="Setup_AddDunnage.TypeSelection.PageLabel.Text" xml:space="preserve">
+  <data name="Setup_AddDunnage_TypeSelection_PageLabel.Text" xml:space="preserve">
     <value>Select Dunnage Type</value>
   </data>
-  <data name="Setup_AddDunnage.PartSelection.Title" xml:space="preserve">
+  <data name="Setup_AddDunnage_PartSelection.Title" xml:space="preserve">
     <value>Select Dunnage Part</value>
   </data>
-  <data name="Setup_AddDunnage.PartSelection.PageLabel.Text" xml:space="preserve">
+  <data name="Setup_AddDunnage_PartSelection_PageLabel.Text" xml:space="preserve">
     <value>Select Dunnage Part</value>
   </data>
   <data name="Setup_Common.None" xml:space="preserve">
     <value>None</value>
   </data>
-  <data name="Setup_DunnagePair.Header.WorkStation.Text" xml:space="preserve">
+  <data name="Setup_DunnagePair_Header_WorkStation.Text" xml:space="preserve">
     <value>WORK CENTER</value>
   </data>
-  <data name="Setup_DunnagePair.Header.WorkOrder.Text" xml:space="preserve">
+  <data name="Setup_DunnagePair_Header_WorkOrder.Text" xml:space="preserve">
     <value>WORK ORDER</value>
   </data>
-  <data name="Setup_DunnagePair.Header.PartNumber.Text" xml:space="preserve">
+  <data name="Setup_DunnagePair_Header_PartNumber.Text" xml:space="preserve">
     <value>PART NUMBER</value>
   </data>
-  <data name="Setup_DunnagePair.Header.Sequence.Text" xml:space="preserve">
+  <data name="Setup_DunnagePair_Header_Sequence.Text" xml:space="preserve">
     <value>SEQUENCE</value>
   </data>
-  <data name="Setup_Combined.Header.WorkOrder.Text" xml:space="preserve">
+  <data name="Setup_Combined_Header_WorkOrder.Text" xml:space="preserve">
     <value>WORK ORDER</value>
   </data>
-  <data name="Setup_Combined.Header.SelectedPart.Text" xml:space="preserve">
+  <data name="Setup_Combined_Header_SelectedPart.Text" xml:space="preserve">
     <value>SELECTED PART</value>
   </data>
   <data name="Setup_Completion.Title" xml:space="preserve">
@@ -355,85 +355,85 @@
   <data name="Setup_Completion.UnknownFailure" xml:space="preserve">
     <value>Setup save failed. Please review the reason and try again.</value>
   </data>
-  <data name="Setup_Completion.ResultMessageLabel.Text" xml:space="preserve">
+  <data name="Setup_Completion_ResultMessageLabel.Text" xml:space="preserve">
     <value>Result</value>
   </data>
-  <data name="Setup_Completion.FailureReasonLabel.Text" xml:space="preserve">
+  <data name="Setup_Completion_FailureReasonLabel.Text" xml:space="preserve">
     <value>Failure reason</value>
   </data>
-  <data name="Setup_Completion.Action.StartOver.Content" xml:space="preserve">
+  <data name="Setup_Completion_Action_StartOver.Content" xml:space="preserve">
     <value>Start Over</value>
   </data>
-  <data name="Setup_Completion.Action.ReturnToWaitlist.Content" xml:space="preserve">
+  <data name="Setup_Completion_Action_ReturnToWaitlist.Content" xml:space="preserve">
     <value>Return to Waitlist</value>
   </data>
-  <data name="Setup_Workstation.Title.Text" xml:space="preserve">
+  <data name="Setup_Workstation_Title.Text" xml:space="preserve">
     <value>Select Work Center</value>
   </data>
-  <data name="Setup_Workstation.Subtitle.Text" xml:space="preserve">
+  <data name="Setup_Workstation_Subtitle.Text" xml:space="preserve">
     <value>Choose where this setup is being performed.</value>
   </data>
-  <data name="Setup_Workstation.SearchInput.Header" xml:space="preserve">
+  <data name="Setup_Workstation_SearchInput.Header" xml:space="preserve">
     <value>Search</value>
   </data>
-  <data name="Setup_Workstation.SearchInput.PlaceholderText" xml:space="preserve">
+  <data name="Setup_Workstation_SearchInput.PlaceholderText" xml:space="preserve">
     <value>Search by work center, work order, sequence, or part number</value>
   </data>
-  <data name="Setup_Workstation.ManageTitle.Text" xml:space="preserve">
+  <data name="Setup_Workstation_ManageTitle.Text" xml:space="preserve">
     <value>Manage Work Centers</value>
   </data>
-  <data name="Setup_Workstation.NameInput.Header" xml:space="preserve">
+  <data name="Setup_Workstation_NameInput.Header" xml:space="preserve">
     <value>Work Center</value>
   </data>
-  <data name="Setup_Workstation.NameInput.PlaceholderText" xml:space="preserve">
+  <data name="Setup_Workstation_NameInput.PlaceholderText" xml:space="preserve">
     <value>Enter work center name</value>
   </data>
-  <data name="Setup_Workstation.Add.Content" xml:space="preserve">
+  <data name="Setup_Workstation_Add.Content" xml:space="preserve">
     <value>Add</value>
   </data>
-  <data name="Setup_Workstation.Update.Content" xml:space="preserve">
+  <data name="Setup_Workstation_Update.Content" xml:space="preserve">
     <value>Edit</value>
   </data>
-  <data name="Setup_Workstation.Remove.Content" xml:space="preserve">
+  <data name="Setup_Workstation_Remove.Content" xml:space="preserve">
     <value>Remove</value>
   </data>
-  <data name="Setup_Workstation.New.Content" xml:space="preserve">
+  <data name="Setup_Workstation_New.Content" xml:space="preserve">
     <value>New Work Center</value>
   </data>
-  <data name="Setup_Workstation.ManageHint.Text" xml:space="preserve">
+  <data name="Setup_Workstation_ManageHint.Text" xml:space="preserve">
     <value>Setup Tech, Admin, and above can manage work centers.</value>
   </data>
-  <data name="Setup_Action.BackToWorkstations.Content" xml:space="preserve">
+  <data name="Setup_Action_BackToWorkstations.Content" xml:space="preserve">
     <value>Back</value>
   </data>
-  <data name="Setup_DunnagePair.ClearAll.DialogTitle" xml:space="preserve">
+  <data name="Setup_DunnagePair_ClearAll.DialogTitle" xml:space="preserve">
     <value>Clear all dunnage assignments?</value>
   </data>
-  <data name="Setup_DunnagePair.ClearAll.DialogMessage" xml:space="preserve">
+  <data name="Setup_DunnagePair_ClearAll.DialogMessage" xml:space="preserve">
     <value>This will remove all dunnage assignments for the current part/sequence pair.</value>
   </data>
-  <data name="Setup_DunnagePair.ClearAll.Confirm" xml:space="preserve">
+  <data name="Setup_DunnagePair_ClearAll.Confirm" xml:space="preserve">
     <value>Clear All</value>
   </data>
-  <data name="Setup_DunnagePair.ClearAll.Cancel" xml:space="preserve">
+  <data name="Setup_DunnagePair_ClearAll.Cancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
-  <data name="Setup_Navigation.LeaveSetup.Title" xml:space="preserve">
+  <data name="Setup_Navigation_LeaveSetup.Title" xml:space="preserve">
     <value>Leave Work Center Setup?</value>
   </data>
-  <data name="Setup_Navigation.LeaveSetup.Message" xml:space="preserve">
+  <data name="Setup_Navigation_LeaveSetup.Message" xml:space="preserve">
     <value>All unsaved setup data will be lost. Continue?</value>
   </data>
-  <data name="Setup_Navigation.LeaveSetup.Confirm" xml:space="preserve">
+  <data name="Setup_Navigation_LeaveSetup.Confirm" xml:space="preserve">
     <value>Yes</value>
   </data>
-  <data name="Setup_Navigation.LeaveSetup.Cancel" xml:space="preserve">
+  <data name="Setup_Navigation_LeaveSetup.Cancel" xml:space="preserve">
     <value>No</value>
   </data>
-  <data name="Setup_Action.AddDunnage.Content" xml:space="preserve">
+  <data name="Setup_Action_AddDunnage.Content" xml:space="preserve">
     <value>Add Dunnage</value>
   </data>
-  <data name="Setup_Action.Refresh.Content" xml:space="preserve">
+  <data name="Setup_Action_Refresh.Content" xml:space="preserve">
     <value>Refresh Types</value>
   </data>
   <data name="Setup_QuickAddType.DialogTitle" xml:space="preserve">
@@ -555,10 +555,10 @@
   &lt;/actions&gt;
 &lt;/toast&gt;</value>
   </data>
-  <data name="NewRequestAlert_Title" xml:space="preserve">
+  <data name="NewRequestAlert_Title.Text" xml:space="preserve">
     <value>New Waitlist Request</value>
   </data>
-  <data name="NewRequestAlert_Body" xml:space="preserve">
+  <data name="NewRequestAlert_Body.Text" xml:space="preserve">
     <value>A new request is ready for {0} ({1}).</value>
   </data>
   <data name="Setup_Header.Step1" xml:space="preserve">
@@ -603,13 +603,13 @@
   <data name="Setup_DunnagePair.NoScrap" xml:space="preserve">
     <value>No Scrap</value>
   </data>
-  <data name="Setup_DunnagePair.ScrapType.Header.Text" xml:space="preserve">
+  <data name="Setup_DunnagePair_ScrapType_Header.Text" xml:space="preserve">
     <value>SCRAP TYPE</value>
   </data>
-  <data name="Setup_DunnagePair.ScrapType.ComboBox.PlaceholderText" xml:space="preserve">
+  <data name="Setup_DunnagePair_ScrapType_ComboBox.PlaceholderText" xml:space="preserve">
     <value>Select scrap type</value>
   </data>
-  <data name="Setup_DunnagePair.ScrapSelection.Message" xml:space="preserve">
+  <data name="Setup_DunnagePair_ScrapSelection.Message" xml:space="preserve">
     <value>Choose a scrap type or select "No Scrap" to continue.</value>
   </data>
   <data name="Setup_NoDunnage.DialogTitle" xml:space="preserve">
@@ -627,16 +627,16 @@
   <data name="Waitlist_MyRequestsToggle.Header" xml:space="preserve">
     <value>My Requests</value>
   </data>
-  <data name="Waitlist_MyRequestsToggle.AutomationProperties.Name" xml:space="preserve">
+  <data name="Waitlist_MyRequestsToggle_AutomationProperties.Name" xml:space="preserve">
     <value>Show only my requests</value>
   </data>
 
   <!-- Details page: a section whose read threw reports the failure in place with a retry, rather than
        rendering as absence or as the page-level store outage (data-model.md §1 invariants 1–3). -->
-  <data name="Waitlist_Detail.BlockFailed.Message" xml:space="preserve">
+  <data name="Waitlist_Detail_BlockFailed.Message" xml:space="preserve">
     <value>Some of this request's details could not be read. The rest of the page is unaffected.</value>
   </data>
-  <data name="Waitlist_Detail.BlockFailed.Retry" xml:space="preserve">
+  <data name="Waitlist_Detail_BlockFailed.Retry" xml:space="preserve">
     <value>Retry</value>
   </data>
 
@@ -655,37 +655,37 @@
   <data name="Waitlist_Action.CancelRequest" xml:space="preserve">
     <value>Cancel request</value>
   </data>
-  <data name="Waitlist_Action.Refused.AcceptTaken" xml:space="preserve">
+  <data name="Waitlist_Action_Refused.AcceptTaken" xml:space="preserve">
     <value>Another handler already took this request. Please choose a different one.</value>
   </data>
-  <data name="Waitlist_Action.Refused.AcceptGone" xml:space="preserve">
+  <data name="Waitlist_Action_Refused.AcceptGone" xml:space="preserve">
     <value>That request is no longer on the list. Please choose a different one.</value>
   </data>
   <data name="Waitlist_Action.AcceptRefusedTitle" xml:space="preserve">
     <value>Request already taken</value>
   </data>
-  <data name="Waitlist_Action.Refused.CompleteOrRelease" xml:space="preserve">
+  <data name="Waitlist_Action_Refused.CompleteOrRelease" xml:space="preserve">
     <value>That request is not assigned to you, or it has already been finished.</value>
   </data>
-  <data name="Waitlist_Action.Refused.Cancel" xml:space="preserve">
+  <data name="Waitlist_Action_Refused.Cancel" xml:space="preserve">
     <value>Only the person who raised a request can cancel it, and only while it is still waiting.</value>
   </data>
-  <data name="Waitlist_Action.Refused.Unexpected" xml:space="preserve">
+  <data name="Waitlist_Action_Refused.Unexpected" xml:space="preserve">
     <value>That action could not be completed. The request is unchanged.</value>
   </data>
-  <data name="Waitlist_Action.Cancel.DialogTitle" xml:space="preserve">
+  <data name="Waitlist_Action_Cancel.DialogTitle" xml:space="preserve">
     <value>Cancel this request?</value>
   </data>
-  <data name="Waitlist_Action.Cancel.DialogMessage" xml:space="preserve">
+  <data name="Waitlist_Action_Cancel.DialogMessage" xml:space="preserve">
     <value>This withdraws your request and takes it off the list. Give a reason so the floor knows why.</value>
   </data>
-  <data name="Waitlist_Action.Cancel.Confirm" xml:space="preserve">
+  <data name="Waitlist_Action_Cancel.Confirm" xml:space="preserve">
     <value>Cancel request</value>
   </data>
-  <data name="Waitlist_Action.Cancel.Dismiss" xml:space="preserve">
+  <data name="Waitlist_Action_Cancel.Dismiss" xml:space="preserve">
     <value>Keep request</value>
   </data>
-  <data name="Waitlist_Action.Cancel.ReasonPlaceholder" xml:space="preserve">
+  <data name="Waitlist_Action_Cancel.ReasonPlaceholder" xml:space="preserve">
     <value>Reason (optional)</value>
   </data>
   <data name="Waitlist_Action.Dismiss" xml:space="preserve">
@@ -727,13 +727,13 @@
 
   <!-- What the history says for the lifecycle events, so a row's message column reads as a sentence rather
        than a bare employee number or a blank. -->
-  <data name="Waitlist_History.Event.Accepted" xml:space="preserve">
+  <data name="Waitlist_History_Event.Accepted" xml:space="preserve">
     <value>Accepted this request.</value>
   </data>
-  <data name="Waitlist_History.Event.Completed" xml:space="preserve">
+  <data name="Waitlist_History_Event.Completed" xml:space="preserve">
     <value>Completed this request.</value>
   </data>
-  <data name="Waitlist_History.Event.Released" xml:space="preserve">
+  <data name="Waitlist_History_Event.Released" xml:space="preserve">
     <value>Released this request back to the open list.</value>
   </data>
 
@@ -828,157 +828,157 @@
        plain-language reports the Item step can raise. The Item keys follow the catalog's single convention
        (RequestItemCatalog.DisplayNameResourceKeyFor): RequestItem.<item>.DisplayName.
   -->
-  <data name="RequestCategory.Pickup.Name" xml:space="preserve">
+  <data name="RequestCategory_Pickup.Name" xml:space="preserve">
     <value>Pickup</value>
   </data>
-  <data name="RequestCategory.Deliver.Name" xml:space="preserve">
+  <data name="RequestCategory_Deliver.Name" xml:space="preserve">
     <value>Deliver</value>
   </data>
-  <data name="RequestCategory.Assist.Name" xml:space="preserve">
+  <data name="RequestCategory_Assist.Name" xml:space="preserve">
     <value>Assist</value>
   </data>
-  <data name="RequestCategory.Other.Name" xml:space="preserve">
+  <data name="RequestCategory_Other.Name" xml:space="preserve">
     <value>Other</value>
   </data>
-  <data name="RequestItem.pickup-coil.DisplayName" xml:space="preserve">
+  <data name="RequestItem_pickup_coil.DisplayName" xml:space="preserve">
     <value>Coil or Flatstock</value>
   </data>
-  <data name="RequestItem.pickup-die.DisplayName" xml:space="preserve">
+  <data name="RequestItem_pickup_die.DisplayName" xml:space="preserve">
     <value>Die</value>
   </data>
-  <data name="RequestItem.pickup-component.DisplayName" xml:space="preserve">
+  <data name="RequestItem_pickup_component.DisplayName" xml:space="preserve">
     <value>Component</value>
   </data>
-  <data name="RequestItem.pickup-fg.DisplayName" xml:space="preserve">
+  <data name="RequestItem_pickup_fg.DisplayName" xml:space="preserve">
     <value>Finished Goods (FG)</value>
   </data>
-  <data name="RequestItem.pickup-ncm.DisplayName" xml:space="preserve">
+  <data name="RequestItem_pickup_ncm.DisplayName" xml:space="preserve">
     <value>Non-Conforming (NCM)</value>
   </data>
-  <data name="RequestItem.pickup-wip.DisplayName" xml:space="preserve">
+  <data name="RequestItem_pickup_wip.DisplayName" xml:space="preserve">
     <value>Work In Process (WIP)</value>
   </data>
-  <data name="RequestItem.pickup-outside-service.DisplayName" xml:space="preserve">
+  <data name="RequestItem_pickup_outside_service.DisplayName" xml:space="preserve">
     <value>Outside Service</value>
   </data>
-  <data name="RequestItem.pickup-riser-table.DisplayName" xml:space="preserve">
+  <data name="RequestItem_pickup_riser_table.DisplayName" xml:space="preserve">
     <value>Riser Table</value>
   </data>
-  <data name="RequestItem.pickup-dunnage.DisplayName" xml:space="preserve">
+  <data name="RequestItem_pickup_dunnage.DisplayName" xml:space="preserve">
     <value>Dunnage</value>
   </data>
-  <data name="RequestItem.pickup-scrap.DisplayName" xml:space="preserve">
+  <data name="RequestItem_pickup_scrap.DisplayName" xml:space="preserve">
     <value>Scrap / Offal removal</value>
   </data>
-  <data name="RequestItem.pickup-hopper.DisplayName" xml:space="preserve">
+  <data name="RequestItem_pickup_hopper.DisplayName" xml:space="preserve">
     <value>Pickup Hopper (do not return)</value>
   </data>
-  <data name="RequestItem.deliver-coil.DisplayName" xml:space="preserve">
+  <data name="RequestItem_deliver_coil.DisplayName" xml:space="preserve">
     <value>Coil</value>
   </data>
-  <data name="RequestItem.deliver-riser-table.DisplayName" xml:space="preserve">
+  <data name="RequestItem_deliver_riser_table.DisplayName" xml:space="preserve">
     <value>Riser Table</value>
   </data>
-  <data name="RequestItem.deliver-hopper.DisplayName" xml:space="preserve">
+  <data name="RequestItem_deliver_hopper.DisplayName" xml:space="preserve">
     <value>Hopper (scrap)</value>
   </data>
-  <data name="RequestItem.deliver-flatstock.DisplayName" xml:space="preserve">
+  <data name="RequestItem_deliver_flatstock.DisplayName" xml:space="preserve">
     <value>Flatstock</value>
   </data>
-  <data name="RequestItem.deliver-component.DisplayName" xml:space="preserve">
+  <data name="RequestItem_deliver_component.DisplayName" xml:space="preserve">
     <value>Component</value>
   </data>
-  <data name="RequestItem.deliver-die.DisplayName" xml:space="preserve">
+  <data name="RequestItem_deliver_die.DisplayName" xml:space="preserve">
     <value>Die</value>
   </data>
-  <data name="RequestItem.deliver-dunnage.DisplayName" xml:space="preserve">
+  <data name="RequestItem_deliver_dunnage.DisplayName" xml:space="preserve">
     <value>Dunnage</value>
   </data>
-  <data name="RequestItem.deliver-wrong-coil.DisplayName" xml:space="preserve">
+  <data name="RequestItem_deliver_wrong_coil.DisplayName" xml:space="preserve">
     <value>Wrong Coil</value>
   </data>
-  <data name="RequestItem.deliver-wrong-flatstock.DisplayName" xml:space="preserve">
+  <data name="RequestItem_deliver_wrong_flatstock.DisplayName" xml:space="preserve">
     <value>Wrong Flatstock</value>
   </data>
-  <data name="RequestItem.assist-coil-turn.DisplayName" xml:space="preserve">
+  <data name="RequestItem_assist_coil_turn.DisplayName" xml:space="preserve">
     <value>Coil</value>
   </data>
-  <data name="RequestItem.assist-table-place.DisplayName" xml:space="preserve">
+  <data name="RequestItem_assist_table_place.DisplayName" xml:space="preserve">
     <value>Place Parts on Table</value>
   </data>
-  <data name="RequestItem.assist-table-remove.DisplayName" xml:space="preserve">
+  <data name="RequestItem_assist_table_remove.DisplayName" xml:space="preserve">
     <value>Remove Parts from Table</value>
   </data>
-  <data name="RequestItem.other.DisplayName" xml:space="preserve">
+  <data name="RequestItem_other.DisplayName" xml:space="preserve">
     <value>Other</value>
   </data>
-  <data name="NewRequest_Category.Title.Text" xml:space="preserve">
+  <data name="NewRequest_Category_Title.Text" xml:space="preserve">
     <value>New Request - Choose Category</value>
   </data>
-  <data name="NewRequest_Category.Prompt.Text" xml:space="preserve">
+  <data name="NewRequest_Category_Prompt.Text" xml:space="preserve">
     <value>Choose a request category to continue.</value>
   </data>
-  <data name="NewRequest_Category.BackButton.Content" xml:space="preserve">
+  <data name="NewRequest_Category_BackButton.Content" xml:space="preserve">
     <value>Back</value>
   </data>
-  <data name="NewRequest_Item.Title.Text" xml:space="preserve">
+  <data name="NewRequest_Item_Title.Text" xml:space="preserve">
     <value>New Request - Choose Item</value>
   </data>
-  <data name="NewRequest_Item.Prompt.Text" xml:space="preserve">
+  <data name="NewRequest_Item_Prompt.Text" xml:space="preserve">
     <value>Choose an item to continue.</value>
   </data>
-  <data name="NewRequest_Item.BackButton.Content" xml:space="preserve">
+  <data name="NewRequest_Item_BackButton.Content" xml:space="preserve">
     <value>Back</value>
   </data>
-  <data name="NewRequest_Dunnage.Title.Text" xml:space="preserve">
+  <data name="NewRequest_Dunnage_Title.Text" xml:space="preserve">
     <value>New Request - Choose Dunnage</value>
   </data>
-  <data name="NewRequest_Dunnage.BackButton.Content" xml:space="preserve">
+  <data name="NewRequest_Dunnage_BackButton.Content" xml:space="preserve">
     <value>Back</value>
   </data>
-  <data name="NewRequest_Dunnage.SubstituteButton.Content" xml:space="preserve">
+  <data name="NewRequest_Dunnage_SubstituteButton.Content" xml:space="preserve">
     <value>Use substitute…</value>
   </data>
   <data name="NewRequest_Dunnage.Prompt" xml:space="preserve">
     <value>Which dunnage do you need from the material handlers?</value>
   </data>
-  <data name="NewRequest_Dunnage.NoAssignedParts.Message" xml:space="preserve">
+  <data name="NewRequest_Dunnage_NoAssignedParts.Message" xml:space="preserve">
     <value>This job has no dunnage saved on it. Use a substitute if you need one, or go back and choose a different item.</value>
   </data>
-  <data name="NewRequest_Dunnage.SubstituteFailed.Message" xml:space="preserve">
+  <data name="NewRequest_Dunnage_SubstituteFailed.Message" xml:space="preserve">
     <value>The dunnage list could not be opened. Try again, or choose one of the parts listed here.</value>
   </data>
-  <data name="NewRequest_Die.Title.Text" xml:space="preserve">
+  <data name="NewRequest_Die_Title.Text" xml:space="preserve">
     <value>New Request - Choose Die</value>
   </data>
   <data name="NewRequest_Die.Prompt" xml:space="preserve">
     <value>Which die is this request for? Choose one or more.</value>
   </data>
-  <data name="NewRequest_Die.NoDies.Message" xml:space="preserve">
+  <data name="NewRequest_Die_NoDies.Message" xml:space="preserve">
     <value>This job has no die saved on it, so there is no die to ask about. Go back and choose a different item.</value>
   </data>
-  <data name="NewRequest_Die.NothingChosen.Message" xml:space="preserve">
+  <data name="NewRequest_Die_NothingChosen.Message" xml:space="preserve">
     <value>Choose at least one die before continuing.</value>
   </data>
-  <data name="NewRequest_Die.BackButton.Content" xml:space="preserve">
+  <data name="NewRequest_Die_BackButton.Content" xml:space="preserve">
     <value>Back</value>
   </data>
-  <data name="NewRequest_Die.SelectAllButton.Content" xml:space="preserve">
+  <data name="NewRequest_Die_SelectAllButton.Content" xml:space="preserve">
     <value>Select all</value>
   </data>
-  <data name="NewRequest_Die.ContinueButton.Content" xml:space="preserve">
+  <data name="NewRequest_Die_ContinueButton.Content" xml:space="preserve">
     <value>Continue</value>
   </data>
-  <data name="NewRequest_Component.Title.Text" xml:space="preserve">
+  <data name="NewRequest_Component_Title.Text" xml:space="preserve">
     <value>New Request - Choose Component</value>
   </data>
   <data name="NewRequest_Component.Prompt" xml:space="preserve">
     <value>Which component do you need?</value>
   </data>
-  <data name="NewRequest_Component.NoComponents.Message" xml:space="preserve">
+  <data name="NewRequest_Component_NoComponents.Message" xml:space="preserve">
     <value>This job has no components saved on it, so there is no component to choose. Go back and choose a different item.</value>
   </data>
-  <data name="NewRequest_Component.BackButton.Content" xml:space="preserve">
+  <data name="NewRequest_Component_BackButton.Content" xml:space="preserve">
     <value>Back</value>
   </data>
   <data name="NewRequest_Summary.MultipleRequests" xml:space="preserve">
@@ -996,31 +996,31 @@
   <data name="RequestItem_ConfigurationMalformed.Message" xml:space="preserve">
     <value>This item's configuration isn't readable, so a supervisor needs to check it before it can be requested.</value>
   </data>
-  <data name="Waitlist_Card.RequestedBy.Text" xml:space="preserve">
+  <data name="Waitlist_Card_RequestedBy.Text" xml:space="preserve">
     <value>Requested by</value>
   </data>
-  <data name="Waitlist_Card.Press.Text" xml:space="preserve">
+  <data name="Waitlist_Card_Press.Text" xml:space="preserve">
     <value>Press</value>
   </data>
-  <data name="Waitlist_Card.RemainingTime.Text" xml:space="preserve">
+  <data name="Waitlist_Card_RemainingTime.Text" xml:space="preserve">
     <value>Remaining time</value>
   </data>
-  <data name="Waitlist_Card.Waiting.Text" xml:space="preserve">
+  <data name="Waitlist_Card_Waiting.Text" xml:space="preserve">
     <value>Waiting</value>
   </data>
-  <data name="Waitlist_Detail.DeclaredFields.Title" xml:space="preserve">
+  <data name="Waitlist_Detail_DeclaredFields.Title" xml:space="preserve">
     <value>Item details</value>
   </data>
-  <data name="RequestItem.deliver-wrong-coil.Line1" xml:space="preserve">
+  <data name="RequestItem_deliver_wrong_coil.Line1" xml:space="preserve">
     <value>Wrong Coil Bring:</value>
   </data>
-  <data name="RequestItem.deliver-wrong-flatstock.Line1" xml:space="preserve">
+  <data name="RequestItem_deliver_wrong_flatstock.Line1" xml:space="preserve">
     <value>Wrong Flatstock Bring:</value>
   </data>
-  <data name="RequestItem.pickup-die.Line1" xml:space="preserve">
+  <data name="RequestItem_pickup_die.Line1" xml:space="preserve">
     <value>Pickup Die:</value>
   </data>
-  <data name="RequestItem.deliver-die.Line1" xml:space="preserve">
+  <data name="RequestItem_deliver_die.Line1" xml:space="preserve">
     <value>Deliver Die:</value>
   </data>
   <data name="Shell_SortOrder.Label" xml:space="preserve">
@@ -1068,14 +1068,11 @@
   <data name="Startup_SignIn.CredentialLabel" xml:space="preserve">
     <value>PIN</value>
   </data>
-  <data name="Startup_SignIn.RememberMeLabel" xml:space="preserve">
-    <value>Remember me on this computer</value>
-  </data>
   <data name="Startup_SignIn.SignInAction" xml:space="preserve">
     <value>Sign in</value>
   </data>
-  <data name="Startup_SignIn.RememberedAction" xml:space="preserve">
-    <value>Use the sign-in this computer remembers</value>
+  <data name="Startup_SignIn.PreviousPeopleHeading" xml:space="preserve">
+    <value>Signed in here before</value>
   </data>
   <data name="Startup_SignIn.HintNameRequired" xml:space="preserve">
     <value>Type your user name.</value>
@@ -1094,9 +1091,6 @@
   </data>
   <data name="Startup_SignIn.RefusedStoreUnreadable" xml:space="preserve">
     <value>The store could not be reached, so the sign-in could not be confirmed. Try again shortly.</value>
-  </data>
-  <data name="Startup_SignIn.RememberedUnavailable" xml:space="preserve">
-    <value>This computer has not remembered an account it can sign in with. Type your user name and PIN.</value>
   </data>
   <data name="Startup_SignIn.IdentifierLabel" xml:space="preserve">
     <value>User name or employee number</value>
@@ -1156,7 +1150,7 @@
     <value>Set up this computer</value>
   </data>
   <data name="Startup_MachineSetup.Subtitle" xml:space="preserve">
-    <value>This computer has not been set up yet. A Developer or an Admin has to give it a name and tell it where its shared pictures are kept.</value>
+    <value>This computer has not been set up yet. A Developer or an Admin has to tell it where it stands.</value>
   </data>
   <data name="Startup_MachineSetup.SignInHeading" xml:space="preserve">
     <value>Sign in to set this computer up</value>
@@ -1177,28 +1171,13 @@
     <value>Sign in and unlock setup</value>
   </data>
   <data name="Startup_MachineSetup.IdentityHeading" xml:space="preserve">
-    <value>Name this computer</value>
+    <value>Where this computer stands</value>
   </data>
-  <data name="Startup_MachineSetup.DisplayNameLabel" xml:space="preserve">
-    <value>What this computer should be called</value>
+  <data name="Startup_MachineSetup.ComputerNameLabel" xml:space="preserve">
+    <value>This computer's name</value>
   </data>
-  <data name="Startup_MachineSetup.DescriptionLabel" xml:space="preserve">
-    <value>Where this computer is (optional)</value>
-  </data>
-  <data name="Startup_MachineSetup.SharedFolderLabel" xml:space="preserve">
-    <value>Shared pictures folder</value>
-  </data>
-  <data name="Startup_MachineSetup.KeysFolderLabel" xml:space="preserve">
-    <value>Shared keys folder</value>
-  </data>
-  <data name="Startup_MachineSetup.DunnageRootLabel" xml:space="preserve">
-    <value>Dunnage pictures folder</value>
-  </data>
-  <data name="Startup_MachineSetup.DunnageRootHint" xml:space="preserve">
-    <value>Where this computer's dunnage pictures are kept</value>
-  </data>
-  <data name="Startup_MachineSetup.BrowseAction" xml:space="preserve">
-    <value>Choose folder</value>
+  <data name="Startup_MachineSetup.LocationLabel" xml:space="preserve">
+    <value>Where this computer stands</value>
   </data>
   <data name="Startup_MachineSetup.SaveAction" xml:space="preserve">
     <value>Save this computer</value>
@@ -1225,16 +1204,10 @@
     <value>The store could not confirm this sign-in, so setup stays locked. Try again once the store answers.</value>
   </data>
   <data name="Startup_MachineSetup.SaveNameRequired" xml:space="preserve">
-    <value>This computer needs a name people will recognise.</value>
+    <value>This computer reported no name of its own, so it cannot be set up. Ask IT to check this computer's name.</value>
   </data>
   <data name="Startup_MachineSetup.SaveNameInUse" xml:space="preserve">
-    <value>Another computer already holds that name. Give this one a different name.</value>
-  </data>
-  <data name="Startup_MachineSetup.SaveSourcesIncomplete" xml:space="preserve">
-    <value>All three folders are needed: the shared pictures folder, the shared keys folder and the dunnage pictures folder.</value>
-  </data>
-  <data name="Startup_MachineSetup.SaveSourcesNotWritten" xml:space="preserve">
-    <value>The store did not keep all three picture sources, so this computer is not set up. Save again.</value>
+    <value>Another computer's record already holds this computer's name. Ask IT to give one of them a different name.</value>
   </data>
   <data name="Startup_MachineSetup.SaveRefused" xml:space="preserve">
     <value>The store refused this computer's configuration.</value>
@@ -1293,14 +1266,11 @@
   <data name="Startup_BlockedState.RestartFailed" xml:space="preserve">
     <value>The application could not be started again, so it is still stopped. Try again, or close it and open it again.</value>
   </data>
-  <data name="Startup_BlockedState.PartDisplayName" xml:space="preserve">
+  <data name="Startup_BlockedState.PartComputerName" xml:space="preserve">
     <value>what this computer is called</value>
   </data>
-  <data name="Startup_BlockedState.PartDescription" xml:space="preserve">
-    <value>the note about where it is</value>
-  </data>
-  <data name="Startup_BlockedState.PartPictureSources" xml:space="preserve">
-    <value>where its pictures come from</value>
+  <data name="Startup_BlockedState.PartLocation" xml:space="preserve">
+    <value>where this computer stands</value>
   </data>
   <data name="Startup_BlockedState.PartScopedPreference" xml:space="preserve">
     <value>a setting this computer could not read</value>
@@ -1314,7 +1284,7 @@
   <data name="Shell_SignOut.Close" xml:space="preserve">
     <value>Close</value>
   </data>
-  <data name="Shell_SignOut.Failed.Title" xml:space="preserve">
+  <data name="Shell_SignOut_Failed.Title" xml:space="preserve">
     <value>Sign out</value>
   </data>
   <data name="Shell_SortOrder.MostUrgent" xml:space="preserve">
@@ -1484,31 +1454,31 @@
     <value>Open the permissions page and change what one person may do.</value>
   </data>
   <!-- One display text per role the catalogue holds, keyed on the role code. -->
-  <data name="Role_developer" xml:space="preserve">
+  <data name="Role_developer.Text" xml:space="preserve">
     <value>Developer</value>
   </data>
-  <data name="Role_it_department" xml:space="preserve">
+  <data name="Role_it_department.Text" xml:space="preserve">
     <value>IT Department</value>
   </data>
-  <data name="Role_plant_manager" xml:space="preserve">
+  <data name="Role_plant_manager.Text" xml:space="preserve">
     <value>Plant Manager</value>
   </data>
-  <data name="Role_production_lead" xml:space="preserve">
+  <data name="Role_production_lead.Text" xml:space="preserve">
     <value>Production Lead</value>
   </data>
-  <data name="Role_setup_lead" xml:space="preserve">
+  <data name="Role_setup_lead.Text" xml:space="preserve">
     <value>Setup Lead</value>
   </data>
-  <data name="Role_material_handler_lead" xml:space="preserve">
+  <data name="Role_material_handler_lead.Text" xml:space="preserve">
     <value>Material Handler Lead</value>
   </data>
-  <data name="Role_material_handler" xml:space="preserve">
+  <data name="Role_material_handler.Text" xml:space="preserve">
     <value>Material Handler</value>
   </data>
-  <data name="Role_production" xml:space="preserve">
+  <data name="Role_production.Text" xml:space="preserve">
     <value>Production</value>
   </data>
-  <data name="Role_setup" xml:space="preserve">
+  <data name="Role_setup.Text" xml:space="preserve">
     <value>Setup</value>
   </data>
   <!-- The Administration category in Settings: two entries, both of which navigate. -->
@@ -1585,7 +1555,7 @@
   <data name="UserManagement_Filter.Active" xml:space="preserve">
     <value>A filter is applied, so some people are hidden.</value>
   </data>
-  <data name="UserManagement_Filter.HiddenCount.Text" xml:space="preserve">
+  <data name="UserManagement_Filter_HiddenCount.Text" xml:space="preserve">
     <value>{0} hidden by the filter.</value>
   </data>
   <data name="UserManagement_Filter.ShowEveryone" xml:space="preserve">
@@ -1738,10 +1708,10 @@
   <data name="EditUser_Reactivate.Label" xml:space="preserve">
     <value>Reactivate</value>
   </data>
-  <data name="EditUser_Deactivate.Explanation.Text" xml:space="preserve">
+  <data name="EditUser_Deactivate_Explanation.Text" xml:space="preserve">
     <value>A person you deactivate cannot sign in again, and any session they already have open stays open until they close the application.</value>
   </data>
-  <data name="EditUser_Reactivate.Explanation.Text" xml:space="preserve">
+  <data name="EditUser_Reactivate_Explanation.Text" xml:space="preserve">
     <value>Access returns from the person's next sign-in.</value>
   </data>
   <data name="EditUser_Unsaved.ActionNeedsSave" xml:space="preserve">
@@ -1929,13 +1899,13 @@
   <data name="Permissions_Holders.Heading" xml:space="preserve">
     <value>Who holds this</value>
   </data>
-  <data name="Permissions_Holders.Feature.Label" xml:space="preserve">
+  <data name="Permissions_Holders_Feature.Label" xml:space="preserve">
     <value>Permission</value>
   </data>
-  <data name="Permissions_Holders.Roles.Heading" xml:space="preserve">
+  <data name="Permissions_Holders_Roles.Heading" xml:space="preserve">
     <value>Roles that allow this by default</value>
   </data>
-  <data name="Permissions_Holders.People.Heading" xml:space="preserve">
+  <data name="Permissions_Holders_People.Heading" xml:space="preserve">
     <value>People who differ from their role</value>
   </data>
   <data name="Permissions_Holders.Nobody" xml:space="preserve">
@@ -2063,9 +2033,6 @@
   <data name="Settings_StoragePaths_ImageFolder.Label" xml:space="preserve">
     <value>Picture folder</value>
   </data>
-  <data name="Settings_StoragePaths_KeysFolder.Label" xml:space="preserve">
-    <value>Key folder</value>
-  </data>
   <data name="Settings_StoragePaths_DunnageRoot.Label" xml:space="preserve">
     <value>Dunnage picture root</value>
   </data>
@@ -2126,10 +2093,10 @@
   <data name="PartPictureCard_NoPicture.Text" xml:space="preserve">
     <value>No picture</value>
   </data>
-  <data name="Settings_LogPanel_Heading" xml:space="preserve">
+  <data name="Settings_LogPanel_Heading.Text" xml:space="preserve">
     <value>Application log</value>
   </data>
-  <data name="Settings_LogPanel_Description" xml:space="preserve">
+  <data name="Settings_LogPanel_Description.Text" xml:space="preserve">
     <value>Everything the application recorded, newest first. Narrow it by severity, machine, person, module or error kind. The list is always bounded by a time window and a page size.</value>
   </data>
   <data name="Settings_LogPanel_Severity.Label" xml:space="preserve">

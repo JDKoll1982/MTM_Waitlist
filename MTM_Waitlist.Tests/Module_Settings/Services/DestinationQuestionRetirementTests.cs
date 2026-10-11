@@ -33,7 +33,7 @@ public sealed class DestinationQuestionRetirementTests
     // ── The retired value is gone from the code that carried it ─────────────────────────────────────────
 
     [TestMethod]
-    public void TheLine2Context_CarriesNoDestinationValue()
+    public void Service_DestinationQuestionRetirementTests_TheLine2Context_CarriesNoDestinationValue()
     {
         // The context is the one place the captured destination was handed to the card resolver, so its absence
         // here is what proves no template can be shaped by where a die was going (FR-054, contract §3).
@@ -47,7 +47,7 @@ public sealed class DestinationQuestionRetirementTests
     }
 
     [TestMethod]
-    public void NoProductionSource_RegistersOrPassesTheRetiredDestinationToken()
+    public void Service_DestinationQuestionRetirementTests_NoProductionSource_RegistersOrPassesTheRetiredDestinationToken()
     {
         // Identifier-shaped on purpose: the *token* and the *named argument* are what carried the question. The
         // word on its own is not evidence — the startup log's centralized destination and the flatstock row's
@@ -73,7 +73,7 @@ public sealed class DestinationQuestionRetirementTests
     }
 
     [TestMethod]
-    public void NoCatalogRow_NamesTheRetiredDestinationToken()
+    public void Service_DestinationQuestionRetirementTests_NoCatalogRow_NamesTheRetiredDestinationToken()
     {
         var offenders = RequestItemCatalog.Items
             .SelectMany(item => new[] { item.CardLine1Template, item.CardLine2Template }
@@ -88,7 +88,7 @@ public sealed class DestinationQuestionRetirementTests
     }
 
     [TestMethod]
-    public void NoConfigurationRow_AsksWhereTheDieIsGoing()
+    public void Service_DestinationQuestionRetirementTests_NoConfigurationRow_AsksWhereTheDieIsGoing()
     {
         foreach (var relativePath in SeedFiles())
         {
@@ -109,7 +109,7 @@ public sealed class DestinationQuestionRetirementTests
     // ── And both die rows now ask which die ─────────────────────────────────────────────────────────────
 
     [TestMethod]
-    public void BothDieRows_AskWhichDieFromTheJobsOwnList_AndCarryNoListOfTheirOwn()
+    public void Service_DestinationQuestionRetirementTests_BothDieRows_AskWhichDieFromTheJobsOwnListAndCarryNoListOfTheirOwn()
     {
         foreach (var relativePath in SeedFiles())
         {
@@ -137,7 +137,7 @@ public sealed class DestinationQuestionRetirementTests
     }
 
     [TestMethod]
-    public void BothDieRows_ListTheLocationTheJobRecords_NotTheRetiredQuestion()
+    public void Service_DestinationQuestionRetirementTests_BothDieRows_ListTheLocationTheJobRecordsNotTheRetiredQuestion()
     {
         // FR-057: the page states where the die lives, and it is a job value — so it is the *job* row that
         // carries it, and no row asks the requester for it.

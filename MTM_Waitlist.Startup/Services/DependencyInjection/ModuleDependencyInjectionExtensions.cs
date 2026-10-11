@@ -51,7 +51,6 @@ public static class ModuleDependencyInjectionExtensions
         services.AddSingleton<ILaunchStep, ReadComputerRecordStep>();
         services.AddSingleton<ILaunchStep, MachineReadinessStep>();
         services.AddSingleton<ILaunchStep, SaveMachineConfigurationStep>();
-        services.AddSingleton<ILaunchStep, ReadRememberedSignInStep>();
 
         // The machine-setup surface (US2). The gate holds no state of its own and reads the store seam it is
         // given, and the view model is one instance because the window it draws is one window: a second copy
@@ -84,13 +83,15 @@ public static class ModuleDependencyInjectionExtensions
         services.Configure<LaunchWindowOptions>(configuration.GetSection(LaunchWindowOptions.SectionName));
 
         // The sign-in services (US3). Each is one instance because each holds state that belongs to the one launch:
-        // the check spends attempts against the store and must not be doubled, the session holds the only token
-        // this process will ever present, and the remembered sign-in reads a key that must be read once per act.
+        // the check spends attempts against the store and must not be doubled, and the session holds the only
+        // token this process will ever present.
         services.AddSingleton<CredentialCheckService>();
         services.AddSingleton<LaunchSessionService>();
         services.AddSingleton<MachineGateService>();
-        services.AddSingleton<ISharedKeySource, SharedKeyFileSource>();
-        services.AddSingleton<RememberedSignInService>();
+
+        // The sign-in stage's offer of the people who signed in here before. One instance, because it holds no
+        // state between reads: it is a read of the store and an empty list when the store cannot answer (FR-048).
+        services.AddSingleton<PreviousSignInService>();
 
         // What the sign-in produced: one instance, because the surface that recorded the check and the steps that
         // report, judge and write it have to be looking at the same answer. A second copy would let the launch

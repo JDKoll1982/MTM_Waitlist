@@ -35,27 +35,27 @@ public sealed class DunnageImagePathResolverTests
     }
 
     [TestMethod]
-    public void RootFolder_UsesConfiguredValue_WhenSet()
+    public void Service_DunnageImagePathResolverTests_RootFolder_UsesConfiguredValueWhenSet()
     {
         Assert.AreEqual(_tempRoot, DunnageImagePathResolver.RootFolder);
     }
 
     [TestMethod]
-    public void GetDisplayPath_ReturnsNull_WhenPathIsBlank()
+    public void Service_DunnageImagePathResolverTests_GetDisplayPath_ReturnsNullWhenPathIsBlank()
     {
         Assert.IsNull(DunnageImagePathResolver.GetDisplayPath(null));
         Assert.IsNull(DunnageImagePathResolver.GetDisplayPath("   "));
     }
 
     [TestMethod]
-    public void GetDisplayPath_ReturnsNull_WhenFileDoesNotExist()
+    public void Service_DunnageImagePathResolverTests_GetDisplayPath_ReturnsNullWhenFileDoesNotExist()
     {
         var resolved = DunnageImagePathResolver.GetDisplayPath("Parts/Missing Dunnage.png");
         Assert.IsNull(resolved);
     }
 
     [TestMethod]
-    public void GetDisplayPath_ReturnsAbsolutePath_WhenRelativeFileExists()
+    public void Service_DunnageImagePathResolverTests_GetDisplayPath_ReturnsAbsolutePathWhenRelativeFileExists()
     {
         var partsFolder = Path.Combine(_tempRoot!, "Parts");
         Directory.CreateDirectory(partsFolder);
@@ -70,7 +70,7 @@ public sealed class DunnageImagePathResolverTests
     }
 
     [TestMethod]
-    public void GetDisplayPath_NormalizesForwardSlashes_ToDirectorySeparators()
+    public void Service_DunnageImagePathResolverTests_GetDisplayPath_NormalizesForwardSlashesToDirectorySeparators()
     {
         var typesFolder = Path.Combine(_tempRoot!, "Types");
         Directory.CreateDirectory(typesFolder);
@@ -84,7 +84,7 @@ public sealed class DunnageImagePathResolverTests
     }
 
     [TestMethod]
-    public void GetDisplayPath_RootedPath_IsReturnedAsIs_WhenFileExists()
+    public void Service_DunnageImagePathResolverTests_GetDisplayPath_RootedPathIsReturnedAsIsWhenFileExists()
     {
         var file = Path.Combine(_tempRoot!, "already-absolute.png");
         File.WriteAllText(file, "fixture");

@@ -24,7 +24,7 @@ namespace MTM_Waitlist.Tests.Core.Models;
 public sealed class StartupOptionsModelsTests
 {
     [TestMethod]
-    public void WaitlistDatabaseOptions_Defaults()
+    public void Model_StartupOptionsModelsTests_WaitlistDatabaseOptions_Defaults()
     {
         var options = new WaitlistDatabaseOptions();
 
@@ -36,7 +36,7 @@ public sealed class StartupOptionsModelsTests
     }
 
     [TestMethod]
-    public void ModuleCoreSettingsOptions_Defaults()
+    public void Model_StartupOptionsModelsTests_ModuleCoreSettingsOptions_Defaults()
     {
         var options = new ModuleCoreSettingsOptions();
 

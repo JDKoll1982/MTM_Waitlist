@@ -95,7 +95,7 @@ public sealed class WaitlistRequestActionPrompt : IWaitlistRequestActionPrompt
         var reasonBox = new TextBox
         {
             AcceptsReturn = false,
-            PlaceholderText = LocalizeOrDefault("Waitlist_Action.Cancel.ReasonPlaceholder", "Reason (optional)"),
+            PlaceholderText = LocalizeOrDefault("Waitlist_Action_Cancel.ReasonPlaceholder", "Reason (optional)"),
         };
 
         var content = new StackPanel { Spacing = 10 };

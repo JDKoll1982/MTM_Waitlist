@@ -84,7 +84,7 @@ public sealed class PermissionChangeSetServiceTests
     }
 
     [TestMethod]
-    public async Task TheChangeSet_IsWrittenReversedAndRefusedExactlyAsTheContractSays()
+    public async Task Service_PermissionChangeSetServiceTests_TheChangeSet_IsWrittenReversedAndRefusedExactlyAsTheContractSays()
     {
         var service = _service!;
         var helper = _helper!;

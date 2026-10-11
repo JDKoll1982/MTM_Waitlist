@@ -28,10 +28,10 @@ namespace MTM_Waitlist.Module_Startup.Services;
 /// </para>
 /// <para>
 /// <b>The sequence:</b> what this computer keeps locally; whether the store answers; this computer's own name and
-/// hardware address, its record and its configuration; the save that configures it when it needs one; the
-/// remembered sign-in and the key that unlocks it; who is signing in and the roles they hold; the credential
-/// check, the session, the machine gate and a temporary credential's replacement when they apply; the picture
-/// copies and the external-system verdict, both best effort; and finally the hand-over to the first screen.
+/// hardware address, its record and its configuration; the save that configures it when it needs one; who is
+/// signing in and the roles they hold; the credential check, the session, the machine gate and a temporary
+/// credential's replacement when they apply; the picture copies and the external-system verdict, both best
+/// effort; and finally the hand-over to the first screen.
 /// </para>
 /// </remarks>
 public sealed class LaunchStepCatalog
@@ -51,9 +51,9 @@ public sealed class LaunchStepCatalog
     /// its own entry, so a person watching the launch window sees every one of them progress rather than a single
     /// line standing for a group. The order is the launch order, and the straight runs are: what this computer
     /// keeps; whether the store answers; this computer's identity and its record; this computer's configuration
-    /// and the save that sets it; the remembered sign-in; who is signing in and the roles they hold; the
-    /// credential, the session, the machine gate and a temporary credential's replacement; the picture copies and
-    /// the external-system verdict, both best effort; and the hand-over to the first screen.
+    /// and the save that sets it; who is signing in and the roles they hold; the credential, the session, the
+    /// machine gate and a temporary credential's replacement; the picture copies and the external-system verdict,
+    /// both best effort; and the hand-over to the first screen.
     /// </remarks>
     private static readonly LaunchStep[] s_steps =
     [
@@ -106,19 +106,11 @@ public sealed class LaunchStepCatalog
         new(
             "save-machine-configuration",
             "Saving this computer's configuration",
-            "Names this computer and points it at the shared picture sources.",
+            "Records this computer's name and the location it stands in.",
             LaunchStepCategory.Machine,
             Ceiling,
             false,
             "the store"),
-        new(
-            "read-remembered-sign-in",
-            "Reading the remembered sign-in",
-            "Reads, and unlocks, the sign-in this computer was asked to remember.",
-            LaunchStepCategory.Session,
-            TimeSpan.FromSeconds(10),
-            false,
-            "the shared key file"),
         new(
             "resolve-person",
             "Working out who is signed in",

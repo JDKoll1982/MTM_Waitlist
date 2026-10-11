@@ -38,7 +38,7 @@ public sealed class SharedControlsMarkupTests
     /// gesture that knows the card's own click comes first.
     /// </remarks>
     [TestMethod]
-    public void EveryContentPicture_IsDrawnByTheSharedControl()
+    public void UI_SharedControlsMarkupTests_EveryContentPicture_IsDrawnByTheSharedControl()
     {
         string[] pictureCarriers = ["Image", "ImageBrush"];
 
@@ -72,7 +72,7 @@ public sealed class SharedControlsMarkupTests
     /// a long value push the card out of shape or get cut off.
     /// </summary>
     [TestMethod]
-    public void TheSharedCardTitle_IsDrawnByTheOneLineScrollingText()
+    public void UI_SharedControlsMarkupTests_TheSharedCardTitle_IsDrawnByTheOneLineScrollingText()
     {
         var card = Load("Styles", "PartPictureCardTemplate.xaml");
 
@@ -93,7 +93,7 @@ public sealed class SharedControlsMarkupTests
 
     /// <summary>The text control holds its line: one line, no wrapping, and a viewport that hides the overflow.</summary>
     [TestMethod]
-    public void TheTextControl_KeepsItsLineOnOneLine()
+    public void UI_SharedControlsMarkupTests_TheTextControl_KeepsItsLineOnOneLine()
     {
         var control = Load("Module_Shared", "Controls", "AutoScrollTextView.xaml");
 
@@ -117,7 +117,7 @@ public sealed class SharedControlsMarkupTests
     /// ever half in view.
     /// </summary>
     [TestMethod]
-    public void TheTextControl_LoopsTheValueInsteadOfSnappingBack()
+    public void UI_SharedControlsMarkupTests_TheTextControl_LoopsTheValueInsteadOfSnappingBack()
     {
         var control = Load("Module_Shared", "Controls", "AutoScrollTextView.xaml");
 
@@ -168,7 +168,7 @@ public sealed class SharedControlsMarkupTests
     /// suite without rendering, so these checks read the markup and the code behind.
     /// </remarks>
     [TestMethod]
-    public void ThePictureControl_OwnsTheEnlargedView()
+    public void UI_SharedControlsMarkupTests_ThePictureControl_OwnsTheEnlargedView()
     {
         var control = Load("Module_Shared", "Controls", "ClickToEnlargeImageView.xaml");
 

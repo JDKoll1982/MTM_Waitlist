@@ -13,7 +13,7 @@ namespace MTM_Waitlist.Tests.Module_Logging;
 public sealed class LogServiceTests
 {
     [TestMethod]
-    public async Task Error_MachinePersonAndFault_AreCapturedByTheSeamAndNotSuppliedByTheCallSite()
+    public async Task Service_LogServiceTests_Error_MachinePersonAndFaultAreCapturedByTheSeamAndNotSuppliedByTheCallSite()
     {
         // Arrange
         var store = new RecordingLogStore();
@@ -64,7 +64,7 @@ public sealed class LogServiceTests
     }
 
     [TestMethod]
-    public async Task Error_CallerNamesNoAction_UsesTheModuleAsTheAction()
+    public async Task Service_LogServiceTests_Error_CallerNamesNoActionUsesTheModuleAsTheAction()
     {
         // Arrange
         var store = new RecordingLogStore();
@@ -81,7 +81,7 @@ public sealed class LogServiceTests
     }
 
     [TestMethod]
-    public async Task Error_NobodyIsSignedIn_RecordsTheActorAsSystem()
+    public async Task Service_LogServiceTests_Error_NobodyIsSignedInRecordsTheActorAsSystem()
     {
         // Arrange
         var store = new RecordingLogStore();
@@ -100,7 +100,7 @@ public sealed class LogServiceTests
     }
 
     [TestMethod]
-    public async Task Info_RaisedWithoutAFault_CarriesNoErrorTypeAndNoFingerprint()
+    public async Task Service_LogServiceTests_Info_RaisedWithoutAFaultCarriesNoErrorTypeAndNoFingerprint()
     {
         // Arrange
         var store = new RecordingLogStore();
@@ -136,7 +136,7 @@ public sealed class LogServiceTests
     /// faults and the near-faults.
     /// </summary>
     [TestMethod]
-    public async Task Info_IsDroppedByTheShippedDefault_AndKeptOnceTheStoreIsWidened()
+    public async Task Service_LogServiceTests_Info_IsDroppedByTheShippedDefaultAndKeptOnceTheStoreIsWidened()
     {
         // Arrange: the shipped default, which is what a host that configures nothing runs with.
         var defaultStore = new RecordingLogStore();

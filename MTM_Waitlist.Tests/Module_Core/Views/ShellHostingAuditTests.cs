@@ -26,7 +26,7 @@ namespace MTM_Waitlist.Tests.Module_Core.Views;
 public sealed class ShellHostingAuditTests
 {
     [TestMethod]
-    public void TheHost_PutsTheShellIntoTheMainWindow_BeforeTheMainScreensAreShown()
+    public void Audit_ShellHostingAuditTests_TheHost_PutsTheShellIntoTheMainWindowBeforeTheMainScreensAreShown()
     {
         var host = Read("App.xaml.cs");
 
@@ -42,7 +42,7 @@ public sealed class ShellHostingAuditTests
     }
 
     [TestMethod]
-    public void TheShell_OpensItsFirstPage_WhenItLoads()
+    public void Audit_ShellHostingAuditTests_TheShell_OpensItsFirstPageWhenItLoads()
     {
         var shell = Read("Module_Core", "Views", "ShellPage.xaml.cs");
 
@@ -58,7 +58,7 @@ public sealed class ShellHostingAuditTests
     }
 
     [TestMethod]
-    public void TheMainScreens_OpenTheMainWindowMaximized_WithoutLettingThatStopTheHandOver()
+    public void Audit_ShellHostingAuditTests_TheMainScreens_OpenTheMainWindowMaximizedWithoutLettingThatStopTheHandOver()
     {
         var host = Read("App.xaml.cs");
 

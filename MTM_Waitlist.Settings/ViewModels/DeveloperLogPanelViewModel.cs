@@ -230,9 +230,9 @@ public partial class DeveloperLogPanelViewModel : ObservableObject
         ", ",
         DescribeFilters());
 
-    public string HeadingText => "Settings_LogPanel_Heading".GetLocalized();
+    public string HeadingText => "Settings_LogPanel_Heading.Text".GetLocalized();
 
-    public string DescriptionText => "Settings_LogPanel_Description".GetLocalized();
+    public string DescriptionText => "Settings_LogPanel_Description.Text".GetLocalized();
 
     public string SeverityLabelText => "Settings_LogPanel_Severity.Label".GetLocalized();
 

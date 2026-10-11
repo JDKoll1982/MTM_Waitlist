@@ -96,14 +96,41 @@ MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row 
 
 ALTER TABLE core_computers_registry COMMENT = 'Registered computer and host identity catalog.';
 
+-- T238: this computer's free-text note became the location it stands in. A guarded rename is required rather
+-- than optional for the same reason the column additions above are: `CREATE TABLE IF NOT EXISTS` cannot rename a
+-- column on a table that already exists, and the MODIFY below names the new column. The paired rollback — the
+-- reverse rename for a store upgraded in place — is Database/Tables/02_core_computers_registry/rollback.sql.
+SET
+    @has_computer_description_column := (
+        SELECT COUNT(*)
+        FROM information_schema.columns
+        WHERE
+            table_schema = DATABASE()
+            AND table_name = 'core_computers_registry'
+            AND column_name = 'description'
+    );
+
+SET
+    @sql_stmt := IF(
+        @has_computer_description_column = 1,
+        'ALTER TABLE core_computers_registry CHANGE COLUMN description location VARCHAR(255) NULL COMMENT ''Where this computer stands; the only value a person supplies at setup.''',
+        'SELECT ''core_computers_registry.description already renamed'''
+    );
+
+PREPARE stmt FROM @sql_stmt;
+
+EXECUTE stmt;
+
+DEALLOCATE PREPARE stmt;
+
 ALTER TABLE core_computers_registry
 MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
 MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for computer record.',
 MODIFY COLUMN computer_name VARCHAR(128) NOT NULL COMMENT 'Friendly computer name.',
 MODIFY COLUMN hostname_normalized VARCHAR(255) NOT NULL COMMENT 'Normalized host name used for identity matching.',
 MODIFY COLUMN mac_address_normalized VARCHAR(64) NOT NULL COMMENT 'Normalized MAC address for computer identity.',
-MODIFY COLUMN display_name VARCHAR(128) NOT NULL COMMENT 'User-facing display name for the computer.',
-MODIFY COLUMN description VARCHAR(255) NULL COMMENT 'Optional free-text description for the computer.',
+MODIFY COLUMN display_name VARCHAR(128) NOT NULL COMMENT 'The name the computer reports for itself, held uniquely so no two records claim one name.',
+MODIFY COLUMN location VARCHAR(255) NULL COMMENT 'Where this computer stands; the only value a person supplies at setup.',
 MODIFY COLUMN is_registered TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether the computer is currently registered.',
 MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was created.',
 MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was last updated.';
@@ -604,36 +631,14 @@ DEALLOCATE PREPARE stmt;
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ============================================================
--- auth_remembered_sign_ins - feature 010-startup-rebuild (task T046, plan D12)
+-- auth_remembered_sign_ins - retired by feature 010-startup-rebuild (task T234)
 -- ============================================================
--- New table. The owning artifact is Database/Tables/35_auth_remembered_sign_ins/create.sql; the guarded statement
--- below carries the same shape so a store that ALREADY EXISTS gains the table when this maintenance file is run.
--- FOREIGN_KEY_CHECKS is off for the same reason as above: the table carries two foreign keys.
-SET FOREIGN_KEY_CHECKS = 0;
-
-SET
-    @has_auth_remembered_sign_ins_table := (
-        SELECT COUNT(*)
-        FROM information_schema.tables
-        WHERE
-            table_schema = DATABASE()
-            AND table_name = 'auth_remembered_sign_ins'
-    );
-
-SET
-    @sql_stmt := IF(
-        @has_auth_remembered_sign_ins_table = 0,
-        'CREATE TABLE auth_remembered_sign_ins (id BIGINT NOT NULL AUTO_INCREMENT COMMENT ''Surrogate primary key.'', public_id CHAR(36) NOT NULL COMMENT ''Public UUID for external references.'', user_id BIGINT NOT NULL COMMENT ''The person the remembered sign-in belongs to.'', computer_id BIGINT NOT NULL COMMENT ''The machine the remembered sign-in was made on.'', payload_ciphertext VARBINARY(512) NOT NULL COMMENT ''The encrypted remembered payload; opaque to the store'', payload_iv VARBINARY(16) NOT NULL COMMENT ''The initialisation vector the ciphertext was produced with'', key_fingerprint CHAR(64) NOT NULL COMMENT ''Identifies the key that encrypted the payload, so a rotated key is detected rather than raised'', is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT ''Soft state: 0 once cleared, and a cleared row is never read'', created_utc DATETIME NOT NULL COMMENT ''When this person first used this machine to remember a sign-in'', updated_utc DATETIME NOT NULL COMMENT ''When the payload was last written or cleared'', PRIMARY KEY (id), UNIQUE KEY uq_auth_remembered_sign_ins_public_id (public_id), UNIQUE KEY uq_auth_remembered_sign_ins_user_computer (user_id, computer_id) COMMENT ''One remembered sign-in per person per machine'', CONSTRAINT fk_auth_remembered_sign_ins_core_users_profiles_user_id FOREIGN KEY (user_id) REFERENCES core_users_profiles (id), CONSTRAINT fk_auth_remembered_sign_ins_core_computers_registry_computer_id FOREIGN KEY (computer_id) REFERENCES core_computers_registry (id)) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = ''An encrypted remembered sign-in per person and machine, with the initialisation vector and the fingerprint of the key that produced it.''',
-        'SELECT ''auth_remembered_sign_ins already exists'''
-    );
-
-PREPARE stmt FROM @sql_stmt;
-
-EXECUTE stmt;
-
-DEALLOCATE PREPARE stmt;
-
-SET FOREIGN_KEY_CHECKS = 1;
+-- This block used to create the table. It is deliberately absent now, for the same reason `auth_sessions_tokens`
+-- is absent above: remember-me was withdrawn, the sign-in stage offers the last six people from the session
+-- records instead (sp_auth_user_previous_sign_ins_list), and a MODIFY or CREATE against a retired table stops
+-- this script on the first run after the retirement. The object is recorded in the retired-objects section at
+-- the foot of this file, which is where a description for it now belongs, and its own rollback is the drop a
+-- DBA promotes.
 
 -- ============================================================
 -- sp_auth_user_credential_get - feature 010-startup-rebuild (task T110)
@@ -723,15 +728,15 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- artifact under Database/.
 --   Owning artifact: Database/StoredProcedures/sp_machine_configuration_reset/create.sql, with its rollback
 --     beside it, and its body registered in Database/StoredProcedures/AllSPs.sql.
---   What it writes: this machine's own configuration and nothing else — its display name and description in
+--   What it writes: this machine's own configuration and nothing else — its name and its location in
 --     `core_computers_registry`, its picture sources in `config_images_locations` (withdrawn, not deleted), and
 --     its scoped preference rows in `config_settings_values`. All three writes are one transaction behind one
 --     call, because a half-finished reset leaves a machine in a state none of the three tables can express.
 --   Why it exists: FR-018 requires a targeted restore of exactly the parts named as broken, on this machine
 --     only, with a single implementation that the recovery step drives rather than re-implementing. It never
 --     touches a person, a role, a permission, another machine, a session or a log entry, and it deliberately
---     does not delete the registry row: that row is referenced by `user_active_sessions` and
---     `auth_remembered_sign_ins`, and neither may be cleared by a machine-configuration reset.
+--     does not delete the registry row: that row is referenced by `user_active_sessions`, and a session may not
+--     be cleared by a machine-configuration reset.
 
 -- ============================================================
 -- Retired objects - feature 001-module-mock-visual-fallback (FR-014)
@@ -781,7 +786,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 --     machine-facts contract reads a machine by its (name, hardware address) pair, and the retained computer
 --     registry service still calls all three — so removing them here would leave live code calling a
 --     procedure no install creates. They retire with that service instead (T187).
---   Retained, unchanged: `fn_server_utc_now`. The rebuilt session, remembered sign-in, log and
+--   Retained, unchanged: `fn_server_utc_now`. The rebuilt session, log and
 --     picture-source procedures all compare against the store's own clock through it, so it stays the single
 --     implementation of "now" (S8.1).
 --   T061 then retired three more objects that the dead-weight audit (T056) found orphaned of application code.
@@ -835,6 +840,23 @@ SET FOREIGN_KEY_CHECKS = 1;
 --       FR-040 inside the same feature, so the reason to keep them expired with the requirement.
 --     Not retired: `config_images_locations` itself, its `computer` scope value and its `computer_id` column. A
 --       store that already holds rows keeps them, withdrawn, and the table's own rollback is what removes them.
+--   T234 then retired the store side of remember-me, because the requirement that asked for it was withdrawn:
+--     a remembered sign-in cannot be offered before a name is typed, since the store keys it by person and
+--     machine, so the sign-in stage offers the last six people who signed in on this computer instead (FR-014,
+--     FR-048). Their folders are kept and their create.sql files are gone — the matching rollback is the drop a
+--     DBA promotes — and the table's body was removed from Database/Tables/AllTables.sql and the three
+--     procedures' bodies from Database/StoredProcedures/AllSPs.sql in the same change:
+--     Tables (drop via Database/Tables/<name>/rollback.sql):
+--       auth_remembered_sign_ins
+--     Stored procedures (drop via Database/StoredProcedures/<name>/rollback.sql):
+--       sp_auth_remembered_sign_ins_get, sp_auth_remembered_sign_ins_upsert, sp_auth_remembered_sign_ins_clear
+--     Validation: Database/Validation/auth_remembered_sign_ins_schema was deleted with the table it asserted, and
+--       its line was removed from the installer's validation list in Database/install_local_database.vbs.
+--     Replacing it: Database/StoredProcedures/sp_auth_user_previous_sign_ins_list, which reads the last six
+--       people who signed in on one computer from the `user_active_sessions` rows the store already holds and
+--       carries no credential of any kind.
+--     Nothing is kept in its place: the shared key file it was encrypted with is read by nothing now, so no key
+--       file is read, copied or kept anywhere (FR-025, FR-043, SC-024).
 --   The development seed's credential was repaired, and seed application was taken out of the validator's
 --     default path.
 --     `Database/Seeds/seed_dev_masked_baseline` wrote the retired four-character marker `'0000'` into

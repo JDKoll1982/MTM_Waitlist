@@ -53,7 +53,7 @@ public sealed class PartPictureStoragePathPortabilityTests
     }
 
     [TestMethod]
-    public void ARecordedPartPictureNamesNoFolderOfItsOwn()
+    public void Service_PartPictureStoragePathPortabilityTests_ARecordedPartPictureNamesNoFolderOfItsOwn()
     {
         var recorded = PartPictureLayout.RelativePathFor(PartPictureLayout.VisualPartScope, PartNumber, ".png");
 
@@ -69,7 +69,7 @@ public sealed class PartPictureStoragePathPortabilityTests
     }
 
     [TestMethod]
-    public void OneRecordedValueResolvesUnderEachMachinesOwnConfiguredFolder()
+    public void Service_PartPictureStoragePathPortabilityTests_OneRecordedValueResolvesUnderEachMachinesOwnConfiguredFolder()
     {
         var recorded = PartPictureLayout.RelativePathFor(PartPictureLayout.VisualPartScope, PartNumber, ".png")!;
 
@@ -94,7 +94,7 @@ public sealed class PartPictureStoragePathPortabilityTests
     }
 
     [TestMethod]
-    public void EachMachineDrawsItsOwnCopyOfTheSameRecordedPicture()
+    public void Service_PartPictureStoragePathPortabilityTests_EachMachineDrawsItsOwnCopyOfTheSameRecordedPicture()
     {
         var recorded = PartPictureLayout.RelativePathFor(PartPictureLayout.VisualPartScope, PartNumber, ".png")!;
 
@@ -116,7 +116,7 @@ public sealed class PartPictureStoragePathPortabilityTests
     }
 
     [TestMethod]
-    public void AMachineWithNoCopyFallsBackToItsOwnShareFile()
+    public void Service_PartPictureStoragePathPortabilityTests_AMachineWithNoCopyFallsBackToItsOwnShareFile()
     {
         var recorded = PartPictureLayout.RelativePathFor(PartPictureLayout.VisualPartScope, PartNumber, ".png")!;
         var sharedPath = Path.Combine(_secondRoot, AppStoragePaths.NormalizeSeparators(recorded));

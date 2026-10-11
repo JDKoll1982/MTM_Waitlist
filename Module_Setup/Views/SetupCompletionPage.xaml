@@ -29,14 +29,14 @@
                 </StackPanel>
 
                 <TextBlock
-                    x:Uid="Setup_Completion.ResultMessageLabel"
+                    x:Uid="Setup_Completion_ResultMessageLabel"
                     Style="{ThemeResource BodyStrongTextBlockStyle}"
                     Text="Result" />
 
                 <TextBlock Text="{x:Bind ViewModel.ResultMessage, Mode=OneWay}" TextWrapping="WrapWholeWords" />
 
                 <TextBlock
-                    x:Uid="Setup_Completion.FailureReasonLabel"
+                    x:Uid="Setup_Completion_FailureReasonLabel"
                     Style="{ThemeResource BodyStrongTextBlockStyle}"
                     Text="Failure reason"
                     Visibility="{x:Bind ViewModel.FailureReasonVisibility, Mode=OneWay}" />
@@ -49,8 +49,8 @@
         </Border>
 
         <StackPanel Grid.Row="1" Style="{StaticResource SetupActionBarStyle}">
-            <Button AutomationProperties.AutomationId="SetupCompletionPage_StartOverButton" x:Uid="Setup_Completion.Action.StartOver" Content="Start Over" Command="{x:Bind ViewModel.StartOverCommand}" />
-            <Button AutomationProperties.AutomationId="SetupCompletionPage_ReturnToWaitlistButton" x:Uid="Setup_Completion.Action.ReturnToWaitlist" Content="Return to Waitlist" Command="{x:Bind ViewModel.ReturnToWaitlistCommand}" />
+            <Button AutomationProperties.AutomationId="SetupCompletionPage_StartOverButton" x:Uid="Setup_Completion_Action_StartOver" Content="Start Over" Command="{x:Bind ViewModel.StartOverCommand}" />
+            <Button AutomationProperties.AutomationId="SetupCompletionPage_ReturnToWaitlistButton" x:Uid="Setup_Completion_Action_ReturnToWaitlist" Content="Return to Waitlist" Command="{x:Bind ViewModel.ReturnToWaitlistCommand}" />
         </StackPanel>
     </Grid>
 </Page>

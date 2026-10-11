@@ -42,7 +42,7 @@ public sealed class MachineSetupGateTests
     private static readonly byte[] s_salt = PasswordSecretHasher.NewSalt();
 
     [TestMethod]
-    public async Task AuthorizeAsync_WhenAnITDepartmentSignInHoldsThePermission_AuthorisesConfigurationOnly()
+    public async Task Service_MachineSetupGateTests_AuthorizeAsync_WhenAnITDepartmentSignInHoldsThePermissionAuthorisesConfigurationOnly()
     {
         var stub = new StubMySqlHelperServer()
             .Returns(CredentialProcedure, AccountRow("it_department"))
@@ -59,7 +59,7 @@ public sealed class MachineSetupGateTests
     }
 
     [TestMethod]
-    public async Task AuthorizeAsync_WhenADeveloperSignsIn_AuthorisesConfiguration()
+    public async Task Service_MachineSetupGateTests_AuthorizeAsync_WhenADeveloperSignsInAuthorisesConfiguration()
     {
         var stub = new StubMySqlHelperServer()
             .Returns(CredentialProcedure, AccountRow("developer"))
@@ -73,7 +73,7 @@ public sealed class MachineSetupGateTests
     }
 
     [TestMethod]
-    public void AuthorizeAsync_AnswersNothingThatCouldOpenTheMainScreens()
+    public void Service_MachineSetupGateTests_AuthorizeAsync_AnswersNothingThatCouldOpenTheMainScreens()
     {
         // The authorisation is a verdict about configuration and carries no route: no member of the gate or of its
         // answer has a launch outcome in it, so a caller cannot read the shell out of an unlocked setup (FR-007).
@@ -98,7 +98,7 @@ public sealed class MachineSetupGateTests
     }
 
     [TestMethod]
-    public async Task AuthorizeAsync_WhenThePersonDoesNotHoldThePermission_RefusesAndStatesWhy()
+    public async Task Service_MachineSetupGateTests_AuthorizeAsync_WhenThePersonDoesNotHoldThePermissionRefusesAndStatesWhy()
     {
         var stub = new StubMySqlHelperServer()
             .Returns(CredentialProcedure, AccountRow("material_handler"))
@@ -112,7 +112,7 @@ public sealed class MachineSetupGateTests
     }
 
     [TestMethod]
-    public async Task AuthorizeAsync_WhenTheStoreHoldsNoRowForTheKey_FallsBackToRefusing()
+    public async Task Service_MachineSetupGateTests_AuthorizeAsync_WhenTheStoreHoldsNoRowForTheKeyFallsBackToRefusing()
     {
         // Every declared key falls back to its shipped answer when the store holds no row for it, and this key's
         // fallback is false. A missing baseline therefore refuses rather than unlocking setup.
@@ -126,7 +126,7 @@ public sealed class MachineSetupGateTests
     }
 
     [TestMethod]
-    public async Task AuthorizeAsync_WhenTheCredentialDoesNotMatch_RefusesBeforeReadingAnyPermission()
+    public async Task Service_MachineSetupGateTests_AuthorizeAsync_WhenTheCredentialDoesNotMatchRefusesBeforeReadingAnyPermission()
     {
         var stub = new StubMySqlHelperServer()
             .Returns(CredentialProcedure, AccountRow("developer"));
@@ -139,7 +139,7 @@ public sealed class MachineSetupGateTests
     }
 
     [TestMethod]
-    public async Task AuthorizeAsync_WhenTheStoreHoldsNoSuchSignInName_RefusesAsThoughTheCredentialWereWrong()
+    public async Task Service_MachineSetupGateTests_AuthorizeAsync_WhenTheStoreHoldsNoSuchSignInNameRefusesAsThoughTheCredentialWereWrong()
     {
         var stub = new StubMySqlHelperServer();
 
@@ -151,7 +151,7 @@ public sealed class MachineSetupGateTests
     }
 
     [TestMethod]
-    public async Task AuthorizeAsync_WithAMixedCaseSignInName_SendsItUpperCasedToTheStore()
+    public async Task Service_MachineSetupGateTests_AuthorizeAsync_WithAMixedCaseSignInNameSendsItUpperCasedToTheStore()
     {
         // Sign-in names are stored and compared upper case (FR-002), so the gate normalises before it asks.
         var stub = new StubMySqlHelperServer();
@@ -163,7 +163,7 @@ public sealed class MachineSetupGateTests
     }
 
     [TestMethod]
-    public async Task AuthorizeAsync_WhenTheStoreCannotAnswer_RefusesRatherThanAuthorising()
+    public async Task Service_MachineSetupGateTests_AuthorizeAsync_WhenTheStoreCannotAnswerRefusesRatherThanAuthorising()
     {
         var stub = new StubMySqlHelperServer()
             .Fails(CredentialProcedure, new InvalidOperationException("the store did not answer"));
@@ -175,7 +175,7 @@ public sealed class MachineSetupGateTests
     }
 
     [TestMethod]
-    public async Task AuthorizeAsync_WhenTheStoreAnsweredTheSaltAsText_StillConfirmsTheCredential()
+    public async Task Service_MachineSetupGateTests_AuthorizeAsync_WhenTheStoreAnsweredTheSaltAsTextStillConfirmsTheCredential()
     {
         // The store holds the salt as VARBINARY, and a provider may hand it back as bytes or as the base64 text of
         // them. Both are the same salt, and a salt that could not be read is not a credential that did not match.
@@ -189,7 +189,7 @@ public sealed class MachineSetupGateTests
     }
 
     [TestMethod]
-    public async Task AuthorizeAsync_WhenNothingWasGiven_RefusesWithoutReadingTheStore()
+    public async Task Service_MachineSetupGateTests_AuthorizeAsync_WhenNothingWasGivenRefusesWithoutReadingTheStore()
     {
         var stub = new StubMySqlHelperServer();
 

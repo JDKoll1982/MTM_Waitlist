@@ -15,7 +15,7 @@ namespace MTM_Waitlist.Tests.Module_Core.Services;
 public sealed class WaitlistSortPreferenceServiceTests
 {
     [TestMethod]
-    public async Task GetSortOrder_FirstRun_IsMostUrgent()
+    public async Task Service_WaitlistSortPreferenceServiceTests_GetSortOrder_FirstRunIsMostUrgent()
     {
         var service = new WaitlistSortPreferenceService(new InMemoryScopedPreferenceStore());
 
@@ -31,7 +31,7 @@ public sealed class WaitlistSortPreferenceServiceTests
     [DataRow(WaitlistSortOrder.Press)]
     [DataRow(WaitlistSortOrder.RequestedBy)]
     [DataRow(WaitlistSortOrder.Status)]
-    public async Task SetSortOrder_EachOfTheFiveKeys_SurvivesAServiceReconstruction(string sortOrder)
+    public async Task Service_WaitlistSortPreferenceServiceTests_SetSortOrder_EachOfTheFiveKeysSurvivesAServiceReconstruction(string sortOrder)
     {
         var preferences = new InMemoryScopedPreferenceStore();
         await new WaitlistSortPreferenceService(preferences).SetSortOrderAsync(sortOrder).ConfigureAwait(false);
@@ -43,7 +43,7 @@ public sealed class WaitlistSortPreferenceServiceTests
     }
 
     [TestMethod]
-    public async Task SetSortOrder_StoresOneScalarKey_RatherThanASecondStore()
+    public async Task Service_WaitlistSortPreferenceServiceTests_SetSortOrder_StoresOneScalarKeyRatherThanASecondStore()
     {
         var preferences = new InMemoryScopedPreferenceStore();
         var service = new WaitlistSortPreferenceService(preferences);
@@ -60,7 +60,7 @@ public sealed class WaitlistSortPreferenceServiceTests
     }
 
     [TestMethod]
-    public async Task GetSortOrder_UnknownStoredValue_ReportsTheDefault()
+    public async Task Service_WaitlistSortPreferenceServiceTests_GetSortOrder_UnknownStoredValueReportsTheDefault()
     {
         var preferences = new InMemoryScopedPreferenceStore();
         preferences.SeedText(WaitlistSortPreferenceService.SettingsKey, PreferenceScope.Person, "by-vibes");
@@ -72,7 +72,7 @@ public sealed class WaitlistSortPreferenceServiceTests
     }
 
     [TestMethod]
-    public async Task SetSortOrder_UnknownKey_RemembersTheDefault()
+    public async Task Service_WaitlistSortPreferenceServiceTests_SetSortOrder_UnknownKeyRemembersTheDefault()
     {
         var preferences = new InMemoryScopedPreferenceStore();
         var service = new WaitlistSortPreferenceService(preferences);

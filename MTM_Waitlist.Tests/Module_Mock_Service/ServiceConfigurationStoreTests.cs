@@ -34,7 +34,7 @@ public sealed class ServiceConfigurationStoreTests
     }
 
     [TestMethod]
-    public async Task LoadAsync_OnFirstRun_PersistsTheDefaultConfiguration()
+    public async Task Service_ServiceConfigurationStoreTests_LoadAsync_OnFirstRunPersistsTheDefaultConfiguration()
     {
         var store = new ServiceConfigurationStore(_appDataRoot);
 
@@ -44,7 +44,7 @@ public sealed class ServiceConfigurationStoreTests
     }
 
     [TestMethod]
-    public async Task SaveAsync_ThenLoadAsync_RoundTripsOperatorSettings()
+    public async Task Service_ServiceConfigurationStoreTests_SaveAsync_ThenLoadAsyncRoundTripsOperatorSettings()
     {
         var store = new ServiceConfigurationStore(_appDataRoot);
         await store.LoadAsync();
@@ -65,7 +65,7 @@ public sealed class ServiceConfigurationStoreTests
     }
 
     [TestMethod]
-    public async Task SaveAsync_IsAtomic_AndLeavesNoTemporaryFile()
+    public async Task Service_ServiceConfigurationStoreTests_SaveAsync_IsAtomicAndLeavesNoTemporaryFile()
     {
         var store = new ServiceConfigurationStore(_appDataRoot);
         await store.LoadAsync();
@@ -77,7 +77,7 @@ public sealed class ServiceConfigurationStoreTests
     }
 
     [TestMethod]
-    public async Task SaveAsync_NeverPersistsASecret()
+    public async Task Service_ServiceConfigurationStoreTests_SaveAsync_NeverPersistsASecret()
     {
         var store = new ServiceConfigurationStore(_appDataRoot);
         await store.LoadAsync();
@@ -95,7 +95,7 @@ public sealed class ServiceConfigurationStoreTests
     }
 
     [TestMethod]
-    public async Task LoadAsync_WhenARetiredCredentialBlobIsPresent_DropsItFromTheFile()
+    public async Task Service_ServiceConfigurationStoreTests_LoadAsync_WhenARetiredCredentialBlobIsPresentDropsItFromTheFile()
     {
         // An install that ran a pre-T147 build still carries the DPAPI blob, and nothing rewrites the file
         // unless an operator saves — so the load path has to remove it (T156).
@@ -131,7 +131,7 @@ public sealed class ServiceConfigurationStoreTests
     }
 
     [TestMethod]
-    public void ApiSettings_ExposesNoCredentialProperty()
+    public void Service_ServiceConfigurationStoreTests_ApiSettings_ExposesNoCredentialProperty()
     {
         Assert.IsNull(
             typeof(ApiSettings).GetProperty("Credential"),
@@ -139,7 +139,7 @@ public sealed class ServiceConfigurationStoreTests
     }
 
     [TestMethod]
-    public void Validate_RejectsAnOutOfRangePort()
+    public void Service_ServiceConfigurationStoreTests_Validate_RejectsAnOutOfRangePort()
     {
         var configuration = ServiceConfiguration.CreateDefault(_appDataRoot) with
         {
@@ -150,7 +150,7 @@ public sealed class ServiceConfigurationStoreTests
     }
 
     [TestMethod]
-    public void Validate_RejectsAMissingPerStoreBackupPolicy()
+    public void Service_ServiceConfigurationStoreTests_Validate_RejectsAMissingPerStoreBackupPolicy()
     {
         // The four-store set is fixed; dropping one is a configuration error, not an extension point.
         var configuration = ServiceConfiguration.CreateDefault(_appDataRoot) with
@@ -162,7 +162,7 @@ public sealed class ServiceConfigurationStoreTests
     }
 
     [TestMethod]
-    public void Validate_RejectsANonPositiveRetentionCount()
+    public void Service_ServiceConfigurationStoreTests_Validate_RejectsANonPositiveRetentionCount()
     {
         var defaults = ServiceConfiguration.CreateDefault(_appDataRoot);
         var policies = defaults.BackupPolicies.ToDictionary(
@@ -176,7 +176,7 @@ public sealed class ServiceConfigurationStoreTests
     }
 
     [TestMethod]
-    public void CreateDefault_ProvidesOneEnabledPolicyPerStore()
+    public void Service_ServiceConfigurationStoreTests_CreateDefault_ProvidesOneEnabledPolicyPerStore()
     {
         var configuration = ServiceConfiguration.CreateDefault(_appDataRoot);
 

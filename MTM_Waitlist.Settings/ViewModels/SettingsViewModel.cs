@@ -313,20 +313,6 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         get; set;
     } = string.Empty;
 
-    /// <summary>The folder holding the key files, as the store holds it (FR-016).</summary>
-    [ObservableProperty]
-    public partial string KeysFolderPath
-    {
-        get; set;
-    } = string.Empty;
-
-    /// <summary>What the key folder box holds.</summary>
-    [ObservableProperty]
-    public partial string KeysFolderInput
-    {
-        get; set;
-    } = string.Empty;
-
     /// <summary>
     /// What the dunnage root box holds, which is the root the dunnage pictures are read from for every computer
     /// (FR-040).
@@ -807,7 +793,6 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     public string StoragePathsImageFolderLabel => "Settings_StoragePaths_ImageFolder.Label".GetLocalized();
 
     /// <summary>The label on the key-folder box.</summary>
-    public string StoragePathsKeysFolderLabel => "Settings_StoragePaths_KeysFolder.Label".GetLocalized();
 
     public string StoragePathsDunnageRootLabel => "Settings_StoragePaths_DunnageRoot.Label".GetLocalized();
 
@@ -1947,11 +1932,6 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 .ConfigureAwait(true);
             PictureFolderInput = PictureFolderPath;
 
-            KeysFolderPath = await _imageStorageConfigurationResolver
-                .GetKeysFolderPathAsync()
-                .ConfigureAwait(true);
-            KeysFolderInput = KeysFolderPath;
-
             DunnageRootInput = await _imageStorageConfigurationResolver
                 .GetDunnageRootPathAsync()
                 .ConfigureAwait(true);
@@ -1975,11 +1955,11 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     }
 
     /// <summary>
-    /// Stores the picture folder, the key folder, the dunnage root and the retention period for every computer.
+    /// Stores the picture folder, the dunnage root and the retention period for every computer.
     /// </summary>
     /// <remarks>
-    /// One button for the four, because they are one subject and one screen: four buttons over four boxes on one
-    /// panel is four chances to leave the panel half saved. The period is refused when it is not a positive whole
+    /// One button for the three, because they are one subject and one screen: three buttons over three boxes on one
+    /// panel is three chances to leave the panel half saved. The period is refused when it is not a positive whole
     /// number of days rather than stored as a figure the cleanup would read as zero.
     /// </remarks>
     [RelayCommand]
@@ -1991,11 +1971,10 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         }
 
         var pictureFolder = PictureFolderInput?.Trim() ?? string.Empty;
-        var keysFolder = KeysFolderInput?.Trim() ?? string.Empty;
         var dunnageRoot = DunnageRootInput?.Trim() ?? string.Empty;
         var keepDays = (int)Math.Round(ArchiveKeepDaysInput, MidpointRounding.AwayFromZero);
 
-        if (pictureFolder.Length == 0 || keysFolder.Length == 0 || dunnageRoot.Length == 0)
+        if (pictureFolder.Length == 0 || dunnageRoot.Length == 0)
         {
             StoragePathsStatusMessage = "Settings_StoragePaths_FolderNeeded.Text".GetLocalized();
             return;
@@ -2018,12 +1997,6 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 boolean: null).ConfigureAwait(true);
 
             await SaveAppWideSettingAsync(
-                ConfigSettingKeys.KeysFolderPath,
-                "text",
-                keysFolder,
-                boolean: null).ConfigureAwait(true);
-
-            await SaveAppWideSettingAsync(
                 ConfigSettingKeys.DunnageRootPath,
                 "text",
                 dunnageRoot,
@@ -2037,7 +2010,6 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 integer: keepDays).ConfigureAwait(true);
 
             PictureFolderPath = pictureFolder;
-            KeysFolderPath = keysFolder;
             StoragePathsStatusMessage = "Settings_StoragePaths_Saved.Text".GetLocalized();
         }
         catch (Exception ex)

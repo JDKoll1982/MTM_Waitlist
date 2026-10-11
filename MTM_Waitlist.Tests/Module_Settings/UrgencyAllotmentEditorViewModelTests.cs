@@ -53,7 +53,7 @@ public sealed class UrgencyAllotmentEditorViewModelTests
     // ── The gate that already governs this screen (§D4, FR-020, FR-054) ─────────────────────────────────
 
     [TestMethod]
-    public void CanManage_FollowsTheHandedInAnswerRatherThanAnyRole()
+    public void ViewModel_UrgencyAllotmentEditorViewModelTests_CanManage_FollowsTheHandedInAnswerRatherThanAnyRole()
     {
         Assert.IsTrue(
             Build(new FakeRequestItemAllottedMinutesStore(), canManageUrgency: true).CanManageUrgencySettings,
@@ -67,7 +67,7 @@ public sealed class UrgencyAllotmentEditorViewModelTests
     // ── Configured and observed are two values, shown side by side (FR-018, SC-008) ──────────────────────
 
     [TestMethod]
-    public async Task Load_ShowsTheConfiguredMinutesAndTheObservedAverageAsTwoSeparateValues()
+    public async Task ViewModel_UrgencyAllotmentEditorViewModelTests_Load_ShowsTheConfiguredMinutesAndTheObservedAverageAsTwoSeparateValues()
     {
         var viewModel = Build(new FakeRequestItemAllottedMinutesStore(), canManageUrgency: true);
 
@@ -89,7 +89,7 @@ public sealed class UrgencyAllotmentEditorViewModelTests
     }
 
     [TestMethod]
-    public async Task Load_ForAnItemWithNoConfiguredMinutes_UsesThe15MinuteDefaultAndLabelsItAsADefault()
+    public async Task ViewModel_UrgencyAllotmentEditorViewModelTests_Load_ForAnItemWithNoConfiguredMinutesUsesThe15MinuteDefaultAndLabelsItAsADefault()
     {
         var viewModel = Build(new FakeRequestItemAllottedMinutesStore(), canManageUrgency: true);
 
@@ -109,7 +109,7 @@ public sealed class UrgencyAllotmentEditorViewModelTests
     }
 
     [TestMethod]
-    public async Task Load_ForAnItemWithNoCompletedRequest_ShowsNoObservedValueRatherThanAZero()
+    public async Task ViewModel_UrgencyAllotmentEditorViewModelTests_Load_ForAnItemWithNoCompletedRequestShowsNoObservedValueRatherThanAZero()
     {
         var viewModel = Build(new FakeRequestItemAllottedMinutesStore(), canManageUrgency: true);
 
@@ -127,7 +127,7 @@ public sealed class UrgencyAllotmentEditorViewModelTests
     // ── The observed value is never written back (FR-019) ───────────────────────────────────────────────
 
     [TestMethod]
-    public async Task Load_NeverWritesTheObservedAverageBackAsAConfiguredValue()
+    public async Task ViewModel_UrgencyAllotmentEditorViewModelTests_Load_NeverWritesTheObservedAverageBackAsAConfiguredValue()
     {
         var store = new FakeRequestItemAllottedMinutesStore();
         var viewModel = Build(store, canManageUrgency: true);
@@ -143,7 +143,7 @@ public sealed class UrgencyAllotmentEditorViewModelTests
     // ── The write path: the Item's stored minutes, clamped (FR-016, §D4) ────────────────────────────────
 
     [TestMethod]
-    public async Task EditingMinutes_WritesTheItemsStoredAllotment()
+    public async Task ViewModel_UrgencyAllotmentEditorViewModelTests_EditingMinutes_WritesTheItemsStoredAllotment()
     {
         var store = new FakeRequestItemAllottedMinutesStore();
         var viewModel = Build(store, canManageUrgency: true);
@@ -158,7 +158,7 @@ public sealed class UrgencyAllotmentEditorViewModelTests
     }
 
     [TestMethod]
-    public async Task EditingMinutes_IsClampedToThePositiveMinimumAndTheTwentyFourHourMaximum()
+    public async Task ViewModel_UrgencyAllotmentEditorViewModelTests_EditingMinutes_IsClampedToThePositiveMinimumAndTheTwentyFourHourMaximum()
     {
         var store = new FakeRequestItemAllottedMinutesStore();
         var viewModel = Build(store, canManageUrgency: true);
@@ -178,7 +178,7 @@ public sealed class UrgencyAllotmentEditorViewModelTests
     }
 
     [TestMethod]
-    public async Task EditingMinutes_IsRefusedForAViewerWithoutTheScreensOwnGate()
+    public async Task ViewModel_UrgencyAllotmentEditorViewModelTests_EditingMinutes_IsRefusedForAViewerWithoutTheScreensOwnGate()
     {
         var store = new FakeRequestItemAllottedMinutesStore();
         var viewModel = Build(store);
@@ -196,7 +196,7 @@ public sealed class UrgencyAllotmentEditorViewModelTests
     // ── A failed read is reported, never turned into a fabricated row (FR-026) ─────────────────────────
 
     [TestMethod]
-    public async Task Load_WhenThePairsCannotBeRead_ReportsItInPlainLanguage()
+    public async Task ViewModel_UrgencyAllotmentEditorViewModelTests_Load_WhenThePairsCannotBeReadReportsItInPlainLanguage()
     {
         var observedTimes = new FakeRequestItemObservedTimeService { Failure = new InvalidOperationException("store down") };
         var viewModel = Build(new FakeRequestItemAllottedMinutesStore(), canManageUrgency: true, observedTimes);
