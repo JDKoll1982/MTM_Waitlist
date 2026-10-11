@@ -1,0 +1,51 @@
+{
+  "mcpServers": {
+    "oraios/serena": {
+      "type": "local",
+      "command": "C:\\Users\\johnk\\.local\\bin\\serena.exe",
+      "args": [
+        "start-mcp-server",
+        "--context",
+        "claude-code",
+        "--project-from-cwd"
+      ],
+      "tools": [
+        "*"
+      ]
+    },
+    "csv-mcp-server": {
+      "type": "local",
+      "command": "C:\\ProgramData\\uv\\uv.exe",
+      "args": [
+        "tool",
+        "run",
+        "--from",
+        "csv-mcp-server",
+        "csv",
+        "--transport",
+        "stdio",
+        "--log-level",
+        "INFO"
+      ],
+      "env": {
+        "CSV_STORAGE_PATH": "c:\\Users\\johnk\\source\\repos\\MTM_Waitlist\\Documents\\Development\\InforVisual\\DatabaseCSVFiles",
+        "CSV_MAX_FILE_SIZE": "100",
+        "CSV_BACKUP_ENABLED": "true",
+        "CSV_SUPPORT_ABSOLUTE_PATHS": "true"
+      },
+      "tools": [
+        "*"
+      ]
+    },
+    "xamlmcp": {
+      "type": "local",
+      "command": "C:\\Users\\johnk\\.dotnet\\tools\\xamlmcp.exe",
+      "args": [
+        "--enable-driver"
+      ],
+      "tools": [
+        "*"
+      ]
+    }
+  }
+}
