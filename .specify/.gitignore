@@ -8,6 +8,10 @@ feature.json
 # Per-machine extension config overrides.
 extensions/*/local-config.yml
 
+# Console output of the last local test run, rewritten on every run by
+# tools/run-tests.ps1. Machine-local by nature: it is a transcript, not an artifact.
+test-run.txt
+
 # Executable adapter packages and their per-checkout provenance registry.
 # Execution consent is stored separately in the user's local trust registry.
 integrations/packages/
