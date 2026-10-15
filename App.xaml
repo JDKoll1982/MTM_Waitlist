@@ -15,10 +15,18 @@
                 <ResourceDictionary Source="/Styles/ControlInspector.xaml" />
                 <ResourceDictionary Source="/Styles/RequestDialogs.xaml" />
                 <ResourceDictionary Source="/Styles/PartPictureCardTemplate.xaml" />
+                <!--
+                    The waitlist card's per-Item detail templates: the card's detail column is resolved through
+                    `WaitlistLineCardDetailTemplateSelector`, which looks a row's Item up in the application's
+                    own resources and the dictionaries merged here, so the twenty-four arrangements have to be
+                    merged at this level to be found (research R3, D31).
+                -->
+                <ResourceDictionary Source="/Module_Waitlist/Controls/WaitlistLineCardDetailTemplates.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <converters:StringToImageSourceConverter xmlns:converters="using:MTM_Waitlist.Module_Waitlist.Converters" x:Key="StringToImageSourceConverter" />
             <converters:RemainingTimeToBrushConverter xmlns:converters="using:MTM_Waitlist.Module_Waitlist.Converters" x:Key="RemainingTimeToBrushConverter" />
             <converters:RequestStatusToBrushConverter xmlns:converters="using:MTM_Waitlist.Module_Waitlist.Converters" x:Key="RequestStatusToBrushConverter" />
+            <converters:WaitlistCardTitleAlignmentConverter xmlns:converters="using:MTM_Waitlist.Module_Waitlist.Converters" x:Key="WaitlistCardTitleAlignmentConverter" />
             <settingsConverters:ResolvedImagePathToSourceConverter xmlns:settingsConverters="using:MTM_Waitlist.Module_Settings.Converters" x:Key="ResolvedImagePathToSourceConverter" />
             <settingsConverters:BoolToVisibilityConverter xmlns:settingsConverters="using:MTM_Waitlist.Module_Settings.Converters" x:Key="BoolToVisibilityConverter" />
             <settingsConverters:HexColorToBrushConverter xmlns:settingsConverters="using:MTM_Waitlist.Module_Settings.Converters" x:Key="HexColorToBrushConverter" />

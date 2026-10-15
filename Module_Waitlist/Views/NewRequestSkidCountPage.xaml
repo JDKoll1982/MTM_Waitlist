@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="MTM_Waitlist.Module_Waitlist.Views.NewRequestSkidCountPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Style="{StaticResource SetupPageGridStyle}" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}">
+            <TextBlock
+                x:Uid="NewRequest_SkidCount_Title"
+                Style="{StaticResource SetupPageTitleStyle}"
+                Text="New Request - Skids to Pick Up" />
+            <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="{x:Bind ViewModel.WorkCenterText, Mode=OneWay}" />
+            <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="{x:Bind ViewModel.PromptText, Mode=OneWay}" />
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+            <StackPanel Spacing="10">
+                <!-- How many skids must be picked up. One is the answer the step already carries, so accepting
+                     the step unchanged is a real answer (FR-087). -->
+                <TextBox
+                    x:Name="SkidCountInput"
+                    AutomationProperties.AutomationId="NewRequestSkidCountPage_SkidCountInput"
+                    x:Uid="NewRequest_SkidCount_SkidCountInput"
+                    Header="# of Skids"
+                    MinWidth="160"
+                    MaxWidth="240"
+                    HorizontalAlignment="Left"
+                    Text="{x:Bind ViewModel.SkidCountText, Mode=TwoWay}" />
+                <TextBlock
+                    Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                    Text="{x:Bind ViewModel.ValidationMessage, Mode=OneWay}"
+                    TextWrapping="WrapWholeWords"
+                    Visibility="{x:Bind ViewModel.IsValidationVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+            </StackPanel>
+        </Grid>
+
+        <StackPanel Grid.Row="2" Style="{StaticResource SetupActionBarStyle}">
+            <Button
+                AutomationProperties.AutomationId="NewRequestSkidCountPage_BackButton"
+                x:Uid="NewRequest_SkidCount_BackButton"
+                Content="Back"
+                Command="{x:Bind ViewModel.BackCommand}" />
+            <Button
+                AutomationProperties.AutomationId="NewRequestSkidCountPage_ContinueButton"
+                x:Uid="NewRequest_SkidCount_ContinueButton"
+                Content="Continue"
+                Command="{x:Bind ViewModel.ContinueCommand}"
+                Style="{StaticResource AccentButtonStyle}" />
+        </StackPanel>
+    </Grid>
+</Page>

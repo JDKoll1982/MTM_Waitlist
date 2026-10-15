@@ -215,3 +215,26 @@ recorded here rather than left implicit (task T121 of `specs/001-module-mock-vis
 - A new table is allowed only when the workflow clearly requires a distinct domain model that cannot be represented by the current operational data model without breaking invariants.
 - All new or modified SQL artifacts must still follow the file-per-artifact convention and must update `Database/Bootstrap/update_table_descriptions.sql` when applicable.
 - Blockpoint: do not duplicate persistence logic across feature services; centralize the request creation contract through the helper-server pattern and make any new stored procedure contract explicit in the repo documentation before implementation.
+
+### What the card layout work added (012-waitlist-card-layout, recorded 2026-10-10)
+
+The waitlist card redesign added **two nullable columns and one stored procedure**, and nothing else. Both columns
+are on the existing `waitlist_requests_queue` table (`Database/Tables/18_waitlist_requests_queue/`, `create.sql` with
+`rollback.sql` beside it):
+
+- **`handler_status VARCHAR(32) NULL`** — the one condition the assigned material handler has reported against the
+  request: one of the four verbatim condition strings, or NULL when none is set. It is **deliberately separate from
+  `status`**, because the card has to keep reading the lifecycle word underneath a reported condition; a condition is
+  never written over the lifecycle status.
+- **`answers_json JSON NULL`** — the answers a request captured **beyond** `input_value`, as a label-to-value map
+  keyed by the declared field label the Item asked under. It exists because `input_value` holds exactly one answer
+  and two Items now ask more than one question. It follows the schema's existing structured-declaration pattern
+  (`detail_fields_json`, `options_json`).
+
+**`sp_waitlist_request_handler_status_update`** is the new procedure: it writes `handler_status` and returns its
+affected-row count, so a lost race is reported rather than shown as success. It is gated on the expected material
+handler, and the gate is never relaxed — an absent or empty expected handler matches nothing rather than meaning
+"unconditional", so a caller that does not know the handler cannot write a condition. Two existing procedures were
+extended in place rather than replaced: `sp_waitlist_request_list` returns both new columns on every row, and
+`sp_waitlist_request_insert` takes `p_answers_json`. `AllSPs.sql`, `AllSeeds.sql` and
+`update_table_descriptions.sql` moved in the same change.

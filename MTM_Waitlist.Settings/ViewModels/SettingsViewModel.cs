@@ -324,6 +324,21 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     } = string.Empty;
 
     /// <summary>
+    /// What the hopper picture folder box holds: where the three hopper size reference pictures live, relative to
+    /// the picture folder unless it is given as an absolute path (FR-078).
+    /// </summary>
+    /// <remarks>
+    /// The three files it must contain are named after the size words — <c>Small.png</c>, <c>Medium.png</c> and
+    /// <c>Large.png</c> — and the panel states them, because a folder whose contract is not written down is a
+    /// folder somebody fills with the wrong names. The contract is documented in <c>docs/IMAGE-NAMING.md</c>.
+    /// </remarks>
+    [ObservableProperty]
+    public partial string HopperFolderInput
+    {
+        get; set;
+    } = string.Empty;
+
+    /// <summary>
     /// How many days a replaced picture is kept before it is cleaned up (FR-037).
     /// </summary>
     /// <remarks>
@@ -795,6 +810,16 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     /// <summary>The label on the key-folder box.</summary>
 
     public string StoragePathsDunnageRootLabel => "Settings_StoragePaths_DunnageRoot.Label".GetLocalized();
+
+    /// <summary>The label on the hopper-picture-folder box (FR-078).</summary>
+    public string StoragePathsHopperFolderLabel => "Settings_StoragePaths_HopperFolder.Label".GetLocalized();
+
+    /// <summary>
+    /// The sentence under the hopper-picture-folder box, which names the three files the folder must hold. The
+    /// contract is written in the panel rather than only in a document, because a folder whose naming rule nobody
+    /// has read is a folder filled with the wrong names (FR-078).
+    /// </summary>
+    public string StoragePathsHopperFolderHint => "Settings_StoragePaths_HopperFolder.Hint".GetLocalized();
 
     /// <summary>The label on the retention-period box.</summary>
     public string StoragePathsArchiveKeepDaysLabel => "Settings_StoragePaths_ArchiveKeepDays.Label".GetLocalized();
@@ -1936,6 +1961,10 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 .GetDunnageRootPathAsync()
                 .ConfigureAwait(true);
 
+            HopperFolderInput = await _imageStorageConfigurationResolver
+                .GetHopperFolderPathAsync()
+                .ConfigureAwait(true);
+
             ArchiveKeepDaysInput = await _imageStorageConfigurationResolver
                 .GetArchiveKeepDaysAsync()
                 .ConfigureAwait(true);
@@ -1972,11 +2001,20 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
         var pictureFolder = PictureFolderInput?.Trim() ?? string.Empty;
         var dunnageRoot = DunnageRootInput?.Trim() ?? string.Empty;
+        var hopperFolder = HopperFolderInput?.Trim() ?? string.Empty;
         var keepDays = (int)Math.Round(ArchiveKeepDaysInput, MidpointRounding.AwayFromZero);
 
         if (pictureFolder.Length == 0 || dunnageRoot.Length == 0)
         {
             StoragePathsStatusMessage = "Settings_StoragePaths_FolderNeeded.Text".GetLocalized();
+            return;
+        }
+
+        if (hopperFolder.Length == 0)
+        {
+            // An empty hopper folder is refused rather than stored: it would leave the three sizes pointing at the
+            // picture root itself, and the card would then never find a hopper picture at all (FR-078).
+            StoragePathsStatusMessage = "Settings_StoragePaths_HopperFolderNeeded.Text".GetLocalized();
             return;
         }
 
@@ -2000,6 +2038,12 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 ConfigSettingKeys.DunnageRootPath,
                 "text",
                 dunnageRoot,
+                boolean: null).ConfigureAwait(true);
+
+            await SaveAppWideSettingAsync(
+                ConfigSettingKeys.ImageStorageHopperFolderPath,
+                "text",
+                hopperFolder,
                 boolean: null).ConfigureAwait(true);
 
             await SaveAppWideSettingAsync(

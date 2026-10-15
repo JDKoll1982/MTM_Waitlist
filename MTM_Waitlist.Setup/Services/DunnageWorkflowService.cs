@@ -248,6 +248,7 @@ public sealed class DunnageWorkflowService : IDunnageWorkflowService
                     TypeId = GetValueAsString(row, "type_id"),
                     PartNumber = GetValueAsString(row, "part_id"),
                     DisplayName = GetValueAsString(row, "part_id"),
+                    HomeLocation = homeLocation,
                     ImagePath = ResolvePartOwnImagePath(row),
                     Metadata = BuildMetadata(quantityType, homeLocation),
                 };

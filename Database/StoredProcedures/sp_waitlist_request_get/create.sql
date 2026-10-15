@@ -2,6 +2,8 @@
 -- Engine: MySQL 5.7
 -- Re-keyed by specs/004-unified-card-item-picker: a request is identified by the Category and the Item the
 -- requester chose, and the two legacy columns this procedure used to return no longer exist (FR-004).
+-- Extended for FR-022: the row also carries the material handler's display name, so a reader never has to
+-- print the employee number the queue stores to say who holds the request.
 
 USE mtm_waitlist;
 
@@ -27,6 +29,15 @@ SELECT
     target_time_utc,
     is_overdue,
     assigned_material_handler,
+    -- The handler's display name, resolved from the entry the handler themselves wrote when they took the
+    -- request. See sp_waitlist_request_list for why the name comes from there and not from this table.
+    (SELECT a.actor_employee_name
+       FROM waitlist_requests_audit a
+      WHERE a.request_public_id = waitlist_requests_queue.public_id
+        AND a.actor_employee_name IS NOT NULL
+        AND a.actor_employee_number = waitlist_requests_queue.assigned_material_handler
+      ORDER BY a.occurred_utc DESC
+      LIMIT 1) AS assigned_material_handler_name,
     cancellation_reason,
     canceled_utc,
     canceled_by_employee_number,

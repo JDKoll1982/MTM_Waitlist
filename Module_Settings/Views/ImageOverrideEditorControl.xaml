@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
     x:Class="MTM_Waitlist.Module_Settings.Views.ImageOverrideEditorControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -230,7 +230,7 @@
                                                             FontSize="12"
                                                             Foreground="{ThemeResource SystemFillColorCautionBrush}"
                                                             Text="{x:Bind WarningMessage, Mode=OneWay}"
-                                                            ToolTipService.ToolTip="{x:Bind WarningMessage, Mode=OneWay}"
+                                                            shared:TooltipBehavior.FallbackText="{x:Bind WarningMessage, Mode=OneWay}"
                                                             Visibility="{x:Bind HasWarning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                                                     </StackPanel>
                                                 </Border>

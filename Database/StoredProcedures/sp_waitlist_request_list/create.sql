@@ -2,6 +2,11 @@
 -- Engine: MySQL 5.7
 -- Re-keyed by specs/004-unified-card-item-picker: the list carries each request's Category and Item, which is
 -- what the one card shape is built from, and no longer carries a request type or a subtype (FR-004).
+-- Extended by specs/012-waitlist-card-layout (FR-073): every row now also carries the handler's reported
+-- condition and the request's answers, because the card states the condition and restores the answers from the
+-- list it already reads, rather than issuing a second read per row.
+-- Extended for FR-022: every row now also carries the material handler's display name, because the card names
+-- the people on a request and a person is named by name, never by the employee number the queue stores.
 
 USE mtm_waitlist;
 
@@ -23,6 +28,8 @@ SELECT
     q.category,
     q.item,
     q.input_value,
+    q.handler_status,
+    q.answers_json,
     q.active_setup_job_id,
     q.work_center_name,
     q.requester_employee_number,
@@ -32,6 +39,18 @@ SELECT
     q.target_time_utc,
     q.is_overdue,
     q.assigned_material_handler,
+    -- The handler's display name. The queue column beside this one holds the handler's employee *number*,
+    -- because that number is what every handler authorization compares; the name a person reads instead comes
+    -- from the entry the handler themselves wrote, which carries both. Matching the name to the current
+    -- handler's own number is what keeps it honest: a later entry by somebody else - a requester cancelling a
+    -- request they no longer need, say - can never name the wrong person.
+    (SELECT a.actor_employee_name
+       FROM waitlist_requests_audit a
+      WHERE a.request_public_id = q.public_id
+        AND a.actor_employee_name IS NOT NULL
+        AND a.actor_employee_number = q.assigned_material_handler
+      ORDER BY a.occurred_utc DESC
+      LIMIT 1) AS assigned_material_handler_name,
     q.cancellation_reason,
     q.canceled_utc,
     q.canceled_by_employee_number,

@@ -12,14 +12,14 @@ namespace MTM_Waitlist.Tests.Module_Mock_Service;
 /// <remarks>
 /// The property that makes this true is that every artifact name is <b>derived from the shape key</b>
 /// (<see cref="VisualReadShape.MirrorTableName"/> and friends). These tests pin that derivation, pin the
-/// shipped five, and prove the catalog and the database/test artifacts still line up — so renaming a
+/// shipped seven, and prove the catalog and the database/test artifacts still line up — so renaming a
 /// procedure, retyping a column, or editing the catalog without the artifact (or the other way round) fails
 /// here instead of in production.
 /// </remarks>
 [TestClass]
 public sealed class ShapeAdditionNoDowntimeTests
 {
-    /// <summary>The six shipped shape keys. A change here is a contract change and must be deliberate.</summary>
+    /// <summary>The seven shipped shape keys. A change here is a contract change and must be deliberate.</summary>
     private static readonly string[] s_shippedShapeKeys =
     [
         "work_order_lookup",
@@ -28,10 +28,11 @@ public sealed class ShapeAdditionNoDowntimeTests
         "inventory_locations",
         "disposition_input",
         "employee_by_number",
+        "part_warehouse_quantities",
     ];
 
     [TestMethod]
-    public void Service_ShapeAdditionNoDowntimeTests_ShippedCatalog_ContainsExactlyTheSixPublishedShapeKeys()
+    public void Service_ShapeAdditionNoDowntimeTests_ShippedCatalog_ContainsExactlyTheSevenPublishedShapeKeys()
     {
         var keys = VisualReadShapeCatalog.Create().Select(shape => shape.Key).ToArray();
 

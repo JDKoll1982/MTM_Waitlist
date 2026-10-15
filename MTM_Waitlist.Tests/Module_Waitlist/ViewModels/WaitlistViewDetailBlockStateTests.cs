@@ -198,5 +198,8 @@ public sealed class WaitlistViewDetailBlockStateTests
 
         public virtual Task<WaitlistRequest?> ReleaseAsync(Guid requestId, string handlerEmployeeNumber, string? handlerEmployeeName = null, CancellationToken cancellationToken = default)
             => Task.FromResult<WaitlistRequest?>(null);
+
+        public virtual Task<int> SetHandlerStatusAsync(Guid requestId, string? handlerStatus, string expectedMaterialHandler, CancellationToken cancellationToken = default)
+            => Task.FromResult(0);
     }
 }

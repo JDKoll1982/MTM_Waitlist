@@ -14,7 +14,9 @@
 #        this computer is unconfigured and the app opens the machine-setup window instead of sign-in.
 #
 #   The walk is assisted: a failing assertion here is evidence about the app, and the evidence file written beside
-#   it is what makes the failure reviewable.
+#   it is what makes the failure reviewable. The check at the end is about RESPONSIVENESS as well as existence:
+#   an app whose window has stopped answering is not "alive" in any sense that matters, and reporting it as alive
+#   is how a hang gets mistaken for a pass.
 #
 # USAGE
 #   $env:MTM_WAITLIST_DEV_PIN = '<pin>'
@@ -25,8 +27,9 @@
 # not end up in a command line or in a shell's history. -Pin still overrides it for a one-off run.
 #
 # EXIT CODES
-#   0  the app was still running after visiting Settings
-#   1  the app died while Settings was opening (the crash this script exists to catch)
+#   0  the app was still running AND answering after visiting Settings
+#   1  the app died, or stopped answering, while Settings was opening (the failure this script exists to catch)
+#   2  the walk never reached Settings
 
 [CmdletBinding()]
 param(
@@ -36,7 +39,9 @@ param(
 
     [int]$WaitSeconds = 180,
 
-    # How long to let the page settle after the Settings item is selected, before asking whether the app is alive.
+    # How long the app is given to stay up and answering after the Settings item is selected. This is a soak, not a
+    # settle: the page's own readiness is waited for by polling, and this period is how long the app is watched
+    # afterwards for a crash or a hang that only shows itself once the page is live.
     [int]$SettleSeconds = 6,
 
     [switch]$KeepOpen,
@@ -47,7 +52,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-Add-Type -AssemblyName UIAutomationClient,UIAutomationTypes
+. "$PSScriptRoot\uia-common.ps1"
 
 if ([string]::IsNullOrWhiteSpace($Pin))
 {
@@ -61,11 +66,11 @@ if ([string]::IsNullOrWhiteSpace($Exe)) {
     $Exe = [System.IO.Path]::GetFullPath($Exe)
 }
 
-$Scope = [System.Windows.Automation.TreeScope]
-$CT    = [System.Windows.Automation.ControlType]
-$Inv   = [System.Windows.Automation.InvokePattern]::Pattern
-$Val   = [System.Windows.Automation.ValuePattern]::Pattern
-$Sel   = [System.Windows.Automation.SelectionItemPattern]::Pattern
+$Scope = $UiaScope
+$CT    = $UiaCT
+$Inv   = $UiaInvoke
+$Val   = $UiaValue
+$Sel   = $UiaSelect
 
 New-Item -ItemType Directory -Force -Path $EvidenceDir | Out-Null
 $log = New-Object System.Collections.ArrayList
@@ -74,21 +79,9 @@ function Say([string]$line) {
     [void]$log.Add($line)
 }
 
-function Get-Windows {
-    $p = Get-Process MTM_Waitlist -ErrorAction SilentlyContinue | Select-Object -First 1
-    if (-not $p) { return @() }
-    $cond = New-Object System.Windows.Automation.PropertyCondition(
-        [System.Windows.Automation.AutomationElement]::ProcessIdProperty, $p.Id)
-    $wins = [System.Windows.Automation.AutomationElement]::RootElement.FindAll($Scope::Children, $cond)
-    $out = @(); foreach ($w in $wins) { $out += $w }
-    return $out
-}
+function Get-Windows { @(Get-MtmAppWindows) }
 
-function Find-ById($root, [string]$id) {
-    $c = New-Object System.Windows.Automation.PropertyCondition(
-        [System.Windows.Automation.AutomationElement]::AutomationIdProperty, $id)
-    return $root.FindFirst($Scope::Descendants, $c)
-}
+function Find-ById($root, [string]$id) { Find-MtmById -Root $root -Id $id }
 
 function Get-Texts($root) {
     $c = New-Object System.Windows.Automation.PropertyCondition(
@@ -97,8 +90,7 @@ function Get-Texts($root) {
 }
 
 # --- launch -------------------------------------------------------------------------------------------------
-Get-Process MTM_Waitlist -ErrorAction SilentlyContinue | Stop-Process -Force
-Start-Sleep -Milliseconds 600
+[void](Stop-MtmApp)
 Remove-Item Env:MTM_WAITLIST_DB_CONNECTION_STRING -ErrorAction SilentlyContinue
 Remove-Item Env:MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING -ErrorAction SilentlyContinue
 
@@ -127,7 +119,7 @@ while ((Get-Date) -lt $deadline) {
             (Find-ById $w 'SignInWindow_ConfirmPassword').GetCurrentPattern($Val).SetValue($Pin)
             (Find-ById $w 'SignInWindow_SubmitPasswordButton').GetCurrentPattern($Inv).Invoke()
             Say 'answered the set-a-PIN prompt'
-            Start-Sleep -Seconds 2
+            Wait-MtmUiSettled -Root $w
             continue
         }
 
@@ -138,7 +130,7 @@ while ((Get-Date) -lt $deadline) {
             (Find-ById $w 'SignInWindow_ContinueButton').GetCurrentPattern($Inv).Invoke()
             $identifierDone = $true
             Say 'identifier confirmed'
-            Start-Sleep -Seconds 2
+            Wait-MtmUiSettled -Root $w
             continue
         }
 
@@ -148,19 +140,19 @@ while ((Get-Date) -lt $deadline) {
             (Find-ById $w 'SignInWindow_SignInButton').GetCurrentPattern($Inv).Invoke()
             $signedIn = $true
             Say 'signed in'
-            Start-Sleep -Seconds 2
+            Wait-MtmUiSettled -Root $w
             continue
         }
 
         if (Find-ById $w 'ShellPage_Navigation') { $shell = $w; break }
     }
     if ($shell) { break }
-    Start-Sleep -Milliseconds 400
+    Start-Sleep -Milliseconds $MtmPollMilliseconds
 }
 
 if (-not $shell) {
     Say 'FAIL: the shell never appeared.'
-    Get-Process MTM_Waitlist -ErrorAction SilentlyContinue | Stop-Process -Force
+    [void](Stop-MtmApp)
     $log | Set-Content (Join-Path $EvidenceDir 'walk.txt') -Encoding utf8
     exit 1
 }
@@ -172,7 +164,7 @@ Say "shell ready: '$($shell.Current.Name)'"
 $settings = Find-ById $shell 'SettingsItem'
 if (-not $settings) {
     Say 'FAIL: no element with automation id SettingsItem in the shell.'
-    Get-Process MTM_Waitlist -ErrorAction SilentlyContinue | Stop-Process -Force
+    [void](Stop-MtmApp)
     $log | Set-Content (Join-Path $EvidenceDir 'walk.txt') -Encoding utf8
     exit 1
 }
@@ -181,10 +173,20 @@ Say "selecting settings: '$($settings.Current.Name)'"
 $settings.GetCurrentPattern($Sel).Select()
 Say 'settings selected'
 
-Start-Sleep -Seconds $SettleSeconds
+# The soak, watched rather than slept through: the app is asked every 120 ms whether it is still there and still
+# answering, so a crash or a hang is reported at the moment it happens instead of after the whole period.
+$soakUntil = (Get-Date).AddSeconds($SettleSeconds)
+$hungSamples = 0
+while ((Get-Date) -lt $soakUntil) {
+    $watched = Get-MtmAppProcess
+    if (-not $watched) { break }
+
+    if ($watched.Responding) { $hungSamples = 0 } else { $hungSamples++ }
+    Start-Sleep -Milliseconds $MtmPollMilliseconds
+}
 
 # --- did it survive? ----------------------------------------------------------------------------------------
-$p = Get-Process MTM_Waitlist -ErrorAction SilentlyContinue
+$p = Get-MtmAppProcess
 if (-not $p) {
     Say 'RESULT: CRASHED'
 
@@ -202,12 +204,24 @@ if (-not $p) {
 
 $root = Get-Windows | Select-Object -First 1
 $texts = if ($root) { Get-Texts $root } else { @() }
-Say "RESULT: ALIVE - $($texts.Count) text elements on the page"
+
+# A window that exists but does not answer is the failure this walk is most likely to meet, and calling it ALIVE is
+# how a hang gets mistaken for a pass. The page is read as well, because a hung window usually still reports its
+# last good text.
+if ($hungSamples -ge 5) {
+    Say "RESULT: HUNG - the window stopped answering during the first $SettleSeconds s after Settings was selected"
+    Say "text elements still on the page: $($texts.Count)"
+    $log | Set-Content (Join-Path $EvidenceDir 'walk.txt') -Encoding utf8
+    if (-not $KeepOpen) { [void](Stop-MtmApp) }
+    exit 1
+}
+
+Say "RESULT: ALIVE - $($texts.Count) text elements on the page, answering throughout"
 $texts | Select-Object -First 25 | ForEach-Object { Say "  $_" }
 $log | Set-Content (Join-Path $EvidenceDir 'walk.txt') -Encoding utf8
 
 if (-not $KeepOpen) {
-    Get-Process MTM_Waitlist -ErrorAction SilentlyContinue | Stop-Process -Force
+    [void](Stop-MtmApp)
 }
 
 exit 0

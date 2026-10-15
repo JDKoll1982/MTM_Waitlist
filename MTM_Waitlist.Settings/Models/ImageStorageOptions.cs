@@ -39,6 +39,15 @@ public sealed class ImageStorageOptions
     public string DunnageRootPath { get; init; } = AppStoragePaths.DunnageRootDefault;
 
     /// <summary>
+    /// The folder the hopper reference pictures sit in, relative to <see cref="SharedFolderPath"/> unless it is
+    /// given as an absolute path.
+    /// Default: <c>Waitlist\Hoppers</c> beneath the picture folder — the application's own collection, in the one
+    /// folder set aside for hopper artwork. A plant-wide setting like the picture folder, and this is the fallback.
+    /// The files inside it are named after the size word they picture; the contract is <c>docs/IMAGE-NAMING.md</c>.
+    /// </summary>
+    public string HopperFolderPath { get; init; } = ConfigSettingKeys.ImageStorageHopperFolderPathDefault;
+
+    /// <summary>
     /// The folder on this computer that every picture is mirrored into at startup.
     /// Default: %LOCALAPPDATA%\MTM_Waitlist\ImageCache
     /// Can be overridden by IT Department or Developer through the database (config_settings_values).

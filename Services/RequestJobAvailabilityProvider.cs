@@ -1,9 +1,11 @@
+using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Setup.Models;
 using MTM_Waitlist.Module_Setup.Services;
+using MTM_Waitlist.Module_Waitlist.Services;
 
 namespace MTM_Waitlist.Services;
 
@@ -15,14 +17,30 @@ namespace MTM_Waitlist.Services;
 /// <see cref="RequestJobPartAvailability"/> (Module_Settings), so nothing has to move between the modules and
 /// neither module gains a reference to the other.
 /// </para>
+/// <para>
+/// It is also the first consumer of <see cref="RequestDispositionResolver"/> (research R1, FR-091/FR-092/FR-094).
+/// The four returning pickups are offered on the work the job has, so the derivation has to run before the
+/// snapshot is handed to the picker; until it does, the four gates stay false and the Items stay hidden.
+/// </para>
 /// </summary>
 public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailabilityProvider
 {
     private readonly IActiveJobItemResolverService _activeJobItemResolver;
+    private readonly RequestDispositionResolver _dispositionResolver;
+    private readonly IAverageCoilWeightService _averageCoilWeightService;
 
-    public RequestJobAvailabilityProvider(IActiveJobItemResolverService activeJobItemResolver)
+    public RequestJobAvailabilityProvider(
+        IActiveJobItemResolverService activeJobItemResolver,
+        RequestDispositionResolver dispositionResolver,
+        IAverageCoilWeightService averageCoilWeightService)
     {
+        ArgumentNullException.ThrowIfNull(activeJobItemResolver);
+        ArgumentNullException.ThrowIfNull(dispositionResolver);
+        ArgumentNullException.ThrowIfNull(averageCoilWeightService);
+
         _activeJobItemResolver = activeJobItemResolver;
+        _dispositionResolver = dispositionResolver;
+        _averageCoilWeightService = averageCoilWeightService;
     }
 
     /// <inheritdoc />
@@ -32,7 +50,96 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
             .ResolveAsync(workCenter ?? string.Empty, cancellationToken)
             .ConfigureAwait(false);
 
-        return Map(snapshot);
+        var availability = Map(snapshot);
+        if (snapshot is null)
+        {
+            return availability;
+        }
+
+        availability = await ApplyDispositionAsync(availability, snapshot, cancellationToken).ConfigureAwait(false);
+        return await ApplyCoilAverageWeightAsync(availability, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Resolves the coil's <c>Average coil weight</c> from the <b>receiving store</b>, not from Visual.
+    /// <para>
+    /// Visual holds a single <c>PART.WEIGHT</c> figure per part, which is not the average the card is required to
+    /// show: the card shows what the receiving store has actually weighed, pooled over every receiving-history row
+    /// for the coil's part, through <c>sp_receiving_history_average_coil_weight</c> — the same live read the coil
+    /// turn page already uses, so the two surfaces cannot disagree (FR-030, FR-041, FR-054). Nothing is
+    /// substituted when the part has no history: the read returns no row and the property stays empty, so the
+    /// cell is left out rather than filled with a guess (FR-089).
+    /// </para>
+    /// <para>
+    /// A receiving store that cannot be read leaves the value empty and records the failure, so the rest of the
+    /// snapshot still reaches the card and the missing cell is visible as a gap rather than as a wrong number
+    /// (FR-001, FR-089).
+    /// </para>
+    /// </summary>
+    private async Task<RequestJobPartAvailability> ApplyCoilAverageWeightAsync(
+        RequestJobPartAvailability availability,
+        CancellationToken cancellationToken)
+    {
+        if (availability.CoilPartNumber.Length == 0)
+        {
+            return availability;
+        }
+
+        try
+        {
+            var averageWeight = await _averageCoilWeightService
+                .ResolveAverageCoilWeightTextAsync(availability.CoilPartNumber, cancellationToken)
+                .ConfigureAwait(false);
+
+            return availability with { CoilAverageWeight = averageWeight };
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error(
+                "WaitlistNewRequest",
+                ex,
+                $"The average coil weight for coil '{availability.CoilPartNumber}' could not be read from the receiving store, so the card's `Average coil weight` cell is left empty.");
+            return availability;
+        }
+    }
+
+    /// <summary>
+    /// Writes the job part's derivation onto the snapshot: the single item type the card's <c>Item Type</c> /
+    /// <c>Part Type</c> cell reads, and the four returning pickups' gates.
+    /// <para>
+    /// The gates come from the derivation rather than from a second reading of the same signals, so a job is
+    /// offered exactly the pickups whose item type the derivation can name for it (FR-094). A read that fails
+    /// inside the resolver degrades there to <see cref="RequestDisposition.Unknown"/>, and a failure that escapes
+    /// it is caught here and leaves the mapped snapshot untouched: either way all four gates stay false, the four
+    /// Items stay hidden, and nothing is invented in their place (FR-089).
+    /// </para>
+    /// </summary>
+    private async Task<RequestJobPartAvailability> ApplyDispositionAsync(
+        RequestJobPartAvailability availability,
+        SetupActiveJobSnapshot snapshot,
+        CancellationToken cancellationToken)
+    {
+        RequestDisposition disposition;
+        try
+        {
+            disposition = await _dispositionResolver
+                .GetDispositionAsync(snapshot.WorkOrder, snapshot.PartNumber, cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            // The derivation needs both the plant system and the floor store, and neither may take the snapshot
+            // down with it: without it the part-kind gates are exactly what they were before, the four returning
+            // pickups stay hidden, and the failure is recorded rather than turned into a value nothing supports
+            // (FR-089). The caller's own catch is the last resort, not the first.
+            AppLog.Error(
+                "WaitlistNewRequest",
+                ex,
+                $"The disposition for job '{snapshot.WorkOrder}' part '{snapshot.PartNumber}' could not be derived, so the returning pickups stay hidden and no item type is reported.");
+            return availability;
+        }
+
+        return availability.WithDisposition(disposition);
     }
 
     /// <summary>Pure mapping, so the translation from a job snapshot to the snapshot flags is unit-testable.</summary>
@@ -80,6 +187,12 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
             // the coil or flatstock the job actually carries, so the card names a real part instead of repeating
             // the Item's own name (FR-005).
             CoilPartNumber = snapshot.Coils.FirstOrDefault()?.PartNumber ?? string.Empty,
+            // The coil's own description travels with the snapshot so the coil Items' `Coil description` cell
+            // resolves from it instead of from a second read (FR-088). A coil the job does not carry leaves it
+            // empty rather than substituting a value (FR-089). The coil's `Average coil weight` is deliberately
+            // NOT mapped here: it comes from the receiving store's own weighing history in
+            // `ApplyCoilAverageWeightAsync` below, never from Visual (FR-030, FR-041, FR-054).
+            CoilDescription = snapshot.Coils.FirstOrDefault()?.Description?.Trim() ?? string.Empty,
             FlatstockPartNumber = snapshot.Flatstock.FirstOrDefault()?.PartNumber ?? string.Empty,
             // The scrap type the job already decided, which is what the Scrap Item's card shows (FR-030).
             ScrapType = RealScrapType(snapshot),
@@ -109,6 +222,9 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
         TypeId = part.TypeId ?? string.Empty,
         PartNumber = part.PartNumber ?? string.Empty,
         DisplayName = string.IsNullOrWhiteSpace(part.DisplayName) ? part.PartNumber ?? string.Empty : part.DisplayName,
+        // The home location the receiving read returned for the part travels with it, so the card's `Home Location`
+        // cell has a value on the snapshot rather than only in the store (FR-033, FR-045, FR-089).
+        HomeLocation = part.HomeLocation ?? string.Empty,
         ImagePath = DunnageImagePathResolver.GetDisplayPath(part.ImagePath) ?? string.Empty,
         IsAssignedToJob = true,
     };

@@ -40,6 +40,62 @@ public sealed class NewRequestFlowState
     public string? InputValue { get; set; }
 
     /// <summary>
+    /// The answers the flow captured <b>beyond</b> <see cref="InputValue"/>, keyed by the label the Item declares
+    /// (<c>data-model.md</c> §10). A blank answer is never recorded, so no cell is added for it (FR-006).
+    /// </summary>
+    /// <remarks>
+    /// One answer per Item stays in <see cref="InputValue"/> — the die, component and dunnage choices, the
+    /// description, and the wrong-part Items' reason — while every further answer is a labelled entry here: the
+    /// hopper's size, the die-shop flag, the incorrect part, the weight of coil, and the skid count. The labels are
+    /// the ones the Item's configuration declares, because that is the label the card reads its cell back under
+    /// (FR-073, FR-081).
+    /// </remarks>
+    public Dictionary<string, string> Answers { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Records an answer under the label the Item declares. A blank answer records nothing and clears a previously
+    /// recorded one, because a blank answer is no answer (FR-006).
+    /// </summary>
+    /// <param name="label">The label the Item's configuration declares the field under.</param>
+    /// <param name="value">The answer, or null/blank for none.</param>
+    public void RecordAnswer(string label, string? value)
+    {
+        if (string.IsNullOrWhiteSpace(label))
+        {
+            return;
+        }
+
+        var declared = label.Trim();
+
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            Answers.Remove(declared);
+            return;
+        }
+
+        Answers[declared] = value.Trim();
+    }
+
+    /// <summary>Whether an answer was captured under the label the Item declares.</summary>
+    /// <param name="label">The label the Item's configuration declares the field under.</param>
+    public bool HasAnswer(string label) =>
+        !string.IsNullOrWhiteSpace(label) && Answers.ContainsKey(label.Trim());
+
+    /// <summary>The answer captured under the label the Item declares, or null when none was.</summary>
+    /// <param name="label">The label the Item's configuration declares the field under.</param>
+    public string? AnswerFor(string label)
+    {
+        if (string.IsNullOrWhiteSpace(label))
+        {
+            return null;
+        }
+
+        return Answers.TryGetValue(label.Trim(), out var value) && !string.IsNullOrWhiteSpace(value)
+            ? value
+            : null;
+    }
+
+    /// <summary>
     /// The dies the operator chose at the die step, in the job's own order, when the Item they picked asks which
     /// die the request is for (FR-054). Empty for every other Item, and for a request raised before the step
     /// existed — so the ordinary one-request wizard is untouched.
@@ -110,10 +166,27 @@ public sealed class NewRequestFlowState
         Category = Category?.ToString() ?? string.Empty,
         Item = Item?.Id ?? string.Empty,
         InputValue = inputValue,
+        Answers = CapturedAnswers(),
         ActiveSetupJobId = WorkCenter.Trim(),
         WorkCenterName = WorkCenter.Trim(),
         RequesterEmployeeNumber = RequesterEmployeeNumber.Trim(),
         RequesterEmployeeName = RequesterEmployeeName.Trim(),
         RequestedUtc = DateTimeOffset.UtcNow,
     };
+
+    /// <summary>
+    /// The answers the flow captured as a label-to-value map, with a blank one left out and no answers payload at
+    /// all when nothing was captured — so a request that captured none reads back as capturing none (FR-006).
+    /// </summary>
+    private IReadOnlyDictionary<string, string>? CapturedAnswers()
+    {
+        var captured = Answers
+            .Where(answer => !string.IsNullOrWhiteSpace(answer.Key) && !string.IsNullOrWhiteSpace(answer.Value))
+            .ToDictionary(
+                answer => answer.Key.Trim(),
+                answer => answer.Value.Trim(),
+                StringComparer.Ordinal);
+
+        return captured.Count == 0 ? null : captured;
+    }
 }

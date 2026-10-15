@@ -9,6 +9,7 @@ using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Shared.Helpers;
+using MTM_Waitlist.Module_Waitlist.Helpers;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
 
@@ -78,6 +79,24 @@ public partial class NewRequestDieViewModel : ObservableRecipient, INavigationAw
     /// <summary>The dies the requesting job carries, in the job's own order, marked where already chosen.</summary>
     public ObservableCollection<NewRequestDieOption> Options { get; } = new();
 
+    /// <summary>
+    /// Whether the die is at the die shop or must be sent there (FR-081). On a pickup Item it means the die has
+    /// to be taken to the die shop; on a deliver Item it means the die is at the die shop. Either way the answer is
+    /// what decides whether the card draws its third, label-less cell (FR-055).
+    /// </summary>
+    [ObservableProperty]
+    public partial bool IsDieShopSelected
+    {
+        get; set;
+    }
+
+    /// <summary>The checkbox's own question, resolved through the resource mechanism (FR-022).</summary>
+    [ObservableProperty]
+    public partial string DieShopPromptText
+    {
+        get; set;
+    } = LocalizeOrDefault("NewRequest_Die.DieShopPrompt", "Does this die go to the die shop?");
+
     public NewRequestDieViewModel(
         INavigationService navigationService,
         IPartPictureResolver? partPictureResolver = null)
@@ -98,6 +117,17 @@ public partial class NewRequestDieViewModel : ObservableRecipient, INavigationAw
         WorkCenterText = $"Work Center: {state.WorkCenter}";
         UnavailableMessage = string.Empty;
         IsUnavailableVisible = false;
+
+        // Coming back to the step shows the checkbox as it was left, read through the card's own rule so the two
+        // cannot disagree about what "ticked" means (FR-081, D40).
+        IsDieShopSelected = WaitlistCardCellRules.IsDieShopAnswerGiven(
+            state.AnswerFor(WaitlistCardCellRules.DieShopAnswerLabel));
+
+        // The checkbox asks the direction's own question: a pickup asks whether the die has to be taken to the
+        // die shop, a deliver asks whether it is already there (FR-081). One wording for both would make the same
+        // tick mean two different things, and the card draws a different phrase for each.
+        DieShopPromptText = WaitlistCardCellRules.DieShopPrompt(state.Item?.Id) ?? DieShopPromptText;
+
         await LoadCardsAsync(state).ConfigureAwait(true);
     }
 
@@ -230,9 +260,15 @@ public partial class NewRequestDieViewModel : ObservableRecipient, INavigationAw
         state.SelectedDies = chosen;
         state.InputValue = chosen[0].Label;
 
+        // The die-shop answer is a labelled answer, never the request's single value, and an unticked checkbox is
+        // written as no answer at all — so the card draws two cells rather than a third one (FR-055, FR-081, D40).
+        state.RecordAnswer(
+            WaitlistCardCellRules.DieShopAnswerLabel,
+            IsDieShopSelected ? "true" : string.Empty);
+
         AppLog.Info(
             "NewRequestDie",
-            $"Die step for work center '{state.WorkCenter}' captured {chosen.Length} die(s): {string.Join(", ", chosen.Select(die => die.Label))}.");
+            $"Die step for work center '{state.WorkCenter}' captured {chosen.Length} die(s): {string.Join(", ", chosen.Select(die => die.Label))}. DieShop={IsDieShopSelected}.");
         _navigationService.NavigateTo(NewRequestFlowRules.GetNextStepType(state).FullName!, state);
     }
 

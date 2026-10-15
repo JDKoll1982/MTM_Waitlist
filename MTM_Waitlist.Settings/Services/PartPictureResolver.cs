@@ -47,7 +47,7 @@ public sealed class PartPictureResolver : IPartPictureResolver
     /// The extensions a hand-placed picture may carry, in the order they are looked for, which is the order the
     /// application's own image rules list them.
     /// </summary>
-    private static readonly string[] AcceptedExtensions = [".png", ".jpg", ".jpeg"];
+    private static readonly string[] s_acceptedExtensions = [".png", ".jpg", ".jpeg"];
 
     public PartPictureResolver(
         IImageOverrideReadService readService,
@@ -71,12 +71,20 @@ public sealed class PartPictureResolver : IPartPictureResolver
         string partNumber,
         CancellationToken cancellationToken = default)
     {
-        if (PartPictureLayout.IsPartScope(scope) is false || string.IsNullOrWhiteSpace(partNumber))
+        if (PartPictureLayout.IsKnownPictureScope(scope) is false || string.IsNullOrWhiteSpace(partNumber))
         {
             return null;
         }
 
         var normalizedPart = partNumber.Trim();
+
+        // A hopper size is not a part: it has no override row and no part-number family, and its picture lives in
+        // the one folder the storage screen names. It is answered on its own path so the part rules below cannot
+        // misfile "Large" as an unrecognised part (D22, FR-078).
+        if (PartPictureLayout.IsHopperSizeScope(scope))
+        {
+            return await ResolveHopperSizePictureAsync(normalizedPart).ConfigureAwait(false);
+        }
 
         ImageOverride? stored;
         try
@@ -115,6 +123,53 @@ public sealed class PartPictureResolver : IPartPictureResolver
     }
 
     /// <summary>
+    /// A hopper size's reference picture: the file named after the size word, in the folder the storage screen
+    /// names, under the configured picture folder.
+    /// </summary>
+    /// <param name="size">The size word, which is the file's name.</param>
+    /// <returns>The path of a usable picture, or <see langword="null"/> so the caller draws the placeholder.</returns>
+    /// <remarks>
+    /// There is no override row and no hand-dropped-file search here, because the whole point of this folder is that
+    /// three files with three known names are placed in it. A size word that is not one of the three, a folder the
+    /// store cannot name, and a file the picture rule refuses all answer null rather than substituting artwork:
+    /// the card then draws the one shared placeholder (FR-079, FR-080, FR-089).
+    /// </remarks>
+    private async Task<string?> ResolveHopperSizePictureAsync(string size)
+    {
+        var relative = PartPictureLayout.HopperPictureRelativePath(size);
+        if (string.IsNullOrWhiteSpace(relative))
+        {
+            return null;
+        }
+
+        try
+        {
+            var folder = await _configurationResolver.GetHopperFolderPathAsync().ConfigureAwait(false);
+
+            if (!string.IsNullOrWhiteSpace(folder))
+            {
+                // The configured folder replaces the layout's default one, so moving the artwork is a setting
+                // rather than a release. An absolute folder is taken whole and the picture root is not consulted.
+                relative = $"{AppStoragePaths.NormalizeSeparators(folder.Trim()).TrimEnd('/')}/{PartPictureLayout.HopperPictureFileName(size)}";
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(
+                ex,
+                "The configured hopper picture folder could not be read; the layout's own folder is used instead.");
+        }
+
+        var root = await ResolveRootAsync().ConfigureAwait(false);
+        var usable = ResolveUsableFile(PartPictureLayout.HopperSizeScope, relative, root);
+
+        return usable is null
+            ? null
+            : await EnsureLocalCopyAsync(PartPictureLayout.HopperSizeScope, relative, usable).ConfigureAwait(false)
+                ?? usable;
+    }
+
+    /// <summary>
     /// The configured picture root, or null when it could not be read.
     /// </summary>
     /// <returns>The root, or <see langword="null"/>.</returns>
@@ -148,7 +203,7 @@ public sealed class PartPictureResolver : IPartPictureResolver
     {
         var root = await ResolveRootAsync().ConfigureAwait(false);
 
-        foreach (var extension in AcceptedExtensions)
+        foreach (var extension in s_acceptedExtensions)
         {
             var relative = PartPictureLayout.RelativePathFor(scope, partNumber, extension);
             if (string.IsNullOrWhiteSpace(relative))
@@ -253,7 +308,34 @@ public sealed class PartPictureResolver : IPartPictureResolver
             }
         }
 
-        return ImagePicturePolicy.ResolveUsableFile(AppStoragePaths.ResolvePicturePath(root, storedPath));
+        return ImagePicturePolicy.ResolveUsableFile(ResolveShareFile(root, storedPath));
+    }
+
+    /// <summary>
+    /// The picture on the share, or <see langword="null" /> when the share it belongs to is not answering.
+    /// </summary>
+    /// <param name="root">The configured picture root, or null when it could not be read.</param>
+    /// <param name="storedPath">The recorded path, in either layout.</param>
+    /// <returns>The path to probe, or <see langword="null" /> so the caller draws the placeholder.</returns>
+    /// <remarks>
+    /// The probe this guards is a file existence check against a network share, and a share that is not answering
+    /// costs a failed name resolution — measured in hundreds of milliseconds to seconds — rather than a quick
+    /// miss. A card list asks about every part it draws, once per accepted extension, and rebuilds itself whenever
+    /// a request's status changes, so the same silent share was probed again and again and the whole list stalled.
+    /// The verdict is asked for first (and remembered for a short window, see
+    /// <see cref="PictureShareReachability" />); it changes nothing at all while the share answers, and while it
+    /// does not, the answer here is the one the probe would have produced.
+    /// </remarks>
+    private static string? ResolveShareFile(string? root, string storedPath)
+    {
+        var candidate = AppStoragePaths.ResolvePicturePath(root, storedPath);
+        var shareRoot = PictureShareReachability.ShareRootOf(candidate);
+
+        // A path with no root to read — a relative one — is taken as it is: the picture rule already answers
+        // nothing for it, and refusing it here would be this gate pretending to know something it does not.
+        return shareRoot is not null && PictureShareReachability.IsReachable(shareRoot) is false
+            ? null
+            : candidate;
     }
 
     /// <summary>

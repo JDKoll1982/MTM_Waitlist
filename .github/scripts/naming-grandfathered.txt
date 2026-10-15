@@ -1,0 +1,285 @@
+# Grandfathered naming findings — passable, but only these.
+#
+# What this is
+# ------------
+# validate-csharp-xaml-naming.ps1 reads this file and does NOT report a finding listed here. Everything
+# listed was already failing when this list was made; nothing here was introduced by a change that this
+# list was written to hide.
+#
+# Created: 2026-10-11
+#
+# Why these are passable
+# ---------------------
+# These 249 findings pre-date feature 012 (specs/012-waitlist-card-layout) and were the guard's entire
+# failure set before that work started. The owner's instruction (2026-10-11) was to grandfather the
+# pre-existing findings and FIX the ones belonging to that feature, rather than spend a release renaming
+# working identifiers the feature never touched. The feature's own 16 findings were fixed in code and are
+# deliberately NOT listed here: if one of them reappears it must fail the guard.
+#
+# Format
+# ------
+# One finding per line:
+#
+#     <relative\path>|<message>
+#
+# Path as the guard prints it (leading .\ dropped, backslashes), then the message text that follows the
+# line number. NO line number is recorded on purpose: line numbers shift with every edit above them, so a
+# line-keyed list would silently stop matching and grant a pass to whatever moved into that line.
+#
+# Rules for changing it
+# ---------------------
+# 1. Never add a line to make a new finding pass. Fix the code, or state the reason in the commit.
+# 2. Deleting a line is always allowed and always welcome: it means somebody fixed that one.
+# 3. A count that changes without a matching code change means the guard's rules changed; re-derive the
+#    list rather than editing it by hand.
+#
+
+MainWindow.xaml.cs|Private static readonly field 'DefaultLaunchSize' must be s_camelCase
+Module_Shared\Controls\ClickToEnlargeImageView.xaml.cs|Private field 'IsEnlargingOffered' must be _camelCase
+Module_Shared\Controls\RotatingTextView.xaml.cs|Private static readonly field 'HalfDuration' must be s_camelCase
+MTM_Waitlist.Core\Contracts\Services\IPermissionAdministrationService.cs|Public type 'PermissionProvenance' must match file name 'IPermissionAdministrationService'
+MTM_Waitlist.Core\Contracts\Services\IRoleCatalogService.cs|Public type 'RoleCatalogEntry' must match file name 'IRoleCatalogService'
+MTM_Waitlist.Core\Contracts\Services\IScopedPreferenceStore.cs|Public type 'PreferenceScope' must match file name 'IScopedPreferenceStore'
+MTM_Waitlist.Core\Models\ComputerGateCheck.cs|Public type 'ComputerGateStatus' must match file name 'ComputerGateCheck'
+MTM_Waitlist.Core\Models\ConnectionHealthState.cs|Public type 'ConnectionSource' must match file name 'ConnectionHealthState'
+MTM_Waitlist.Core\Models\InternalStoreAvailability.cs|Public type 'InternalStoreStatus' must match file name 'InternalStoreAvailability'
+MTM_Waitlist.Core\Models\UserManagement\UserManagementResult.cs|Public type 'UserManagementOutcomeKind' must match file name 'UserManagementResult'
+MTM_Waitlist.Core\Services\IgnoredLocationsService.cs|Public type 'IgnoredLocationDefaults' must match file name 'IgnoredLocationsService'
+MTM_Waitlist.Core\Services\MySqlHelperServer.cs|Public type 'MySqlDatabaseTarget' must match file name 'MySqlHelperServer'
+MTM_Waitlist.Core\Services\ReportPrintService.cs|Private static readonly field 'DividerBrush' must be s_camelCase
+MTM_Waitlist.Core\Services\ReportPrintService.cs|Private static readonly field 'LabelBrush' must be s_camelCase
+MTM_Waitlist.Core\Services\ReportPrintService.cs|Private static readonly field 'MutedBrush' must be s_camelCase
+MTM_Waitlist.Core\Services\ReportPrintService.cs|Private static readonly field 'SubtitleBrush' must be s_camelCase
+MTM_Waitlist.Core\Services\ReportPrintService.cs|Private static readonly field 'TitleBrush' must be s_camelCase
+MTM_Waitlist.Core\Services\ReportPrintService.cs|Private static readonly field 'ValueBrush' must be s_camelCase
+MTM_Waitlist.Core\Services\RequestActionPolicy.cs|Private static readonly field 'DoneStatuses' must be s_camelCase
+MTM_Waitlist.Core\Services\RequestActionPolicy.cs|Private static readonly field 'OpenStatuses' must be s_camelCase
+MTM_Waitlist.Core\Services\RequestActionPolicy.cs|Private static readonly field 'TakenStatuses' must be s_camelCase
+MTM_Waitlist.Core\Services\RequestDeepLinkHandler.cs|Public type 'IDeepLinkWindow' must match file name 'RequestDeepLinkHandler'
+MTM_Waitlist.Mock.Service\Strings\en-us\Resources.resw|RESW key 'Service_Shape.disposition_input' must match Feature_Element.Property
+MTM_Waitlist.Mock.Service\Strings\en-us\Resources.resw|RESW key 'Service_Shape.inventory_locations' must match Feature_Element.Property
+MTM_Waitlist.Mock.Service\Strings\en-us\Resources.resw|RESW key 'Service_Shape.operation_sequences' must match Feature_Element.Property
+MTM_Waitlist.Mock.Service\Strings\en-us\Resources.resw|RESW key 'Service_Shape.subordinate_parts' must match Feature_Element.Property
+MTM_Waitlist.Mock.Service\Strings\en-us\Resources.resw|RESW key 'Service_Shape.work_order_lookup' must match Feature_Element.Property
+MTM_Waitlist.Mock.Service\Strings\en-us\Resources.resw|RESW key 'Service_ShapeDescription.disposition_input' must match Feature_Element.Property
+MTM_Waitlist.Mock.Service\Strings\en-us\Resources.resw|RESW key 'Service_ShapeDescription.inventory_locations' must match Feature_Element.Property
+MTM_Waitlist.Mock.Service\Strings\en-us\Resources.resw|RESW key 'Service_ShapeDescription.operation_sequences' must match Feature_Element.Property
+MTM_Waitlist.Mock.Service\Strings\en-us\Resources.resw|RESW key 'Service_ShapeDescription.subordinate_parts' must match Feature_Element.Property
+MTM_Waitlist.Mock.Service\Strings\en-us\Resources.resw|RESW key 'Service_ShapeDescription.work_order_lookup' must match Feature_Element.Property
+MTM_Waitlist.Mock.Service\Strings\en-us\Resources.resw|RESW key 'Service_Store.mtm_mock' must match Feature_Element.Property
+MTM_Waitlist.Mock.Service\Strings\en-us\Resources.resw|RESW key 'Service_Store.mtm_receiving_application' must match Feature_Element.Property
+MTM_Waitlist.Mock.Service\Strings\en-us\Resources.resw|RESW key 'Service_Store.mtm_waitlist' must match Feature_Element.Property
+MTM_Waitlist.Mock.Service\Strings\en-us\Resources.resw|RESW key 'Service_Store.mtm_wip_application_winforms' must match Feature_Element.Property
+MTM_Waitlist.Mock.Service\Strings\en-us\Resources.resw|RESW key 'Service_StoreDescription.mtm_mock' must match Feature_Element.Property
+MTM_Waitlist.Mock.Service\Strings\en-us\Resources.resw|RESW key 'Service_StoreDescription.mtm_receiving_application' must match Feature_Element.Property
+MTM_Waitlist.Mock.Service\Strings\en-us\Resources.resw|RESW key 'Service_StoreDescription.mtm_waitlist' must match Feature_Element.Property
+MTM_Waitlist.Mock.Service\Strings\en-us\Resources.resw|RESW key 'Service_StoreDescription.mtm_wip_application_winforms' must match Feature_Element.Property
+MTM_Waitlist.Mock\Services\VisualReadFallback.cs|Private field 'IsVerdictCached' must be _camelCase
+MTM_Waitlist.Settings\Models\ImageValidation.cs|Public type 'ImageValidationResult' must match file name 'ImageValidation'
+MTM_Waitlist.Settings\Models\PermissionHoldersView.cs|Public type 'PermissionHolderRow' must match file name 'PermissionHoldersView'
+MTM_Waitlist.Settings\Services\DefectTypeCatalogService.cs|Public type 'DefectTypeMutationResult' must match file name 'DefectTypeCatalogService'
+MTM_Waitlist.Settings\Services\LogStoreLevelService.cs|Public type 'ILogStoreLevelService' must match file name 'LogStoreLevelService'
+MTM_Waitlist.Settings\Services\NewRequestPickerService.cs|Public type 'INewRequestPickerService' must match file name 'NewRequestPickerService'
+MTM_Waitlist.Settings\Services\PartPictureCoverageService.cs|Public type 'IPartNumberSource' must match file name 'PartPictureCoverageService'
+MTM_Waitlist.Settings\Services\RequestItemConfigurationService.cs|Public type 'IRequestItemConfigurationService' must match file name 'RequestItemConfigurationService'
+MTM_Waitlist.Settings\Services\RequestItemLine2Resolver.cs|Public type 'RequestItemLine2Context' must match file name 'RequestItemLine2Resolver'
+MTM_Waitlist.Settings\Services\RequestItemObservedTimeService.cs|Public type 'IRequestItemObservedTimeService' must match file name 'RequestItemObservedTimeService'
+MTM_Waitlist.Setup\Contracts\Services\SetupContracts.cs|Public type 'IWorkOrderValidationService' must match file name 'SetupContracts'
+MTM_Waitlist.Setup\Converters\SetupReviewConverters.cs|Public type 'CategoryAccentBrushConverter' must match file name 'SetupReviewConverters'
+MTM_Waitlist.Setup\Models\SetupModels.cs|Public type 'SetupWorkflowStep' must match file name 'SetupModels'
+MTM_Waitlist.Setup\ViewModels\SetupCompletionViewModel.cs|Public type 'SetupCompletionNavigationData' must match file name 'SetupCompletionViewModel'
+MTM_Waitlist.Shared\Services\ControlInspectorService.cs|Private field 'IsDeveloper' must be _camelCase
+MTM_Waitlist.Shared\Services\ImageCacheSyncService.cs|Public type 'ImageCacheSource' must match file name 'ImageCacheSyncService'
+MTM_Waitlist.Shared\Services\PartPictureCacheStore.cs|Public type 'IPartPictureCacheStore' must match file name 'PartPictureCacheStore'
+MTM_Waitlist.Shared\Services\TooltipService.cs|Private field 'IsDeveloper' must be _camelCase
+MTM_Waitlist.Startup\Models\IdentifierSignInResult.cs|Public type 'IdentifierSignInOutcome' must match file name 'IdentifierSignInResult'
+MTM_Waitlist.Startup\Services\AccountCreationService.cs|Public type 'AccountSetupDraft' must match file name 'AccountCreationService'
+MTM_Waitlist.Startup\Services\AppProcessRestarter.cs|Public type 'IProcessRestarter' must match file name 'AppProcessRestarter'
+MTM_Waitlist.Startup\Services\BlockedStateRemedies.cs|Public type 'BlockedStateCause' must match file name 'BlockedStateRemedies'
+MTM_Waitlist.Startup\Services\IPlantEmployeeReader.cs|Public type 'PlantEmployee' must match file name 'IPlantEmployeeReader'
+MTM_Waitlist.Startup\Services\LaunchStepGroups.cs|Public type 'LaunchStepGroup' must match file name 'LaunchStepGroups'
+MTM_Waitlist.Startup\Services\WindowPlacementService.cs|Public type 'WindowResizeCause' must match file name 'WindowPlacementService'
+MTM_Waitlist.Startup\ViewModels\SetUpPanelViewModel.cs|Public type 'SetUpField' must match file name 'SetUpPanelViewModel'
+MTM_Waitlist.Startup\ViewModels\SignInViewModel.cs|Public type 'SignInField' must match file name 'SignInViewModel'
+MTM_Waitlist.Tests\Core\Services\ResolvedRetentionFilterTests.cs|Private static readonly field 'Now' must be s_camelCase
+MTM_Waitlist.Tests\Core\Services\UrgencyCalculatorTests.cs|Private static readonly field 'Now' must be s_camelCase
+MTM_Waitlist.Tests\Core\Services\UrgencyDeadlineServiceTests.cs|Private static readonly field 'Now' must be s_camelCase
+MTM_Waitlist.Tests\Module_Core\Permissions\RoleAuthorizationTests.cs|Private static readonly field 'WorkerCodes' must be s_camelCase
+MTM_Waitlist.Tests\Module_Logging\RecordingLogStore.cs|Private static readonly field 'DefaultFirstWriteWait' must be s_camelCase
+MTM_Waitlist.Tests\Module_Mock_Service\BackupRestoreTests.cs|Private static readonly field 'BaseUtc' must be s_camelCase
+MTM_Waitlist.Tests\Module_Mock_Service\BackupRetentionTests.cs|Private static readonly field 'BaseUtc' must be s_camelCase
+MTM_Waitlist.Tests\Module_Mock\FabricatedValueGuard.cs|Public type 'FabricatedValueGuardTests' must match file name 'FabricatedValueGuard'
+MTM_Waitlist.Tests\Module_Mock\ReadStatusProviderTests.cs|Private static readonly field 'NowUtc' must be s_camelCase
+MTM_Waitlist.Tests\Module_Settings\ConfigImagesLocationsHistoryIntegrationTests.cs|Async Task method 'TestCleanup' must end with Async
+MTM_Waitlist.Tests\Module_Settings\ConfigImagesLocationsHistoryIntegrationTests.cs|Async Task method 'TestInitialize' must end with Async
+MTM_Waitlist.Tests\Module_Settings\ConfigImagesLocationsIntegrationTests.cs|Async Task method 'TestCleanup' must end with Async
+MTM_Waitlist.Tests\Module_Settings\ConfigImagesLocationsIntegrationTests.cs|Async Task method 'TestInitialize' must end with Async
+MTM_Waitlist.Tests\Module_Settings\DefectTypesCrudIntegrationTests.cs|Async Task method 'TestCleanup' must end with Async
+MTM_Waitlist.Tests\Module_Settings\ImageLocationServiceCascadeTests.cs|Async Task method 'TestInitialize' must end with Async
+MTM_Waitlist.Tests\Module_Settings\ImageOverrideWriteServiceTests.cs|Async Task method 'TestInitialize' must end with Async
+MTM_Waitlist.Tests\Module_Settings\Services\RequestItemConfigurationServiceTests.cs|Private static readonly field 'Catalog' must be s_camelCase
+MTM_Waitlist.Tests\Module_Settings\TestPngWriter.cs|Private static readonly field 'CrcTable' must be s_camelCase
+MTM_Waitlist.Tests\Module_Settings\TestPngWriter.cs|Private static readonly field 'Signature' must be s_camelCase
+MTM_Waitlist.Tests\Module_Settings\ViewModels\PartPictureManagerViewModelTests.cs|Async Task method '_Find' must end with Async
+MTM_Waitlist.Tests\Module_Setup\ActiveJobReadBackSpIntegrationTests.cs|Async Task method 'TestCleanup' must end with Async
+MTM_Waitlist.Tests\Module_Startup\Services\DiagnosticContextTests.cs|Private static readonly field 'ProcessStarted' must be s_camelCase
+MTM_Waitlist.Waitlist.NewRequest\ViewModels\NewRequestResultViewModel.cs|Public type 'NewRequestResultPhase' must match file name 'NewRequestResultViewModel'
+MTM_Waitlist.Waitlist.View\Models\WaitlistRequestCancelResult.cs|Public type 'WaitlistRequestCancelStatus' must match file name 'WaitlistRequestCancelResult'
+MTM_Waitlist.Waitlist.View\Models\WaitlistRequestSubmitResult.cs|Public type 'WaitlistRequestSubmitStatus' must match file name 'WaitlistRequestSubmitResult'
+MTM_Waitlist.Waitlist.View\Models\WaitlistRequestTitles.cs|Private static readonly field 'Resolver' must be s_camelCase
+Services\DependencyInjection\ServiceRegistrationExtensions.PartPictureCache.cs|Public type 'ServiceRegistrationExtensions' must match file name 'ServiceRegistrationExtensions.PartPictureCache'
+Services\DependencyInjection\ServiceRegistrationExtensions.PartPictures.cs|Public type 'ServiceRegistrationExtensions' must match file name 'ServiceRegistrationExtensions.PartPictures'
+Services\DependencyInjection\ServiceRegistrationExtensions.PartPictureScreen.cs|Public type 'ServiceRegistrationExtensions' must match file name 'ServiceRegistrationExtensions.PartPictureScreen'
+Services\DependencyInjection\ServiceRegistrationExtensions.Permissions.cs|Public type 'ServiceRegistrationExtensions' must match file name 'ServiceRegistrationExtensions.Permissions'
+Services\DependencyInjection\ServiceRegistrationExtensions.UserAccount.cs|Public type 'ServiceRegistrationExtensions' must match file name 'ServiceRegistrationExtensions.UserAccount'
+Services\DependencyInjection\ServiceRegistrationExtensions.UserManagement.cs|Public type 'ServiceRegistrationExtensions' must match file name 'ServiceRegistrationExtensions.UserManagement'
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Core_ShellPage_NavigationViewItem1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Core_ShellPage_NavigationViewItem2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Settings_AppTheme_Tooltip_2' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Settings_AppTheme_Tooltip_3' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Settings_AppTheme_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Settings_Custom_image_path_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Settings_CustomOnlyToggle_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Settings_ImageOverrideEditorControl_Button2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Settings_ImageOverrideEditorControl_Button3_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Settings_Manage_request_item_images_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Settings_Manage_work_center_images_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Settings_ResetAllButton_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Settings_SearchTextBox_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Settings_SettingsPage_Button4_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Settings_SettingsPage_Button5_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Settings_SettingsPage_Button6_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Settings_SettingsPage_Button7_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Settings_SettingsPage_ComboBox1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Settings_SettingsPage_HyperlinkButton1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Settings_SettingsPage_TextBox1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Settings_SettingsPage_ToggleSwitch1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Settings_SettingsPage_ToggleSwitch2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupCompletionPage_Button1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupCompletionPage_Button2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupDunnageAddPartSelectionPage_Button1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupDunnageAddPartSelectionPage_Button2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupDunnageAddPartSelectionPage_GridView1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupDunnageAddPartSelectionPage_TextBox1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupDunnagePartPage_Button1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupDunnagePartPage_Button2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupDunnagePartPage_ComboBox1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupDunnagePartPage_GridView1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupDunnageTypePage_Button1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupDunnageTypePage_Button2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupDunnageTypePage_Button3_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupDunnageTypePage_Button4_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupDunnageTypePage_Button5_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupDunnageTypePage_Button6_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupDunnageTypePage_ComboBox1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupPartSelectionPage_Button1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupPartSelectionPage_Button2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupPartSelectionPage_ListView1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupReviewPage_Button1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupReviewPage_Button2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupReviewPage_Button3_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupReviewPage_Button4_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupSequenceSelectionPage_Button1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupSequenceSelectionPage_Button2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupSequenceSelectionPage_ListView1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupWorkOrderPage_Button1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupWorkOrderPage_Button2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupWorkOrderPage_Button3_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupWorkOrderPage_Button4_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupWorkOrderPage_Button5_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupWorkstationPage_Button1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupWorkstationPage_Button2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupWorkstationPage_Button3_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupWorkstationPage_GridView1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupWorkstationPage_MenuFlyoutItem1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupWorkstationPage_MenuFlyoutItem2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_SetupWorkstationPage_TextBox1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Setup_WorkOrderTextBox_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Shared_ControlInspectorDetailPage_Button1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Shared_ControlInspectorDetailPage_ToggleSwitch1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Shared_HotWorkCentersGridView_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Shared_OtherWorkCentersGridView_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Shared_PrintButton_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Shell_CurrentUser_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Shell_SearchBox_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Shell_SelectFacility_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Shell_SortOrder_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Waitlist_Accept_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Waitlist_Cancel_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Waitlist_JobTypeGridView_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.developer.resw|RESW key 'Waitlist_WaitlistFab_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Core_ShellPage_NavigationViewItem1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Core_ShellPage_NavigationViewItem2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Settings_AppTheme_Tooltip_2' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Settings_AppTheme_Tooltip_3' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Settings_AppTheme_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Settings_Custom_image_path_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Settings_CustomOnlyToggle_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Settings_ImageOverrideEditorControl_Button2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Settings_ImageOverrideEditorControl_Button3_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Settings_Manage_request_item_images_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Settings_Manage_work_center_images_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Settings_ResetAllButton_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Settings_SearchTextBox_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Settings_SettingsPage_Button4_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Settings_SettingsPage_Button5_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Settings_SettingsPage_Button6_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Settings_SettingsPage_Button7_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Settings_SettingsPage_ComboBox1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Settings_SettingsPage_HyperlinkButton1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Settings_SettingsPage_TextBox1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Settings_SettingsPage_ToggleSwitch1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Settings_SettingsPage_ToggleSwitch2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupCompletionPage_Button1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupCompletionPage_Button2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupDunnageAddPartSelectionPage_Button1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupDunnageAddPartSelectionPage_Button2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupDunnageAddPartSelectionPage_GridView1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupDunnageAddPartSelectionPage_TextBox1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupDunnagePartPage_Button1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupDunnagePartPage_Button2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupDunnagePartPage_ComboBox1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupDunnagePartPage_GridView1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupDunnageTypePage_Button1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupDunnageTypePage_Button2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupDunnageTypePage_Button3_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupDunnageTypePage_Button4_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupDunnageTypePage_Button5_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupDunnageTypePage_Button6_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupDunnageTypePage_ComboBox1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupPartSelectionPage_Button1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupPartSelectionPage_Button2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupPartSelectionPage_ListView1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupReviewPage_Button1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupReviewPage_Button2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupReviewPage_Button3_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupReviewPage_Button4_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupSequenceSelectionPage_Button1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupSequenceSelectionPage_Button2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupSequenceSelectionPage_ListView1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupWorkOrderPage_Button1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupWorkOrderPage_Button2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupWorkOrderPage_Button3_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupWorkOrderPage_Button4_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupWorkOrderPage_Button5_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupWorkstationPage_Button1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupWorkstationPage_Button2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupWorkstationPage_Button3_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupWorkstationPage_GridView1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupWorkstationPage_MenuFlyoutItem1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupWorkstationPage_MenuFlyoutItem2_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_SetupWorkstationPage_TextBox1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Setup_WorkOrderTextBox_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Shared_ControlInspectorDetailPage_Button1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Shared_ControlInspectorDetailPage_ToggleSwitch1_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Shared_HotWorkCentersGridView_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Shared_OtherWorkCentersGridView_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Shared_PrintButton_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Shell_CurrentUser_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Shell_SearchBox_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Shell_SelectFacility_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Shell_SortOrder_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Waitlist_Accept_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Waitlist_Cancel_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Waitlist_JobTypeGridView_Tooltip' must match Feature_Element.Property
+Strings\en-us\TooltipResources.resw|RESW key 'Waitlist_WaitlistFab_Tooltip' must match Feature_Element.Property

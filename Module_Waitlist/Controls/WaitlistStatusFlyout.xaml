@@ -1,0 +1,42 @@
+<UserControl
+    x:Class="MTM_Waitlist.Module_Waitlist.Controls.WaitlistStatusFlyout"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="Root"
+    mc:Ignorable="d">
+
+    <!--
+        The body of the status word's flyout (FR-071): the conditions the host hands it, in the order the shared
+        vocabulary holds them, each one a button so the keyboard can reach and activate it without a pointer
+        (FR-075). The list is the vocabulary rather than a set of its own, so the picker that writes a condition
+        and the card that reads one back can never drift apart.
+    -->
+    <StackPanel
+        MinWidth="220"
+        AutomationProperties.Name="{Binding FlyoutAccessibleName, ElementName=Root}"
+        KeyDown="OnConditionChoiceKeyDown"
+        Spacing="6">
+        <TextBlock
+            Style="{ThemeResource BodyStrongTextBlockStyle}"
+            Text="{Binding FlyoutAccessibleName, ElementName=Root}"
+            TextWrapping="Wrap" />
+        <ItemsControl
+            x:Name="ConditionChoices"
+            AutomationProperties.AutomationId="WaitlistStatusFlyout_Choices"
+            ItemsSource="{Binding Conditions, ElementName=Root}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Button
+                        MinHeight="44"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Left"
+                        AutomationProperties.Name="{Binding}"
+                        Click="OnConditionChoiceClick"
+                        Content="{Binding}" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+</UserControl>

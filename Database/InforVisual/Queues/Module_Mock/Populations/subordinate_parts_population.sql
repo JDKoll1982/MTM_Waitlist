@@ -15,6 +15,13 @@
 --   Category, PartNumber, Description, Location, User8, OnHandQuantity (outputs).
 --   `PartNumber` in a returned row is always the SUBORDINATE part, while `ParentPartNumber` carries
 --   the order's own part number the caller passes in as its `PartNumber` parameter.
+--   For an `MMC` subordinate row -- the coil -- `Description` IS the coil's description, so no second
+--   description column exists. The coil's `Average coil weight` is deliberately NOT projected here:
+--   VISUAL's `PART.WEIGHT` is a single figure the plant keeps against the part, while the card must
+--   show the average the receiving store has actually weighed, pooled over that part's receiving
+--   history. That value comes from `sp_receiving_history_average_coil_weight` in
+--   `mtm_receiving_application` (FR-030, FR-041, FR-054). This projection must stay byte-identical to
+--   GetSubordinateParts.sql, so a cached answer and a live answer cannot disagree (FR-088).
 -- ========================================
 
 SET NOCOUNT ON;

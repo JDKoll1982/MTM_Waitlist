@@ -106,40 +106,90 @@ public sealed class RequestItemPickerRulesTests
             RequestItemPickerRules.IsVisible(scrap, WithScrap(string.Empty)));
     }
 
+    /// <summary>
+    /// The four returning pickups are offered on the requesting job's own work rather than hidden by a fixed
+    /// list: each is offered <b>exactly</b> when the job has the work it names, and not otherwise (FR-094).
+    /// </summary>
     [TestMethod]
-    public void Service_RequestItemPickerRulesTests_OutOfScopeItems_AreNeverOfferedButStayInTheCatalog()
+    public void Service_RequestItemPickerRulesTests_EachReturningPickup_IsOfferedExactlyWhenTheJobHasThatWork()
     {
-        string[] outOfScope = ["pickup-fg", "pickup-ncm", "pickup-wip", "pickup-outside-service"];
-
-        // Present in the catalog: a hidden Item and a missing row are different states (FR-028).
-        Assert.AreEqual(24, RequestItemCatalog.TotalCount);
-        foreach (var id in outOfScope)
+        var cases = new (string ItemId, RequestJobPartAvailability WithThatWork)[]
         {
-            Assert.IsNotNull(RequestItemCatalog.FindById(id), id);
+            ("pickup-fg", NoReturningWork with { HasFinishedGoodsToReturn = true }),
+            ("pickup-ncm", NoReturningWork with { HasNonconformingStockToReturn = true }),
+            ("pickup-wip", NoReturningWork with { HasWorkInProgressToReturn = true }),
+            ("pickup-outside-service", NoReturningWork with { HasOutsideServiceWorkToReturn = true }),
+        };
+
+        foreach (var (itemId, withThatWork) in cases)
+        {
+            var item = RequestItemCatalog.FindById(itemId);
+            Assert.IsNotNull(
+                item,
+                $"'{itemId}' stays in the catalog: a hidden Item and a missing row are different states (FR-028).");
+            Assert.IsFalse(
+                RequestItemPickerRules.IsVisible(item!, NoReturningWork),
+                $"'{itemId}' must not be offered for a job that has none of the work it names.");
+            Assert.IsTrue(
+                RequestItemPickerRules.IsVisible(item!, withThatWork),
+                $"'{itemId}' must be offered for a job that has the work it names.");
         }
+    }
 
-        // Never offered — under any job, including the job that has everything.
-        foreach (var availability in EightConfigurations())
+    /// <summary>
+    /// Each of the four gates lights its own Item and no other, so a job with finished goods is never offered the
+    /// NCM pickup and so on (FR-094, SC-010).
+    /// </summary>
+    [TestMethod]
+    public void Service_RequestItemPickerRulesTests_AReturningPickup_IsNotOfferedForAnotherKindOfWork()
+    {
+        var work = new (string ItemId, RequestJobPartAvailability WithThatWork)[]
         {
-            foreach (var id in outOfScope)
+            ("pickup-fg", NoReturningWork with { HasFinishedGoodsToReturn = true }),
+            ("pickup-ncm", NoReturningWork with { HasNonconformingStockToReturn = true }),
+            ("pickup-wip", NoReturningWork with { HasWorkInProgressToReturn = true }),
+            ("pickup-outside-service", NoReturningWork with { HasOutsideServiceWorkToReturn = true }),
+        };
+
+        foreach (var (holderId, holderAvailability) in work)
+        {
+            foreach (var (otherId, _) in work.Where(candidate => !string.Equals(candidate.ItemId, holderId, StringComparison.Ordinal)))
             {
                 Assert.IsFalse(
-                    RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById(id)!, availability),
-                    $"'{id}' must never be offered, including for {Describe(availability)}.");
+                    RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById(otherId)!, holderAvailability),
+                    $"'{otherId}' must not be offered by the work that lights '{holderId}'.");
             }
         }
+    }
 
-        // And the count is exact: no out-of-scope Item leaks into any configuration's visible set.
-        foreach (var availability in EightConfigurations())
-        {
-            foreach (var item in RequestItemCatalog.Items)
-            {
-                if (RequestItemPickerRules.IsVisible(item, availability))
-                {
-                    CollectionAssert.DoesNotContain(outOfScope, item.Id);
-                }
-            }
-        }
+    /// <summary>
+    /// No catalogued Item is hidden from every job: the fixed out-of-scope list is gone, so the only thing that
+    /// hides a returning pickup is a job that has none of the work it names (FR-094, FR-028).
+    /// </summary>
+    [TestMethod]
+    public void Service_RequestItemPickerRulesTests_NoCatalogItem_IsHiddenFromEveryJob()
+    {
+        Assert.AreEqual(24, RequestItemCatalog.TotalCount);
+
+        var jobs = EightConfigurations()
+            .Concat(
+            [
+                NoReturningWork with { HasFinishedGoodsToReturn = true },
+                NoReturningWork with { HasNonconformingStockToReturn = true },
+                NoReturningWork with { HasWorkInProgressToReturn = true },
+                NoReturningWork with { HasOutsideServiceWorkToReturn = true },
+            ])
+            .ToArray();
+
+        var neverOffered = RequestItemCatalog.Items
+            .Where(item => jobs.All(availability => !RequestItemPickerRules.IsVisible(item, availability)))
+            .Select(item => item.Id)
+            .ToList();
+
+        CollectionAssert.AreEqual(
+            Array.Empty<string>(),
+            neverOffered,
+            "Every catalogued Item is offerable for some job; a row that no job can reach is a hidden Item, not a rule.");
     }
 
     /// <summary>
@@ -200,11 +250,18 @@ public sealed class RequestItemPickerRulesTests
             ]);
 
         AssertVisible(
-            "everything at once, a real scrap type",
-            WithScrap("Steel Offal"),
+            "everything at once, a real scrap type and all four kinds of returning work",
+            WithScrap("Steel Offal") with
+            {
+                HasFinishedGoodsToReturn = true,
+                HasNonconformingStockToReturn = true,
+                HasWorkInProgressToReturn = true,
+                HasOutsideServiceWorkToReturn = true,
+            },
             [
                 .. jobIndependent,
                 "pickup-coil", "pickup-die", "pickup-component", "pickup-dunnage", "pickup-scrap",
+                "pickup-fg", "pickup-ncm", "pickup-wip", "pickup-outside-service",
                 "deliver-coil", "deliver-flatstock", "deliver-component", "deliver-die", "deliver-dunnage",
                 "deliver-wrong-coil", "deliver-wrong-flatstock",
                 "assist-coil-turn", "assist-table-place", "assist-table-remove"
@@ -250,7 +307,6 @@ public sealed class RequestItemPickerRulesTests
             RequestItemPickerRules.RequiredJobPart(pickup),
             RequestItemPickerRules.RequiredJobPart(deliver),
             "The two component Items must be gated on the same job part.");
-        Assert.IsFalse(RequestItemPickerRules.IsOutOfScope(deliver));
 
         var noComponent = RequestJobPartAvailability.All with { HasComponent = false };
         Assert.IsFalse(RequestItemPickerRules.IsVisible(deliver, noComponent));
@@ -271,12 +327,26 @@ public sealed class RequestItemPickerRulesTests
 
     private static RequestJobPartAvailability WithScrap(string? scrapType)
     {
-        // The scrap value is stored per subordinate part; the snapshot only carries the derived decision.
-        return RequestJobPartAvailability.All with
+        // The scrap value is stored per subordinate part; the snapshot only carries the derived decision. The
+        // four returning-work gates are left off here: the eight job configurations §D18 fixes are about part
+        // kinds, and each returning Item's own gating is pinned by its own tests above (FR-094).
+        return NoReturningWork with
         {
             HasScrapDecision = ScrapDecisionRules.HasRealScrapDecision(scrapType)
         };
     }
+
+    /// <summary>
+    /// A job with every part kind and none of the four kinds of returning work, so each returning pickup's own
+    /// gate can be set in isolation.
+    /// </summary>
+    private static RequestJobPartAvailability NoReturningWork => RequestJobPartAvailability.All with
+    {
+        HasFinishedGoodsToReturn = false,
+        HasNonconformingStockToReturn = false,
+        HasWorkInProgressToReturn = false,
+        HasOutsideServiceWorkToReturn = false,
+    };
 
     private static IEnumerable<RequestJobPartAvailability> EightConfigurations()
     {

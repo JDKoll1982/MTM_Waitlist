@@ -17,8 +17,8 @@
 -- Content
 -- -------
 -- Captured 2026-09-12 from the live `mtm_mock` mirror on the shared host, so a fresh install
--- starts from real Infor Visual reads rather than hand-written samples. Five of the six shapes are
--- covered:  83,224 rows total.
+-- starts from real Infor Visual reads rather than hand-written samples. Six of the seven shapes are
+-- covered:  83,224 rows total, plus the shape 7 aggregate derived from shape 4 below.
 --
 --     work_order_lookup     694
 --     operation_sequences   886
@@ -84293,3 +84293,25 @@ VALUES
     (692,'WO-965582','965582','U',7500.0000,250.0000,0,'2026-09-12 17:00:07',1),
     (693,'WO-965732','965732','U',8333.0000,1999.0000,0,'2026-09-12 17:00:07',1),
     (694,'WO-966539','966539','U',100000.0000,14800.0000,1,'2026-09-12 17:00:07',1);
+
+-- Shape 7: part_warehouse_quantities
+-- Added by feature 012 (FR-090). Unlike the sections above, these rows are not a copy of a live read: they are the
+-- part-wide aggregate of the `inventory_locations` seed content ABOVE, which is the same figure the live
+-- population computes. Deriving them keeps the baseline internally consistent by construction instead of inventing
+-- part numbers or quantities, which the employee_by_number note below the header already rejects.
+--
+-- `finished_goods_quantity` is deliberately 0: `visual_inventory_locations_result` carries no location class, so
+-- the finished-goods split cannot be derived from this seed. A refreshed mirror replaces these rows wholesale, and
+-- `is_seed_content = 1` is what makes the read-status surface say "seeded content, not yet refreshed" rather than
+-- reporting a fabricated cache age for this machine (FR-022, data-model.md 3).
+INSERT IGNORE INTO `visual_part_warehouse_quantities_result`
+    (`part_number`, `warehouse_quantity`, `finished_goods_quantity`, `refreshed_utc`, `is_seed_content`)
+SELECT
+    l.part_number,
+    CAST(SUM(l.on_hand_quantity) AS DECIMAL(18,4)),
+    0.0000,
+    '2026-09-12 17:00:07',
+    1
+FROM `visual_inventory_locations_result` AS l
+WHERE l.is_seed_content = 1
+GROUP BY l.part_number;

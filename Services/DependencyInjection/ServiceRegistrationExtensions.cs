@@ -20,6 +20,7 @@ using MTM_Waitlist.Module_Waitlist.Views;
 using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Module_Core.Views;
 using MTM_Waitlist.ViewModels;
+using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Shared.ViewModels;
 using MTM_Waitlist.Module_Shared.Views;
 using MTM_Waitlist.Mock.DependencyInjection;
@@ -70,9 +71,12 @@ public static partial class ServiceRegistrationExtensions
             pageService.Configure<NewRequestDieViewModel, NewRequestDiePage>();
             pageService.Configure<NewRequestComponentViewModel, NewRequestComponentPage>();
             pageService.Configure<NewRequestDetailsViewModel, NewRequestDetailsPage>();
+            pageService.Configure<NewRequestHopperViewModel, NewRequestHopperPage>();
+            pageService.Configure<NewRequestPartSearchViewModel, NewRequestPartSearchPage>();
+            pageService.Configure<NewRequestCoilTurnViewModel, NewRequestCoilTurnPage>();
+            pageService.Configure<NewRequestSkidCountViewModel, NewRequestSkidCountPage>();
             pageService.Configure<NewRequestSummaryViewModel, NewRequestSummaryPage>();
             pageService.Configure<NewRequestResultViewModel, NewRequestResultPage>();
-            pageService.Configure<ControlInspectorDetailViewModel, ControlInspectorDetailPage>();
             pageService.Configure<SettingsViewModel, SettingsPage>();
             pageService.Configure<SetupWorkCenterViewModel, SetupWorkCenterPage>();
             pageService.Configure<SetupWorkOrderViewModel, SetupWorkOrderPage>();
@@ -195,12 +199,24 @@ public static partial class ServiceRegistrationExtensions
         services.AddTransient<NewRequestComponentPage>();
         services.AddTransient<NewRequestDetailsViewModel>();
         services.AddTransient<NewRequestDetailsPage>();
+        services.AddTransient<NewRequestHopperViewModel>();
+        services.AddTransient<NewRequestHopperPage>();
+        services.AddTransient<NewRequestPartSearchViewModel>();
+        services.AddTransient<NewRequestPartSearchPage>();
+        services.AddTransient<NewRequestCoilTurnViewModel>();
+        services.AddTransient<NewRequestCoilTurnPage>();
+        services.AddTransient<NewRequestSkidCountViewModel>();
+        services.AddTransient<NewRequestSkidCountPage>();
         services.AddTransient<NewRequestSummaryViewModel>();
         services.AddTransient<NewRequestSummaryPage>();
         services.AddTransient<NewRequestResultViewModel>();
         services.AddTransient<NewRequestResultPage>();
         services.AddTransient<ControlInspectorDetailViewModel>();
-        services.AddTransient<ControlInspectorDetailPage>();
+
+        // The inspector's window is opened by the service that watches for the shortcut, through a seam, because
+        // that service is in a library that may not reference a window. It is a singleton so one window is reused
+        // while it stays open rather than a new one per press.
+        services.AddSingleton<IControlInspectorDetailPresenter, ControlInspectorDetailPresenter>();
         // Named arguments on purpose: every constructor parameter is supplied explicitly. A positional call
         // would silently leave the optional ones null, and a null prompt seam means the handler gets no
         // confirmation and no lost-claim warning at all — a control the user is shown whose wiring is absent.
@@ -218,7 +234,10 @@ public static partial class ServiceRegistrationExtensions
             sortPreferenceService: provider.GetRequiredService<IWaitlistSortPreferenceService>(),
             jobAvailabilityProvider: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestJobPartAvailabilityProvider>(),
             permissionService: provider.GetRequiredService<IPermissionService>(),
-            partPictureResolver: provider.GetRequiredService<MTM_Waitlist.Module_Core.Contracts.Services.IPartPictureResolver>()));
+            partPictureResolver: provider.GetRequiredService<MTM_Waitlist.Module_Core.Contracts.Services.IPartPictureResolver>(),
+            // The Item's declaration is where the card's cells come from, so a null seam here would leave every
+            // card drawing no detail cell at all while the screen still looked wired (FR-025).
+            itemConfigurationService: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestItemConfigurationService>()));
         services.AddTransient<WaitlistViewPage>();
         services.AddTransient<ShellPage>();
         services.AddTransient<ShellViewModel>();

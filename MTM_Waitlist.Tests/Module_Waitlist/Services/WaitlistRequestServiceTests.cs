@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
@@ -247,6 +249,48 @@ public sealed class WaitlistRequestServiceTests
         Assert.AreEqual("Pending", request!.Status);
         Assert.AreEqual("100-03", request.WorkCenter);
         Assert.AreEqual("db note", request.Note);
+    }
+
+    /// <summary>
+    /// The handler's display name arrives from the list read, so a card built from it can name the person who
+    /// holds the request (FR-022).
+    /// </summary>
+    /// <remarks>
+    /// The store keeps the assignee as an employee number, because that number is what the handler
+    /// authorizations compare. <c>sp_waitlist_request_list</c> resolves the name from the entry the handler
+    /// themselves wrote and returns it beside the number, which is where this row comes from.
+    /// </remarks>
+    [TestMethod]
+    public async Task Service_WaitlistRequestServiceTests_RefreshFromDatabaseAsync_CarriesTheHandlersNameAlongsideTheNumber()
+    {
+        var helper = new StubMySqlHelperServer(
+        [
+            new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["public_id"] = "f0000000-00aa-4000-8000-0000000000ab",
+                ["building"] = "Expo Drive",
+                ["work_center"] = "100-03",
+                ["category"] = "Deliver",
+                ["item"] = "deliver-coil",
+                ["status"] = "Accepted",
+                ["requester_employee_number"] = "6229",
+                ["requester_employee_name"] = "John Koll",
+                ["requested_utc"] = new DateTime(2026, 10, 11, 23, 0, 0, DateTimeKind.Unspecified),
+                ["is_overdue"] = 0,
+                ["assigned_material_handler"] = "6229",
+                ["assigned_material_handler_name"] = "John Koll",
+            },
+        ]);
+        var service = new WaitlistRequestService(helper);
+
+        await service.RefreshFromDatabaseAsync("Expo Drive");
+        var request = service.GetActiveRequests("Expo Drive").Single();
+
+        Assert.AreEqual("6229", request.AssignedMaterialHandler, "The number the authorizations compare is kept.");
+        Assert.AreEqual("John Koll", request.AssignedMaterialHandlerName, "And the name the screen prints comes with it.");
+
+        var order = WaitlistViewViewModel.CreateSessionOrder(request);
+        Assert.AreEqual("John Koll", order.PersonText);
     }
 
     [TestMethod]
@@ -951,11 +995,52 @@ public sealed class WaitlistRequestServiceTests
         Assert.IsNotNull(accepted);
         Assert.AreEqual("Accepted", accepted!.Status);
         Assert.AreEqual("9001", accepted.AssignedMaterialHandler);
+        Assert.AreEqual("Hana Handler", accepted.AssignedMaterialHandlerName, "The handler row carries the name the screen prints, not the number beside it.");
         Assert.IsNotNull(accepted.AcceptedUtc);
         Assert.IsNull(accepted.ReleasedUtc);
         // An accepted job stays on the shared (active) list.
         Assert.IsTrue(service.GetActiveRequests("Expo Drive").Any(item => item.Id == request.Id));
         Assert.IsTrue(service.GetAuditTrail(request.Id).Any(entry => entry.EventType == "Accepted"));
+    }
+
+    /// <summary>
+    /// The card's person row names the handler, never the employee number the store assigns with (FR-022).
+    /// </summary>
+    /// <remarks>
+    /// This is the defect the rule closes: the card read <c>6229</c> under the ring where the name of the person
+    /// holding the work belongs, because the row carried the number the assignment stores and nothing else.
+    /// </remarks>
+    [TestMethod]
+    public async Task Service_WaitlistRequestServiceTests_AcceptAsync_NamesTheHandlerOnTheCardRatherThanNumberingThem()
+    {
+        var service = new WaitlistRequestService();
+        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var request = submitResult.Request!;
+
+        var accepted = await service.AcceptAsync(request.Id, "6229", "John Koll");
+        Assert.IsNotNull(accepted);
+
+        var order = WaitlistViewViewModel.CreateSessionOrder(accepted!);
+
+        Assert.AreEqual("John Koll", order.PersonText, "The card names the handler.");
+        Assert.AreNotEqual("6229", order.PersonText, "And never prints their employee number as a name.");
+        Assert.IsTrue(order.HasPerson);
+    }
+
+    [TestMethod]
+    public async Task Service_WaitlistRequestServiceTests_ReleaseAsync_ClearsTheHandlerNameWithTheHandler()
+    {
+        var service = new WaitlistRequestService();
+        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var request = submitResult.Request!;
+
+        await service.AcceptAsync(request.Id, "6229", "John Koll");
+        var released = await service.ReleaseAsync(request.Id, "6229", "John Koll");
+
+        Assert.IsNotNull(released);
+        Assert.IsNull(released!.AssignedMaterialHandler);
+        Assert.IsNull(released.AssignedMaterialHandlerName, "A released request is back in the open list and its card names the requester again.");
+        Assert.AreEqual("John Koll", released.RequesterEmployeeName, "Which is the requester, by name.");
     }
 
     [TestMethod]
@@ -1436,6 +1521,218 @@ public sealed class WaitlistRequestServiceTests
         var success = await service.CancelOwnRequestAsync(mine.Request.Id, "6229", "No longer needed");
         Assert.AreEqual(WaitlistRequestCancelStatus.Success, success.Status);
         Assert.AreEqual("Canceled", service.GetRequest(mine.Request.Id)!.Status);
+    }
+
+    [TestMethod]
+    public async Task Service_WaitlistRequestServiceTests_SetHandlerStatusAsync_AWriteByTheRowsOwnHandlerReportsTheAffectedCount()
+    {
+        var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
+        var service = new WaitlistRequestService(helper);
+        var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var request = submit.Request!;
+
+        var rowsAffected = await service.SetHandlerStatusAsync(request.Id, "Product Buried", "M. Lewis");
+
+        Assert.AreEqual(
+            1,
+            rowsAffected,
+            "The write must hand the store's own affected-row count back to the caller (FR-076).");
+        var write = helper.NonQueryCalls.Last(call => call.Procedure == "sp_waitlist_request_handler_status_update");
+        Assert.AreEqual(request.Id.ToString(), Convert.ToString(write.Parameters["p_public_id"]));
+        Assert.AreEqual("Product Buried", Convert.ToString(write.Parameters["p_handler_status"]));
+        Assert.AreEqual(
+            "M. Lewis",
+            Convert.ToString(write.Parameters["p_expected_material_handler"]),
+            "The write is conditional on the handler the caller read, exactly as the lifecycle update is (FR-076).");
+        Assert.AreEqual(
+            "Product Buried",
+            service.GetRequest(request.Id)!.HandlerStatus,
+            "The row carries the condition the handler just set.");
+    }
+
+    [TestMethod]
+    public async Task Service_WaitlistRequestServiceTests_SetHandlerStatusAsync_ChoosingAConditionReplacesTheOneTheRowAlreadyCarried()
+    {
+        var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
+        var service = new WaitlistRequestService(helper);
+        var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var request = submit.Request!;
+
+        var reported = await service.SetHandlerStatusAsync(request.Id, "Product Buried", "M. Lewis");
+        var replaced = await service.SetHandlerStatusAsync(request.Id, "Changing Propane", "M. Lewis");
+
+        Assert.AreEqual(1, reported, "The first choice reached the store.");
+        Assert.AreEqual(1, replaced, "A second choice is its own write, and it too reached the store.");
+        Assert.AreEqual(
+            "Changing Propane",
+            service.GetRequest(request.Id)!.HandlerStatus,
+            "Choosing a condition on a row that already carries one replaces it, because the flyout writes the "
+                + "chosen value and the feature defines no path that clears a condition back to none (FR-072, data-model.md §2).");
+        Assert.AreEqual(
+            2,
+            helper.NonQueryCalls.Count(call => call.Procedure == "sp_waitlist_request_handler_status_update"),
+            "Each choice must be its own write, so nothing about the second is inferred from the first.");
+    }
+
+    [TestMethod]
+    public async Task Service_WaitlistRequestServiceTests_SetHandlerStatusAsync_ALostRaceReportsZeroRatherThanSuccess()
+    {
+        // Two handlers read the same row; the store applies one condition and matches no row for the other. The
+        // losing caller is told by the count rather than shown a success it did not get (FR-076).
+        var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
+        var service = new WaitlistRequestService(helper);
+        var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var request = submit.Request!;
+        helper.AffectedRows = 0;
+
+        var rowsAffected = await service.SetHandlerStatusAsync(request.Id, "Changing Forklift", "M. Lewis");
+
+        Assert.AreEqual(
+            0,
+            rowsAffected,
+            "A write the store refused must surface as zero affected rows, never as success (FR-076).");
+        Assert.IsTrue(helper.NonQueryProcedures.Contains("sp_waitlist_request_handler_status_update"));
+        Assert.IsNull(
+            service.GetRequest(request.Id)!.HandlerStatus,
+            "The row must not carry a condition the store never recorded.");
+    }
+
+    [TestMethod]
+    public async Task Service_WaitlistRequestServiceTests_SetHandlerStatusAsync_SomeoneOtherThanTheRowsHandlerWritesNothing()
+    {
+        var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
+        var service = new WaitlistRequestService(helper);
+        var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var request = submit.Request!;
+        helper.NonQueryCalls.Clear();
+
+        var anotherPerson = await service.SetHandlerStatusAsync(request.Id, "Product Buried", "9002");
+        var blankExpectedHandler = await service.SetHandlerStatusAsync(request.Id, "Product Buried", "   ");
+
+        Assert.AreEqual(0, anotherPerson, "Only the row's own material handler may set that row's condition (FR-076).");
+        Assert.AreEqual(0, blankExpectedHandler, "A handler gate with nothing to match on writes nothing.");
+        Assert.IsFalse(
+            helper.NonQueryCalls.Any(call => call.Procedure == "sp_waitlist_request_handler_status_update"),
+            "A caller that does not hold the row must not reach the store at all.");
+        Assert.IsNull(service.GetRequest(request.Id)!.HandlerStatus);
+    }
+
+    [TestMethod]
+    public async Task Service_WaitlistRequestServiceTests_RefreshFromDatabaseAsync_MapsTheHandlerConditionAndTheAnswersOntoTheRow()
+    {
+        var helper = new StubMySqlHelperServer(
+        [
+            new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["public_id"] = "f0000000-00aa-4000-8000-0000000000ac",
+                ["building"] = "Expo Drive",
+                ["work_center"] = "Press 12",
+                ["category"] = "Pickup",
+                ["item"] = "pickup-hopper",
+                ["input_value"] = null,
+                ["handler_status"] = "Changing Propane",
+                ["answers_json"] = "{\"Size\":\"Large\",\"Weight of Coil\":\"1840\"}",
+                ["status"] = "Accepted",
+                ["requested_utc"] = new DateTime(2026, 9, 5, 15, 0, 0, DateTimeKind.Unspecified),
+                ["assigned_material_handler"] = "M. Lewis",
+            },
+        ]);
+        var service = new WaitlistRequestService(helper);
+
+        await service.RefreshFromDatabaseAsync("Expo Drive");
+
+        var request = service.GetRequest(Guid.Parse("f0000000-00aa-4000-8000-0000000000ac"));
+        Assert.IsNotNull(request);
+        Assert.AreEqual(
+            "Changing Propane",
+            request!.HandlerStatus,
+            "A stored condition is restored onto its row when the list is next read (FR-073).");
+        Assert.IsNotNull(request.Answers, "The stored answers ride the list read (FR-073).");
+        Assert.AreEqual("Large", request.Answers!["Size"]);
+        Assert.AreEqual("1840", request.Answers!["Weight of Coil"]);
+    }
+
+    [TestMethod]
+    public async Task Service_WaitlistRequestServiceTests_RefreshFromDatabaseAsync_AnUnusableAnswersPayloadLeavesTheRowWithNoAnswers()
+    {
+        // A half-read map would put cells on the card that the request never captured; the row carries no
+        // readable answers instead (FR-006).
+        var helper = new StubMySqlHelperServer(
+        [
+            new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["public_id"] = "f0000000-00aa-4000-8000-0000000000ad",
+                ["building"] = "Expo Drive",
+                ["item"] = "pickup-hopper",
+                ["answers_json"] = "{ not json",
+                ["status"] = "Pending",
+                ["requested_utc"] = new DateTime(2026, 9, 5, 15, 0, 0, DateTimeKind.Unspecified),
+            },
+        ]);
+        var service = new WaitlistRequestService(helper);
+
+        await service.RefreshFromDatabaseAsync("Expo Drive");
+
+        var request = service.GetRequest(Guid.Parse("f0000000-00aa-4000-8000-0000000000ad"));
+        Assert.IsNotNull(request);
+        Assert.IsNull(request!.Answers);
+        Assert.IsNull(request.HandlerStatus, "A row written before this change reads as no condition, not as a special case.");
+    }
+
+    [TestMethod]
+    public async Task Service_WaitlistRequestServiceTests_SubmitAsync_CarriesTheAnswersMapAsJsonAndDropsABlankAnswer()
+    {
+        var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
+        var service = new WaitlistRequestService(helper);
+        var draft = new WaitlistRequestDraft
+        {
+            Building = "Expo Drive",
+            WorkCenter = "Press 12",
+            Category = "Pickup",
+            Item = "assist-coil-turn",
+            InputValue = "Coil turn",
+            ActiveSetupJobId = "JOB-1001",
+            WorkCenterName = "Press 12",
+            RequesterEmployeeNumber = "6229",
+            RequesterEmployeeName = "John Koll",
+            TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(15),
+            Answers = new Dictionary<string, string>
+            {
+                ["# of Skids"] = "3",
+                ["Weight of Coil"] = "   ",
+            },
+        };
+
+        var submit = await service.SubmitAsync(draft, allowDuplicate: false);
+
+        Assert.AreEqual(WaitlistRequestSubmitStatus.Success, submit.Status);
+        var insert = helper.NonQueryCalls.Last(call => call.Procedure == "sp_waitlist_request_insert");
+        var payload = Convert.ToString(insert.Parameters["p_answers_json"]);
+        Assert.IsNotNull(payload, "The request's answers must ride the insert as JSON (FR-073).");
+        using var document = JsonDocument.Parse(payload);
+        Assert.AreEqual("3", document.RootElement.GetProperty("# of Skids").GetString());
+        Assert.IsFalse(
+            document.RootElement.TryGetProperty("Weight of Coil", out _),
+            "A blank answer must not be written, so no cell is added for it (FR-006).");
+        Assert.IsNotNull(submit.Request!.Answers);
+        Assert.AreEqual("3", submit.Request.Answers!["# of Skids"]);
+        Assert.IsFalse(submit.Request.Answers!.ContainsKey("Weight of Coil"));
+    }
+
+    [TestMethod]
+    public async Task Service_WaitlistRequestServiceTests_SubmitAsync_WritesNoAnswersPayloadWhenTheDraftCapturedNone()
+    {
+        var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
+        var service = new WaitlistRequestService(helper);
+
+        var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+
+        Assert.AreEqual(WaitlistRequestSubmitStatus.Success, submit.Status);
+        var insert = helper.NonQueryCalls.Last(call => call.Procedure == "sp_waitlist_request_insert");
+        Assert.IsNull(
+            insert.Parameters["p_answers_json"],
+            "A request that captured no answers writes NULL rather than an empty object (FR-006).");
+        Assert.IsNull(submit.Request!.Answers);
     }
 
     private static async Task InvokeLoad(WaitlistViewViewModel viewModel, string building)

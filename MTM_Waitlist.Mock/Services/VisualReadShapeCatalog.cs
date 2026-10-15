@@ -3,7 +3,7 @@ using MTM_Waitlist.Mock.Models;
 namespace MTM_Waitlist.Mock.Services;
 
 /// <summary>
-/// The shipped read-shape catalog — the six shapes the service refreshes.
+/// The shipped read-shape catalog — the seven shapes the service refreshes.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -22,7 +22,7 @@ namespace MTM_Waitlist.Mock.Services;
 /// </remarks>
 public static class VisualReadShapeCatalog
 {
-    /// <summary>Creates the six shipped read-shape definitions.</summary>
+    /// <summary>Creates the seven shipped read-shape definitions.</summary>
     public static IReadOnlyList<VisualReadShape> Create() =>
     [
         new VisualReadShape
@@ -135,6 +135,26 @@ public static class VisualReadShapeCatalog
                 new VisualShapeColumn("EmployeeNumber", "nvarchar(32)"),
                 new VisualShapeColumn("FirstName", "nvarchar(128)"),
                 new VisualShapeColumn("LastName", "nvarchar(128)")
+            ]
+        },
+        new VisualReadShape
+        {
+            Key = "part_warehouse_quantities",
+            Module = VisualReadShapeModule.ModuleWaitlist,
+            SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartWarehouseQuantities.sql",
+            PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/part_warehouse_quantities_population.sql",
+            InputParameters =
+            [
+                // The same value is both the read's input and one of its output columns.
+                new VisualShapeParameter("PartNumber", "nvarchar(60)", IsRequired: true)
+            ],
+            OutputColumns =
+            [
+                // The part-wide on-hand quantity summed over ALL of the part's locations, and that same sum
+                // restricted to finished-goods locations. One row per part — never a per-location figure.
+                new VisualShapeColumn("PartNumber", "nvarchar(60)"),
+                new VisualShapeColumn("WarehouseQuantity", "decimal(18,4)"),
+                new VisualShapeColumn("FinishedGoodsQuantity", "decimal(18,4)")
             ]
         }
     ];

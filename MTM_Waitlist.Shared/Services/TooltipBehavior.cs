@@ -93,6 +93,17 @@ public static class TooltipBehavior
             var resourceKey = GetResourceKey(element);
             var associatedFiles = ParseFiles(GetAssociatedFiles(element));
             var fallbackText = GetFallbackText(element);
+
+            // A control that declares no key and no text has nothing to say, and applying a tooltip anyway would
+            // invent one: the service's own answer for "no key, no fallback" is a placeholder, which is right for a
+            // control that asked for a tooltip without naming one and wrong for one that never asked at all. This
+            // matters for the tooltips that echo a value - a row with no warning, a card with no new messages -
+            // where the bound text is legitimately empty and a placeholder would be a lie.
+            if (string.IsNullOrWhiteSpace(resourceKey) && string.IsNullOrWhiteSpace(fallbackText))
+            {
+                return;
+            }
+
             var tooltipService = SharedServiceLocator.TooltipService;
             if (tooltipService is null)
             {

@@ -33,6 +33,7 @@
             x:Name="Thumbnail"
             AutomationProperties.Name="{Binding Path=(AutomationProperties.Name), ElementName=Root}"
             PointerPressed="OnThumbnailPointerPressed"
+            PointerReleased="OnThumbnailPointerReleased"
             Source="{Binding Source, ElementName=Root}"
             Stretch="{Binding Stretch, ElementName=Root}"
             Tapped="OnThumbnailTapped" />

@@ -46,12 +46,18 @@ For this repository, prioritize MCP-backed validation for:
 - When any `mcp_*` tool is missing, reports "currently disabled by the user", or throws an unexpected exception, **consult `/memories/repo/mcp-tooling.md` first** for the verified troubleshooting playbook (stale-tool-snapshot fix, CSV server limitation, XamlMcp notes) before re-deriving it from scratch.
 - Interaction notes (2026-08-22): Setup/New Request work center card selection is **model-driven** — the blue outline + blue photo frame bind to the item model's `IsSelected` (`WorkCenterSelectionItem`/`SetupWorkstation`), and the grids use `SelectionMode="None"` + `IsItemClickEnabled="True"` + `ItemClick` handlers. `action` select / `set-prop IsSelected` on a `GridViewItem` does **not** show the highlight; use a real click (`input` kind click) to trigger `ItemClick`. In New Request, clicking a card also advances to the next step — click then use **Back** to capture the selected card. Card templates now set `AutomationProperties.Name` (bound to the work center name); note `props` does not enumerate `AutomationProperties.*`, and `search` `name` matches `x:Name` only (`automationId` matches `AutomationProperties.AutomationId`) — use `search` `text` or `hit-test` to locate cards. For cropped on-disk screenshots, XamlMcp's `screenshot` returns a resource URI that can't be saved; use `tools/capture_app_region.ps1` + `tools/ocr_png.ps1` (see `/memories/repo/mcp-tooling.md`).
 
-## CodeGraphy Agent Integration (Relationship Graph)
-- CodeGraphy (VS Code extension + `@codegraphy-dev/core` CLI) projects the workspace as a relationship graph; the extension and the CLI share the **same** Graph Cache (`.codegraphy/graph.sqlite`), so indexing once serves both the graph UI and agent queries.
-- Workspace config lives in `.codegraphy/settings.json` (repo-root, **gitignored**). `include` is set to `["**/*.cs", "**/*.xaml"]` so the graph shows only C#/XAML source (drops docs/CSV/binaries). Re-index after changing it (VS Code "Re-index Workspace" or `codegraphy index`).
-- Core CLI is installed globally (`codegraphy 5.0.4`). Agent-friendly, bounded-JSON commands over the shared cache: `codegraphy index`, `status`, `doctor`, `nodes`, `edges`, `search <term>`, `map <task>`, `query <file|symbol>`, `dependencies <node>`, `dependents <node>`, `path <from> <to>`, `filter`, `scope`, `settings get|set|unset`. Read-only by default; `index` / `settings set` mutate `.codegraphy/`.
-- **Windows install quirk (this machine):** `npm i -g @codegraphy-dev/core` fails to build `@driftlog/tree-sitter-dart` because Node 26's `common.gypi` emits the lld-only `/opt:lldltojobs=<(lto_jobs)` linker flag, which MSVC rejects with `LNK1117`. Workaround used: install with `--ignore-scripts`, patch `C:\Users\johnk\AppData\Local\node-gyp\Cache\26.5.1\include\node\common.gypi` so that condition is `lto_jobs=="__never__"` (always false), then `node-gyp rebuild` the Dart binding. NOTE: that patch was reverted on this machine; the already-built binding persists so the CLI works now, but a future reinstall/rebuild would need the patch again. See `/memories/user/windows-node-gyp-lto.md` and `/memories/repo/codegraphy-setup.md`.
-- The official **CodeGraphy Agent Skill** is installed globally at `~\.agents\skills\codegraphy` (`npx --yes skills@latest add ./skills/codegraphy --global` from a clone of `joesobo/CodeGraphyV4`). It teaches agents to run the CLI (`index` → bounded Graph Query) before broad source search. Note: use a real path when cloning (PowerShell rejects the `<temp>` placeholder — `<` is a reserved operator), and `--global` is required so the skill lands in `~\.agents\skills` instead of the clone's ephemeral `.agents\skills`. Context7 does NOT index CodeGraphy — use the official repo/docs for guidance.
+## CodeGraphy — retired (owner decision, 2026-10-11)
+- **CodeGraphy is no longer used by this repo, and agents must not reach for it.** The owner retired it on
+  2026-10-11 when trimming the tool budget: Serena is the code-exploration MCP server of record here, and
+  CodeGraphy's graph duplicated that job.
+- Removed from the agent instructions, and the `.codegraphy/` workspace config is gone. The **global** CLI
+  (`codegraphy 5.0.4`) and the global agent skill at `~\.agents\skills\codegraphy` live outside this repository
+  and may still be installed on a machine; they are not part of this repo's workflow and nothing here should
+  invoke them.
+- Use **Serena** for symbol lookup and cross-file navigation, and `grep`/`glob`/`view` for text search. The
+  `codegraphy` skill and CLI invocation steps that used to be documented here are **withdrawn** — ignore any
+  older note (including `/memories/repo/codegraphy-setup.md`) that still tells you to run `codegraphy index`
+  before searching.
 
 ---
 
@@ -141,10 +147,21 @@ When executing complex, cross-file architectural edits, you must strictly move t
 - For whole-repo exploration or validation (e.g., "validate all tasks in `<checklist>`", "summarize all docs"), delegate read-only research to the `Explore` subagent instead of reading many files into the main context.
 - Work in small, verifiable steps and state progress as you go. If a long operation fails or is interrupted, explicitly say what completed and resume from that point rather than restarting from scratch.
 
-## Subagent Model (owner instruction, 2026-10-10)
-- **Every background/subagent task MUST run on DeepSeek V4 Flash** — pass `model: "deepseek/deepseek-v4-flash"`
-  on the `task` call. The owner named it "DeepSeek V4.1 Flash", which is that model identifier in this client;
-  there is no separate `v4.1` entry, so use `deepseek/deepseek-v4-flash`.
+## Subagent Model (owner instruction, 2026-10-11)
+- **Every background/subagent task MUST run on DeepSeek V4.1 Flash** — pass `model: "deepseek/deepseek-flash"`
+  on the `task` call.
+- **Do not confuse it with `deepseek/deepseek-v4-flash`.** The provider (`vizards.deepseek-v4-for-copilot`)
+  ships both, and they are *different models*:
+  | Model id | Display name | Version |
+  | --- | --- | --- |
+  | `deepseek-flash` | **DeepSeek V4.1 Flash** | `v4.1` ← the one to use |
+  | `deepseek-v4-flash` | DeepSeek V4 Flash | `v4` |
+  | `deepseek-v4-flash-vision-exp` | DeepSeek V4 Flash (vision, experimental) | `v4` |
+  | `deepseek-v4-pro` | DeepSeek V4 Pro | `v4` |
+  Verified 2026-10-11 by reading `out/consts.js` in
+  `%USERPROFILE%\.vscode\extensions\vizards.deepseek-v4-for-copilot-0.9.4`: the entry with
+  `name: 'DeepSeek V4.1 Flash'` carries `id: 'deepseek-flash'`. An earlier version of this section wrongly
+  claimed the two were the same model and told agents to use `v4-flash`; that was wrong and is corrected here.
 - This **overrides** the usual "leave `model` unset and let the runtime resolve `/subagents` preferences" default,
   because the owner has explicitly required a specific model for this repo's subagents.
 - It applies to every agent type that accepts a model override — `Explore`, `task`, `general-purpose`,

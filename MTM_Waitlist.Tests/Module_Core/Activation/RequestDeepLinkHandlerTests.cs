@@ -151,6 +151,12 @@ public sealed class RequestDeepLinkHandlerTests
             Messages.Add(message);
         }
 
+        public void Warn(string module, string message, string? errorType = null)
+        {
+            Areas.Add(module);
+            Messages.Add(message);
+        }
+
         public void Error(string module, string message, Exception? exception = null)
         {
             Areas.Add(module);

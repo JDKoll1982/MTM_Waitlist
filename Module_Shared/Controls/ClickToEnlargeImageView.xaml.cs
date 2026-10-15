@@ -1,3 +1,4 @@
+using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
@@ -10,6 +11,7 @@ using MTM_Waitlist.Module_Core.Helpers;
 
 using Windows.Foundation;
 using Windows.System;
+using Windows.UI.Core;
 
 namespace MTM_Waitlist.Module_Shared.Controls;
 
@@ -68,6 +70,12 @@ public sealed partial class ClickToEnlargeImageView : UserControl
 
     private IPictureEnlargePreference? _enlargePreference;
     private XamlRoot? _sizedRoot;
+
+    /// <summary>
+    /// Set while an enlarging press is the reason the view is open, so the tap and the release that follow the
+    /// same gesture are claimed here instead of being handed to the host around the picture.
+    /// </summary>
+    private bool _enlargedOnPress;
 
     public ClickToEnlargeImageView()
     {
@@ -195,12 +203,35 @@ public sealed partial class ClickToEnlargeImageView : UserControl
             return;
         }
 
+        // The press is answered here, so the tap that follows is the same gesture arriving a second time and is
+        // claimed for this control in OnThumbnailTapped rather than handed to the host.
+        _enlargedOnPress = true;
         ShowEnlarged();
         e.Handled = true;
     }
 
+    /// <summary>Whether the pointer's release belongs to an enlarging press, which the host must not act on.</summary>
+    private void OnThumbnailPointerReleased(object sender, PointerRoutedEventArgs e)
+    {
+        if (_enlargedOnPress)
+        {
+            e.Handled = true;
+        }
+    }
+
     private void OnThumbnailTapped(object sender, TappedRoutedEventArgs e)
     {
+        if (_enlargedOnPress)
+        {
+            // The Shift+click was already answered on the press. The host around the picture acts on a tap - it
+            // selects the row, or raises ItemClick - and letting it act here opened the request behind the
+            // enlarged view and took the view down with it, so the click looked as if it had done nothing. The
+            // tap is swallowed instead, and swallowing it is what lets the view stay open.
+            _enlargedOnPress = false;
+            e.Handled = true;
+            return;
+        }
+
         // The preference is re-read here as well as on load: the store answers after start-up, and a reader who
         // has just switched the feature off should not get one more enlarging out of the open screen.
         ApplyAffordance();
@@ -214,12 +245,31 @@ public sealed partial class ClickToEnlargeImageView : UserControl
     }
 
     /// <summary>
-    /// Whether Shift was held for this pointer event. The modifiers come from the event itself rather than from the
-    /// keyboard's current state: verified in the running app (2026-09-24) that the state read at handling time does
-    /// not see the Shift of the very click being handled, so the gesture would simply never fire.
+    /// Whether Shift was held for this pointer event. Both the event's own modifiers and the keyboard's current
+    /// state are consulted, because neither is dependable on its own: a mouse pointer event does not always carry
+    /// the modifiers that were down when it was created, and the keyboard's state read at handling time does not
+    /// always see the Shift of the very click being handled. Asking both is what makes the gesture fire whichever
+    /// of the two the platform filled in.
     /// </summary>
-    private static bool IsShiftHeld(PointerRoutedEventArgs e) =>
-        (e.KeyModifiers & VirtualKeyModifiers.Shift) == VirtualKeyModifiers.Shift;
+    private static bool IsShiftHeld(PointerRoutedEventArgs e)
+    {
+        if ((e.KeyModifiers & VirtualKeyModifiers.Shift) == VirtualKeyModifiers.Shift)
+        {
+            return true;
+        }
+
+        try
+        {
+            return (InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Shift) & CoreVirtualKeyStates.Down)
+                == CoreVirtualKeyStates.Down;
+        }
+        catch (Exception)
+        {
+            // No window to ask (a designer, a unit test, a control hosted outside the app): the event's own
+            // modifiers remain the answer, which is what they were before this fallback existed.
+            return false;
+        }
+    }
 
     /// <summary>Opens the enlarged view over the page the picture was clicked on.</summary>
     private void ShowEnlarged()

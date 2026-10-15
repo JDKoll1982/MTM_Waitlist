@@ -1,10 +1,9 @@
-﻿using Microsoft.UI.Xaml.Navigation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Shared.ViewModels;
 using MTM_Waitlist.Tests.Fixtures;
+using MTM_Waitlist.Tests.Module_Mock;
 
 namespace MTM_Waitlist.Tests.Module_Shared.Services;
 
@@ -14,62 +13,90 @@ public sealed class ControlInspectorServiceTests
     [TestMethod]
     public void Service_ControlInspectorServiceTests_TryOpenActiveDetail_WhenNotDeveloperReturnsFalse()
     {
-        var navigation = new RecordingNavigationService();
-        var service = CreateService("Operator", navigation);
+        var presenter = new RecordingPresenter();
+        var service = CreateService("Operator", presenter);
 
         var opened = service.TryOpenActiveDetail();
 
         Assert.IsFalse(opened);
-        Assert.AreEqual(0, navigation.NavigateCalls.Count);
+        Assert.AreEqual(0, presenter.Presented.Count);
     }
 
     [TestMethod]
     public void Service_ControlInspectorServiceTests_TryOpenActiveDetail_WhenDeveloperWithoutHoverReturnsFalse()
     {
-        var navigation = new RecordingNavigationService();
-        var service = CreateService("Developer", navigation);
+        var presenter = new RecordingPresenter();
+        var service = CreateService("Developer", presenter);
 
         var opened = service.TryOpenActiveDetail();
 
         Assert.IsFalse(opened);
         Assert.IsFalse(service.CanOpenActiveDetail);
-        Assert.AreEqual(0, navigation.NavigateCalls.Count);
+        Assert.AreEqual(0, presenter.Presented.Count);
     }
 
     [TestMethod]
     public void Service_ControlInspectorServiceTests_ClearActiveElement_DisablesShortcutUntilHoverReturns()
     {
-        var navigation = new RecordingNavigationService();
-        var service = CreateService("Developer", navigation);
+        var presenter = new RecordingPresenter();
+        var service = CreateService("Developer", presenter);
 
         service.ClearActiveElement();
 
         Assert.IsFalse(service.CanOpenActiveDetail);
         Assert.IsFalse(service.TryOpenActiveDetail());
-        Assert.AreEqual(0, navigation.NavigateCalls.Count);
+        Assert.AreEqual(0, presenter.Presented.Count);
     }
 
+    /// <summary>
+    /// The inspector is presented, not navigated to: a page behind a modal dialog can never be seen, which is
+    /// where a hovered control very often is.
+    /// </summary>
+    /// <remarks>
+    /// This is asserted against the markup and the seam rather than by driving a hover, because the hover that
+    /// arms the shortcut comes from a real pointer over a real window. What is pinned here is the shape that made
+    /// the fix possible: the service's third dependency is the presenter, and the page it used to navigate to is
+    /// gone from the tree along with every mention of its page key.
+    /// </remarks>
     [TestMethod]
-    public void Service_ControlInspectorServiceTests_InspectorNavigationTarget_UsesControlInspectorDetailViewModelKey()
+    public void Service_ControlInspectorServiceTests_InspectorIsPresentedInItsOwnWindowRatherThanNavigatedTo()
     {
-        var navigation = new RecordingNavigationService();
-        var detail = new ControlInspectorDetail
-        {
-            Title = "Button details",
-            Summary = "Test control",
-            ElementName = "SaveButton",
-            ElementType = "Microsoft.UI.Xaml.Controls.Button",
-            AssociatedFiles = new[] { "Module_Core/Views/ShellPage.xaml" },
-        };
+        var serviceType = typeof(ControlInspectorService);
+        var dependencies = serviceType
+            .GetConstructors()
+            .SelectMany(static constructor => constructor.GetParameters())
+            .Select(static parameter => parameter.ParameterType)
+            .ToArray();
 
-        var pageKey = typeof(ControlInspectorDetailViewModel).FullName!;
-        var navigated = navigation.NavigateTo(pageKey, detail);
+        Assert.IsTrue(
+            dependencies.Contains(typeof(IControlInspectorDetailPresenter)),
+            "The inspector service no longer asks for a presenter, so it has gone back to whatever surface it can "
+                + "reach from a library - which was a page.");
 
-        Assert.IsTrue(navigated);
-        Assert.AreEqual(1, navigation.NavigateCalls.Count);
-        Assert.AreEqual(pageKey, navigation.NavigateCalls[0].PageKey);
-        Assert.AreSame(detail, navigation.NavigateCalls[0].Parameter);
-        Assert.IsTrue(pageKey.Contains("ControlInspectorDetailViewModel", StringComparison.Ordinal));
+        Assert.IsFalse(
+            dependencies.Any(static type => type.Name == "INavigationService"),
+            "The inspector service navigates again, so its details are shown on a page that a modal dialog hides.");
+
+        var root = RepositoryPatternScan.FindRepositoryRoot();
+
+        Assert.IsTrue(
+            File.Exists(Path.Combine(root, "Module_Shared", "Views", "ControlInspectorDetailWindow.xaml")),
+            "The inspector's window is gone.");
+
+        Assert.IsFalse(
+            File.Exists(Path.Combine(root, "Module_Shared", "Views", "ControlInspectorDetailPage.xaml")),
+            "The inspector's page is back: a page cannot be shown over the modal dialog that raised it.");
+
+        var window = File.ReadAllText(Path.Combine(root, "Module_Shared", "Views", "ControlInspectorDetailWindow.xaml"));
+
+        StringAssert.Contains(window, "<windowex:WindowEx", "The inspector's surface is not a window.");
+        StringAssert.Contains(
+            window,
+            "ControlInspectorDetailWindow_CloseButton",
+            "The window has no close path of its own, and it has no navigation stack to go back along.");
+        Assert.IsFalse(
+            window.Contains("ViewModel.BackCommand", StringComparison.Ordinal),
+            "The window still binds a Back command, which belonged to the page's navigation stack.");
     }
 
     [TestMethod]
@@ -143,37 +170,28 @@ public sealed class ControlInspectorServiceTests
         Assert.IsFalse(filtered.Any(static path => path.Contains("Tooltip", StringComparison.OrdinalIgnoreCase)));
     }
 
-    private static ControlInspectorService CreateService(string role, RecordingNavigationService navigation)
+    private static ControlInspectorService CreateService(string role, RecordingPresenter presenter)
     {
         var person = new FakePersonIdentity { CurrentRoleCode = role };
         var tooltipService = new TooltipService(person);
-        return new ControlInspectorService(person, tooltipService, navigation);
+        return new ControlInspectorService(person, tooltipService, presenter);
     }
 
-    private sealed class RecordingNavigationService : INavigationService
+    /// <summary>
+    /// Stands in for the window that shows the details. It records what it was asked to present, so a test can say
+    /// whether the shortcut reached the surface and what it carried.
+    /// </summary>
+    private sealed class RecordingPresenter : IControlInspectorDetailPresenter
     {
-        public List<(string PageKey, object? Parameter)> NavigateCalls { get; } = new();
+        public List<ControlInspectorDetail> Presented { get; } = new();
 
-        public event NavigatedEventHandler? Navigated
+        /// <summary>What <see cref="Present"/> answers, so a surface that could not be shown can be driven.</summary>
+        public bool Result { get; set; } = true;
+
+        public bool Present(ControlInspectorDetail detail)
         {
-            add { }
-            remove { }
-        }
-
-        public bool CanGoBack => false;
-
-        public Microsoft.UI.Xaml.Controls.Frame? Frame { get; set; }
-
-        public bool GoBack() => false;
-
-        public bool NavigateTo(string pageKey, object? parameter = null, bool clearNavigation = false)
-        {
-            NavigateCalls.Add((pageKey, parameter));
-            return true;
-        }
-
-        public void SetListDataItemForNextConnectedAnimation(object item)
-        {
+            Presented.Add(detail);
+            return Result;
         }
     }
 }

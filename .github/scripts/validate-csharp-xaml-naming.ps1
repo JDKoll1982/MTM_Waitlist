@@ -25,7 +25,25 @@ if (-not $targetFiles -or $targetFiles.Count -eq 0) {
 
 $errors = New-Object System.Collections.Generic.List[string]
 $disallowedAbbrev = @('cfg', 'usr', 'msg', 'auth')
-$reswKeyExceptions = @('AppDisplayName', 'AppDescription', 'AppNotificationSamplePayload')
+# Keys exempt from the `Feature_Element.Property` key shape.
+#
+# `AppDisplayName`/`AppDescription`/`AppNotificationSamplePayload` are platform-reserved names.
+#
+# The remaining entries are the declared cell labels the waitlist card resolves (specs/012-waitlist-card-layout,
+# FR-104 and data-model.md §9). A cell's label IS the resource key: the Item declaration in
+# `Database/Seeds/seed_waitlist_request_item_configs/create.sql` declares the label, and the card resolves it at
+# bind time through `GetLocalized()`. Renaming the key to the `Feature_Element.Property` shape would stop it
+# matching the declaration and the cell's label would draw as its own raw key, so the bare-label shape is the only
+# one that can work here. Every one of them is a label a shipped declaration actually carries - the guard is
+# deliberately not pattern-matched to allow bare labels generally, so a *new* undeclared bare-label key still fails.
+$reswKeyExceptions = @(
+    'AppDisplayName', 'AppDescription', 'AppNotificationSamplePayload',
+    'Die Location', 'Home Location', 'Scrap Type', 'Coil Number', 'Size', '# of Skids', 'Weight of Coil',
+    'Die Shop Direction', 'Part Type', 'Item Type', 'Total Qty In House',
+    'Coil description', 'Average coil weight', 'Quantity in house', 'Die', 'Component', 'Dunnage part',
+    'Pickup location', 'Part', 'Quantity', 'Destination', 'Correct coil', 'Correct flatstock',
+    'Lugger Location', 'Part description', 'Quantity on hand', 'Quantity involved', 'Scrap lugger',
+    'Request description', 'Reason', 'Pickup work center', 'Requesting work center', 'Work center')
 
 function Add-Error {
     param([string]$File, [int]$Line, [string]$Message)
@@ -172,12 +190,74 @@ foreach ($relative in $targetFiles) {
     }
 }
 
-if ($errors.Count -gt 0) {
+# ---------------------------------------------------------------------------
+# Grandfathered findings — reported as passable.
+#
+# `naming-grandfathered.txt` lists the findings that were already failing before feature 012
+# (specs/012-waitlist-card-layout) started. The owner's instruction on 2026-10-11 was to grandfather the
+# pre-existing ones and fix the feature's own, so a listed finding is not a failure and never appears in the
+# report. The file records the reason, the format and the rules for changing it.
+#
+# A missing or unreadable file is not an error: the list is empty, every finding fails, and the reason is
+# stated once. A key is the guard's own path and message WITHOUT the line number, because line numbers move
+# and a line-keyed list would quietly grant a pass to whatever shifted into that line.
+# ---------------------------------------------------------------------------
+$grandfatheredKeys = New-Object System.Collections.Generic.HashSet[string]
+$grandfatherFile = Join-Path $PSScriptRoot 'naming-grandfathered.txt'
+
+if (Test-Path -LiteralPath $grandfatherFile) {
+    try {
+        Get-Content -LiteralPath $grandfatherFile |
+        Where-Object { $_.Trim().Length -gt 0 -and -not $_.StartsWith('#') } |
+        ForEach-Object { [void]$grandfatheredKeys.Add(($_.Trim() -replace '\\', '\')) }
+    }
+    catch {
+        Write-Host "Could not read $grandfatherFile, so no finding is grandfathered: $($_.Exception.Message)"
+    }
+}
+else {
+    Write-Host "No grandfather list at $grandfatherFile, so every finding fails."
+}
+
+# The key for one finding: its path and its message, with no line number.
+function Get-FindingKey {
+    param([string]$Finding)
+
+    $separator = $Finding.IndexOf(' ')
+    if ($separator -lt 0) {
+        return $Finding
+    }
+
+    $location = $Finding.Substring(0, $separator)
+    $message = $Finding.Substring($separator + 1).Trim()
+
+    # Drop the line number: `file.cs:123` -> `file.cs`, and the leading `.\` the enumeration adds, so a key
+    # matches the list however the file was reached.
+    $lastColon = $location.LastIndexOf(':')
+    $asFile = if ($lastColon -gt 1) { $location.Substring(0, $lastColon) } else { $location }
+
+    return "$(($asFile -replace '^\.\\', ''))|$message"
+}
+
+$grandfatheredCount = 0
+$newErrors = New-Object System.Collections.Generic.List[string]
+
+foreach ($e in $errors) {
+    if ($grandfatheredKeys.Contains((Get-FindingKey $e))) {
+        $grandfatheredCount++
+        continue
+    }
+
+    $newErrors.Add($e)
+}
+
+if ($newErrors.Count -gt 0) {
     Write-Host 'C#/XAML naming compliance failed:'
-    foreach ($e in $errors) {
+    foreach ($e in $newErrors) {
         Write-Host "- $e"
     }
+    Write-Host "New: $($newErrors.Count). Grandfathered: $grandfatheredCount."
     exit 1
 }
 
-Write-Host "C#/XAML naming compliance passed for $($targetFiles.Count) file(s)."
+Write-Host "C#/XAML naming compliance passed for $($targetFiles.Count) file(s). Grandfathered: $grandfatheredCount. New: 0."

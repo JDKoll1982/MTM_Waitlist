@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="MTM_Waitlist.Module_Waitlist.Views.NewRequestHopperPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
+    mc:Ignorable="d">
+
+    <Grid Style="{StaticResource SetupPageGridStyle}" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}">
+            <TextBlock
+                x:Uid="NewRequest_Hopper_Title"
+                Style="{StaticResource SetupPageTitleStyle}"
+                Text="New Request - Hopper Size" />
+            <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="{x:Bind ViewModel.WorkCenterText, Mode=OneWay}" />
+            <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="{x:Bind ViewModel.PromptText, Mode=OneWay}" />
+            <TextBlock
+                Margin="0,6,0,0"
+                Style="{StaticResource RequestDialogCaptionStyle}"
+                Text="{x:Bind ViewModel.UnavailableMessage, Mode=OneWay}"
+                TextWrapping="WrapWholeWords"
+                Visibility="{x:Bind ViewModel.IsUnavailableVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="12">
+                    <!-- The size is asked as three choices (FR-077). The radio group is what keeps them one answer. -->
+                    <RadioButton
+                        AutomationProperties.AutomationId="NewRequestHopperPage_SmallOption"
+                        x:Uid="NewRequest_Hopper_SmallOption"
+                        Content="Small"
+                        GroupName="HopperSize"
+                        IsChecked="{x:Bind ViewModel.IsSmallSelected, Mode=TwoWay}" />
+                    <RadioButton
+                        AutomationProperties.AutomationId="NewRequestHopperPage_MediumOption"
+                        x:Uid="NewRequest_Hopper_MediumOption"
+                        Content="Medium"
+                        GroupName="HopperSize"
+                        IsChecked="{x:Bind ViewModel.IsMediumSelected, Mode=TwoWay}" />
+                    <RadioButton
+                        AutomationProperties.AutomationId="NewRequestHopperPage_LargeOption"
+                        x:Uid="NewRequest_Hopper_LargeOption"
+                        Content="Large"
+                        GroupName="HopperSize"
+                        IsChecked="{x:Bind ViewModel.IsLargeSelected, Mode=TwoWay}" />
+
+                    <!-- The chosen size's reference image, drawn beneath the choices. The frame is a fixed-size
+                         thumbnail so the picture is never measured at its own natural size, and a size whose image
+                         is missing or unusable draws the one shared placeholder rather than a blank (FR-077,
+                         FR-079, FR-080). -->
+                    <Border
+                        Width="192"
+                        Height="192"
+                        Padding="8"
+                        HorizontalAlignment="Left"
+                        Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
+                        CornerRadius="8">
+                        <sharedControls:ClickToEnlargeImageView
+                            AutomationProperties.AutomationId="NewRequestHopperPage_SizePicture"
+                            Source="{x:Bind ViewModel.SelectedImagePath, Mode=OneWay, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
+                            Stretch="Uniform" />
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <StackPanel Grid.Row="2" Style="{StaticResource SetupActionBarStyle}">
+            <Button
+                AutomationProperties.AutomationId="NewRequestHopperPage_BackButton"
+                x:Uid="NewRequest_Hopper_BackButton"
+                Content="Back"
+                Command="{x:Bind ViewModel.BackCommand}" />
+            <Button
+                AutomationProperties.AutomationId="NewRequestHopperPage_ContinueButton"
+                x:Uid="NewRequest_Hopper_ContinueButton"
+                Content="Continue"
+                Command="{x:Bind ViewModel.ContinueCommand}"
+                Style="{StaticResource AccentButtonStyle}" />
+        </StackPanel>
+    </Grid>
+</Page>

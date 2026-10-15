@@ -21,6 +21,21 @@ public sealed class WaitlistRequest
     public RequestItemDefinition? ItemDefinition => RequestItemCatalog.FindById(Item);
 
     public string? InputValue { get; init; }
+
+    /// <summary>
+    /// The condition the request's own material handler reported from its card, or null when none is set. One
+    /// of the four verbatim conditions (<c>HandlerStatusCatalog</c>); anything else is not a condition and the
+    /// card falls through to the overdue marking or the lifecycle word (<c>data-model.md</c> §2, FR-012).
+    /// </summary>
+    public string? HandlerStatus { get; init; }
+
+    /// <summary>
+    /// The answers the request captured beyond <see cref="InputValue"/>, keyed by the label the Item declared,
+    /// or null when it captured none. A blank answer is never written, so a label the requester left blank has
+    /// no entry here and no cell on the card (FR-006, FR-073).
+    /// </summary>
+    public IReadOnlyDictionary<string, string>? Answers { get; init; }
+
     public string ActiveSetupJobId { get; init; } = string.Empty;
     public string WorkCenterName { get; init; } = string.Empty;
     public string RequesterEmployeeNumber { get; init; } = string.Empty;
@@ -29,7 +44,19 @@ public sealed class WaitlistRequest
     public DateTimeOffset RequestedUtc { get; init; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? TargetTimeUtc { get; init; }
     public bool IsOverdue { get; init; }
+
+    /// <summary>
+    /// The material handler the request is assigned to, by employee number. This is the number every handler
+    /// authorization compares, which is why the queue stores it; it is never what the screen prints.
+    /// </summary>
     public string? AssignedMaterialHandler { get; init; }
+
+    /// <summary>
+    /// The assigned material handler's display name, resolved from the entry that handler wrote when they took
+    /// the request, or null when no such entry names them. This is what every reader prints, because a person is
+    /// named by name (FR-022).
+    /// </summary>
+    public string? AssignedMaterialHandlerName { get; init; }
     public string? CancellationReason { get; init; }
     public DateTimeOffset? CanceledUtc { get; init; }
     public string? CanceledByEmployeeNumber { get; init; }

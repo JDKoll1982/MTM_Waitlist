@@ -1,10 +1,12 @@
 using System.Collections.Concurrent;
+using System.Text.Json;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
+using MTM_Waitlist.Module_Waitlist.Helpers;
 using MTM_Waitlist.Module_Waitlist.Models;
 
 namespace MTM_Waitlist.Module_Waitlist.Services;
@@ -101,6 +103,8 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             Category = ReadString(row, "category"),
             Item = ReadString(row, "item"),
             InputValue = ReadNullableString(row, "input_value"),
+            HandlerStatus = ReadNullableString(row, "handler_status"),
+            Answers = ReadAnswers(row, "answers_json"),
             ActiveSetupJobId = ReadString(row, "active_setup_job_id"),
             WorkCenterName = ReadString(row, "work_center_name"),
             RequesterEmployeeNumber = ReadString(row, "requester_employee_number"),
@@ -110,6 +114,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             TargetTimeUtc = ReadDateTimeUtc(row, "target_time_utc"),
             IsOverdue = ReadBool(row, "is_overdue"),
             AssignedMaterialHandler = ReadNullableString(row, "assigned_material_handler"),
+            AssignedMaterialHandlerName = ReadNullableString(row, "assigned_material_handler_name"),
             CancellationReason = ReadNullableString(row, "cancellation_reason"),
             CanceledUtc = ReadDateTimeUtc(row, "canceled_utc"),
             CanceledByEmployeeNumber = ReadNullableString(row, "canceled_by_employee_number"),
@@ -163,6 +168,51 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             }
         }
         return null;
+    }
+
+    /// <summary>
+    /// The request's captured answers, read from the stored label-to-value JSON object, or null when the row
+    /// carries none. A blank entry is dropped rather than carried, so the card adds no cell for an answer the
+    /// request never gave (FR-006, FR-073).
+    /// </summary>
+    /// <remarks>
+    /// A payload that cannot be read yields no answers rather than a half-read map or an exception: the list is
+    /// what the whole screen is built from, and one unusable row must not take the list with it.
+    /// </remarks>
+    private static IReadOnlyDictionary<string, string>? ReadAnswers(IReadOnlyDictionary<string, object?> row, string key)
+    {
+        var json = ReadNullableString(row, key);
+        if (json is null)
+        {
+            return null;
+        }
+
+        try
+        {
+            var parsed = JsonSerializer.Deserialize<Dictionary<string, string?>>(json);
+            if (parsed is null || parsed.Count == 0)
+            {
+                return null;
+            }
+
+            var answers = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (var (label, value) in parsed)
+            {
+                if (string.IsNullOrWhiteSpace(label) || string.IsNullOrWhiteSpace(value))
+                {
+                    continue;
+                }
+
+                answers[label.Trim()] = value.Trim();
+            }
+
+            return answers.Count == 0 ? null : answers;
+        }
+        catch (JsonException)
+        {
+            AppLog.Info("WaitlistRequest", $"The stored answers payload could not be read and was ignored. Payload='{json}'.");
+            return null;
+        }
     }
 
     public IReadOnlyList<WaitlistRequest> GetActiveRequests(string? building = null)
@@ -345,6 +395,8 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             Category = existing.Category,
             Item = existing.Item,
             InputValue = existing.InputValue,
+            HandlerStatus = existing.HandlerStatus,
+            Answers = existing.Answers,
             ActiveSetupJobId = existing.ActiveSetupJobId,
             WorkCenterName = existing.WorkCenterName,
             RequesterEmployeeNumber = existing.RequesterEmployeeNumber,
@@ -354,6 +406,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             TargetTimeUtc = existing.TargetTimeUtc,
             IsOverdue = existing.IsOverdue,
             AssignedMaterialHandler = existing.AssignedMaterialHandler,
+            AssignedMaterialHandlerName = existing.AssignedMaterialHandlerName,
             CancellationReason = string.Equals(nextStatus, "Canceled", StringComparison.OrdinalIgnoreCase)
                 ? (string.IsNullOrWhiteSpace(cancellationReason) ? existing.CancellationReason : cancellationReason.Trim())
                 : null,
@@ -489,6 +542,8 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             Category = existing.Category,
             Item = existing.Item,
             InputValue = existing.InputValue,
+            HandlerStatus = existing.HandlerStatus,
+            Answers = existing.Answers,
             ActiveSetupJobId = existing.ActiveSetupJobId,
             WorkCenterName = existing.WorkCenterName,
             RequesterEmployeeNumber = existing.RequesterEmployeeNumber,
@@ -498,6 +553,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             TargetTimeUtc = existing.TargetTimeUtc,
             IsOverdue = existing.IsOverdue,
             AssignedMaterialHandler = existing.AssignedMaterialHandler,
+            AssignedMaterialHandlerName = existing.AssignedMaterialHandlerName,
             CancellationReason = existing.CancellationReason,
             CanceledUtc = existing.CanceledUtc,
             CanceledByEmployeeNumber = existing.CanceledByEmployeeNumber,
@@ -586,6 +642,8 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             Category = existing.Category,
             Item = existing.Item,
             InputValue = existing.InputValue,
+            HandlerStatus = existing.HandlerStatus,
+            Answers = existing.Answers,
             ActiveSetupJobId = existing.ActiveSetupJobId,
             WorkCenterName = existing.WorkCenterName,
             RequesterEmployeeNumber = existing.RequesterEmployeeNumber,
@@ -595,6 +653,9 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             TargetTimeUtc = existing.TargetTimeUtc,
             IsOverdue = existing.IsOverdue,
             AssignedMaterialHandler = handler,
+            // The handler who took this request is the caller, so the name is known here and the row (and the
+            // card drawn from it) names them immediately, without waiting for the next list read to resolve it.
+            AssignedMaterialHandlerName = string.IsNullOrWhiteSpace(handlerEmployeeName) ? null : handlerEmployeeName.Trim(),
             CancellationReason = null,
             CanceledUtc = null,
             CanceledByEmployeeNumber = null,
@@ -646,6 +707,8 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             Category = existing.Category,
             Item = existing.Item,
             InputValue = existing.InputValue,
+            HandlerStatus = existing.HandlerStatus,
+            Answers = existing.Answers,
             ActiveSetupJobId = existing.ActiveSetupJobId,
             WorkCenterName = existing.WorkCenterName,
             RequesterEmployeeNumber = existing.RequesterEmployeeNumber,
@@ -655,6 +718,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             TargetTimeUtc = existing.TargetTimeUtc,
             IsOverdue = existing.IsOverdue,
             AssignedMaterialHandler = existing.AssignedMaterialHandler,
+            AssignedMaterialHandlerName = existing.AssignedMaterialHandlerName,
             CancellationReason = existing.CancellationReason,
             CanceledUtc = existing.CanceledUtc,
             CanceledByEmployeeNumber = existing.CanceledByEmployeeNumber,
@@ -706,6 +770,8 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             Category = existing.Category,
             Item = existing.Item,
             InputValue = existing.InputValue,
+            HandlerStatus = existing.HandlerStatus,
+            Answers = existing.Answers,
             ActiveSetupJobId = existing.ActiveSetupJobId,
             WorkCenterName = existing.WorkCenterName,
             RequesterEmployeeNumber = existing.RequesterEmployeeNumber,
@@ -715,6 +781,9 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             TargetTimeUtc = existing.TargetTimeUtc,
             IsOverdue = existing.IsOverdue,
             AssignedMaterialHandler = null,
+            // Releasing clears the assignee, so the name goes with it: a released request is back in the open
+            // list and the card names its requester again.
+            AssignedMaterialHandlerName = null,
             CancellationReason = existing.CancellationReason,
             CanceledUtc = existing.CanceledUtc,
             CanceledByEmployeeNumber = existing.CanceledByEmployeeNumber,
@@ -734,6 +803,157 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         AppLog.Info("WaitlistRequest", $"Request '{requestId}' released by handler '{handler}'. Status 'Accepted' -> 'Pending' (not a cancellation).");
         return updated;
     }
+
+    /// <summary>
+    /// Sets the condition the row's own material handler reported from its card, and hands the store's own
+    /// affected-row count back so a lost race is told rather than shown as success (FR-070, FR-073, FR-076).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The write goes through the same non-query seam and the same conditional shape as the lifecycle update:
+    /// a bare <c>UPDATE</c>, gated on the handler the caller read, whose affected-row count <i>is</i> the answer.
+    /// The condition is stored beside the lifecycle status and never over it, so nothing here touches the
+    /// status, the assignee or any other column (FR-072, FR-073).
+    /// </para>
+    /// <para>
+    /// The four conditions are the closed vocabulary (<see cref="HandlerStatusCatalog"/>), and the feature
+    /// defines no path that clears a condition back to none, so a value that is not one of the four is refused
+    /// here rather than written and cleared later.
+    /// </para>
+    /// </remarks>
+    /// <returns>
+    /// The store's affected-row count: 1 when the condition was written; 0 when nothing was affected — a caller
+    /// that is not the row's own material handler, an expected handler with nothing to match on, a request this
+    /// session does not hold, or a value that is not one of the four conditions.
+    /// </returns>
+    public async Task<int> SetHandlerStatusAsync(
+        Guid requestId,
+        string? handlerStatus,
+        string expectedMaterialHandler,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var condition = string.IsNullOrWhiteSpace(handlerStatus) ? null : handlerStatus.Trim();
+        if (condition is null || !HandlerStatusCatalog.IsCondition(condition))
+        {
+            AppLog.Info(
+                "WaitlistRequest",
+                $"Handler status write refused for request '{requestId}': '{handlerStatus ?? "null"}' is not one of the four conditions (FR-071, FR-102).");
+            return 0;
+        }
+
+        if (!_requests.TryGetValue(requestId, out var existing))
+        {
+            AppLog.Info("WaitlistRequest", $"Handler status write skipped: request '{requestId}' is not held by this session.");
+            return 0;
+        }
+
+        // The same gate the procedure applies, applied to the row this session holds: only the row's own
+        // material handler can set its condition, and an expected handler with nothing to match on writes
+        // nothing rather than everything (FR-076).
+        var expectedHandler = (expectedMaterialHandler ?? string.Empty).Trim();
+        if (expectedHandler.Length == 0
+            || !string.Equals(expectedHandler, existing.AssignedMaterialHandler, StringComparison.OrdinalIgnoreCase))
+        {
+            AppLog.Info(
+                "WaitlistRequest",
+                $"Handler status write denied for request '{requestId}': '{expectedHandler}' is not its material handler ('{existing.AssignedMaterialHandler ?? "none"}') (FR-076).");
+            return 0;
+        }
+
+        var rowsAffected = 1;
+        if (_mySqlHelperServer is not null)
+        {
+            rowsAffected = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+                "sp_waitlist_request_handler_status_update",
+                new Dictionary<string, object?>
+                {
+                    ["p_public_id"] = requestId.ToString(),
+                    ["p_handler_status"] = condition,
+                    ["p_expected_material_handler"] = expectedHandler,
+                },
+                MySqlDatabaseTarget.MtmWaitlist,
+                cancellationToken).ConfigureAwait(false);
+        }
+
+        if (rowsAffected <= 0)
+        {
+            // The store matched no row: the condition was not recorded, so the row this session holds is left
+            // exactly as it was and the caller is answered with the count rather than a success (FR-076).
+            AppLog.Info(
+                "WaitlistRequest",
+                $"Handler status '{condition}' did not take on request '{requestId}': the row is no longer held by handler '{expectedHandler}'. RowsAffected={rowsAffected}.");
+            return rowsAffected;
+        }
+
+        _requests[requestId] = new WaitlistRequest
+        {
+            Id = existing.Id,
+            Building = existing.Building,
+            WorkCenter = existing.WorkCenter,
+            Category = existing.Category,
+            Item = existing.Item,
+            InputValue = existing.InputValue,
+            HandlerStatus = condition,
+            Answers = existing.Answers,
+            ActiveSetupJobId = existing.ActiveSetupJobId,
+            WorkCenterName = existing.WorkCenterName,
+            RequesterEmployeeNumber = existing.RequesterEmployeeNumber,
+            RequesterEmployeeName = existing.RequesterEmployeeName,
+            Status = existing.Status,
+            RequestedUtc = existing.RequestedUtc,
+            TargetTimeUtc = existing.TargetTimeUtc,
+            IsOverdue = existing.IsOverdue,
+            AssignedMaterialHandler = existing.AssignedMaterialHandler,
+            AssignedMaterialHandlerName = existing.AssignedMaterialHandlerName,
+            CancellationReason = existing.CancellationReason,
+            CanceledUtc = existing.CanceledUtc,
+            CanceledByEmployeeNumber = existing.CanceledByEmployeeNumber,
+            AcceptedUtc = existing.AcceptedUtc,
+            CompletedUtc = existing.CompletedUtc,
+            ReleasedUtc = existing.ReleasedUtc,
+            UpdatedUtc = existing.UpdatedUtc,
+            Note = existing.Note,
+            LastMessageUtc = existing.LastMessageUtc,
+        };
+
+        AppLog.Info("WaitlistRequest", $"Handler status '{condition}' set on request '{requestId}'. RowsAffected={rowsAffected}.");
+        RequestsChanged?.Invoke(this, EventArgs.Empty);
+        return rowsAffected;
+    }
+
+    /// <summary>
+    /// The draft's captured answers as a label-to-value map with the blank answers left out, or null when
+    /// nothing was captured. A blank answer is never written, so no cell is added for it (FR-006).
+    /// </summary>
+    private static Dictionary<string, string>? NormalizeAnswers(IReadOnlyDictionary<string, string>? answers)
+    {
+        if (answers is null || answers.Count == 0)
+        {
+            return null;
+        }
+
+        var captured = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var (label, value) in answers)
+        {
+            if (string.IsNullOrWhiteSpace(label) || string.IsNullOrWhiteSpace(value))
+            {
+                continue;
+            }
+
+            captured[label.Trim()] = value.Trim();
+        }
+
+        return captured.Count == 0 ? null : captured;
+    }
+
+    /// <summary>
+    /// The answers as the store's JSON object, or null when the request captured none — the procedure stores
+    /// NULL rather than an empty object, so a request with no answers reads back as no answers.
+    /// </summary>
+    private static string? SerializeAnswers(Dictionary<string, string>? answers)
+        => answers is null ? null : JsonSerializer.Serialize(answers);
 
     /// <summary>
     /// Stores a handler-action transition, records its audit entry, persists it through the status-update
@@ -863,6 +1083,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             }
         }
 
+        var capturedAnswers = NormalizeAnswers(draft.Answers);
         var request = new WaitlistRequest
         {
             Building = draft.Building.Trim(),
@@ -870,6 +1091,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             Category = string.IsNullOrWhiteSpace(draft.Category) ? string.Empty : draft.Category.Trim(),
             Item = resolvedItem,
             InputValue = string.IsNullOrWhiteSpace(draft.InputValue) ? null : draft.InputValue.Trim(),
+            Answers = capturedAnswers,
             ActiveSetupJobId = draft.ActiveSetupJobId.Trim(),
             WorkCenterName = draft.WorkCenterName.Trim(),
             RequesterEmployeeNumber = draft.RequesterEmployeeNumber.Trim(),
@@ -907,6 +1129,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
                     ["p_assigned_material_handler"] = request.AssignedMaterialHandler,
                     ["p_cancellation_reason"] = request.CancellationReason,
                     ["p_note"] = request.Note,
+                    ["p_answers_json"] = SerializeAnswers(capturedAnswers),
                 },
                 MySqlDatabaseTarget.MtmWaitlist,
                 cancellationToken).ConfigureAwait(false);

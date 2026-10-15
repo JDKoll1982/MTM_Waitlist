@@ -39,14 +39,17 @@ public sealed partial class WaitlistViewPage : Page
         EmptyStateImage.Source = PictureSource.FromPath("Assets/Placeholders/waitlist-empty-state.png");
     }
 
-    private void ListView_ItemClick(object sender, ItemClickEventArgs e)
-    {
-        if (ViewModel.ItemClickCommand != null && ViewModel.ItemClickCommand.CanExecute(e.ClickedItem))
-        {
-            ViewModel.ItemClickCommand.Execute(e.ClickedItem);
-        }
-    }
+    /// <summary>
+    /// The condition a row's own material handler chose from its status word: the row's command stores it, so the
+    /// one write path and its affected-row reporting are the same as every other action on the list, and a lost
+    /// race is told rather than shown as success (FR-070, FR-072, FR-076).
+    /// </summary>
+    private void OnCardStatusConditionChosen(object? sender, (SampleOrder Row, string Condition) selection) =>
+        ViewModel.SetStatusConditionCommand.Execute((selection.Row, selection.Condition));
 
+    // The card body no longer opens the request: the card's own `Open details` button is the one path that
+    // does, through the navigation service. The list keeps its row selection so a Shift+click on the picture
+    // is still the gesture that enlarges it, and nothing acts on the selection itself (FR-003, FR-068, FR-069).
     private void OnAddRequestClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         var navigationService = App.GetService<INavigationService>();

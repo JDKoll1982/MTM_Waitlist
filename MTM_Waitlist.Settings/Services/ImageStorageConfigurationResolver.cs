@@ -18,7 +18,7 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
     
     // Cache for resolved values with TTL
     private readonly ConcurrentDictionary<string, CachedValue<object>> _cache;
-    private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(5);
+    private static readonly TimeSpan s_cacheTtl = TimeSpan.FromMinutes(5);
 
     /// <summary>
     /// Initializes a new ImageStorageConfigurationResolver.
@@ -114,6 +114,45 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
             _logger.LogError(ex, "Failed to resolve the dunnage root configuration");
             throw new InvalidOperationException(
                 "Failed to resolve the dunnage root configuration", ex);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<string> GetHopperFolderPathAsync()
+    {
+        try
+        {
+            var cacheKey = ConfigSettingKeys.ImageStorageHopperFolderPath;
+
+            if (_cache.TryGetValue(cacheKey, out var cached) && cached.IsValid())
+            {
+                _logger.LogDebug("Using cached hopper picture folder: {Source}", cached.Source);
+                return (string)cached.Value;
+            }
+
+            // The plant-wide override, which is an IT-level decision that applies to every computer: where the
+            // hopper artwork lives is the owner's to change without a new release (FR-078).
+            var dbValue = await _configService.GetSettingValueAsync(
+                ConfigSettingKeys.ImageStorageHopperFolderPath, "all_users");
+
+            if (dbValue != null && !string.IsNullOrWhiteSpace(dbValue.SettingValue))
+            {
+                _logger.LogInformation("Using database override for the hopper picture folder: {Path}",
+                                     dbValue.SettingValue);
+                CacheValue(cacheKey, dbValue.SettingValue, "database");
+                return dbValue.SettingValue;
+            }
+
+            var appsettingsValue = _appsettingsOptions.Value.HopperFolderPath;
+            _logger.LogInformation("Using the shipped default for the hopper picture folder: {Path}", appsettingsValue);
+            CacheValue(cacheKey, appsettingsValue, "default");
+            return appsettingsValue;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to resolve the hopper picture folder configuration");
+            throw new InvalidOperationException(
+                "Failed to resolve the hopper picture folder configuration", ex);
         }
     }
 
@@ -383,7 +422,7 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
         public DateTime CachedAtUtc { get; init; }
 
         public bool IsValid() =>
-            DateTime.UtcNow - CachedAtUtc < CacheTtl;
+            DateTime.UtcNow - CachedAtUtc < s_cacheTtl;
     }
 }
 

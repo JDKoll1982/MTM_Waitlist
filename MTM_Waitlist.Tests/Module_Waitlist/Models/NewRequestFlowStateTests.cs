@@ -218,4 +218,139 @@ public sealed class NewRequestFlowStateTests
             },
         },
     };
+
+    [TestMethod]
+    public void Model_NewRequestFlowStateTests_ToDraft_CarriesTheCapturedAnswersAndDropsABlankOne()
+    {
+        var state = new NewRequestFlowState
+        {
+            Building = "Expo Drive",
+            WorkCenter = "Press 12",
+            Category = RequestCategory.Other,
+            Item = OtherItem,
+            InputValue = "Wrong material at press",
+        };
+        state.RecordAnswer("Size", "Large");
+        state.RecordAnswer("Weight of Coil", "   ");
+
+        var draft = state.ToDraft();
+
+        Assert.IsNotNull(draft.Answers, "The answers the flow captured ride the draft to the store (FR-073).");
+        Assert.AreEqual("Large", draft.Answers!["Size"]);
+        Assert.IsFalse(
+            draft.Answers!.ContainsKey("Weight of Coil"),
+            "A blank answer is not written, so no cell is added for it (FR-006).");
+    }
+
+    [TestMethod]
+    public void Model_NewRequestFlowStateTests_ToDraft_CarriesNoAnswersPayloadWhenNothingWasAnswered()
+    {
+        var draft = new NewRequestFlowState
+        {
+            WorkCenter = "Press 12",
+            Category = RequestCategory.Other,
+            Item = OtherItem,
+            InputValue = "Please assist",
+        }.ToDraft();
+
+        Assert.IsNull(draft.Answers, "A request that captured no answers carries no answers payload at all (FR-006).");
+    }
+
+    [TestMethod]
+    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheHopperStepWhenTheRowAsksForTheSize()
+    {
+        // The step is chosen by the answer the row declares, never by the Item's code (FR-013, FR-077).
+        var state = StateDeclaring(NewRequestFlowRules.HopperSizeLabel, requiresAnswer: false);
+
+        Assert.AreEqual(typeof(NewRequestHopperViewModel), NewRequestFlowRules.GetNextStepType(state));
+    }
+
+    [TestMethod]
+    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheConfirmationStepOnceTheSizeIsCaptured()
+    {
+        var state = StateDeclaring(NewRequestFlowRules.HopperSizeLabel, requiresAnswer: false);
+        state.RecordAnswer(NewRequestFlowRules.HopperSizeLabel, "Large");
+
+        Assert.AreEqual(typeof(NewRequestSummaryViewModel), NewRequestFlowRules.GetNextStepType(state));
+    }
+
+    [TestMethod]
+    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheCoilTurnStepWhenTheRowAsksForTheWeightOfCoil()
+    {
+        var state = StateDeclaring(NewRequestFlowRules.CoilWeightLabel, requiresAnswer: true);
+
+        Assert.AreEqual(typeof(NewRequestCoilTurnViewModel), NewRequestFlowRules.GetNextStepType(state));
+    }
+
+    [TestMethod]
+    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheSkidCountStepWhenTheRowAsksForTheSkidCount()
+    {
+        var state = StateDeclaring(NewRequestFlowRules.SkidCountLabel, requiresAnswer: false);
+
+        Assert.AreEqual(typeof(NewRequestSkidCountViewModel), NewRequestFlowRules.GetNextStepType(state));
+    }
+
+    [TestMethod]
+    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsThePartSearchStepWhenTheRowAsksForTheIncorrectPart()
+    {
+        var state = StateDeclaring(NewRequestFlowRules.IncorrectCoilLabel, requiresAnswer: true);
+
+        Assert.AreEqual(typeof(NewRequestPartSearchViewModel), NewRequestFlowRules.GetNextStepType(state));
+    }
+
+    [TestMethod]
+    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheDetailsStepAfterThePartSearchWhenTheRowAlsoAsksForAReason()
+    {
+        // The wrong-part Items ask two things: the incorrect part through the search, and the reason as the row's
+        // own single answer. Capturing the part must not skip the reason the row still requires (data-model §10).
+        var state = StateDeclaring(NewRequestFlowRules.IncorrectCoilLabel, requiresAnswer: true, alsoDeclaresReason: true);
+        state.RecordAnswer(NewRequestFlowRules.IncorrectCoilLabel, "MMC0001000");
+
+        Assert.AreEqual(typeof(NewRequestDetailsViewModel), NewRequestFlowRules.GetNextStepType(state));
+    }
+
+    /// <summary>A row that declares one answer-sourced field under <paramref name="label"/> and nothing else.</summary>
+    private static NewRequestFlowState StateDeclaring(string label, bool requiresAnswer, bool alsoDeclaresReason = false)
+    {
+        var fields = new List<RequestItemFieldDefinition>
+        {
+            new()
+            {
+                Label = label,
+                ValueType = RequestItemValueType.String,
+                Source = RequestItemFieldDefinition.Sources.Answer,
+                Order = alsoDeclaresReason ? 2 : 1,
+            },
+        };
+
+        if (alsoDeclaresReason)
+        {
+            fields.Add(new RequestItemFieldDefinition
+            {
+                Label = "Reason",
+                ValueType = RequestItemValueType.Text,
+                Source = RequestItemFieldDefinition.Sources.Answer,
+                Order = 1,
+                IsRequired = true,
+            });
+        }
+
+        return new NewRequestFlowState
+        {
+            WorkCenter = "Press 12",
+            Category = RequestCategory.Other,
+            Item = OtherItem,
+            ItemConfiguration = new RequestItemConfiguration
+            {
+                Item = "other",
+                Category = "Other",
+                ControlFlow = requiresAnswer
+                    ? RequestItemConfiguration.CollectInputThenConfirm
+                    : RequestItemConfiguration.DirectToConfirmation,
+                RequiresAnswer = requiresAnswer,
+                AnswerValueType = RequestItemValueType.Text,
+                DetailFields = fields,
+            },
+        };
+    }
 }

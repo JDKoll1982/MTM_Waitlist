@@ -229,6 +229,24 @@ public partial class ShellViewModel : ObservableRecipient
     } = CreateUserBadgeBrush("#FF5C5C5C");
 
     /// <summary>
+    /// What the signed-in-user badge announces to assistive technology (FR-105): who is signed in, and that the
+    /// badge is how anyone signs out.
+    /// </summary>
+    /// <remarks>
+    /// The badge draws an icon and initials and no text, so it derives no accessible name of its own; without this
+    /// it announced nothing at all.
+    /// </remarks>
+    public string CurrentUserAutomationName => string.IsNullOrWhiteSpace(CurrentUserDisplayName)
+        ? "Current user, with sign out options"
+        : $"Signed in as {CurrentUserDisplayName}, with sign out options";
+
+    /// <summary>
+    /// Keeps the badge's announceable name in step with the identity it names, so the name the person hears is
+    /// never the person who signed in before them.
+    /// </summary>
+    partial void OnCurrentUserDisplayNameChanged(string value) => OnPropertyChanged(nameof(CurrentUserAutomationName));
+
+    /// <summary>
     /// The label of the badge flyout's Sign out entry (FR-022, FR-033). The fallback is readable text rather
     /// than the resource key, so a missing entry never shows the person a key.
     /// </summary>

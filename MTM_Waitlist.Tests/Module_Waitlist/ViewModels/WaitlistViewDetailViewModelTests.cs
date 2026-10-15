@@ -160,7 +160,9 @@ public sealed class WaitlistViewDetailViewModelTests
             string.Equals(section.Title, "Request context", StringComparison.OrdinalIgnoreCase));
         Assert.AreEqual("100-03", SectionField(contextSection, "Work center"));
         Assert.AreEqual("John Koll", SectionField(contextSection, "Requesting user"));
-        Assert.AreEqual("6229", SectionField(contextSection, "Employee number"), "Employee number should come from the requester.");
+        Assert.IsNull(
+            SectionField(contextSection, "Employee number"),
+            "The page names the person who asked; it does not print their employee number as well.");
     }
 
     private static string? SectionField(WaitlistDetailTemplateSection section, string label)

@@ -35,7 +35,7 @@ public sealed class NewRequestFlowService : INewRequestFlowService
             var availability = await _availabilityProvider.GetAvailabilityAsync(normalized, cancellationToken).ConfigureAwait(false);
             AppLog.Info(
                 "WaitlistNewRequest",
-                $"Availability for work center '{normalized}': ActiveJob={availability.HasActiveJob}, Coil={availability.HasCoil}, Flatstock={availability.HasFlatstock}, Die={availability.HasDie}, Component={availability.HasComponent}, Dunnage={availability.HasDunnage}, ScrapDecision={availability.HasScrapDecision}.");
+                $"Availability for work center '{normalized}': ActiveJob={availability.HasActiveJob}, Coil={availability.HasCoil}, Flatstock={availability.HasFlatstock}, Die={availability.HasDie}, Component={availability.HasComponent}, Dunnage={availability.HasDunnage}, ScrapDecision={availability.HasScrapDecision}, Disposition={availability.Disposition}, ReturningWork(FG/NCM/WIP/O-S)={availability.HasFinishedGoodsToReturn}/{availability.HasNonconformingStockToReturn}/{availability.HasWorkInProgressToReturn}/{availability.HasOutsideServiceWorkToReturn}.");
             return availability;
         }
         catch (Exception ex)

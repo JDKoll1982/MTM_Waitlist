@@ -696,7 +696,10 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
             "Who asked, where it goes, and how urgent it is.",
             ("Work center", Item.RequestedPressName),
             ("Requesting user", Item.RequestedByName),
-            ("Employee number", Item.RequesterEmployeeNumber),
+            // No employee-number row. The row above this one already names the person who asked, and a person is
+            // named by name — the number was a second way of saying the same thing, in the one form the screen
+            // must not use for a person. The handler is named where a handler belongs: on the card's person row
+            // and in the history below.
             ("Remaining time", Item.RemainingTimeText));
     }
 

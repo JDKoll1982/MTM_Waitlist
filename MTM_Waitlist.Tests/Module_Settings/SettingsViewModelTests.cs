@@ -19,7 +19,7 @@ using MTM_Waitlist.Tests.Fixtures;
 namespace MTM_Waitlist.Tests.Module_Settings;
 
 [TestClass]
-public sealed class SettingsViewModelIgnoredLocationsTests
+public sealed class SettingsViewModelTests
 {
     [TestMethod]
     public void ViewModel_SettingsViewModelTests_DefaultSeed_PopulatesTheDefaultIgnoredLocations()
@@ -641,9 +641,12 @@ public sealed class SettingsViewModelIgnoredLocationsTests
                 .IsStoragePathsPanelVisible);
     }
 
-    /// <summary>Both storage folders and the retention period are stored for every computer in one action.</summary>
+    /// <summary>
+    /// Both storage folders, the hopper picture folder and the retention period are stored for every computer in
+    /// one action.
+    /// </summary>
     [TestMethod]
-    public void ViewModel_SettingsViewModelTests_SavingTheStorageFoldersStoresAllThreeValuesForEveryUser()
+    public void ViewModel_SettingsViewModelTests_SavingTheStorageFoldersStoresAllFourValuesForEveryUser()
     {
         var configuration = new FakeConfigSettingsValueService();
         var viewModel = BuildViewModel(
@@ -654,6 +657,7 @@ public sealed class SettingsViewModelIgnoredLocationsTests
 
         viewModel.PictureFolderInput = @"\\share\pictures";
         viewModel.DunnageRootInput = @"\\share\dunnage";
+        viewModel.HopperFolderInput = @"Waitlist\Hoppers";
         viewModel.ArchiveKeepDaysInput = 90;
         viewModel.SaveStoragePathsCommand.Execute(null);
 
@@ -663,14 +667,45 @@ public sealed class SettingsViewModelIgnoredLocationsTests
             @"\\share\dunnage",
             saved[ConfigSettingKeys.DunnageRootPath].SettingValue,
             "the dunnage root is held once for the plant, like the picture folder beside it (FR-040)");
+        Assert.AreEqual(
+            @"Waitlist\Hoppers",
+            saved[ConfigSettingKeys.ImageStorageHopperFolderPath].SettingValue,
+            "the hopper picture folder is held once for the plant, so the card and the wizard read the same artwork (FR-078)");
         Assert.AreEqual(90L, saved[ConfigSettingKeys.ImageStorageArchiveKeepDays].SettingValueInt);
         Assert.IsTrue(
             saved.Values.All(value => value.ScopeType == "all_users" && value.ScopeKey == "all_users"),
             "A person-scoped row would leave every other machine unchanged.");
         Assert.AreEqual(
-            3,
+            4,
             saved.Count,
-            "Three values and no more: the key-files folder was withdrawn with remember-me, so nothing writes it.");
+            "Four values and no more: the key-files folder was withdrawn with remember-me, so nothing writes it.");
+    }
+
+    /// <summary>
+    /// An empty hopper picture folder is refused rather than stored: storing it would leave the three sizes
+    /// pointing at the picture root itself, and the card would never find a hopper picture (FR-078).
+    /// </summary>
+    [TestMethod]
+    public void ViewModel_SettingsViewModelTests_AnEmptyHopperFolderIsRefusedAndNothingIsWritten()
+    {
+        var configuration = new FakeConfigSettingsValueService();
+        var viewModel = BuildViewModel(
+            new InMemoryScopedPreferenceStore(),
+            [PermissionKeys.SettingsStoragePaths],
+            configSettingsValueService: configuration,
+            imageStorageConfigurationResolver: new FakeImageStorageConfigurationResolver());
+
+        viewModel.PictureFolderInput = @"\\share\pictures";
+        viewModel.DunnageRootInput = @"\\share\dunnage";
+        viewModel.HopperFolderInput = "   ";
+        viewModel.ArchiveKeepDaysInput = 90;
+        viewModel.SaveStoragePathsCommand.Execute(null);
+
+        Assert.AreEqual(0, configuration.SavedValues.Count, "A refused save must not write any of the four values.");
+        Assert.AreEqual(
+            "Settings_StoragePaths_HopperFolderNeeded.Text",
+            viewModel.StoragePathsStatusMessage,
+            "The refusal does not name the hopper folder, so the person has to guess which box is at fault (FR-078).");
     }
 
     /// <summary>

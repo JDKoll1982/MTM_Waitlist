@@ -456,6 +456,69 @@ MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last updated the 
 MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when override was created.',
 MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when override was last updated.';
 
+-- ============================================================
+-- waitlist_requests_queue - feature 012-waitlist-card-layout (FR-073)
+-- ============================================================
+-- Two columns added to a table that already exists. The guarded blocks below are what puts them there, because
+-- `CREATE TABLE IF NOT EXISTS` cannot add a column to a table that already exists and a plain MODIFY against a
+-- column the store does not have stops this script on the first run after the change; the ALTER ... MODIFY that
+-- follows carries their descriptions once they are there. Both are nullable with no default, so a row written
+-- before the change reads as NULL for both, which is the same as "no condition" and "no extra answers" rather
+-- than a special case.
+--   Owning artifact: Database/Tables/18_waitlist_requests_queue/create.sql, with its rollback beside it and its
+--     body registered in Database/Tables/AllTables.sql.
+--   `handler_status` is deliberately separate from `status`: the lifecycle word underneath a condition is still
+--     needed, because the card has to know it when no condition is set (FR-012, research R4).
+--   `answers_json` exists because `input_value` holds exactly one answer and the die Items now ask two questions,
+--     while each of the four returning Items asks one. The map is a label-to-value object, the same shape the
+--     schema already uses for structured declaration data (`detail_fields_json`, `options_json`) (FR-073,
+--     FR-087, research R5).
+SET
+    @has_answers_json_column := (
+        SELECT COUNT(*)
+        FROM information_schema.columns
+        WHERE
+            table_schema = DATABASE()
+            AND table_name = 'waitlist_requests_queue'
+            AND column_name = 'answers_json'
+    );
+
+SET
+    @sql_stmt := IF(
+        @has_answers_json_column = 0,
+        'ALTER TABLE waitlist_requests_queue ADD COLUMN answers_json JSON NULL COMMENT ''The answers a request captured beyond input_value, keyed by the label the Item declared; NULL when the request captured none (FR-073, FR-087).'' AFTER input_value',
+        'SELECT ''waitlist_requests_queue.answers_json already exists'''
+    );
+
+PREPARE stmt FROM @sql_stmt;
+
+EXECUTE stmt;
+
+DEALLOCATE PREPARE stmt;
+
+SET
+    @has_handler_status_column := (
+        SELECT COUNT(*)
+        FROM information_schema.columns
+        WHERE
+            table_schema = DATABASE()
+            AND table_name = 'waitlist_requests_queue'
+            AND column_name = 'handler_status'
+    );
+
+SET
+    @sql_stmt := IF(
+        @has_handler_status_column = 0,
+        'ALTER TABLE waitlist_requests_queue ADD COLUMN handler_status VARCHAR(32) NULL COMMENT ''The condition the assigned material handler reported: one of the four verbatim condition strings, or NULL when no condition is set. Deliberately separate from status (FR-012, FR-070).'' AFTER status',
+        'SELECT ''waitlist_requests_queue.handler_status already exists'''
+    );
+
+PREPARE stmt FROM @sql_stmt;
+
+EXECUTE stmt;
+
+DEALLOCATE PREPARE stmt;
+
 ALTER TABLE waitlist_requests_queue COMMENT = 'Submitted material-handling requests awaiting pickup, in progress, or resolved.';
 
 ALTER TABLE waitlist_requests_queue
@@ -466,11 +529,13 @@ MODIFY COLUMN work_center VARCHAR(64) NOT NULL COMMENT 'Work center that raised 
 MODIFY COLUMN category VARCHAR(16) NOT NULL COMMENT 'The Category the requester chose: Pickup, Deliver, Assist or Other.',
 MODIFY COLUMN item VARCHAR(64) NOT NULL COMMENT 'The Item the requester chose: one of the catalogued Item codes.',
 MODIFY COLUMN input_value VARCHAR(255) NULL COMMENT 'The answer captured for an Item whose flow collects one.',
+MODIFY COLUMN answers_json JSON NULL COMMENT 'The answers a request captured beyond input_value, keyed by the label the Item declared; NULL when the request captured none (FR-073, FR-087).',
 MODIFY COLUMN active_setup_job_id VARCHAR(64) NOT NULL COMMENT 'Active setup job associated with the request at submission time.',
 MODIFY COLUMN work_center_name VARCHAR(64) NOT NULL COMMENT 'Work center that submitted the request.',
 MODIFY COLUMN requester_employee_number VARCHAR(32) NOT NULL COMMENT 'Employee number of the requester.',
 MODIFY COLUMN requester_employee_name VARCHAR(128) NOT NULL COMMENT 'Display name of the requester.',
 MODIFY COLUMN status VARCHAR(32) NOT NULL DEFAULT 'Pending' COMMENT 'Lifecycle status, for example Pending, InProgress, Resolved, or Canceled.',
+MODIFY COLUMN handler_status VARCHAR(32) NULL COMMENT 'The condition the assigned material handler reported: one of the four verbatim condition strings, or NULL when no condition is set. Deliberately separate from status, because the lifecycle word is still needed when no condition is set (FR-012, FR-070).',
 MODIFY COLUMN requested_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the request was submitted.',
 MODIFY COLUMN target_time_utc DATETIME NULL COMMENT 'UTC target completion time when one is supplied.',
 MODIFY COLUMN is_overdue TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'True when the request passed its target time without resolution.',
@@ -737,6 +802,32 @@ SET FOREIGN_KEY_CHECKS = 1;
 --     touches a person, a role, a permission, another machine, a session or a log entry, and it deliberately
 --     does not delete the registry row: that row is referenced by `user_active_sessions`, and a session may not
 --     be cleared by a machine-configuration reset.
+
+-- sp_waitlist_request_handler_status_update - feature 012-waitlist-card-layout (FR-070)
+-- ============================================================
+-- New procedure. It creates no table and adds no column, so there is nothing to ALTER and no description to
+-- attach: the write is described where a procedure is described, in its own artifact and in the aggregate's
+-- header. What is recorded here is that the artifact was added, which is what the ruleset requires of every SQL
+-- artifact under Database/.
+--   Owning artifact: Database/StoredProcedures/sp_waitlist_request_handler_status_update/create.sql, with its
+--     rollback beside it, and its body registered in Database/StoredProcedures/AllSPs.sql.
+--   What it writes: one row's `handler_status`, and nothing else.
+--   Why it exists: FR-070 and FR-076 require the write to be gated on the handler the caller read, so a caller
+--     that is not the row's own material handler matches no row and a lost race is reported as zero affected
+--     rows rather than shown as success. Matching on `public_id` alone would let any caller set a condition on
+--     somebody else's work.
+
+-- ============================================================
+-- sp_waitlist_request_list, sp_waitlist_request_insert - feature 012-waitlist-card-layout (FR-073)
+-- ============================================================
+-- Two procedures extended, not added and not retired. Neither adds a table or a column, so there is nothing to
+-- ALTER here; what is recorded is that their artifacts and their bodies in
+-- Database/StoredProcedures/AllSPs.sql moved in the same change, which is what the ruleset requires.
+--   sp_waitlist_request_list now returns `handler_status` and `answers_json` alongside the columns it already
+--     returned, so the condition a handler reported and the answers a request captured are restored onto the
+--     row when the list is next read (FR-073, SC-016).
+--   sp_waitlist_request_insert now carries `answers_json`, so a new request's answers are stored with it rather
+--     than in a second write (FR-073, FR-087).
 
 -- ============================================================
 -- Retired objects - feature 001-module-mock-visual-fallback (FR-014)

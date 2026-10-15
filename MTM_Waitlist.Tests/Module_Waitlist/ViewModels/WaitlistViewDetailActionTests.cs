@@ -25,7 +25,7 @@ public sealed class WaitlistViewDetailActionTests
 
     private static readonly XNamespace s_presentation = "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
 
-    private static readonly DateTimeOffset Now = new(2026, 9, 12, 12, 0, 0, TimeSpan.Zero);
+    private static readonly DateTimeOffset s_now = new(2026, 9, 12, 12, 0, 0, TimeSpan.Zero);
 
     /// <summary>Every file that can carry one of this feature's resource keys.</summary>
     private static readonly string[] s_keyBearingFiles =
@@ -281,7 +281,7 @@ public sealed class WaitlistViewDetailActionTests
             EventType = "Accepted",
             EmployeeName = "Hana Handler",
             EmployeeNumber = "9001",
-            OccurredUtc = Now.AddHours(-2),
+            OccurredUtc = s_now.AddHours(-2),
         };
 
         var service = new StubRequestService(BuildRequest()) { AuditTrail = [entry] };
@@ -327,7 +327,7 @@ public sealed class WaitlistViewDetailActionTests
     {
         // Reading the request's history is what clears its new-message indicator on the card. The marker is the
         // newest entry, so anything that arrives afterwards re-flags the card.
-        var newest = Now.AddMinutes(-5);
+        var newest = s_now.AddMinutes(-5);
         var entry = new WaitlistRequestAuditEntry { EventType = "NoteUpdated", OccurredUtc = newest };
         var seen = new RecordingMessageSeenStore();
         var viewModel = BuildViewModel(new StubRequestService(BuildRequest()) { AuditTrail = [entry] }, seen);
@@ -397,9 +397,9 @@ public sealed class WaitlistViewDetailActionTests
         RequesterEmployeeNumber = RequesterEmployeeNumber,
         RequesterEmployeeName = "Dana Whitfield",
         Status = "Pending",
-        RequestedUtc = Now.AddMinutes(-20),
-        TargetTimeUtc = Now.AddMinutes(40),
-        UpdatedUtc = Now,
+        RequestedUtc = s_now.AddMinutes(-20),
+        TargetTimeUtc = s_now.AddMinutes(40),
+        UpdatedUtc = s_now,
     };
 
     private static WaitlistViewDetailViewModel BuildViewModel(
@@ -524,6 +524,9 @@ public sealed class WaitlistViewDetailActionTests
 
         public Task<WaitlistRequest?> ReleaseAsync(Guid requestId, string handlerEmployeeNumber, string? handlerEmployeeName = null, CancellationToken cancellationToken = default)
             => Task.FromResult<WaitlistRequest?>(null);
+
+        public Task<int> SetHandlerStatusAsync(Guid requestId, string? handlerStatus, string expectedMaterialHandler, CancellationToken cancellationToken = default)
+            => Task.FromResult(0);
     }
 
     /// <summary>Records what the page marked as seen, instead of writing to a settings file.</summary>

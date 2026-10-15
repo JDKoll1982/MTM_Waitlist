@@ -41,6 +41,35 @@ public static class PartPictureLayout
     public const string CatchAllFolder = "Categorized Parts";
 
     /// <summary>
+    /// The folder holding the hopper reference pictures, inside the application's own collection
+    /// (<c>Waitlist/Hoppers</c>).
+    /// </summary>
+    /// <remarks>
+    /// The hopper pictures are keyed by the <b>size word</b> rather than by a part number, because what they
+    /// picture is the size a person chose and not a part: <c>Small</c>, <c>Medium</c> and <c>Large</c>, one file
+    /// each (D22, FR-077, FR-078). That is why they sit in a folder of their own instead of under one of the
+    /// part-number family folders, and why the scope below is deliberately not one of the part scopes.
+    /// </remarks>
+    public const string HoppersFolder = "Hoppers";
+
+    /// <summary>
+    /// The file-name stem of each hopper picture, in the order the size choices are offered. The stem is the
+    /// size's own word, which is also the answer the flow records and the key the card resolves, so one spelling
+    /// serves the step, the share and the card.
+    /// </summary>
+    public static readonly IReadOnlyList<string> HopperSizeCodes = ["Small", "Medium", "Large"];
+
+    /// <summary>The extension every hopper reference picture is expected to carry.</summary>
+    public const string HopperPictureExtension = ".png";
+
+    /// <summary>The store/read scope for a hopper size's reference picture.</summary>
+    /// <remarks>
+    /// A scope of its own rather than <see cref="VisualPartScope"/>: a size word is not a part number, and
+    /// filing it under the Visual part scope would make the part-picture rules look for a part called "Large".
+    /// </remarks>
+    public const string HopperSizeScope = "hopper_size";
+
+    /// <summary>
     /// The longest part number this feature accepts, which is the width of the store column that has to hold it.
     /// A longer number is refused when its picture is set rather than stored truncated.
     /// </summary>
@@ -78,6 +107,17 @@ public static class PartPictureLayout
         ("FGT", "Die", DieFolder),
     ];
 
+    /// <summary>
+    /// The part-number prefixes the application knows, in the order they are tested: coil, flatstock and die.
+    /// </summary>
+    /// <remarks>
+    /// Exposed as the one source of truth for "does this term start with a known prefix", which is the question
+    /// the fuzzy incorrect-part search asks of the number the operator types before it zero-pads it (D24, FR-082).
+    /// Derived from <see cref="PrefixFamilies"/> so a fourth family cannot be added here and forgotten there.
+    /// </remarks>
+    public static IReadOnlyList<string> KnownPartNumberPrefixes { get; } =
+        PrefixFamilies.Select(family => family.Prefix).ToArray();
+
     /// <summary>Whether a scope is one of the two part scopes.</summary>
     /// <param name="scope">A store scope value.</param>
     /// <returns><see langword="true"/> when the scope holds a part picture.</returns>
@@ -107,6 +147,13 @@ public static class PartPictureLayout
         if (string.Equals(normalized, WipPartScope, StringComparison.OrdinalIgnoreCase))
         {
             return WipCollection;
+        }
+
+        // A hopper size's picture lives in the application's own collection, in the `Hoppers` folder. It is not a
+        // part, so it is answered before the part-family rules below rather than by them.
+        if (IsHopperSizeScope(normalized))
+        {
+            return WaitlistCollection;
         }
 
         // The three scopes the application already had keep their own names verbatim as the kind folders inside
@@ -218,11 +265,81 @@ public static class PartPictureLayout
             return null;
         }
 
+        // A hopper size is filed by its size word in the `Hoppers` folder, never by a part-number family: there is
+        // no part here to derive a family from, and "Large" must not be filed under the catch-all as if it were an
+        // unrecognised part (D22, FR-078).
+        if (IsHopperSizeScope(scope))
+        {
+            var hopperFileName = HopperPictureFileName(partNumber);
+
+            return hopperFileName.Length == 0 ? null : $"{collection}/{HoppersFolder}/{hopperFileName}";
+        }
+
         var folder = FamilyFolderFor(partNumber);
         var fileName = SafeFileBaseName(partNumber) + extension;
 
         return $"{collection}/{folder}/{fileName}";
     }
+
+    /// <summary>
+    /// Whether a scope is the hopper size pictures' own scope.
+    /// </summary>
+    /// <param name="scope">A store or read scope value.</param>
+    /// <returns><see langword="true"/> for the hopper size scope.</returns>
+    public static bool IsHopperSizeScope(string? scope) =>
+        !string.IsNullOrWhiteSpace(scope)
+        && string.Equals(scope.Trim(), HopperSizeScope, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Whether a scope is one this layout can produce a picture path for: a part scope, or the hopper size scope.
+    /// </summary>
+    /// <param name="scope">A store or read scope value.</param>
+    /// <returns><see langword="true"/> when the layout knows where the picture lives.</returns>
+    public static bool IsKnownPictureScope(string? scope) =>
+        IsPartScope(scope) || IsHopperSizeScope(scope);
+
+    /// <summary>
+    /// Whether a value is one of the three hopper sizes, compared case-insensitively so <c>large</c> and
+    /// <c>Large</c> are one size and one file.
+    /// </summary>
+    /// <param name="size">The size word a flow recorded or a card drew.</param>
+    /// <returns><see langword="true"/> for Small, Medium or Large.</returns>
+    public static bool IsHopperSizeCode(string? size) =>
+        !string.IsNullOrWhiteSpace(size)
+        && HopperSizeCodes.Contains(size.Trim(), StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// The file name a hopper size's reference picture is stored under: the size's own word, canonicalised to the
+    /// spelling the layout lists.
+    /// </summary>
+    /// <param name="size">The size word.</param>
+    /// <returns>The file name, for example <c>Large.png</c>.</returns>
+    public static string HopperPictureFileName(string? size) =>
+        CanonicalHopperSize(size) is { Length: > 0 } canonical
+            ? canonical + HopperPictureExtension
+            : string.Empty;
+
+    /// <summary>
+    /// The path a hopper size's reference picture is stored at, relative to the configured picture root.
+    /// </summary>
+    /// <param name="size">The size word.</param>
+    /// <returns>
+    /// The relative path, for example <c>Waitlist/Hoppers/Large.png</c>, or <see langword="null"/> when the value
+    /// is not one of the three sizes.
+    /// </returns>
+    public static string? HopperPictureRelativePath(string? size)
+    {
+        var fileName = HopperPictureFileName(size);
+
+        return fileName.Length == 0 ? null : $"{WaitlistCollection}/{HoppersFolder}/{fileName}";
+    }
+
+    /// <summary>The size word's canonical spelling, or empty when the value is not one of the three sizes.</summary>
+    private static string CanonicalHopperSize(string? size) =>
+        string.IsNullOrWhiteSpace(size)
+            ? string.Empty
+            : HopperSizeCodes.FirstOrDefault(code => string.Equals(code, size.Trim(), StringComparison.OrdinalIgnoreCase))
+                ?? string.Empty;
 
     private static bool IsApplicationOwnScope(string scope) =>
         string.Equals(scope, "request_item", StringComparison.OrdinalIgnoreCase)

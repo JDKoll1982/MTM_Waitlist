@@ -1,7 +1,8 @@
 # Database/CopilotScripts
 
 Reusable PowerShell helpers for the `mtm_mock` cache database (feature
-`001-module-mock-visual-fallback`). These exist because the interactive terminal cannot
+`001-module-mock-visual-fallback`) and for the `mtm_waitlist` application store
+(`refresh_schema_drift.ps1`). These exist because the interactive terminal cannot
 reliably push multi-line `mysql` invocations — every script here is idempotent and
 safe to re-run.
 
@@ -68,6 +69,42 @@ $env:MYSQL_PWD='root'; pwsh -NoProfile -File Database/CopilotScripts/verify_mtm_
 > `mtm_wip_application_winforms`, or `mtm_receiving_application`.
 
 ---
+
+## `refresh_schema_drift.ps1`
+
+Reports — and optionally repairs — a store whose **deployed stored procedures have fallen behind the
+repository's own `create.sql` artifacts**.
+
+This exists because that drift is **invisible at run time**. MySQL accepts a call that passes **more**
+parameters than the deployed routine declares, **silently ignores the surplus, and reports success**: a call
+site that passes a parameter the routine does not have writes its other columns, returns a healthy result, and
+loses that one value with nothing logged, nothing thrown and nothing on screen to suggest anything is missing.
+Found the hard way on 2026-10-11 (feature `012-waitlist-card-layout`): the app's per-Item answers had been
+discarded on every request since the store was last deployed, and the die-shop cell they feed never appeared.
+
+```powershell
+# Report (changes nothing)
+pwsh -NoProfile -File Database/CopilotScripts/refresh_schema_drift.ps1
+
+# Repair only what was proved wrong
+pwsh -NoProfile -File Database/CopilotScripts/refresh_schema_drift.ps1 -Apply `
+    -Procedure sp_waitlist_request_insert,sp_waitlist_request_list
+
+# Repair every routine in the schema, then re-seed one seed by name
+pwsh -NoProfile -File Database/CopilotScripts/refresh_schema_drift.ps1 -Apply `
+    -Seed seed_waitlist_request_item_configs
+```
+
+- Defaults to `mtm_waitlist` and to `$env:MTM_WAITLIST_DB_CONNECTION_STRING` (what the application itself
+  resolves). The script probes the configured server, then this machine, so it follows the same rule as
+  `MTM_Waitlist.Core/Services/MySqlHostFallback` — the app falls back to `localhost` when the plant host is
+  unreachable, and the store it is actually reading is the one that has to be current.
+- Reports **missing** and **parameter-drifted** routines. It deliberately does **not** claim body drift: a
+  changed body cannot be told from reformatting this way, so `-Apply` is the remedy — it rewrites every routine
+  in the schema from the repository, which is the only way to be sure a body matches its artifact.
+- Seeds are never applied implicitly; each one is named with `-Seed`, because a seed is a data change.
+- The password reaches `mysql.exe` through a temporary client option file outside the repository, never a
+  command line.
 
 ## Related validation SQL
 

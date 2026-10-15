@@ -162,10 +162,20 @@ internal sealed partial class SignInPage : Page, ILaunchStageSurface
                 ? Visibility.Visible
                 : Visibility.Collapsed;
 
+        var credentialWasVisible = CredentialPanel.Visibility == Visibility.Visible;
+
         CredentialPanel.Visibility =
             !onPanel && ViewModel.IsCredentialStage && ViewModel.ShowSignInForm
                 ? Visibility.Visible
                 : Visibility.Collapsed;
+
+        // The PIN box is the only thing this stage asks for, so it takes the keyboard the moment it appears:
+        // the person has just said who they are - by typing the user name or by picking one of the people
+        // offered beside the form - and there is nothing else on the stage to do (FR-014, FR-048).
+        if (!credentialWasVisible && CredentialPanel.Visibility == Visibility.Visible)
+        {
+            CredentialBox.Focus(FocusState.Programmatic);
+        }
     }
 
     /// <summary>

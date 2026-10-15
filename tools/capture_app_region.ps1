@@ -35,7 +35,7 @@ $hwnd = $proc.MainWindowHandle
 
 # Bring to foreground so CopyFromScreen captures it (it is visible on screen).
 [Win32Capture]::SetForegroundWindow($hwnd) | Out-Null
-Start-Sleep -Milliseconds 300
+Start-Sleep -Milliseconds 120
 
 $winRect = New-Object Win32Capture+RECT
 [Win32Capture]::GetWindowRect($hwnd, [ref]$winRect) | Out-Null

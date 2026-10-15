@@ -17,7 +17,7 @@
 
         <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}">
             <TextBlock
-                x:Uid="NewRequest_Die_Title.Text"
+                x:Uid="NewRequest_Die_Title"
                 Style="{StaticResource SetupPageTitleStyle}"
                 Text="New Request - Choose Die" />
             <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="{x:Bind ViewModel.WorkCenterText, Mode=OneWay}" />
@@ -32,7 +32,16 @@
 
         <Grid Grid.Row="1">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <GridView
+                <StackPanel Spacing="12">
+                    <!-- The die-shop question (FR-081): a checkbox stating whether the die is at the die shop or
+                         must be sent there. Its answer is what decides whether the card draws its third,
+                         label-less cell (FR-055, D40). -->
+                    <CheckBox
+                        AutomationProperties.AutomationId="NewRequestDiePage_DieShopCheckBox"
+                        Content="{x:Bind ViewModel.DieShopPromptText, Mode=OneWay}"
+                        IsChecked="{x:Bind ViewModel.IsDieShopSelected, Mode=TwoWay}" />
+
+                    <GridView
                     AutomationProperties.AutomationId="NewRequestDiePage_DieTiles"
                     x:Name="DieGridView"
                     ItemsSource="{x:Bind ViewModel.Options, Mode=OneWay}"
@@ -115,23 +124,24 @@
                         </DataTemplate>
                     </GridView.ItemTemplate>
                 </GridView>
+                </StackPanel>
             </ScrollViewer>
         </Grid>
 
         <StackPanel Grid.Row="2" Style="{StaticResource SetupActionBarStyle}">
             <Button
                 AutomationProperties.AutomationId="NewRequestDiePage_BackButton"
-                x:Uid="NewRequest_Die_BackButton.Content"
+                x:Uid="NewRequest_Die_BackButton"
                 Content="Back"
                 Command="{x:Bind ViewModel.BackCommand}" />
             <Button
                 AutomationProperties.AutomationId="NewRequestDiePage_SelectAllButton"
-                x:Uid="NewRequest_Die_SelectAllButton.Content"
+                x:Uid="NewRequest_Die_SelectAllButton"
                 Content="Select all"
                 Command="{x:Bind ViewModel.SelectAllCommand}" />
             <Button
                 AutomationProperties.AutomationId="NewRequestDiePage_ContinueButton"
-                x:Uid="NewRequest_Die_ContinueButton.Content"
+                x:Uid="NewRequest_Die_ContinueButton"
                 Content="Continue"
                 Command="{x:Bind ViewModel.ContinueCommand}"
                 Style="{StaticResource AccentButtonStyle}" />

@@ -150,8 +150,14 @@ public sealed class DestinationQuestionRetirementTests
                 var row = SeedRow(seed, itemCode);
 
                 Assert.IsTrue(
-                    row.Contains("'label','Pickup location','value_type','string','source','job'", StringComparison.Ordinal),
-                    $"{itemCode} must show the location the requesting job records (FR-057).");
+                    row.Contains("'label','Die Location','value_type','string','source','job'", StringComparison.Ordinal),
+                    $"{itemCode} must show the location the requesting job records under the corrected label (FR-057, FR-059, D33).");
+
+                // The label the move replaced may not come back, and the row must still not ask the requester
+                // where the die is going: the location is a job value or it is not drawn at all (FR-057).
+                Assert.IsFalse(
+                    row.Contains("'label','Pickup location'", StringComparison.Ordinal),
+                    $"{itemCode} still declares the retired `Pickup location` label, which FR-059 corrects (D33).");
             }
         }
     }

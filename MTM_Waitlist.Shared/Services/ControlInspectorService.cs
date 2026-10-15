@@ -28,16 +28,16 @@ public sealed class ControlInspectorService : IControlInspectorService
 
     private readonly IPersonIdentity _personIdentity;
     private readonly ITooltipService _tooltipService;
-    private readonly INavigationService _navigationService;
+    private readonly IControlInspectorDetailPresenter _presenter;
 
     public ControlInspectorService(
         IPersonIdentity personIdentity,
         ITooltipService tooltipService,
-        INavigationService navigationService)
+        IControlInspectorDetailPresenter presenter)
     {
         _personIdentity = personIdentity;
         _tooltipService = tooltipService;
-        _navigationService = navigationService;
+        _presenter = presenter;
     }
 
     private bool IsDeveloper => _personIdentity.Holds(DeveloperRoleCode);
@@ -266,7 +266,10 @@ public sealed class ControlInspectorService : IControlInspectorService
         }
 
         var detail = ActiveDetail;
-        return _navigationService.NavigateTo(typeof(ControlInspectorDetailViewModel).FullName!, detail);
+
+        // Shown in the inspector's own window rather than navigated to as a page: the control that raised this is
+        // often inside a modal dialog, whose XamlRoot a page behind it can never be seen through (FR-105).
+        return _presenter.Present(detail);
     }
 
     private void OnTrackedPointerEntered(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
@@ -414,8 +417,9 @@ public sealed class ControlInspectorService : IControlInspectorService
         yield return "Module_Shared/Services/IControlInspectorService.cs";
         yield return "Module_Shared/Models/ControlInspectorDetail.cs";
         yield return "Module_Shared/ViewModels/ControlInspectorDetailViewModel.cs";
-        yield return "Module_Shared/Views/ControlInspectorDetailPage.xaml";
-        yield return "Module_Shared/Views/ControlInspectorDetailPage.xaml.cs";
+        yield return "Module_Shared/Views/ControlInspectorDetailWindow.xaml";
+        yield return "Module_Shared/Views/ControlInspectorDetailWindow.xaml.cs";
+        yield return "Services/ControlInspectorDetailPresenter.cs";
         yield return "Styles/TooltipStandard.xaml";
         yield return "Styles/TooltipDeveloper.xaml";
         yield return "Module_Core/Views/ShellPage.xaml";

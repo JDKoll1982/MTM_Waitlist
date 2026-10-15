@@ -78,6 +78,10 @@ internal sealed class FakeImageStorageConfigurationResolver : IImageStorageConfi
     /// <summary>The root the dunnage pictures are read from for every computer (FR-040).</summary>
     public string DunnageRootPath { get; set; } = Path.Combine(Path.GetTempPath(), "mtm-image-tests", "dunnage");
 
+    /// <summary>The folder the hopper reference pictures sit in (FR-078).</summary>
+    public string HopperFolderPath { get; set; } =
+        MTM_Waitlist.Module_Settings.Models.ConfigSettingKeys.ImageStorageHopperFolderPathDefault;
+
     public string CacheFolderPath { get; set; } = Path.Combine(Path.GetTempPath(), "mtm-image-tests", "cache");
 
     public bool CacheEnabled { get; set; } = true;
@@ -93,6 +97,8 @@ internal sealed class FakeImageStorageConfigurationResolver : IImageStorageConfi
     public Task<string> GetSharedFolderPathAsync() => Task.FromResult(SharedFolderPath);
 
     public Task<string> GetDunnageRootPathAsync() => Task.FromResult(DunnageRootPath);
+
+    public Task<string> GetHopperFolderPathAsync() => Task.FromResult(HopperFolderPath);
 
     public Task<string> GetImageCacheFolderPathAsync() => Task.FromResult(CacheFolderPath);
 

@@ -145,6 +145,7 @@
                 Text="{x:Bind ViewModel.FilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             <Button
                 AutomationProperties.AutomationId="NewRequestWorkCenterPage_BuildingButton"
+                AutomationProperties.Name="Choose the building"
                 HorizontalAlignment="Left"
                 MinWidth="200"
                 shared:TooltipBehavior.ResourceKey="NewRequest_SelectBuilding_Tooltip"

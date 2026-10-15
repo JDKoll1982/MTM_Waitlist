@@ -237,4 +237,7 @@
   <data name="Shared_PrintButton_Tooltip" xml:space="preserve">
     <value>Activate Print Button.</value>
   </data>
+  <data name="Setup_DunnageShowAll.Tooltip" xml:space="preserve">
+    <value>Include parts that do not have an image.</value>
+  </data>
 </root>

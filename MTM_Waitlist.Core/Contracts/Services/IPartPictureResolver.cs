@@ -22,8 +22,13 @@ public interface IPartPictureResolver
     /// The picture file a control draws for one part: this machine's copy when it holds one, otherwise the source
     /// on the share, otherwise nothing.
     /// </summary>
-    /// <param name="scope">The part's store scope: <c>visual_part</c> or <c>wip_part</c>.</param>
-    /// <param name="partNumber">The part number.</param>
+    /// <param name="scope">
+    /// The picture's scope: <c>visual_part</c>, <c>wip_part</c>, or <c>hopper_size</c> for a hopper size's
+    /// reference picture.
+    /// </param>
+    /// <param name="partNumber">
+    /// The part number, or — for the hopper size scope — the size word, which is the key its picture is filed under.
+    /// </param>
     /// <param name="cancellationToken">A token to cancel the read.</param>
     /// <returns>
     /// The absolute path of a picture the application accepts, or <see langword="null"/> when there is no picture,

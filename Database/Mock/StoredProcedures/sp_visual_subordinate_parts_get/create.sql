@@ -11,6 +11,10 @@
 -- Live projection: Category, PartNumber, Description, Location, User8, OnHandQuantity
 -- (ORDER BY Category, req.PART_ID).
 --
+-- `Description` is already the coil's description, so no second description column exists. The coil's
+-- `Average coil weight` is deliberately NOT mirrored here: it must come from the receiving store's
+-- `sp_receiving_history_average_coil_weight` (FR-030, FR-041, FR-054).
+--
 -- The live read takes the OPERATION's part number as an input. That input is persisted as
 -- `parent_part_number`, and the procedure exposes it as `p_part_number` so callers see the same
 -- parameter name and meaning as the live read (data-model.md §3.3). `PartNumber` in the RETURNED

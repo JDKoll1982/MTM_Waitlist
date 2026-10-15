@@ -31,6 +31,19 @@ public interface IAppLogSink
     void Info(string module, string message, string? target = null);
 
     /// <summary>
+    /// Records that something the caller expected to be readable was not, so the gap can be chased up later.
+    /// </summary>
+    /// <param name="module">The part of the application the entry came from.</param>
+    /// <param name="message">What the entry says.</param>
+    /// <param name="errorType">The kind of gap, when the caller can name one.</param>
+    /// <remarks>
+    /// The store keeps warnings alongside faults (<c>LogStoreLevel.ShippedMinimum</c>), and the severity is what
+    /// separates a gap worth chasing from a failure, so a call site that records a gap must not have to raise it
+    /// as an error to be heard.
+    /// </remarks>
+    void Warn(string module, string message, string? errorType = null);
+
+    /// <summary>
     /// Records that the operation under way failed, with the fault that failed it.
     /// </summary>
     /// <param name="module">The part of the application the entry came from.</param>

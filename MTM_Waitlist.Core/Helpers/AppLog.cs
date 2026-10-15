@@ -52,6 +52,18 @@ public static class AppLog
     public static void Info(string module, string message) => s_sink?.Info(module, message);
 
     /// <summary>
+    /// Records that something the caller expected to be readable was not, so the gap can be chased up later.
+    /// </summary>
+    /// <param name="module">The part of the application the entry came from.</param>
+    /// <param name="message">What the entry says.</param>
+    /// <remarks>
+    /// A warning is not a failure: the call site is reporting that a value it should have been able to read was
+    /// not there, which is exactly the entry a person chases up later. Raising it as an error would file it as a
+    /// fault and report the wrong outcome to the store.
+    /// </remarks>
+    public static void Warn(string module, string message) => s_sink?.Warn(module, message);
+
+    /// <summary>
     /// Records that the operation under way failed, with the fault that failed it.
     /// </summary>
     /// <param name="module">The part of the application the entry came from.</param>

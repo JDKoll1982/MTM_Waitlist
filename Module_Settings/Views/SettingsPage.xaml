@@ -273,6 +273,20 @@
                                 Text="{x:Bind ViewModel.DunnageRootInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         </wct:SettingsCard>
 
+                        <!-- The hopper reference pictures (012-waitlist-card-layout, FR-078). A folder of its own
+                             because the three files are named after the size a person chose, not after a part. -->
+                        <wct:SettingsCard
+                            ContentAlignment="Vertical"
+                            Description="{x:Bind ViewModel.StoragePathsHopperFolderHint}"
+                            Header="{x:Bind ViewModel.StoragePathsHopperFolderLabel}"
+                            HorizontalContentAlignment="Stretch">
+                            <TextBox
+                                AutomationProperties.AutomationId="SettingsPage_StoragePaths_HopperFolderBox"
+                                AutomationProperties.Name="{x:Bind ViewModel.StoragePathsHopperFolderLabel}"
+                                MinWidth="420"
+                                Text="{x:Bind ViewModel.HopperFolderInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </wct:SettingsCard>
+
                         <wct:SettingsCard Header="{x:Bind ViewModel.StoragePathsArchiveKeepDaysLabel}">
                             <NumberBox
                                 AutomationProperties.AutomationId="SettingsPage_StoragePaths_KeepDaysBox"
@@ -658,11 +672,13 @@
                             IsActive="{x:Bind ViewModel.ComputerManagement.IsBusy, Mode=OneWay}" />
                         <Button
                             AutomationProperties.AutomationId="SettingsPage_Computers_AddButton"
+                            AutomationProperties.Name="Add computer"
                             Content="Add"
                             Click="AddComputer_Click"
                             IsEnabled="{x:Bind ViewModel.ComputerManagement.CanManageComputers, Mode=OneWay}" />
                         <Button
                             AutomationProperties.AutomationId="SettingsPage_Computers_EditButton"
+                            AutomationProperties.Name="Edit the selected computer"
                             Content="Edit"
                             Click="EditComputer_Click"
                             IsEnabled="{x:Bind ViewModel.ComputerManagement.CanEditSelected, Mode=OneWay}" />
@@ -726,6 +742,7 @@
                 <!-- Ignored Infor Visual locations -->
                 <wct:SettingsExpander
                     AutomationProperties.AutomationId="SettingsPage_IgnoredLocationsExpander"
+                    AutomationProperties.Name="{x:Bind IgnoredLocationsHeaderText.Text, Mode=OneWay}"
                     x:Name="IgnoredLocationsExpander"
                     x:Load="{x:Bind ViewModel.IsIgnoredLocationsPanelVisible, Mode=OneWay}"
                     HorizontalAlignment="Stretch"
@@ -736,6 +753,7 @@
 
                     <wct:SettingsExpander.Header>
                         <TextBlock
+                            x:Name="IgnoredLocationsHeaderText"
                             x:Uid="Settings_IgnoredLocations_Title"
                             Text="Ignored Infor Visual Locations" />
                     </wct:SettingsExpander.Header>
@@ -1116,6 +1134,7 @@
                 <!-- Cached Infor Visual data -->
                 <wct:SettingsExpander
                     AutomationProperties.AutomationId="SettingsPage_CacheRefreshExpander"
+                    AutomationProperties.Name="{x:Bind CacheRefreshHeaderText.Text, Mode=OneWay}"
                     x:Name="CacheRefreshExpander"
                     x:Load="{x:Bind ViewModel.IsCacheRefreshPanelVisible, Mode=OneWay}"
                     HorizontalAlignment="Stretch"
@@ -1126,6 +1145,7 @@
 
                     <wct:SettingsExpander.Header>
                         <TextBlock
+                            x:Name="CacheRefreshHeaderText"
                             x:Uid="Settings_CacheRefresh_Title"
                             Text="Cached Infor Visual data" />
                     </wct:SettingsExpander.Header>

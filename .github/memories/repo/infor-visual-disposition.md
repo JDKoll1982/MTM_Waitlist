@@ -102,3 +102,51 @@ Phase 24 (the 2026-09-12 fix).
   (`HAVING MAX(COALESCE(pl.QTY, part.QTY_ON_HAND, 0)) >= 1`, T150, 2026-09-12) — the same rule the caller applies, so
   a location that drops to zero simply disappears at the next refresh, which always replaces the mirror wholesale.
   The population reads still need a live re-run on the cache host to confirm the new row counts.
+
+## Feature 012 Phase 7 (US5) — the four previously-hidden pickups (2026-10-10)
+
+- **The fixed hide is gone; four real gates replaced it.** `MTM_Waitlist.Settings/Services/RequestItemPickerRules.cs`
+  no longer carries the `s_outOfScopeItemIds` array (nor `IsOutOfScope`). `pickup-fg` / `pickup-ncm` / `pickup-wip` /
+  `pickup-outside-service` now answer their own `RequestJobPartKind` (`FinishedGoodsToReturn`,
+  `NonconformingStockToReturn`, `WorkInProgressToReturn`, `OutsideServiceWorkToReturn`) and are offered when the
+  requesting job has the work they name (FR-094). All four stay catalogued (24 rows) — a hidden Item and a missing
+  row remain different states (FR-028).
+- **Nothing else populates those gates, so the unhide and the wiring ship together.** `RequestJobPartAvailability`
+  carries the four gates plus `Disposition` (the derivation). `Services/RequestJobAvailabilityProvider.cs` (app
+  composition root) is `RequestDispositionResolver`'s **first consumer**: it resolves the job's work order + part and
+  sets `Disposition` and the four gates **from that derivation** — mutually exclusive, so exactly one of the four is
+  true. Deleting the array without this wiring would silently hide all four Items.
+- **The card reads the derivation, not a second one.** `RequestJobFieldValues` answers `Part Type` / `Item Type` from
+  `Disposition` via `RequestDispositionLabels.Of` → `Finished Goods` / `Outside Service` / `WIP` / `NCM`; `Unknown`
+  answers `null`, so the cell resolves nothing and is left out rather than invented (FR-089).
+- **`Ncm` is a location state, never a production type (FR-093).** `RequestDisposition.Ncm` is returned when
+  `DispositionInput.NonConformingQuantity > 0`, which the mapper fills from the WIP floor bucket
+  `NonConformingFloorQuantity` — i.e. `md_locations.Location LIKE 'NCM%'` (live-validated 2026-09-08; `inv_inventory.
+  ItemType` still reads `WIP` while the part sits at NCM, which is precisely why the recorded item type must never be
+  the signal).
+- **Priority, decided here:** Outside Service → **NCM** → Finished Goods → WIP → Unknown. The three production types
+  keep R8's documented priority unchanged (FR-092); NCM sits between Outside Service and them because quarantined
+  stock must never read as Finished Goods or WIP. **Open question for `clarify`:** the ordering of NCM against
+  Outside Service when a part has *both* subcontracted work and stock at an NCM location — only one item type can be
+  named, so today Outside Service wins and `pickup-ncm` is not offered for that job.
+- **The classifier's rule wording is deliberately NOT amended** (research R8): only the value handed to it changed.
+  The Infor-side NCM signal (`PART_LOCATION.STATUS` against the occupied `LOCATION`) is **not read yet** — no Visual
+  read in the repository carries that column and its code values are unconfirmed — so the arm is driven by the floor
+  location signal alone.
+- **FR-090 correction applied (T065/T066).** `GetDispositionInput.sql` and
+  `Database/InforVisual/Queues/Module_Mock/Populations/disposition_input_population.sql` now project
+  `FinishedGoodsQuantity` as `SUM(PART_LOCATION.QTY)` over the part's finished-goods locations, classified as
+  `LOCATION.DESCRIPTION LIKE '%FINISHED GOODS%'` OR `WAREHOUSE.DESCRIPTION LIKE '%FINISHED GOODS%'`
+  OR `LOCATION.ID IN ('FG','DC-FG')` — mirroring `GetWipFloorQuantities.sql` (WIP side) and the already-built
+  `GetPartWarehouseQuantities.sql`. `PART.QTY_ON_HAND` must not return as this figure anywhere. Output column names
+  and order are unchanged, so `VisualReadShapeCatalog`, the mirror table + stage, `sp_visual_disposition_input_refresh`
+  and `sp_visual_disposition_input_get` did not move.
+- **The finished-goods/NCM codes are STILL UNCONFIRMED for this installation, and T067 has NOT been run.**
+  `Database/Validation/disposition_input_finished_goods/validate.sql` is written for the live plant system (steps:
+  the codes found, the NCM locations, the `ENUM_CODES` lists for `PART_LOCATION.STATUS` / `LOCATION.TYPE`, and one
+  known part's finished-goods sum next to `PART.QTY_ON_HAND`). It must be run **on that system**: no Visual host
+  resolves from this workstation (`No such host is known`) and there is no live `mtm_waitlist`, so neither it nor
+  T068's "codes match T067's output" nor T069's end-to-end pass can be carried out here. Until step 1/2 output is
+  read, treat `'FG'` / `'DC-FG'` and the `%FINISHED GOODS%` matches as **provisional**: if its step 4 reports the
+  finished-goods sum equal to the part total, or step 1 matches no stocked location, correct the predicate in both
+  scripts to the codes it reports.

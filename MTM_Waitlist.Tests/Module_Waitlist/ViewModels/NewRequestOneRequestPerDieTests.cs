@@ -187,5 +187,7 @@ public sealed class NewRequestOneRequestPerDieTests
         public Task<WaitlistRequest?> CompleteAsync(Guid requestId, string handlerEmployeeNumber, string? handlerEmployeeName = null, CancellationToken cancellationToken = default) => Task.FromResult<WaitlistRequest?>(null);
 
         public Task<WaitlistRequest?> ReleaseAsync(Guid requestId, string handlerEmployeeNumber, string? handlerEmployeeName = null, CancellationToken cancellationToken = default) => Task.FromResult<WaitlistRequest?>(null);
+
+        public Task<int> SetHandlerStatusAsync(Guid requestId, string? handlerStatus, string expectedMaterialHandler, CancellationToken cancellationToken = default) => Task.FromResult(0);
     }
 }

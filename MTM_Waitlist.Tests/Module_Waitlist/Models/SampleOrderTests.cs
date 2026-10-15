@@ -4,6 +4,7 @@ using System.Windows.Input;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Shared.Helpers;
+using MTM_Waitlist.Module_Waitlist.Helpers;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
 
@@ -347,6 +348,476 @@ public sealed class SampleOrderTests
 
         var onTheBoundary = new DateTimeOffset(2026, 9, 11, 14, 30, 0, TimeSpan.Zero);
         Assert.AreEqual(TimeSpan.FromMinutes(1), WaitlistViewViewModel.TimeUntilNextMinute(onTheBoundary));
+    }
+
+    /// <summary>
+    /// The status zone's word and theme follow the same precedence: the handler condition when the row carries
+    /// one, otherwise the overdue marking, otherwise the lifecycle word (FR-012, FR-023).
+    /// </summary>
+    [TestMethod]
+    public void Model_SampleOrderTests_StatusWord_PrefersTheConditionOverTheOverdueMarkingAndTheLifecycleWord()
+    {
+        var order = new SampleOrder
+        {
+            Status = "Pending",
+            IsOverdue = true,
+            HandlerStatus = "Product Buried",
+        };
+
+        Assert.AreEqual(
+            "Product Buried",
+            order.StatusWord,
+            "A condition wins over everything, including the overdue marking (FR-012, FR-023).");
+        Assert.AreNotEqual("Overdue", order.StatusWord, "A condition and the overdue marking are never both shown.");
+        Assert.AreNotEqual("Waiting", order.StatusWord, "The lifecycle word is the last of the three, not the first.");
+        Assert.AreEqual(
+            StatusColumnTheme.HandlerCondition,
+            order.StatusTheme,
+            "The condition is themed as a condition, so the word and the theme cannot disagree.");
+        Assert.AreNotEqual(
+            StatusColumnTheme.Overdue,
+            order.StatusTheme,
+            "The two reds are apart so an overdue row and a condition-carrying row are never mistaken for one another (FR-072).");
+    }
+
+    /// <summary>
+    /// With no condition reported, the overdue marking is the next of the three, and nothing but the overdue
+    /// marking takes the overdue theme (FR-014).
+    /// </summary>
+    [TestMethod]
+    public void Model_SampleOrderTests_StatusWord_ReadsOverdueWhenNoConditionIsSetAndTheRequestIsPastItsTime()
+    {
+        var order = new SampleOrder { Status = "Pending", IsOverdue = true };
+
+        Assert.AreEqual("Overdue", order.StatusWord, "An overdue row with no condition reads the overdue marking.");
+        Assert.AreEqual(StatusColumnTheme.Overdue, order.StatusTheme);
+
+        order.IsOverdue = false;
+
+        Assert.AreEqual("Waiting", order.StatusWord, "Clearing the overdue marking falls through to the lifecycle word.");
+        Assert.AreEqual(StatusColumnTheme.Normal, order.StatusTheme, "A lifecycle word is themed normally.");
+    }
+
+    /// <summary>
+    /// The word and the theme ride the overdue flag, so the card is told to repaint both rather than reading a
+    /// stale pair.
+    /// </summary>
+    [TestMethod]
+    public void Model_SampleOrderTests_StatusWord_AnnouncesTheWordAndTheThemeWhenTheOverdueMarkingChanges()
+    {
+        var order = new SampleOrder { Status = "Pending" };
+        var raised = new List<string?>();
+        order.PropertyChanged += (_, e) => raised.Add(e.PropertyName);
+
+        order.IsOverdue = true;
+
+        CollectionAssert.Contains(raised, nameof(SampleOrder.StatusWord));
+        CollectionAssert.Contains(raised, nameof(SampleOrder.StatusTheme));
+        Assert.AreEqual("Overdue", order.StatusWord);
+        Assert.AreEqual(StatusColumnTheme.Overdue, order.StatusTheme);
+    }
+
+    /// <summary>
+    /// The lifecycle word comes from the stored status alone: the four mapped statuses read their word, and a
+    /// stored value the card does not know yields no word at all (FR-012, FR-018).
+    /// </summary>
+    [TestMethod]
+    public void Model_SampleOrderTests_StatusWord_ReadsTheLifecycleWordForTheFourStoredStatusesAndNothingForAnUnknownOne()
+    {
+        Assert.AreEqual("Waiting", new SampleOrder { Status = "Pending" }.StatusWord);
+        Assert.AreEqual("In Progress", new SampleOrder { Status = "Accepted" }.StatusWord);
+        Assert.AreEqual("Done", new SampleOrder { Status = "Completed" }.StatusWord);
+        Assert.AreEqual("Cancelled", new SampleOrder { Status = "Canceled" }.StatusWord, "The one-l spelling maps like the two-l one.");
+        Assert.AreEqual("Cancelled", new SampleOrder { Status = "Cancelled" }.StatusWord);
+        Assert.AreEqual(StatusColumnTheme.Normal, new SampleOrder { Status = "Accepted" }.StatusTheme);
+
+        var unknown = new SampleOrder { Status = "Archived" };
+
+        Assert.AreEqual(
+            string.Empty,
+            unknown.StatusWord,
+            "An unrecognised stored status yields no word, and the card then removes the row rather than leaving it blank (FR-018).");
+        Assert.IsFalse(unknown.HasStatusBadge);
+        Assert.AreEqual(StatusColumnTheme.Normal, unknown.StatusTheme);
+    }
+
+    /// <summary>
+    /// The vocabulary is closed and verbatim: the four conditions are restored as reported, and anything else —
+    /// a fifth word, a differently cased or padded one — is restored as no condition at all and behaves exactly
+    /// like a row nobody reported on (FR-071, FR-073).
+    /// </summary>
+    [TestMethod]
+    public void Model_SampleOrderTests_HandlerStatus_RestoresOnlyTheFourVerbatimConditionsAndTreatsAnythingElseAsNoCondition()
+    {
+        foreach (var condition in HandlerStatusCatalog.Conditions)
+        {
+            var reported = new SampleOrder { Status = "Pending", IsOverdue = true, HandlerStatus = condition };
+
+            Assert.AreEqual(condition, reported.HandlerStatus, $"'{condition}' is one of the four conditions.");
+            Assert.AreEqual(condition, reported.StatusWord, $"'{condition}' is what the status row reads.");
+            Assert.AreEqual(StatusColumnTheme.HandlerCondition, reported.StatusTheme);
+        }
+
+        foreach (var altered in new[] { "Product buried", "ProductBuried", " Product Buried", "Product Buried ", "Product Missing", "Pending", string.Empty, "   " })
+        {
+            var restored = new SampleOrder { Status = "Pending", IsOverdue = true, HandlerStatus = altered };
+
+            Assert.IsNull(restored.HandlerStatus, $"'{altered}' is not one of the four verbatim conditions.");
+            Assert.AreEqual(
+                "Overdue",
+                restored.StatusWord,
+                $"'{altered}' behaves exactly like a row nobody reported on, not like a word of its own.");
+            Assert.AreEqual(StatusColumnTheme.Overdue, restored.StatusTheme, $"'{altered}' must not theme the column as a condition.");
+        }
+    }
+
+    /// <summary>
+    /// The ring's scale: the Item's configured allotment, or the labelled fifteen-minute default when the Item
+    /// configures none or configures one that cannot be measured (FR-017).
+    /// </summary>
+    [TestMethod]
+    public void Model_SampleOrderTests_AllottedMinutes_FallsBackToTheLabelledDefaultWhenTheItemConfiguresNone()
+    {
+        Assert.AreEqual(
+            15,
+            SampleOrder.DefaultAllottedMinutes,
+            "The default is pinned at a labelled fifteen minutes rather than read from a setting.");
+
+        Assert.AreEqual<int?>(
+            SampleOrder.DefaultAllottedMinutes,
+            new SampleOrder().AllottedMinutes,
+            "An Item that configures no allotment allots the default.");
+
+        Assert.AreEqual<int?>(
+            30,
+            new SampleOrder { AllottedMinutes = 30 }.AllottedMinutes,
+            "A configured allotment is the ring's scale.");
+
+        foreach (var unusable in new int?[] { null, 0, -5 })
+        {
+            var row = new SampleOrder { AllottedMinutes = unusable };
+
+            Assert.AreEqual<int?>(
+                SampleOrder.DefaultAllottedMinutes,
+                row.AllottedMinutes,
+                $"An allotment of '{unusable?.ToString() ?? "unset"}' cannot be measured, so the ring falls back to the default rather than having no scale.");
+        }
+    }
+
+    /// <summary>
+    /// The ring states which of the two things it is drawing: the time the request still has left while it is
+    /// live, and the time it took once it has closed (FR-015, FR-016).
+    /// </summary>
+    [TestMethod]
+    public void Model_SampleOrderTests_RingMeasure_ReadsTimeLeftWhileLiveAndTimeTakenOnceClosed()
+    {
+        var requested = new DateTimeOffset(2026, 9, 11, 14, 0, 0, TimeSpan.Zero);
+
+        Assert.AreEqual(
+            TimeRingMeasure.TimeLeft,
+            new SampleOrder { Status = "Pending", RequestedUtc = requested }.RingMeasure,
+            "A live request's ring measures the time it still has left.");
+
+        Assert.AreEqual(
+            TimeRingMeasure.TimeTaken,
+            new SampleOrder { Status = "Pending", RequestedUtc = requested, ClosedUtc = requested.AddMinutes(8) }.RingMeasure,
+            "A close instant closes the request for the ring, whatever the stored status still reads.");
+
+        Assert.AreEqual(
+            TimeRingMeasure.TimeTaken,
+            new SampleOrder { Status = "Completed", RequestedUtc = requested }.RingMeasure,
+            "A finished stored status closes the request for the ring as well (FR-015).");
+
+        Assert.AreEqual(
+            TimeRingMeasure.TimeLeft,
+            new SampleOrder { Status = "Accepted", RequestedUtc = requested, HandlerStatus = "Changing Forklift" }.RingMeasure,
+            "A reported condition does not move the ring's measure.");
+    }
+
+    /// <summary>
+    /// Once the request closes the ring is held at the moment it closed: the fraction reports the time taken and
+    /// does not keep moving afterwards (FR-015).
+    /// </summary>
+    [TestMethod]
+    public void Model_SampleOrderTests_RingValue_FreezesOnTheTimeTakenOnceTheRequestCloses()
+    {
+        var requested = new DateTimeOffset(2026, 9, 11, 14, 0, 0, TimeSpan.Zero);
+        var closed = requested.AddMinutes(8);
+        var order = new SampleOrder
+        {
+            Status = "Completed",
+            RequestedUtc = requested,
+            ClosedUtc = closed,
+            AllottedMinutes = 15,
+        };
+
+        Assert.AreEqual(
+            8d / 15d,
+            order.RingValue,
+            0.000001,
+            "The closed ring reports the eight minutes it took out of its fifteen-minute allotment.");
+
+        Assert.AreEqual(
+            8d / 15d,
+            SampleOrder.RingFraction(requested, closed, 15, closed.AddHours(6)),
+            0.000001,
+            "Measured six hours later the closed ring still reports the same fraction, because it measures to the close instant.");
+
+        Assert.IsTrue(
+            SampleOrder.RingFraction(requested, null, 15, closed.AddHours(6)) > 1d,
+            "The same request while live would have grown past its allotment, so the freeze is the close instant and not the clock standing still.");
+    }
+
+    /// <summary>
+    /// A request that ran past its allotment reads above one rather than being clamped, so the ring can show the
+    /// overrun instead of hiding it at full (FR-014).
+    /// </summary>
+    [TestMethod]
+    public void Model_SampleOrderTests_RingValue_CarriesAnOverdueRequestsOverrunAboveOneRatherThanClampingIt()
+    {
+        var requested = new DateTimeOffset(2026, 9, 11, 14, 0, 0, TimeSpan.Zero);
+
+        Assert.AreEqual(
+            40d / 15d,
+            SampleOrder.RingFraction(requested, null, 15, requested.AddMinutes(40)),
+            0.000001,
+            "Forty minutes of a fifteen-minute allotment is the whole allotment and the overrun besides.");
+
+        var overdue = new SampleOrder
+        {
+            Status = "Accepted",
+            IsOverdue = true,
+            RequestedUtc = DateTimeOffset.UtcNow.AddMinutes(-40),
+            AllottedMinutes = 15,
+        };
+
+        Assert.IsTrue(
+            overdue.RingValue > 1d,
+            "A live overdue row's fraction reads above one, so the overrun is carried rather than clamped.");
+        Assert.AreEqual(
+            TimeRingMeasure.TimeLeft,
+            overdue.RingMeasure,
+            "An overdue but unfinished request is still measuring the time left (FR-014).");
+    }
+
+    /// <summary>
+    /// Rows 3 and 4 of the status zone: the person row reads the requester while nobody has claimed the request
+    /// and the handler once somebody has, and the requester row appears only once the request has closed
+    /// (FR-011, FR-022).
+    /// </summary>
+    [TestMethod]
+    public void Model_SampleOrderTests_PersonText_ReadsTheRequesterWhileUnclaimedAndBothPeopleOnceClosed()
+    {
+        var unclaimed = new SampleOrder { Status = "Pending", RequestedByName = "Ada Lovelace" };
+
+        Assert.AreEqual("Ada Lovelace", unclaimed.PersonText, "An unclaimed request's person row reads the requester (data-model.md §5).");
+        Assert.IsTrue(unclaimed.HasPerson);
+        Assert.AreEqual(string.Empty, unclaimed.RequesterText);
+        Assert.IsFalse(
+            unclaimed.HasRequester,
+            "The requester row is absent rather than blank while the request is open — the requester is already row 3.");
+
+        var claimed = new SampleOrder
+        {
+            Status = "Accepted",
+            RequestedByName = "Ada Lovelace",
+            AssignedMaterialHandler = "6229",
+            AssignedMaterialHandlerName = "Grace Hopper",
+        };
+
+        Assert.AreEqual(
+            "Grace Hopper",
+            claimed.PersonText,
+            "A claimed request's person row reads its material handler's name, not the employee number beside it.");
+        Assert.IsTrue(claimed.HasPerson);
+        Assert.IsFalse(claimed.HasRequester);
+
+        var closed = new SampleOrder
+        {
+            Status = "Completed",
+            RequestedByName = "Ada Lovelace",
+            AssignedMaterialHandler = "6229",
+            AssignedMaterialHandlerName = "Grace Hopper",
+        };
+
+        Assert.AreEqual("Grace Hopper", closed.PersonText, "A closed request keeps its handler on row 3.");
+        Assert.IsTrue(closed.HasPerson);
+        Assert.AreEqual("Ada Lovelace", closed.RequesterText, "And names the requester on row 4.");
+        Assert.IsTrue(closed.HasRequester);
+
+        var handlerWithNoRecordedName = new SampleOrder
+        {
+            Status = "Accepted",
+            RequestedByName = "Ada Lovelace",
+            AssignedMaterialHandler = "6229",
+        };
+
+        Assert.AreEqual(
+            string.Empty,
+            handlerWithNoRecordedName.PersonText,
+            "A handler whose name no source records leaves the row empty; the employee number is never printed as a name.");
+        Assert.IsFalse(
+            handlerWithNoRecordedName.HasPerson,
+            "And the card removes the row rather than drawing the number where a person belongs (FR-018).");
+
+        var cancelledWhileWaiting = new SampleOrder { Status = "Canceled", RequestedByName = "Ada Lovelace" };
+
+        Assert.AreEqual(
+            "Ada Lovelace",
+            cancelledWhileWaiting.PersonText,
+            "A request cancelled before anybody claimed it names the only person who could have cancelled it.");
+        Assert.IsTrue(cancelledWhileWaiting.HasPerson);
+        Assert.AreEqual("Ada Lovelace", cancelledWhileWaiting.RequesterText);
+        Assert.IsTrue(cancelledWhileWaiting.HasRequester);
+
+        var blankHandler = new SampleOrder
+        {
+            Status = "Accepted",
+            RequestedByName = "Ada Lovelace",
+            AssignedMaterialHandler = "   ",
+        };
+
+        Assert.AreEqual(
+            "Ada Lovelace",
+            blankHandler.PersonText,
+            "A handler that is only blank is not a person, so row 3 falls back to the requester rather than drawing whitespace.");
+        Assert.IsTrue(blankHandler.HasPerson);
+
+        var closedWithoutNames = new SampleOrder { Status = "Completed" };
+
+        Assert.IsFalse(closedWithoutNames.HasPerson, "A row with nobody to name removes row 3 rather than drawing a blank one (FR-018).");
+        Assert.IsFalse(closedWithoutNames.HasRequester, "And removes row 4 as well.");
+    }
+
+    /// <summary>
+    /// The card's detail cells are the fields the Item declared, drawn in declaration order, with nowhere to put
+    /// a field that resolved nothing: one cell per resolved field and no padding (FR-026, <c>data-model.md</c> §7).
+    /// </summary>
+    [TestMethod]
+    public void Model_SampleOrderTests_Cells_DrawOneCellPerResolvedFieldInDeclaredOrder()
+    {
+        var order = new SampleOrder { ItemCode = "pickup-coil" };
+
+        order.Cells.Add(new WaitlistLineCardCell { Label = "CardCellCoilDescription", Value = "H-118", Order = 4 });
+        order.Cells.Add(new WaitlistLineCardCell { Value = "Take To Die Shop", Order = 1 });
+        order.Cells.Add(new WaitlistLineCardCell { Label = "CardCellQuantityInHouse", Value = "   ", Order = 3 });
+        order.Cells.Add(new WaitlistLineCardCell { Label = "CardCellCoilNumber", Value = "MMC0001000", Order = 2 });
+
+        Assert.AreEqual(4, order.Cells.Count, "The row holds every cell it was given, in the order it was given them.");
+
+        var drawn = WaitlistLineCardCell.CellsToDraw(order.Cells);
+
+        Assert.AreEqual(3, drawn.Count, "One cell per declared field that resolved a value; the field that resolved nothing is not drawn at all.");
+        CollectionAssert.AreEqual(
+            new[] { "Take To Die Shop", "MMC0001000", "H-118" },
+            drawn.Select(cell => cell.Value).ToArray(),
+            "The cells are drawn in their declared order, not the order the row happened to resolve them in.");
+        Assert.IsFalse(
+            drawn.Any(cell => cell.Label == "CardCellQuantityInHouse"),
+            "A cell that resolved nothing is not among the drawn cells (FR-018).");
+    }
+
+    /// <summary>
+    /// The ring's own text carries one of two different quantities by state: the time the request still has left
+    /// while it is live, and the time it took once it has closed (FR-015). A closed request must not keep showing
+    /// the countdown it was frozen at.
+    /// </summary>
+    [TestMethod]
+    public void Model_SampleOrderTests_RingText_ReadsTheTimeLeftWhileLiveAndTheTimeTakenOnceClosed()
+    {
+        var requested = new DateTimeOffset(2026, 9, 5, 8, 0, 0, TimeSpan.Zero);
+        var live = new SampleOrder
+        {
+            RequestedUtc = requested,
+            TargetTimeUtc = requested.AddMinutes(90),
+        };
+        live.RefreshTimeDerivedText(requested.AddMinutes(10));
+
+        Assert.AreEqual(TimeRingMeasure.TimeLeft, live.RingMeasure);
+        Assert.AreEqual(live.RemainingTimeText, live.RingText, "A live ring draws the same countdown the row shows.");
+
+        var closed = new SampleOrder
+        {
+            RequestedUtc = requested,
+            TargetTimeUtc = requested.AddMinutes(90),
+            ClosedUtc = requested.AddMinutes(80),
+        };
+
+        Assert.AreEqual(TimeRingMeasure.TimeTaken, closed.RingMeasure);
+        Assert.AreEqual("01:20", closed.RingText, "A closed ring draws the time the request took, not a countdown (FR-015).");
+        Assert.AreNotEqual(closed.RemainingTimeText, closed.RingText);
+    }
+
+    /// <summary>
+    /// The time-taken text has nothing to say about a row that has not closed, or one with no creation instant, and
+    /// says so rather than guessing a figure (FR-089).
+    /// </summary>
+    [TestMethod]
+    public void Model_SampleOrderTests_FormatTimeTaken_YieldsNothingWithoutBothInstants()
+    {
+        var requested = new DateTimeOffset(2026, 9, 5, 8, 0, 0, TimeSpan.Zero);
+
+        Assert.AreEqual(string.Empty, SampleOrder.FormatTimeTaken(null, requested));
+        Assert.AreEqual(string.Empty, SampleOrder.FormatTimeTaken(requested, null));
+        Assert.AreEqual("00:00", SampleOrder.FormatTimeTaken(requested, requested));
+    }
+
+    /// <summary>
+    /// The four slots the per-Item templates bind take the row's cells in order, and answer nothing at all for
+    /// a slot the row did not fill (FR-026).
+    /// </summary>
+    /// <remarks>
+    /// The templates bind <c>Cell0</c> to <c>Cell3</c> rather than indexing the collection, because a slot a
+    /// row never filled is the ordinary case and an index into it is a binding failure: what the templates
+    /// need is an empty slot, not a failed lookup.
+    /// </remarks>
+    [TestMethod]
+    public void Model_SampleOrderTests_CellSlots_TakeTheRowsCellsInOrderAndAnswerNothingForTheRest()
+    {
+        var order = new SampleOrder();
+
+        Assert.IsNull(order.Cell0, "A row with no cells still answers a cell for its first slot.");
+        Assert.IsNull(order.Cell1, "A row with no cells still answers a cell for its second slot.");
+        Assert.IsNull(order.Cell2, "A row with no cells still answers a cell for its third slot.");
+        Assert.IsNull(order.Cell3, "A row with no cells still answers a cell for its fourth slot.");
+
+        var first = new WaitlistLineCardCell { Label = "Coil number", Value = "MMC0001000" };
+        var second = new WaitlistLineCardCell { Label = "Coil description", Value = "Coil 0.062 x 48 wide" };
+
+        order.Cells.Add(first);
+        order.Cells.Add(second);
+
+        Assert.AreSame(first, order.Cell0);
+        Assert.AreSame(second, order.Cell1);
+        Assert.IsNull(order.Cell2, "A row with two cells answers a cell for its third slot.");
+        Assert.IsNull(order.Cell3, "A row with two cells answers a cell for its fourth slot.");
+
+        order.Cells.Add(new WaitlistLineCardCell { Label = "Average coil weight", Value = "5,432 lb" });
+        order.Cells.Add(new WaitlistLineCardCell { Label = "Request description", Value = "Changeover review" });
+
+        Assert.AreSame(order.Cells[2], order.Cell2);
+        Assert.AreSame(order.Cells[3], order.Cell3);
+    }
+
+    /// <summary>
+    /// A slot announces itself when the row's cells arrive, so a card bound before its cells are resolved fills
+    /// its slots rather than staying empty (FR-025).
+    /// </summary>
+    [TestMethod]
+    public void Model_SampleOrderTests_CellSlots_AnnounceThemselvesWhenTheRowsCellsArrive()
+    {
+        var order = new SampleOrder();
+        var announced = new List<string?>();
+
+        order.PropertyChanged += (_, args) => announced.Add(args.PropertyName);
+
+        order.Cells.Add(new WaitlistLineCardCell { Label = "Coil number", Value = "MMC0001000" });
+
+        CollectionAssert.IsSubsetOf(
+            new[] { "Cell0", "Cell1", "Cell2", "Cell3" },
+            announced,
+            "The row's slots do not announce themselves when its cells arrive, so a card bound first would "
+                + "draw no cells at all.");
     }
 
     /// <summary>

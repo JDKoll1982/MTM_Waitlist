@@ -17,6 +17,57 @@ namespace MTM_Waitlist.Module_Waitlist.Services;
 /// </remarks>
 public static class NewRequestFlowRules
 {
+    /// <summary>The label both hopper Items declare their size answer under (FR-077, data-model §9).</summary>
+    public const string HopperSizeLabel = "Size";
+
+    /// <summary>The label `assist-coil-turn` declares the operator's coil weight under (FR-086, data-model §9).</summary>
+    public const string CoilWeightLabel = "Weight of Coil";
+
+    /// <summary>The label the four returning pickups declare their skid count under (FR-087, data-model §9).</summary>
+    public const string SkidCountLabel = "# of Skids";
+
+    /// <summary>The label `deliver-wrong-coil` declares its incorrect coil under (FR-082, data-model §9).</summary>
+    public const string IncorrectCoilLabel = "Coil number";
+
+    /// <summary>The label `deliver-wrong-flatstock` declares its incorrect flatstock under (FR-082, data-model §9).</summary>
+    public const string IncorrectFlatstockLabel = "Part";
+
+    /// <summary>
+    /// Whether the chosen Item's configuration declares an answer under <paramref name="label"/>, which is what a
+    /// step checks before it asks its own question: a row that does not declare the field has nothing for the step
+    /// to capture and is reported rather than answered into a label nothing reads (FR-013, FR-056).
+    /// </summary>
+    /// <param name="configuration">The chosen Item's stored behaviour, or null.</param>
+    /// <param name="label">The label a step asks its answer under.</param>
+    public static bool DeclaresAnswerLabel(RequestItemConfiguration? configuration, string label) =>
+        configuration is not null
+        && !string.IsNullOrWhiteSpace(label)
+        && configuration.DetailFields.Any(authority =>
+            string.Equals(authority.Source, RequestItemFieldDefinition.Sources.Answer, StringComparison.OrdinalIgnoreCase)
+            && string.Equals(authority.Label?.Trim(), label.Trim(), StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>
+    /// The label the two wrong-part Items declare their incorrect part under — <c>Coil number</c> on one and
+    /// <c>Part</c> on the other — or null when the row declares neither (FR-082, data-model §9).
+    /// </summary>
+    /// <param name="configuration">The chosen Item's stored behaviour, or null.</param>
+    public static string? PartSearchAnswerLabel(RequestItemConfiguration? configuration)
+    {
+        if (configuration is null)
+        {
+            return null;
+        }
+
+        foreach (var label in new[] { IncorrectCoilLabel, IncorrectFlatstockLabel })
+        {
+            if (DeclaresAnswerLabel(configuration, label))
+            {
+                return label;
+            }
+        }
+
+        return null;
+    }
     /// <summary>
     /// Whether the signed-in person may raise a request, judged by the record the employee lookup returned for
     /// their own employee identifier (FR-046).
@@ -179,6 +230,15 @@ public static class NewRequestFlowRules
         ArgumentNullException.ThrowIfNull(state.Item);
 
         var configuration = state.ItemConfiguration;
+
+        // A declared answer a step of this flow asks is asked by that step, whether or not the row also declares a
+        // single answer: the size, the weight of coil, the skid count and the incorrect part each have a step of
+        // their own, chosen by the label the ROW declares rather than by the Item's identity (FR-013, FR-082).
+        if (PendingAnswerStep(state) is { } answerStep)
+        {
+            return answerStep;
+        }
+
         var requiresAnswer = configuration?.RequiresAnswer == true
             || string.Equals(configuration?.ControlFlow, RequestItemConfiguration.CollectInputThenConfirm, StringComparison.OrdinalIgnoreCase);
 
@@ -205,6 +265,54 @@ public static class NewRequestFlowRules
             _ => typeof(NewRequestDetailsViewModel),
         };
     }
+
+    /// <summary>
+    /// The step that asks the first answer the row declares that has a step of its own and has not been captured
+    /// yet, or null when every such answer is captured — or when the row declares none.
+    /// </summary>
+    /// <remarks>
+    /// Read in declared order, so a row asking two such answers is asked them in the order it declares them. The
+    /// die-shop checkbox is deliberately absent from this map: it is asked on the die step, beside the die it
+    /// belongs to, rather than on a step of its own (FR-081).
+    /// </remarks>
+    private static Type? PendingAnswerStep(NewRequestFlowState state)
+    {
+        var configuration = state.ItemConfiguration;
+        if (configuration is null)
+        {
+            return null;
+        }
+
+        foreach (var field in configuration.DetailFields.OrderBy(field => field.Order))
+        {
+            if (!string.Equals(field.Source, RequestItemFieldDefinition.Sources.Answer, StringComparison.OrdinalIgnoreCase)
+                || string.IsNullOrWhiteSpace(field.Label)
+                || state.HasAnswer(field.Label))
+            {
+                continue;
+            }
+
+            if (StepForAnswerLabel(field.Label) is { } step)
+            {
+                return step;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// The step a declared answer's label names, or null when no step of this flow asks that answer.
+    /// </summary>
+    /// <param name="label">The label the row declares the answer under.</param>
+    private static Type? StepForAnswerLabel(string label) => label.Trim().ToLowerInvariant() switch
+    {
+        "size" => typeof(NewRequestHopperViewModel),
+        "weight of coil" => typeof(NewRequestCoilTurnViewModel),
+        "# of skids" => typeof(NewRequestSkidCountViewModel),
+        "coil number" or "part" => typeof(NewRequestPartSearchViewModel),
+        _ => null,
+    };
 
     private static bool IsNoActiveJobPlaceholder(string? value) =>
         string.Equals(value?.Trim(), "No active job", StringComparison.OrdinalIgnoreCase)

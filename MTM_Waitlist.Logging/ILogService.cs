@@ -51,7 +51,7 @@ public interface ILogService : IAppLogSink
     /// <param name="module">The part of the application the entry came from.</param>
     /// <param name="message">What the entry says.</param>
     /// <param name="errorType">The fault type the warning is about, when it is about one.</param>
-    void Warn(string module, string message, string? errorType = null);
+    new void Warn(string module, string message, string? errorType = null);
 
     /// <summary>
     /// Records that the operation under way failed, with the fault that failed it.

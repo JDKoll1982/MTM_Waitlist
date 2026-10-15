@@ -69,4 +69,27 @@ public interface IWaitlistRequestService
     /// assigned handler and a taken, not-done state. Returns the updated request, or null when not found/denied.
     /// </summary>
     Task<WaitlistRequest?> ReleaseAsync(Guid requestId, string handlerEmployeeNumber, string? handlerEmployeeName = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sets the condition the row's own material handler reported from its card, and hands back the affected-row
+    /// count so the caller can tell a write from a lost race rather than being shown a success it did not get
+    /// (FR-070, FR-073, FR-076).
+    /// </summary>
+    /// <param name="requestId">The request the condition belongs to.</param>
+    /// <param name="handlerStatus">
+    /// One of the four verbatim conditions, or something else to be refused. A value that is not a condition is
+    /// never written: the vocabulary is closed (<see cref="Helpers.HandlerStatusCatalog"/>), and the workspace
+    /// offers no path that clears a condition back to none.
+    /// </param>
+    /// <param name="expectedMaterialHandler">
+    /// The handler the caller read on the row. The write is conditional on it, so only the row's own handler can
+    /// set its condition and a caller whose expected handler is blank affects nothing (FR-076).
+    /// </param>
+    /// <param name="cancellationToken">Cancels the write.</param>
+    /// <returns>
+    /// The store's own affected-row count: 1 when the condition was written, 0 when nothing was affected — a
+    /// handler who no longer holds the request, a caller that is not that handler, or a value that is not one of
+    /// the four conditions.
+    /// </returns>
+    Task<int> SetHandlerStatusAsync(Guid requestId, string? handlerStatus, string expectedMaterialHandler, CancellationToken cancellationToken = default);
 }

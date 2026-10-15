@@ -3,20 +3,6 @@ using MTM_Waitlist.Module_Core.Models;
 namespace MTM_Waitlist.Module_Settings.Services;
 
 /// <summary>
-/// One Infor Visual <c>GetDispositionInput.sql</c> result row (WORK_ORDER/OPERATION/PART snapshot).
-/// </summary>
-public sealed record InforDispositionRow
-{
-    public string? WorkOrderStatus { get; init; }
-
-    public decimal OpenWorkOrderQuantity { get; init; }
-
-    public decimal FinishedGoodsQuantity { get; init; }
-
-    public bool HasOutsideVendorOperation { get; init; }
-}
-
-/// <summary>
 /// Maps the two live snapshots (Infor Visual WORK_ORDER/OPERATION + MTM WIP Application floor stock)
 /// onto the pure <see cref="RequestDispositionClassifier.DispositionInput"/>. This is the only glue
 /// between the queue scripts and the classifier; it stays pure (no DB access) so it is trivially
@@ -31,6 +17,14 @@ public static class RequestDispositionMapper
     {
         var floorOutside = (floorSnapshot?.OutsideServiceFloorQuantity ?? 0m) > 0m;
 
+        // Non-conforming stock is a property of the location the material occupies, so it is read from the
+        // floor buckets, which classify each location (`md_locations.Location LIKE 'NCM%'`). The Infor side's
+        // equivalent (`PART_LOCATION.STATUS` against the occupied LOCATION) is not read here: no Visual read in
+        // this repository carries that column, and the codes this installation uses are not yet confirmed —
+        // task T067's live validation confirms them, and until then nothing is invented in their place. What is
+        // certain either way is that the part's recorded `ItemType` is never the signal (FR-093).
+        var nonConforming = floorSnapshot?.NonConformingFloorQuantity ?? 0m;
+
         if (inforRow is null)
         {
             // No Infor work order/part snapshot: classify from floor stock alone.
@@ -38,7 +32,8 @@ public static class RequestDispositionMapper
                 WorkOrderStatus: null,
                 FinishedGoodsQuantity: floorSnapshot?.FinishedGoodsFloorQuantity ?? 0m,
                 OpenWorkOrderQuantity: floorSnapshot?.WipFloorQuantity ?? 0m,
-                HasOutsideVendorOperation: floorOutside);
+                HasOutsideVendorOperation: floorOutside,
+                NonConformingQuantity: nonConforming);
         }
 
         // Prefer the Infor on-hand/open quantities; only use floor buckets when Infor reports none
@@ -55,7 +50,8 @@ public static class RequestDispositionMapper
             WorkOrderStatus: inforRow.WorkOrderStatus,
             FinishedGoodsQuantity: finishedGoods,
             OpenWorkOrderQuantity: openQuantity,
-            HasOutsideVendorOperation: inforRow.HasOutsideVendorOperation || floorOutside);
+            HasOutsideVendorOperation: inforRow.HasOutsideVendorOperation || floorOutside,
+            NonConformingQuantity: nonConforming);
     }
 
     /// <summary>Maps one GetDispositionInput.sql result row to an <see cref="InforDispositionRow"/> (columns case-insensitive).</summary>

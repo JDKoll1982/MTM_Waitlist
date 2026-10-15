@@ -24,6 +24,13 @@ public sealed class RequestDunnagePart
     public string DisplayName { get; init; } = string.Empty;
 
     /// <summary>
+    /// Where the part lives — the home location the receiving store records for it. Empty when the store records
+    /// none, so the card can leave its <c>Home Location</c> cell out rather than show a blank one (FR-033,
+    /// FR-045, FR-089).
+    /// </summary>
+    public string HomeLocation { get; init; } = string.Empty;
+
+    /// <summary>
     /// The part's picture as an absolute path, or empty when it has none. Resolved by the composition root, so
     /// the wizard never has to know where the shared dunnage image root lives.
     /// </summary>

@@ -22,7 +22,8 @@
                 AutomationProperties.Name="{x:Bind Title}"
                 AccentBrush="{ThemeResource AccentFillColorDefaultBrush}"
                 AccentSurfaceBrush="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
-                Order="{Binding}" />
+                Order="{Binding}"
+                StatusConditionChosen="OnCardStatusConditionChosen" />
         </DataTemplate>
     </Page.Resources>
 
@@ -61,8 +62,6 @@
             AutomationProperties.AutomationId="WaitlistViewPage_CardList"
             x:Name="WaitlistListView"
             Padding="6,12,6,92"
-            IsItemClickEnabled="True"
-            ItemClick="ListView_ItemClick"
             ItemTemplate="{StaticResource WaitlistLineCardTemplate}"
             ItemsSource="{x:Bind ViewModel.Source, Mode=OneWay}"
             SelectionMode="Single">

@@ -50,7 +50,7 @@ while ((Get-Date) -lt $deadline -and -not $proc) {
     $candidate = Get-Process -Name MTM_Waitlist -ErrorAction SilentlyContinue |
         Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1
     if ($candidate -and (Test-IsShellWindow -WindowHandle $candidate.MainWindowHandle)) { $proc = $candidate }
-    if (-not $proc) { Start-Sleep -Milliseconds 500 }
+    if (-not $proc) { Start-Sleep -Milliseconds 120 }
 }
 
 if (-not $proc) {
@@ -62,7 +62,7 @@ $hwnd = $proc.MainWindowHandle
 [void][MtmCapture]::ShowWindow($hwnd, $(if ($Maximize) { 3 } else { 9 }))
 [void][MtmCapture]::BringWindowToTop($hwnd)
 [void][MtmCapture]::SetForegroundWindow($hwnd)
-Start-Sleep -Milliseconds 900
+Start-Sleep -Milliseconds 250
 
 $raised = ([MtmCapture]::GetForegroundWindow() -eq $hwnd)
 Write-Output "foreground-is-app: $raised"

@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Navigation;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Waitlist.Helpers;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
 
@@ -156,6 +157,128 @@ public sealed class NewRequestDieViewModelTests
         Assert.AreEqual(1, navigation.GoBackCount, "The step cannot run without the request in progress.");
     }
 
+    [TestMethod]
+    public void ViewModel_NewRequestDieViewModelTests_Continue_WithTheDieShopCheckboxTickedRecordsTheAnswerTheCardReads()
+    {
+        var state = TwoDieState();
+        var viewModel = CreateViewModel();
+        viewModel.OnNavigatedTo(state);
+
+        viewModel.IsDieShopSelected = true;
+        viewModel.SelectDieCommand.Execute(viewModel.Options[0]);
+        viewModel.ContinueCommand.Execute(null);
+
+        Assert.IsTrue(
+            WaitlistCardCellRules.IsDieShopAnswerGiven(state.AnswerFor(WaitlistCardCellRules.DieShopAnswerLabel)),
+            "A ticked checkbox is an answer the card draws its third, label-less cell for (FR-081).");
+        Assert.AreEqual(
+            WaitlistCardCellRules.DieShopAnswerLabel,
+            state.Answers.Keys.Single(),
+            "The answer is captured under the label the die Items declare, which is the label the card reads (FR-081).");
+    }
+
+    [TestMethod]
+    public void ViewModel_NewRequestDieViewModelTests_Continue_WithTheCheckboxUntickedWritesNoAnswerSoTheCardDrawsTwoCells()
+    {
+        var state = TwoDieState();
+        var viewModel = CreateViewModel();
+        viewModel.OnNavigatedTo(state);
+
+        viewModel.SelectDieCommand.Execute(viewModel.Options[0]);
+        viewModel.ContinueCommand.Execute(null);
+
+        Assert.IsFalse(
+            state.HasAnswer(WaitlistCardCellRules.DieShopAnswerLabel),
+            "An unticked checkbox is written as no answer at all, so the card draws two cells rather than a third one (FR-055, FR-081).");
+        Assert.IsFalse(
+            WaitlistCardCellRules.IsDieShopAnswerGiven(state.AnswerFor(WaitlistCardCellRules.DieShopAnswerLabel)),
+            "The card's own rule agrees that nothing was answered.");
+    }
+
+    [TestMethod]
+    public void ViewModel_NewRequestDieViewModelTests_OnNavigatedTo_ComingBackWithTheDieShopAnswerTickedShowsItTicked()
+    {
+        var state = TwoDieState();
+        state.RecordAnswer(WaitlistCardCellRules.DieShopAnswerLabel, "true");
+        var viewModel = CreateViewModel();
+
+        viewModel.OnNavigatedTo(state);
+
+        Assert.IsTrue(viewModel.IsDieShopSelected, "Coming back to the step shows the checkbox already ticked (FR-081).");
+    }
+
+    [TestMethod]
+    public void ViewModel_NewRequestDieViewModelTests_OnNavigatedTo_AsksTheDieShopQuestionInPlainLanguage()
+    {
+        var viewModel = CreateViewModel();
+
+        viewModel.OnNavigatedTo(TwoDieState());
+
+        Assert.IsFalse(
+            viewModel.DieShopPromptText.StartsWith("NewRequest_", StringComparison.Ordinal),
+            "The checkbox's question is plain language, never a bare resource key (FR-022).");
+    }
+
+    [TestMethod]
+    public void ViewModel_NewRequestDieViewModelTests_OnNavigatedTo_WithoutAResolvedWordingKeepsTheStepsOwnDefault()
+    {
+        // The direction's wording is resolved from the resource file, and a wording that is not there must leave
+        // the step with the question it already had rather than showing a resource key to the operator (FR-022).
+        var viewModel = CreateViewModel();
+        var before = viewModel.DieShopPromptText;
+
+        viewModel.OnNavigatedTo(new NewRequestFlowState
+        {
+            WorkCenter = "100-07",
+            Category = RequestCategory.Pickup,
+            Item = RequestItemCatalog.FindById("pickup-coil"),
+        });
+
+        Assert.AreEqual(
+            before,
+            viewModel.DieShopPromptText,
+            "An Item with no die-shop direction replaced the step's own question (FR-022, FR-081).");
+    }
+
+    [TestMethod]
+    public void ViewModel_NewRequestDieViewModelTests_TheDieShopLabel_IsTheLabelLessCellTheCardDrawsOnlyWhenGiven()
+    {
+        // The label the checkbox's answer is captured under is the die Items' die-shop field, and the phrase the
+        // card draws is chosen by the Item's direction — never by the answer's own text (FR-055, D40).
+        foreach (var itemCode in new[] { "pickup-die", "deliver-die" })
+        {
+            Assert.IsTrue(
+                WaitlistCardCellRules.IsDieShopField(itemCode, WaitlistCardCellRules.DieShopAnswerLabel),
+                $"'{itemCode}' declares the die-shop field the step answers under.");
+            Assert.IsTrue(
+                WaitlistCardCellRules.IsCell(itemCode, WaitlistCardCellRules.DieShopAnswerLabel),
+                $"'{itemCode}' must draw a cell for the answer the checkbox captures.");
+            Assert.IsTrue(
+                WaitlistCardCellRules.DieShopPhrase(itemCode)?.Length > 0,
+                $"'{itemCode}' must resolve its die-shop phrase from the resource file (FR-104).");
+        }
+
+        Assert.IsTrue(
+            WaitlistCardCellRules.IsDieShopAnswerGiven("true"),
+            "A ticked checkbox is an answer the card draws the third cell for.");
+    }
+
+    [TestMethod]
+    public void ViewModel_NewRequestDieViewModelTests_TheDirections_AskDifferentDieShopQuestions()
+    {
+        // The one tick means "take it there" on a pickup and "it is already there" on a deliver, so the two
+        // directions cannot ask the same question (FR-081). The wording itself is resolved from the resource
+        // file, which a host with no resources cannot read, so what is pinned here is the rule: the two
+        // directions name different questions, and an Item with no die-shop direction is given none.
+        Assert.AreNotEqual(
+            WaitlistCardCellRules.TakeToDieShopPromptKey,
+            WaitlistCardCellRules.LocatedInDieShopPromptKey,
+            "Both die directions ask one question, so the same tick answers two different things (FR-081).");
+        Assert.IsNull(
+            WaitlistCardCellRules.DieShopPrompt("pickup-coil"),
+            "An Item that has no die-shop direction asks no die-shop question (FR-081).");
+    }
+
     private static RequestDiePart Die(string partNumber, string location) =>
         new() { PartNumber = partNumber, Location = location };
 
@@ -166,6 +289,15 @@ public sealed class NewRequestDieViewModelTests
         Item = RequestItemCatalog.FindById("pickup-die"),
         Availability = (RequestJobPartAvailability.None with { HasActiveJob = true, HasDie = true })
             .WithDies([Die(FirstDie, "DIE SHOP"), Die(SecondDie, "PRESS BAY")]),
+    };
+
+    private static NewRequestFlowState DeliverDieState() => new()
+    {
+        WorkCenter = "100-07",
+        Category = RequestCategory.Deliver,
+        Item = RequestItemCatalog.FindById("deliver-die"),
+        Availability = (RequestJobPartAvailability.None with { HasActiveJob = true, HasDie = true })
+            .WithDies([Die(FirstDie, "DIE SHOP")]),
     };
 
     private static NewRequestDieViewModel CreateViewModel(RecordingNavigationService? navigation = null)

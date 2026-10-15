@@ -80,6 +80,51 @@ public sealed class ShellHostingAuditTests
             "a window that cannot be maximized must still complete the hand-over rather than stop it");
     }
 
+    /// <summary>
+    /// The cached-data notice belongs at the foot of the shell, not above the page.
+    /// </summary>
+    /// <remarks>
+    /// It is a notice about the data, and every page under it is worked on while it is shown. Sitting in the row
+    /// above the frame, it pushed the page down the moment Infor Visual went unreachable and pulled it back up
+    /// when it recovered, so the screen moved under the person's hands for a reason that had nothing to do with
+    /// what they were doing. It has a row of its own, after the frame, and takes no height while it is away.
+    /// </remarks>
+    [TestMethod]
+    public void Audit_ShellHostingAuditTests_TheShell_KeepsTheCachedDataNoticeInItsOwnRowBelowThePage()
+    {
+        var shell = Read("Module_Core", "Views", "ShellPage.xaml");
+
+        var frameIndex = shell.IndexOf("x:Name=\"NavigationFrame\"", StringComparison.Ordinal);
+        var noticeIndex = shell.IndexOf("<mock:ReadStatusIndicator", StringComparison.Ordinal);
+
+        Assert.IsTrue(noticeIndex >= 0, "the shell no longer hosts the read-only cached-data status at all");
+        Assert.IsTrue(
+            noticeIndex > frameIndex,
+            "the cached-data notice is declared before the frame, so it is drawn above the page rather than below it");
+
+        StringAssert.Contains(
+            shell,
+            "<Frame x:Name=\"NavigationFrame\" Grid.Row=\"0\" />",
+            "the page must keep the row that expands, so the notice below it cannot push it down");
+
+        StringAssert.Contains(
+            shell,
+            "Grid.Row=\"1\"",
+            "the notice must sit in the row after the page");
+
+        // It is a notice inside the shell, not a strip of chrome along the window's edge: the row it sits in
+        // reaches the bottom of the window, so the gap below it has to be declared here. The shell's own content
+        // margin carries no bottom inset (56,24,56,0), so nothing else provides one.
+        var notice = shell[noticeIndex..];
+        var noticeEnd = notice.IndexOf("/>", StringComparison.Ordinal);
+        var margin = System.Text.RegularExpressions.Regex.Match(
+            notice[..(noticeEnd < 0 ? notice.Length : noticeEnd)],
+            "Margin=\"([^\"]*)\"").Groups[1].Value.Split(',');
+
+        Assert.AreEqual(4, margin.Length, "the cached-data notice carries no margin of its own, so it sits flush against the window's bottom edge");
+        Assert.AreNotEqual("0", margin[3].Trim(), "the cached-data notice has no gap below it and sits at the very bottom of the window");
+    }
+
     /// <summary>One repository file, addressed from the repository root.</summary>
     private static string Read(params string[] parts)
     {

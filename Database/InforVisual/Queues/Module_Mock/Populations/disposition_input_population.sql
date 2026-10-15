@@ -13,6 +13,16 @@
 --   WorkOrder, PartNumber (input keys),
 --   WorkOrderStatus, OpenWorkOrderQuantity, FinishedGoodsQuantity, HasOutsideVendorOperation (outputs).
 --
+-- `FinishedGoodsQuantity` is the part's stock AT A FINISHED-GOODS LOCATION, projected exactly as the live read
+-- (GetDispositionInput.sql) projects it, so a cached answer and a live answer cannot differ in shape or meaning
+-- (FR-090). It is NOT PART.QTY_ON_HAND: that is the part's total on-hand across every location with no location
+-- filter, and it is the defect the spec records. The finished-goods class is
+-- LOCATION.DESCRIPTION LIKE '%FINISHED GOODS%' OR WAREHOUSE.DESCRIPTION LIKE '%FINISHED GOODS%'
+-- OR LOCATION.ID IN ('FG','DC-FG'), mirroring the taxonomy documented for the WIP side in
+-- Database/MTMWipApp/Queues/Module_Waitlist/Queues/GetWipFloorQuantities.sql. The codes are NOT YET CONFIRMED for
+-- this installation: task T067's live validation (Database/Validation/disposition_input_finished_goods/validate.sql)
+-- confirms them, and none is invented before it does.
+--
 -- `WorkOrderStatus` is the raw Visual status code and the KEY is the same normalized `WO-` form the
 -- caller uses. The status MEANING stays owned solely by RequestDispositionStatusCodes; this cache
 -- never interprets it (FR-018).
@@ -28,7 +38,20 @@ SELECT
         CASE WHEN wo.DESIRED_QTY > wo.RECEIVED_QTY THEN wo.DESIRED_QTY - wo.RECEIVED_QTY ELSE 0 END
         AS decimal(20, 8)
     ) AS OpenWorkOrderQuantity,
-    CAST(COALESCE(part.QTY_ON_HAND, 0) AS decimal(20, 8)) AS FinishedGoodsQuantity,
+    CAST(COALESCE(
+    (
+        SELECT SUM(COALESCE(pl.QTY, 0))
+        FROM PART_LOCATION AS pl
+        LEFT JOIN WAREHOUSE AS wh
+            ON wh.ID = pl.WAREHOUSE_ID
+        LEFT JOIN LOCATION AS loc
+            ON loc.WAREHOUSE_ID = pl.WAREHOUSE_ID
+            AND loc.ID = pl.LOCATION_ID
+        WHERE pl.PART_ID = wo.PART_ID
+            AND (ISNULL(loc.DESCRIPTION, '') LIKE '%FINISHED GOODS%'
+                 OR ISNULL(wh.DESCRIPTION, '') LIKE '%FINISHED GOODS%'
+                 OR ISNULL(loc.ID, '') IN ('FG', 'DC-FG'))
+    ), 0) AS decimal(20, 8)) AS FinishedGoodsQuantity,
     CASE WHEN EXISTS
     (
         SELECT 1
@@ -43,8 +66,6 @@ SELECT
                  OR LTRIM(RTRIM(ISNULL(o.SERVICE_PART_ID, ''))) <> '')
     ) THEN 1 ELSE 0 END AS HasOutsideVendorOperation
 FROM WORK_ORDER AS wo
-LEFT JOIN PART AS part
-    ON part.ID = wo.PART_ID
 WHERE
     wo.STATUS IN ('R', 'U', 'F')
     AND wo.BASE_ID IS NOT NULL

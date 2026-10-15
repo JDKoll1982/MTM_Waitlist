@@ -13,7 +13,7 @@
 --   p_rows : JSON array of result objects. Keys:
 --              "NormalizedWorkOrder", "ParentPartNumber", "SequenceNumber"  (the read's inputs)
 --              "Category", "PartNumber", "Description", "Location", "User8",
---              "OnHandQuantity"                                             (the read's outputs)
+--              "OnHandQuantity"                                            (the read's outputs)
 --
 -- KEY NAMING: the live read's input part number and its returned subordinate part number are both
 -- called `PartNumber` in the Visual source. The payload therefore uses `ParentPartNumber` for the

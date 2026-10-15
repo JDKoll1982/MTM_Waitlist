@@ -33,6 +33,20 @@ public interface IImageStorageConfigurationResolver
     Task<string> GetDunnageRootPathAsync();
 
     /// <summary>
+    /// Gets the effective folder holding the hopper reference pictures, which is held once for the plant like the
+    /// picture folder.
+    /// Resolution order:
+    /// 1. Database override from config_settings_values (if set and not null)
+    /// 2. appsettings.json ImageStorage.HopperFolderPath
+    /// 3. Hard-coded default from <c>ConfigSettingKeys.ImageStorageHopperFolderPathDefault</c>
+    /// </summary>
+    /// <returns>
+    /// The effective hopper picture folder, relative to the picture folder unless it is given as an absolute path.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">If configuration cannot be resolved</exception>
+    Task<string> GetHopperFolderPathAsync();
+
+    /// <summary>
     /// Gets the effective local picture cache folder with database override support.
     /// Resolution order:
     /// 1. Database override from config_settings_values (if set and not null)

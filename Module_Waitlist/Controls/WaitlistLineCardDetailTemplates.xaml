@@ -1,0 +1,1537 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:settingsConverters="using:MTM_Waitlist.Module_Settings.Converters"
+    xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
+    xmlns:waitlistConverters="using:MTM_Waitlist.Module_Waitlist.Converters">
+
+    <!--
+        The detail column's per-Item arrangements, one template per Item, all in this one dictionary
+        (specs/012-waitlist-card-layout, research R3, D31). The card's own selector looks a row's Item up at
+        run time under `WaitlistLineCardDetail_<ItemCode>` and draws what it finds, so an Item's arrangement
+        landing here is all it takes for that Item to draw its own cells, with no card edit.
+
+        Each template is the detail zone's two lower rows: a two-column grid whose four slots fill in the
+        row's declared cell order (FR-026). Which slots exist and how far the last one reaches is read off
+        the number of cells the row actually filled, through `WaitlistCardCellLayout` (FR-103): four cells
+        are two rows of two, three let the third span the bottom row, two leave the bottom row empty so it
+        collapses, one spans the full width, and none leaves both rows empty with the title row above keeping
+        the space (FR-024, FR-026, FR-027). Nothing is padded to fill a short panel (FR-006).
+
+        Every cell is drawn by the same pair of shared templates below, so the anatomy - the label on top with
+        the value beneath, tight against it - is written once (FR-028). The label is the one the cell's own
+        declaration carries, resolved through the application's resources rather than written here (FR-059,
+        FR-104); the label-less die-shop cell hides its label and draws its phrase as the value (FR-055); and
+        `other`'s request description is drawn through the application's shared scrolling text control, so a
+        long description scrolls rather than being clipped (FR-053).
+    -->
+
+    <waitlistConverters:WaitlistCardCellLabelConverter x:Key="WaitlistCardCellLabelConverter" />
+    <waitlistConverters:WaitlistCardCellSpanConverter x:Key="WaitlistCardCellSpanConverter" />
+    <waitlistConverters:WaitlistCardCellVisibilityConverter x:Key="WaitlistCardCellVisibilityConverter" />
+    <settingsConverters:BoolToVisibilityConverter x:Key="WaitlistCardCellLabelVisibilityConverter" />
+
+    <!--
+        The picture rule, declared here as the label converter above is: this dictionary is merged into the
+        application's resources before the app-level declaration is in scope, so a cell that draws a picture
+        carries its own instance rather than reaching for a key that is not yet there.
+    -->
+    <settingsConverters:ResolvedImagePathToSourceConverter x:Key="WaitlistCardCellReferenceImageConverter" />
+
+    <!--
+        One cell: the label the declaration carries on top, its value beneath, the two touching, the pair centred
+        in its own slot and closed off from its neighbours by a hairline along its top and its left edge.
+    -->
+    <DataTemplate x:Key="WaitlistLineCardDetailCell">
+        <Border
+            Padding="10,2"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1,1,0,0">
+            <StackPanel HorizontalAlignment="Center" Spacing="0">
+                <TextBlock
+                    FontSize="13"
+                    FontWeight="SemiBold"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="{Binding Label, Converter={StaticResource WaitlistCardCellLabelConverter}}"
+                    TextAlignment="Center"
+                    TextTrimming="CharacterEllipsis"
+                    Visibility="{Binding IsLabelLess, Converter={StaticResource WaitlistCardCellLabelVisibilityConverter}, ConverterParameter=Invert}" />
+                <TextBlock
+                    FontSize="15"
+                    Text="{Binding Value}"
+                    TextAlignment="Center"
+                    TextTrimming="CharacterEllipsis"
+                    TextWrapping="NoWrap" />
+            </StackPanel>
+        </Border>
+    </DataTemplate>
+
+    <!--
+        One cell whose value is drawn in full by scrolling it past rather than clipping it: the request
+        description on `other`, which can be a whole sentence (FR-053).
+    -->
+    <DataTemplate x:Key="WaitlistLineCardDetailScrollingCell">
+        <Border
+            Padding="10,2"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1,1,0,0">
+            <StackPanel HorizontalAlignment="Center" Spacing="0">
+                <TextBlock
+                    FontSize="13"
+                    FontWeight="SemiBold"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="{Binding Label, Converter={StaticResource WaitlistCardCellLabelConverter}}"
+                    TextAlignment="Center"
+                    TextTrimming="CharacterEllipsis"
+                    Visibility="{Binding IsLabelLess, Converter={StaticResource WaitlistCardCellLabelVisibilityConverter}, ConverterParameter=Invert}" />
+                <sharedControls:AutoScrollTextView
+                    FontSize="15"
+                    Text="{Binding Value}" />
+            </StackPanel>
+        </Border>
+    </DataTemplate>
+
+    <!--
+        One cell that pictures the answer it shows: the hopper's size, whose word is also the key its reference
+        picture is filed under, so the card opens the picture the New Request hopper step drew (FR-077, D22).
+        The picture is the card's own enlarge behaviour and nothing new - Shift+click, because a plain click on
+        a card row already belongs to the row (FR-078) - and a size whose picture is missing or unusable draws
+        the application's one shared placeholder instead of a blank (FR-080). The value stays beside the
+        picture so the size the requester chose is still readable as a word.
+    -->
+    <DataTemplate x:Key="WaitlistLineCardDetailPictureCell">
+        <Border
+            Padding="10,2"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1,1,0,0">
+            <StackPanel HorizontalAlignment="Center" Spacing="0">
+                <TextBlock
+                    FontSize="13"
+                    FontWeight="SemiBold"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="{Binding Label, Converter={StaticResource WaitlistCardCellLabelConverter}}"
+                    TextAlignment="Center"
+                    TextTrimming="CharacterEllipsis"
+                    Visibility="{Binding IsLabelLess, Converter={StaticResource WaitlistCardCellLabelVisibilityConverter}, ConverterParameter=Invert}" />
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <sharedControls:ClickToEnlargeImageView
+                        Width="28"
+                        Height="28"
+                        VerticalAlignment="Center"
+                        AutomationProperties.AutomationId="WaitlistLineCardDetailCell_ReferenceImage"
+                        Source="{Binding EffectiveReferenceImagePath, Converter={StaticResource WaitlistCardCellReferenceImageConverter}}"
+                        Stretch="Uniform" />
+                    <TextBlock
+                        FontSize="15"
+                        VerticalAlignment="Center"
+                        Text="{Binding Value}"
+                        TextTrimming="CharacterEllipsis"
+                        TextWrapping="NoWrap" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </DataTemplate>
+
+    <!--  Pickup  -->
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_pickup-coil">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_pickup-die">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_pickup-component">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_pickup-fg">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_pickup-ncm">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_pickup-wip">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_pickup-outside-service">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_pickup-riser-table">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_pickup-dunnage">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_pickup-scrap">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_pickup-hopper">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailPictureCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+
+
+    <!--  Deliver  -->
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_deliver-coil">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_deliver-riser-table">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_deliver-hopper">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailPictureCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_deliver-flatstock">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_deliver-component">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_deliver-die">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_deliver-dunnage">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_deliver-wrong-coil">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_deliver-wrong-flatstock">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+
+
+    <!--  Assist  -->
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_assist-coil-turn">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_assist-table-place">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_assist-table-remove">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+
+
+    <!--  Other  -->
+
+    <DataTemplate x:Key="WaitlistLineCardDetail_other">
+        <Grid ColumnSpacing="0" RowSpacing="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=0}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell0}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailScrollingCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=0}" />
+            <ContentControl
+                Grid.Row="0"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=1}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell1}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=1}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=2}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell2}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=2}" />
+            <ContentControl
+                Grid.Row="1"
+                Grid.Column="1"
+                Grid.ColumnSpan="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellSpanConverter}, ConverterParameter=3}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch"
+                VerticalContentAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Content="{Binding Cell3}"
+                ContentTemplate="{StaticResource WaitlistLineCardDetailCell}"
+                Visibility="{Binding Cells.Count, Converter={StaticResource WaitlistCardCellVisibilityConverter}, ConverterParameter=3}" />
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>

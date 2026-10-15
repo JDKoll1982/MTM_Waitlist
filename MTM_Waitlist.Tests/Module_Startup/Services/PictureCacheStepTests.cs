@@ -257,6 +257,13 @@ public sealed class PictureCacheStepTests
         }
 
         /// <inheritdoc />
+        public void Warn(string module, string message, string? errorType = null)
+        {
+            Areas.Add(module);
+            Messages.Add(message);
+        }
+
+        /// <inheritdoc />
         public void Error(string module, string message, Exception? exception = null)
         {
             Areas.Add(module);

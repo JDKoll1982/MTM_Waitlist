@@ -1572,6 +1572,26 @@ SET u.username_normalized = UPPER(u.username_normalized),
 --     answer field names that job list so the choice never depends on the Item's identity (FR-013, FR-048).
 --   * detail_fields_json's key order stays inside the JSON payload: a bare `order` column is banned by
 --     Database/Database-Ruleset.md and is never introduced.
+--   * Seed reconciliation (2026-10-10, spec 012 §9, D33): four declared labels are corrected in place to the
+--     labels the card reads — `Pickup location` to `Die Location` on both die Items, `Home location` to
+--     `Home Location` on both dunnage Items, `Scrap type` to `Scrap Type`, and `Coil number` to `Coil Number`
+--     on assist-coil-turn only (the coil Items keep their own `Coil number`). The corrected labels are appended
+--     after every field the Item already declared, so no existing declaration is reordered. An installed store
+--     is moved without a reinstall by seed_waitlist_request_item_configs_label_move, whose rollback restores the
+--     previous spellings.
+--   * Seed reconciliation (2026-10-10, spec 012 §9): the cells the card drew and configuration did not carry
+--     are appended as declarations — `Die Shop Direction` on both die Items, `Size` on both hopper Items,
+--     `# of Skids` on the four returning pickups, `Weight of Coil` on assist-coil-turn, `Part Type` on the four
+--     returning pickups, `Item Type` and `Total Qty In House` on both component Items, and `Lugger Location` on
+--     pickup-scrap. Every one of them is a label the card's own rules already read; none of them is invented
+--     here.
+--   * Nothing is removed: every declared field the card does not draw is left declared and excluded by
+--     WaitlistCardCellRules instead (FR-056), so the exclusion stays a card rule rather than a configuration
+--     edit. `Description` on the two dunnage Items is the live example — it is provably unfillable, and whether
+--     to remove it is an open question rather than a silent deletion (FR-095).
+--   * Only the two wrong-part Items change a field's source: their incorrect part (`Coil number`,
+--     `Part`) moves from `job` to `answer`, because the operator types it through the fuzzy search (FR-082).
+--     Their correct part stays the job's own (FR-088).
 
 USE mtm_waitlist;
 
@@ -1604,8 +1624,9 @@ VALUES
  NULL,
  JSON_ARRAY(
    JSON_OBJECT('label','Die','value_type','enum','source','answer','list','die','order',1,'is_required',TRUE),
-   JSON_OBJECT('label','Pickup location','value_type','string','source','job','order',2,'is_required',FALSE),
-   JSON_OBJECT('label','Quantity','value_type','string','source','job','order',3,'is_required',FALSE)),
+   JSON_OBJECT('label','Die Location','value_type','string','source','job','order',2,'is_required',FALSE),
+   JSON_OBJECT('label','Quantity','value_type','string','source','job','order',3,'is_required',FALSE),
+   JSON_OBJECT('label','Die Shop Direction','value_type','string','source','answer','order',4,'is_required',FALSE)),
  45, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
 ('c1000000-0000-4000-8000-000000000003', 'pickup-component', 'Pickup', 'collect-input-then-confirm', 1, 'enum',
@@ -1615,7 +1636,9 @@ VALUES
    JSON_OBJECT('label','Component','value_type','enum','source','answer','order',1,'is_required',TRUE),
    JSON_OBJECT('label','Part description','value_type','string','source','job','order',2,'is_required',FALSE),
    JSON_OBJECT('label','Quantity','value_type','string','source','job','order',3,'is_required',FALSE),
-   JSON_OBJECT('label','Requesting work center','value_type','string','source','fixed','order',4,'is_required',FALSE)),
+   JSON_OBJECT('label','Requesting work center','value_type','string','source','fixed','order',4,'is_required',FALSE),
+   JSON_OBJECT('label','Total Qty In House','value_type','string','source','job','order',5,'is_required',FALSE),
+   JSON_OBJECT('label','Item Type','value_type','string','source','job','order',6,'is_required',FALSE)),
  30, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
 ('c1000000-0000-4000-8000-000000000004', 'pickup-fg', 'Pickup', 'direct-to-confirmation', 0, NULL, NULL,
@@ -1625,7 +1648,9 @@ VALUES
    JSON_OBJECT('label','Quantity remaining','value_type','string','source','job','order',2,'is_required',FALSE),
    JSON_OBJECT('label','Part description','value_type','string','source','job','order',3,'is_required',FALSE),
    JSON_OBJECT('label','Customer','value_type','string','source','job','order',4,'is_required',FALSE),
-   JSON_OBJECT('label','Packlist','value_type','string','source','job','order',5,'is_required',FALSE)),
+   JSON_OBJECT('label','Packlist','value_type','string','source','job','order',5,'is_required',FALSE),
+   JSON_OBJECT('label','Part Type','value_type','string','source','job','order',6,'is_required',FALSE),
+   JSON_OBJECT('label','# of Skids','value_type','string','source','answer','order',7,'is_required',FALSE)),
  NULL, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
 ('c1000000-0000-4000-8000-000000000005', 'pickup-ncm', 'Pickup', 'direct-to-confirmation', 0, NULL, NULL,
@@ -1635,7 +1660,9 @@ VALUES
    JSON_OBJECT('label','Quantity to move','value_type','string','source','job','order',2,'is_required',FALSE),
    JSON_OBJECT('label','Pickup location','value_type','string','source','job','order',3,'is_required',FALSE),
    JSON_OBJECT('label','Destination','value_type','string','source','fixed','order',4,'is_required',FALSE),
-   JSON_OBJECT('label','Traceability ID','value_type','string','source','job','order',5,'is_required',FALSE)),
+   JSON_OBJECT('label','Traceability ID','value_type','string','source','job','order',5,'is_required',FALSE),
+   JSON_OBJECT('label','Part Type','value_type','string','source','job','order',6,'is_required',FALSE),
+   JSON_OBJECT('label','# of Skids','value_type','string','source','answer','order',7,'is_required',FALSE)),
  NULL, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
 ('c1000000-0000-4000-8000-000000000006', 'pickup-wip', 'Pickup', 'direct-to-confirmation', 0, NULL, NULL,
@@ -1644,7 +1671,9 @@ VALUES
    JSON_OBJECT('label','Part and quantity','value_type','string','source','job','order',1,'is_required',FALSE),
    JSON_OBJECT('label','Pickup work center','value_type','string','source','fixed','order',2,'is_required',FALSE),
    JSON_OBJECT('label','WIP destination','value_type','string','source','job','order',3,'is_required',FALSE),
-   JSON_OBJECT('label','Operation sequence','value_type','string','source','job','order',4,'is_required',FALSE)),
+   JSON_OBJECT('label','Operation sequence','value_type','string','source','job','order',4,'is_required',FALSE),
+   JSON_OBJECT('label','Part Type','value_type','string','source','job','order',5,'is_required',FALSE),
+   JSON_OBJECT('label','# of Skids','value_type','string','source','answer','order',6,'is_required',FALSE)),
  NULL, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
 ('c1000000-0000-4000-8000-000000000007', 'pickup-outside-service', 'Pickup', 'direct-to-confirmation', 0, NULL, NULL,
@@ -1654,7 +1683,9 @@ VALUES
    JSON_OBJECT('label','Quantity to move','value_type','string','source','job','order',2,'is_required',FALSE),
    JSON_OBJECT('label','Pickup location','value_type','string','source','job','order',3,'is_required',FALSE),
    JSON_OBJECT('label','Destination','value_type','string','source','fixed','order',4,'is_required',FALSE),
-   JSON_OBJECT('label','Traceability ID','value_type','string','source','job','order',5,'is_required',FALSE)),
+   JSON_OBJECT('label','Traceability ID','value_type','string','source','job','order',5,'is_required',FALSE),
+   JSON_OBJECT('label','Part Type','value_type','string','source','job','order',6,'is_required',FALSE),
+   JSON_OBJECT('label','# of Skids','value_type','string','source','answer','order',7,'is_required',FALSE)),
  NULL, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
 ('c1000000-0000-4000-8000-000000000008', 'pickup-riser-table', 'Pickup', 'direct-to-confirmation', 0, NULL, NULL,
@@ -1668,23 +1699,25 @@ VALUES
  JSON_ARRAY(
    JSON_OBJECT('label','Dunnage part','value_type','enum','source','answer','list','dunnage','order',1,'is_required',TRUE),
    JSON_OBJECT('label','Description','value_type','string','source','job','order',2,'is_required',FALSE),
-   JSON_OBJECT('label','Home location','value_type','string','source','job','order',3,'is_required',FALSE),
+   JSON_OBJECT('label','Home Location','value_type','string','source','job','order',3,'is_required',FALSE),
    JSON_OBJECT('label','Quantity on hand','value_type','string','source','job','order',4,'is_required',FALSE)),
  30, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
 ('c1000000-0000-4000-8000-000000000010', 'pickup-scrap', 'Pickup', 'direct-to-confirmation', 0, NULL, NULL,
  0, 200, NULL,
  JSON_ARRAY(
-   JSON_OBJECT('label','Scrap type','value_type','string','source','job','order',1,'is_required',FALSE),
+   JSON_OBJECT('label','Scrap Type','value_type','string','source','job','order',1,'is_required',FALSE),
    JSON_OBJECT('label','Quantity involved','value_type','string','source','job','order',2,'is_required',FALSE),
    JSON_OBJECT('label','Scrap lugger','value_type','string','source','job','order',3,'is_required',FALSE),
-   JSON_OBJECT('label','Pickup work center','value_type','string','source','fixed','order',4,'is_required',FALSE)),
+   JSON_OBJECT('label','Pickup work center','value_type','string','source','fixed','order',4,'is_required',FALSE),
+   JSON_OBJECT('label','Lugger Location','value_type','string','source','job','order',5,'is_required',FALSE)),
  30, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
 ('c1000000-0000-4000-8000-000000000011', 'pickup-hopper', 'Pickup', 'direct-to-confirmation', 0, NULL, NULL,
  0, 200, NULL,
  JSON_ARRAY(
-   JSON_OBJECT('label','Pickup work center','value_type','string','source','fixed','order',1,'is_required',FALSE)),
+   JSON_OBJECT('label','Pickup work center','value_type','string','source','fixed','order',1,'is_required',FALSE),
+   JSON_OBJECT('label','Size','value_type','enum','source','answer','order',2,'is_required',TRUE)),
  20, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
 -- ------------------------------------------------------------------ Deliver (9)
@@ -1707,7 +1740,8 @@ VALUES
 ('c1000000-0000-4000-8000-000000000014', 'deliver-hopper', 'Deliver', 'direct-to-confirmation', 0, NULL, NULL,
  0, 200, NULL,
  JSON_ARRAY(
-   JSON_OBJECT('label','Requesting work center','value_type','string','source','fixed','order',1,'is_required',FALSE)),
+   JSON_OBJECT('label','Requesting work center','value_type','string','source','fixed','order',1,'is_required',FALSE),
+   JSON_OBJECT('label','Size','value_type','enum','source','answer','order',2,'is_required',TRUE)),
  20, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
 ('c1000000-0000-4000-8000-000000000015', 'deliver-flatstock', 'Deliver', 'direct-to-confirmation', 0, NULL, NULL,
@@ -1726,7 +1760,9 @@ VALUES
    JSON_OBJECT('label','Component','value_type','enum','source','answer','list','component','order',1,'is_required',TRUE),
    JSON_OBJECT('label','Part description','value_type','string','source','job','order',2,'is_required',FALSE),
    JSON_OBJECT('label','Quantity','value_type','string','source','job','order',3,'is_required',FALSE),
-   JSON_OBJECT('label','Requesting work center','value_type','string','source','fixed','order',4,'is_required',FALSE)),
+   JSON_OBJECT('label','Requesting work center','value_type','string','source','fixed','order',4,'is_required',FALSE),
+   JSON_OBJECT('label','Total Qty In House','value_type','string','source','job','order',5,'is_required',FALSE),
+   JSON_OBJECT('label','Item Type','value_type','string','source','job','order',6,'is_required',FALSE)),
  30, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
 ('c1000000-0000-4000-8000-000000000016', 'deliver-die', 'Deliver', 'collect-input-then-confirm', 1, 'enum',
@@ -1734,8 +1770,9 @@ VALUES
  NULL,
  JSON_ARRAY(
    JSON_OBJECT('label','Die','value_type','enum','source','answer','list','die','order',1,'is_required',TRUE),
-   JSON_OBJECT('label','Pickup location','value_type','string','source','job','order',2,'is_required',FALSE),
-   JSON_OBJECT('label','Quantity','value_type','string','source','job','order',3,'is_required',FALSE)),
+   JSON_OBJECT('label','Die Location','value_type','string','source','job','order',2,'is_required',FALSE),
+   JSON_OBJECT('label','Quantity','value_type','string','source','job','order',3,'is_required',FALSE),
+   JSON_OBJECT('label','Die Shop Direction','value_type','string','source','answer','order',4,'is_required',FALSE)),
  45, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
 ('c1000000-0000-4000-8000-000000000017', 'deliver-dunnage', 'Deliver', 'collect-input-then-confirm', 1, 'enum',
@@ -1743,14 +1780,14 @@ VALUES
  JSON_ARRAY(
    JSON_OBJECT('label','Dunnage part','value_type','enum','source','answer','list','dunnage','order',1,'is_required',TRUE),
    JSON_OBJECT('label','Description','value_type','string','source','job','order',2,'is_required',FALSE),
-   JSON_OBJECT('label','Home location','value_type','string','source','job','order',3,'is_required',FALSE),
+   JSON_OBJECT('label','Home Location','value_type','string','source','job','order',3,'is_required',FALSE),
    JSON_OBJECT('label','Quantity on hand','value_type','string','source','job','order',4,'is_required',FALSE)),
  30, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
 ('c1000000-0000-4000-8000-000000000018', 'deliver-wrong-coil', 'Deliver', 'collect-input-then-confirm', 1, 'text',
  'Explain how or why the coil is wrong', 5, 200, NULL,
  JSON_ARRAY(
-   JSON_OBJECT('label','Coil number','value_type','string','source','job','order',1,'is_required',FALSE),
+   JSON_OBJECT('label','Coil number','value_type','string','source','answer','order',1,'is_required',FALSE),
    JSON_OBJECT('label','Reason','value_type','text','source','answer','order',2,'is_required',TRUE),
    JSON_OBJECT('label','Correct coil','value_type','string','source','job','order',3,'is_required',FALSE)),
  30, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
@@ -1758,7 +1795,7 @@ VALUES
 ('c1000000-0000-4000-8000-000000000019', 'deliver-wrong-flatstock', 'Deliver', 'collect-input-then-confirm', 1, 'text',
  'Explain how or why the flatstock is wrong', 5, 200, NULL,
  JSON_ARRAY(
-   JSON_OBJECT('label','Part','value_type','string','source','job','order',1,'is_required',FALSE),
+   JSON_OBJECT('label','Part','value_type','string','source','answer','order',1,'is_required',FALSE),
    JSON_OBJECT('label','Reason','value_type','text','source','answer','order',2,'is_required',TRUE),
    JSON_OBJECT('label','Correct flatstock','value_type','string','source','job','order',3,'is_required',FALSE)),
  30, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
@@ -1767,8 +1804,9 @@ VALUES
 ('c1000000-0000-4000-8000-000000000020', 'assist-coil-turn', 'Assist', 'direct-to-confirmation', 0, NULL, NULL,
  0, 200, NULL,
  JSON_ARRAY(
-   JSON_OBJECT('label','Coil number','value_type','string','source','job','order',1,'is_required',FALSE),
-   JSON_OBJECT('label','Quantity in house','value_type','string','source','job','order',2,'is_required',FALSE)),
+   JSON_OBJECT('label','Coil Number','value_type','string','source','job','order',1,'is_required',FALSE),
+   JSON_OBJECT('label','Quantity in house','value_type','string','source','job','order',2,'is_required',FALSE),
+   JSON_OBJECT('label','Weight of Coil','value_type','string','source','answer','order',3,'is_required',TRUE)),
  30, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 
 ('c1000000-0000-4000-8000-000000000021', 'assist-table-place', 'Assist', 'direct-to-confirmation', 0, NULL, NULL,
@@ -1796,6 +1834,75 @@ VALUES
    JSON_OBJECT('label','Request description','value_type','text','source','answer','order',1,'is_required',TRUE),
    JSON_OBJECT('label','Requested work center','value_type','string','source','fixed','order',2,'is_required',FALSE)),
  15, UTC_TIMESTAMP(), UTC_TIMESTAMP());
+
+-- Seed: seed_waitlist_request_item_configs_label_move
+-- Engine: MySQL 5.7
+-- Purpose: Move the four declaration labels the card reads onto the spellings it reads them under, in place, so
+--          an installed store gets `Die Location`, `Home Location`, `Scrap Type` and `Coil Number` without the
+--          truncate-and-reinsert of Database/Seeds/seed_waitlist_request_item_configs wiping operator edits
+--          (D33, FR-059).
+-- Scope:   1. `Pickup location` to `Die Location` on pickup-die and deliver-die.
+--          2. `Home location` to `Home Location` on pickup-dunnage and deliver-dunnage.
+--          3. `Scrap type` to `Scrap Type` on pickup-scrap.
+--          4. `Coil number` to `Coil Number` on assist-coil-turn only. The coil Items keep `Coil number`, which
+--             is the label their own cell is declared and read under, so this move is scoped to the one Item
+--             whose cell is spelled `Coil Number` (data-model.md §9).
+-- Method:  Each statement rewrites one label inside detail_fields_json through JSON_SEARCH, so the path is the
+--          path the label actually sits at rather than a guessed array index: a store whose fields were added,
+--          removed or reordered still moves the label it holds, and a store that does not hold it is left
+--          untouched. Every other key of that field, every other field, and every other column of the row are
+--          left exactly as they were; only the label and the row's updated_utc change.
+-- Rerunnable: The guard is the presence of the label being moved, so a second run matches no row and changes
+--          nothing. The statements are the only writes, and there is no TRUNCATE anywhere in this file.
+-- Not in scope: The cells this feature adds (`Die Shop Direction`, `Size`, `# of Skids`, `Weight of Coil`,
+--          `Part Type`, `Item Type`, `Total Qty In House`, `Lugger Location`) and the two source corrections on
+--          the wrong-part Items are declarations rather than labels, and they arrive with
+--          Database/Seeds/seed_waitlist_request_item_configs, which the installer applies. This file moves
+--          labels only, so a store that is updated by hand never has its field set rewritten wholesale.
+
+USE mtm_waitlist;
+
+SET NAMES utf8mb4;
+
+-- 1. The die Items' location label.
+UPDATE waitlist_request_item_configs
+SET detail_fields_json = JSON_REPLACE(
+        detail_fields_json,
+        JSON_UNQUOTE(JSON_SEARCH(detail_fields_json, 'one', 'Pickup location', NULL, '$[*].label')),
+        'Die Location'),
+    updated_utc = UTC_TIMESTAMP()
+WHERE item IN ('pickup-die', 'deliver-die')
+  AND JSON_SEARCH(detail_fields_json, 'one', 'Pickup location', NULL, '$[*].label') IS NOT NULL;
+
+-- 2. The dunnage Items' home-location label.
+UPDATE waitlist_request_item_configs
+SET detail_fields_json = JSON_REPLACE(
+        detail_fields_json,
+        JSON_UNQUOTE(JSON_SEARCH(detail_fields_json, 'one', 'Home location', NULL, '$[*].label')),
+        'Home Location'),
+    updated_utc = UTC_TIMESTAMP()
+WHERE item IN ('pickup-dunnage', 'deliver-dunnage')
+  AND JSON_SEARCH(detail_fields_json, 'one', 'Home location', NULL, '$[*].label') IS NOT NULL;
+
+-- 3. The scrap Item's type label.
+UPDATE waitlist_request_item_configs
+SET detail_fields_json = JSON_REPLACE(
+        detail_fields_json,
+        JSON_UNQUOTE(JSON_SEARCH(detail_fields_json, 'one', 'Scrap type', NULL, '$[*].label')),
+        'Scrap Type'),
+    updated_utc = UTC_TIMESTAMP()
+WHERE item = 'pickup-scrap'
+  AND JSON_SEARCH(detail_fields_json, 'one', 'Scrap type', NULL, '$[*].label') IS NOT NULL;
+
+-- 4. The assist coil turn's coil label. Scoped to that one Item: the coil Items' own cell is `Coil number`.
+UPDATE waitlist_request_item_configs
+SET detail_fields_json = JSON_REPLACE(
+        detail_fields_json,
+        JSON_UNQUOTE(JSON_SEARCH(detail_fields_json, 'one', 'Coil number', NULL, '$[*].label')),
+        'Coil Number'),
+    updated_utc = UTC_TIMESTAMP()
+WHERE item = 'assist-coil-turn'
+  AND JSON_SEARCH(detail_fields_json, 'one', 'Coil number', NULL, '$[*].label') IS NOT NULL;
 
 -- Seed: seed_waitlist_request_item_images
 -- Engine: MySQL 5.7

@@ -388,6 +388,7 @@
                             <Button
                                 AutomationProperties.AutomationId="ShellPage_FacilitySelector"
                                 x:Name="FacilitySelectorButton"
+                                AutomationProperties.Name="Select the active facility"
                                 Grid.Column="3"
                                 MinWidth="160"
                                 MaxWidth="220"
@@ -420,6 +421,7 @@
                             <Button
                                 AutomationProperties.AutomationId="ShellPage_CurrentUserButton"
                                 x:Name="CurrentUserButton"
+                                AutomationProperties.Name="{Binding CurrentUserAutomationName}"
                                 Grid.Column="4"
                                 Margin="16,0,0,0"
                                 Padding="8"
@@ -435,7 +437,7 @@
                                             AutomationProperties.AutomationId="ShellPage_SignOutItem"
                                             Click="SignOutItem_Click"
                                             Text="{Binding SignOutLabel}"
-                                            ToolTipService.ToolTip="{Binding SignOutTooltip}" />
+                                            shared:TooltipBehavior.FallbackText="{Binding SignOutTooltip}" />
                                     </MenuFlyout>
                                 </Button.Flyout>
                                 <StackPanel Orientation="Horizontal" Spacing="12">
@@ -579,6 +581,7 @@
                                     <Button
                                         AutomationProperties.AutomationId="ShellPage_FacilitySelectorDefault"
                                         x:Name="FacilitySelectorButtonDefault"
+                                        AutomationProperties.Name="Select the active facility"
                                         Grid.Column="3"
                                         MinWidth="160"
                                         MaxWidth="220"
@@ -609,6 +612,7 @@
                                     <Button
                                         AutomationProperties.AutomationId="ShellPage_CurrentUserButtonDefault"
                                         x:Name="CurrentUserButtonDefault"
+                                        AutomationProperties.Name="{Binding CurrentUserAutomationName}"
                                         Grid.Column="4"
                                         Margin="16,0,0,0"
                                         Padding="8"
@@ -624,7 +628,7 @@
                                                     AutomationProperties.AutomationId="ShellPage_SignOutItemDefault"
                                                     Click="SignOutItem_Click"
                                                     Text="{Binding SignOutLabel}"
-                                                    ToolTipService.ToolTip="{Binding SignOutTooltip}" />
+                                                    shared:TooltipBehavior.FallbackText="{Binding SignOutTooltip}" />
                                             </MenuFlyout>
                                         </Button.Flyout>
                                         <StackPanel Orientation="Horizontal" Spacing="12">
@@ -677,21 +681,29 @@
             </i:Interaction.Behaviors>
             <Grid Margin="{StaticResource NavigationViewPageContentMargin}">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
+                <Frame x:Name="NavigationFrame" Grid.Row="0" />
+
                 <!--
-                  Read-only fallback status, hosted in the existing shell: no new navigation route and no
-                  interactive control. It appears only while cached data is in use and clears itself when
-                  Infor Visual recovers (FR-003/FR-005, US4).
+                  Read-only fallback status, on its own row at the foot of the shell: no new navigation route and
+                  no interactive control. It is a notice about the data rather than part of the page a person is
+                  working on, so it is kept out of the header above the content and out of the content itself,
+                  where it would move the page every time Infor Visual went reachable or unreachable. It appears
+                  only while cached data is in use and clears itself when Infor Visual recovers
+                  (FR-003/FR-005, US4), and an empty row takes no height while it is away.
+
+                  The two gaps are both deliberate. Above, 8 clears the page it annotates. Below, 24 is the
+                  shell's own inset (NavigationViewPageContentMargin carries 56,24,56,0, so its bottom is zero
+                  and nothing else insets this row): without it the notice sat flush against the window's bottom
+                  edge, which read as a strip of chrome rather than as a notice inside the page.
                 -->
                 <mock:ReadStatusIndicator
-                    Grid.Row="0"
-                    Margin="0,0,0,8"
+                    Grid.Row="1"
+                    Margin="0,8,0,24"
                     HorizontalAlignment="Stretch" />
-
-                <Frame x:Name="NavigationFrame" Grid.Row="1" />
             </Grid>
         </NavigationView>
     </Grid>

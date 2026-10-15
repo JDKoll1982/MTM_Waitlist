@@ -502,6 +502,124 @@ END $$
 DELIMITER ;
 
 -- ============================================================
+-- Artifact: sp_visual_part_warehouse_quantities_get
+-- ============================================================
+
+-- ============================================================
+-- Stored Procedure: sp_visual_part_warehouse_quantities_get
+-- Database:   mtm_mock
+-- Engine:     MySQL 5.7 (verified on 9.6)
+-- Kind:       StoredProcedure / create  (read, shape 7 of 7)
+-- Created:    2026-10-10
+-- Feature:    012-waitlist-card-layout (task T020)
+-- Shape key:  part_warehouse_quantities
+-- ============================================================
+--
+-- Live projection: PartNumber, WarehouseQuantity, FinishedGoodsQuantity  (one row per part).
+--
+-- `part_number` is both the read's input parameter and its returned identifying column, exactly as
+-- shape 4 (`inventory_locations`) arranges it, so the procedure takes `p_part_number` and the caller
+-- sees the same name and meaning as the live read (FR-090).
+-- ============================================================
+
+USE mtm_mock;
+
+DROP PROCEDURE IF EXISTS sp_visual_part_warehouse_quantities_get;
+
+CREATE PROCEDURE sp_visual_part_warehouse_quantities_get(
+    IN p_part_number VARCHAR(64)
+)
+SELECT
+    part_number                AS PartNumber,
+    warehouse_quantity         AS WarehouseQuantity,
+    finished_goods_quantity    AS FinishedGoodsQuantity
+FROM visual_part_warehouse_quantities_result
+WHERE part_number = p_part_number;
+
+-- ============================================================
+-- Artifact: sp_visual_part_warehouse_quantities_refresh
+-- ============================================================
+
+-- ============================================================
+-- Stored Procedure: sp_visual_part_warehouse_quantities_refresh
+-- Database:   mtm_mock
+-- Engine:     MySQL 5.7 (verified on 9.6)
+-- Kind:       StoredProcedure / create  (refresh, shape 7 of 7)
+-- Created:    2026-10-10
+-- Feature:    012-waitlist-card-layout (task T021)
+-- Shape key:  part_warehouse_quantities
+-- ============================================================
+--
+-- Follows the T015 reference pattern exactly. See that file for the full rationale.
+--
+--   p_rows : JSON array of result objects. Keys:
+--              "PartNumber"          (the read's input AND its returned part number)
+--              "WarehouseQuantity", "FinishedGoodsQuantity"   (the read's outputs)
+--
+-- The swap is one statement, so a refresh that fails its count check leaves the live snapshot
+-- untouched, and the transient `_prev` name never persists between cycles.
+-- ============================================================
+
+USE mtm_mock;
+
+DROP PROCEDURE IF EXISTS sp_visual_part_warehouse_quantities_refresh;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_visual_part_warehouse_quantities_refresh(
+    IN p_rows JSON
+)
+BEGIN
+    DECLARE v_expected INT DEFAULT 0;
+    DECLARE v_loaded   INT DEFAULT 0;
+
+    TRUNCATE TABLE visual_part_warehouse_quantities_result_stage;
+
+    SET v_expected = IFNULL(JSON_LENGTH(p_rows), 0);
+
+    INSERT INTO visual_part_warehouse_quantities_result_stage (
+        part_number,
+        warehouse_quantity,
+        finished_goods_quantity,
+        refreshed_utc,
+        is_seed_content
+    )
+    SELECT
+        JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].PartNumber'))),
+        CAST(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].WarehouseQuantity'))) AS DECIMAL(18,4)),
+        CAST(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].FinishedGoodsQuantity'))) AS DECIMAL(18,4)),
+        UTC_TIMESTAMP(),
+        0
+    FROM (
+        SELECT (ones.n + tens.n * 10 + hundreds.n * 100 + thousands.n * 1000 + ten_thousands.n * 10000) AS i
+        FROM (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS ones
+        CROSS JOIN (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS tens
+        CROSS JOIN (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS hundreds
+        CROSS JOIN (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS thousands
+        CROSS JOIN (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS ten_thousands
+    ) AS n
+    WHERE n.i < v_expected;
+
+    SELECT COUNT(*) INTO v_loaded FROM visual_part_warehouse_quantities_result_stage;
+
+    IF v_loaded <> v_expected THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'sp_visual_part_warehouse_quantities_refresh: staged row count does not match payload length; live snapshot left untouched.';
+    END IF;
+
+    RENAME TABLE visual_part_warehouse_quantities_result       TO visual_part_warehouse_quantities_result_prev,
+                 visual_part_warehouse_quantities_result_stage TO visual_part_warehouse_quantities_result,
+                 visual_part_warehouse_quantities_result_prev  TO visual_part_warehouse_quantities_result_stage;
+END $$
+
+DELIMITER ;
+
+-- ============================================================
 -- Artifact: sp_visual_read_shape_freshness_get
 -- ============================================================
 
@@ -719,6 +837,10 @@ ORDER BY k.shape_key;
 -- Live projection: Category, PartNumber, Description, Location, User8, OnHandQuantity
 -- (ORDER BY Category, req.PART_ID).
 --
+-- `Description` is already the coil's description, so no second description column exists. The coil's
+-- `Average coil weight` is deliberately NOT mirrored here: it must come from the receiving store's
+-- `sp_receiving_history_average_coil_weight` (FR-030, FR-041, FR-054).
+--
 -- The live read takes the OPERATION's part number as an input. That input is persisted as
 -- `parent_part_number`, and the procedure exposes it as `p_part_number` so callers see the same
 -- parameter name and meaning as the live read (data-model.md §3.3). `PartNumber` in the RETURNED
@@ -766,7 +888,7 @@ ORDER BY category, part_number;
 --   p_rows : JSON array of result objects. Keys:
 --              "NormalizedWorkOrder", "ParentPartNumber", "SequenceNumber"  (the read's inputs)
 --              "Category", "PartNumber", "Description", "Location", "User8",
---              "OnHandQuantity"                                             (the read's outputs)
+--              "OnHandQuantity"                                            (the read's outputs)
 --
 -- KEY NAMING: the live read's input part number and its returned subordinate part number are both
 -- called `PartNumber` in the Visual source. The payload therefore uses `ParentPartNumber` for the

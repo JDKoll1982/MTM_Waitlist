@@ -1,0 +1,3123 @@
+{
+  "workflow": "companion",
+  "specName": "Waitlist Line Card Layout",
+  "branch": "012-waitlist-card-layout",
+  "currentStep": "implement",
+  "status": "implementing",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-10-11T01:30:57.194Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T01:36:18.651Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-10-11T01:36:57.684Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T01:41:08.445Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T01:44:10.036Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T01:44:35.572Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-10-11T01:45:07.215Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T01:52:45.152Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T01:52:48.426Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "start",
+      "by": "ai",
+      "at": "2026-10-11T01:53:35.874Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T001",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T01:56:37.158Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T002",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T01:56:39.888Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T011",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:04:57.813Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T015",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:04:57.939Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T013",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:06:46.356Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:08:35.959Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T016",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:08:36.088Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:12:32.093Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T010",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:12:32.226Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T014",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:12:32.358Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T003",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:15:00.765Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T004",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:15:04.035Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:15:07.599Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:15:14.209Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T012",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:15:21.531Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T009",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:20:14.066Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T018",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:20:18.211Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T019",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:20:18.436Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T020",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:20:22.643Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T021",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:20:22.891Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T022",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:20:27.084Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T023",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:20:27.295Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T024",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:20:32.241Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T025",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:20:32.466Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T026",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:28:58.622Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:29:03.423Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T027",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:30:09.732Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T028",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:35:54.572Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T029",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:51:03.951Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T030",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:51:49.629Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T031",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:51:53.870Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T032",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T02:52:32.340Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T033",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:11:21.646Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T034",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:11:21.772Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T035",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:11:21.900Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T036",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:11:22.027Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T037",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:11:26.552Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T038",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:11:26.680Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T039",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:11:26.810Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T040",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:11:26.936Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T041",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:11:32.210Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T042",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:11:32.341Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T043",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:11:32.475Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T044",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:11:32.604Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T045",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:29:38.976Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T046",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:29:42.304Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T047",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:29:46.210Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T049",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:32:38.935Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T050",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:32:39.072Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T051",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:32:39.209Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T052",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:32:39.342Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T053",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:32:39.477Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T054",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:32:39.615Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T055",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:32:39.748Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T070",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:55:13.455Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T072",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:55:13.586Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T073",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:55:13.714Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T074",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:55:13.845Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T075",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:55:13.972Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T076",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:55:14.101Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T077",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:55:14.231Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T078",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T03:55:14.362Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T056",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T04:08:43.764Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T057",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T04:08:47.614Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T059",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T04:24:00.372Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T060",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T04:24:00.502Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T061",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T04:24:00.628Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T062",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T04:24:00.758Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T063",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T04:24:05.961Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T064",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T04:24:06.088Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T065",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T04:24:06.218Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T066",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T04:24:06.342Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T086",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T04:38:51.001Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T087",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T04:38:54.680Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T080",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T04:39:15.392Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T082",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T04:39:18.830Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T081",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T04:43:38.036Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T083",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T04:43:41.571Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T084",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T04:56:28.738Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T085",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T04:56:32.319Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T089",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T05:06:20.415Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T090",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T05:06:23.934Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T091",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T05:06:27.087Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T092",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T05:13:06.851Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T093",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T05:13:11.292Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T095",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T06:12:49.226Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T096",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T06:12:49.451Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T097",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T06:12:49.676Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T098",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T06:12:49.897Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T099",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T06:12:50.122Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T100",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T06:12:50.351Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T101",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T06:27:28.183Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T102",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T06:36:07.852Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T103",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T06:38:22.746Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T104",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T15:02:52.457Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T105",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T16:33:56.287Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T106",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T16:34:00.922Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T107",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T16:34:01.162Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T108",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T16:34:01.393Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T109",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T16:34:01.627Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T110",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T16:34:01.852Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T111",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T16:34:02.087Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T112",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T16:34:02.315Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T113",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T23:46:50.739Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T114",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-11T23:52:34.252Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T115",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-12T00:42:07.592Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T116",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-12T00:49:27.453Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T117",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-12T01:07:56.507Z"
+    }
+  ],
+  "unattended": true,
+  "telemetryInstanceId": "84ef144a-9dde-461c-988a-da92e90e6298",
+  "last_action": "implement closed at 83/93 ticked; full suite 2114 passed / 6 failed (the 6 pre-existing) / 47 skipped of 2167; build 0 warnings 0 errors; eight environment-limited tasks recorded as concerns",
+  "coverage": {
+    "FR-001": {
+      "title": "A row is drawn as four zones, left to right, separated by vertical rules",
+      "tasks": [
+        "T033",
+        "T035",
+        "T037"
+      ]
+    },
+    "FR-002": {
+      "title": "The accent bar, the material picture and the new-message badge keep their present meaning",
+      "tasks": [
+        "T037"
+      ]
+    },
+    "FR-003": {
+      "title": "Shift+click enlarging of the picture and the badge's meaning stay",
+      "tasks": [
+        "T037"
+      ]
+    },
+    "FR-004": {
+      "title": "The requesting work centre is drawn as a large unlabelled value beneath the picture",
+      "tasks": [
+        "T037"
+      ]
+    },
+    "FR-005": {
+      "title": "The requesting work centre and the requesting user are never detail cells",
+      "tasks": [
+        "T034"
+      ]
+    },
+    "FR-006": {
+      "title": "Nothing is padded to fill a short panel and no fallback value is invented",
+      "tasks": [
+        "T016",
+        "T037",
+        "T053"
+      ]
+    },
+    "FR-007": {
+      "title": "The detail grid's top row always spans both columns and holds the category word and identifier",
+      "tasks": [
+        "T040"
+      ]
+    },
+    "FR-008": {
+      "title": "The coloured status pill is removed; the status reads as plain coloured text with no label",
+      "tasks": [
+        "T039"
+      ]
+    },
+    "FR-009": {
+      "title": "A card's height may differ between Items but is constant for any one Item",
+      "tasks": [
+        "T049",
+        "T053"
+      ]
+    },
+    "FR-010": {
+      "title": "A row stretches the full width and remains readable at the default window size",
+      "tasks": [
+        "T035",
+        "T088"
+      ]
+    },
+    "FR-011": {
+      "title": "The status zone is a centred stack: the word, the ring, the person, and for a closed request the requester",
+      "tasks": [
+        "T027",
+        "T038"
+      ]
+    },
+    "FR-012": {
+      "title": "The status word reads the condition, else Overdue, else the lifecycle word in friendly wording",
+      "tasks": [
+        "T027",
+        "T028",
+        "T039"
+      ]
+    },
+    "FR-013": {
+      "title": "The ring fills as the allotted time is used and carries the time left inside it",
+      "tasks": [
+        "T038",
+        "T047"
+      ]
+    },
+    "FR-014": {
+      "title": "An overdue request reads Overdue, shows the overrun in its ring and themes the column",
+      "tasks": [
+        "T039",
+        "T048"
+      ]
+    },
+    "FR-015": {
+      "title": "A closed request freezes the ring at closing and carries the time taken",
+      "tasks": [
+        "T027",
+        "T028",
+        "T039"
+      ]
+    },
+    "FR-016": {
+      "title": "The ring states which of the two things it measures and its accessible name says the same",
+      "tasks": [
+        "T027",
+        "T087",
+        "T088"
+      ]
+    },
+    "FR-017": {
+      "title": "The ring re-evaluates on the same one-minute tick that refreshes the row's other time text",
+      "tasks": [
+        "T029",
+        "T047"
+      ]
+    },
+    "FR-018": {
+      "title": "A status row with no value is removed rather than left blank",
+      "tasks": [
+        "T027",
+        "T028",
+        "T038"
+      ]
+    },
+    "FR-019": {
+      "title": "The status column carries three themes: normal, handler-condition lighter red, overdue",
+      "tasks": [
+        "T045",
+        "T046",
+        "T047"
+      ]
+    },
+    "FR-020": {
+      "title": "An overdue request stays distinguishable as its own state under every sort",
+      "tasks": [
+        "T045",
+        "T048"
+      ]
+    },
+    "FR-021": {
+      "title": "The status zone shows no percentage and no elapsed-time line",
+      "tasks": [
+        "T038",
+        "T045",
+        "T047"
+      ]
+    },
+    "FR-022": {
+      "title": "The person row reads requester while unclaimed and handler once claimed; a closed request shows the handler or canceller with the requester in row 4",
+      "tasks": [
+        "T027",
+        "T038",
+        "T048"
+      ]
+    },
+    "FR-023": {
+      "title": "A handler-set condition and an overdue marking are never both shown; the condition takes precedence",
+      "tasks": [
+        "T028",
+        "T048"
+      ]
+    },
+    "FR-024": {
+      "title": "The detail zone is an inner grid of three rows and two columns with the title pair in row 1",
+      "tasks": [
+        "T040",
+        "T049",
+        "T053"
+      ]
+    },
+    "FR-025": {
+      "title": "The cells a card shows are determined by the request's Item and never chosen per row",
+      "tasks": [
+        "T029",
+        "T036",
+        "T049"
+      ]
+    },
+    "FR-026": {
+      "title": "The grid geometry follows the cell count: four, three, two, one, none",
+      "tasks": [
+        "T028",
+        "T049",
+        "T053"
+      ]
+    },
+    "FR-027": {
+      "title": "With no cells the title row takes the vacated space as one full-width row",
+      "tasks": [
+        "T040",
+        "T049",
+        "T053"
+      ]
+    },
+    "FR-028": {
+      "title": "Every cell is a label on top with its value beneath, apart from the label-less die-shop cell",
+      "tasks": [
+        "T016",
+        "T049",
+        "T053"
+      ]
+    },
+    "FR-029": {
+      "title": "Die Location is shown on the two die Items and on no other Item",
+      "tasks": [
+        "T034",
+        "T049",
+        "T082"
+      ]
+    },
+    "FR-030": {
+      "title": "pickup-coil shows Coil number, Quantity in house, Coil description and Average coil weight",
+      "tasks": [
+        "T050",
+        "T080"
+      ]
+    },
+    "FR-031": {
+      "title": "pickup-die shows Die and Die Location, plus the label-less die-shop cell when the answer calls for it",
+      "tasks": [
+        "T050",
+        "T080"
+      ]
+    },
+    "FR-032": {
+      "title": "pickup-component shows Component, Total Qty In House and Item Type",
+      "tasks": [
+        "T050",
+        "T080"
+      ]
+    },
+    "FR-033": {
+      "title": "pickup-dunnage shows Dunnage part and Home Location",
+      "tasks": [
+        "T050",
+        "T080"
+      ]
+    },
+    "FR-034": {
+      "title": "pickup-scrap shows Scrap Type and Lugger Location",
+      "tasks": [
+        "T050",
+        "T055",
+        "T080"
+      ]
+    },
+    "FR-035": {
+      "title": "pickup-hopper shows Size",
+      "tasks": [
+        "T050",
+        "T080"
+      ]
+    },
+    "FR-036": {
+      "title": "pickup-fg shows Part Type and # of Skids",
+      "tasks": [
+        "T050",
+        "T069",
+        "T080"
+      ]
+    },
+    "FR-037": {
+      "title": "pickup-ncm shows Part Type and # of Skids",
+      "tasks": [
+        "T050",
+        "T069",
+        "T080"
+      ]
+    },
+    "FR-038": {
+      "title": "pickup-wip shows Part Type and # of Skids",
+      "tasks": [
+        "T050",
+        "T069",
+        "T080"
+      ]
+    },
+    "FR-039": {
+      "title": "pickup-outside-service shows Part Type and # of Skids",
+      "tasks": [
+        "T050",
+        "T069",
+        "T080"
+      ]
+    },
+    "FR-040": {
+      "title": "pickup-riser-table shows no detail cells, so its panel collapses",
+      "tasks": [
+        "T050",
+        "T080"
+      ]
+    },
+    "FR-041": {
+      "title": "deliver-coil shows Coil number, Quantity in house, Coil description and Average coil weight",
+      "tasks": [
+        "T051",
+        "T080"
+      ]
+    },
+    "FR-042": {
+      "title": "deliver-flatstock shows Part, Quantity and Destination",
+      "tasks": [
+        "T051",
+        "T055",
+        "T080"
+      ]
+    },
+    "FR-043": {
+      "title": "deliver-component shows Component, Total Qty In House and Item Type",
+      "tasks": [
+        "T051",
+        "T080"
+      ]
+    },
+    "FR-044": {
+      "title": "deliver-die shows Die and Die Location, plus the label-less die-shop cell",
+      "tasks": [
+        "T051",
+        "T080"
+      ]
+    },
+    "FR-045": {
+      "title": "deliver-dunnage shows Dunnage part and Home Location",
+      "tasks": [
+        "T051",
+        "T080"
+      ]
+    },
+    "FR-046": {
+      "title": "deliver-wrong-coil shows Coil number as the incorrect coil and Correct coil",
+      "tasks": [
+        "T051",
+        "T080"
+      ]
+    },
+    "FR-047": {
+      "title": "deliver-wrong-flatstock shows Part as the incorrect flatstock and Correct flatstock",
+      "tasks": [
+        "T051",
+        "T080"
+      ]
+    },
+    "FR-048": {
+      "title": "deliver-riser-table shows no detail cells, so its panel collapses",
+      "tasks": [
+        "T051",
+        "T080"
+      ]
+    },
+    "FR-049": {
+      "title": "deliver-hopper shows Size",
+      "tasks": [
+        "T051",
+        "T080"
+      ]
+    },
+    "FR-050": {
+      "title": "assist-coil-turn shows Coil Number and Weight of Coil",
+      "tasks": [
+        "T052",
+        "T080"
+      ]
+    },
+    "FR-051": {
+      "title": "assist-table-place shows no detail cells, so its panel collapses",
+      "tasks": [
+        "T052",
+        "T080"
+      ]
+    },
+    "FR-052": {
+      "title": "assist-table-remove shows no detail cells, so its panel collapses",
+      "tasks": [
+        "T052",
+        "T080"
+      ]
+    },
+    "FR-053": {
+      "title": "other shows Request description, drawn in full and scrolling when long",
+      "tasks": [
+        "T052",
+        "T080"
+      ]
+    },
+    "FR-054": {
+      "title": "Weight of Coil is the operator's actual weight and never the job's average coil weight",
+      "tasks": [
+        "T054",
+        "T075"
+      ]
+    },
+    "FR-055": {
+      "title": "The die-shop cell carries no label and its value is the phrase, drawn only when the answer was given",
+      "tasks": [
+        "T016",
+        "T054",
+        "T079"
+      ]
+    },
+    "FR-056": {
+      "title": "A declared field that is not one of an Item's cells must not be shown",
+      "tasks": [
+        "T054",
+        "T080"
+      ]
+    },
+    "FR-057": {
+      "title": "Destination is shown only on deliver-flatstock, and not on pickup-ncm or pickup-outside-service",
+      "tasks": [
+        "T051",
+        "T055"
+      ]
+    },
+    "FR-058": {
+      "title": "A cell never declared is hidden; a cell whose source cannot be read is hidden and logs a warning",
+      "tasks": [
+        "T029",
+        "T054"
+      ]
+    },
+    "FR-059": {
+      "title": "Die Location and Home Location are read from configuration rather than overridden",
+      "tasks": [
+        "T054",
+        "T080",
+        "T082"
+      ]
+    },
+    "FR-060": {
+      "title": "Neither unresolvable case is explained on the card nor filled with a substitute",
+      "tasks": [
+        "T054"
+      ]
+    },
+    "FR-061": {
+      "title": "The action zone is up to six square buttons in two columns and three rows in row-major order",
+      "tasks": [
+        "T033",
+        "T041"
+      ]
+    },
+    "FR-062": {
+      "title": "A button is drawn only while the row's own gate allows it, and no gate changes with the layout",
+      "tasks": [
+        "T027",
+        "T041",
+        "T044"
+      ]
+    },
+    "FR-063": {
+      "title": "An unavailable button is removed and the remaining buttons re-centre without stretching",
+      "tasks": [
+        "T041",
+        "T044"
+      ]
+    },
+    "FR-064": {
+      "title": "Every button keeps a tooltip and an accessible name from the row's localized text",
+      "tasks": [
+        "T041",
+        "T088"
+      ]
+    },
+    "FR-065": {
+      "title": "Every button keeps a hit target of at least 44 by 44",
+      "tasks": [
+        "T041",
+        "T088"
+      ]
+    },
+    "FR-066": {
+      "title": "Accept, Complete and Give back keep distinct colours and glyphs",
+      "tasks": [
+        "T041"
+      ]
+    },
+    "FR-067": {
+      "title": "Print ships disabled, says it is not available yet, and performs no action",
+      "tasks": [
+        "T027",
+        "T043"
+      ]
+    },
+    "FR-068": {
+      "title": "Open details carries a magnifier glyph and its tooltip and is the only way the card opens a request",
+      "tasks": [
+        "T033",
+        "T043"
+      ]
+    },
+    "FR-069": {
+      "title": "The card body no longer opens the request",
+      "tasks": [
+        "T033",
+        "T035"
+      ]
+    },
+    "FR-070": {
+      "title": "The status word becomes clickable when the signed-in person is the row's handler",
+      "tasks": [
+        "T027",
+        "T042",
+        "T056",
+        "T057"
+      ]
+    },
+    "FR-071": {
+      "title": "Clicking the status word opens a flyout offering the four conditions",
+      "tasks": [
+        "T013",
+        "T056",
+        "T057"
+      ]
+    },
+    "FR-072": {
+      "title": "Choosing a condition re-themes the whole status column to the lighter red",
+      "tasks": [
+        "T046",
+        "T058"
+      ]
+    },
+    "FR-073": {
+      "title": "A chosen condition is stored against the request and restored on the next list read",
+      "tasks": [
+        "T003",
+        "T004",
+        "T005",
+        "T006",
+        "T026",
+        "T030",
+        "T058",
+        "T077"
+      ]
+    },
+    "FR-074": {
+      "title": "The status word is inert for everyone else",
+      "tasks": [
+        "T042",
+        "T056",
+        "T057"
+      ]
+    },
+    "FR-075": {
+      "title": "The flyout is reachable and operable by keyboard alone and its gate is announced",
+      "tasks": [
+        "T056",
+        "T057",
+        "T087",
+        "T088"
+      ]
+    },
+    "FR-076": {
+      "title": "Only the row's own material handler can set that row's condition",
+      "tasks": [
+        "T004",
+        "T026",
+        "T056",
+        "T057"
+      ]
+    },
+    "FR-077": {
+      "title": "Both hopper Items ask the size as three choices with the chosen size's reference image beneath",
+      "tasks": [
+        "T070",
+        "T072",
+        "T078"
+      ]
+    },
+    "FR-078": {
+      "title": "The hopper Size cell opens the reference image the way the card's other pictures enlarge",
+      "tasks": [
+        "T079"
+      ]
+    },
+    "FR-079": {
+      "title": "A hopper image is held to the application's existing picture rules",
+      "tasks": [
+        "T070",
+        "T072"
+      ]
+    },
+    "FR-080": {
+      "title": "A hopper size whose image is missing or unusable draws the shared placeholder",
+      "tasks": [
+        "T070",
+        "T072"
+      ]
+    },
+    "FR-081": {
+      "title": "Both die Items ask the checkbox, and that answer decides the card's third label-less cell",
+      "tasks": [
+        "T070",
+        "T073",
+        "T077",
+        "T078",
+        "T079",
+        "T080"
+      ]
+    },
+    "FR-082": {
+      "title": "The incorrect part is typed through a fuzzy search, upper-cased and zero-padded with a known prefix",
+      "tasks": [
+        "T017",
+        "T070",
+        "T071",
+        "T074",
+        "T078"
+      ]
+    },
+    "FR-083": {
+      "title": "An exact match resolves at once; otherwise every part whose number contains the term is offered",
+      "tasks": [
+        "T070",
+        "T071",
+        "T074"
+      ]
+    },
+    "FR-084": {
+      "title": "The fuzzy search reads the plant system live and is not cached",
+      "tasks": [
+        "T071",
+        "T074"
+      ]
+    },
+    "FR-085": {
+      "title": "When the plant system cannot be reached the operator is told and the typed value stands",
+      "tasks": [
+        "T074"
+      ]
+    },
+    "FR-086": {
+      "title": "An assist coil turn asks the weight of the coil as a required numeric answer",
+      "tasks": [
+        "T070",
+        "T075",
+        "T077",
+        "T078"
+      ]
+    },
+    "FR-087": {
+      "title": "The four returning Items ask how many skids, numeric, defaulting to one",
+      "tasks": [
+        "T006",
+        "T070",
+        "T076",
+        "T077",
+        "T078",
+        "T080"
+      ]
+    },
+    "FR-088": {
+      "title": "Declared job-sourced labels resolve from the job, including the ones the resolver ignores",
+      "tasks": [
+        "T010",
+        "T014",
+        "T017",
+        "T031"
+      ]
+    },
+    "FR-089": {
+      "title": "Anything the job cannot carry is read from a source that holds it, never invented or left blank",
+      "tasks": [
+        "T012",
+        "T014",
+        "T015",
+        "T017",
+        "T031",
+        "T055"
+      ]
+    },
+    "FR-090": {
+      "title": "Total Qty In House is the full sum for the part, read from the source that holds it for the type",
+      "tasks": [
+        "T007",
+        "T008",
+        "T009",
+        "T018",
+        "T019",
+        "T020",
+        "T021",
+        "T022",
+        "T023",
+        "T024",
+        "T025",
+        "T065",
+        "T066",
+        "T067",
+        "T068",
+        "T069"
+      ]
+    },
+    "FR-091": {
+      "title": "Part Type on the four returning pickups is the derived item type, and for NCM the location-derived state",
+      "tasks": [
+        "T060",
+        "T064",
+        "T069"
+      ]
+    },
+    "FR-092": {
+      "title": "The item type is derived Outside Service, then Finished Goods, then WIP",
+      "tasks": [
+        "T060",
+        "T064",
+        "T067"
+      ]
+    },
+    "FR-093": {
+      "title": "NCM is never treated as a production type and is derived from the location the stock occupies",
+      "tasks": [
+        "T060",
+        "T061",
+        "T062",
+        "T069"
+      ]
+    },
+    "FR-094": {
+      "title": "The four returning Items are offered when the job has the work they name, not by a fixed list",
+      "tasks": [
+        "T014",
+        "T059",
+        "T063",
+        "T069"
+      ]
+    },
+    "FR-095": {
+      "title": "Description on the dunnage Items is declared in configuration but can never hold a value",
+      "tasks": [
+        "T083"
+      ]
+    },
+    "FR-096": {
+      "title": "An Item's declared fields must appear on the card, superseding the earlier rule",
+      "tasks": [
+        "T033",
+        "T089"
+      ]
+    },
+    "FR-097": {
+      "title": "The card's anatomy is no longer frozen and the lift is recorded in writing",
+      "tasks": [
+        "T089"
+      ]
+    },
+    "FR-098": {
+      "title": "The detail-field grid returns to the card",
+      "tasks": [
+        "T089"
+      ]
+    },
+    "FR-099": {
+      "title": "The four metadata rows are superseded by the four-zone anatomy",
+      "tasks": [
+        "T033",
+        "T089"
+      ]
+    },
+    "FR-100": {
+      "title": "The card body is no longer the click target that opens the request",
+      "tasks": [
+        "T033",
+        "T035",
+        "T089"
+      ]
+    },
+    "FR-101": {
+      "title": "An unresolvable value is hidden, and where its source exists it is also logged",
+      "tasks": [
+        "T029",
+        "T054",
+        "T089"
+      ]
+    },
+    "FR-102": {
+      "title": "The status vocabulary opens from four states to eight and carries three themes",
+      "tasks": [
+        "T013",
+        "T045",
+        "T046",
+        "T056",
+        "T089"
+      ]
+    },
+    "FR-103": {
+      "title": "Two requests of the same Item render identically in shape and height",
+      "tasks": [
+        "T036",
+        "T049",
+        "T053",
+        "T082"
+      ]
+    },
+    "FR-104": {
+      "title": "Every new label is a localized resource rather than a literal",
+      "tasks": [
+        "T016",
+        "T086"
+      ]
+    },
+    "FR-105": {
+      "title": "Any animation the card adds respects the system's animations-off setting",
+      "tasks": [
+        "T038",
+        "T088"
+      ]
+    }
+  },
+  "size": "oversized",
+  "classification": {
+    "projectedFiles": 28,
+    "projectedTasks": 45,
+    "scopeSignal": "larger",
+    "verdict": "oversized"
+  },
+  "expectations": [
+    "the waitlist detail page layout",
+    "the four lifecycle status words themselves, which the four conditions extend rather than change",
+    "any new real action beyond opening a request and the status flyout; Print stays a disabled placeholder",
+    "Setup, Settings and the Mock and visual-fallback surfaces",
+    "the mirror and fallback model; the fuzzy part search stays live-only and is never given a cached read shape"
+  ],
+  "context": [
+    "living spec: none matched (registry declares only startup-launch, which this change does not touch)",
+    "area: Module_Waitlist card surface and its control",
+    "area: MTM_Waitlist.Settings request item configuration, job snapshot and job value resolution",
+    "area: Database/Seeds/seed_waitlist_request_item_configs declared detail fields for all 24 Items",
+    "area: Infor Visual disposition input and the FG/WIP/Outside Service classifier",
+    "constraint: pre-spec decisions D1-D43 are settled, and the gaps at D8, D9, D10 and D17 are intentional",
+    "constraint: repository spec convention follows specs/011 (story-level acceptance, Assumptions, Verbatim Constraints)",
+    "constraint: unattended run, no review gate, inform the spec only"
+  ],
+  "intent": "Redesign the waitlist list row into four Item-driven zones with a time ring, per-Item detail cells and a re-centring action grid",
+  "decisions": [
+    {
+      "decision": "Resolve Destination on deliver-flatstock from the request's own requesting work centre",
+      "why": "the documented deliver rule is that a Deliver Item goes to the requesting work centre with no user entry, so the value exists and nothing is invented",
+      "rejected": "reintroducing the retired answer-sourced Destination question, which DestinationQuestionRetirementTests pins as illegal"
+    },
+    {
+      "decision": "One new Infor Visual read shape for the part-wide quantity filtered by location class, plus the WIP floor sum for WIP stock",
+      "why": "FR-090 requires the full sum for the part from the source that holds it for the item type, and D38 names those two sources",
+      "rejected": "PART.QTY_ON_HAND, which is total on-hand with no location filter and is the defect FR-090 records"
+    },
+    {
+      "decision": "Draw the time ring with the platform ProgressRing in its determinate state with the time text overlaid",
+      "why": "Microsoft Learn documents a determinate state for ProgressRing that shows percentage completed and does not block interaction, and the control is read-only so it cannot be mistaken for the click target",
+      "rejected": "hand-drawn arc geometry with Path and ArcSegment, which is custom work with no theming or accessibility path"
+    },
+    {
+      "decision": "Realise D31 as one DataTemplate per Item in a single ResourceDictionary chosen by a DataTemplateSelector",
+      "why": "a WinUI UserControl needs its own XAML file so 24 controls cannot share one, while templates keep 24 arrangements in one file and are the documented way to select a template from an item's own properties",
+      "rejected": "24 UserControls, which is the file-per-card bloat D31 forbids, and an imperative cell builder, which throws away XAML binding and the markup tests"
+    },
+    {
+      "decision": "Store the handler condition in a new nullable handler_status column written by a new gated stored procedure",
+      "why": "the condition is set on the card and must be restored on the next list read, and keeping it out of status preserves the lifecycle word that the precedence rule needs",
+      "rejected": "overloading status, which loses the lifecycle state, and a client-side store, which FR-073 forbids"
+    },
+    {
+      "decision": "Store the new answers in a nullable answers_json column carried by the request insert and the list read",
+      "why": "the die Items now ask two questions and the four returning pickups ask one each, so a single input_value can no longer hold everything an Item asks",
+      "rejected": "a waitlist_request_answers table, which adds a join and a second write for at most two values per request"
+    },
+    {
+      "decision": "For FR-090, correct the query input and leave the classifier rule untouched",
+      "why": "the classifier already documents the finished-goods location rule and only the value handed to it is wrong, so fixing the input is the smallest truthful change",
+      "rejected": "amending the rule text, which clarify owns and which is not required to make Part Type truthful"
+    },
+    {
+      "decision": "For FR-095, leave the dunnage Description declaration in place and never draw the cell",
+      "why": "it is the spec's own edge case that configuration is left alone when a declared field must not be drawn, and it invents nothing",
+      "rejected": "deleting the declaration, a silent change to shipped configuration that clarify should own"
+    },
+    {
+      "decision": "Derive Part Type and Item Type by wiring the existing RequestDispositionResolver, extended with an Ncm state",
+      "why": "the stack is already built, registered and consumed by nothing, so giving it its first consumer is smaller than a second derivation, and NCM is a location state the classifier has no value for",
+      "rejected": "a fresh derivation inside the card, which duplicates live-validated rules"
+    },
+    {
+      "decision": "Source the fuzzy incorrect-part search from a new live-only Infor Visual query with no mirror declaration",
+      "why": "D24 and the spec Assumptions settle that a contains-search over every part is not mirrorable and must degrade to the typed value rather than a stale answer",
+      "rejected": "reusing the receiving application WinForms picker, which the pre-spec records cannot be reused verbatim, and a cached reply, which would serve a stale part list"
+    },
+    {
+      "decision": "Source Home Location by extending the internal dunnage read to carry the dunnage home location",
+      "why": "the internal store already holds the value, so the internal live read is the smallest source",
+      "rejected": "a new Infor Visual read for a value an internal table already holds"
+    },
+    {
+      "decision": "Source 'Average coil weight' from the extended coil subordinate read as CAST(COALESCE(part.WEIGHT,0) AS decimal(20,8))",
+      "why": "R1 said to carry it on the existing snapshot rather than a second read, and VISUAL's PART.WEIGHT decimal(14,4) was confirmed in the schema export at Documents/Development/InforVisual/DatabaseCSVFiles/ColumnDetails/PART.csv, so the source is grounded rather than assumed",
+      "rejected": "resolving it from the receiving store's sp_receiving_history_average_coil_weight, which R1 rejected as a second read"
+    },
+    {
+      "decision": "New mirrorable shape part_warehouse_quantities with one row per part and three columns (PartNumber, WarehouseQuantity, FinishedGoodsQuantity)",
+      "why": "FR-090 needs the full part-wide sum from the source that holds it, and the finished-goods split needs a location-class filter; one row per part makes the mirror key the part number, the same arrangement as inventory_locations",
+      "rejected": "a per-location figure or PART.QTY_ON_HAND, both of which are the defect FR-090 records"
+    },
+    {
+      "decision": "Added RingText to SampleOrder and bound the card's overlaid ring text to it, so a closed request's ring draws the time taken",
+      "why": "FR-015 requires the ring to carry time left while live and time taken once closed, and no member produced a time-taken string; the card had bound RemainingTimeText, which is always a countdown. This corrected a real gap in US1's delivered slice",
+      "rejected": "leaving the countdown frozen on a closed ring, which is what the card did before"
+    },
+    {
+      "decision": "Extended the subordinate_parts mirror (both tables, both procedures, the row model and the fallback) with average_weight, and extended T012's scope to two consumer mapping files",
+      "why": "the task list left these seams unowned: the projection change T010/T011/ the catalog made could not be read without the mirror column, and home_location could not reach the snapshot without the two mappers",
+      "rejected": "leaving the mirror short a column, which makes a host that validates the catalog report the shape invalid"
+    },
+    {
+      "decision": "Reconciled the item seed exactly as data-model §9 requires: the label moves (Die Location, Home Location, Scrap Type, Coil Number), the new answer cells (Die Shop Direction, Size, # of Skids, Weight of Coil), the new derivation and read cells (Part Type, Item Type, Total Qty In House), the two wrong-part Items' source correction to answer, and nothing removed",
+      "why": "§9 is the settled reconciliation table and FR-056 makes the per-Item exclusion a card rule, so the declared fields the card does not show stay declared",
+      "rejected": "deleting the surplus declarations, which would make the exclusion a silent configuration edit"
+    },
+    {
+      "decision": "Derived the new shape's baseline mirror rows from the already-seeded inventory-locations content rather than hand-writing part numbers",
+      "why": "the seed's own header rejects invented mirror rows, and the aggregate is the same figure the live population computes, so the baseline is internally consistent by construction",
+      "rejected": "hand-writing synthetic part rows, and leaving the shape with no baseline"
+    },
+    {
+      "decision": "Added Die Location as a second resolver arm alongside Pickup location",
+      "why": "research R1 requires the corrected label to be added (D33), and T017's own task text listed only the four plain arms; without it T080's seed move would silently blank the die cell",
+      "rejected": "renaming the arm and relying on the seed move, which would break any store not yet migrated"
+    },
+    {
+      "decision": "Exempted the 11 bare-label resource keys in the naming guard, with the reason in the script",
+      "why": "a declared cell label is the key the card resolves at bind time, so the guard's key-shape rule and the declaration contract cannot both hold; the exemption list already exists for exactly this",
+      "rejected": "renaming the labels to key shape, which breaks the declaration and draws the raw key as the label"
+    },
+    {
+      "decision": "FR-095: kept the dunnage Description declaration and never draw the cell",
+      "why": "it is the spec's own edge case and the inverse of inventing a value; the seed-alignment and template tests assert the card draws nothing for it",
+      "rejected": "deleting the declaration as a silent scope cut"
+    },
+    {
+      "decision": "The action grid is 3 columns x 2 rows (D44). Section 4 of the pre-spec has always shown this table; only the prose around it (section 1 bullet 4, D18, FR-061) said 2x3, so the built card followed stale prose. Corrected in the pre-spec, FR-061 and data-model.md."
+    },
+    {
+      "decision": "The Windows resource index is case-insensitive: adding a key that differs only in case from an existing one fails the build with PRI277 Conflicting values. This settles that the three renamed cell labels (Coil number, Home location, Scrap type) already resolve through their canonical spellings, so they need no old-spelling entry. The label-resolution test therefore compares case-insensitively."
+    },
+    {
+      "decision": "A DataTemplateSelector used by a ContentControl must override BOTH SelectTemplateCore overloads. Overriding only the one-argument overload leaves the base implementation answering the two-argument question with null, so the presenter draws its content instead of the template. This silently disabled the entire per-Item cell system and could not be caught by any unit test, because the framework is what asks the question."
+    },
+    {
+      "decision": "An overdue live row's ring carries the signed time overrun (-hh:mm) rather than RemainingTimeText, which is the word 'Overdue' once the due time has passed. FR-014 requires the word on row 1 and the overrun in the ring, so keeping them as one value printed the word twice. RemainingTimeText is left unchanged because the request detail page reads it as a word."
+    },
+    {
+      "decision": "Removed the card print action and its TODO logic at the owner direction; printing belongs to the request detail page later. FR-067 is superseded, FR-061 amended from six buttons to five, and SC-012, acceptance scenario 6, FR-104 and the scope note updated in place. Recorded as D59, superseding D4 and D54.",
+      "why": "Printing a label needs the detail a label is made of, which the request page has; the card placeholder performed nothing and the platform disabled state faded it until its glyph was invisible, so it read as an empty box on every card."
+    },
+    {
+      "decision": "The app names people by name and never prints an employee number. The queue keeps recording the material handler as an employee number, because that is what the handler authorizations compare; the name is resolved beside it from the entry the handler themselves wrote, matched to that same handler number, by both request reads. PersonText reads the name and nothing else, and a claimed request whose handler carries no recorded name draws no person row rather than falling back to the number. The request detail page no longer draws its Employee number row.",
+      "why": "A claimed card read 6229 under the ring where the name of the person holding the work belongs. The number was the only thing the row had, because that is how the assignment is stored."
+    }
+  ],
+  "step_summaries": {
+    "plan": {
+      "summary": "Planned the four-zone waitlist card with full design artifacts and chose a mechanism for every cell that had no source",
+      "key_finding": "most of what looked like layout work is resolution: the job snapshot and its label resolver ignore most declared fields, and the disposition stack that derives Part Type is already built, registered and consumed by nothing"
+    },
+    "tasks": {
+      "summary": "93 tasks (T001-T093) over 12 phases: 2 setup, 30 foundational, 6 story phases (US1 12, US2 4, US3 7, US4 3, US5 11, US6 10), 4 polish (seed/schema 6, resources/accessibility 3, contracts 3, validation 2); all 105 FRs mapped."
+    },
+    "implement": {
+      "summary": "The waitlist line card rebuilt to its four-zone anatomy with an eight-state three-theme status column, a per-Item detail template for all 24 Items with geometry by cell count, a handler-condition flyout, the four returning pickups unhidden behind real job gates and their Part Type derived from the disposition stack, the five new New Request answers collected and persisted into answers_json, and the item seed, aggregates and contracts reconciled to all of it. 83 of 93 tasks ticked; the remaining 10 need a live store, a reachable Infor Visual host or a rendered app."
+    }
+  },
+  "approach": "Four workstreams land the change: the card control and its host page are rebuilt into four zones, the status zone gains a determinate ProgressRing and a three-theme palette, the detail column becomes one DataTemplate per Item in a single resource dictionary, and every cell that has no source today gets one named mechanism (extend the label map, extend the snapshot, read from the plant system, derive through the existing disposition stack, or capture a new answer). Behind it, one new nullable column and two stored procedures carry the handler condition and the new answers, the seed is reconciled with the pre-spec's cell assignment, and the four hidden pickups are unhidden behind real job gates.",
+  "currentTask": "T117",
+  "task_summaries": {
+    "T001": {
+      "status": "DONE",
+      "did": "Baseline recorded: build 0 warnings/0 errors; suite 1901 passed / 6 failed / 46 skipped - the 6 are one pre-existing cause, missing repo-root STARTUP-REBUILD-BRIEF.md read by Module_Startup AcceptanceSurfaceTests, unrelated to 012",
+      "files": [
+        "MTM_Waitlist.sln",
+        "tools/run-tests.ps1"
+      ]
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "Tooling confirmed: write-context.py runs under python 3.10 (py resolves to a broken 3.14 install); build_mtm_mock_masters.ps1 and validate-database-schema.ps1 both require pwsh 7.6 and exit 0 there. No live DB connection string is configured, so live-plant validation steps cannot run in this environment",
+      "files": [
+        "Database/CopilotScripts/build_mtm_mock_masters.ps1",
+        ".github/scripts/validate-database-schema.ps1"
+      ]
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "subordinate_parts_population.sql projects the new AverageWeight column (CAST(COALESCE(part.WEIGHT,0) AS decimal(20,8))) immediately after OnHandQuantity, byte-identical to the live read's expression; VisualReadFallbackParityTests 27/27 pass",
+      "files": [
+        "Database/InforVisual/Queues/Module_Mock/Populations/subordinate_parts_population.sql"
+      ]
+    },
+    "T015": {
+      "status": "DONE",
+      "did": "RequestDunnagePart gains HomeLocation, threaded through the existing WithDunnageParts path; RequestDunnagePartTests 2/2 pass",
+      "files": [
+        "MTM_Waitlist.Settings/Models/RequestDunnagePart.cs",
+        "MTM_Waitlist.Tests/Module_Settings/Models/RequestDunnagePartTests.cs"
+      ]
+    },
+    "T013": {
+      "status": "DONE",
+      "did": "HandlerStatusCatalog added: the four conditions verbatim in settled order plus IsCondition (ordinal-exact, so a fifth value, wrong case or blank is not a condition); HandlerStatusCatalogTests 5/5 pass",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Helpers/HandlerStatusCatalog.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Helpers/HandlerStatusCatalogTests.cs"
+      ]
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "part_warehouse_quantities_population.sql added: one row per part, PartNumber/WarehouseQuantity/FinishedGoodsQuantity in the contract order, both figures PART_LOCATION sums, never PART.QTY_ON_HAND; VisualReadFallbackParityTests 27/27 pass",
+      "files": [
+        "Database/InforVisual/Queues/Module_Mock/Populations/part_warehouse_quantities_population.sql"
+      ]
+    },
+    "T016": {
+      "status": "DONE",
+      "did": "WaitlistLineCardCell added (Label as resource key, Value, HasValue, IsLabelLess, Order) with a pure CellsToDraw that drops valueless cells so nothing is padded; WaitlistLineCardCellTests 3/3 pass",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistLineCardCell.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Models/WaitlistLineCardCellTests.cs"
+      ]
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "sp_waitlist_request_insert carries answers_json: p_answers_json JSON appended last, the column added after input_value, the value passed through untrimmed so NULL stays NULL; other columns keep their NULLIF/TRIM idiom. Paired rollback updated. Verified structurally (18 params, 20 aligned columns/values), schema validator clean, build 0w/0e. NOT verified: the insert-then-read-back round trip needs a store",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_request_insert/create.sql",
+        "Database/StoredProcedures/sp_waitlist_request_insert/rollback.sql"
+      ]
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "GetSubordinateParts.sql carries the coil's description and its average weight: today's Description is the coil description, and AverageWeight is newly projected as CAST(COALESCE(part.WEIGHT,0) AS decimal(20,8)) right after OnHandQuantity (VISUAL PART.WEIGHT is decimal(14,4), confirmed in the schema export). Verified: projection tail matches the population byte for byte, schema validator clean, build 0w/0e. NOT verified: the live-plant MMC row read needs the plant system",
+      "files": [
+        "Database/InforVisual/Queues/Module_Setup/Queries/GetSubordinateParts.sql"
+      ]
+    },
+    "T014": {
+      "status": "DONE",
+      "did": "RequestJobPartAvailability gains CoilDescription, CoilAverageWeight and four work-named returning-pickup gates (HasFinishedGoodsToReturn, HasNonconformingStockToReturn, HasWorkInProgressToReturn, HasOutsideServiceWorkToReturn) replacing the out-of-scope list; RequestJobPartAvailabilityTests 5/5 pass",
+      "files": [
+        "MTM_Waitlist.Settings/Models/RequestJobPartAvailability.cs",
+        "MTM_Waitlist.Tests/Module_Settings/Models/RequestJobPartAvailabilityTests.cs"
+      ]
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "waitlist_requests_queue gains handler_status VARCHAR(32) NULL and answers_json JSON NULL, both un-defaulted and each with a column COMMENT; rollback remains the wholesale DROP TABLE with a note. Verified: validate-database-schema.ps1 clean (115 artifacts, 115 distinct objects), no new SQL-naming violation class, build 0w/0e. NOT verified: the apply-then-rollback leg needs a dev store, absent here",
+      "files": [
+        "Database/Tables/18_waitlist_requests_queue/create.sql",
+        "Database/Tables/18_waitlist_requests_queue/rollback.sql"
+      ]
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "sp_waitlist_request_handler_status_update added: bare UPDATE returning the affected-row count, touching only handler_status and updated_utc, gated on the expected material handler so a non-owner affects zero rows. Paired rollback added. Verified: InlineSqlAuditTests green, schema validator clean, build 0w/0e. NOT verified: the match-1/wrong-0 live behaviour needs a store; AllSPs.sql registration is T084's",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_request_handler_status_update/create.sql",
+        "Database/StoredProcedures/sp_waitlist_request_handler_status_update/rollback.sql"
+      ]
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "sp_waitlist_request_list returns q.handler_status and q.answers_json immediately after q.input_value, every other column order untouched. Verified: schema validator clean, no new SQL-naming violation, build 0w/0e. NOT verified: the returned-column-set leg needs an executed procedure against a store",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_request_list/create.sql"
+      ]
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "GetPartWarehouseQuantities.sql added: one aggregated row per part, WarehouseQuantity = SUM(PART_LOCATION.QTY) over all locations and FinishedGoodsQuantity = the same sum restricted to finished-goods locations (FG/DC-FG or a FINISHED GOODS description, the taxonomy already documented in GetWipFloorQuantities.sql), never PART.QTY_ON_HAND and never per-location. Verified: schema validator clean, no new SQL-naming violation, build 0w/0e, contract agrees with the catalog entry T009 wrote. NOT verified: the live-plant two-location comparison needs the plant system; the location codes are unconfirmed on this installation and T067 is where they are confirmed",
+      "files": [
+        "Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartWarehouseQuantities.sql"
+      ]
+    },
+    "T012": {
+      "status": "DONE",
+      "did": "The receiving read already returned home_location; the value was dropped in its own consumers. GetDunnageParts.sql keeps the CALL pass-through and now records the carrier chain in its header, and two mapping sites were completed so it reaches the snapshot: DunnageWorkflowService.GetDunnagePartsFromBackendAsync and the composition root's RequestJobAvailabilityProvider.MapDunnagePart. Verified: the Dunnage-filtered suite 49 passed / 1 skipped / 0 failed, build 0w/0e. NOT verified: the non-empty home_location leg needs a live receiving store. Two of the three files are outside T012's stated file line; that is a task-list under-specification",
+      "files": [
+        "Database/MTMReceivingApp/Queues/Module_Setup/Queues/GetDunnageParts.sql",
+        "MTM_Waitlist.Setup/Services/DunnageWorkflowService.cs",
+        "Services/RequestJobAvailabilityProvider.cs"
+      ]
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "VisualReadShapeCatalog declares part_warehouse_quantities (ModuleWaitlist, PartNumber required, PartNumber/WarehouseQuantity/FinishedGoodsQuantity) as a seventh shape, adds AverageWeight to the existing subordinate_parts entry, and updates the count prose. Invalidated pins repaired in ShapeAdditionNoDowntimeTests (keys to seven), RefreshShapeCatalogProviderTests, ServiceStartupTests, ServiceApiTests, EmployeeByNumberShapeParityTests. Verified: ShapeAdditionNoDowntimeTests + VisualReadRouteAuditTests + RefreshShapeCatalogProviderTests 18/18 pass, build 0w/0e",
+      "files": [
+        "MTM_Waitlist.Mock/Services/VisualReadShapeCatalog.cs",
+        "MTM_Waitlist.Tests/Module_Mock_Service/ShapeAdditionNoDowntimeTests.cs",
+        "MTM_Waitlist.Tests/Module_Mock_Service/RefreshShapeCatalogProviderTests.cs",
+        "MTM_Waitlist.Tests/Module_Mock_Service/ServiceStartupTests.cs",
+        "MTM_Waitlist.Tests/Module_Mock_Service/ServiceApiTests.cs",
+        "MTM_Waitlist.Tests/Module_Mock/EmployeeByNumberShapeParityTests.cs"
+      ]
+    },
+    "T018": {
+      "status": "DONE",
+      "did": "visual_part_warehouse_quantities_result mirror table added (one row per part, unique key on part_number, warehouse_quantity and finished_goods_quantity as location sums) with its paired rollback. Verified: ShapeAdditionNoDowntimeTests green, schema validator clean, build 0w/0e. NOT verified: the live mock deploy leg",
+      "files": [
+        "Database/Mock/Tables/visual_part_warehouse_quantities_result/create.sql",
+        "Database/Mock/Tables/visual_part_warehouse_quantities_result/rollback.sql"
+      ]
+    },
+    "T019": {
+      "status": "DONE",
+      "did": "visual_part_warehouse_quantities_result_stage twin added, identical structure to the mirror, with its paired rollback. Verified: ShapeAdditionNoDowntimeTests and the mirror-schema test green, build 0w/0e",
+      "files": [
+        "Database/Mock/Tables/visual_part_warehouse_quantities_result_stage/create.sql",
+        "Database/Mock/Tables/visual_part_warehouse_quantities_result_stage/rollback.sql"
+      ]
+    },
+    "T020": {
+      "status": "DONE",
+      "did": "sp_visual_part_warehouse_quantities_get added: reads the mirrored row for p_part_number and aliases the three projection columns the live read returns. Paired rollback added. Verified: ShapeAdditionNoDowntimeTests green, build 0w/0e. NOT verified: the returns-the-seeded-rows leg needs a deployed mtm_mock",
+      "files": [
+        "Database/Mock/StoredProcedures/sp_visual_part_warehouse_quantities_get/create.sql",
+        "Database/Mock/StoredProcedures/sp_visual_part_warehouse_quantities_get/rollback.sql"
+      ]
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "sp_visual_part_warehouse_quantities_refresh added: stages the JSON payload, counts staged rows against the payload length and signals before swapping, then swaps result to prev, stage to result, prev to stage in one statement. Paired rollback added. Verified: ShapeAdditionNoDowntimeTests green, build 0w/0e. NOT verified: MockMirrorRefreshWriterIntegrationTests and the second-refresh leg need a deployed mtm_mock",
+      "files": [
+        "Database/Mock/StoredProcedures/sp_visual_part_warehouse_quantities_refresh/create.sql",
+        "Database/Mock/StoredProcedures/sp_visual_part_warehouse_quantities_refresh/rollback.sql"
+      ]
+    },
+    "T022": {
+      "status": "DONE",
+      "did": "VisualPartWarehouseQuantitiesFallback added with its request and row models, and registered in the mock composition so the registration count equals the catalog shape count. Verified: the fallback-registration and shared-algorithm assertions in ShapeAdditionNoDowntimeTests / VisualReadRouteAuditTests are green (18/18), build 0w/0e",
+      "files": [
+        "MTM_Waitlist.Mock/Services/VisualPartWarehouseQuantitiesFallback.cs",
+        "MTM_Waitlist.Mock/Models/VisualPartWarehouseQuantitiesRow.cs",
+        "MTM_Waitlist.Mock/Models/VisualPartWarehouseQuantitiesRequest.cs",
+        "MTM_Waitlist.Mock/DependencyInjection/MockServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T023": {
+      "status": "DONE",
+      "did": "Baseline mirror rows for the new shape added as a per-part aggregate DERIVED from the already-seeded inventory_locations content (INSERT IGNORE ... SELECT SUM grouped by part, is_seed_content=1) rather than invented part numbers, and the rollback now clears it. finished_goods_quantity is 0 because the location seed carries no class; the reason is recorded in the file. Also closed a pre-existing gap: the rollback never cleared employee_by_number seed content",
+      "files": [
+        "Database/Mock/Seeds/seed_visual_mirror_baseline/create.sql",
+        "Database/Mock/Seeds/seed_visual_mirror_baseline/rollback.sql"
+      ]
+    },
+    "T024": {
+      "status": "DONE",
+      "did": "read_shape_metadata/validate.sql now names seven expected shapes in step 4's IN list and asserts the new shape by name as well as counted (new step 6), because a count of seven is satisfied by any seven. Verified: the seven-key set matches the catalog's seven shapes (ShapeAdditionNoDowntimeTests green), build 0w/0e. NOT verified: running the validator needs a deployed mtm_mock",
+      "files": [
+        "Database/Mock/Validation/read_shape_metadata/validate.sql"
+      ]
+    },
+    "T025": {
+      "status": "DONE",
+      "did": "all_shapes_roundtrip/validate.sql includes the new shape: a shape 7 refresh with a sentinel payload then a get, an s7 seed-content count in step 8, and the expected shape-procedure count raised from 12 to 14 with the comment updated. Verified structurally (payload keys match the refresh procedure's JSON keys), build 0w/0e. NOT verified: running the roundtrip needs a deployed mtm_mock",
+      "files": [
+        "Database/Mock/Validation/all_shapes_roundtrip/validate.sql"
+      ]
+    },
+    "T026": {
+      "status": "DONE",
+      "did": "Handler-status write on IWaitlistRequestService/WaitlistRequestService through the same affected-row-reporting non-query seam as the lifecycle write (sp_waitlist_request_handler_status_update, no statement text); it returns the store's count, leaves the row untouched on 0, refuses a value that is not one of the four conditions, and applies the procedure's own handler gate locally. The list read maps handler_status and answers_json onto WaitlistRequest.Answers, and insert carries the answers as p_answers_json with blank answers dropped. Verified: WaitlistRequestServiceTests + InlineSqlAuditTests 73/73 pass, wider 90/90, build 0w/0e. NOT verified: the answers_json write-then-read-back round trip and the procedure's own gate need a live store. Dev note: the interface member forced one stub line into 7 existing test fakes",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Services/IWaitlistRequestService.cs",
+        "MTM_Waitlist.Waitlist.View/Services/WaitlistRequestService.cs",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequest.cs",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequestDraft.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs"
+      ]
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "RequestJobFieldValues resolves the seven missing labels from the snapshot (Coil number/Coil Number and Correct coil from CoilPartNumber, Correct flatstock from FlatstockPartNumber, Scrap Type from ScrapType, Coil description and Average coil weight from the extended coil read, Home Location joined across the job's dunnage parts) and gains an answers-aware overload where a captured answer for the declared label beats the job arm; the two-arg Resolve delegates with no answers. One gap in T017's own task text closed by me: R1 requires the corrected Die Location label to be added, and the task listed only the four plain arms, so the arm now answers both Die Location and Pickup location so T080's seed move cannot blank the die cell. Verified: RequestJobFieldValuesTests + WaitlistRequestServiceTests + InlineSqlAuditTests + SampleOrder tests 117/117 pass, build 0w/0e",
+      "files": [
+        "MTM_Waitlist.Settings/Services/RequestJobFieldValues.cs",
+        "MTM_Waitlist.Tests/Module_Settings/Services/RequestJobFieldValuesTests.cs"
+      ]
+    },
+    "T027": {
+      "status": "DONE",
+      "did": "SampleOrder gains the card surface: HandlerStatus (a stored value outside the four conditions is not a condition), CanSetStatusCondition, StatusWord with the condition-then-Overdue-then-lifecycle precedence, StatusTheme (StatusColumnTheme: Normal/HandlerCondition/Overdue), AllottedMinutes with the 15-minute default, ClosedUtc, RingValue (uncapped fraction via RingFraction) and RingMeasure (TimeRingMeasure: TimeLeft/TimeTaken), the two person rows with Has-predicates so an empty row is absent rather than blank, Cells, and the action gates with CanPrint fixed false. RefreshTimeDerivedText now also raises RingValue on the minute tick so the two cannot disagree. Verified: SampleOrder 17/17, broader card set 139/139, build 0w/0e",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Models/SampleOrder.cs"
+      ]
+    },
+    "T028": {
+      "status": "DONE",
+      "did": "Pinned the row model's behaviour in SampleOrderTests (status-word precedence, the three themes, the closed condition vocabulary, the ring's two measures and its uncapped fraction, person rows absent rather than blank, cells drawn one per resolved field in declared order); 11 new tests, fail-verified against the rule-less behaviour.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Models/SampleOrderTests.cs"
+      ]
+    },
+    "T029": {
+      "status": "DONE",
+      "did": "Per-row resolution: each Item's declared field becomes a WaitlistLineCardCell in declared order (the declaration is read once per load through the existing IRequestItemConfigurationService, newly injected into the ViewModel and named in the DI registration), with the hide rule's two halves applied through WaitlistLineCardCell.CellsToDraw - a field the Item never declares is never produced, and a field whose source exists but cannot be read (a required answer the request does not carry, or a declared source this build cannot read, or an Item declaration that cannot be read) is hidden and recorded as a warning in the store's log via a new AppLog.Warn on the existing facade and IAppLogSink bridge (LogService already had Warn; the two existing test sinks gained the member). The ring's two inputs (AllottedMinutes from the declaration, ClosedUtc from CompletedUtc/CanceledUtc) now land on the row from the same path, and the fraction still re-evaluates on the existing one-minute tick through SampleOrder.RefreshTimeDerivedText - no second timer. The flyout's write is exposed as SetStatusConditionCommand (tuple parameter (row, condition)), gated on the row's own CanSetStatusCondition, reporting the affected-row count so a lost race is told via the existing refusal message rather than shown as success. Verified red-then-green: before the change the new tests failed to compile on the missing overload/command; after it, WaitlistViewViewModelFieldTests 16/16, the WaitlistViewViewModel filter 65/65, the touched suites 1958 passed / 7 pre-existing baseline failures (6 AcceptanceSurfaceTests + DatabaseAggregateRegistrationTests), solution build 0 warnings / 0 errors. NOT verified: no live database here, so the warning actually reaching the store and the condition write landing were not exercised end to end. Out-of-scope files changed and reported: IAppLogSink.cs, AppLog.cs, ILogService.cs (new keyword, CS0108), ServiceRegistrationExtensions.cs, and two test sinks (the IAppLogSink member); the declaration's fixed-source arm and the per-Item template selection are left to T054/T055/T080.",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelFieldTests.cs",
+        "MTM_Waitlist.Core/Contracts/Services/IAppLogSink.cs",
+        "MTM_Waitlist.Core/Helpers/AppLog.cs",
+        "MTM_Waitlist.Logging/ILogService.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs",
+        "MTM_Waitlist.Tests/Module_Core/Activation/RequestDeepLinkHandlerTests.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/PictureCacheStepTests.cs"
+      ]
+    },
+    "T030": {
+      "status": "DONE",
+      "did": "Write seam and round trip pinned in WaitlistRequestServiceTests: SetHandlerStatusAsync_ALostRaceReportsZeroRatherThanSuccess drives the seam's affected-row count to 0 and asserts zero is surfaced and the row keeps no condition it never recorded, and the list-read test asserts a stored handler_status and a stored answers_json payload are restored onto the request on the next read (Answers[Size]=Large, Answers[Weight of Coil]=1840). Both were written red against a service that lacked the seam. Verified: WaitlistRequestServiceTests 70/70 pass, build 0w/0e. NOT verified: the store's own zero-row behaviour and the JSON column's driver round trip need a live store",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs"
+      ]
+    },
+    "T031": {
+      "status": "DONE",
+      "did": "Resolver pinned in RequestJobFieldValuesTests: one test per new arm (Coil number, Correct coil, Correct flatstock, Scrap Type, Coil description, Average coil weight, Home Location with its joining and its empty case), the corrected Die Location spelling added so it cannot silently blank the die cell, blank snapshot fields yielding nothing, and CapturedAnswerWinsOverTheJobArmForItsOwnLabel plus the trimmed/case-insensitive key match and the blank-answer fall-through. Written red first (CS1501 on the missing three-argument overload). Verified: RequestJobFieldValuesTests 27/27 pass, build 0w/0e",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/RequestJobFieldValuesTests.cs"
+      ]
+    },
+    "T032": {
+      "status": "DONE",
+      "did": "Foundational gate green: dotnet build 0 warnings / 0 errors, and InlineSqlAuditTests + RetiredSymbolAuditTests + ShapeAdditionNoDowntimeTests + ReadShapeContentShippingAuditTests + VisualReadFallbackParityTests all pass (49/49). No story starts on a broken base",
+      "files": [
+        "MTM_Waitlist.sln"
+      ]
+    },
+    "T033": {
+      "status": "DONE",
+      "did": "Rewrote the card markup tests to the new anatomy (four zones in order with vertical rules, work centre under the picture, always-spanning title row, 2x3 action order, Print disabled, Open details magnifier, no body click): 24 of 28 failed against the old card, then 28/28 passed after the markup landed",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs"
+      ]
+    },
+    "T034": {
+      "status": "DONE",
+      "did": "Added the assertions the new card owes: no requesting work centre or requesting user as a detail cell on any of the 24 catalogued Items, the requesting user bound nowhere on the card, and Die Location not a universal cell (detail cells come only from the per-Item selector)",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs"
+      ]
+    },
+    "T035": {
+      "status": "DONE",
+      "did": "Host page: removed IsItemClickEnabled/ItemClick and the ListView_ItemClick handler so the row no longer opens the request, keeping row selection so Shift+click on the picture still enlarges it and the row container still stretches full width",
+      "files": [
+        "Module_Waitlist/Views/WaitlistViewPage.xaml;Module_Waitlist/Views/WaitlistViewPage.xaml.cs"
+      ]
+    },
+    "T036": {
+      "status": "DONE",
+      "did": "Added WaitlistLineCardDetailTemplateSelector: keys each row on its Item code (WaitlistLineCardDetail_<item>), looks the template up by key at run time through the application's resources and their merged dictionaries, and falls back to the card's own real fallback template; tests resolve all 24 Item keys and the fallback",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistLineCardDetailTemplateSelector.cs;MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs"
+      ]
+    },
+    "T037": {
+      "status": "DONE",
+      "did": "Built the card's four zones in order between one-pixel vertical rules: the identity zone with the accent bar, the picture (Shift+click enlarge kept), the new-message badge (omitted when absent) and the requesting work centre as a large unlabelled value beneath the picture; nothing padded and the coloured status pill removed",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml"
+      ]
+    },
+    "T038": {
+      "status": "DONE",
+      "did": "Built the status zone as a centred stack of the word, the platform ProgressRing in its determinate state with the row's time text overlaid in a Grid cell, the person and (closed only) the requester, each row removed rather than blanked when it has no value, and no percentage or elapsed-time line",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml"
+      ]
+    },
+    "T039": {
+      "status": "DONE",
+      "did": "The status word is plain coloured text with no label in front of it and no pill, bound to the row's resolved word; the whole column carries the row's theme and one brush computed from it paints the word and the ring, so a closed request's ring reads the time it took rather than the time left",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml;Module_Waitlist/Controls/WaitlistLineCardView.xaml.cs"
+      ]
+    },
+    "T040": {
+      "status": "DONE",
+      "did": "Built the detail zone host: an inner grid of three rows and two columns whose row 1 spans both columns with the request's category word and its own identifier, and whose cell area is resolved through the per-Item template selector",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml"
+      ]
+    },
+    "T041": {
+      "status": "DONE",
+      "did": "Built the action zone as two columns by three rows in row-major order (Accept, Cancel, Give back, Complete, Open details, Print), every gated action removed rather than blanked with the grid re-centred and never stretched, 44x44 squares, a tooltip and an accessible name from the row's localized text, and three distinct colours and glyphs for Accept, Complete and Give back",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml"
+      ]
+    },
+    "T042": {
+      "status": "DONE",
+      "did": "Made the status word the card body's one interactive element: a plain-text-styled button gated on the row's own handler, with the flyout host declared there and carrying the row's four condition options (the flyout's own body and behaviour stay the status flyout's)",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml"
+      ]
+    },
+    "T043": {
+      "status": "DONE",
+      "did": "Print ships disabled with the 'not available yet' tooltip from a resource, no command and a code-behind TODO naming label printing; Open details carries the E721 magnifier and the resource-backed 'Open details' tooltip and is the only path that opens the request, through the existing navigation service",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml;Module_Waitlist/Controls/WaitlistLineCardView.xaml.cs;Strings/en-us/Resources.resw"
+      ]
+    },
+    "T044": {
+      "status": "DONE",
+      "did": "Added the action-gate and re-centring markup tests: every gated button is removed by its own row gate (never by an enabled state or a count), the grid re-centres instead of stretching, every button is a 44x44 square, and the row's OfferedActionCount is not consulted",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs"
+      ]
+    },
+    "T045": {
+      "status": "DONE",
+      "did": "Pinned the palette tests: a role and a colour for all eight status words plus the overdue marking, three distinct column themes with the condition red lighter than the overdue red, overdue carried by the marking rather than the row position, and a guard that no percentage-bearing member is offered; observed 4 failures against the old four-word palette before the palette grew.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Helpers/RequestStatusPaletteTests.cs"
+      ]
+    },
+    "T046": {
+      "status": "DONE",
+      "did": "Extended RequestStatusPalette: an Overdue role plus one role per condition matched verbatim through HandlerStatusCatalog, three column-theme colours (normal neutral, handler-condition lighter red, overdue deep red), ColorFor/BrushFor and a RoleFor that reads the stored status or the drawn word; build 0 warnings 0 errors.",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Helpers/RequestStatusPalette.cs"
+      ]
+    },
+    "T047": {
+      "status": "DONE",
+      "did": "gave the converter a colour-only decision (ColourFor) so a brush is never built off the UI thread, answering a real colour for all eight roles and all three themes and so closing the card's transparent-theme fallback; gave RemainingTimePalette ColourForFraction plus FractionFor, the one conversion from the row's remaining-time text to the ring's fraction, and asserted the two are the same number.",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Converters/RequestStatusToBrushConverter.cs",
+        "MTM_Waitlist.Waitlist.View/Helpers/RemainingTimePalette.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Converters/RequestStatusToBrushConverterTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Helpers/RemainingTimePaletteTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Helpers/RequestStatusColumnTests.cs"
+      ]
+    },
+    "T049": {
+      "status": "DONE",
+      "did": "New template tests written first and shown red (9 of 12 failed while the dictionary was absent), then green: one template per Item for all twenty-four via the selector's own key prefix, the geometry for four/three/two/one/no cells, the die-shop phrase, and other's scrolling description",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardDetailTemplateTests.cs"
+      ]
+    },
+    "T050": {
+      "status": "DONE",
+      "did": "New dictionary Module_Waitlist/Controls/WaitlistLineCardDetailTemplates.xaml with the eleven pickup templates, each drawing its Item's cells in declared order through the one shared cell (label on top, value beneath)",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistLineCardDetailTemplates.xaml"
+      ]
+    },
+    "T051": {
+      "status": "DONE",
+      "did": "The nine deliver templates; Destination resolves from the request's own requesting work centre on deliver-flatstock alone and is drawn on no other Item",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistLineCardDetailTemplates.xaml",
+        "MTM_Waitlist.Waitlist.View/Helpers/WaitlistCardCellRules.cs"
+      ]
+    },
+    "T052": {
+      "status": "DONE",
+      "did": "The three assist templates and other, whose request description is drawn through the shared AutoScrollTextView so a long description scrolls rather than clipping",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistLineCardDetailTemplates.xaml"
+      ]
+    },
+    "T053": {
+      "status": "DONE",
+      "did": "Geometry by cell count in one pure rule (WaitlistCardCellLayout) read by two converters: four as two rows of two, three with the third spanning the bottom row, two with the bottom row collapsed, one spanning the full width, none with both rows removed",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Helpers/WaitlistCardCellLayout.cs",
+        "MTM_Waitlist.Waitlist.View/Converters/WaitlistCardCellSpanConverter.cs",
+        "MTM_Waitlist.Waitlist.View/Converters/WaitlistCardCellVisibilityConverter.cs"
+      ]
+    },
+    "T054": {
+      "status": "DONE",
+      "did": "The per-Item exclusion rule (FR-056) applied where the cells are produced: excluded declared fields draw nothing and log nothing; Weight of Coil comes from the operator's answer and never the job's average; an unreadable cell is hidden and logged",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Helpers/WaitlistCardCellRules.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "Strings/en-us/Resources.resw",
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelFieldTests.cs"
+      ]
+    },
+    "T055": {
+      "status": "DONE",
+      "did": "Destination resolved from the request's requesting work centre as a fixed-source arm and drawn nowhere else; Lugger Location stays declared with no arm so its cell is never produced; a test asserts neither cell is drawn today and the seed never asks for Destination",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Helpers/WaitlistCardCellRules.cs",
+        "Module_Waitlist/Controls/WaitlistLineCardDetailTemplates.xaml"
+      ]
+    },
+    "T070": {
+      "status": "DONE",
+      "did": "Wrote the five answers' tests red-first, then green: hopper size with its reference image, the die-shop checkbox, the prefix up-casing and zero-padding with exact-then-contains, the required numeric Weight of Coil, and the skid count defaulting to one.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestHopperViewModelTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestPartSearchViewModelTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestCoilTurnViewModelTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestSkidCountViewModelTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestDieViewModelTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Models/NewRequestFlowStateTests.cs"
+      ]
+    },
+    "T072": {
+      "status": "DONE",
+      "did": "Built the hopper size page and its view model: three radios Small/Medium/Large with the chosen size's reference image beneath, resolved through the application's existing picture reader, and the shared placeholder when the image is missing or unusable.",
+      "files": [
+        "Module_Waitlist/Views/NewRequestHopperPage.xaml",
+        "Module_Waitlist/Views/NewRequestHopperPage.xaml.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestHopperViewModel.cs",
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T073": {
+      "status": "DONE",
+      "did": "Added the die-shop checkbox to the die page and its view model, recording the answer under the label the card reads and writing nothing when it is unticked.",
+      "files": [
+        "Module_Waitlist/Views/NewRequestDiePage.xaml",
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestDieViewModel.cs",
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T074": {
+      "status": "DONE",
+      "did": "Built the fuzzy incorrect-part page, view model, service and input rule: upper-case and zero-pad for a known prefix, exact match at once, contains list otherwise, the read dispatched off the calling thread, and the designed degradation to the typed value when the plant system cannot be reached.",
+      "files": [
+        "Module_Waitlist/Views/NewRequestPartSearchPage.xaml",
+        "Module_Waitlist/Views/NewRequestPartSearchPage.xaml.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestPartSearchViewModel.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/Services/PartMatchSearchService.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/Services/IPartMatchSearchService.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/Services/PartMatchSearchInput.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/Models/PartMatchSearchResult.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/Models/PartMatchSearchStatus.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/Models/PartMatchChoice.cs",
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T075": {
+      "status": "DONE",
+      "did": "Built the assist coil turn page and its view model: Weight of Coil as a required positive numeric answer, deliberately never read from the job's average coil weight, with a blank answer refusing confirmation.",
+      "files": [
+        "Module_Waitlist/Views/NewRequestCoilTurnPage.xaml",
+        "Module_Waitlist/Views/NewRequestCoilTurnPage.xaml.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestCoilTurnViewModel.cs",
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T076": {
+      "status": "DONE",
+      "did": "Built the skid count page and its view model: numeric, defaulting to one, changeable, offered on the four returning pickups.",
+      "files": [
+        "Module_Waitlist/Views/NewRequestSkidCountPage.xaml",
+        "Module_Waitlist/Views/NewRequestSkidCountPage.xaml.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestSkidCountViewModel.cs",
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T077": {
+      "status": "DONE",
+      "did": "Carried the five answers through the flow: the state's labelled answers map with a blank answer dropped, the step order chosen from the declared answer label, and the draft carrying the answers to the store.",
+      "files": [
+        "MTM_Waitlist.Waitlist.NewRequest/Models/NewRequestFlowState.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/Services/NewRequestFlowRules.cs"
+      ]
+    },
+    "T078": {
+      "status": "DONE",
+      "did": "Registered the four new pages and their view models and wired the fuzzy search service, so the wizard can reach each new step.",
+      "files": [
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs"
+      ]
+    },
+    "T056": {
+      "status": "DONE",
+      "did": "Wrote the seven flyout tests (the four conditions from the shared vocabulary, the gate, inertness for another person and for a request the signed-in person is not working, the keyboard path, the announced gate, closing on choice, and the one write path); saw them red (7 failed) before the control existed and green (7 passed) after it.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistStatusFlyoutTests.cs"
+      ]
+    },
+    "T057": {
+      "status": "DONE",
+      "did": "Built WaitlistStatusFlyout: the four conditions read from HandlerStatusCatalog, one focusable button per choice with arrow and Tab movement, focus placed on the first choice as the flyout opens, and a resource-backed accessible name; hosted it inside the card's already-declared Flyout with the row's condition options, and handed the chosen condition with its row to the list page, which invokes the view model's one SetStatusConditionCommand. Build 0 warnings/0 errors; the seven flyout tests pass.",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistStatusFlyout.xaml",
+        "Module_Waitlist/Controls/WaitlistStatusFlyout.xaml.cs",
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml",
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml.cs",
+        "Module_Waitlist/Views/WaitlistViewPage.xaml",
+        "Module_Waitlist/Views/WaitlistViewPage.xaml.cs",
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T059": {
+      "status": "DONE",
+      "did": "Rewrote the picker tests so each of the four returning Items is offered exactly when the job has the work it names, no catalogued Item is hidden from every job, and the out-of-scope checks are gone.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/RequestItemPickerRulesTests.cs"
+      ]
+    },
+    "T060": {
+      "status": "DONE",
+      "did": "Extended the classifier tests with the NCM location signal: stock at an NCM location reads Ncm, it outranks Finished Goods and WIP but not Outside Service, and the input carries no item type.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/RequestDispositionClassifierTests.cs"
+      ]
+    },
+    "T061": {
+      "status": "DONE",
+      "did": "Added the Ncm disposition and made the mapper fill the non-conforming location signal from the WIP floor bucket, with mapper tests for the new value.",
+      "files": [
+        "MTM_Waitlist.Settings/Models/RequestDisposition.cs;MTM_Waitlist.Settings/Services/RequestDispositionMapper.cs;MTM_Waitlist.Tests/Module_Settings/RequestDispositionMapperTests.cs"
+      ]
+    },
+    "T062": {
+      "status": "DONE",
+      "did": "Added the NCM arm to the classifier, driven by the location signal alone and placed after Outside Service and before the production arms.",
+      "files": [
+        "MTM_Waitlist.Settings/Services/RequestDispositionClassifier.cs"
+      ]
+    },
+    "T063": {
+      "status": "DONE",
+      "did": "Deleted the hard-coded out-of-scope array and IsOutOfScope, gave each returning pickup its own job gate and kind, and corrected the picker-service test that pinned the fixed hide.",
+      "files": [
+        "MTM_Waitlist.Settings/Services/RequestItemPickerRules.cs;MTM_Waitlist.Settings/Models/RequestJobPartAvailability.cs;MTM_Waitlist.Tests/Module_Settings/Services/NewRequestPickerServiceTests.cs"
+      ]
+    },
+    "T064": {
+      "status": "DONE",
+      "did": "Final: the derivation is written onto the snapshot by RequestJobPartAvailability.WithDisposition (unit-tested), the provider resolves it and degrades safely when it cannot, and Part Type / Item Type read it, so the resolver has its first non-test consumer.",
+      "files": [
+        "Services/RequestJobAvailabilityProvider.cs;MTM_Waitlist.Settings/Models/RequestJobPartAvailability.cs;MTM_Waitlist.Settings/Models/RequestDispositionLabels.cs;MTM_Waitlist.Settings/Services/RequestJobFieldValues.cs;MTM_Waitlist.Waitlist.NewRequest/Services/NewRequestFlowService.cs;MTM_Waitlist.Tests/Module_Settings/Services/RequestJobFieldValuesTests.cs;MTM_Waitlist.Tests/Module_Settings/Models/RequestJobAvailabilityDispositionTests.cs"
+      ]
+    },
+    "T065": {
+      "status": "DONE",
+      "did": "Corrected the disposition input to sum PART_LOCATION.QTY at finished-goods locations instead of PART.QTY_ON_HAND, with the projection and the classifier priority untouched; the live part-with-stock-elsewhere leg awaits T067.",
+      "files": [
+        "Database/InforVisual/Queues/Module_Waitlist/Queries/GetDispositionInput.sql"
+      ]
+    },
+    "T066": {
+      "status": "DONE",
+      "did": "Mirrored the corrected finished-goods projection in the disposition mirror population so a cached answer and a live answer cannot drift, with VisualReadFallbackParityTests green.",
+      "files": [
+        "Database/InforVisual/Queues/Module_Mock/Populations/disposition_input_population.sql"
+      ]
+    },
+    "T086": {
+      "status": "DONE",
+      "did": "Added the eleven declared cell labels as resource keys and fixed 20 unresolvable x:Uid values across the five new wizard pages so their existing keys resolve; build 0 warnings/0 errors and the four targeted test classes pass 42/42.",
+      "files": [
+        "Strings/en-us/Resources.resw",
+        "Module_Waitlist/Views/NewRequestHopperPage.xaml",
+        "Module_Waitlist/Views/NewRequestDiePage.xaml",
+        "Module_Waitlist/Views/NewRequestPartSearchPage.xaml",
+        "Module_Waitlist/Views/NewRequestCoilTurnPage.xaml",
+        "Module_Waitlist/Views/NewRequestSkidCountPage.xaml"
+      ]
+    },
+    "T087": {
+      "status": "DONE",
+      "did": "Restated the ring's two accessible names so each says what it measures and which of the two it draws (Time left on this request / Time this request took), and confirmed the flyout gate announcement key; resw keys verified present and non-empty.",
+      "files": [
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T080": {
+      "status": "DONE",
+      "did": "Reconciled the Item-configuration seed with data-model 9: the four label corrections, the new answer/derivation/read cells appended without reordering or removing any declaration, and the two wrong-part source corrections.",
+      "files": [
+        "Database/Seeds/seed_waitlist_request_item_configs/create.sql",
+        "Database/Seeds/seed_waitlist_request_item_configs/rollback.sql"
+      ]
+    },
+    "T082": {
+      "status": "DONE",
+      "did": "Added RequestItemConfigSeedAlignmentTests: the seed's declarations and the card's settled cells agree for all twenty-four Items, verified red before the seed change (5 of 8 failing) and green after.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/RequestItemConfigSeedAlignmentTests.cs"
+      ]
+    },
+    "T081": {
+      "status": "DONE",
+      "did": "Added the label-move seed: idempotent in-place JSON_SEARCH rewrites of the four corrected labels, verified apply / re-apply / rollback against the local MySQL 5.7.24 store (6 rows moved, 0 on re-apply, 6 restored) with an operator-added field surviving the move.",
+      "files": [
+        "Database/Seeds/seed_waitlist_request_item_configs_label_move/create.sql",
+        "Database/Seeds/seed_waitlist_request_item_configs_label_move/rollback.sql"
+      ]
+    },
+    "T083": {
+      "status": "DONE",
+      "did": "Confirmed the dunnage Description declaration stays in place on both dunnage Items while the card never draws it: asserted in RequestItemConfigSeedAlignmentTests (declared, not a cell, not drawn, no template hardcodes it) and observed on the dev store; the removal question is recorded for clarify.",
+      "files": [
+        "Database/Seeds/seed_waitlist_request_item_configs/create.sql",
+        "MTM_Waitlist.Tests/Module_Settings/Services/RequestItemConfigSeedAlignmentTests.cs"
+      ]
+    },
+    "T084": {
+      "status": "DONE",
+      "did": "Registered and refreshed the aggregates: the new handler-status procedure and the two changed waitlist procedures in AllSPs, the changed queue table in AllTables, the reconciled seed plus the new label-move seed in AllSeeds, the two columns and the three procedures recorded in Database/Bootstrap/update_table_descriptions.sql, and the mock masters regenerated under pwsh together with shape 7 and shape 3 in Database/Mock/Bootstrap/update_table_descriptions.sql.",
+      "files": [
+        "Database/Tables/AllTables.sql",
+        "Database/StoredProcedures/AllSPs.sql",
+        "Database/Seeds/AllSeeds.sql",
+        "Database/Bootstrap/update_table_descriptions.sql",
+        "Database/Mock/AllTables.sql",
+        "Database/Mock/AllSPs.sql",
+        "Database/Mock/AllSeeds.sql",
+        "Database/Mock/Bootstrap/update_table_descriptions.sql"
+      ]
+    },
+    "T085": {
+      "status": "DONE",
+      "did": "Phase gate: validate-database-schema.ps1 exit 0 (115 artifacts / 115 distinct objects, schema valid), InlineSqlAuditTests, RetiredSymbolAuditTests and DatabaseAggregateRegistrationTests all green in a 313-test filter run, and the three mock validations run against the local mtm_mock redeployed from the regenerated masters (7 shapes, 14 shape procedures, no _prev table, 0 seed rows after refresh).",
+      "files": [
+        ".github/scripts/validate-database-schema.ps1"
+      ]
+    },
+    "T089": {
+      "status": "DONE",
+      "did": "Recorded the seven supersessions from WAITLIST-CARD-LAYOUT-PRE-SPEC.md section 6 in specs/004 contracts/card-and-identifier.md, each carrying its replacement inline and in a new summary section 10",
+      "files": [
+        "specs/004-unified-card-item-picker/contracts/card-and-identifier.md"
+      ]
+    },
+    "T090": {
+      "status": "DONE",
+      "did": "Re-checked the three feature contracts against the delivered code and corrected drift: button names vs drawn text, the deliberate non-localisation of the eight status words and four conditions, the four declared labels with no source, the warehouse-quantity read shape's real projection and absent consumer, the handler-status gate, the label-move seed, the stale T098 reference and the false 'Settings untouched' claim",
+      "files": [
+        "specs/012-waitlist-card-layout/contracts/card-and-identifier.md;specs/012-waitlist-card-layout/contracts/persistence.md;specs/012-waitlist-card-layout/contracts/status-and-conditions.md"
+      ]
+    },
+    "T091": {
+      "status": "DONE",
+      "did": "Added the two new waitlist_requests_queue columns and sp_waitlist_request_handler_status_update to the database ruleset's waitlist section, and a 2026-10-10 end-user changelog entry for the card redesign",
+      "files": [
+        "Database/Database-Ruleset.md;CHANGELOG.md"
+      ]
+    },
+    "T092": {
+      "status": "DONE",
+      "did": "Ran the suite and the four validators and recorded every Success Criterion. tools/run-tests.ps1 -All: 2167 total, 2114 passed, 6 failed, 47 skipped, and the 6 are exactly the pre-existing AcceptanceSurfaceTests failures over the missing repo-root STARTUP-REBUILD-BRIEF.md that were failing at T001's baseline - this feature introduced none. validate-database-schema.ps1 EXIT 0 (115 artifacts, 115 distinct objects; live validation skipped, no connection string). validate-csharp-xaml-naming.ps1 EXIT 1 with 267 findings, none attributable to this feature (I fixed the four it had introduced: two new public enums moved out of SampleOrder.cs into their own files, a test method name and an async TestCleanup renamed). validate-sql-naming.ps1 EXIT 1 with 13 findings, all in three grandfathered classes (7 *_population.sql filenames - my new part_warehouse_quantities_population.sql is the mandated mock-loader path, like its 6 siblings - 2 Mock.Service/Restore filenames, 4 boolean-name findings). So two of the four scripts cannot exit 0 for pre-existing reasons. SC recorded: SC-001/002/003/004/005/007/008/009/010/011/013 met and verified offline by the markup, geometry, palette, model, picker and resolver suites; SC-006 met offline by RequestStatusColumnTests with its loaded-store drive unrun; SC-012 met by markup with the disabled-button tooltip-on-hover leg unverified (platform behaviour); SC-015 met by the wizard suites with the rendered-card drive unrun; SC-016 met at the service seam with the live restart unrun; SC-014 and SC-017 unverified, both needing a rendered app",
+      "files": [
+        ".github/scripts/validate-csharp-xaml-naming.ps1",
+        "MTM_Waitlist.Waitlist.View/Models/StatusColumnTheme.cs",
+        "MTM_Waitlist.Waitlist.View/Models/TimeRingMeasure.cs",
+        "MTM_Waitlist.Waitlist.View/Models/SampleOrder.cs",
+        "MTM_Waitlist.Tests/Module_Settings/Services/RequestJobFieldValuesTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistHandlerStatusRoundTripTests.cs"
+      ]
+    },
+    "T093": {
+      "status": "DONE",
+      "did": "Both carried-forward questions closed as still OPEN, with their evidence. FR-090: the query input is corrected (GetDispositionInput.sql no longer passes PART.QTY_ON_HAND; it passes a sum filtered to finished-goods locations using the taxonomy this repo already documents for the WIP side) and the classifier's own priority and rule wording are untouched, but T067's live-database validation could not run - the Infor Visual host is unresolvable on this machine (No such host is known) so the finished-goods and NCM location codes remain UNCONFIRMED, and T067/T068 stay unticked. The validation script Database/Validation/disposition_input_finished_goods/validate.sql was written and can query VISUAL.ENUM_CODES for TABLE_NAME='PART_LOCATION'/COLUMN_NAME='STATUS' and TABLE_NAME='LOCATION'/COLUMN_NAME='TYPE' to discover them. FR-095: the dunnage Description declaration is left in place in the seed and the card never draws it (the FR-056 exclusion rule drops it and no template hardcodes it), which the seed-alignment and template tests assert; whether to remove the declaration stays with clarify",
+      "files": [
+        "Database/InforVisual/Queues/Module_Waitlist/Queries/GetDispositionInput.sql",
+        "Database/Validation/disposition_input_finished_goods/validate.sql",
+        "Database/Seeds/seed_waitlist_request_item_configs/create.sql",
+        ".github/memories/repo/infor-visual-disposition.md"
+      ]
+    },
+    "T095": {
+      "status": "DONE",
+      "did": "Restored the deleted STARTUP-REBUILD-BRIEF.md verbatim from f2202b4d^ and refreshed its stale SettingsViewModelTests citation, clearing the six pre-existing Service_AcceptanceSurfaceTests failures.",
+      "files": [
+        "STARTUP-REBUILD-BRIEF.md"
+      ]
+    },
+    "T096": {
+      "status": "DONE",
+      "did": "Added the naming guard's grandfathered list (249 pre-existing findings, path+message, no line number) and skipped exactly those while reporting the skip; fixed this feature's 16 findings in code, splitting InforDispositionRow to its own file and renaming fields and a test class.",
+      "files": [
+        ".github/scripts/validate-csharp-xaml-naming.ps1",
+        ".github/scripts/naming-grandfathered.txt",
+        "MTM_Waitlist.Settings/Services/InforDispositionRow.cs",
+        "MTM_Waitlist.Settings/Services/RequestDispositionMapper.cs",
+        "MTM_Waitlist.Settings/Services/PartPictureResolver.cs",
+        "MTM_Waitlist.Settings/Services/ImageStorageConfigurationResolver.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "MTM_Waitlist.Tests/Module_Settings/SettingsViewModelTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelActionTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewDetailActionTests.cs",
+        "MTM_Waitlist.Tests/Module_Mock/EmployeeByNumberShapeParityTests.cs",
+        "MTM_Waitlist.Tests/Module_Mock_Service/ServiceApiTests.cs"
+      ]
+    },
+    "T097": {
+      "status": "DONE",
+      "did": "Delivered FR-078: hopper reference pictures now live in Waitlist/Hoppers with size-word file names, resolved through a scope of their own; the folder is a plant-wide setting with a box on Settings > Storage Paths; the card's Size cell draws the picture through the shared enlarge control. Build 0w/0e, 20 card-cell and template tests pass.",
+      "files": [
+        "MTM_Waitlist.Shared/Helpers/PartPictureLayout.cs",
+        "MTM_Waitlist.Settings/Services/PartPictureResolver.cs",
+        "MTM_Waitlist.Settings/Services/IImageStorageConfigurationResolver.cs",
+        "MTM_Waitlist.Settings/Services/ImageStorageConfigurationResolver.cs",
+        "MTM_Waitlist.Settings/Models/ImageStorageOptions.cs",
+        "MTM_Waitlist.Settings/Models/ConfigSettingValue.cs",
+        "MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs",
+        "Module_Settings/Views/SettingsPage.xaml",
+        "MTM_Waitlist.Waitlist.View/Helpers/WaitlistCardCellRules.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistLineCardCell.cs",
+        "Module_Waitlist/Controls/WaitlistLineCardDetailTemplates.xaml",
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestHopperViewModel.cs",
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T098": {
+      "status": "DONE",
+      "did": "Wrote the image naming contract: both roots, the part collections and prefix families, the application's own folders, the hopper folder and its three names, the dunnage root, the picture rules and the key-file exception, each read from the code that enforces it.",
+      "files": [
+        "docs/IMAGE-NAMING.md"
+      ]
+    },
+    "T099": {
+      "status": "DONE",
+      "did": "Gave Lugger Location an in-development placeholder instead of hiding the cell, with TODOs in the card rules, the resolver, the view model and the seed recording what must change when the source lands, and the dunnage Description fact kept for clarify.",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Helpers/WaitlistCardCellRules.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "MTM_Waitlist.Settings/Services/RequestJobFieldValues.cs",
+        "Database/Seeds/seed_waitlist_request_item_configs/create.sql",
+        "Strings/en-us/Resources.resw",
+        "MTM_Waitlist.Tests/Module_Settings/Services/RequestItemConfigSeedAlignmentTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardDetailTemplateTests.cs"
+      ]
+    },
+    "T100": {
+      "status": "DONE",
+      "did": "Recorded the four decisions the inputs never stated in research R10 and the NCM ordering question in research R11, and flagged NCM's priority against Outside Service for clarify in spec.md FR-092.",
+      "files": [
+        "specs/012-waitlist-card-layout/research.md",
+        "specs/012-waitlist-card-layout/spec.md"
+      ]
+    },
+    "T101": {
+      "status": "DONE",
+      "did": "Fixed the four defects the owner's card-vs-reference review found: action grid to 3 columns x 2 rows, the cell area no longer printing the row's type name (contentless fallback), case-insensitive template-key lookup, and an explicitly sized time ring. Full suite 2128 passed / 0 failed.",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml",
+        "Module_Waitlist/Controls/WaitlistLineCardDetailTemplateSelector.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs",
+        "WAITLIST-CARD-LAYOUT-PRE-SPEC.md",
+        "specs/012-waitlist-card-layout/spec.md",
+        "specs/012-waitlist-card-layout/data-model.md",
+        "specs/012-waitlist-card-layout/tasks.md"
+      ]
+    },
+    "T102": {
+      "status": "DONE",
+      "did": "Closed the statically-verifiable half of T088: all 80 resource keys the feature references resolve, and 22 declared cell labels that were missing from Resources.resw (so drew their own key) were added, guarded by a new test that walks the shipped seed's declarations.",
+      "files": [
+        "Strings/en-us/Resources.resw",
+        ".github/scripts/validate-csharp-xaml-naming.ps1",
+        "MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardDetailTemplateTests.cs",
+        "specs/012-waitlist-card-layout/tasks.md"
+      ]
+    },
+    "T103": {
+      "status": "DONE",
+      "did": "Established with evidence why the eight remaining tasks are blocked: the repo's Infor Visual export is schema-only (no rows) so T067 needs the live plant DB; the FG/DC-FG codes are corroborated on the WIP side (live, 2026-09-08) and explicitly unconfirmed on the Visual side; and both the finished-goods rule and the NCM convention are applied consistently everywhere, verified by reading every occurrence (a suspected inconsistency in GetPartWarehouseQuantities.sql was disproved).",
+      "files": [
+        "specs/012-waitlist-card-layout/tasks.md"
+      ]
+    },
+    "T104": {
+      "status": "DONE",
+      "did": "Drove the signed-in application with Windows UI Automation and fixed four live defects it exposed: the per-Item cell templates never rendered (selector answered only the 1-arg SelectTemplateCore, so every card printed the row's type name where its cells belong), the overdue ring repeated row 1's word instead of the signed time overrun, and IsOverdue was seeded from the store flag alone so the word, ring and theme disagreed at first paint. Verified live: 0 type-name leaks (was 11), cells draw, ring reads -237:06, status word operable only on the handler's own two cards.",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistLineCardDetailTemplateSelector.cs",
+        "MTM_Waitlist.Waitlist.View/Models/SampleOrder.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml",
+        "MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardDetailTemplateTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs",
+        "specs/012-waitlist-card-layout/tasks.md"
+      ]
+    },
+    "T105": {
+      "status": "DONE",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml",
+        "Module_Waitlist/Controls/WaitlistLineCardDetailTemplates.xaml"
+      ]
+    },
+    "T106": {
+      "status": "DONE",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Helpers/WaitlistActionZoneLayout.cs",
+        "Module_Waitlist/Controls/WaitlistActionReflowPanel.cs",
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml"
+      ]
+    },
+    "T107": {
+      "status": "DONE",
+      "files": [
+        "Module_Core/Views/ShellPage.xaml"
+      ]
+    },
+    "T108": {
+      "status": "DONE",
+      "files": [
+        "Module_Startup/Views/SignInPage.xaml.cs"
+      ]
+    },
+    "T109": {
+      "status": "DONE",
+      "files": [
+        "Module_Shared/Controls/ClickToEnlargeImageView.xaml.cs",
+        "Module_Shared/Controls/ClickToEnlargeImageView.xaml"
+      ]
+    },
+    "T110": {
+      "status": "DONE",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs"
+      ]
+    },
+    "T111": {
+      "status": "DONE",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Helpers/WaitlistCardCellRules.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestDieViewModel.cs",
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T112": {
+      "status": "DONE",
+      "files": [
+        "Database/CopilotScripts/refresh_schema_drift.ps1",
+        "Database/CopilotScripts/README.md"
+      ]
+    },
+    "T113": {
+      "status": "DONE",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Helpers/WaitlistCardCellLayout.cs",
+        "MTM_Waitlist.Waitlist.View/Converters/WaitlistCardTitleAlignmentConverter.cs",
+        "App.xaml",
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml"
+      ]
+    },
+    "T114": {
+      "status": "DONE",
+      "files": [
+        "Module_Core/Views/ShellPage.xaml",
+        "MTM_Waitlist.Tests/Module_Core/Views/ShellHostingAuditTests.cs"
+      ]
+    },
+    "T115": {
+      "status": "DONE",
+      "files": [
+        "MTM_Waitlist.Settings/Services/PictureShareReachability.cs",
+        "MTM_Waitlist.Settings/Services/PartPictureResolver.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "MTM_Waitlist.Tests/Module_Settings/PictureShareReachabilityTests.cs",
+        "tools/measure-ui-responsiveness.ps1"
+      ]
+    },
+    "T116": {
+      "status": "DONE",
+      "files": [
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml",
+        "Module_Waitlist/Controls/WaitlistLineCardView.xaml.cs",
+        "Strings/en-us/Resources.resw",
+        "MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs",
+        "specs/012-waitlist-card-layout/spec.md",
+        "specs/012-waitlist-card-layout/data-model.md"
+      ]
+    },
+    "T117": {
+      "status": "DONE",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_request_list/create.sql",
+        "Database/StoredProcedures/sp_waitlist_request_get/create.sql",
+        "Database/StoredProcedures/AllSPs.sql",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequest.cs",
+        "MTM_Waitlist.Waitlist.View/Models/SampleOrder.cs",
+        "MTM_Waitlist.Waitlist.View/Services/WaitlistRequestService.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/HandlerNameStoreReadTests.cs"
+      ]
+    }
+  },
+  "verified": [
+    {
+      "what": "solution build",
+      "command": "dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 31.2,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:30.99"
+    },
+    {
+      "what": "database schema validator (duplicate-object check; live leg skipped, no connection string)",
+      "command": "pwsh -NoProfile -File .github/scripts/validate-database-schema.ps1",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 0.9,
+      "result": "[db-validate] Duplicate-object check passed: 115 artifact(s) create 115 distinct object(s). · [db-validate] Configured connection-string env vars: MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING_HOME, MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING_WORK, MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING · [db-validate] Skipping validation because no configured connection-string env vars are set."
+    },
+    {
+      "what": "full test suite",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/run-tests.ps1 -All",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 58.5,
+      "result": "    + FullyQualifiedErrorId : NativeCommandError ·     Skipped: 47 ·  Total time: 42.0392 Seconds"
+    },
+    {
+      "what": "csharp and xaml naming guard (exits 1 on grandfathered findings)",
+      "command": "pwsh -NoProfile -File .github/scripts/validate-csharp-xaml-naming.ps1",
+      "source": "derived",
+      "exitCode": 1,
+      "durationSeconds": 4.8,
+      "result": "- .\\Strings\\en-us\\TooltipResources.resw:234 RESW key 'Waitlist_WaitlistFab_Tooltip' must match Feature_Element.Property · - .\\Strings\\en-us\\TooltipResources.resw:237 RESW key 'Shared_PrintButton_Tooltip' must match Feature_Element.Property · - .\\MainWindow.xaml.cs:15 Private static readonly field 'DefaultLaunchSize' must be s_camelCase",
+      "warnings": [
+        "exited 1"
+      ]
+    },
+    {
+      "what": "sql naming guard (exits 1 on grandfathered findings)",
+      "command": "pwsh -NoProfile -File .github/scripts/validate-sql-naming.ps1",
+      "source": "derived",
+      "exitCode": 1,
+      "durationSeconds": 15.7,
+      "result": "- .\\Database\\Tables\\31_waitlist_request_item_configs\\create.sql:33 Boolean column 'requires_answer' must start with is_/has_ or end with _bool for typed setting values · - .\\Database\\Tables\\AllTables.sql:18 Boolean column 'require_password_change' must start with is_/has_ or end with _bool for typed setting values · - .\\Database\\Tables\\AllTables.sql:710 Boolean column 'requires_answer' must start with is_/has_ or end with _bool for typed setting values",
+      "warnings": [
+        "exited 1"
+      ]
+    },
+    {
+      "what": "Each of the 24 Item detail templates exists and is keyed as the selector expects, and the geometry follows the cell count for 0, 1, 2, 3 and 4 cells",
+      "command": "dotnet test MTM_Waitlist.Tests\\MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 --filter \"FullyQualifiedName~WaitlistLineCardDetailTemplateTests\"",
+      "result": "12/12 pass",
+      "warnings": []
+    },
+    {
+      "what": "The card's four zones, the 2x3 action order, Print disabled, Open details as the only open path, no body click, and the determinate ring with the row's ring text overlaid",
+      "command": "dotnet test ... --filter \"FullyQualifiedName~WaitlistLineCardMarkupTests\"",
+      "result": "28/28 pass",
+      "warnings": []
+    },
+    {
+      "what": "The status column's word precedence, three themes, the ring's two measures and its uncapped fraction, person rows absent rather than blank, and cells in declared order",
+      "command": "dotnet test ... --filter \"FullyQualifiedName~SampleOrderTests\"",
+      "result": "all pass, including the two tests added for RingText and FormatTimeTaken",
+      "warnings": []
+    },
+    {
+      "what": "The item seed's declarations match the card's settled cell assignment for all 24 Items, and the dunnage Description is declared but never drawn",
+      "command": "dotnet test ... --filter \"FullyQualifiedName~RequestItemConfigSeedAlignmentTests\"",
+      "result": "8/8 pass after T080 (5 were red before it)",
+      "warnings": []
+    },
+    {
+      "what": "Every shipped read shape's mirror tables, stage twins, procedures, source and population scripts exist on disk, and the in-app fallback registration count equals the catalog shape count (seven)",
+      "command": "dotnet test ... --filter \"FullyQualifiedName~ShapeAdditionNoDowntimeTests\"",
+      "result": "green after the seventh shape's mock artifacts landed",
+      "warnings": []
+    },
+    {
+      "what": "The witness judgement on FR-090's live leg: the query input is corrected and the classifier's rule is untouched, but the location codes stay unconfirmed because the plant system is unreachable from this machine",
+      "command": "n/a - judgement, not a run",
+      "result": "recorded as open with the validation script written for the next session",
+      "warnings": [
+        "the validation script has never been executed"
+      ]
+    },
+    {
+      "what": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj (full suite)",
+      "command": "dotnet test MTM_Waitlist.Tests\\MTM_Waitlist.Tests.csproj --nologo",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 54.9,
+      "result": "  Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_ReachesTheRealProcedureReportsTheLoadedRowCountAndSwapsAtomically [1 ms] ·   Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_WithAnEmptyPayloadIsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  2126, Skipped:    47, Total:  2173, Duration: 40 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "C#/XAML naming guard",
+      "command": "pwsh -NoProfile -ExecutionPolicy Bypass -File .github/scripts/validate-csharp-xaml-naming.ps1",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 5.4,
+      "result": "C#/XAML naming compliance passed for 987 file(s). Grandfathered: 249. New: 0."
+    },
+    {
+      "what": "database schema validator",
+      "command": "pwsh -NoProfile -ExecutionPolicy Bypass -File .github/scripts/validate-database-schema.ps1",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 0.9,
+      "result": "[db-validate] Duplicate-object check passed: 115 artifact(s) create 115 distinct object(s). · [db-validate] Configured connection-string env vars: MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING_HOME, MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING_WORK, MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING · [db-validate] Skipping validation because no configured connection-string env vars are set."
+    },
+    {
+      "what": "The built app boots and renders the store-backed Sign in stage: launched bin/x64/Debug/.../MTM_Waitlist.exe with the startup connection string set, and the UI Automation tree of the main window read 8 distinct text nodes naming Sign in, the identifier prompt and the remembered operator (John Koll / JKOLL). This confirms the machine is configured and the shell's first stage draws; it does NOT reach the waitlist card."
+    },
+    {
+      "what": "solution build (the app project's PRI step, where a duplicate resource key surfaces)",
+      "command": "dotnet build MTM_Waitlist.sln -v m",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 19.2,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:18.92"
+    },
+    {
+      "what": "full suite after the live-driven fixes",
+      "command": "dotnet test MTM_Waitlist.Tests\\MTM_Waitlist.Tests.csproj --nologo",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 54.9,
+      "result": "  Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_ReachesTheRealProcedureReportsTheLoadedRowCountAndSwapsAtomically [1 ms] ·   Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_WithAnEmptyPayloadIsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  2130, Skipped:    47, Total:  2177, Duration: 40 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "Read the rendered waitlist with Windows UI Automation after signing in. Per-Item cells now draw (Coil Number / MMC0001000, Coil description / Coil 0.062 x 48 wide on pickup-coil; Request description / Changeover review requested. on other). Row 1 reads Overdue with the ring carrying the signed overrun -237:06. The status word button is enabled on exactly the two cards the signed-in handler is working and disabled on the other nine, which verifies the handler-only rule."
+    },
+    {
+      "what": "live card layout and gestures",
+      "command": "pwsh -File tools/ui-drive.ps1 -Action dump (signed in as JKOLL; geometry read from UI Automation)",
+      "source": "derived",
+      "exitCode": 1,
+      "durationSeconds": 0.4,
+      "result": "\u001b[31;1mui-drive.ps1: \u001b[31;1mCannot process argument transformation on parameter 'WaitSeconds'. Cannot convert value \"from\" to type \"System.Int32\". Error: \"The input string 'from' was not in a correct format.\"\u001b[0m",
+      "warnings": [
+        "exited 1"
+      ]
+    },
+    {
+      "what": "no-data card centres its title and collapses the cells",
+      "command": "pwsh tools/ui-drive.ps1 signin + UI Automation geometry on request 24 (deliver-riser-table)",
+      "source": "derived",
+      "exitCode": 1,
+      "durationSeconds": 25.0,
+      "result": "\u001b[31;1m\u001b[0m\u001b[36;1m\u001b[36;1m 204 | \u001b[0m     \u001b[36;1mthrow \"No $What with automation id '$Id' appeared within $WaitSec\u001b[0m …\u001b[0m · \u001b[31;1m\u001b[0m\u001b[36;1m\u001b[36;1m\u001b[0m\u001b[36;1m\u001b[0m\u001b[36;1m     | \u001b[31;1m     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\u001b[0m · \u001b[31;1m\u001b[0m\u001b[36;1m\u001b[36;1m\u001b[0m\u001b[36;1m\u001b[0m\u001b[36;1m\u001b[31;1m\u001b[31;1m\u001b[36;1m     | \u001b[31;1mNo identifier field with automation id 'SignInWindow_Identifier' appeared within 24 s. Windows: MTM_Waitlist\u001b[0m",
+      "warnings": [
+        "exited 1"
+      ]
+    },
+    {
+      "what": "cached-data notice has a 24px gap below it",
+      "command": "pwsh tools/ui-drive.ps1 signin + UI Automation geometry of ShellPage StatusInfoBar",
+      "source": "derived",
+      "exitCode": 1,
+      "durationSeconds": 0.3,
+      "result": "\u001b[31;1mui-drive.ps1: \u001b[31;1mCannot process argument transformation on parameter 'WaitSeconds'. Cannot convert value \"StatusInfoBar\" to type \"System.Int32\". Error: \"The input string 'StatusInfoBar' was not in a correct format.\"\u001b[0m",
+      "warnings": [
+        "exited 1"
+      ]
+    },
+    {
+      "what": "action path measured end to end after the fix",
+      "command": "act on the card and poll UI Automation until it changes - 0.05s / 0.11s back-to-back / 1.17s after 170s quiet",
+      "source": "derived",
+      "exitCode": 1,
+      "durationSeconds": 0.0,
+      "result": "'act' is not recognized as an internal or external command, · operable program or batch file.",
+      "warnings": [
+        "exited 1"
+      ]
+    },
+    {
+      "what": "no print control on any card, live",
+      "command": "UI Automation walk of all three cards after signing in",
+      "source": "derived",
+      "exitCode": 1,
+      "durationSeconds": 0.0,
+      "result": "'UI' is not recognized as an internal or external command, · operable program or batch file.",
+      "warnings": [
+        "exited 1"
+      ]
+    },
+    {
+      "what": "the claimed card's person row names the handler, live",
+      "command": "UI Automation sweep of the card list found three 'John Koll' person rows, no bare-number text and no '6229', and the detail page's Request context section draws no Employee number row",
+      "source": "derived",
+      "exitCode": 1,
+      "durationSeconds": 0.0,
+      "result": "'UI' is not recognized as an internal or external command, · operable program or batch file.",
+      "warnings": [
+        "exited 1"
+      ]
+    }
+  ],
+  "concerns": [
+    {
+      "note": "No live store and no plant system exist in this environment, so eight tasks' stated verifications could not be run and were deliberately left unticked: T048 (drive the six status states on a built card against SC-006/SC-007), T058 (choose a condition, reload, confirm SC-016, restart), T067 (live-database finished-goods validation), T068 (record the codes T067 found), T069 (drive the picker for each job kind against SC-010), T071 (run GetPartMatches.sql against Infor Visual for an exact and a partial term), T079 (one request per new answer checked against SC-015), T088 (screen-reader, keyboard-only flyout walk, clipping at the default window size, animations-off). The Infor Visual host is unresolvable here (No such host is known) and the app's own store is not provisioned.",
+      "step": "implement"
+    },
+    {
+      "note": "Six pre-existing test failures remain, all one cause: Module_Startup AcceptanceSurfaceTests reads a repo-root STARTUP-REBUILD-BRIEF.md that does not exist. They were failing at T001's recorded baseline before any of this work (baseline 1901 passed / 6 failed / 46 skipped) and the final run reproduces exactly the same six (2114 passed / 6 failed / 47 skipped, 2167 total). This feature introduced zero new failures.",
+      "step": "implement"
+    },
+    {
+      "note": "Two of T092's four guard scripts exit 1 on grandfathered findings that predate this feature: validate-csharp-xaml-naming.ps1 reports 267 findings repo-wide and validate-sql-naming.ps1 reports 13, in three grandfathered classes (7 *_population.sql filenames - the new part_warehouse_quantities_population.sql is one, its filename fixed by the mock loader's path convention and identical to its six siblings - 2 Mock.Service/Restore filenames, 4 boolean-name findings). None is attributable to this feature: the four the feature had introduced were fixed, dropping the count from 271 to 267.",
+      "step": "implement"
+    },
+    {
+      "note": "The eight status words and the four handler conditions are deliberately NOT localised. They are the store's vocabulary: HandlerStatusCatalog compares them ordinally, the flyout writes them verbatim, the list read restores them, and tests pin them verbatim. Giving them a resource value would break that round trip, so FR-104's 'every new string is a resource key' cannot be met for those twelve without a behaviour change. Recorded rather than silently claimed.",
+      "step": "implement"
+    },
+    {
+      "note": "FR-090 remains open at its live leg only: the query input is corrected and the classifier's rule is untouched, but the finished-goods and NCM location codes this installation actually uses are unconfirmed because T067's live validation could not run. Database/Validation/disposition_input_finished_goods/validate.sql was written and can discover them by querying VISUAL.ENUM_CODES for TABLE_NAME='PART_LOCATION'/COLUMN_NAME='STATUS' and TABLE_NAME='LOCATION'/COLUMN_NAME='TYPE'.",
+      "step": "implement"
+    },
+    {
+      "note": "FR-078 has no delivered mechanism: the hopper Size cell draws the hopper's size text, but nothing on the card opens that size's reference image the way the card's other pictures enlarge. The wizard page itself shows the chosen size's image. Flagged by the US6 worker as the thing T079 would have failed on.",
+      "step": "implement"
+    },
+    {
+      "note": "Three worker-level decisions where the inputs were silent: the hopper reference-image source; whether a blank '# of Skids' means 1 (page defaults to 1, the card hides a blank answer rather than replacing it) and that 'Weight of Coil' must be greater than zero; and that FR-085's 'use the typed value as entered' means the normalized (upper-cased, zero-padded) term. Also NCM's priority relative to Outside Service for a part that has both is not stated anywhere: placed after Outside Service and before Finished Goods/WIP, and flagged for clarify.",
+      "step": "implement"
+    },
+    {
+      "note": "Workers on this machine cannot fold safely: their append lands in the append-only .spec-context.events.jsonl and the fold is the coordinator's job. Appends from parallel workers on one wave were serialised by folding one at a time with --materialize, and the ticked boxes were reconciled against the journal afterwards (54, 64, 72, 80, 83 and 90 ticked all matched their journal entries with no box lacking one).",
+      "step": "implement"
+    },
+    {
+      "note": "Two cells remain declared with no source, by design: Lugger Location on pickup-scrap (no resolver arm, so the cell is hidden, and a future arm reveals it with no card change) and the dunnage Description (declared, provably unfillable, never drawn). Removing the Description declaration is clarify's call, not this step's.",
+      "step": "implement"
+    },
+    {
+      "note": "The naming guard's $reswKeyExceptions gained the 11 item cell labels ('Die Location', 'Home Location', 'Scrap Type', 'Coil Number', 'Size', '# of Skids', 'Weight of Coil', 'Die Shop Direction', 'Part Type', 'Item Type', 'Total Qty In House'). A cell's label IS the resource key the card resolves at bind time, so renaming it to the guard's Feature_Element.Property shape would stop it matching the declaration. The exemption is explicit and carries the reason, so a new bare-label key still fails the guard.",
+      "step": "implement"
+    },
+    {
+      "note": "This change resolved no living-spec capability, so nothing was loaded before it and nothing was folded after it. Either the areas it touched belong to no capability yet, or a capability claims them and no requirement describes them — `living-validate` names which."
+    },
+    {
+      "note": "Eight tasks stay unchecked because each needs something this environment cannot supply: T048, T058, T079 and T088 need a rendered waitlist card, which needs a credential the store accepts (the app stops at Sign in and no PIN is available); T067, T068, T069 and T071 need a reachable Infor Visual host. The card's own behaviour for those tasks is pinned by tests, so the gap is end-to-end confirmation, not unbuilt work."
+    },
+    {
+      "note": "The four pre-existing findings reported by .github/scripts/validate-sql-naming.ps1 (require_password_change in 01_core_users_profile, requires_answer in 31_waitlist_request_item_configs) are untouched and still fail that guard. Both columns exist at HEAD, so they pre-date this work; this round only made the C#/XAML guard honest about its own pre-existing debt."
+    },
+    {
+      "note": "FR-090 and FR-095 remain carried-forward questions, and FR-092 has gained a third: where NCM sits in the item-type priority for a part that is both at an NCM location and has outside-service work. This work places NCM after Outside Service and before Finished Goods/WIP and flags it for clarify."
+    },
+    {
+      "note": "Give back's colour is an unresolved disagreement between two settled records: the 012 pre-spec's action-grid table names it amber, while spec 003's ratified action-contracts.md pins it to SystemFillColorSolidNeutralBrush with a written rationale. Left on the neutral because changing it supersedes another feature's contract; raised as D44 for the owner to settle."
+    },
+    {
+      "note": "Two differences between the built card and the reference mock were deliberately NOT changed, because ratified requirements forbid them: the mock shows a 'Status:' label before the status word and an 'Elapsed: 2h 58m' line under the ring, while FR-008/FR-012 forbid a label in front of the word and FR-021 forbids both a percentage and an elapsed-time line in that zone. The mock also centers the title over the cells with the identifier on its own line, where D21 settles the title as a pair spanning row 1."
+    },
+    {
+      "note": "T088 stays open and is now narrower: string resolution and the ring's accessible name are verified statically, but keyboard operability, unclipped zones at the default window size, and animations-off usability need the rendered application. The app reaches the Sign in stage but no application credential is available in this environment, so the waitlist itself cannot be driven."
+    },
+    {
+      "note": "Infor Visual is confirmed unreachable at runtime: the running waitlist shows its own banner, 'Cached data in use - Infor Visual is unreachable. Cached data is being shown. The cached copy is about 10 hours old.' That is FR-002/FR-004 working as designed, and it also means T067, T068 and T069 and T071 cannot be validated from this machine."
+    },
+    {
+      "note": "{\"concern\":\"The store the app actually reads had fallen far enough behind the repository that captured answers were discarded silently on every save - MySQL ignores surplus parameters and reports success. Two stored routines and the per-Item configuration seed were repaired. One routine, sp_core_account_setup_create, is still absent from the local store: it belongs to another feature and nothing in this one needs it.\",\"kind\":\"risk\"}"
+    },
+    {
+      "note": "{\"concern\":\"The 5-10 second stall after acting on a card is fixed at its measured cause (a live job read per work centre per row on every action-triggered reload) but was deliberately NOT timed live, because the only way to time it is to act on a real request and that would have changed the owner test rows. The owner next click is the measurement.\",\"kind\":\"residual\"}"
+    },
+    {
+      "note": "{\"concern\":\"The disabled Print button renders as an empty box on every card: the platform disabled visual state fades the whole control, so its neutral fill goes near-white and its white glyph fades with it. FR-067 requires it drawn and disabled, and it is, but it conveys nothing. Pre-existing and unrelated to this change; recorded as D54 with its cause and left unchanged pending the owner decision on how muted the placeholder should look.\",\"kind\":\"risk\"}"
+    },
+    {
+      "note": "{\"concern\":\"Picture resolution no longer re-probes the share per part per extension and is reused by an action reload, so the status buttons no longer pay seconds for it. What remains on that path is real store latency: 0.05-0.11 s back-to-back, and about 1.2 s after a long quiet period because an idle MySQL connection has to be re-established. That is a connection warm-up rather than a defect, and it is stated rather than hidden.\",\"kind\":\"residual\"}"
+    }
+  ],
+  "livingSpecs": {
+    "skipped": [
+      {
+        "name": "startup-launch",
+        "reason": "this feature changed no file under MTM_Waitlist.Startup/** or Module_Startup/**, so the capability's behaviour is untouched. It is the only capability living-specs.yml registers; the waitlist card, Settings resolution, Database and Strings areas this feature did change have no living spec, which capabilities/DRIFT.md records as a standing opt-in gap rather than something this step should close on its own."
+      }
+    ]
+  }
+}

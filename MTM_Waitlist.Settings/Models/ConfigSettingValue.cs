@@ -112,6 +112,30 @@ public static class ConfigSettingKeys
     public const string ImageStorageSharedFolderPath = "image_storage.shared_folder_path";
 
     /// <summary>
+    /// The folder the hopper reference pictures sit in, relative to the picture folder (or absolute, in which case
+    /// the picture folder is not consulted).
+    /// <para>
+    /// Setting Key: "image_storage.hopper_folder_path"
+    /// </para>
+    /// <para>
+    /// Description: IT-configured location of the three hopper size reference pictures, one file per size named
+    /// after the size word. Owned by the storage screen (Settings, the storage panel) rather than compiled in, so
+    /// where the hopper artwork lives is the owner's to change without a new release (FR-078). When set, overrides
+    /// the value from appsettings.json. The naming contract for the files inside it is
+    /// <c>docs/IMAGE-NAMING.md</c>.
+    /// </para>
+    /// Default: <see cref="ImageStorageHopperFolderPathDefault"/> (<c>Waitlist\Hoppers</c> beneath the picture
+    /// folder).
+    /// </summary>
+    public const string ImageStorageHopperFolderPath = "image_storage.hopper_folder_path";
+
+    /// <summary>
+    /// The hopper picture folder this application ships with, relative to the picture folder, and the one place the
+    /// figure is written: the storage screen's box and the compiled fallback both read it from here.
+    /// </summary>
+    public const string ImageStorageHopperFolderPathDefault = @"Waitlist\Hoppers";
+
+    /// <summary>
     /// The root the dunnage pictures sit under, one folder per dunnage type and part beneath it.
     /// Setting Key: "dunnage.root_path"
     /// Value Type: "text" (string path)

@@ -251,6 +251,31 @@ public sealed class SharedControlsMarkupTests
         StringAssert.Contains(codeBehind, "ButtonBase", "A picture inside a button must be recognised as one whose plain click is spoken for.");
         StringAssert.Contains(codeBehind, "IsItemClickEnabled", "A picture inside a list row that acts on a click must be recognised too.");
 
+        // The Shift+click is answered on the press, and the tap and the release that follow the same gesture have
+        // to be claimed here as well. The host around the picture acts on a tap - it selects the row, or raises
+        // ItemClick - and letting it act opened the request behind the enlarged view and took the view down with
+        // it, so the click looked as if it had done nothing at all (FR-031).
+        Assert.IsNotNull(
+            picture.Attribute("PointerReleased"),
+            "The release of an enlarging press is not claimed, so the host around the picture still acts on the gesture.");
+
+        StringAssert.Contains(
+            codeBehind,
+            "_enlargedOnPress",
+            "Nothing records that the press is why the view is open, so the tap that follows it cannot be claimed (FR-031).");
+        StringAssert.Contains(
+            codeBehind,
+            "e.Handled = true;",
+            "The gesture that enlarged the picture is not claimed for this control, so the host acts on it as well (FR-031).");
+
+        // The Shift state is asked of both the event and the keyboard: a mouse pointer event does not always
+        // carry the modifiers that were down when it was created, and asking only the event is how the gesture
+        // came to do nothing in the running app.
+        StringAssert.Contains(
+            codeBehind,
+            "GetKeyStateForCurrentThread",
+            "Shift is read from the event alone, which is the state that was found missing in the running app (FR-031).");
+
         var resources = File.ReadAllText(Path.Combine(
             RepositoryPatternScan.FindRepositoryRoot(),
             "Strings",

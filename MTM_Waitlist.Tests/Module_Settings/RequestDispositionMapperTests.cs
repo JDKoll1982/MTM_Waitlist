@@ -183,4 +183,72 @@ public sealed class RequestDispositionMapperTests
 
         Assert.AreEqual(RequestDisposition.Unknown, RequestDispositionClassifier.Classify(input));
     }
+
+    // --- BuildDispositionInput: the non-conforming (NCM) location signal ---
+
+    [TestMethod]
+    public void Service_RequestDispositionMapperTests_BuildDispositionInput_FloorStockAtAnNcmLocationClassifiesNcm()
+    {
+        // The location the stock occupies is the signal, and it reaches the classifier through the floor
+        // buckets, which classify each location (`md_locations.Location LIKE 'NCM%'`). FR-093.
+        var floor = new WipFloorQuantitySnapshot
+        {
+            FinishedGoodsFloorQuantity = 0m,
+            OutsideServiceFloorQuantity = 0m,
+            NonConformingFloorQuantity = 74m,
+            WipFloorQuantity = 0m,
+        };
+
+        var input = RequestDispositionMapper.BuildDispositionInput(inforRow: null, floor);
+
+        Assert.IsTrue(input.HasNonConformingStock);
+        Assert.AreEqual(RequestDisposition.Ncm, RequestDispositionClassifier.Classify(input));
+    }
+
+    [TestMethod]
+    public void Service_RequestDispositionMapperTests_BuildDispositionInput_StockAtAnNcmLocationIsNeverReadAsAProductionType()
+    {
+        // Infor reports a closed order with stock on hand, which on its own would be Finished Goods. The stock is
+        // physically in an NCM area, so the location decides and the production state is not reported (FR-093).
+        var floor = new WipFloorQuantitySnapshot { NonConformingFloorQuantity = 6m };
+        var input = RequestDispositionMapper.BuildDispositionInput(
+            new InforDispositionRow
+            {
+                WorkOrderStatus = "C",
+                OpenWorkOrderQuantity = 0m,
+                FinishedGoodsQuantity = 50m,
+                HasOutsideVendorOperation = false,
+            },
+            floor);
+
+        Assert.AreEqual(RequestDisposition.Ncm, RequestDispositionClassifier.Classify(input));
+    }
+
+    [TestMethod]
+    public void Service_RequestDispositionMapperTests_BuildDispositionInput_NoStockAtAnNcmLocationIsNotNcm()
+    {
+        var floor = new WipFloorQuantitySnapshot { WipFloorQuantity = 40m };
+
+        var input = RequestDispositionMapper.BuildDispositionInput(inforRow: null, floor);
+
+        Assert.IsFalse(input.HasNonConformingStock);
+        Assert.AreEqual(RequestDisposition.WorkInProcess, RequestDispositionClassifier.Classify(input));
+    }
+
+    [TestMethod]
+    public void Service_RequestDispositionMapperTests_BuildDispositionInput_NoFloorSnapshotCarriesNoNcmSignal()
+    {
+        var input = RequestDispositionMapper.BuildDispositionInput(
+            new InforDispositionRow
+            {
+                WorkOrderStatus = "R",
+                OpenWorkOrderQuantity = 0m,
+                FinishedGoodsQuantity = 0m,
+                HasOutsideVendorOperation = false,
+            },
+            floorSnapshot: null);
+
+        Assert.IsFalse(input.HasNonConformingStock);
+        Assert.AreEqual(RequestDisposition.WorkInProcess, RequestDispositionClassifier.Classify(input));
+    }
 }

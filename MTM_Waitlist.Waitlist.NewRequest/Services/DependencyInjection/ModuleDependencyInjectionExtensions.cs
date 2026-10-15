@@ -10,6 +10,10 @@ public static class ModuleDependencyInjectionExtensions
     {
         services.AddSingleton<INewRequestFlowService, NewRequestFlowService>();
         services.AddSingleton<ICoilAvailabilityService, CoilAvailabilityService>();
+
+        // The fuzzy incorrect-part search, which reads the plant system live and is never served from the mirror:
+        // registering it here keeps the read's own composition beside the rest of this module's (FR-084, FR-085).
+        services.AddSingleton<IPartMatchSearchService, PartMatchSearchService>();
         return services;
     }
 }

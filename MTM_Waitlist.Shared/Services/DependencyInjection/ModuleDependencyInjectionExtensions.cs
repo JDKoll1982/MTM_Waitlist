@@ -14,8 +14,7 @@ public static class ModuleDependencyInjectionExtensions
         services.AddSingleton<SharedModuleService>();
         services.AddSingleton<ISharedConfigurationService, SharedConfigurationService>();
         services.AddSingleton<ITooltipService, TooltipService>();
-        services.AddSingleton<IControlInspectorService, ControlInspectorService>();
-        services.AddSingleton<IWorkCenterCatalogService, WorkCenterCatalogService>();
+        services.AddSingleton<IControlInspectorService, ControlInspectorService>();        services.AddSingleton<IWorkCenterCatalogService, WorkCenterCatalogService>();
         services.AddSingleton<IDunnageTypeVisibilityCatalogService, DunnageTypeVisibilityCatalogService>();
         return services;
     }

@@ -1,5 +1,15 @@
 # Tools
 
+## UI automation
+
+Driving the running app with UI Automation — auditing which controls a person cannot identify, clicking, reading the
+automation tree, capturing the window, and measuring whether it has actually frozen — has its own page:
+[UI-AUTOMATION.md](./UI-AUTOMATION.md).
+
+Start there for `uia-common.ps1`, `ui-drive.ps1`, `uia-surface-audit.ps1`, `uia-surface-walk.ps1`,
+`uia-invoke.ps1`, `ui-settings-drive.ps1`, `capture_app_window.ps1`, `capture_app_region.ps1`, `ocr_png.ps1` and
+`measure-ui-responsiveness.ps1`.
+
 ## read_wakatime.py / wakatime_api.py
 
 Read coding-activity data from the local WakaTime extension install and the WakaTime API.

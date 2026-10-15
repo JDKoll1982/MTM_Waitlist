@@ -13,6 +13,14 @@ public sealed class WaitlistRequestDraft
     public string Item { get; init; } = string.Empty;
 
     public string? InputValue { get; init; }
+
+    /// <summary>
+    /// The answers the flow captured beyond <see cref="InputValue"/>, keyed by the label the Item declared.
+    /// A blank value is dropped on the way to the store rather than written, so no cell is added for it
+    /// (FR-006, FR-073). Null when the draft captured none.
+    /// </summary>
+    public IReadOnlyDictionary<string, string>? Answers { get; init; }
+
     public string ActiveSetupJobId { get; init; } = string.Empty;
     public string WorkCenterName { get; init; } = string.Empty;
     public string RequesterEmployeeNumber { get; init; } = string.Empty;

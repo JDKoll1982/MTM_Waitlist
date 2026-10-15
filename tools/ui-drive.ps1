@@ -18,13 +18,30 @@
 #
 #   -Name is a match pattern, tried in order: exact, then prefix, then contains. Pass several comma-separated
 #   candidates to try in preference order: -Name 'Pickup Die,Pickup Die:,Die'.
+#
+# TIMING
+#   Nothing here sleeps for a guessed interval. Every wait polls the app for the thing it is waiting for - a
+#   control, the shell, or the page itself becoming still - at 120 ms, and the step after a click continues as soon
+#   as the page has stopped redrawing rather than after a flat 1.5 s. The primitives live in uia-common.ps1, which
+#   this script dot-sources, so the other driving scripts wait the same way.
+#
+#   -NoEvidence skips the evidence dump. The dump walks the whole tree, so a walk that is only driving (not
+#   recording) runs markedly faster with it; the default keeps the record.
 
 [CmdletBinding()]
 param(
-    [ValidateSet('launch', 'dump', 'click-item', 'click-button', 'kill')]
+    [ValidateSet('launch', 'dump', 'click-item', 'click-button', 'click-id', 'kill', 'signin', 'wait-for-id')]
     [string]$Action = 'dump',
 
     [string[]]$Name,
+
+    # Sign-in credentials. Passed in rather than defaulted: this file is committed, and a working PIN in source is
+    # a credential in source.
+    [string]$Identifier,
+    [string]$Pin,
+
+    # The automation id -Action wait-for-id waits for, and prints the whole subtree of when it appears.
+    [string]$AutomationId,
 
     [string]$Label = 'step',
 
@@ -32,65 +49,61 @@ param(
 
     [int]$WaitSeconds = 90,
 
+    # Skip the evidence dump: a driving-only step does not need the tree walked three times.
+    [switch]$NoEvidence,
+
     [string]$Exe = "$PSScriptRoot\..\bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.exe",
 
-    [string]$ConnectionString = 'Server=127.0.0.1;Port=3306;Database=mtm_waitlist;User Id=root;Password=root;AllowPublicKeyRetrieval=True;'
+    # Left empty by default and taken from the environment on launch: this machine already carries
+    # MTM_WAITLIST_DB_CONNECTION_STRING at user scope, so the credential never has to appear on a command
+    # line or in this file.
+    [string]$ConnectionString = ''
 )
 
 $ErrorActionPreference = 'Stop'
-Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes
+. "$PSScriptRoot\uia-common.ps1"
 
-$CT     = [System.Windows.Automation.ControlType]
-$Scope  = [System.Windows.Automation.TreeScope]
-$Invoke = [System.Windows.Automation.InvokePattern]::Pattern
+$CT     = $UiaCT
+$Scope  = $UiaScope
+$Invoke = $UiaInvoke
 
-function Get-AppProcess {
-    Get-Process MTM_Waitlist -ErrorAction SilentlyContinue | Select-Object -First 1
-}
+# This script's own wait budget, which the shared helpers honour.
+$MtmWaitSeconds = $WaitSeconds
 
-function Get-AppRoot {
-    $p = Get-AppProcess
-    if (-not $p) { return $null }
-    if ($p.MainWindowHandle -eq 0) { return $null }
-    [System.Windows.Automation.AutomationElement]::FromHandle($p.MainWindowHandle)
-}
+function Get-AppProcess { Get-MtmAppProcess }
 
-function Wait-AppRoot {
-    $deadline = (Get-Date).AddSeconds($WaitSeconds)
-    while ((Get-Date) -lt $deadline) {
-        $r = Get-AppRoot
-        if ($r) { return $r }
-        Start-Sleep -Milliseconds 500
-    }
-    throw "No main window appeared within $WaitSeconds s. The app may be showing a startup dialog - run -Action dump to see its text."
-}
+function Get-AppRoot { Get-MtmAppRoot }
 
-# The splash is a window too, and it answers MainWindowHandle seconds before the shell exists. A click aimed at the
-# splash finds nothing and the whole chain after it fails, so anything that CLICKS waits for the real shell: the
-# frameless splash has no caption buttons, the shell does. (-Action dump deliberately does not wait - seeing the
+function Wait-AppRoot { Wait-MtmWindow -TimeoutSeconds $WaitSeconds }
+
+# Anything that CLICKS waits for the real shell rather than the splash: the splash is a window too and answers
+# MainWindowHandle seconds before the shell exists, so a click aimed at it finds nothing and the whole chain after
+# it fails. The shell is recognised by its own navigation pane - the sign-in window has caption buttons as well, so
+# "has caption buttons" would call the sign-in window a shell. (-Action dump deliberately does not wait: seeing the
 # splash is occasionally the point.)
-function Test-ShellReady {
+function Wait-ShellRoot { Wait-MtmShell -TimeoutSeconds $WaitSeconds }
+
+# One walk of the tree, grouped by control type. The evidence used to be written with a separate FindAll per control
+# type, which walked the whole tree three times per step.
+function Get-WindowInventory {
     param($Root)
 
-    if (-not $Root) { return $false }
+    $byType = @{}
+    foreach ($el in @($Root.FindAll($Scope::Descendants, $UiaAny))) {
+        $name = $el.Current.Name
+        if ([string]::IsNullOrWhiteSpace($name)) { continue }
 
-    $c = New-Object System.Windows.Automation.PropertyCondition(
-        [System.Windows.Automation.AutomationElement]::ControlTypeProperty, $CT::Button)
-    return @($Root.FindAll($Scope::Descendants, $c) | Where-Object { $_.Current.Name -eq 'Minimize' }).Count -gt 0
-}
-
-function Wait-ShellRoot {
-    $deadline = (Get-Date).AddSeconds($WaitSeconds)
-    while ((Get-Date) -lt $deadline) {
-        $r = Get-AppRoot
-        if (Test-ShellReady -Root $r) { return $r }
-        Start-Sleep -Milliseconds 500
+        $type = $el.Current.ControlType.ProgrammaticName.Replace('ControlType.', '')
+        if (-not $byType.ContainsKey($type)) { $byType[$type] = New-Object System.Collections.ArrayList }
+        [void]$byType[$type].Add($name)
     }
-    throw "The shell did not appear within $WaitSeconds s. The app may be stuck on a startup dialog - run -Action dump to see its text."
+
+    return $byType
 }
 
 function Get-ByControlType {
     param($Root, $ControlType)
+
     $c = New-Object System.Windows.Automation.PropertyCondition(
         [System.Windows.Automation.AutomationElement]::ControlTypeProperty, $ControlType)
     $Root.FindAll($Scope::Descendants, $c) | ForEach-Object { $_.Current.Name } | Where-Object { $_ }
@@ -99,25 +112,33 @@ function Get-ByControlType {
 function Write-Evidence {
     param($Root, [string]$Label, [string]$Note = '')
 
+    if ($NoEvidence) { return }
+    if (-not $Root) { $Root = Wait-AppRoot }
+
     New-Item -ItemType Directory -Force -Path $EvidenceDir | Out-Null
     $path = Join-Path $EvidenceDir ("{0}.txt" -f $Label)
 
-    $items   = @(Get-ByControlType -Root $Root -ControlType $CT::ListItem)
-    $texts   = @(Get-ByControlType -Root $Root -ControlType $CT::Text)
-    $buttons = @(Get-ByControlType -Root $Root -ControlType $CT::Button)
+    $inventory = Get-WindowInventory -Root $Root
+    $items   = @($inventory['ListItem'])
+    $texts   = @($inventory['Text'])
+    $buttons = @($inventory['Button'])
+    $edits   = @($inventory['Edit'])
 
     $body = @(
         "# $Label"
         "when      : $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
         "window    : '$(($Root.Current.Name))'  hwnd=$($Root.Current.NativeWindowHandle)"
         if ($Note) { "note      : $Note" }
-        ""
+        ''
         "## ListItems ($($items.Count))"
         $items
-        ""
+        ''
         "## Buttons ($($buttons.Count))"
         $buttons
-        ""
+        ''
+        "## Edits ($($edits.Count))"
+        $edits
+        ''
         "## Texts ($($texts.Count))"
         $texts
     )
@@ -126,6 +147,7 @@ function Write-Evidence {
     Write-Host "evidence  : $path" -ForegroundColor DarkGray
     Write-Host "items     : $($items.Count)  [$($items -join ' | ')]" -ForegroundColor Cyan
     Write-Host "buttons   : $($buttons.Count)  [$($buttons -join ' | ')]" -ForegroundColor Cyan
+    Write-Host "edits     : $($edits.Count)  [$($edits -join ' | ')]" -ForegroundColor DarkGray
     Write-Host "texts     : $($texts.Count)" -ForegroundColor DarkGray
     $texts | ForEach-Object { Write-Host "            $_" -ForegroundColor Gray }
 }
@@ -156,6 +178,34 @@ function Find-Element {
     return $null
 }
 
+function Get-AppWindows { Get-MtmAppWindows }
+
+function Find-ById { param($Root, [string]$Id) Find-MtmById -Root $Root -Id $Id }
+
+# By id across every window the app owns, because which window is "main" changes as the app moves from splash to
+# sign-in to shell.
+function Wait-ById { param([string]$Id, [string]$What = 'control') Wait-MtmById -Id $Id -What $What -TimeoutSeconds $WaitSeconds }
+
+# Typed into the control the way a person types rather than written straight to the model, so anything the field
+# does on input (validation, enabling the button, clearing an error) actually happens.
+function Set-Text { param($Element, [string]$Text) Set-MtmText -Element $Element -Text $Text }
+
+function Invoke-ById {
+    param([string]$Id, [string]$What = 'button')
+
+    $el = Wait-ById -Id $Id -What $What
+    Invoke-MtmElement -Element $el -What $Id
+    Write-Host "pressed   : $Id" -ForegroundColor Green
+    return $el
+}
+
+# The app's signed-in landing place, which is what every later click is rooted at.
+function Get-WindowOwning {
+    param([string]$Id)
+
+    return @(Get-AppWindows | Where-Object { Find-ById -Root $_ -Id $Id }) | Select-Object -First 1
+}
+
 switch ($Action) {
 
     'launch' {
@@ -165,8 +215,14 @@ switch ($Action) {
         else {
             if (-not (Test-Path $Exe)) { throw "Executable not found: $Exe" }
 
-            # Both are required: the plain one is not enough, the app still fails its startup session check without
-            # the STARTUP_ variant. Set on this process so the child inherits them.
+            # The app needs both: the plain one for the stores, and the STARTUP_ variant to clear its startup
+            # session check. Taken from this process's environment when -ConnectionString was not passed, which is
+            # how the value reaches the app without ever being written down.
+            if (-not $ConnectionString) { $ConnectionString = $env:MTM_WAITLIST_DB_CONNECTION_STRING }
+            if (-not $ConnectionString) {
+                throw 'No connection string. Pass -ConnectionString or set MTM_WAITLIST_DB_CONNECTION_STRING.'
+            }
+
             $env:MTM_WAITLIST_DB_CONNECTION_STRING = $ConnectionString
             $env:MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING = $ConnectionString
 
@@ -191,9 +247,12 @@ switch ($Action) {
             $available = @(Get-ByControlType -Root $root -ControlType $CT::ListItem)
             throw "No ListItem matched [$($Name -join ', ')]. Available: $($available -join ' | ')"
         }
-        $el.GetCurrentPattern($Invoke).Invoke()
+        # A navigation entry is selected rather than invoked, so this goes through the same fallback a button does.
+        Invoke-MtmElement -Element $el -What "list item '$($el.Current.Name)'"
         Write-Host "clicked   : '$($el.Current.Name)'" -ForegroundColor Green
-        Start-Sleep -Milliseconds 1200
+        # Wait for the page to stop redrawing instead of sleeping a guess: a card rebuild takes 0.05-1.2 s, and a
+        # fixed 1200 ms charged every step for the slowest one.
+        Wait-MtmUiSettled -Root (Get-AppRoot)
         Write-Evidence -Root (Wait-AppRoot) -Label $Label -Note "after clicking item '$($el.Current.Name)'"
     }
 
@@ -205,16 +264,61 @@ switch ($Action) {
             $available = @(Get-ByControlType -Root $root -ControlType $CT::Button)
             throw "No Button matched [$($Name -join ', ')]. Available: $($available -join ' | ')"
         }
-        $el.GetCurrentPattern($Invoke).Invoke()
+        Invoke-MtmElement -Element $el -What "button '$($el.Current.Name)'"
         Write-Host "clicked   : '$($el.Current.Name)'" -ForegroundColor Green
-        Start-Sleep -Milliseconds 1500
+        Wait-MtmUiSettled -Root (Get-AppRoot)
         Write-Evidence -Root (Wait-AppRoot) -Label $Label -Note "after clicking button '$($el.Current.Name)'"
     }
 
+    'click-id' {
+        # For the controls a name-based find cannot reach: an unnamed button is invisible to Find-Element, so the
+        # id is the only handle on it. Necessary while such a control exists, and useful afterwards for the ones
+        # whose name is localised.
+        if (-not $AutomationId) { throw 'click-id needs -AutomationId.' }
+        $el = Wait-ById -Id $AutomationId -What 'control'
+        Invoke-MtmElement -Element $el -What "control '$AutomationId'"
+        Write-Host "clicked   : $AutomationId  ('$($el.Current.Name)')" -ForegroundColor Green
+        Wait-MtmUiSettled -Root (Get-AppRoot)
+        Write-Evidence -Root (Wait-AppRoot) -Label $Label -Note "after clicking '$AutomationId'"
+    }
+
+    'signin' {
+        if (-not $Identifier) { throw 'signin needs -Identifier.' }
+        if (-not $Pin) { throw 'signin needs -Pin.' }
+
+        # Two stages, and the second field does not exist until the first is submitted. Each control is found by
+        # automation id rather than by name: the fields carry no accessible name until validation has run once,
+        # so a name-based find reports nothing on a clean sign-in.
+        Set-Text -Element (Wait-ById -Id 'SignInWindow_Identifier' -What 'identifier field') -Text $Identifier
+        Write-Host "typed     : identifier" -ForegroundColor Green
+        Invoke-ById -Id 'SignInWindow_ContinueButton' | Out-Null
+
+        Set-Text -Element (Wait-ById -Id 'SignInWindow_Credential' -What 'credential field') -Text $Pin
+        Write-Host "typed     : pin" -ForegroundColor Green
+        Invoke-ById -Id 'SignInWindow_SignInButton' | Out-Null
+
+        # Sign-in reaches the store, so this is the slow step and the one that can fail on its own.
+        $root = Wait-ShellRoot
+        Write-Host "signed in : shell is up" -ForegroundColor Green
+        Write-Evidence -Root $root -Label $Label -Note 'after signing in'
+    }
+
+    'wait-for-id' {
+        if (-not $AutomationId) { throw 'wait-for-id needs -AutomationId.' }
+        $el = Wait-ById -Id $AutomationId -What 'control'
+        Write-Host "found     : $AutomationId  ('$($el.Current.Name)')" -ForegroundColor Green
+
+        # Evidence comes from the window that owns the control, not the desktop root: the root's descendants are
+        # every window on the machine, which is neither useful nor quick to walk.
+        Write-Evidence -Root (Get-WindowOwning -Id $AutomationId) -Label $Label -Note "after $AutomationId appeared"
+    }
+
     'kill' {
-        Get-Process MTM_Waitlist -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.Id -Force }
-        Start-Sleep -Milliseconds 800
+        $stopped = Stop-MtmApp
         $left = (Get-Process MTM_Waitlist -ErrorAction SilentlyContinue | Measure-Object).Count
+        if (-not $stopped) {
+            Write-Host 'the process did not exit within 15 s' -ForegroundColor Yellow
+        }
         Write-Host "instances remaining: $left" -ForegroundColor Green
     }
 }

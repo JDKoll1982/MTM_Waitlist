@@ -7,6 +7,7 @@ namespace MTM_Waitlist.Module_Settings.Services;
 /// Category→Item picker (Phase 3) and the uniform card renderer (Phase 4) consume. Encodes the
 /// CSV columns that are not already on <see cref="RequestItemDefinition"/>:
 ///   • auto-populated Item visibility — a job-part item appears only if the requesting job has that part
+///   • the four returning pickups appear when the requesting job has the work they name (FR-094)
 ///   • always-available manual equipment/consumable Items (Riser Table / Hopper / Scrap / Other)
 ///   • Deliver destination is always the requesting work center (no user entry)
 /// Deterministic and DB-free so the rules are unit-testable before any UI wiring.
@@ -14,29 +15,15 @@ namespace MTM_Waitlist.Module_Settings.Services;
 public static class RequestItemPickerRules
 {
     /// <summary>
-    /// Catalogued Items that are <b>never offered</b>: they exist in the catalog so the twenty-four-row
-    /// identity assertion stays true, and are hidden by this rule rather than by deletion — a hidden Item and a
-    /// missing row are different states (FR-028).
-    /// </summary>
-    private static readonly string[] s_outOfScopeItemIds =
-    [
-        "pickup-fg",
-        "pickup-ncm",
-        "pickup-wip",
-        "pickup-outside-service"
-    ];
-
-    /// <summary>Whether the Item is catalogued but deliberately never offered (FR-028).</summary>
-    public static bool IsOutOfScope(RequestItemDefinition item)
-    {
-        ArgumentNullException.ThrowIfNull(item);
-        return s_outOfScopeItemIds.Contains(item.Id, StringComparer.OrdinalIgnoreCase);
-    }
-
-    /// <summary>
     /// The active-job part an auto-populated Item depends on for visibility, or <see cref="RequestJobPartKind.None"/>
     /// for manual / always-available Items. Grounded in the visibility rules recorded in
     /// specs/004-unified-card-item-picker/contracts/request-picker-flow.md §4.
+    /// <para>
+    /// The four previously-hidden pickups answer here on the work the requesting job actually has — finished
+    /// goods to return, non-conforming stock, work in progress, subcontracted work — rather than on a fixed list
+    /// of Item codes (FR-094). A hidden Item and a missing row stay different states: the four are still
+    /// catalogued, and what keeps one out is a job that has none of the work it names.
+    /// </para>
     /// </summary>
     public static RequestJobPartKind RequiredJobPart(RequestItemDefinition item)
     {
@@ -56,8 +43,11 @@ public static class RequestItemPickerRules
             // 'Scrap Type Required' placeholder, which means no decision was made (FR-031, contract §5).
             "pickup-scrap" => RequestJobPartKind.Scrap,
             "assist-table-place" or "assist-table-remove" => RequestJobPartKind.AnySubordinate,
-            // The four out-of-scope Items fall here rather than on their own arm: they are hidden by
-            // IsOutOfScope regardless of what the job has (FR-028).
+            // The four returning pickups: each is offered on the work it names and on nothing else (FR-094).
+            "pickup-fg" => RequestJobPartKind.FinishedGoodsToReturn,
+            "pickup-ncm" => RequestJobPartKind.NonconformingStockToReturn,
+            "pickup-wip" => RequestJobPartKind.WorkInProgressToReturn,
+            "pickup-outside-service" => RequestJobPartKind.OutsideServiceWorkToReturn,
             _ => RequestJobPartKind.None,
         };
     }
@@ -84,17 +74,12 @@ public static class RequestItemPickerRules
 
     /// <summary>
     /// Conditional-visibility rule: an Item is shown only when the requesting job has what it needs.
-    /// Manual / always-available Items are always visible; a catalogued-but-out-of-scope Item never is.
+    /// Manual / always-available Items are always visible.
     /// </summary>
     public static bool IsVisible(RequestItemDefinition item, RequestJobPartAvailability availability)
     {
         ArgumentNullException.ThrowIfNull(item);
         ArgumentNullException.ThrowIfNull(availability);
-
-        if (IsOutOfScope(item))
-        {
-            return false;
-        }
 
         return RequiredJobPart(item) switch
         {
@@ -108,6 +93,12 @@ public static class RequestItemPickerRules
             RequestJobPartKind.Scrap => availability.HasScrapDecision,
             RequestJobPartKind.AnySubordinate => availability.HasAnySubordinate,
             RequestJobPartKind.RequiresActiveJob => availability.HasActiveJob,
+            // The four returning pickups read the work the requesting job has, which the disposition derivation
+            // populates (FR-094).
+            RequestJobPartKind.FinishedGoodsToReturn => availability.HasFinishedGoodsToReturn,
+            RequestJobPartKind.NonconformingStockToReturn => availability.HasNonconformingStockToReturn,
+            RequestJobPartKind.WorkInProgressToReturn => availability.HasWorkInProgressToReturn,
+            RequestJobPartKind.OutsideServiceWorkToReturn => availability.HasOutsideServiceWorkToReturn,
             _ => true,
         };
     }

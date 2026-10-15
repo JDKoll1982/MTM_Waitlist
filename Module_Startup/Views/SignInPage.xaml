@@ -195,6 +195,7 @@
                                     HorizontalAlignment="Stretch"
                                     HorizontalContentAlignment="Left"
                                     AutomationProperties.AutomationId="{x:Bind SignInName}"
+                                    AutomationProperties.Name="{x:Bind ChoiceAutomationName}"
                                     Click="OnPreviousPersonClick">
                                     <StackPanel>
                                         <TextBlock

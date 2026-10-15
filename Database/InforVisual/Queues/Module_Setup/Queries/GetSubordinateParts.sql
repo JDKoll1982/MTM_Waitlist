@@ -7,6 +7,16 @@
 --   @NormalizedWorkOrder - the `WO-######` key, matched verbatim against WORK_ORDER.BASE_ID
 --   @PartNumber
 --   @SequenceNumber
+--
+-- Output note (specs/012-waitlist-card-layout, FR-088): for an `MMC` subordinate row -- the coil -- this
+-- READ's `Description` IS the coil's description, so the waitlist job snapshot resolves the coil's
+-- `Coil description` cell from here instead of a second read. The coil's `Average coil weight` is
+-- deliberately NOT projected here: VISUAL's `PART.WEIGHT` is a single figure the plant keeps against the
+-- part, while the card must show the average the receiving store has actually weighed, pooled over that
+-- part's receiving history. That value comes from `sp_receiving_history_average_coil_weight` in
+-- `mtm_receiving_application` (FR-030, FR-041, FR-054). The cached copy of this shape carries the same
+-- columns: Database/InforVisual/Queues/Module_Mock/Populations/subordinate_parts_population.sql stays
+-- identical to this projection, and the mirror table and the shape catalog move with it.
 -- ========================================
 
 SET NOCOUNT ON;

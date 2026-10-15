@@ -48,7 +48,7 @@ Read left to right the card has **four zones**, separated by vertical rules:
 2. **Status zone** — a centred stack of the rows below (D25).
 3. **Identity-and-detail zone** — an inner grid of **3 rows × 2 columns** (D21): row 1 the always-spanning title
    pair, rows 2–3 the detail cells.
-4. **Action zone** — up to six square icon buttons in a 2×3 grid, standing off behind a vertical rule, removing
+4. **Action zone** — up to six square icon buttons in a 3×2 grid, standing off behind a vertical rule, removing
    unavailable buttons and **re-centring** what remains (D18, D30).
 
 ### The status zone's rows (D25, D27, D28, D42)
@@ -79,7 +79,7 @@ A row with no value is **removed**, not blanked (D27).
 | D1 | Surface | The waitlist list rows only. The detail page is **not** changed by this work. |
 | D2 | Action buttons | Only actions the application can really perform are wired. No new business actions. |
 | D3 | Action grid shape | Up to six slots in a 2×3 grid — see §4. |
-| D4 | Print | Ships **disabled**, with a "not available yet" tooltip and a `TODO` in the code-behind naming label printing as the future action. A placeholder, not a working feature. |
+| D4 | Print | **Superseded by D59 (2026-10-11): there is no print action on the card.** Ships **disabled**, with a "not available yet" tooltip and a `TODO` in the code-behind naming label printing as the future action. A placeholder, not a working feature. |
 | D5 | Card click | The card body **stops** opening the request. A dedicated button opens it. The status flyout (D42) is the one interactive element in the body and does not change this. |
 | D6 | Open-details button | Magnifier glyph, tooltip "Open details". |
 | D7 | Picture behaviour | Shift+click enlarge and the new-message badge both stay. |
@@ -89,7 +89,7 @@ A row with no value is **removed**, not blanked (D27).
 | D14 | Sizing | A full-width row that stretches; tuned to stay readable at the app's default window size. |
 | D15 | Pre-spec | This document. It is the input to a new `/speckit.specify` run — no code is written yet. |
 | D16 | `Die Location` cell | **Dies only.** Shown on `pickup-die` and `deliver-die` and on no other Item, and labelled `Die Location`. |
-| D18 | Action buttons | **Square**, same colours, glyphs and gating as today. The ≥44×44 hit target is unchanged. |
+| D18 | Action buttons | **Square**, same colours, glyphs and gating as today. The ≥44×44 hit target is unchanged. **Give back's colour is the one open disagreement between the two settled records**: §4's table below names it **amber**, but spec 003's ratified action contract pins it to `SystemFillColorSolidNeutralBrush` and carries a rationale for that brush. This work left it on the solid neutral, because changing it means superseding another feature's contract; see **D44**. |
 | D19 | The panel never shows | The **requesting work centre** and the **requesting user** are **never** detail cells. The work centre is the large left-column value; the requesting user appears only on the request's own detail page. There are **no universal fallbacks** — nothing is padded to fill a short panel. |
 | D20 | Panel spanning by cell count | The panel's geometry follows how many cells the Item fills: **4** → 2×2; **3** → cells 1–2 on the top row with **cell 3 spanning the full bottom row**; **2** → cells 1–2 with the **bottom row collapsed**; **1** → **cell 1 spanning the full width**; **0** → both lower rows removed. A card's height differs **between** Items but is constant for any one Item. |
 | D21 | Detail-zone grid | The card's third column is an inner grid of **3 rows × 2 columns**. **Row 1 is the title pair** and **always spans both columns**; rows 2 and 3 hold the detail cells. D20's rules are row merges of this grid. With no cells, the title row occupies the vacated space as a single full-width row. |
@@ -115,11 +115,35 @@ A row with no value is **removed**, not blanked (D27).
 | D41 | A cell that cannot be resolved is hidden, and logged where it should have been readable | **Both** cases hide the cell — a source that **exists but cannot be read**, and a cell the Item **never declares**. In addition the first case **writes a warning to the database log** so it can be chased up later; it is never drawn as a reason on the card and never invented. This **supersedes spec 004 FR-026**, which required an unresolvable value to say *why* rather than render blank. |
 | D42 | The status flyout | **When the signed-in user is the material handler working on that job**, the **status text on row 1 becomes clickable**. Clicking it opens a **flyout window offering the four statuses of D26**. Choosing one **re-themes the whole status column to a lighter red than the overdue treatment**, so a handler-reported condition on a live job is distinguishable at a glance from an overdue one. The text is **not clickable for anyone else** — not for other users, and not on a job the signed-in handler is not working. This is the **first interactive element inside the card body**; it does not reopen D5. |
 | D43 | Row 1 precedence | A **handler status takes over row 1** and its theme while it is set. **Overdue** applies when no handler status is set. With neither, row 1 reads the lifecycle word in the normal theme. A handler status therefore hides the lifecycle state on the card for as long as it is set — the same trade D29 makes for overdue, and the reason both are deliberately visible states rather than silent ones. |
+| D44 | The action grid is 3 columns × 2 rows | **Corrected 2026-10-11 (owner, on review of the built card).** The grid is **three columns by two rows**, not the two-by-three that §1 bullet 4, **D18** and spec **FR-061** still said: **Accept · Cancel · Give back** across the top, **Complete · Open details · Print** beneath. This is what §4's own table has always shown, so the table was right and the prose around it was stale — the built card followed the prose and drew three rows. Six actions in three rows made the action zone the tallest thing on the card, which the two-row grid removes. **Not changed: Give back's colour.** §4's table names it amber while spec 003's ratified action contract pins it to `SystemFillColorSolidNeutralBrush`; the two records disagree, and settling it means superseding spec 003's contract, so it is left on the neutral and raised rather than quietly changed. |
+
+| D45 | The detail title is two centred lines, and the cells are ruled off from each other | **Corrected 2026-10-11 (owner, on review of the built card against `NewWaitlistCardLayout.jpg`).** Row 1 of the detail zone is the title **pair** as D21 settled, but **stacked and centred** — the Item's word large on the first line, the request's identifier smaller beneath it — rather than side by side, where the two read as one sentence and the identifier, which is the part a person is looking for, gets lost in it. The cells beneath are each closed off by a **hairline along their top and left edge**, which is what draws one continuous line between two cells and one under the title; the per-Item grids therefore carry **no spacing of their own** (the gap moved inside each cell as padding) and each cell **fills its row**, so a rule cannot stop short at the shorter of two cells. Cell copy is **centred**, its label semi-bold. |
+| D46 | The action zone keeps three columns, and a missing button lets the rest shift left | **Corrected 2026-10-11 (owner, on review of the built card).** D44 fixed the count of columns; this fixes what happens when one of them is empty. A button whose gate says the action is unavailable is **removed** (FR-062), and in a grid with a row and a column written per button that left a **hole** — the row read as if a button had failed to load. The zone is now a **reflow panel** that keeps **three columns regardless** and fills them left to right with the buttons that are actually drawn: with the fourth of six unavailable the five that remain read **1 2 3 / 5 6**, and only the **number of rows** shrinks. The width stays three columns even with one or two buttons, so the cards in one list are all the same shape. The rule itself lives in `WaitlistActionZoneLayout`, where it is checked by its own tests; the panel applies it. |
+| D47 | The cached-data notice sits in its own row at the foot of the shell | **Decided 2026-10-11 (owner).** The "Cached data in use" notice was drawn in the row **above** the page frame, so it pushed every page down the moment Infor Visual went unreachable and pulled it back up when it recovered — the screen moved under the person's hands for a reason that had nothing to do with their work. It now has **its own row after the frame**, and being an `Auto` row that is empty while the notice is away, it costs no height when it has nothing to say. |
+| D48 | The PIN box takes the keyboard when the credential stage appears | **Decided 2026-10-11 (owner).** Choosing one of the people offered beside the form fills in the user name and shows the PIN box, and the person then had to click into the box before typing. The PIN box is the only thing that stage asks for, so it takes the keyboard **when the stage appears** — once per appearance rather than on every redraw, so it cannot fight a person who has moved on to something else on the page. Both routes into the stage (a typed user name, a remembered person) are covered by the same rule. |
+| D49 | The enlarging gesture claims the whole gesture, and reads Shift from both sources | **Corrected 2026-10-11 (owner: "shift click on request image is not working").** A picture whose plain click belongs to its host enlarges on **Shift+click**, caught on the press so the host never sees it. The press alone was not enough: the host around the picture acts on a **tap** (it selects the row or raises `ItemClick`), so the enlarged view opened and was taken down with the host's own action before it could be seen — the click looked as if it had done nothing. The **release and the tap are now claimed** for the control as well. The Shift state itself is read from **both** the pointer event and the keyboard: a mouse pointer event does not always carry the modifiers that were down when it was created, and asking only the event is how the gesture came to do nothing in the running app. |
+| D50 | A reload raised by a change in the store reuses the job data the load before it read | **Decided 2026-10-11 (owner: a 5–10 second pause after a status change or a cancel).** Every action raises a change, and the list rebuilds itself from the store, which is right — but the rebuild also **re-read** each work centre's job, its allotted window and its per-row pictures, at one live read per work centre per row. Acting on a card changes a request's status and its handler and touches **none** of those, so the reload now **reuses** what the load before it read, bounded by a **two-minute** window (a screen left open still re-reads). A load from a building change, or the person's own refresh, still reads everything. |
+| D51 | The die-shop question follows the Item's direction | **Decided 2026-10-11 (owner).** The checkbox asked one question — *"Does this die go to the die shop?"* — on both die Items, while the card draws a different phrase for each: `Deliver to die shop` for a pickup and `Located at die shop` for a deliver. The question is now chosen by the **direction**, as the phrase already was, and both are read from the same rule so they cannot drift: a pickup asks whether the die has to be **taken** there, a deliver asks whether it **is** there. A wording that cannot be resolved leaves the step with its own default rather than showing a resource key. |
+| D52 | The store the app runs against must match the repository, and a drift check now says so | **Found 2026-10-11, while chasing the missing die-shop message.** The message never appeared for a reason that had nothing to do with the card: the local store the app was talking to was a **pre-012 snapshot**. Its `sp_waitlist_request_insert` had **no `p_answers_json` parameter**, and MySQL accepts a call that passes **more** parameters than the routine declares, **ignores the surplus and reports success** — so every request saved normally and every captured answer was silently discarded, with nothing logged and nothing on screen. Its per-Item configuration seed was stale as well, so the die Items did not even **declare** the die-shop cell. Both are now brought up to the repository, and `Database/CopilotScripts/refresh_schema_drift.ps1` reports — and with `-Apply` repairs — a store whose routines have fallen behind their `create.sql` artifacts, because this class of drift is invisible at run time by construction. |
+
+| D53 | A request that resolved no data centres its title pair, and its cell rows collapse to nothing | **Decided 2026-10-11 (owner, on reviewing a `deliver-riser-table` card).** The values a card draws come from the requesting job and from the request's own captured answers; when nothing resolves, `CellsToDraw` drops every cell, so **no cells is the same statement as no data**. That row drew its **title pair at the top** of a full-height zone with an empty area beneath it, which reads as a card whose contents failed to load. The zone's alignment now follows the row's **own cell count**: **centred** when it filled none, at the top over its cells otherwise. The two lower rows also collapse to **nothing** rather than to a gap: the zone carries **no spacing of its own**, the gap between the title and the cells is owned by the **cell area**, and that area is **collapsed** on the same count — so an empty row leaves no gap, no separator and no vacant row behind. This refines D24/FR-026, which said the title row "keeps the space": it keeps the space and is centred in it. |
+| D54 | **Superseded by D59.** The action zone's disabled `Print` button is washed out to an empty box, and is left alone pending a decision | **Reported 2026-10-11 (found while capturing the card for D53), NOT changed.** `Print` is drawn disabled (FR-067), and the platform's **disabled visual state** fades the whole control — so its neutral fill becomes near-white **and its white glyph fades with it**, leaving a faint outline that reads as an empty box on every card rather than as a placeholder that is coming. The owner's own screenshot of the card shows it. It is **pre-existing** and unrelated to D45–D53, and it is a question about FR-067's presentation rather than a defect in the layout, so it is recorded here with its cause rather than changed uninvited: the fix is to keep the glyph legible at the disabled opacity (an explicit disabled foreground/background on this one button), and it needs a decision on how muted the placeholder should look. |
+
+| D55 | The cached-data notice carries its own bottom gap, because nothing else insets that row | **Decided 2026-10-11 (owner: "add proper padding so it does not sit at the very bottom of the window").** The notice has a row of its own at the foot of the shell, and that row reaches the bottom of the window: the shell's content margin is **`56,24,56,0`**, so its bottom is **zero**, and nothing else insets the row. The notice therefore sat flush against the window's bottom edge and read as a strip of chrome rather than as a notice inside the page. It now carries **`0,8,0,24`** — 8 above, clearing the page it annotates, and 24 below, the shell's own inset, so the two gaps are the ones the shell already uses and not two new numbers. Horizontal inset was already right (the 56 each side of the same margin) and is unchanged. |
+
+| D56 | A status change re-reads nothing that a status change cannot have moved, and the picture share is probed once per window rather than once per picture | **Decided 2026-10-11 (owner: "the application still hangs some times when I click the buttons that cause the status of the request to change, normally hangs for about 5 seconds"), measured rather than assumed.** The action's write was never the problem — it lands in the same second as the click — the **rebuild that follows it** was. An instrumented cold rebuild spent **2698 ms of its three-row loop resolving pictures** and **1020 ms reading jobs**, and the action path paid that whenever the two-minute reuse window had lapsed; a file probe against the plant picture share costs a **failed name resolution of 2.3–2.7 s** off the plant network (measured directly, where the same probe answers in 0.01 s once the operating system has cached the failure). Three changes: (1) `PictureShareReachability` remembers whether a share is answering, per share, for a short window — the same shape as `MySqlHostFallback` — so a silent share is probed once instead of once per part per extension, and while the share answers nothing changes at all; (2) a reload raised by a **change in the store** reuses the resolved pictures as well as the job data, because a status change cannot change a picture; (3) the **two-minute window is gone** — reuse is bounded by the **cold load** (the page opening, the building changing, the person's own refresh), which the person controls and which is the only thing that pays for a live read. Measured from the click to the card changing: **0.05 s**, **0.11 s** back-to-back, **1.17 s** after 170 s of quiet (an idle connection being re-established). **Disproved and reverted:** resolving the per-work-centre and per-Item data concurrently up front measured **2027 ms against the serial 1020 ms** — the store seam serialises those reads, and the warm-up read data the row loop only needs conditionally. |
+| D57 | A hang is not a frozen window: the UI thread never blocks, so the measurement has to be of the card | **Established 2026-10-11, and it corrects how the symptom was described.** `tools/measure-ui-responsiveness.ps1` asks the window to acknowledge a null message every 25 ms and reports the longest stretch it could not; across every rebuild measured — 3718 ms of rebuild work included — the window answered **every** time (`0 s` unresponsive). The rebuild runs on pool threads, so the UI thread keeps pumping input throughout. What a person experiences as "it hangs for five seconds" is therefore **the card not changing for five seconds** while the window is in fact responsive, and a fix has to remove the *delay before the row updates*, not a block on the UI thread. That distinction is what pointed at the rebuild's per-row I/O rather than at anything on the UI thread. |
+| D58 | The picture share is unreachable from this workstation, and part pictures are therefore placeholders | **Recorded 2026-10-11 while measuring D56, as a fact about the machine rather than a defect.** `Database/Seeds` and the shipped defaults point the picture root at `\\mtmanu-fs01\Expo Drive\…`, which this workstation cannot resolve off the plant network (`GetHostAddresses` fails after 2.71 s). The launch step already says so in its own words — *"the picture share could not be read, so the copies held on this computer are the ones being used"* — and every card draws the shared no-image placeholder as a result. **Not changed here:** the resolver's own acceptance rule answers "no picture" for a part whose file cannot be read, and whether a machine holding a local copy should draw it while the share is down is a question about FR-030 and FR-080, not about this stall. Flagged rather than settled. |
+
+| D59 | The card carries **no** print action, and its placeholder is gone with its TODO | **Decided 2026-10-11 (owner: "remove the print button from all request types and remove its todo logic as well — this will not be a feature for the card itself, but for the details page later").** Printing a label needs the detail a label is made of, which lives on the request's own page, so the card is not where it belongs. **Supersedes D4** (the disabled "not available yet" placeholder with the code-behind TODO), **D54** (the decision to leave that placeholder alone pending a call on how muted it should look — D54's own evidence is why the answer turned out to be "remove it": the platform's disabled state faded the control until its 18px glyph was invisible, so it read as an empty box on every card), the **§4 table's** `Print` cells, the second row's `Print` entry in §2's grid diagram, and this document's **§5 localization**, **§8 artifacts** and **§10 out-of-scope** lines that name a Print tooltip, TODO or placeholder. **Also supersedes the spec's FR-067 and amends FR-061** (six buttons become five), **SC-012**, acceptance scenario 6 and FR-104's label list — all updated in place with the direction recorded. Nothing about print is left on the card: no control, no glyph, no resource key, no TODO. The action zone still lays out **three columns by two rows** (D44), which is what lets five actions take two rows rather than three. |
+
+| D60 | The card names the material handler, and never prints their employee number | **Decided 2026-10-11 (owner, on reviewing a claimed card: "do not have the app show the user's employee number, instead show the user's full name").** The card's person row read **`6229`** under the ring where the name of the person holding the work belongs: the queue records the assignee in `assigned_material_handler` as an **employee number**, because that number is what every handler authorization compares, and the row had nothing else to print. The number stays exactly where it is needed — the assignment column and the authorization comparisons are untouched — and the **name** is resolved beside it from the entry the handler themselves wrote, matched to that same handler's number (`actor_employee_number = assigned_material_handler`, newest first). Both request reads return it (`sp_waitlist_request_list`, `sp_waitlist_request_get` → `assigned_material_handler_name`), the request and the card row carry it (`AssignedMaterialHandlerName`), and `PersonText` reads the name and nothing else. A handler whose name no source records leaves the row **empty** rather than falling back to the number: an employee number is an identifier, not a name. **Also removes the request detail page's "Employee number" row**, which printed the requester's number directly beneath the row that already names them; a person is named by name wherever the app names one. **Left alone:** the sign-in page still offers each remembered person by their sign-in name (the account key a person types is the number), and the machine set-up panel still echoes the employee number it is configuring — both are identity surfaces, not places where the app names a person. | **Amends FR-022** (both person rows are named, with the no-number rule stated) and `data-model.md` §5. |
 
 ### Open questions
 
-**None outstanding.** Every question raised during this pre-spec's review is settled and recorded as a decision
-above.
+**None outstanding.** Every question raised during this pre-spec's review is settled and recorded as a decision above.
+
+
 
 ---
 
@@ -139,7 +163,7 @@ above.
 | Title and identifier | `Order.Title`, `Order.Subtitle` | promoted into the spanning top row of the grid (D12, D21) |
 | Detail cells | *new on the card* — the Item's declared fields | new resolution path (§5); Die-only cell is D16, placement is D20/D21 |
 | Row 1: Accept / Cancel / Give back | `Order.AcceptCommand` / `CancelCommand` / `ReleaseCommand` | restyled into a grid |
-| Row 2: Complete / Details / Print | `Order.CompleteCommand` / **new** / **new, disabled** | one new navigation action, one placeholder |
+| Row 2: Complete / Details / ~~Print~~ | `Order.CompleteCommand` / **new** / *(no third cell — D59)* | one new navigation action, and no placeholder |
 | Status pill | `Order.StatusBadgeText` | removed (D11) |
 | Card-body click → open request | `ItemClick` on the list | removed; the Details button owns it (D5/D6) |
 
@@ -158,12 +182,12 @@ The ring must re-evaluate on the same one-minute tick that already refreshes `Wa
 
 ---
 
-## 4. The action grid (2 columns × 3 rows, row-major)
+## 4. The action grid (3 columns × 2 rows, row-major)
 
 | | Column 1 | Column 2 | Column 3 |
 |---|---|---|---|
 | **Row 1** | **Accept** — green check | **Cancel** — red X | **Give back** — amber pause |
-| **Row 2** | **Complete** — blue box-with-check | **Open details** — magnifier | **Print** — printer, **disabled** |
+| **Row 2** | **Complete** — blue box-with-check | **Open details** — magnifier | *(~~Print~~ — removed, D59)* |
 
 Rules that carry over unchanged and must not be weakened:
 
@@ -174,7 +198,7 @@ Rules that carry over unchanged and must not be weakened:
 * Minimum 44×44 hit target.
 * Accept / Complete / Give back keep their three distinct colours and glyphs so they are never mistaken for one
   another.
-* **Print** is `IsEnabled="False"` with a "not available yet" tooltip and a code-behind `TODO` naming label printing.
+* ~~**Print** is `IsEnabled="False"` with a "not available yet" tooltip and a code-behind `TODO` naming label printing.~~ **Superseded by D59:** the card draws no print control and carries no print TODO.
   Visible so the layout is honest about what is coming; inert so it cannot mislead.
 * **Open details** replaces the card-body click. The picture keeps Shift+click enlarge; the badge keeps its meaning.
 
@@ -235,9 +259,10 @@ collapses entirely.
 |---|---|---|
 | `other` | Request description — drawn with **`AutoScrollTextView`** | 1 |
 
-⚠ **Weight of Coil is not Pickup Coil's `Average coil weight`.** One is a job-derived average; the other is the
-actual weight the operator must supply on an Assist Coil Turn so a material handler can judge whether a larger
-forklift is needed. They must not be conflated.
+⚠ **Weight of Coil is not Pickup Coil's `Average coil weight`.** One is the average the receiving store's own
+weighing history holds for the coil part (`mtm_receiving_application.receiving_history`, read through
+`sp_receiving_history_average_coil_weight`); the other is the actual weight the operator must supply on an Assist
+Coil Turn so a material handler can judge whether a larger forklift is needed. They must not be conflated.
 
 ### 5.1 New request-workflow requirements
 
@@ -403,7 +428,7 @@ are cargo-cult risks the moment a later reader finds the old text.
    and cards of different Items may differ in height.
 4. **Action availability is unchanged.** A button's visibility still comes from the row's own gate; no action
    becomes available or unavailable because the layout changed.
-5. **Localization.** Every new label — the ring's accessible name, `Open details`, the Print tooltip, the new cell
+5. **Localization.** Every new label — the ring's accessible name, `Open details`, the new cell
    labels, the die-shop phrases, the four handler statuses and the three status words — is a resource key in
    `Strings/en-us/Resources.resw`, never a literal.
 6. **Accessibility.** The ring must expose a text equivalent saying what it measures **and which of the two things
@@ -421,7 +446,7 @@ are cargo-cult risks the moment a later reader finds the old text.
 ## 8. Artifacts the implementation will touch (for the plan, not the spec)
 
 * `Module_Waitlist/Controls/WaitlistLineCardView.xaml` and `.xaml.cs` — the card, now **pulling a detail control
-  per card** (D31), plus the Print `TODO`.
+  per card** (D31). No print `TODO`: the card carries no print action (D59).
 * **The detail controls, one per card, all in a single file** (D31) — the arrangement that keeps column 3 out of
   the card's own XAML without adding a file per card. Any other section that grows complex may also move into a
   control of its own.
@@ -477,7 +502,7 @@ image alone.
 * The card remains usable with the system's animations switched off, and the flyout is keyboard-operable.
 * No card shows a value the request does not carry, and a cell whose source cannot be read is hidden and logged
   rather than explained on the card (D41).
-* Printing is visibly unavailable and says so when pointed at, rather than appearing broken or appearing to work.
+* ~~Printing is visibly unavailable and says so when pointed at~~ **Superseded by D59:** the card offers only actions that do something, so nothing on it reads as broken.
 * Opening a request is a deliberate, separate action from clicking anywhere on its row.
 
 ---
@@ -487,7 +512,7 @@ image alone.
 * The waitlist **detail page** layout (D1).
 * Any change to the four **lifecycle** status words themselves. The four **handler-set** statuses of D26 are an
   **addition** to the vocabulary, not a change to it.
-* Any **new real action** beyond Open details and the status flyout. Print is a disabled placeholder (D4).
+* Any **new real action** beyond Open details and the status flyout. ~~Print is a disabled placeholder (D4)~~ **Superseded by D59:** printing is not on the card at all and belongs to the detail page later.
 * **Setup, Settings, and the Mock/visual-fallback surfaces.**
 * Any change to the **mirror/fallback** model. The fuzzy part search is deliberately **live-only** and must not be
   given a cached read shape (D24).

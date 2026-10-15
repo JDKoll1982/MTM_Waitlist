@@ -4739,6 +4739,8 @@ ORDER BY occurred_utc ASC, id ASC;
 -- Engine: MySQL 5.7
 -- Re-keyed by specs/004-unified-card-item-picker: a request is identified by the Category and the Item the
 -- requester chose, and the two legacy columns this procedure used to return no longer exist (FR-004).
+-- Extended for FR-022: the row also carries the material handler's display name, so a reader never has to
+-- print the employee number the queue stores to say who holds the request.
 
 USE mtm_waitlist;
 
@@ -4764,6 +4766,15 @@ SELECT
     target_time_utc,
     is_overdue,
     assigned_material_handler,
+    -- The handler's display name, resolved from the entry the handler themselves wrote when they took the
+    -- request. See sp_waitlist_request_list for why the name comes from there and not from this table.
+    (SELECT a.actor_employee_name
+       FROM waitlist_requests_audit a
+      WHERE a.request_public_id = waitlist_requests_queue.public_id
+        AND a.actor_employee_name IS NOT NULL
+        AND a.actor_employee_number = waitlist_requests_queue.assigned_material_handler
+      ORDER BY a.occurred_utc DESC
+      LIMIT 1) AS assigned_material_handler_name,
     cancellation_reason,
     canceled_utc,
     canceled_by_employee_number,
@@ -4777,11 +4788,47 @@ FROM waitlist_requests_queue
 WHERE public_id = p_public_id
 LIMIT 1;
 
+-- Create procedure: sp_waitlist_request_handler_status_update
+-- Engine: MySQL 5.7
+-- The write is CONDITIONAL on the handler the caller read (FR-070, FR-073, FR-076). Two handlers acting on the
+-- same request at the same moment must produce exactly one outcome: the second caller matches no row, the update
+-- reports zero affected rows, and the caller is told rather than shown a success it did not get. Matching on
+-- public_id alone would let a caller that is not the row's own material handler set a condition on somebody
+-- else's work, which is the same lost-race hole sp_waitlist_request_status_update closes with p_expected_status.
+-- p_expected_material_handler is the handler the caller saw, and it is what decides the match. Unlike that
+-- sibling's p_expected_status, an absent or empty value is NOT treated as "unconditional": a handler gate with
+-- nothing to match on leaves the row alone and reports 0, because the one thing this procedure must never do is
+-- write a handler status for somebody who is not that handler.
+-- The return value is the UPDATE's own affected-row count, the same way sp_waitlist_request_status_update
+-- reports it, so the caller's write seam can tell a lost race from a write.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_request_handler_status_update;
+
+CREATE PROCEDURE sp_waitlist_request_handler_status_update(
+    IN p_public_id CHAR(36),
+    IN p_handler_status VARCHAR(32),
+    IN p_expected_material_handler VARCHAR(128)
+)
+UPDATE waitlist_requests_queue
+SET handler_status = NULLIF(TRIM(COALESCE(p_handler_status, '')) COLLATE utf8mb4_unicode_ci, ''),
+    updated_utc = UTC_TIMESTAMP()
+WHERE public_id = p_public_id
+  AND NULLIF(TRIM(COALESCE(p_expected_material_handler, '')), '') IS NOT NULL
+  AND assigned_material_handler = TRIM(p_expected_material_handler);
+
 -- Create procedure: sp_waitlist_request_insert
 -- Engine: MySQL 5.7
 -- Re-keyed by specs/004-unified-card-item-picker: a new request is raised with the Category and the Item the
 -- requester chose, and no longer with a request type or a subtype (FR-004). The lifecycle columns this
 -- procedure writes are unchanged, because the request lifecycle does not change with the Item (FR-032).
+-- Extended by specs/012-waitlist-card-layout: a request now also carries the answers it captured beyond
+-- `input_value`, which holds exactly one answer while the die Items ask two questions and each of the four
+-- returning Items asks one (FR-073, FR-087). The map is keyed by the label the Item declared, the same
+-- label-to-value shape the row's `answers_json` column holds, and it is written through exactly as it arrives:
+-- a JSON column needs no TRIM, and a caller with no answers passes NULL, which stores NULL rather than an
+-- empty object.
 
 USE mtm_waitlist;
 
@@ -4804,7 +4851,8 @@ CREATE PROCEDURE sp_waitlist_request_insert(
     IN p_is_overdue TINYINT,
     IN p_assigned_material_handler VARCHAR(128),
     IN p_cancellation_reason VARCHAR(255),
-    IN p_note VARCHAR(500)
+    IN p_note VARCHAR(500),
+    IN p_answers_json JSON
 )
 INSERT INTO waitlist_requests_queue (
     public_id,
@@ -4813,6 +4861,7 @@ INSERT INTO waitlist_requests_queue (
     category,
     item,
     input_value,
+    answers_json,
     active_setup_job_id,
     work_center_name,
     requester_employee_number,
@@ -4834,6 +4883,7 @@ VALUES (
     TRIM(p_category),
     TRIM(p_item),
     NULLIF(TRIM(COALESCE(p_input_value, '')) COLLATE utf8mb4_unicode_ci, ''),
+    p_answers_json,
     TRIM(p_active_setup_job_id),
     TRIM(p_work_center_name),
     TRIM(p_requester_employee_number),
@@ -4958,6 +5008,11 @@ ORDER BY q.item ASC;
 -- Engine: MySQL 5.7
 -- Re-keyed by specs/004-unified-card-item-picker: the list carries each request's Category and Item, which is
 -- what the one card shape is built from, and no longer carries a request type or a subtype (FR-004).
+-- Extended by specs/012-waitlist-card-layout (FR-073): every row now also carries the handler's reported
+-- condition and the request's answers, because the card states the condition and restores the answers from the
+-- list it already reads, rather than issuing a second read per row.
+-- Extended for FR-022: every row now also carries the material handler's display name, because the card names
+-- the people on a request and a person is named by name, never by the employee number the queue stores.
 
 USE mtm_waitlist;
 
@@ -4979,6 +5034,8 @@ SELECT
     q.category,
     q.item,
     q.input_value,
+    q.handler_status,
+    q.answers_json,
     q.active_setup_job_id,
     q.work_center_name,
     q.requester_employee_number,
@@ -4988,6 +5045,18 @@ SELECT
     q.target_time_utc,
     q.is_overdue,
     q.assigned_material_handler,
+    -- The handler's display name. The queue column beside this one holds the handler's employee *number*,
+    -- because that number is what every handler authorization compares; the name a person reads instead comes
+    -- from the entry the handler themselves wrote, which carries both. Matching the name to the current
+    -- handler's own number is what keeps it honest: a later entry by somebody else - a requester cancelling a
+    -- request they no longer need, say - can never name the wrong person.
+    (SELECT a.actor_employee_name
+       FROM waitlist_requests_audit a
+      WHERE a.request_public_id = q.public_id
+        AND a.actor_employee_name IS NOT NULL
+        AND a.actor_employee_number = q.assigned_material_handler
+      ORDER BY a.occurred_utc DESC
+      LIMIT 1) AS assigned_material_handler_name,
     q.cancellation_reason,
     q.canceled_utc,
     q.canceled_by_employee_number,

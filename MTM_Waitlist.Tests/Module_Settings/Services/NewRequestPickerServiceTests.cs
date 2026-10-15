@@ -178,6 +178,13 @@ public sealed class NewRequestPickerServiceTests
             HasComponent = false,
             HasDunnage = false,
             HasScrapDecision = false,
+            // The four returning pickups are offered on the work the job has (FR-094), so this job — which has
+            // none of it — must not be handed them. Their own gating is pinned by
+            // RequestItemPickerRulesTests_EachReturningPickup_IsOfferedExactlyWhenTheJobHasThatWork.
+            HasFinishedGoodsToReturn = false,
+            HasNonconformingStockToReturn = false,
+            HasWorkInProgressToReturn = false,
+            HasOutsideServiceWorkToReturn = false,
         };
 
         var built = service.GetVisibleItems(RequestCategory.Pickup, onlyFlatstock).Select(i => i.Id).ToList();

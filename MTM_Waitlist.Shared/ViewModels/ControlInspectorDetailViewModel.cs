@@ -1,15 +1,11 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using MTM_Waitlist.Module_Core.Contracts.Services;
-using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Shared.Models;
 
 namespace MTM_Waitlist.Module_Shared.ViewModels;
 
-public partial class ControlInspectorDetailViewModel : ObservableRecipient, INavigationAware
+public partial class ControlInspectorDetailViewModel : ObservableRecipient
 {
-    private readonly INavigationService _navigationService;
     private IReadOnlyList<string> _allAssociatedFiles = Array.Empty<string>();
     private IReadOnlyList<ControlInspectorSection> _allSections = Array.Empty<ControlInspectorSection>();
 
@@ -37,21 +33,23 @@ public partial class ControlInspectorDetailViewModel : ObservableRecipient, INav
     public IReadOnlyList<ControlInspectorWorkflowStep> WorkflowSteps =>
         Detail?.WorkflowSteps ?? Array.Empty<ControlInspectorWorkflowStep>();
 
-    public ControlInspectorDetailViewModel(INavigationService navigationService)
+    public ControlInspectorDetailViewModel()
     {
-        _navigationService = navigationService;
     }
 
-    public void OnNavigatedTo(object parameter)
+    /// <summary>
+    /// Fills the view model with one control's details.
+    /// </summary>
+    /// <remarks>
+    /// It is loaded rather than navigated to because the inspector is a window, not a stage of the shell: there is
+    /// no frame to navigate, no back stack to return along, and nothing to raise <c>OnNavigatedTo</c>.
+    /// </remarks>
+    public void Load(ControlInspectorDetail? detail)
     {
-        Detail = parameter as ControlInspectorDetail;
-        _allAssociatedFiles = Detail?.AssociatedFiles ?? Array.Empty<string>();
-        _allSections = Detail?.Sections ?? Array.Empty<ControlInspectorSection>();
+        Detail = detail;
+        _allAssociatedFiles = detail?.AssociatedFiles ?? Array.Empty<string>();
+        _allSections = detail?.Sections ?? Array.Empty<ControlInspectorSection>();
         RefreshVisibleCollections();
-    }
-
-    public void OnNavigatedFrom()
-    {
     }
 
     partial void OnDetailChanged(ControlInspectorDetail? value)
@@ -66,12 +64,6 @@ public partial class ControlInspectorDetailViewModel : ObservableRecipient, INav
     partial void OnHideTooltipRelatedFilesChanged(bool value)
     {
         RefreshVisibleCollections();
-    }
-
-    [RelayCommand]
-    private void Back()
-    {
-        _navigationService.GoBack();
     }
 
     private void RefreshVisibleCollections()

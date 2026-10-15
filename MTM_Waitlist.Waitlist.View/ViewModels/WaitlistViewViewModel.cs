@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
@@ -51,10 +51,27 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     /// <summary>
     /// The requesting job per work centre for the load in flight. Building a card's two lines can need the job's
     /// own part number and the die assigned to it, and every row of a work centre needs the same job, so a list of
-    /// N rows costs one read per distinct work centre rather than N. Cleared at the start of each load, so a job
-    /// that has moved on since the last load is picked up.
+    /// N rows costs one read per distinct work centre rather than N. Cleared at the start of each cold load, so a
+    /// job that has moved on since the last one is picked up, and kept across a reload raised by a change in the
+    /// store, which cannot have moved it.
     /// </summary>
     private readonly Dictionary<string, RequestJobPartAvailability> _jobAvailabilityCache = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// The pictures this list has already resolved, keyed by the scope and part that were asked about, so a
+    /// reload raised by a change in the store does not resolve them all over again.
+    /// </summary>
+    /// <remarks>
+    /// A resolved path is the expensive half of building a card: it is a file probe, and the picture root is a
+    /// network share in the plant's configuration, so a share that is not answering makes every probe a failed
+    /// lookup that measured hundreds of milliseconds to seconds (2026-10-11). A status change alters a request's
+    /// status and its handler and cannot alter any picture, so a reload raised by one reuses what the cold load
+    /// before it resolved. The map is emptied by every cold load - the page opening, the building changing, the
+    /// person's own refresh - so a genuinely new picture is picked up on the next of those rather than being
+    /// remembered away. The resolver does the same thing for itself one level down: it copies a picture onto this
+    /// computer the first time it draws it, and reads the copy from then on.
+    /// </remarks>
+    private readonly Dictionary<string, string> _resolvedPictureCache = new(StringComparer.OrdinalIgnoreCase);
 
     private readonly IRequestJobPartAvailabilityProvider? _jobAvailabilityProvider;
 
@@ -71,15 +88,23 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     /// </summary>
     private readonly IPermissionService? _permissionService;
 
+    /// <summary>
+    /// The reader every card's declared fields come from. A row's cells are the fields its Item declares
+    /// (FR-025), and the declaration is read live from the internal store once per list load rather than once
+    /// per row, which is what <c>GetConfigurationsAsync</c> exists for. Null on a headless host, which draws no
+    /// detail cell at all rather than inventing one.
+    /// </summary>
+    private readonly IRequestItemConfigurationService? _itemConfigurationService;
+
     /// <summary>The documented default allotted time, used when no deadline service is supplied or the Item has no configured allotment.</summary>
-    private static readonly TimeSpan DefaultMaxAllotted = TimeSpan.FromMinutes(UrgencySettingsService.DefaultMinutes);
+    private static readonly TimeSpan s_defaultMaxAllotted = TimeSpan.FromMinutes(UrgencySettingsService.DefaultMinutes);
 
     /// <summary>
     /// The ordering key for a row whose due time cannot be derived. It is not overdue and carries the longest
     /// possible remaining time, so it sorts after every row that does carry an urgency without the ordering
     /// rule pretending it is something it is not.
     /// </summary>
-    private static readonly UrgencyState NoUrgency = new() { Remaining = TimeSpan.MaxValue, IsOverdue = false };
+    private static readonly UrgencyState s_noUrgency = new() { Remaining = TimeSpan.MaxValue, IsOverdue = false };
 
     private IDisposable? _imageLocationSubscription;
     private long _refreshVersion;
@@ -126,7 +151,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         IWaitlistSortPreferenceService? sortPreferenceService = null,
         IRequestJobPartAvailabilityProvider? jobAvailabilityProvider = null,
         IPermissionService? permissionService = null,
-        IPartPictureResolver? partPictureResolver = null)
+        IPartPictureResolver? partPictureResolver = null,
+        IRequestItemConfigurationService? itemConfigurationService = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(buildingSelectionService);
@@ -146,6 +172,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         _sortPreferenceService = sortPreferenceService;
         _jobAvailabilityProvider = jobAvailabilityProvider;
         _partPictureResolver = partPictureResolver;
+        _itemConfigurationService = itemConfigurationService;
 
         // This screen's own internal-store unavailable state (FR-021): the waitlist list reads
         // mtm_waitlist live, so a failure is reported here, with a retry that re-runs this screen's load.
@@ -349,6 +376,46 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         catch (Exception ex)
         {
             AppLog.Error("Waitlist", ex, "A waitlist request action failed; the row is unchanged.");
+            ActionRefusalMessage = "Waitlist_Action_Refused.Unexpected".GetLocalized();
+        }
+    }
+
+    /// <summary>
+    /// Sets the condition the row's own material handler reported from its card (FR-070, FR-072, FR-076).
+    /// </summary>
+    /// <remarks>
+    /// This is the command the status word's flyout invokes with the row and the condition chosen from the four;
+    /// the flyout's own body and behaviour are Phase 6's work, so nothing more than the command and its gate is
+    /// exposed here. The write goes through the seam that reports the affected rows, so a lost race — a handler
+    /// who no longer holds the request, or a value that is not one of the four conditions — is told rather than
+    /// shown as a success that did not happen (FR-073). The gate is the row's own: only its recorded material
+    /// handler is offered the write at all, which is the same rule the store enforces, so nobody is asked and
+    /// then refused.
+    /// </remarks>
+    [RelayCommand]
+    private async Task SetStatusConditionAsync((SampleOrder? Row, string? Condition) selection)
+    {
+        if (selection.Row is not { RequestId: Guid requestId, CanSetStatusCondition: true } row)
+        {
+            return;
+        }
+
+        try
+        {
+            // No ConfigureAwait(false): a continuation may set the bindable refusal message, and that is
+            // UI-thread-only, exactly as the other action paths here are.
+            var affected = await _waitlistRequestService.SetHandlerStatusAsync(
+                requestId,
+                selection.Condition,
+                row.AssignedMaterialHandler?.Trim() ?? string.Empty);
+
+            ActionRefusalMessage = affected > 0
+                ? string.Empty
+                : "Waitlist_Action_Refused.CompleteOrRelease".GetLocalized();
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("Waitlist", ex, "Setting the row's condition failed; the row is unchanged.");
             ActionRefusalMessage = "Waitlist_Action_Refused.Unexpected".GetLocalized();
         }
     }
@@ -558,7 +625,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     }
 
     /// <summary>One minute: the granularity of both time-derived card texts.</summary>
-    private static readonly TimeSpan MinuteTickInterval = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan s_minuteTickInterval = TimeSpan.FromMinutes(1);
 
     private DispatcherQueueTimer? _minuteTicker;
 
@@ -613,9 +680,9 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     private void OnMinuteTick(DispatcherQueueTimer sender, object args)
     {
         // The alignment interval applies to the first tick only.
-        if (sender.Interval != MinuteTickInterval)
+        if (sender.Interval != s_minuteTickInterval)
         {
-            sender.Interval = MinuteTickInterval;
+            sender.Interval = s_minuteTickInterval;
         }
 
         RefreshTimeDerivedText();
@@ -629,8 +696,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     public static TimeSpan TimeUntilNextMinute(DateTimeOffset now)
     {
         var elapsedInMinute = TimeSpan.FromSeconds(now.Second) + TimeSpan.FromMilliseconds(now.Millisecond);
-        var remaining = MinuteTickInterval - elapsedInMinute;
-        return remaining > TimeSpan.Zero ? remaining : MinuteTickInterval;
+        var remaining = s_minuteTickInterval - elapsedInMinute;
+        return remaining > TimeSpan.Zero ? remaining : s_minuteTickInterval;
     }
 
     /// <summary>
@@ -667,7 +734,12 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
     private async void OnRequestsChanged(object? sender, EventArgs e)
     {
-        await LoadOrdersAsync(_buildingSelectionService.SelectedBuilding);
+        // A change in the store - an action taken on a card, or a request just raised - reloads the list, and the
+        // job each work centre is running is not what changed. Re-reading it costs one live read per work centre
+        // per row, which is what left a person waiting several seconds to see a card they had just acted on, so
+        // this reload reuses what the cold load before it read.
+        await LoadOrdersCoreAsync(_buildingSelectionService.SelectedBuilding, reuseJobData: true)
+            .ConfigureAwait(false);
     }
 
     private void OnImageLocationChanged(ImageLocationChangedEventArgs args)
@@ -676,6 +748,20 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     }
 
     private async Task LoadOrdersAsync(string building)
+        => await LoadOrdersCoreAsync(building, reuseJobData: false).ConfigureAwait(false);
+
+    /// <summary>
+    /// Rebuilds the list from the store.
+    /// </summary>
+    /// <param name="building">The building whose rows are wanted.</param>
+    /// <param name="reuseJobData">
+    /// Whether the job data and the resolved pictures the cold load before this one read may be reused instead of
+    /// read again. Passing <see langword="true" /> is only correct for a reload raised by a change in the store —
+    /// an action taken on a card, or a request just raised — because such a change moves a request's status and its
+    /// handler and touches neither the job its work centre is running, nor that job's allotted window, nor any
+    /// picture. A cold load reads all of it again, and is therefore the refresh point.
+    /// </param>
+    private async Task LoadOrdersCoreAsync(string building, bool reuseJobData)
     {
         var refreshVersion = Interlocked.Increment(ref _refreshVersion);
         await Task.Yield();
@@ -696,14 +782,32 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         await _waitlistRequestService.RefreshFromDatabaseAsync(building).ConfigureAwait(false);
         var activeRequests = _waitlistRequestService.GetActiveRequests(building);
         var activeRequestCount = activeRequests.Count;
+        var itemDeclarations = await ReadItemDeclarationsAsync(activeRequests).ConfigureAwait(false);
         var workCenterImageLookup = await BuildWorkCenterImageLookupAsync(cancellationToken: default).ConfigureAwait(false);
+
+        // A load raised by a change in the store - an action taken on a card, or a request just raised - reuses
+        // what the cold load before it read, because such a change moves a request's status and its handler and
+        // cannot move the job its work centre is running, that job's allotted window, or any picture. A cold load
+        // - the page opening, the building changing, the person's own refresh - reads all of it again, and is
+        // therefore both the refresh point and the only thing that pays for a live read.
+        //
+        // This was a two-minute timer to begin with, and the timer was the defect: an action taken more than two
+        // minutes after the page was opened re-read every work centre's job, which measured up to three seconds
+        // from the click to the card changing, and only some of the time - which is exactly how the hang was
+        // reported. The window is now the cold load, which the person controls.
+        if (!reuseJobData)
+        {
+            _maxAllottedCache.Clear();
+            _jobAvailabilityCache.Clear();
+            _resolvedPictureCache.Clear();
+        }
+
         var now = DateTimeOffset.UtcNow;
-        _maxAllottedCache.Clear();
-        _jobAvailabilityCache.Clear();
+
         foreach (var request in activeRequests)
         {
             var jobAvailability = await ResolveJobAvailabilityAsync(request.WorkCenter).ConfigureAwait(false);
-            var sessionOrder = CreateSessionOrder(request, jobAvailability);
+            var sessionOrder = CreateSessionOrder(request, jobAvailability, itemDeclarations?.Get(request.Item));
             sessionOrder.Urgency = await ResolveUrgencyAsync(request, now).ConfigureAwait(false);
             await ApplyResolvedImagesAsync(sessionOrder, request, workCenterImageLookup).ConfigureAwait(false);
             newItems.Add(sessionOrder);
@@ -810,10 +914,10 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
     /// <summary>
     /// The row's already-computed values, as the order keys read them. A row whose urgency could not be derived
-    /// carries <see cref="NoUrgency"/>, so it takes its place at the calm end rather than pretending to be urgent.
+    /// carries <see cref="s_noUrgency"/>, so it takes its place at the calm end rather than pretending to be urgent.
     /// </summary>
     private static UrgencyCalculator.SortValues SortValuesOf(SampleOrder order) => new(
-        order.Urgency ?? NoUrgency,
+        order.Urgency ?? s_noUrgency,
         order.RequestedUtc,
         order.RequestedPressName,
         order.RequestedByName,
@@ -867,7 +971,10 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         }
     }
 
-    public static SampleOrder CreateSessionOrder(WaitlistRequest request, RequestJobPartAvailability? jobAvailability = null)
+    public static SampleOrder CreateSessionOrder(
+        WaitlistRequest request,
+        RequestJobPartAvailability? jobAvailability = null,
+        RequestItemConfiguration? declaration = null)
     {
         // The request's identity is its Item code. Everything the card shows about *what* was asked for —
         // both lines, the picture, the detail slots — resolves from that one code through the Item catalog,
@@ -892,6 +999,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             MaterialPartScope = materialPartNumber is null ? string.Empty : PartPictureLayout.VisualPartScope,
             RequesterEmployeeNumber = request.RequesterEmployeeNumber,
             AssignedMaterialHandler = request.AssignedMaterialHandler,
+            AssignedMaterialHandlerName = request.AssignedMaterialHandlerName,
             Note = request.Note,
             Title = line1,
             Subtitle = line2.Text,
@@ -904,8 +1012,26 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             RequestedUtc = request.RequestedUtc,
             TargetTimeUtc = request.TargetTimeUtc,
             LastMessageUtc = request.LastMessageUtc,
-            IsOverdue = request.IsOverdue,
+            // The store's overdue flag is sticky, and a row whose due time has already passed is overdue too, so
+            // the setter is never given an answer the row's own first paint would contradict: without this the word
+            // on row 1 read `Waiting` while the ring beside it already read `Overdue`, until the first tick ran.
+            IsOverdue = SampleOrder.IsOverdueAt(request.IsOverdue, request.TargetTimeUtc),
             IsOverdueAtSource = request.IsOverdue,
+
+            // The condition the row's own material handler reported, read back with the request so it is restored
+            // onto the same card on the next list read and survives a restart (FR-073, SC-016). It is copied as
+            // the store holds it: the row's own setter is what decides whether the value is one of the four
+            // conditions, so a fifth word reads as no condition rather than as a report nobody made.
+            HandlerStatus = request.HandlerStatus,
+
+            // The ring's two extra inputs (data-model.md §7, FR-015, FR-017). The allotment is the Item's
+            // declared one — the number the urgency deadline service reads from the same configuration row — so
+            // the ring's scale and the countdown come from one source, and an Item that declares none keeps the
+            // row's own labelled fifteen-minute fallback. The close instant freezes the ring for a Done or
+            // Cancelled request; from then on the fraction is the time taken rather than the time left, and the
+            // minute tick recomputes the fraction without a second clock.
+            AllottedMinutes = declaration?.AllottedMinutes,
+            ClosedUtc = request.CompletedUtc ?? request.CanceledUtc,
         };
 
         // One card row per request: the row carries the two lines, the picture, the four metadata values and
@@ -913,13 +1039,272 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         // not padded into template slots any more — the card draws no per-Item field, and the ones the request
         // does carry are read by the request page (FR-007).
         AddRequestFields(item, request);
+
+        // The card's own cells are the fields the Item declares, resolved here where the request and the
+        // requesting job are both in hand (FR-025, FR-026, §7).
+        AddDeclaredCells(item, request, jobAvailability, declaration);
         return item;
     }
 
     /// <summary>
-    /// The requesting job for one work centre, read once per load and held for that work centre. Where a card's
-    /// two lines need a value the request never stored — the job's own part number, the die it is assigned, the
-    /// die's location — this is where it comes from (FR-053).
+    /// Reads every Item's declaration once for a load, so a list of N rows costs one read rather than N, and
+    /// reports the Items whose declaration cannot be read: their cards draw no cells at all and the gap is
+    /// recorded, rather than a cell being invented or a reason being drawn on the card (FR-058, FR-101, D41).
+    /// </summary>
+    /// <param name="requests">The requests the load is about to build rows for.</param>
+    /// <returns>The declarations, or null when there is nothing to read them from or the read failed.</returns>
+    private async Task<RequestItemConfigurationSet?> ReadItemDeclarationsAsync(IReadOnlyList<WaitlistRequest> requests)
+    {
+        if (_itemConfigurationService is null)
+        {
+            return null;
+        }
+
+        RequestItemConfigurationSet declarations;
+        try
+        {
+            declarations = await _itemConfigurationService.GetConfigurationsAsync().ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            // A declaration the screen cannot read is a source that exists but cannot be read, so no card on
+            // this load draws a detail cell and the failure is recorded rather than papered over.
+            AppLog.Error(
+                "Waitlist",
+                ex,
+                "The Items' declared fields could not be read, so no card on this load draws a detail cell.");
+            return null;
+        }
+
+        foreach (var itemCode in requests
+            .Select(request => request.Item)
+            .Where(code => !string.IsNullOrWhiteSpace(code))
+            .Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            if (!declarations.Get(itemCode).IsAvailable)
+            {
+                AppLog.Warn(
+                    "Waitlist",
+                    $"Item '{itemCode}' has no usable declaration, so its card draws no detail cells. The gap needs chasing up (FR-058).");
+            }
+        }
+
+        return declarations;
+    }
+
+    /// <summary>
+    /// Fills a row's cells from its Item's declaration: one cell per declared field, in declared order, with
+    /// every field that resolved nothing left out entirely (FR-006, FR-026).
+    /// </summary>
+    private static void AddDeclaredCells(
+        SampleOrder item,
+        WaitlistRequest request,
+        RequestJobPartAvailability? jobAvailability,
+        RequestItemConfiguration? declaration)
+    {
+        foreach (var cell in ResolveDeclaredCells(declaration, request, jobAvailability))
+        {
+            item.Cells.Add(cell);
+        }
+    }
+
+    /// <summary>
+    /// The cells one row draws: one per field the Item's declaration carries <b>that is one of the Item's
+    /// cells</b>, resolved by that field's own source and laid out in declared order, with the hide rule's two
+    /// halves applied — a cell the Item never declares is never produced, and a cell whose source exists but
+    /// cannot be read is not produced either and is recorded in the store's log instead (FR-025, FR-026,
+    /// FR-056, FR-058, FR-101, D41).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <c>WaitlistLineCardCell.CellsToDraw</c> is the one place the "a cell that resolved nothing is not
+    /// drawn" rule lives, so this method hands it every declared field's cell and draws what comes back.
+    /// </para>
+    /// <para>
+    /// <c>WaitlistCardCellRules</c> is the one place the other half lives: an Item declares fields its card
+    /// does not show, and those are excluded here rather than removed from configuration, which is what keeps
+    /// the exclusion a card rule and lets the two disagree without either being quietly edited (FR-056,
+    /// <c>data-model.md</c> §9). An excluded field is working as designed, so nothing is logged for it.
+    /// </para>
+    /// </remarks>
+    /// <param name="declaration">The Item's configuration row, or null when it could not be read.</param>
+    /// <param name="request">The request the row was built from.</param>
+    /// <param name="jobAvailability">The requesting job's snapshot, or null before one has arrived.</param>
+    /// <returns>The cells to draw, in declared order; nothing at all when the declaration cannot be read.</returns>
+    public static IReadOnlyList<WaitlistLineCardCell> ResolveDeclaredCells(
+        RequestItemConfiguration? declaration,
+        WaitlistRequest request,
+        RequestJobPartAvailability? jobAvailability)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (declaration is null || !declaration.IsAvailable || declaration.DetailFields.Count == 0)
+        {
+            return Array.Empty<WaitlistLineCardCell>();
+        }
+
+        var candidates = new List<WaitlistLineCardCell?>(declaration.DetailFields.Count);
+        foreach (var field in declaration.DetailFields)
+        {
+            if (field is null || !WaitlistCardCellRules.IsCell(request.Item, field.Label))
+            {
+                continue;
+            }
+
+            candidates.Add(ResolveDeclaredCell(field, request, jobAvailability));
+        }
+
+        return WaitlistLineCardCell.CellsToDraw(candidates);
+    }
+
+    /// <summary>
+    /// One declared field as a cell, carrying the declared label as the resource key it is and whatever its
+    /// source resolved to. A field whose source exists but cannot be read resolves to nothing — and is recorded
+    /// — so it is hidden rather than explained on the card or filled with a substitute (FR-058, FR-101, D41).
+    /// </summary>
+    private static WaitlistLineCardCell ResolveDeclaredCell(
+        RequestItemFieldDefinition? field,
+        WaitlistRequest request,
+        RequestJobPartAvailability? jobAvailability)
+    {
+        if (field is null)
+        {
+            return new WaitlistLineCardCell();
+        }
+
+        var label = field.Label ?? string.Empty;
+        var source = field.Source?.Trim() ?? string.Empty;
+
+        if (WaitlistCardCellRules.IsDieShopField(request.Item, label))
+        {            // The die Items' die-shop cell is the one cell with no label: its phrase IS its value, so what the
+            // requester ticked is read here and the phrase — chosen by the Item's direction — is what lands in
+            // the cell. An unticked checkbox is no answer, so the third cell stays absent rather than drawing
+            // the other half of the choice (FR-055, FR-081). The answer is read as a labelled one, never as
+            // the request's single answer, so the die the flow asked for can never be mistaken for this flag.
+            var given = CapturedAnswer(label, request, required: false);
+
+            return new WaitlistLineCardCell
+            {
+                Value = WaitlistCardCellRules.IsDieShopAnswerGiven(given)
+                    ? WaitlistCardCellRules.DieShopPhrase(request.Item) ?? string.Empty
+                    : string.Empty,
+                Order = field.Order,
+            };
+        }
+
+        // A cell whose source is designed but not yet built draws a plainly-worded placeholder rather than being
+        // hidden, so the person can see the cell is coming (FR-034). It is a message about the cell, never a value
+        // read from anywhere, and it is not recorded as a failure: nothing has failed, the source is simply not
+        // built yet. Delete the field from `WaitlistCardCellRules.s_pendingSourceLabels` once its source lands.
+        if (WaitlistCardCellRules.IsPendingSourceField(request.Item, label))
+        {
+            return new WaitlistLineCardCell
+            {
+                Label = label,
+                Value = WaitlistCardCellRules.PendingSourcePhrase(request.Item, label) ?? string.Empty,
+                Order = field.Order,
+            };
+        }
+
+        if (string.Equals(source, RequestItemFieldDefinition.Sources.Answer, StringComparison.OrdinalIgnoreCase))
+        {
+            var answer = CapturedAnswer(label, request, field.IsRequired);
+
+            if (answer is null && field.IsRequired)
+            {
+                WarnUnreadableDeclaredField(
+                    request,
+                    label,
+                    "the answer it declares it needs was not captured");
+            }
+
+            return new WaitlistLineCardCell
+            {
+                Label = label,
+                Value = answer ?? string.Empty,
+                Order = field.Order,
+
+                // The one cell on a hopper card that pictures the answer it shows: the size word is also the key
+                // that size's reference picture is filed under, so the card opens the same picture the New
+                // Request hopper step drew (FR-077, FR-078, D22). Any other answer-sourced cell opens none.
+                ReferencePartNumber = WaitlistCardCellRules.ReferencePicturePart(request.Item, label, answer) ?? string.Empty,
+                ReferencePartScope = WaitlistCardCellRules.ReferencePictureScope,
+            };
+        }
+
+        if (string.Equals(source, RequestItemFieldDefinition.Sources.Job, StringComparison.OrdinalIgnoreCase))
+        {
+            // A label the requesting job does not carry is the designed absence, not a fault: a job with no die
+            // draws no Die cell and nothing is logged for it (FR-057, RequestJobFieldValues). The label that
+            // resolves is the declared one, and an answer captured under it outranks the job's own (FR-082).
+            var jobValue = RequestJobFieldValues.Resolve(label, jobAvailability, request.Answers);
+            return new WaitlistLineCardCell { Label = label, Value = jobValue ?? string.Empty, Order = field.Order };
+        }
+
+        if (string.Equals(source, RequestItemFieldDefinition.Sources.Fixed, StringComparison.OrdinalIgnoreCase))
+        {
+            // A fixed field is one the request itself decides, and `Destination` is the one such field that is
+            // a cell: every Deliver Item is delivered to the work centre that asked for it, so the cell reads
+            // the request's own requesting work centre and nothing asks the requester where it goes (FR-042,
+            // FR-057, research R1). Any other fixed label resolves nothing, so its cell is hidden without a
+            // warning — the value does not exist yet rather than existing and failing to be read.
+            var fixedValue = WaitlistCardCellRules.RequestWorkCentreValue(label, request);
+            return new WaitlistLineCardCell { Label = label, Value = fixedValue ?? string.Empty, Order = field.Order };
+        }
+
+        WarnUnreadableDeclaredField(
+            request,
+            label,
+            $"its declared source '{source}' is not one this build can read");
+
+        return new WaitlistLineCardCell { Label = label, Order = field.Order };
+    }
+
+    /// <summary>
+    /// The answer a declared answer-sourced field reads.
+    /// </summary>
+    /// <remarks>
+    /// A labelled entry the request captured under the declared label wins, because that is the request's own
+    /// answer for that field. Failing that, a <b>required</b> answer-sourced field reads the one answer the flow
+    /// asked for and the request stores on itself — <see cref="WaitlistRequest.Answers"/> holds only what was
+    /// captured <i>beyond</i> it — which is how a one-answer Item's cell resolves. An <b>optional</b>
+    /// answer-sourced field reads only its own labelled entry, so the die-shop checkbox the requester never
+    /// ticked stays absent instead of reading an answer the flow asked for under another label (D40, FR-055).
+    /// A required answer the request does not carry resolves to nothing, and the caller records that gap.
+    /// </remarks>
+    private static string? CapturedAnswer(string label, WaitlistRequest request, bool required)
+    {
+        if (!string.IsNullOrWhiteSpace(label) && request.Answers is { Count: > 0 } answers)
+        {
+            foreach (var answer in answers)
+            {
+                if (string.Equals(answer.Key?.Trim(), label.Trim(), StringComparison.OrdinalIgnoreCase)
+                    && !string.IsNullOrWhiteSpace(answer.Value))
+                {
+                    return answer.Value.Trim();
+                }
+            }
+        }
+
+        return required && !string.IsNullOrWhiteSpace(request.InputValue)
+            ? request.InputValue.Trim()
+            : null;
+    }
+
+    /// <summary>
+    /// Records a declared field whose source exists but cannot be read, so the gap can be chased up later
+    /// (FR-058, FR-101, D41). It is never drawn as a reason on the card and never filled with a substitute.
+    /// </summary>
+    private static void WarnUnreadableDeclaredField(WaitlistRequest request, string label, string reason) =>
+        AppLog.Warn(
+            "Waitlist",
+            $"The card for request {request.Id:D} (item '{request.Item}') cannot read its declared field '{label}': {reason}. The cell is hidden.");
+
+    /// <summary>
+    /// The requesting job for one work centre, read once per load and held for that work centre, and reused by a
+    /// reload raised by a change in the store, and re-read by the next cold load.
+    /// Where a card's two lines need a value the request never stored — the job's own part number, the die it is
+    /// assigned, the die's location — this is where it comes from (FR-053).
     /// </summary>
     /// <remarks>
     /// A job that cannot be read is not worth failing the whole list for: the row falls back to what the request
@@ -983,7 +1368,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         }
 
         var maxAllotted = _urgencyDeadlineService is null
-            ? DefaultMaxAllotted
+            ? s_defaultMaxAllotted
             : await _urgencyDeadlineService.GetMaxAllottedAsync(key).ConfigureAwait(false);
 
         _maxAllottedCache[key] = maxAllotted;
@@ -1029,8 +1414,14 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
                 // Checked once per work centre rather than once per row, because every row of a work centre draws
                 // the same picture. A resolved path that is not a picture the application will draw is not an
                 // answer: it is stored as empty so the card draws the application's no-image placeholder rather
-                // than a hole.
-                if (!ImageFileProbe.IsUsablePicture(resolvedPath))
+                // than a hole. The share is asked about first, because this probe is against the picture share
+                // and a share that is not answering costs a failed lookup per work centre on every rebuild
+                // (PictureShareReachability); the answer it gives when it is silent is the same one the probe
+                // would have produced.
+                var shareRoot = PictureShareReachability.ShareRootOf(resolvedPath);
+
+                if ((shareRoot is not null && PictureShareReachability.IsReachable(shareRoot) is false)
+                    || ImageFileProbe.IsUsablePicture(resolvedPath) is false)
                 {
                     AppLog.Info(
                         "WaitlistRequest",
@@ -1056,6 +1447,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         CancellationToken cancellationToken = default)
     {
         await ApplyResolvedPartPictureAsync(order, cancellationToken).ConfigureAwait(false);
+        await ApplyResolvedCellReferencePicturesAsync(order, cancellationToken).ConfigureAwait(false);
 
         if (workCenterImageLookup.TryGetValue(request.WorkCenter, out var workCenterImage))
         {
@@ -1088,9 +1480,19 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
         try
         {
+            var key = PictureCacheKey(order.MaterialPartScope, order.MaterialPartNumber);
+
+            if (_resolvedPictureCache.TryGetValue(key, out var remembered))
+            {
+                order.ResolvedPartImagePath = remembered;
+                return;
+            }
+
             var resolved = await _partPictureResolver
                 .ResolvePartPicturePathAsync(order.MaterialPartScope, order.MaterialPartNumber, cancellationToken)
                 .ConfigureAwait(false);
+
+            _resolvedPictureCache[key] = resolved ?? string.Empty;
 
             if (string.IsNullOrWhiteSpace(resolved))
             {
@@ -1115,6 +1517,80 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         }
     }
 
+    /// <summary>
+    /// Resolves every cell's own reference picture and carries it on the cell, so the card draws a value it was
+    /// handed rather than resolving a storage root of its own (FR-078).
+    /// </summary>
+    /// <remarks>
+    /// Only the cells that open a picture are asked about, so an ordinary card costs no read at all. The hopper
+    /// size's picture follows the application's one picture rule through the resolver, and a size whose picture
+    /// is missing or unusable leaves the cell's path empty so the card draws the shared placeholder rather than a
+    /// blank (FR-080). A resolver that cannot answer is not worth failing the list for: the reason is logged and
+    /// the cell keeps its placeholder.
+    /// </remarks>
+    private async Task ApplyResolvedCellReferencePicturesAsync(SampleOrder order, CancellationToken cancellationToken)
+    {
+        if (_partPictureResolver is null)
+        {
+            return;
+        }
+
+        foreach (var cell in order.Cells)
+        {
+            if (!cell.OpensReferencePicture)
+            {
+                continue;
+            }
+
+            try
+            {
+                var key = PictureCacheKey(cell.ReferencePartScope, cell.ReferencePartNumber);
+
+                if (_resolvedPictureCache.TryGetValue(key, out var remembered))
+                {
+                    cell.ResolvedReferenceImagePath = remembered;
+                    continue;
+                }
+
+                var resolved = await _partPictureResolver
+                    .ResolvePartPicturePathAsync(cell.ReferencePartScope, cell.ReferencePartNumber, cancellationToken)
+                    .ConfigureAwait(false);
+
+                _resolvedPictureCache[key] = resolved ?? string.Empty;
+
+                if (string.IsNullOrWhiteSpace(resolved))
+                {
+                    AppLog.Info(
+                        "WaitlistRequest",
+                        $"Request '{order.RequestId}' has no picture for '{cell.ReferencePartNumber}'; the cell will draw the no-image placeholder.");
+                    continue;
+                }
+
+                cell.ResolvedReferenceImagePath = resolved;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                AppLog.Error(
+                    "WaitlistRequest",
+                    ex,
+                    $"Resolving the reference picture for '{cell.ReferencePartNumber}' failed; the cell will draw the no-image placeholder.");
+            }
+        }
+    }
+
+    /// <summary>
+    /// The key a resolved picture is remembered under: the scope and the part, because a picture is resolved for
+    /// a part in a scope and for nothing else. The two are joined with a separator neither can contain, so a part
+    /// whose name happens to end in another scope's name cannot be answered with the wrong picture.
+    /// </summary>
+    /// <param name="scope">The store scope the part's picture lives in.</param>
+    /// <param name="partNumber">The part the picture is of.</param>
+    private static string PictureCacheKey(string? scope, string? partNumber) =>
+        $"{scope?.Trim()}\u001F{partNumber?.Trim()}";
     private static void AddRequestFields(SampleOrder item, WaitlistRequest request)
     {
         // Every row below is sourced from the request itself. Nothing is derived from a retired type/subtype

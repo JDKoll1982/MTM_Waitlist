@@ -25,9 +25,11 @@ so those are machine-local and will NOT be committed when you push.
   `Documents/Development/InforVisual/Phase6-Disposition-StatusCodes-Research.md`.
 - `repo/tasks-md-id-allocation.md` — how task IDs are allocated in `tasks.md` so they stay unique and
   stable across phases.
-- `repo/subagent-models.md` — the owner's 2026-10-10 rule that **all background/subagent work runs on
-  DeepSeek V4 Flash** (`deepseek/deepseek-v4-flash`), the naming caveat around "V4.1", and the prohibition on
-  substituting a GitHub-hosted model.
+- `repo/subagent-models.md` — the owner's 2026-10-11 rule that **all background/subagent work runs on
+  DeepSeek V4.1 Flash** (`deepseek/deepseek-flash`), the model table that distinguishes it from
+  `deepseek/deepseek-v4-flash` (v4), and the prohibition on substituting a GitHub-hosted model.
+- `repo/tool-budget.md` — which tool groups were disabled to get under the model's 128-tool ceiling
+  (owner decisions, 2026-10-11) and which must never be disabled.
 - `repo/workstation-elevation.md` — which account to use when administrator rights are needed on this
   workstation, when elevation is *not* needed, and the owner-approved exception that lets it name a password.
 - `repo/workstation-secrets.md` — the `MTM_Waitlist.Mock.Service` host's per-user environment variables,

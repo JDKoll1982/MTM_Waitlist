@@ -7,8 +7,8 @@ namespace MTM_Waitlist.Tests.Module_Mock;
 
 /// <summary>
 /// The sixth read shape's proofs (`contracts/employee-read-shape-contract.md`; FR-032, FR-033): the catalog holds
-/// six shapes and one of them returns an employee by number, the mirrored row has the same shape as the live read,
-/// and every artifact the shape needs exists with its rollback.
+/// seven shapes and one of them returns an employee by number, the mirrored row has the same shape as the live
+/// read, and every artifact the shape needs exists with its rollback.
 /// </summary>
 /// <remarks>
 /// Parity is proved against the shipped scripts rather than a database, because what must not drift is the
@@ -20,14 +20,14 @@ public sealed class EmployeeByNumberShapeParityTests
 {
     private const string ShapeKey = "employee_by_number";
 
-    private static readonly string[] ExpectedColumns = ["EmployeeNumber", "FirstName", "LastName"];
+    private static readonly string[] s_expectedColumns = ["EmployeeNumber", "FirstName", "LastName"];
 
     [TestMethod]
-    public void Service_EmployeeByNumberShapeParityTests_TheCatalog_HoldsSixShapesIncludingTheEmployeeByNumber()
+    public void Service_EmployeeByNumberShapeParityTests_TheCatalog_HoldsSevenShapesIncludingTheEmployeeByNumber()
     {
         var shapes = VisualReadShapeCatalog.Create();
 
-        Assert.AreEqual(6, shapes.Count, "FR-033: the count moved from five to six deliberately");
+        Assert.AreEqual(7, shapes.Count, "FR-090: the count moved from six to seven deliberately");
         Assert.AreEqual(
             1,
             shapes.Count(shape => string.Equals(shape.Key, ShapeKey, StringComparison.Ordinal)),
@@ -44,7 +44,7 @@ public sealed class EmployeeByNumberShapeParityTests
             shape.InputParameters.Select(parameter => parameter.Name).ToArray());
 
         CollectionAssert.AreEqual(
-            ExpectedColumns,
+            s_expectedColumns,
             shape.OutputColumns.Select(column => column.Name).ToArray(),
             "the shape's declared output is the row contract");
     }
@@ -58,11 +58,11 @@ public sealed class EmployeeByNumberShapeParityTests
             "Database", "Mock", "StoredProcedures", "sp_visual_employee_by_number_get", "create.sql"));
 
         CollectionAssert.AreEqual(
-            ExpectedColumns,
+            s_expectedColumns,
             AliasesIn(live),
             "the live read projects the agreed names");
         CollectionAssert.AreEqual(
-            ExpectedColumns,
+            s_expectedColumns,
             AliasesIn(mirror),
             "the mirror projects the agreed names, so a caller cannot tell which answered (FR-032)");
     }
@@ -123,7 +123,7 @@ public sealed class EmployeeByNumberShapeParityTests
                 continue;
             }
 
-            foreach (var alias in ExpectedColumns)
+            foreach (var alias in s_expectedColumns)
             {
                 if (line.EndsWith($"AS {alias}", StringComparison.Ordinal)
                     || line.EndsWith($"AS {alias},", StringComparison.Ordinal))

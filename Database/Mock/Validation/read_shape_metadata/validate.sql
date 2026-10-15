@@ -20,7 +20,7 @@ CALL sp_visual_read_shape_metadata_get('work_order_lookup');
 SELECT '3. a requested shape with no artifacts is still reported (half-added detection)' AS step;
 CALL sp_visual_read_shape_metadata_get('definitely_not_a_shape');
 
-SELECT '4. the derived key set matches the six expected shapes' AS step;
+SELECT '4. the derived key set matches the seven expected shapes' AS step;
 SELECT COUNT(*) AS shape_count
 FROM (
     SELECT DISTINCT SUBSTRING(tb.table_name, 8, CHAR_LENGTH(tb.table_name) - 14) AS shape_key
@@ -29,10 +29,15 @@ FROM (
        AND tb.table_name LIKE 'visual\_%\_result'
 ) AS k
 WHERE k.shape_key IN ('work_order_lookup', 'operation_sequences', 'subordinate_parts',
-                      'inventory_locations', 'disposition_input', 'employee_by_number');
+                      'inventory_locations', 'disposition_input', 'employee_by_number',
+                      'part_warehouse_quantities');
 
--- The sixth shape is asserted by name as well as counted, because a count of six is satisfied by any six: this
--- asks whether the one feature 011 added is present and complete (FR-032, FR-033). A shape whose artifacts are
--- missing is reported rather than silently absent, which is the same rule step 3 applies to an unknown shape.
+-- Two shapes are asserted by name as well as counted, because a count of seven is satisfied by any seven: these
+-- ask whether the two shapes the later features added are present and complete (011's FR-032/FR-033, 012's
+-- FR-090). A shape whose artifacts are missing is reported rather than silently absent, which is the same rule
+-- step 3 applies to an unknown shape.
 SELECT '5. the sixth shape reports all four artifacts present' AS step;
 CALL sp_visual_read_shape_metadata_get('employee_by_number');
+
+SELECT '6. the seventh shape reports all four artifacts present' AS step;
+CALL sp_visual_read_shape_metadata_get('part_warehouse_quantities');

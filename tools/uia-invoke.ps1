@@ -23,17 +23,12 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes
+. "$PSScriptRoot\uia-common.ps1"
 
-$Scope          = [System.Windows.Automation.TreeScope]
-$InvokePattern  = [System.Windows.Automation.InvokePattern]::Pattern
+$Scope          = $UiaScope
+$InvokePattern  = $UiaInvoke
 
-function Get-AppRoot {
-    $p = Get-Process MTM_Waitlist -ErrorAction SilentlyContinue | Select-Object -First 1
-    if (-not $p) { throw 'MTM_Waitlist is not running.' }
-    if ($p.MainWindowHandle -eq 0) { throw 'MTM_Waitlist has no main window yet.' }
-    [System.Windows.Automation.AutomationElement]::FromHandle($p.MainWindowHandle)
-}
+function Get-AppRoot { Get-MtmAppRoot }
 
 function Get-Invokables {
     param($Root)
@@ -48,10 +43,16 @@ function Get-Invokables {
         if (-not $ok) { continue }
 
         $r = $el.Current.BoundingRectangle
-        $rect = 'empty'
-        if (-not [double]::IsNaN($r.Width)) {
-            $rect = '{0},{1} {2}x{3}' -f ([int]$r.X), ([int]$r.Y), ([int]$r.Width), ([int]$r.Height)
+        # A rectangle can be NaN (nothing measured yet) or infinite (a host that spans everything), and both are
+        # "no usable rectangle": casting either to an integer throws, which is how this used to fail on whichever
+        # element happened to report one.
+        $hasRect = -not ([double]::IsNaN($r.Width) -or [double]::IsInfinity($r.Width) -or
+            [double]::IsNaN($r.Height) -or [double]::IsInfinity($r.Height))
+
+        $rect = if ($hasRect) {
+            '{0},{1} {2}x{3}' -f ([int]$r.X), ([int]$r.Y), ([int]$r.Width), ([int]$r.Height)
         }
+        else { 'empty' }
         $null = $rows.Add([pscustomobject]@{
             Index        = $rows.Count
             ControlType  = $el.Current.ControlType.ProgrammaticName.Replace('ControlType.', '')
@@ -98,8 +99,8 @@ if ($Index -lt 0 -or $Index -ge $rows.Count) {
 
 $chosen = $rows[$Index]
 Write-Host ("invoking  : index {0} - {1} '{2}'" -f $chosen.Index, $chosen.ControlType, $chosen.Name) -ForegroundColor Green
-$chosen.Element.GetCurrentPattern($InvokePattern).Invoke()
-Start-Sleep -Milliseconds 1500
+Invoke-MtmElement -Element $chosen.Element -What "invokable at index $($chosen.Index)"
+Wait-MtmUiSettled -Root (Get-MtmAppRoot)
 
 # Re-dump the same view ui-drive.ps1 writes, so the evidence trail stays in one format.
 & "$PSScriptRoot\ui-drive.ps1" -Action dump -Label $Label -EvidenceDir $EvidenceDir -WaitSeconds 30

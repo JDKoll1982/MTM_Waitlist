@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="MTM_Waitlist.Module_Waitlist.Views.NewRequestPartSearchPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:MTM_Waitlist.Module_Waitlist.Models"
+    mc:Ignorable="d">
+
+    <Grid Style="{StaticResource SetupPageGridStyle}" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}">
+            <TextBlock
+                x:Uid="NewRequest_PartSearch_Title"
+                Style="{StaticResource SetupPageTitleStyle}"
+                Text="New Request - Find the Part" />
+            <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="{x:Bind ViewModel.WorkCenterText, Mode=OneWay}" />
+            <TextBlock Style="{StaticResource SetupPageSubtitleStyle}" Text="{x:Bind ViewModel.PromptText, Mode=OneWay}" />
+            <TextBlock
+                Margin="0,6,0,0"
+                Style="{StaticResource RequestDialogCaptionStyle}"
+                Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}"
+                TextWrapping="WrapWholeWords"
+                Visibility="{x:Bind ViewModel.IsStatusVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <TextBox
+                x:Name="PartNumberInput"
+                Grid.Row="0"
+                AutomationProperties.AutomationId="NewRequestPartSearchPage_PartNumberInput"
+                x:Uid="NewRequest_PartSearch_PartNumberInput"
+                Header="Part number"
+                PlaceholderText="For example MMC1000"
+                MinWidth="360"
+                MaxWidth="520"
+                HorizontalAlignment="Left"
+                Text="{x:Bind ViewModel.TypedPart, Mode=TwoWay}" />
+
+            <TextBlock
+                Grid.Row="1"
+                Margin="0,8,0,0"
+                FontSize="14"
+                Text="{x:Bind ViewModel.SelectedPart, Mode=OneWay}"
+                TextWrapping="WrapWholeWords"
+                Visibility="{x:Bind ViewModel.HasMatches, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Invert}" />
+
+            <!-- Every part whose number contains the term, offered for the operator to choose from (FR-083). The
+                 rows are part numbers: the live read answers numbers, and nothing is invented for a row. -->
+            <GridView
+                x:Name="MatchGridView"
+                Grid.Row="2"
+                Margin="0,8,0,0"
+                AutomationProperties.AutomationId="NewRequestPartSearchPage_Matches"
+                AutomationProperties.Name="{x:Bind ViewModel.PromptText, Mode=OneWay}"
+                MaxWidth="520"
+                HorizontalAlignment="Left"
+                IsItemClickEnabled="True"
+                ItemClick="MatchGridView_ItemClick"
+                ItemsSource="{x:Bind ViewModel.Matches, Mode=OneWay}"
+                SelectionMode="None"
+                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                Visibility="{x:Bind ViewModel.HasMatches, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <GridView.ItemTemplate>
+                    <DataTemplate x:DataType="models:PartMatchChoice">
+                        <Grid Margin="4" AutomationProperties.AutomationId="{x:Bind AutomationId}">
+                            <Border
+                                MinWidth="180"
+                                Padding="10"
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                                <TextBlock
+                                    FontSize="14"
+                                    Text="{x:Bind Title}"
+                                    TextTrimming="CharacterEllipsis" />
+                            </Border>
+
+                            <!-- Selection outline, drawn only on the part currently chosen. -->
+                            <Border
+                                BorderBrush="{ThemeResource SystemControlHighlightAccentBrush}"
+                                BorderThickness="2"
+                                CornerRadius="8"
+                                IsHitTestVisible="False"
+                                Visibility="{x:Bind IsSelected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        </Grid>
+                    </DataTemplate>
+                </GridView.ItemTemplate>
+            </GridView>
+        </Grid>
+
+        <StackPanel Grid.Row="2" Style="{StaticResource SetupActionBarStyle}">
+            <Button
+                AutomationProperties.AutomationId="NewRequestPartSearchPage_BackButton"
+                x:Uid="NewRequest_PartSearch_BackButton"
+                Content="Back"
+                Command="{x:Bind ViewModel.BackCommand}" />
+            <Button
+                AutomationProperties.AutomationId="NewRequestPartSearchPage_SearchButton"
+                x:Uid="NewRequest_PartSearch_SearchButton"
+                Content="Search"
+                Command="{x:Bind ViewModel.SearchCommand}" />
+            <Button
+                AutomationProperties.AutomationId="NewRequestPartSearchPage_ContinueButton"
+                x:Uid="NewRequest_PartSearch_ContinueButton"
+                Content="Continue"
+                Command="{x:Bind ViewModel.ContinueCommand}"
+                Style="{StaticResource AccentButtonStyle}" />
+        </StackPanel>
+    </Grid>
+</Page>

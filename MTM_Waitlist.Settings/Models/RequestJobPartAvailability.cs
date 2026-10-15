@@ -1,53 +1,6 @@
 namespace MTM_Waitlist.Module_Settings.Models;
 
 /// <summary>
-/// Which active-job part (if any) an auto-populated canonical Item depends on for
-/// visibility in the New Request picker / card render. The per-Item visibility rules are recorded in
-/// specs/004-unified-card-item-picker/contracts/request-picker-flow.md §4.
-/// </summary>
-public enum RequestJobPartKind
-{
-    /// <summary>No job part required — always available (manual equipment/consumable or free text).</summary>
-    None,
-
-    /// <summary>Visible only when the requesting job has a coil (MMC / Coil subordinate).</summary>
-    Coil,
-
-    /// <summary>
-    /// Visible when the requesting job has a coil <b>or</b> flatstock. This is the merged Pickup Item
-    /// (<c>pickup-coil</c>), whose one request covers either material (FR-002, D21): a flatstock-only job that
-    /// withheld it would silently lose a supported Item, which is what SC-004 measures.
-    /// </summary>
-    CoilOrFlatstock,
-
-    /// <summary>Visible only when the requesting job has flatstock (MMF / Flatstock subordinate).</summary>
-    Flatstock,
-
-    /// <summary>Visible only when the requesting job has a die (FGT / Die subordinate).</summary>
-    Die,
-
-    /// <summary>Visible only when the requesting job has a component (non-coil/flatstock subordinate).</summary>
-    Component,
-
-    /// <summary>Visible only when the requesting job has an assigned dunnage part.</summary>
-    Dunnage,
-
-    /// <summary>Visible only when the requesting job has any subordinate part (used by Assist table place/remove).</summary>
-    AnySubordinate,
-
-    /// <summary>
-    /// Visible only when the requesting job has a <b>real scrap decision</b> — a scrap value that is set, is
-    /// not <c>No Scrap</c> and is not the <c>Scrap Type Required</c> placeholder (FR-031, contract §5).
-    /// Evaluated through the canonical predicate in <c>MTM_Waitlist.Core</c> so Setup and New Request
-    /// cannot diverge.
-    /// </summary>
-    Scrap,
-
-    /// <summary>Visible only when the requesting job has a work order/sequence (FG / WIP / Outside, NCM defect).</summary>
-    RequiresActiveJob,
-}
-
-/// <summary>
 /// What parts the requesting work center's active setup job actually has. Drives the
 /// conditional-visibility rule for auto-populated canonical Items. Pure value snapshot so
 /// picker rules stay testable and DB-free; a caller (Phase 3) maps an
@@ -66,9 +19,54 @@ public sealed record RequestJobPartAvailability(
     public static RequestJobPartAvailability None { get; } = new(false, false, false, false, false, false, false);
 
     /// <summary>A job with every part present — renders all auto-populated items.</summary>
-    public static RequestJobPartAvailability All { get; } = new(true, true, true, true, true, true, true);
+    public static RequestJobPartAvailability All { get; } = new(true, true, true, true, true, true, true)
+    {
+        HasFinishedGoodsToReturn = true,
+        HasNonconformingStockToReturn = true,
+        HasWorkInProgressToReturn = true,
+        HasOutsideServiceWorkToReturn = true,
+    };
 
     public bool HasAnySubordinate => HasCoil || HasFlatstock || HasDie || HasComponent || HasDunnage;
+
+    /// <summary>
+    /// Whether the requesting job has <b>finished goods</b> to pick up — stock completed at a finished-goods
+    /// location. This is the work the <c>pickup-fg</c> Item names, so the Item is offered on the job's real work
+    /// rather than hidden by a fixed list (FR-094).
+    /// </summary>
+    public bool HasFinishedGoodsToReturn { get; init; }
+
+    /// <summary>
+    /// Whether the requesting job has <b>non-conforming stock</b> to pick up — material sitting at an NCM
+    /// location. This is the work the <c>pickup-ncm</c> Item names, and it is a signal of the location the stock
+    /// occupies, never of the part's recorded item type (FR-093, FR-094).
+    /// </summary>
+    public bool HasNonconformingStockToReturn { get; init; }
+
+    /// <summary>
+    /// Whether the requesting job has <b>work in progress</b> to pick up — quantity still open on the work order.
+    /// This is the work the <c>pickup-wip</c> Item names (FR-094).
+    /// </summary>
+    public bool HasWorkInProgressToReturn { get; init; }
+
+    /// <summary>
+    /// Whether the requesting job has <b>subcontracted work</b> to pick up — an operation an outside vendor
+    /// performs. This is the work the <c>pickup-outside-service</c> Item names (FR-094).
+    /// </summary>
+    public bool HasOutsideServiceWorkToReturn { get; init; }
+
+    /// <summary>
+    /// The item type the requesting job's part is derived to be — the single derivation behind `Item Type` on
+    /// the component Items and `Part Type` on the four returning pickups (FR-091, FR-092).
+    /// <para>
+    /// It is produced by <c>RequestDispositionResolver</c> and travels with the snapshot so the card reads a
+    /// value it was handed rather than running a second derivation of its own (research R1). It is
+    /// <see cref="RequestDisposition.Unknown"/> when nothing has been derived — a snapshot built by a caller
+    /// that cannot reach the derivation — and the cell is then left out rather than filled with a guess
+    /// (FR-089).
+    /// </para>
+    /// </summary>
+    public RequestDisposition Disposition { get; init; } = RequestDisposition.Unknown;
 
     /// <summary>
     /// The requesting job's component part numbers, in the job's own order (FR-035).
@@ -95,6 +93,27 @@ public sealed record RequestJobPartAvailability(
     /// none. It is the part the flatstock Items' identifier names, read exactly as the coil's is.
     /// </summary>
     public string FlatstockPartNumber { get; init; } = string.Empty;
+
+    /// <summary>
+    /// The description the plant records for the coil the job carries, or empty when the job has no coil.
+    /// <para>
+    /// It is the coil subordinate read's own <c>Description</c> output (FR-088), so `Coil description` resolves
+    /// from the snapshot rather than from a second read. Nothing is substituted when it is empty: the cell is
+    /// left out instead of being filled with the coil's number or the Item's name (FR-089).
+    /// </para>
+    /// </summary>
+    public string CoilDescription { get; init; } = string.Empty;
+
+    /// <summary>
+    /// The average the <b>receiving store</b> holds for the coil's part: <c>receiving_history.quantity</c> averaged
+    /// over every row for that part through <c>sp_receiving_history_average_coil_weight</c>, rendered whole pounds
+    /// with a unit suffix (FR-030, FR-041). It is what the store has actually weighed, deliberately not Visual's
+    /// single <c>PART.WEIGHT</c> figure for the part, and not a weighed figure for this coil either — so the assist
+    /// coil turn's `Weight of Coil` answer (<c>input_value</c>) is never read from here (FR-054, FR-086). Empty
+    /// when the job has no coil or the store holds no weighted history for the part, and never substituted with a
+    /// guess (FR-089).
+    /// </summary>
+    public string CoilAverageWeight { get; init; } = string.Empty;
 
     /// <summary>
     /// The dunnage parts assigned to the requesting job, in the job's own order (FR-035).
@@ -148,6 +167,27 @@ public sealed record RequestJobPartAvailability(
             : dies
                 .Where(die => die is not null && !string.IsNullOrWhiteSpace(die.PartNumber))
                 .ToArray(),
+    };
+
+    /// <summary>
+    /// A copy of this snapshot carrying the part's <b>derived</b> item type: the value the card's
+    /// <c>Item Type</c> / <c>Part Type</c> cell reads, together with the four returning pickups' gates, which the
+    /// same derivation decides (FR-091, FR-094).
+    /// <para>
+    /// Exactly one gate is ever set, because the gates are read from one derivation rather than from four
+    /// separate probes — so the pickups a job is offered are exactly the ones whose item type the derivation can
+    /// name for it. <see cref="RequestDisposition.Unknown"/> means nothing was derived (no job, no part, or a read
+    /// that failed) and sets none of them, which keeps the four hidden rather than inventing an item type for
+    /// them (FR-089).
+    /// </para>
+    /// </summary>
+    public RequestJobPartAvailability WithDisposition(RequestDisposition disposition) => this with
+    {
+        Disposition = disposition,
+        HasFinishedGoodsToReturn = disposition == RequestDisposition.FinishedGoods,
+        HasNonconformingStockToReturn = disposition == RequestDisposition.Ncm,
+        HasWorkInProgressToReturn = disposition == RequestDisposition.WorkInProcess,
+        HasOutsideServiceWorkToReturn = disposition == RequestDisposition.OutsideService,
     };
 
     /// <summary>

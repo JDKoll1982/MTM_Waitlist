@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -969,6 +969,129 @@
   <data name="NewRequest_Die_ContinueButton.Content" xml:space="preserve">
     <value>Continue</value>
   </data>
+  <data name="NewRequest_Die.DieShopPrompt" xml:space="preserve">
+    <value>Does this die go to the die shop?</value>
+  </data>
+  <data name="NewRequest_Die.DieShopPromptLocated" xml:space="preserve">
+    <value>Is this die located at the die shop?</value>
+  </data>
+  <data name="NewRequest_Hopper.Title" xml:space="preserve">
+    <value>New Request - Hopper Size</value>
+  </data>
+  <data name="NewRequest_Hopper_Title.Text" xml:space="preserve">
+    <value>New Request - Hopper Size</value>
+  </data>
+  <data name="NewRequest_Hopper.Prompt" xml:space="preserve">
+    <value>Which size hopper do you need?</value>
+  </data>
+  <data name="NewRequest_Hopper_SmallOption.Content" xml:space="preserve">
+    <value>Small</value>
+  </data>
+  <data name="NewRequest_Hopper_MediumOption.Content" xml:space="preserve">
+    <value>Medium</value>
+  </data>
+  <data name="NewRequest_Hopper_LargeOption.Content" xml:space="preserve">
+    <value>Large</value>
+  </data>
+  <data name="NewRequest_Hopper_NothingChosen.Message" xml:space="preserve">
+    <value>Choose a size before continuing.</value>
+  </data>
+  <data name="NewRequest_Hopper_NotConfigured.Message" xml:space="preserve">
+    <value>This item's size question is not configured yet. A supervisor needs to check it.</value>
+  </data>
+  <data name="NewRequest_Hopper_BackButton.Content" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="NewRequest_Hopper_ContinueButton.Content" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="NewRequest_PartSearch.Title" xml:space="preserve">
+    <value>New Request - Find the Part</value>
+  </data>
+  <data name="NewRequest_PartSearch_Title.Text" xml:space="preserve">
+    <value>New Request - Find the Part</value>
+  </data>
+  <data name="NewRequest_PartSearch.Prompt" xml:space="preserve">
+    <value>Type the part number you need. We will find every part that matches it.</value>
+  </data>
+  <data name="NewRequest_PartSearch_PartNumberInput.Header" xml:space="preserve">
+    <value>Part number</value>
+  </data>
+  <data name="NewRequest_PartSearch_PartNumberInput.PlaceholderText" xml:space="preserve">
+    <value>For example MMC1000</value>
+  </data>
+  <data name="NewRequest_PartSearch_SearchButton.Content" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="NewRequest_PartSearch_ContinueButton.Content" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="NewRequest_PartSearch_BackButton.Content" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="NewRequest_PartSearch_NothingTyped.Message" xml:space="preserve">
+    <value>Type a part number to search for.</value>
+  </data>
+  <data name="NewRequest_PartSearch_NothingChosen.Message" xml:space="preserve">
+    <value>Choose one of the parts listed, or search for the number you need.</value>
+  </data>
+  <data name="NewRequest_PartSearch_Unavailable.Message" xml:space="preserve">
+    <value>The part search is not available right now. The number you typed will be used as entered.</value>
+  </data>
+  <data name="NewRequest_PartSearch_Failed.Message" xml:space="preserve">
+    <value>The part search could not be completed. The number you typed will be used as entered.</value>
+  </data>
+  <data name="NewRequest_PartSearch_NotConfigured.Message" xml:space="preserve">
+    <value>This item's incorrect-part question is not configured yet. A supervisor needs to check it.</value>
+  </data>
+  <data name="NewRequest_CoilTurn.Title" xml:space="preserve">
+    <value>New Request - Turn the Coil</value>
+  </data>
+  <data name="NewRequest_CoilTurn_Title.Text" xml:space="preserve">
+    <value>New Request - Turn the Coil</value>
+  </data>
+  <data name="NewRequest_CoilTurn.Prompt" xml:space="preserve">
+    <value>What is the weight of the coil?</value>
+  </data>
+  <data name="NewRequest_CoilTurn_WeightInput.Header" xml:space="preserve">
+    <value>Weight of Coil</value>
+  </data>
+  <data name="NewRequest_CoilTurn_ContinueButton.Content" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="NewRequest_CoilTurn_BackButton.Content" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="NewRequest_CoilTurn_WeightRequired.Message" xml:space="preserve">
+    <value>Enter the weight of the coil as a number before continuing.</value>
+  </data>
+  <data name="NewRequest_CoilTurn_NotConfigured.Message" xml:space="preserve">
+    <value>This item's coil weight question is not configured yet. A supervisor needs to check it.</value>
+  </data>
+  <data name="NewRequest_SkidCount.Title" xml:space="preserve">
+    <value>New Request - Skids to Pick Up</value>
+  </data>
+  <data name="NewRequest_SkidCount_Title.Text" xml:space="preserve">
+    <value>New Request - Skids to Pick Up</value>
+  </data>
+  <data name="NewRequest_SkidCount.Prompt" xml:space="preserve">
+    <value>How many skids must be picked up?</value>
+  </data>
+  <data name="NewRequest_SkidCount_SkidCountInput.Header" xml:space="preserve">
+    <value># of Skids</value>
+  </data>
+  <data name="NewRequest_SkidCount_ContinueButton.Content" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="NewRequest_SkidCount_BackButton.Content" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="NewRequest_SkidCount_WholeNumberRequired.Message" xml:space="preserve">
+    <value>Enter how many skids are being picked up, as a whole number.</value>
+  </data>
+  <data name="NewRequest_SkidCount_NotConfigured.Message" xml:space="preserve">
+    <value>This item's skid count question is not configured yet. A supervisor needs to check it.</value>
+  </data>
   <data name="NewRequest_Component_Title.Text" xml:space="preserve">
     <value>New Request - Choose Component</value>
   </data>
@@ -1007,6 +1130,145 @@
   </data>
   <data name="Waitlist_Card_Waiting.Text" xml:space="preserve">
     <value>Waiting</value>
+  </data>
+  <data name="Waitlist_Card_OpenDetails.Text" xml:space="preserve">
+    <value>Open details</value>
+  </data>
+  <data name="Waitlist_Card_Ring.TimeLeft" xml:space="preserve">
+    <value>Time left on this request</value>
+  </data>
+  <data name="Waitlist_Card_Ring.TimeTaken" xml:space="preserve">
+    <value>Time this request took</value>
+  </data>
+  <data name="Waitlist_Card_StatusWord.SetCondition" xml:space="preserve">
+    <value>Set a condition on this request</value>
+  </data>
+  <data name="Waitlist_Card_StatusFlyout.Heading" xml:space="preserve">
+    <value>Choose a condition</value>
+  </data>
+  <data name="Waitlist_Card_DieShop.TakeToDieShop" xml:space="preserve">
+    <value>Take To Die Shop</value>
+  </data>
+  <data name="Waitlist_Card_DieShop.LocatedInDieShop" xml:space="preserve">
+    <value>Located In Die Shop</value>
+  </data>
+  <data name="Waitlist_Card_PendingSource.InDevelopment" xml:space="preserve">
+    <value>In development</value>
+  </data>
+  <data name="Die Location" xml:space="preserve">
+    <value>Die Location</value>
+  </data>
+  <data name="Home Location" xml:space="preserve">
+    <value>Home Location</value>
+  </data>
+  <data name="Scrap Type" xml:space="preserve">
+    <value>Scrap Type</value>
+  </data>
+  <data name="Coil Number" xml:space="preserve">
+    <value>Coil Number</value>
+  </data>
+  <data name="Size" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="# of Skids" xml:space="preserve">
+    <value># of Skids</value>
+  </data>
+  <data name="Weight of Coil" xml:space="preserve">
+    <value>Weight of Coil</value>
+  </data>
+  <data name="Die Shop Direction" xml:space="preserve">
+    <value>Die Shop Direction</value>
+  </data>
+  <data name="Part Type" xml:space="preserve">
+    <value>Part Type</value>
+  </data>
+  <data name="Item Type" xml:space="preserve">
+    <value>Item Type</value>
+  </data>
+  <data name="Total Qty In House" xml:space="preserve">
+    <value>Total Qty In House</value>
+  </data>
+  <!--
+    The remaining declared cell labels (012-waitlist-card-layout, FR-104). A cell's label IS a resource key: the
+    Item declaration in `Database/Seeds/seed_waitlist_request_item_configs/create.sql` declares the label and the
+    card resolves it at bind time through `GetLocalized()`. A label with no entry here does NOT draw a blank -
+    `GetLocalized()` falls back to the key itself - so the cell read as correct English while never being a
+    resolved string, which is how this gap survived. Every one of these is a label the card can draw.
+
+    The three labels this work renames (`Coil Number`, `Home Location`, `Scrap Type`) are deliberately NOT paired
+    with their old spellings. The resource index is **case-insensitive** - adding `Coil number` beside
+    `Coil Number` fails the build with `PRI277: Conflicting values for resource 'Resources/Coil Number'` - so the
+    pre-migration spelling resolves through the canonical key and a second entry would be a duplicate, not a fix.
+
+    These keep the bare-label shape rather than `Feature_Element.Property` because the label IS the key the
+    declaration carries; `.github/scripts/validate-csharp-xaml-naming.ps1` lists them as exceptions for that
+    reason.
+  -->
+  <data name="Coil description" xml:space="preserve">
+    <value>Coil description</value>
+  </data>
+  <data name="Average coil weight" xml:space="preserve">
+    <value>Average coil weight</value>
+  </data>
+  <data name="Quantity in house" xml:space="preserve">
+    <value>Quantity in house</value>
+  </data>
+  <data name="Die" xml:space="preserve">
+    <value>Die</value>
+  </data>
+  <data name="Component" xml:space="preserve">
+    <value>Component</value>
+  </data>
+  <data name="Dunnage part" xml:space="preserve">
+    <value>Dunnage part</value>
+  </data>
+  <data name="Pickup location" xml:space="preserve">
+    <value>Pickup location</value>
+  </data>
+  <data name="Part" xml:space="preserve">
+    <value>Part</value>
+  </data>
+  <data name="Quantity" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="Destination" xml:space="preserve">
+    <value>Destination</value>
+  </data>
+  <data name="Correct coil" xml:space="preserve">
+    <value>Correct coil</value>
+  </data>
+  <data name="Correct flatstock" xml:space="preserve">
+    <value>Correct flatstock</value>
+  </data>
+  <data name="Lugger Location" xml:space="preserve">
+    <value>Lugger Location</value>
+  </data>
+  <data name="Part description" xml:space="preserve">
+    <value>Part description</value>
+  </data>
+  <data name="Quantity on hand" xml:space="preserve">
+    <value>Quantity on hand</value>
+  </data>
+  <data name="Quantity involved" xml:space="preserve">
+    <value>Quantity involved</value>
+  </data>
+  <data name="Scrap lugger" xml:space="preserve">
+    <value>Scrap lugger</value>
+  </data>
+  <data name="Request description" xml:space="preserve">
+    <value>Request description</value>
+  </data>
+  <data name="Reason" xml:space="preserve">
+    <value>Reason</value>
+  </data>
+  <data name="Pickup work center" xml:space="preserve">
+    <value>Pickup work center</value>
+  </data>
+  <data name="Requesting work center" xml:space="preserve">
+    <value>Requesting work center</value>
+  </data>
+  <data name="Work center" xml:space="preserve">
+    <value>Work center</value>
   </data>
   <data name="Waitlist_Detail_DeclaredFields.Title" xml:space="preserve">
     <value>Item details</value>
@@ -2035,6 +2297,15 @@
   </data>
   <data name="Settings_StoragePaths_DunnageRoot.Label" xml:space="preserve">
     <value>Dunnage picture root</value>
+  </data>
+  <data name="Settings_StoragePaths_HopperFolder.Label" xml:space="preserve">
+    <value>Hopper picture folder</value>
+  </data>
+  <data name="Settings_StoragePaths_HopperFolder.Hint" xml:space="preserve">
+    <value>The three hopper size pictures live here, one file per size named after it: Small.png, Medium.png and Large.png. A relative path is read under the picture folder.</value>
+  </data>
+  <data name="Settings_StoragePaths_HopperFolderNeeded.Text" xml:space="preserve">
+    <value>A hopper picture folder is needed before this can be saved.</value>
   </data>
   <data name="Settings_StoragePaths_ArchiveKeepDays.Label" xml:space="preserve">
     <value>Keep a replaced picture for (days)</value>

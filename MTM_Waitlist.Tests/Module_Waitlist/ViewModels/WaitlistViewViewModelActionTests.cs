@@ -34,13 +34,13 @@ public sealed class WaitlistViewViewModelActionTests
     /// <summary>A role that is not at handler level, so the handler gate must refuse it.</summary>
     private const string NonHandlerRole = "Contractor";
 
-    private static readonly DateTimeOffset Now = new(2026, 9, 12, 12, 0, 0, TimeSpan.Zero);
+    private static readonly DateTimeOffset s_now = new(2026, 9, 12, 12, 0, 0, TimeSpan.Zero);
 
-    private static readonly Guid PendingRequestId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-    private static readonly Guid TakenByViewerRequestId = Guid.Parse("22222222-2222-2222-2222-222222222222");
-    private static readonly Guid TakenByOtherRequestId = Guid.Parse("33333333-3333-3333-3333-333333333333");
-    private static readonly Guid CompletedRequestId = Guid.Parse("44444444-4444-4444-4444-444444444444");
-    private static readonly Guid CanceledRequestId = Guid.Parse("55555555-5555-5555-5555-555555555555");
+    private static readonly Guid s_pendingRequestId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+    private static readonly Guid s_takenByViewerRequestId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+    private static readonly Guid s_takenByOtherRequestId = Guid.Parse("33333333-3333-3333-3333-333333333333");
+    private static readonly Guid s_completedRequestId = Guid.Parse("44444444-4444-4444-4444-444444444444");
+    private static readonly Guid s_canceledRequestId = Guid.Parse("55555555-5555-5555-5555-555555555555");
 
     // ── G4: the gate matrix ──────────────────────────────────────────────────────────────────────────
 
@@ -140,7 +140,7 @@ public sealed class WaitlistViewViewModelActionTests
     {
         // The pairing the card is designed around: once the viewer has claimed a request, refusing it is as
         // available as finishing it.
-        var request = BuildRequest(TakenByViewerRequestId, "Accepted", assignee: HandlerEmployeeNumber, RequesterEmployeeNumber);
+        var request = BuildRequest(s_takenByViewerRequestId, "Accepted", assignee: HandlerEmployeeNumber, RequesterEmployeeNumber);
         var viewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, new RecordingRequestService(request));
 
         await viewModel.RefreshAsync().ConfigureAwait(false);
@@ -160,7 +160,7 @@ public sealed class WaitlistViewViewModelActionTests
         // The command is read off the view model rather than assumed by name: [RelayCommand] strips the
         // trailing "Async" from ReleaseRequestAsync, so the generated member is ReleaseRequestCommand and a
         // binding written against the other name would be a silent XAML failure (WMC9999).
-        var request = BuildRequest(TakenByViewerRequestId, "Accepted", assignee: HandlerEmployeeNumber, RequesterEmployeeNumber);
+        var request = BuildRequest(s_takenByViewerRequestId, "Accepted", assignee: HandlerEmployeeNumber, RequesterEmployeeNumber);
         var viewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, new RecordingRequestService(request));
 
         await viewModel.RefreshAsync().ConfigureAwait(false);
@@ -184,7 +184,7 @@ public sealed class WaitlistViewViewModelActionTests
     [TestMethod]
     public async Task ViewModel_WaitlistViewViewModelActionTests_GiveBack_ReachesTheReleasePathOnceAsTheSignedInHandler()
     {
-        var request = BuildRequest(TakenByViewerRequestId, "Accepted", assignee: HandlerEmployeeNumber, RequesterEmployeeNumber);
+        var request = BuildRequest(s_takenByViewerRequestId, "Accepted", assignee: HandlerEmployeeNumber, RequesterEmployeeNumber);
         var service = new RecordingRequestService(request);
         var viewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, service);
 
@@ -194,7 +194,7 @@ public sealed class WaitlistViewViewModelActionTests
         await viewModel.ReleaseRequestCommand.ExecuteAsync(row).ConfigureAwait(false);
 
         Assert.AreEqual(1, service.ReleaseCalls.Count, "Give back must reach the release path exactly once.");
-        Assert.AreEqual(TakenByViewerRequestId, service.ReleaseCalls[0].RequestId, "Give back targeted the wrong request.");
+        Assert.AreEqual(s_takenByViewerRequestId, service.ReleaseCalls[0].RequestId, "Give back targeted the wrong request.");
         Assert.AreEqual(HandlerEmployeeNumber, service.ReleaseCalls[0].EmployeeNumber, "Give back must act as the signed-in handler.");
         Assert.AreEqual(0, service.CompleteCalls.Count, "Give back must not complete the request.");
     }
@@ -204,7 +204,7 @@ public sealed class WaitlistViewViewModelActionTests
     {
         // The card offers only what the service would allow: a handler looking at somebody else's claim, and a
         // viewer who is not a handler at all, are both offered no Give back.
-        var takenByOther = BuildRequest(TakenByOtherRequestId, "Accepted", assignee: OtherHandlerEmployeeNumber, RequesterEmployeeNumber);
+        var takenByOther = BuildRequest(s_takenByOtherRequestId, "Accepted", assignee: OtherHandlerEmployeeNumber, RequesterEmployeeNumber);
         var otherViewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, new RecordingRequestService(takenByOther));
 
         await otherViewModel.RefreshAsync().ConfigureAwait(false);
@@ -214,7 +214,7 @@ public sealed class WaitlistViewViewModelActionTests
         Assert.IsNull(otherRow.ReleaseCommand, "Give back was carried on a request the viewer does not own.");
         Assert.AreEqual(string.Empty, otherRow.ReleaseActionText, "A control that is not shown must not be named either.");
 
-        var takenByViewer = BuildRequest(TakenByViewerRequestId, "Accepted", assignee: HandlerEmployeeNumber, RequesterEmployeeNumber);
+        var takenByViewer = BuildRequest(s_takenByViewerRequestId, "Accepted", assignee: HandlerEmployeeNumber, RequesterEmployeeNumber);
         var nonHandlerViewModel = BuildViewModel(NonHandlerRole, HandlerEmployeeNumber, new RecordingRequestService(takenByViewer));
 
         await nonHandlerViewModel.RefreshAsync().ConfigureAwait(false);
@@ -228,7 +228,7 @@ public sealed class WaitlistViewViewModelActionTests
     [TestMethod]
     public async Task ViewModel_WaitlistViewViewModelActionTests_Complete_CallsTheServiceWithTheSignedInAssignee()
     {
-        var request = BuildRequest(TakenByViewerRequestId, "Accepted", assignee: HandlerEmployeeNumber, RequesterEmployeeNumber);
+        var request = BuildRequest(s_takenByViewerRequestId, "Accepted", assignee: HandlerEmployeeNumber, RequesterEmployeeNumber);
         var service = new RecordingRequestService(request);
         var viewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, service);
 
@@ -238,7 +238,7 @@ public sealed class WaitlistViewViewModelActionTests
         await viewModel.CompleteRequestCommand.ExecuteAsync(row).ConfigureAwait(false);
 
         Assert.AreEqual(1, service.CompleteCalls.Count, "Complete must reach the service exactly once.");
-        Assert.AreEqual(TakenByViewerRequestId, service.CompleteCalls[0].RequestId, "Complete targeted the wrong request.");
+        Assert.AreEqual(s_takenByViewerRequestId, service.CompleteCalls[0].RequestId, "Complete targeted the wrong request.");
         Assert.AreEqual(HandlerEmployeeNumber, service.CompleteCalls[0].EmployeeNumber, "Complete must act as the signed-in handler.");
 
         Assert.AreEqual(0, service.ReleaseCalls.Count, "Complete must not reach the release path; Give back is its own control (FR-047).");
@@ -247,7 +247,7 @@ public sealed class WaitlistViewViewModelActionTests
     [TestMethod]
     public async Task ViewModel_WaitlistViewViewModelActionTests_CompleteAndRelease_AreNotOfferedToAHandlerTheRequestIsNotAssignedTo()
     {
-        var request = BuildRequest(TakenByOtherRequestId, "Accepted", assignee: OtherHandlerEmployeeNumber, RequesterEmployeeNumber);
+        var request = BuildRequest(s_takenByOtherRequestId, "Accepted", assignee: OtherHandlerEmployeeNumber, RequesterEmployeeNumber);
         var service = new RecordingRequestService(request);
         var viewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, service);
 
@@ -270,15 +270,15 @@ public sealed class WaitlistViewViewModelActionTests
         var noTargetId = Guid.Parse("a0000000-0000-0000-0000-000000000003");
         var laterId = Guid.Parse("a0000000-0000-0000-0000-000000000004");
 
-        var overdue = BuildRequest(overdueId, "Pending", null, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-40), targetUtc: Now.AddMinutes(-10));
-        var soon = BuildRequest(soonId, "Pending", null, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-5), targetUtc: Now.AddMinutes(5));
+        var overdue = BuildRequest(overdueId, "Pending", null, RequesterEmployeeNumber, createdUtc: s_now.AddMinutes(-40), targetUtc: s_now.AddMinutes(-10));
+        var soon = BuildRequest(soonId, "Pending", null, RequesterEmployeeNumber, createdUtc: s_now.AddMinutes(-5), targetUtc: s_now.AddMinutes(5));
 
         // No stored target, so its due time is derived from the app's ONE documented default allotment — the
         // same 15 minutes the deadline service would have stamped (FR-017). Five minutes of waiting plus fifteen
-        // puts its due time at Now+10, between the soon row and the later one, which is what this ordering check
+        // puts its due time at s_now+10, between the soon row and the later one, which is what this ordering check
         // is about.
-        var noTarget = BuildRequest(noTargetId, "Pending", null, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-5), targetUtc: null);
-        var later = BuildRequest(laterId, "Pending", null, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-5), targetUtc: Now.AddMinutes(60));
+        var noTarget = BuildRequest(noTargetId, "Pending", null, RequesterEmployeeNumber, createdUtc: s_now.AddMinutes(-5), targetUtc: null);
+        var later = BuildRequest(laterId, "Pending", null, RequesterEmployeeNumber, createdUtc: s_now.AddMinutes(-5), targetUtc: s_now.AddMinutes(60));
 
         // Served in a deliberately unhelpful order, so the ordering under test is the list's own.
         var service = new RecordingRequestService(later, noTarget, soon, overdue);
@@ -303,10 +303,10 @@ public sealed class WaitlistViewViewModelActionTests
         var overdue = Guid.Parse("b0000000-0000-0000-0000-000000000004");
 
         var service = new RecordingRequestService(
-            BuildRequest(a, "Pending", null, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-5), targetUtc: Now.AddMinutes(90)),
-            BuildRequest(b, "Pending", null, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-5), targetUtc: Now.AddMinutes(3)),
-            BuildRequest(c, "Pending", null, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-5), targetUtc: Now.AddMinutes(30)),
-            BuildRequest(overdue, "Pending", null, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-90), targetUtc: Now.AddMinutes(-30)));
+            BuildRequest(a, "Pending", null, RequesterEmployeeNumber, createdUtc: s_now.AddMinutes(-5), targetUtc: s_now.AddMinutes(90)),
+            BuildRequest(b, "Pending", null, RequesterEmployeeNumber, createdUtc: s_now.AddMinutes(-5), targetUtc: s_now.AddMinutes(3)),
+            BuildRequest(c, "Pending", null, RequesterEmployeeNumber, createdUtc: s_now.AddMinutes(-5), targetUtc: s_now.AddMinutes(30)),
+            BuildRequest(overdue, "Pending", null, RequesterEmployeeNumber, createdUtc: s_now.AddMinutes(-90), targetUtc: s_now.AddMinutes(-30)));
 
         var viewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, service);
         await viewModel.RefreshAsync().ConfigureAwait(false);
@@ -333,8 +333,8 @@ public sealed class WaitlistViewViewModelActionTests
 
         // Served alpha-first, so a list that merely kept the store's order would look sorted and be wrong.
         var service = new RecordingRequestService(
-            BuildRequest(calmId, "Pending", null, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-5), targetUtc: Now.AddMinutes(55), workCenter: "Alpha Line"),
-            BuildRequest(overdueId, "Pending", null, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-30), targetUtc: Now.AddMinutes(-10), workCenter: "Bravo Line"));
+            BuildRequest(calmId, "Pending", null, RequesterEmployeeNumber, createdUtc: s_now.AddMinutes(-5), targetUtc: s_now.AddMinutes(55), workCenter: "Alpha Line"),
+            BuildRequest(overdueId, "Pending", null, RequesterEmployeeNumber, createdUtc: s_now.AddMinutes(-30), targetUtc: s_now.AddMinutes(-10), workCenter: "Bravo Line"));
         var viewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, service, sortPreferenceService: new StubSortPreferenceService(null));
 
         await viewModel.RefreshAsync().ConfigureAwait(false);
@@ -353,8 +353,8 @@ public sealed class WaitlistViewViewModelActionTests
         var calmId = Guid.Parse("d0000000-0000-0000-0000-000000000002");
 
         var service = new RecordingRequestService(
-            BuildRequest(calmId, "Pending", null, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-5), targetUtc: Now.AddMinutes(55), workCenter: "Alpha Line"),
-            BuildRequest(overdueId, "Pending", null, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-30), targetUtc: Now.AddMinutes(-10), workCenter: "Bravo Line"));
+            BuildRequest(calmId, "Pending", null, RequesterEmployeeNumber, createdUtc: s_now.AddMinutes(-5), targetUtc: s_now.AddMinutes(55), workCenter: "Alpha Line"),
+            BuildRequest(overdueId, "Pending", null, RequesterEmployeeNumber, createdUtc: s_now.AddMinutes(-30), targetUtc: s_now.AddMinutes(-10), workCenter: "Bravo Line"));
         var viewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, service, sortPreferenceService: new StubSortPreferenceService(WaitlistSortOrder.Press));
 
         await viewModel.RefreshAsync().ConfigureAwait(false);
@@ -373,8 +373,8 @@ public sealed class WaitlistViewViewModelActionTests
         var claimedId = Guid.Parse("e0000000-0000-0000-0000-000000000002");
 
         var service = new RecordingRequestService(
-            BuildRequest(overdueId, "Pending", null, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-30), targetUtc: Now.AddMinutes(-10), workCenter: "Bravo Line"),
-            BuildRequest(claimedId, "Accepted", HandlerEmployeeNumber, RequesterEmployeeNumber, createdUtc: Now.AddMinutes(-5), targetUtc: Now.AddMinutes(55), workCenter: "Alpha Line"));
+            BuildRequest(overdueId, "Pending", null, RequesterEmployeeNumber, createdUtc: s_now.AddMinutes(-30), targetUtc: s_now.AddMinutes(-10), workCenter: "Bravo Line"),
+            BuildRequest(claimedId, "Accepted", HandlerEmployeeNumber, RequesterEmployeeNumber, createdUtc: s_now.AddMinutes(-5), targetUtc: s_now.AddMinutes(55), workCenter: "Alpha Line"));
         var viewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, service);
 
         await viewModel.RefreshAsync().ConfigureAwait(false);
@@ -406,7 +406,7 @@ public sealed class WaitlistViewViewModelActionTests
     [TestMethod]
     public async Task ViewModel_WaitlistViewViewModelActionTests_ApplySortOrder_ChoosingTheOrderAlreadyInForceLeavesTheRowsInPlace()
     {
-        var request = BuildRequest(PendingRequestId, "Pending", null, RequesterEmployeeNumber);
+        var request = BuildRequest(s_pendingRequestId, "Pending", null, RequesterEmployeeNumber);
         var viewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, new RecordingRequestService(request));
 
         await viewModel.RefreshAsync().ConfigureAwait(false);
@@ -420,7 +420,7 @@ public sealed class WaitlistViewViewModelActionTests
     [TestMethod]
     public async Task ViewModel_WaitlistViewViewModelActionTests_Accept_CallsTheServiceWithTheSignedInHandlerAndTheRowsRequestId()
     {
-        var request = BuildRequest(PendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
+        var request = BuildRequest(s_pendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
         var service = new RecordingRequestService(request);
         var viewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, service);
 
@@ -428,7 +428,7 @@ public sealed class WaitlistViewViewModelActionTests
         await viewModel.AcceptRequestCommand.ExecuteAsync(SingleRow(viewModel)).ConfigureAwait(false);
 
         Assert.AreEqual(1, service.AcceptCalls.Count, "Accept must reach the service exactly once.");
-        Assert.AreEqual(PendingRequestId, service.AcceptCalls[0].RequestId, "Accept targeted the wrong request.");
+        Assert.AreEqual(s_pendingRequestId, service.AcceptCalls[0].RequestId, "Accept targeted the wrong request.");
         Assert.AreEqual(HandlerEmployeeNumber, service.AcceptCalls[0].EmployeeNumber, "Accept must claim the request for the signed-in handler.");
         Assert.AreEqual(string.Empty, viewModel.ActionRefusalMessage, "A successful accept must not report a refusal.");
     }
@@ -436,7 +436,7 @@ public sealed class WaitlistViewViewModelActionTests
     [TestMethod]
     public async Task ViewModel_WaitlistViewViewModelActionTests_Accept_WhenTheStoreRefusesReportsItAndWarnsTheHandler()
     {
-        var request = BuildRequest(PendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
+        var request = BuildRequest(s_pendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
         var service = new RecordingRequestService(request) { AcceptResult = null };
         var prompt = new NoOpWaitlistRequestActionPrompt();
         var viewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, service, prompt);
@@ -457,7 +457,7 @@ public sealed class WaitlistViewViewModelActionTests
     public async Task ViewModel_WaitlistViewViewModelActionTests_Accept_WhenTheRequestLeftTheListTellsTheHandlerToChooseSomethingElse()
     {
         // The store has no such request at all, so "another handler took it" would be the wrong thing to say.
-        var request = BuildRequest(PendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
+        var request = BuildRequest(s_pendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
         var service = new RecordingRequestService(request) { AcceptResult = null };
         var prompt = new NoOpWaitlistRequestActionPrompt();
         var viewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, service, prompt);
@@ -481,7 +481,7 @@ public sealed class WaitlistViewViewModelActionTests
     {
         // One shared store, two handlers, both looking at the same available request. This is the only test
         // where the store arbitrates, so the winner is decided by the store and not by either screen.
-        var request = BuildRequest(PendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
+        var request = BuildRequest(s_pendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
         var store = new FirstClaimWinsRequestService(request);
 
         var winnerPrompt = new NoOpWaitlistRequestActionPrompt();
@@ -504,7 +504,7 @@ public sealed class WaitlistViewViewModelActionTests
             store.Current.AssignedMaterialHandler,
             "The first handler to claim the request must keep it.");
         Assert.IsTrue(
-            store.GetActiveRequests("Expo Drive").Any(item => item.Id == PendingRequestId),
+            store.GetActiveRequests("Expo Drive").Any(item => item.Id == s_pendingRequestId),
             "A claimed request stays on the shared list.");
 
         Assert.AreEqual(string.Empty, winner.ActionRefusalMessage, "The winner must not be told anything went wrong.");
@@ -553,7 +553,7 @@ public sealed class WaitlistViewViewModelActionTests
     [TestMethod]
     public async Task ViewModel_WaitlistViewViewModelActionTests_Accept_WhenTheViewerIsNotAHandlerIsNotOfferedAndNeverCallsTheService()
     {
-        var request = BuildRequest(PendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
+        var request = BuildRequest(s_pendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
         var service = new RecordingRequestService(request);
         var viewModel = BuildViewModel(NonHandlerRole, HandlerEmployeeNumber, service);
 
@@ -568,7 +568,7 @@ public sealed class WaitlistViewViewModelActionTests
     [TestMethod]
     public async Task ViewModel_WaitlistViewViewModelActionTests_Cancel_CallsTheServiceWithTheRequesterIdentityAndThePromptedReason()
     {
-        var request = BuildRequest(PendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
+        var request = BuildRequest(s_pendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
         var service = new RecordingRequestService(request);
         var prompt = new NoOpWaitlistRequestActionPrompt { CancellationReasonResult = "Raised by mistake" };
         var viewModel = BuildViewModel(NonHandlerRole, RequesterEmployeeNumber, service, prompt);
@@ -578,7 +578,7 @@ public sealed class WaitlistViewViewModelActionTests
 
         Assert.AreEqual(1, prompt.CancellationPromptCallCount, "Cancel must ask before it acts.");
         Assert.AreEqual(1, service.CancelCalls.Count, "Cancel must reach the store exactly once.");
-        Assert.AreEqual(PendingRequestId, service.CancelCalls[0].RequestId, "Cancel targeted the wrong request.");
+        Assert.AreEqual(s_pendingRequestId, service.CancelCalls[0].RequestId, "Cancel targeted the wrong request.");
         Assert.AreEqual(RequesterEmployeeNumber, service.CancelCalls[0].EmployeeNumber, "Cancel must act as the requester.");
         Assert.AreEqual("Raised by mistake", service.CancelCalls[0].Reason, "The reason the requester gave must be the reason recorded.");
         Assert.AreEqual(string.Empty, viewModel.ActionRefusalMessage, "A successful cancellation must not report a refusal.");
@@ -587,7 +587,7 @@ public sealed class WaitlistViewViewModelActionTests
     [TestMethod]
     public async Task ViewModel_WaitlistViewViewModelActionTests_Cancel_WhenThePromptIsDismissedPerformsNoActionAndSaysNothing()
     {
-        var request = BuildRequest(PendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
+        var request = BuildRequest(s_pendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
         var service = new RecordingRequestService(request);
         var prompt = new NoOpWaitlistRequestActionPrompt { CancellationReasonResult = null };
         var viewModel = BuildViewModel(NonHandlerRole, RequesterEmployeeNumber, service, prompt);
@@ -603,7 +603,7 @@ public sealed class WaitlistViewViewModelActionTests
     [TestMethod]
     public async Task ViewModel_WaitlistViewViewModelActionTests_Cancel_WithAnEmptyReasonIsStillAConfirmedCancellation()
     {
-        var request = BuildRequest(PendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
+        var request = BuildRequest(s_pendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
         var service = new RecordingRequestService(request);
         var prompt = new NoOpWaitlistRequestActionPrompt { CancellationReasonResult = string.Empty };
         var viewModel = BuildViewModel(NonHandlerRole, RequesterEmployeeNumber, service, prompt);
@@ -618,7 +618,7 @@ public sealed class WaitlistViewViewModelActionTests
     [TestMethod]
     public async Task ViewModel_WaitlistViewViewModelActionTests_Cancel_WhenTheStoreRefusesReportsItInPlainLanguage()
     {
-        var request = BuildRequest(PendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
+        var request = BuildRequest(s_pendingRequestId, "Pending", assignee: null, RequesterEmployeeNumber);
         var service = new RecordingRequestService(request)
         {
             CancelResult = WaitlistRequestCancelResult.NotInCancelableState(),
@@ -639,10 +639,10 @@ public sealed class WaitlistViewViewModelActionTests
 
     private static Guid RequestIdFor(string status) => status switch
     {
-        "Accepted" => TakenByViewerRequestId,
-        "Completed" => CompletedRequestId,
-        "Canceled" => CanceledRequestId,
-        _ => PendingRequestId,
+        "Accepted" => s_takenByViewerRequestId,
+        "Completed" => s_completedRequestId,
+        "Canceled" => s_canceledRequestId,
+        _ => s_pendingRequestId,
     };
 
     private static SampleOrder SingleRow(WaitlistViewViewModel viewModel)
@@ -691,9 +691,9 @@ public sealed class WaitlistViewViewModelActionTests
         RequesterEmployeeName = requesterName,
         Status = status,
         AssignedMaterialHandler = assignee,
-        RequestedUtc = createdUtc ?? Now.AddMinutes(-20),
-        TargetTimeUtc = targetUtc is null && createdUtc is null ? Now.AddMinutes(40) : targetUtc,
-        IsOverdue = targetUtc is not null && targetUtc < Now,
+        RequestedUtc = createdUtc ?? s_now.AddMinutes(-20),
+        TargetTimeUtc = targetUtc is null && createdUtc is null ? s_now.AddMinutes(40) : targetUtc,
+        IsOverdue = targetUtc is not null && targetUtc < s_now,
         LastMessageUtc = lastMessageUtc,
     };
 
@@ -771,7 +771,7 @@ public sealed class WaitlistViewViewModelActionTests
     {
         // Job created, accepted, completed and canceled are things the system recorded. Flagging them turned
         // every routine transition into an unread message, which is exactly what the floor complained about.
-        var request = BuildRequest(PendingRequestId, "Accepted", HandlerEmployeeNumber, RequesterEmployeeNumber);
+        var request = BuildRequest(s_pendingRequestId, "Accepted", HandlerEmployeeNumber, RequesterEmployeeNumber);
         var viewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, new RecordingRequestService(request), messageSeenStore: new RecordingMessageSeenStore());
 
         await viewModel.RefreshAsync().ConfigureAwait(false);
@@ -787,8 +787,8 @@ public sealed class WaitlistViewViewModelActionTests
     [TestMethod]
     public async Task ViewModel_WaitlistViewViewModelActionTests_Card_MessageTheViewerHasNotReadShowsTheMarker()
     {
-        var written = Now.AddMinutes(-5);
-        var request = BuildRequest(PendingRequestId, "Pending", null, RequesterEmployeeNumber, lastMessageUtc: written);
+        var written = s_now.AddMinutes(-5);
+        var request = BuildRequest(s_pendingRequestId, "Pending", null, RequesterEmployeeNumber, lastMessageUtc: written);
         var viewModel = BuildViewModel(HandlerRole, HandlerEmployeeNumber, new RecordingRequestService(request), messageSeenStore: new RecordingMessageSeenStore());
 
         await viewModel.RefreshAsync().ConfigureAwait(false);
@@ -805,8 +805,8 @@ public sealed class WaitlistViewViewModelActionTests
     [TestMethod]
     public async Task ViewModel_WaitlistViewViewModelActionTests_Card_MessageTheViewerHasAlreadyReadShowsNoMarker()
     {
-        var written = Now.AddMinutes(-5);
-        var request = BuildRequest(PendingRequestId, "Pending", null, RequesterEmployeeNumber, lastMessageUtc: written);
+        var written = s_now.AddMinutes(-5);
+        var request = BuildRequest(s_pendingRequestId, "Pending", null, RequesterEmployeeNumber, lastMessageUtc: written);
         var seen = new RecordingMessageSeenStore();
         seen.MarkSeenAsync(request.Id, written).GetAwaiter().GetResult();
 
@@ -934,6 +934,9 @@ public sealed class WaitlistViewViewModelActionTests
             ReleaseCalls.Add((requestId, handlerEmployeeNumber));
             return Task.FromResult(ReleaseResult);
         }
+
+        public Task<int> SetHandlerStatusAsync(Guid requestId, string? handlerStatus, string expectedMaterialHandler, CancellationToken cancellationToken = default)
+            => Task.FromResult(0);
     }
 
     /// <summary>
@@ -1012,7 +1015,7 @@ public sealed class WaitlistViewViewModelActionTests
                 TargetTimeUtc = _current.TargetTimeUtc,
                 IsOverdue = _current.IsOverdue,
                 AssignedMaterialHandler = handlerEmployeeNumber.Trim(),
-                AcceptedUtc = Now,
+                AcceptedUtc = s_now,
             };
 
             return Task.FromResult<WaitlistRequest?>(_current);
@@ -1023,5 +1026,8 @@ public sealed class WaitlistViewViewModelActionTests
 
         public Task<WaitlistRequest?> ReleaseAsync(Guid requestId, string handlerEmployeeNumber, string? handlerEmployeeName = null, CancellationToken cancellationToken = default)
             => Task.FromResult<WaitlistRequest?>(null);
+
+        public Task<int> SetHandlerStatusAsync(Guid requestId, string? handlerStatus, string expectedMaterialHandler, CancellationToken cancellationToken = default)
+            => Task.FromResult(0);
     }
 }

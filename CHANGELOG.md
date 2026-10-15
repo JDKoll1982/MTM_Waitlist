@@ -10,6 +10,53 @@
 
 ---
 
+## 2026-10-10 — the waitlist card is rebuilt around what you need to see, and a handler can say what is wrong
+
+**What changed:** the waitlist card is now four panels instead of a picture, a stack of labels and a row of buttons.
+Left to right: **what it is** (the part's picture, and the work centre that asked for it as a large value beneath
+it), **where it stands** (the status in plain coloured words, a ring showing the time, and who has it), **what it is
+for** (the request's title and identifier, with the details of that kind of request laid out beneath), and **what
+you can do** (the buttons). The coloured status pill and the four little labelled rows — requested by, press,
+remaining time, waiting — are gone; the one thing that was in them that mattered, how long is left, is the ring now.
+
+**Why it matters:** the old card made you read four labelled rows to answer two questions, and its labels and
+buttons crowded out the things you actually need on the floor: which part, where the request stands, and how long
+is left. It also made the whole card clickable, so a handler aiming for a button kept opening the request by
+accident. Now the card says what you need at a glance, only one button opens the request, and a card grows or
+shrinks to fit the kind of request rather than padding itself out with fields that do not apply.
+
+**What to expect:**
+
+- **The status is a word, not a badge, and it tells you more.** It still reads Waiting, In Progress, Done or
+  Cancelled, and it goes red with the word `Overdue` when a request is past its time. Beside it the ring fills as the
+  time is used and carries the time left inside it; once a request closes the ring stops and carries the time it
+  took instead, and it says which of the two it is showing.
+- **A material handler can report what is holding a request up.** If a request is yours to work, its status is
+  clickable, and it offers four conditions: Product Buried, Cant Find Product, Changing Forklift and Changing
+  Propane. Choosing one shows that condition on the card and colours the whole panel a lighter red. Nobody else can
+  set it, and the condition never overwrites the request's real status — remove or change it and the true state
+  shows again.
+- **Each kind of request shows its own details.** The details panel now carries the fields that belong to that kind
+  of request — the coil's number, description and average weight; the die's location; the dunnage part's home
+  location; and so on. Requests of the same kind always look the same, and a field with nothing behind it is left
+  out rather than shown empty.
+- **`Open details` is how you open a request.** A magnifier button with that name; the card's body no longer opens
+  anything. The picture still enlarges with Shift+click.
+- **Print is visible but not working yet.** It is greyed out and tells you it is not available when you point at it,
+  so you can see it is coming without being misled.
+- **Four kinds of pickup request that used to be hidden are back.** Finished goods, non-conforming stock, work in
+  process and outside service are offered again — each one only when the job you are on actually has that work — and
+  their cards show the part's type and how many skids are needed.
+- **The New Request wizard asks a few more questions.** The two hopper requests ask for the size, with a picture of
+  that size (tap it on the card to see it full size). The two die requests ask whether the die is at the die shop or
+  must go there, which decides whether the card shows that as a third field. The coil-turn request asks for the
+  weight of the coil, and needs a number. Requests that pick up skids start at one unless you say otherwise. The
+  wrong-part requests now ask you to look the part up rather than type it free-hand, so a mistyped number cannot slip
+  through — if the plant system cannot be reached, the request says the search is unavailable and keeps what you
+  typed.
+
+---
+
 ## 2026-09-27 — starting the application is now watchable, and a stopped start says why
 
 **What changed:** the way the application starts up has been rebuilt from the ground up. Instead of a splash

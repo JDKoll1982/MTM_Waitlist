@@ -3,6 +3,12 @@
 -- Re-keyed by specs/004-unified-card-item-picker: a new request is raised with the Category and the Item the
 -- requester chose, and no longer with a request type or a subtype (FR-004). The lifecycle columns this
 -- procedure writes are unchanged, because the request lifecycle does not change with the Item (FR-032).
+-- Extended by specs/012-waitlist-card-layout: a request now also carries the answers it captured beyond
+-- `input_value`, which holds exactly one answer while the die Items ask two questions and each of the four
+-- returning Items asks one (FR-073, FR-087). The map is keyed by the label the Item declared, the same
+-- label-to-value shape the row's `answers_json` column holds, and it is written through exactly as it arrives:
+-- a JSON column needs no TRIM, and a caller with no answers passes NULL, which stores NULL rather than an
+-- empty object.
 
 USE mtm_waitlist;
 
@@ -25,7 +31,8 @@ CREATE PROCEDURE sp_waitlist_request_insert(
     IN p_is_overdue TINYINT,
     IN p_assigned_material_handler VARCHAR(128),
     IN p_cancellation_reason VARCHAR(255),
-    IN p_note VARCHAR(500)
+    IN p_note VARCHAR(500),
+    IN p_answers_json JSON
 )
 INSERT INTO waitlist_requests_queue (
     public_id,
@@ -34,6 +41,7 @@ INSERT INTO waitlist_requests_queue (
     category,
     item,
     input_value,
+    answers_json,
     active_setup_job_id,
     work_center_name,
     requester_employee_number,
@@ -55,6 +63,7 @@ VALUES (
     TRIM(p_category),
     TRIM(p_item),
     NULLIF(TRIM(COALESCE(p_input_value, '')) COLLATE utf8mb4_unicode_ci, ''),
+    p_answers_json,
     TRIM(p_active_setup_job_id),
     TRIM(p_work_center_name),
     TRIM(p_requester_employee_number),
