@@ -398,6 +398,13 @@ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
 
 ## 8. Pitfalls already paid for — do not re-derive them
 
+- **A full `dotnet build` reports 48 warnings and they are not yours.** Every one is `NU1902` / `NU1903` about
+  `System.Security.Cryptography.Pkcs` 9.0.4 — one moderate advisory (`GHSA-2fmv-rv2c-59x7`) and one **high**
+  (`GHSA-846f-f764-76mx`) — repeated across the projects and their target frameworks. They are NuGet *audit* findings
+  surfaced on restore, they pre-date this branch, and they are absent from an incremental build that does not
+  re-restore, which is why the same tree can report `0 Warning(s)` on one run and `48 Warning(s)` on the next.
+  **Zero errors is the signal that matters here.** Bumping the package is a repository-wide decision with its own
+  build risk and is deliberately not part of this work — report it, do not "tidy" it mid-run.
 - **MySQL silently ignores surplus call parameters and reports success.** A caller passing an argument the routine
   does not declare loses that value with nothing logged, nothing thrown and nothing on screen. This is the T112
   defect and the reason §2 exists. After bringing any store current, **verify with the drift report, not with a
