@@ -23,6 +23,9 @@ so those are machine-local and will NOT be committed when you push.
 - `repo/infor-visual-disposition.md` — Infor Visual status codes + FG/WIP/Outside derivation +
   MTM WIP Application facts + tooling quirks (file 14 Phase 6). Canonical long-form note:
   `Documents/Development/InforVisual/Phase6-Disposition-StatusCodes-Research.md`.
+- `repo/copilot-cli-install.md` — how the GitHub Copilot CLI is really installed on this workstation:
+  gh ≥ 2.102 makes `copilot` a built-in command, so the SpecKit Companion's hinted
+  `gh extension install github/gh-copilot` cannot work; the fix is `npm install -g @github/copilot`.
 - `repo/tasks-md-id-allocation.md` — how task IDs are allocated in `tasks.md` so they stay unique and
   stable across phases.
 - `repo/subagent-models.md` — the owner's 2026-10-11 rule that **all background/subagent work runs on
