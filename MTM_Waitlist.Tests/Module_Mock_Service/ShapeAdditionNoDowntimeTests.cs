@@ -183,6 +183,50 @@ public sealed class ShapeAdditionNoDowntimeTests
                 + "(playbook step 5); a shape without one has no in-app fallback.");
     }
 
+    /// <summary>
+    /// The freshness report must add one branch per catalog shape (playbook step 3b), by name and exactly once.
+    /// </summary>
+    /// <remarks>
+    /// <b>Why this test exists.</b> <c>sp_visual_read_shape_freshness_get</c> is the only artifact that must
+    /// enumerate the shapes: freshness is a per-table read, so it cannot be derived from
+    /// <c>information_schema</c> the way the metadata procedure is. Shapes 6 and 7 were added to the catalog
+    /// without their branch, and nothing failed — the service still refreshed them and still wrote their rows.
+    /// What broke was the report: a shape with no branch is absent from the result set, so
+    /// <c>ServiceApiOperations</c> falls through to <c>RefreshedUtc: null</c> / <c>IsSeedContentOnly: true</c>
+    /// for it, and both the service status payload and the app's read-status indicator claimed a full, freshly
+    /// refreshed mirror was seed-only content that had never been refreshed.
+    /// </remarks>
+    [TestMethod]
+    public void Service_ShapeAdditionNoDowntimeTests_TheFreshnessReport_NamesEveryCatalogShapeExactlyOnce()
+    {
+        var path = Path.Combine(
+            FindRepositoryRoot(),
+            "Database",
+            "Mock",
+            "StoredProcedures",
+            "sp_visual_read_shape_freshness_get",
+            "create.sql");
+
+        Assert.IsTrue(File.Exists(path), $"The freshness report was not found at '{path}'.");
+
+        var source = File.ReadAllText(path);
+        var wrong = VisualReadShapeCatalog.Create()
+            .Select(shape => (shape.Key, Branches: CountOccurrences(source, $"'{shape.Key}' AS shape_key")))
+            .Where(entry => entry.Branches != 1)
+            .Select(entry => $"{entry.Key}: {entry.Branches} branch(es)")
+            .ToArray();
+
+        Assert.AreEqual(
+            0,
+            wrong.Length,
+            "sp_visual_read_shape_freshness_get must add exactly one UNION ALL branch for every shape in the "
+                + "catalog (playbook step 3b). A shape with no branch is silently absent from the freshness "
+                + "report, so the service status payload and the app's read-status indicator report "
+                + "refreshedUtc null / isSeedContentOnly true for it however successfully it refreshes:"
+                + Environment.NewLine
+                + string.Join(Environment.NewLine, wrong));
+    }
+
     private static int CountOccurrences(string source, string value)
     {
         var count = 0;

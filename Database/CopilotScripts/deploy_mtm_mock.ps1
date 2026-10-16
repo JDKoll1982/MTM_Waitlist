@@ -5,7 +5,7 @@
 .DESCRIPTION
     Deploys, in dependency order, every artifact under Database/Mock/:
       1. Bootstrap/create_database.sql
-      2. Tables/<name>/create.sql            (5 mirrors + 5 stage twins)
+      2. Tables/<name>/create.sql            (one mirror + one stage twin per shape)
       3. StoredProcedures/<name>/create.sql  (sp_visual_*)
       4. Bootstrap/update_table_descriptions.sql
       5. Seeds/<name>/create.sql

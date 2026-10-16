@@ -12,7 +12,22 @@ param(
     # secrets pointing at a real one - so applying seeds by default meant a pull request touching any
     # Database/**/*.sql file rewrote that store's users. A schema that validates needs no seed data to be
     # judged, so populating a store is now the deliberate act rather than the side effect of checking it.
-    [switch]$ApplySeeds
+    [switch]$ApplySeeds,
+
+    # The schema repair is a writer for the same reason, and this switch is why. Validation is the default.
+    #
+    # When the schema check finds a gap the script used to apply the object files - and, worse, the bootstrap -
+    # without being asked, so a store one deploy behind was migrated by the act of checking it. On 2026-10-16
+    # that combination destroyed the plant's live `mtm_waitlist`: the bootstrap begins with
+    # `DROP DATABASE IF EXISTS`, the repair path applied it to an existing store, and every table came back
+    # empty. Checking a store must not change it, so a run without this switch now reports the gap and exits
+    # rather than migrating. Pass `-ApplySchema` to migrate the named store deliberately.
+    #
+    # `-ApplySchema` is still not a licence to point this at production carelessly: it rewrites every table,
+    # procedure, function and view from the repository, which is a broad write. Ordering matters too - it
+    # applies the object files as they are written, so a repository change that renames a column must have that
+    # rename applied to the store first (`Database/Database-Ruleset.md`, "no migration runner").
+    [switch]$ApplySchema
 )
 
 $ErrorActionPreference = 'Stop'
@@ -384,17 +399,30 @@ function Install-Or-UpdateDatabase {
 
     $serverConnectionString = New-ValidatedConnectionString -ConnectionString $ConnectionString -TargetDatabaseName ''
 
-    Write-Log 'Bootstrap phase: opening server connection to create the database if needed.'
-
-    $serverConnection = [Activator]::CreateInstance($connectionType, @($serverConnectionString))
-    try {
-        [void]$connectionType.GetMethod('Open', [Type[]]@()).Invoke($serverConnection, @())
-        Write-Log 'Bootstrap phase: applying Database/Bootstrap/create_database.sql.'
-        $bootstrapStatements = Split-SqlStatements -Text (Get-InstallSqlText -Path $bootstrapCreatePath)
-        Invoke-SqlStatements -Connection $serverConnection -Statements $bootstrapStatements
+    # `Database/Bootstrap/create_database.sql` begins with `DROP DATABASE IF EXISTS`, and its own header says it
+    # is the first step of the fresh-store path "and only that". So it may be applied ONLY when the database is
+    # genuinely absent - which is safe, because the DROP then has nothing to remove.
+    #
+    # It used to be applied unconditionally, on the repair path as well. Applied to a store that existed and
+    # merely had a schema gap, it dropped the store and recreated every table empty: that is the 2026-10-16
+    # loss of the plant's live `mtm_waitlist`. This guard is the fix, and the fresh-store path is unchanged,
+    # because a missing database is exactly the case the bootstrap exists for.
+    if (Test-DatabaseExists -ConnectionString $ConnectionString -DatabaseName $TargetDatabaseName) {
+        Write-Log "Bootstrap phase: skipped - '$TargetDatabaseName' already exists, and the bootstrap script drops it. Applying the object files only."
     }
-    finally {
-        $serverConnection.Dispose()
+    else {
+        Write-Log 'Bootstrap phase: opening server connection to create the database if needed.'
+
+        $serverConnection = [Activator]::CreateInstance($connectionType, @($serverConnectionString))
+        try {
+            [void]$connectionType.GetMethod('Open', [Type[]]@()).Invoke($serverConnection, @())
+            Write-Log 'Bootstrap phase: applying Database/Bootstrap/create_database.sql.'
+            $bootstrapStatements = Split-SqlStatements -Text (Get-InstallSqlText -Path $bootstrapCreatePath)
+            Invoke-SqlStatements -Connection $serverConnection -Statements $bootstrapStatements
+        }
+        finally {
+            $serverConnection.Dispose()
+        }
     }
 
     $targetConnectionString = New-ValidatedConnectionString -ConnectionString $ConnectionString -TargetDatabaseName $TargetDatabaseName
@@ -485,6 +513,42 @@ function Apply-Seeds {
     }
 }
 
+# Whether the named database already exists on the server the connection string points at.
+#
+# Asked with the connection string's own database property cleared, because a connection string that names a
+# missing database cannot be opened at all - which is also why the caller sees `Unknown database` before it can
+# ask this question. The answer is what keeps the bootstrap's `DROP DATABASE IF EXISTS` away from a store that
+# has something to lose.
+function Test-DatabaseExists {
+    param(
+        [string]$ConnectionString,
+        [string]$DatabaseName
+    )
+
+    $serverConnectionString = New-ValidatedConnectionString -ConnectionString $ConnectionString -TargetDatabaseName ''
+    $connection = [Activator]::CreateInstance($connectionType, @($serverConnectionString))
+    try {
+        [void]$connectionType.GetMethod('Open', [Type[]]@()).Invoke($connection, @())
+
+        $command = $connectionType.GetMethod('CreateCommand', [Type[]]@()).Invoke($connection, @())
+        $commandType = $command.GetType()
+        $commandType.GetProperty('CommandText').SetValue(
+            $command,
+            "SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name = '$DatabaseName';")
+
+        $scalarMethod = $commandType.GetMethod('ExecuteScalar', [Type[]]@())
+        $existsObject = $scalarMethod.Invoke($command, @())
+        if ($existsObject -is [System.Array]) {
+            $existsObject = $existsObject | Select-Object -First 1
+        }
+
+        return ([int]$existsObject -gt 0)
+    }
+    finally {
+        $connection.Dispose()
+    }
+}
+
 function Test-DatabaseSchema {
     param(
         [string]$ConnectionString,
@@ -534,6 +598,13 @@ foreach ($entry in $resolvedConnectionStrings) {
         }
 
         if ($issueCount -gt 0) {
+            if (-not $ApplySchema) {
+                Write-Log "$($entry.EnvironmentName) connected, but schema validation found $issueCount gap(s)."
+                Write-Log 'Schema repair is not applied by default: this script points at whatever store its connection strings name, and a repair rewrites that store''s tables, procedures, functions and views. Rerun with -ApplySchema to migrate the named store deliberately.'
+                $attemptErrors.Add("$($entry.EnvironmentName) is behind the repository by $issueCount object(s); rerun with -ApplySchema to migrate it.")
+                continue
+            }
+
             Write-Log "$($entry.EnvironmentName) connected, but schema validation found gaps. Applying schema files..."
             Install-Or-UpdateDatabase -ConnectionString $entry.ConnectionString -TargetDatabaseName $DatabaseName
             $issueCount = [int](Test-DatabaseSchema -ConnectionString $entry.ConnectionString -TargetDatabaseName $DatabaseName)

@@ -177,6 +177,30 @@ next validation run.
 - A schema that validates needs no seed data to be judged, so nothing is lost by the default. A store that is
   installed and wants data is the case the switch exists for.
 
+### Review note — validation never migrates a store either (2026-10-16)
+
+`.github/scripts/validate-database-schema.ps1` had the same defect one step worse. When its schema check found a
+gap it applied the object files — and the bootstrap — without being asked, and `Database/Bootstrap/create_database.sql`
+begins with `DROP DATABASE IF EXISTS mtm_waitlist;` (its own header: "the FIRST step of the fresh-store path, and
+only that"). Pointed at an existing store that was merely one deploy behind, the repair path therefore **dropped
+that store and recreated every table empty**. It did exactly that on 2026-10-16 to the plant's live `mtm_waitlist`. The store was restored from the Mock
+service's own 01:00 backup — the only copy that exists, because MySQL binary logging is off on that host, so there
+is no point-in-time recovery and nothing closer than the last daily dump. Nothing is known to have written to the
+store between that backup and the incident, so the recovered state is believed complete; what matters here is the
+mechanism, which is data loss on a store somebody is using, and a checking tool must never be able to do that.
+- **Schema repair is now opt-in**: pass **`-ApplySchema`** to migrate the named store. A run without the switch
+  reports the gap count and exits non-zero instead of writing.
+- **The bootstrap applies only when the database is genuinely absent** (`Test-DatabaseExists`), so the
+  `DROP DATABASE IF EXISTS` it starts with always has nothing to remove. The fresh-store path is unchanged, because
+  a missing database is the case the bootstrap exists for.
+- **Ordering was a second hazard the same change removes.** Because a repair applied the object files exactly as
+  written, a repository change that renames a column and updates the routines that name it was applied as
+  routines-first on any store that still had the old column — which is the ordering the owner's own comparison warns
+  about (`LIVE-DB-AND-MOCK-UPDATES.md` Part 1, "Apply 1.1 before 1.3"). Repair no longer happens as a side effect
+  of a check, so the two are applied deliberately and in order.
+- Default-run behaviour on a current store is unchanged: it validates, reports, and exits 0. A store that is behind
+  now says so instead of being silently migrated under the person checking it.
+
 ### Review note — the `mtm_mock` mirror schema lives only under `Database/Mock/`
 
 - The six `visual_*_result` mirror tables, their `_stage` twins and the `sp_visual_*` procedures are defined
@@ -195,7 +219,8 @@ recorded here rather than left implicit (task T121 of `specs/001-module-mock-vis
 - **Deviation.** `Database/Mock/AllTables.sql`, `Database/Mock/AllSPs.sql` and `Database/Mock/AllSeeds.sql`
   are **generated**, not hand-maintained, by `Database/CopilotScripts/build_mtm_mock_masters.ps1`, which
   concatenates the file-per-artifact `create.sql` sources in dependency order.
-- **Why.** The cache ships 5 mirror tables, 5 stage twins and 10 procedures through the same file-per-artifact
+- **Why.** The cache ships one mirror table and one stage twin per read shape, plus that shape's `get` and
+  `refresh`, through the same file-per-artifact
   convention the rest of `Database/` uses. Hand-copying those bodies into a second place is exactly the drift
   the naming rule exists to prevent, and it is unreviewable in a diff: a change to one artifact would have to
   be mirrored by hand in an aggregate no one reads line by line.

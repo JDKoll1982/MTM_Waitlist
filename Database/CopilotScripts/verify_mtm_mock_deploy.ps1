@@ -5,9 +5,11 @@
 
 .DESCRIPTION
     This is the executable form of the quickstart.md section 1 gate and covers:
-      * the five mirrors + five stage twins deploy from Database/Mock/AllTables.sql
-      * the ten sp_visual_* procedures deploy from Database/Mock/AllSPs.sql
+      * one mirror + one stage twin per shape deploy from Database/Mock/AllTables.sql
+      * the per-shape and read-shape reporting procedures deploy from Database/Mock/AllSPs.sql
       * every shape refreshes and reads back with an identical result shape (FR-004)
+      * the freshness report enumerates every shape (a shape it omits is reported as seed-only
+        content however successfully it refreshes)
       * a refresh never leaves a partial/empty live table and no `_prev` table persists (FR-006/SC-005)
       * the master lists are in sync with their file-per-artifact sources
 
@@ -95,13 +97,23 @@ Invoke-SqlFile -Path (Join-Path $mockRoot 'AllTables.sql') -Database 'mtm_mock'
 Invoke-SqlFile -Path (Join-Path $mockRoot 'AllSPs.sql') -Database 'mtm_mock'
 
 $tableCount = Get-Scalar -Sql 'SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ''mtm_mock'';' -Database 'mtm_mock'
-# 12 procedures, not 10: the ten shape procedures (5 shapes x {get,refresh}) plus the two
+# 16 procedures, not 12: the fourteen shape procedures (seven shapes x {get,refresh}) plus the two
 # read-shape reporting procedures (sp_visual_read_shape_freshness_get,
 # sp_visual_read_shape_metadata_get). Filtered to `sp_visual%` so the assertion means what its
 # label says rather than counting anything else that may live in mtm_mock.
+# Shipped shape count is asserted here as a literal on purpose: `VisualReadShapeCatalog` is the source of
+# truth for the code, and these two numbers are the deployed consequence. A shape added without its artifacts
+# fails `ShapeAdditionNoDowntimeTests`, and a shape added without regenerating the master lists fails step 1.
 $procCount = Get-Scalar -Sql 'SELECT COUNT(*) FROM information_schema.routines WHERE routine_schema = ''mtm_mock'' AND routine_type = ''PROCEDURE'' AND routine_name LIKE ''sp_visual%'';' -Database 'mtm_mock'
-Assert-Equal $tableCount 10 'tables deployed (5 mirrors + 5 stage twins)'
-Assert-Equal $procCount 12 'procedures deployed (10 shape ops + 2 read-shape reporting)'
+Assert-Equal $tableCount 14 'tables deployed (7 mirrors + 7 stage twins)'
+Assert-Equal $procCount 16 'procedures deployed (14 shape ops + 2 read-shape reporting)'
+
+# The freshness report is the one artifact that enumerates the shapes by hand, so a branch for every shape is
+# asserted directly from the deployed body: each branch contributes exactly one ` AS shape_key` literal.
+# A shape the report omits is absent from its result set, and the status payload fills a missing shape with
+# `refreshedUtc: null` / `isSeedContentOnly: true` — a fully refreshed mirror reported as seed-only content.
+$freshnessBranches = Get-Scalar -Sql "SELECT (CHAR_LENGTH(routine_definition) - CHAR_LENGTH(REPLACE(routine_definition, ' AS shape_key', ''))) / CHAR_LENGTH(' AS shape_key') FROM information_schema.routines WHERE routine_schema = 'mtm_mock' AND routine_name = 'sp_visual_read_shape_freshness_get';" -Database 'mtm_mock'
+Assert-Equal $freshnessBranches 7 'freshness report enumerates every shape (one branch per shape)'
 
 Write-Host "3. Cold cache serves baseline seed content (FR-017)" -ForegroundColor Cyan
 Invoke-SqlFile -Path (Join-Path $mockRoot 'AllSeeds.sql') -Database 'mtm_mock' | Out-Null
@@ -117,12 +129,19 @@ else { Write-Host '  ok   never-refreshed cache serves baseline seed content' -F
 # EVERY seeded row must carry is_seed_content = 1. A copied row is not a refresh, and the flag is
 # what stops the read-status surface reporting a cache age for content that was captured rather
 # than read from Infor Visual (FR-022).
+#
+# `employee_by_number` is deliberately absent from this list: the baseline seed does not cover it, and must not.
+# The seed's own header records why — the shape arrived with feature 011, after the capture, and capturing it
+# means reading EMPLOYEE on the Infor Visual host, so a fresh store serves an empty set for that one shape
+# rather than invented employee rows. Its table is legitimately empty after seeding, so a
+# "COUNT(*) > 0 AND every row is seed content" assertion would fail for it by design.
 foreach ($shape in @(
         'work_order_lookup'
         'operation_sequences'
         'subordinate_parts'
         'inventory_locations'
-        'disposition_input')) {
+        'disposition_input'
+        'part_warehouse_quantities')) {
     $seedOnly = Get-Scalar -Sql "SELECT CASE WHEN COUNT(*) > 0 AND SUM(is_seed_content) = COUNT(*) THEN 1 ELSE 0 END FROM visual_${shape}_result;" -Database 'mtm_mock'
     Assert-Equal $seedOnly 1 "visual_${shape}_result holds only is_seed_content = 1 rows"
 }
@@ -138,8 +157,8 @@ Write-Host "5. Refresh invariants (FR-006 / SC-005)" -ForegroundColor Cyan
 $prevTables = Get-Scalar -Sql "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='mtm_mock' AND table_name LIKE '%\_prev';" -Database 'mtm_mock'
 Assert-Equal $prevTables 0 'no transient _prev table persists'
 
-$seedRows = Get-Scalar -Sql "SELECT (SELECT COUNT(*) FROM visual_work_order_lookup_result WHERE is_seed_content = 1) + (SELECT COUNT(*) FROM visual_operation_sequences_result WHERE is_seed_content = 1) + (SELECT COUNT(*) FROM visual_subordinate_parts_result WHERE is_seed_content = 1) + (SELECT COUNT(*) FROM visual_inventory_locations_result WHERE is_seed_content = 1) + (SELECT COUNT(*) FROM visual_disposition_input_result WHERE is_seed_content = 1);" -Database 'mtm_mock'
-Assert-Equal $seedRows 0 'no seed rows remain after refresh (all mirrors carry refreshed content)'
+$seedRows = Get-Scalar -Sql "SELECT (SELECT COUNT(*) FROM visual_work_order_lookup_result WHERE is_seed_content = 1) + (SELECT COUNT(*) FROM visual_operation_sequences_result WHERE is_seed_content = 1) + (SELECT COUNT(*) FROM visual_subordinate_parts_result WHERE is_seed_content = 1) + (SELECT COUNT(*) FROM visual_inventory_locations_result WHERE is_seed_content = 1) + (SELECT COUNT(*) FROM visual_disposition_input_result WHERE is_seed_content = 1) + (SELECT COUNT(*) FROM visual_employee_by_number_result WHERE is_seed_content = 1) + (SELECT COUNT(*) FROM visual_part_warehouse_quantities_result WHERE is_seed_content = 1);" -Database 'mtm_mock'
+Assert-Equal $seedRows 0 'no seed rows remain after refresh (all seven mirrors carry refreshed content)'
 
 Write-Host "6. Refresh swap smoke (FR-006)" -ForegroundColor Cyan
 Invoke-SqlFile -Path (Join-Path $mockRoot 'Validation/refresh_swap_smoke/validate.sql') -Database 'mtm_mock' | Out-Null

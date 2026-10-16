@@ -114,3 +114,13 @@ SELECT
       WHERE routine_schema = 'mtm_mock' AND routine_type = 'PROCEDURE'
         AND LEFT(routine_name, 21) = 'sp_visual_read_shape_') AS catalog_procedure_count;
 -- Expected: 14 shape procedures (seven shapes x get + refresh) and 2 catalog procedures.
+
+-- ------------------------------------------------------------
+-- The freshness report must name all seven shapes, and after the seven refreshes above every one of them must
+-- report a real snapshot: a non-NULL `refreshed_utc` and `is_seed_content = 0`. Expect seven rows, one per shape,
+-- in shape_key order. A missing row is the defect this step exists to catch — the service status payload fills a
+-- shape the report omits with `refreshedUtc: null` / `isSeedContentOnly: true`, so a fully refreshed mirror is
+-- reported as seed-only content that has never been refreshed.
+-- ------------------------------------------------------------
+SELECT '11. the freshness report covers every shape and none is seed-only' AS shape;
+CALL sp_visual_read_shape_freshness_get(NULL);

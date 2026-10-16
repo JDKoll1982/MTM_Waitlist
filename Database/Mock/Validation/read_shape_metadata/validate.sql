@@ -41,3 +41,15 @@ CALL sp_visual_read_shape_metadata_get('employee_by_number');
 
 SELECT '6. the seventh shape reports all four artifacts present' AS step;
 CALL sp_visual_read_shape_metadata_get('part_warehouse_quantities');
+
+-- ------------------------------------------------------------
+-- The freshness report is a separate artifact that must enumerate the shapes by hand, so it is checked here too.
+-- Read-only: it only selects from the mirrors. Every one of the seven shapes must appear, because a shape the
+-- report omits is reported by the service status payload and by the app's read-status indicator as
+-- refreshedUtc null / isSeedContentOnly true, however successfully that shape refreshes.
+-- ------------------------------------------------------------
+SELECT '7. the freshness report names every one of the seven shapes (expect seven rows, one per shape)' AS step;
+CALL sp_visual_read_shape_freshness_get(NULL);
+
+SELECT '8. a single requested shape reports its own freshness row' AS step;
+CALL sp_visual_read_shape_freshness_get('part_warehouse_quantities');

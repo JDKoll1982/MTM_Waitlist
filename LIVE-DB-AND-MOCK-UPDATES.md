@@ -145,6 +145,13 @@ The mirror schema is already current: all 12 tables (six `_result` mirrors plus 
 twins) and all 14 `sp_visual_*` procedures match the repository. The two `config_images_locations_history`
 triggers belong to `mtm_waitlist` and also match. **There is no `mtm_mock` script to run.**
 
+> **Correction 2026-10-16 — "current" was measured against six shapes, and the repository has seven.** The
+> count above (12 tables, 14 procedures) describes shapes 1–6 only. `part_warehouse_quantities`, added by
+> feature 012, was absent from the host entirely: no mirror table, no stage twin, no `_get`, no `_refresh`.
+> Its artifacts were deployed on their own — the two table `create.sql` files, then its two procedures, then
+> `Database/Mock/Bootstrap/update_table_descriptions.sql` — leaving the existing six shapes' mirrors
+> untouched, and the service populated the shape on its next refresh (8 746 rows). The host now holds
+> **14 tables and 16 procedures**, which is the repository's own set.
 ### 2.2 The running service is an older build
 
 Its own status API reports `"serviceVersion":"1.0.0"`, started **2026-10-05 12:19**; the repository is
@@ -182,6 +189,17 @@ held a refreshed snapshot, while the other five shapes were refreshed successful
 Check that shape specifically after the redeploy; if it still reports seed-only content, the refresh
 for it is reporting success without swapping a snapshot.
 
+> **Resolved 2026-10-16 — the last sentence above was the right instinct aimed at the wrong thing.** The
+> refresh was never broken; the *freshness report* was. `sp_visual_read_shape_freshness_get` enumerates
+> the shapes by hand, it shipped with five branches, and neither feature 011 nor feature 012 added the
+> branch its new shape needed — so the report returned five rows and the status payload fell through to
+> its `refreshedUtc: null` / `isSeedContentOnly: true` defaults for the shape it could not find. The
+> mirror held real refreshed rows throughout. Fixed by adding the two missing branches, regenerating
+> `Database/Mock/AllSPs.sql` through the builder, and pinning the enumeration against the shape catalog
+> with a test that fails the build when a shape is added without its branch; the service was republished
+> to **1.1.0** and redeployed on the host, where all **seven** shapes now report a fresh snapshot. Full
+> record: `defects/Closed-Medium-Mock-ServiceStatusReportedRefreshedShapesAsSeedOnly.md`.
+
 ---
 
 ## Part 3 — Checked and already correct (no action)
@@ -214,6 +232,32 @@ for it is reporting success without swapping a snapshot.
 ---
 
 ## In order
+
+> **Status, 2026-10-16 (added by the agent that ran this list on the host `V-MTMFG-5`).** Steps **1–4 and 7–8 are
+> done**; the notes below say what was observed and what is left. Step 4's verification queries return what this
+> file expects. **Step 9 is still yours**, and it is the one that needs a person at the keyboard.
+>
+> * **1–3 (the required repairs).** Applied: the `description` → `location` rename, and the routine set from
+>   §1.2/§1.3 — `sp_auth_user_previous_sign_ins_list` now exists, the three registry procedures and
+>   `sp_machine_configuration_reset` now use `location`/`p_reset_location`, and all seven `location` values
+>   survived the rename. They were applied as part of recovering the store from an incident: on 2026-10-16 the
+>   schema validator's repair path applied `Database/Bootstrap/create_database.sql` — which begins with
+>   `DROP DATABASE IF EXISTS` — to this store, dropping every table, and the store was restored from the Mock
+>   service's 01:00 dump before this list was re-applied. Full record:
+>   `defects/Closed-Critical-Database-SchemaValidatorDroppedTheLiveWaitlistStore.md`. The validator is fixed and is
+>   now read-only unless `-ApplySchema` is passed.
+> * **4.** Run on the restored store: `core_computers_registry` carries **only** `location`,
+>   `sp_auth_user_previous_sign_ins_list` returns 1 row from `information_schema.routines`, and the validator's own
+>   live half reports `mtm_waitlist` schema is valid.
+> * **5–6 are untouched** — they are optional/recommended and were not in scope. The four `image_storage.*` rows
+>   are still missing, and `seed_username_case_backup` is still present.
+> * **7–8.** The service was republished to **1.1.0** and redeployed on the host, and the mirror now carries
+>   **seven** shapes, not six: `part_warehouse_quantities` was absent from `mtm_mock` entirely (12 tables, no
+>   shape-7 artifacts) and was deployed on its own. A forced refresh returned seven successful results, and the
+>   status payload reports every shape fresh with `isSeedContentOnly: false`.
+> * **Recovery is bounded by the daily dump.** This host has `log_bin = OFF`, so there are no binary logs and no
+>   point-in-time recovery: the Mock service's dump is the only copy, and a fresh one of the repaired store was
+>   taken on 2026-10-16 (`mtm_waitlist_20261016T160557Z.sql`).
 
 1. Take a backup of `mtm_waitlist` (or at least of `config_settings_values`).
 2. Run the `ALTER TABLE` from 1.1.

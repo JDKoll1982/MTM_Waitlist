@@ -629,6 +629,7 @@ DELIMITER ;
 -- Engine:     MySQL 5.7 (verified on 9.6)
 -- Kind:       StoredProcedure / create  (freshness)
 -- Created:    2026-09-10
+-- Updated:    2026-10-16
 -- Feature:    001-module-mock-visual-fallback (task T124)
 -- ============================================================
 --
@@ -661,9 +662,17 @@ DELIMITER ;
 -- Notes
 -- -----
 -- This is the one report that must enumerate the shapes: freshness is a per-table read, so it cannot
--- be derived from information_schema the way the metadata procedure is. Adding a sixth shape adds one
--- branch below. That is additive by construction — the output columns are fixed, so no existing
+-- be derived from information_schema the way the metadata procedure is. Adding a shape adds one
+-- branch below (playbook step 3b) — and the branch is mandatory, not cosmetic: a shape absent from
+-- this list reports `refreshedUtc: null` and `isSeedContentOnly: true` in the service status payload
+-- and on the app's read-status indicator for as long as the omission stands, however successfully
+-- that shape refreshes. Shapes 6 and 7 were added without their branch, so both were reported as
+-- seed-only content while the mirror held a full refreshed snapshot.
+-- That is additive by construction — the output columns are fixed, so no existing
 -- shape's contract, procedure signature, or result type changes (FR-016/FR-020).
+--
+-- The branches below must therefore name every key in `VisualReadShapeCatalog` exactly once;
+-- `ShapeAdditionNoDowntimeTests` fails the build when one is missing.
 --
 -- An empty mirror reports is_seed_content = 1, because no refresh has ever succeeded for it, which is
 -- exactly the state the baseline seed content exists to cover.
@@ -724,6 +733,24 @@ FROM (
         CASE WHEN COUNT(*) = 0 OR SUM(is_seed_content) = COUNT(*) THEN 1 ELSE 0 END AS is_seed_content,
         COUNT(*) AS row_count
     FROM visual_disposition_input_result
+
+    UNION ALL
+
+    SELECT
+        'employee_by_number' AS shape_key,
+        MAX(refreshed_utc) AS refreshed_utc,
+        CASE WHEN COUNT(*) = 0 OR SUM(is_seed_content) = COUNT(*) THEN 1 ELSE 0 END AS is_seed_content,
+        COUNT(*) AS row_count
+    FROM visual_employee_by_number_result
+
+    UNION ALL
+
+    SELECT
+        'part_warehouse_quantities' AS shape_key,
+        MAX(refreshed_utc) AS refreshed_utc,
+        CASE WHEN COUNT(*) = 0 OR SUM(is_seed_content) = COUNT(*) THEN 1 ELSE 0 END AS is_seed_content,
+        COUNT(*) AS row_count
+    FROM visual_part_warehouse_quantities_result
 ) AS f
 WHERE p_shape_key IS NULL OR f.shape_key = p_shape_key
 ORDER BY f.shape_key;

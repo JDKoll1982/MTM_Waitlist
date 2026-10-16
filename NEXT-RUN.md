@@ -183,7 +183,7 @@ $env:MYSQL_PWD='root'; pwsh -NoProfile -File Database/CopilotScripts/build_mtm_m
 ```
 
 `-Check` regenerates the masters in memory and exits non-zero if a committed master list is stale — that is the
-verification worth having, and it touches nothing.
+verification worth having, and it touches nothing. **Run 2026-10-16: exit 0.**
 
 **Confirm the seventh shape exists on the host.** The owner's Part 2.1 counts *six* shapes; the repository carries
 **seven** — the seventh is `part_warehouse_quantities`, added by this feature:
@@ -195,18 +195,34 @@ verification worth having, and it touches nothing.
 If it is missing on the host, deploy **that shape alone** (its two `create.sql` files, then the population script)
 rather than running the whole destructive redeploy. If it is present, nothing to do.
 
-**One known defect to chase on the host, from the owner's own Part 2.3:** the `employee_by_number` shape reports
-`lastOutcome: succeeded` and 2 084 rows, but `refreshedUtc` is `null` and `isSeedContentOnly` is `true` — so it is
-still serving the seeded baseline and has never held a refreshed snapshot, while the other shapes refreshed
-successfully. Check it after the redeploy; if it is still seed-only, the refresh for that shape is reporting success
-without swapping a snapshot, and that is a real defect worth recording even though it is outside this feature.
+**Checked 2026-10-16: it was missing.** The host held 12 tables (six mirrors and their six stage twins) and 14
+procedures — shapes 1–6 plus the two catalog procedures — so the seventh shape was absent entirely. It was deployed
+on its own, in this order: the two `create.sql` files for its mirror and stage twin, then its `_refresh` and `_get`
+procedures, then `Database/Mock/Bootstrap/update_table_descriptions.sql`. The baseline seed was deliberately **not**
+run: it is `INSERT IGNORE` content captured 2026-09-12 for a *cold* store, and on this host the mirrors already hold
+refreshed snapshots, so running it could only add stale rows. The service's next refresh populated the shape instead
+(8 746 rows). The host now holds 14 tables and 16 procedures, exactly the repository's set.
 
-> **Do not deploy the Mock.Service from this machine unless it *is* the server.** `MTM_Waitlist.Mock.Service/deploy/
-> install-mock-service.ps1` refuses with exit code 2 unless the local IPv4 addresses include `172.16.1.104`
-> (`V-MTMFG-5.mantoolmfg.com`). A workstation that can *reach* Visual is not that host. Do not pass
-> `-AllowNonServerHost`; hand the deployment to whoever is on the server. `LIVE-DB-AND-MOCK-UPDATES.md` Part 2.2 has the
-> command and the reason, and the running service was the **1.0.0** build from 2026-10-05 while the repository is
-> `1.1.0`.
+**One known defect to chase on the host, from the owner's own Part 2.3 — CHASED AND FIXED 2026-10-16.** The
+`employee_by_number` shape reported `lastOutcome: succeeded` and 2 084 rows with `refreshedUtc` `null` and
+`isSeedContentOnly` `true`. The suspicion above — that the refresh reported success without swapping a snapshot —
+was right that something was reporting wrongly and wrong about what: **the refresh was never broken**, the
+*freshness report* was. `sp_visual_read_shape_freshness_get` enumerates the shapes by hand (freshness is a
+per-table read, so it cannot come from `information_schema`), it shipped with five branches, and neither feature 011
+nor feature 012 added the branch its new shape needed — so the report returned five rows, `ServiceApiOperations`
+looked freshness up by catalog key, missed, and fell through to its `RefreshedUtc: null` / `IsSeedContentOnly ?? true`
+defaults. The app's read-status indicator reads the same procedure, so both surfaces agreed on the same falsehood.
+Fixed by adding the two branches, regenerating `Database/Mock/AllSPs.sql` through the builder, and pinning the
+enumeration against the catalog with
+`Service_ShapeAdditionNoDowntimeTests_TheFreshnessReport_NamesEveryCatalogShapeExactlyOnce`. Full record:
+`defects/Closed-Medium-Mock-ServiceStatusReportedRefreshedShapesAsSeedOnly.md`.
+
+> **This paragraph is a record of 2026-10-14 and is kept for its reasoning, not its instructions.** The deployment
+> below was carried out on 2026-10-16 **on `V-MTMFG-5` itself** — this machine, `172.16.1.104`, the cache host — so
+> the rule was honoured rather than bypassed, and `install-mock-service.ps1` now **reports** host disposition instead
+> of refusing (see that script's `deploy/README.md`, "Any host"). The service was republished to **1.1.0** and
+> redeployed; the original caution stands unchanged for any machine that can merely *reach* the plant: a workstation
+> is not the cache host, and the deployment belongs to whoever is on the server.
 
 ### 2.6 What "current" looks like
 
@@ -353,15 +369,31 @@ build, and re-specifying them would fork the record.
 pwsh -NoProfile -File tools/run-tests.ps1 -All
 pwsh -NoProfile -ExecutionPolicy Bypass -File .github/scripts/validate-csharp-xaml-naming.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File .github/scripts/validate-sql-naming.ps1
+# The schema validator is READ-ONLY unless you pass -ApplySchema. To get its live verdict, set the connection
+# string it names in the SAME process, as below — never export it into your environment and then forget it.
+$env:MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING = $env:MTM_WAITLIST_DB_CONNECTION_STRING
 pwsh -NoProfile -ExecutionPolicy Bypass -File .github/scripts/validate-database-schema.ps1
 ```
 
+   > **Read this before you run the validator.** On **2026-10-16 it destroyed the live `mtm_waitlist`** — every
+   > table dropped and recreated empty — because its repair path applied `Database/Bootstrap/create_database.sql`,
+   > whose first statement is `DROP DATABASE IF EXISTS mtm_waitlist`, to a store that already existed and was
+   > merely one deploy behind. The store was recovered from the Mock service's 01:00 dump. The script is fixed:
+   > the bootstrap now applies only when the database is genuinely absent, and **schema repair is opt-in via
+   > `-ApplySchema`**, so a plain run reports a gap and exits rather than migrating. The incident, the fix and its
+   > verification are recorded in
+   > `defects/Closed-Critical-Database-SchemaValidatorDroppedTheLiveWaitlistStore.md`.
+   >
+   > Two consequences for this run: run it **without** `-ApplySchema` (a current store validates and exits 0, which
+   > is the live verdict this gate wants), and keep `$env:MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING` scoped to the
+   > command rather than exported for the session.
+
    | Gate | State on this branch | What "good" means |
    |---|---|---|
-   | `run-tests.ps1 -All` | green — 2213 tests, 2166 passed, 0 failed, 47 skipped | 0 failed |
+   | `run-tests.ps1 -All` | green — 2214 tests, 2171 passed, 0 failed, 43 skipped (re-run on the host 2026-10-16; the four fewer skips are the live-store tests that a reachable store un-skips) | 0 failed |
    | C#/XAML naming guard | green — `Grandfathered: 249. New: 0.` | `New: 0`; a rising *new* count is the only thing to act on |
    | SQL naming guard | **exits 1, and did so before this work** — 12 findings at the commit this branch started from, 13 now | no *new* finding. Diff the finding sets against the pre-work commit if you need to attribute one |
-   | database schema validator | exits 0 — but it **skips the live half** unless `MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING*` is set, so its exit 0 is not a live verdict | duplicate-object check passes **and** the live half actually runs |
+   | database schema validator | **read-only unless `-ApplySchema` is passed.** With `MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING` set it ran its live half on 2026-10-16 and reported **`mtm_waitlist` schema is valid**, exit 0, having written nothing | duplicate-object check passes **and** the live half actually runs |
 
    The SQL guard's findings are the filename shapes the repository's own conventions require (the seven
    `*_population.sql` queue-population files, the two `Database/Mock.Service/Restore/*.sql` scripts) plus two boolean

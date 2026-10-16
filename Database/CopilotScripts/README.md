@@ -19,8 +19,8 @@ working directory.
 Deploys every `mtm_mock` artifact in dependency order:
 
 1. `Bootstrap/create_database.sql`
-2. `Tables/<name>/create.sql` — 5 mirrors + 5 stage twins
-3. `StoredProcedures/<name>/create.sql` — the ten `sp_visual_*` procedures
+2. `Tables/<name>/create.sql` — one mirror + one stage twin per shape
+3. `StoredProcedures/<name>/create.sql` — the per-shape `sp_visual_<shape>_*` procedures and the two `sp_visual_read_shape_*` reporting procedures
 4. `Bootstrap/update_table_descriptions.sql`
 5. `Seeds/<name>/create.sql`
 
@@ -54,7 +54,8 @@ redeploys `mtm_mock` **from the master lists only**, then asserts:
 
 | Check | Requirement |
 |---|---|
-| 10 tables, 10 procedures deploy | Schema + procedure completeness |
+| 14 tables, 16 procedures deploy | Schema + procedure completeness (seven shapes) |
+| The freshness report enumerates every shape | A shape the report omits is reported as seed-only content however successfully it refreshes |
 | Every shape refreshes and reads back with an identical result shape | FR-004 |
 | No transient `_prev` table persists | FR-006 / SC-005 |
 | No seed rows remain after refresh | FR-006 / FR-017 |
@@ -67,6 +68,11 @@ $env:MYSQL_PWD='root'; pwsh -NoProfile -File Database/CopilotScripts/verify_mtm_
 
 > **Destructive**: this script drops `mtm_mock` first. It never touches `mtm_waitlist`,
 > `mtm_wip_application_winforms`, or `mtm_receiving_application`.
+>
+> Because it drops the mirror, **do not run it on a host whose cache is warm** — the plant host is one. There the
+> non-destructive checks are the ones to run: `build_mtm_mock_masters.ps1 -Check` for the master lists, and
+> `Database/Mock/Validation/read_shape_metadata/validate.sql` (read-only) for the shape and freshness reports.
+> This script's place is a development store that can be rebuilt.
 
 ---
 
