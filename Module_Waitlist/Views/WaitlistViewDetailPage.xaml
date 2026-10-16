@@ -58,13 +58,25 @@
                             Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
                             CornerRadius="12"
                             Visibility="{x:Bind ViewModel.IsItemPresent, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <sharedControls:ClickToEnlargeImageView
+                            <StackPanel
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                AutomationProperties.AutomationId="WaitlistViewDetailPage_RequestTypeImage"
-                                AutomationProperties.Name="Request type picture"
-                                Source="{x:Bind ViewModel.Item.EffectiveImagePath, Mode=OneWay, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
-                                Stretch="Uniform" />
+                                Spacing="6">
+                                <sharedControls:ClickToEnlargeImageView
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    AutomationProperties.AutomationId="WaitlistViewDetailPage_RequestTypeImage"
+                                    AutomationProperties.Name="Request type picture"
+                                    Source="{x:Bind ViewModel.Item.EffectiveImagePath, Mode=OneWay, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
+                                    Stretch="Uniform" />
+                                <!-- The hero card carries two pictures and neither said what it was, so each now
+                                     states it: a lone picture beside a title names nothing on its own. -->
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                    Text="Request type" />
+                            </StackPanel>
                         </Border>
 
                         <!-- The active work center / press image, shown like the request-type image
@@ -81,13 +93,23 @@
                             Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
                             CornerRadius="12"
                             Visibility="{x:Bind ViewModel.IsItemPresent, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <sharedControls:ClickToEnlargeImageView
+                            <StackPanel
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                AutomationProperties.AutomationId="WaitlistViewDetailPage_WorkCenterImage"
-                                AutomationProperties.Name="Work center picture"
-                                Source="{x:Bind ViewModel.Item.EffectiveWorkCenterImagePath, Mode=OneWay, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
-                                Stretch="Uniform" />
+                                Spacing="6">
+                                <sharedControls:ClickToEnlargeImageView
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    AutomationProperties.AutomationId="WaitlistViewDetailPage_WorkCenterImage"
+                                    AutomationProperties.Name="Work center picture"
+                                    Source="{x:Bind ViewModel.Item.EffectiveWorkCenterImagePath, Mode=OneWay, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
+                                    Stretch="Uniform" />
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Style="{ThemeResource CaptionTextBlockStyle}"
+                                    Text="Work center" />
+                            </StackPanel>
                         </Border>
 
                         <TextBlock
@@ -132,16 +154,7 @@
                             Grid.Column="2"
                             Foreground="{x:Bind ViewModel.Item.RemainingTimeText, Mode=OneWay, Converter={StaticResource RemainingTimeToBrushConverter}}"
                             FontWeight="SemiBold"
-                            Text="{x:Bind ViewModel.Item.RemainingTimeText, Mode=OneWay}" />
-
-                        <TextBlock
-                            Grid.Column="1"
-                            Grid.Row="5"
-                            Grid.ColumnSpan="2"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Style="{ThemeResource CaptionTextBlockStyle}"
-                            Text="Material, workflow, and handoff details are shown below." 
-                            TextWrapping="WrapWholeWords" />
+                            Text="{x:Bind ViewModel.Item.RemainingTimeAndAllotmentText, Mode=OneWay}" />
                     </Grid>
                 </Border>
 

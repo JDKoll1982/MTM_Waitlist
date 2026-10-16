@@ -143,119 +143,133 @@
                 Zone 2, status: a centred stack of the status word, the ring, the person and - for a closed
                 request - the requester (FR-011). The whole column carries one of three themes, so the word and
                 the ring can never disagree about which state the row is in (FR-019).
+
+                The zone is drawn as an inset panel, so the column reads as its own surface against the card
+                instead of a band of bare text. The fill is deliberately neutral and comes from the theme, not
+                from the status: the state is still carried by the word and the ring alone (FR-019), and the
+                panel follows the theme rather than being a colour that only works on one of them.
             -->
-            <StackPanel
+            <Border
                 x:Name="StatusZone"
                 Grid.Column="3"
-                Width="116"
-                Margin="10,0"
+                Width="128"
+                Margin="8,0"
+                Padding="8,6"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Spacing="4"
-                Tag="{Binding Order.StatusTheme, ElementName=Root}">
-                <!--
-                    Row 1: the status word, standing alone as plain coloured text with no label in front of it
-                    and no coloured pill anywhere (FR-008, FR-012). It is the card body's one interactive
-                    element: it becomes clickable only for the row's own material handler, and it opens the
-                    conditions flyout (FR-070, FR-071, FR-074). The flyout host is declared here, carries the row's
-                    condition options, and opens the status flyout control as its body: the picker is therefore
-                    only ever reached through this gated button, and choosing from it closes it (FR-074).
-                -->
-                <Button
-                    x:Name="StatusWordButton"
+                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8">
+                <StackPanel
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    Padding="0"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    CornerRadius="0"
-                    AutomationProperties.AutomationId="WaitlistLineCardView_StatusWordButton"
-                    AutomationProperties.HelpText="{Binding StatusWordHelpText, ElementName=Root}"
-                    AutomationProperties.Name="{Binding Order.StatusWord, ElementName=Root}"
-                    IsEnabled="{Binding Order.CanSetStatusCondition, ElementName=Root}"
-                    Tag="{Binding ConditionOptions, ElementName=Root}"
-                    Visibility="{Binding HasStatusWord, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <Button.Flyout>
-                        <Flyout
-                            x:Name="StatusConditionFlyout"
-                            Opened="OnStatusConditionFlyoutOpened"
-                            Placement="Bottom">
-                            <cardControls:WaitlistStatusFlyout
-                                x:Name="StatusConditionPicker"
-                                ConditionChosen="OnStatusConditionChosen"
-                                Conditions="{Binding ConditionOptions, ElementName=Root}" />
-                        </Flyout>
-                    </Button.Flyout>
-                    <TextBlock
-                        x:Name="StatusWordText"
-                        FontSize="16"
-                        FontWeight="SemiBold"
-                        Foreground="{Binding StatusColumnBrush, ElementName=Root}"
-                        Text="{Binding Order.StatusWord, ElementName=Root}"
-                        TextAlignment="Center"
-                        TextWrapping="Wrap" />
-                </Button>
+                    Spacing="4"
+                    Tag="{Binding Order.StatusTheme, ElementName=Root}">
+                    <!--
+                        Row 1: the status word, standing alone as plain coloured text with no label in front of it
+                        and no coloured pill anywhere (FR-008, FR-012). It is the card body's one interactive
+                        element: it becomes clickable only for the row's own material handler, and it opens the
+                        conditions flyout (FR-070, FR-071, FR-074). The flyout host is declared here, carries the row's
+                        condition options, and opens the status flyout control as its body: the picker is therefore
+                        only ever reached through this gated button, and choosing from it closes it (FR-074).
+                    -->
+                    <Button
+                        x:Name="StatusWordButton"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Padding="0"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        CornerRadius="0"
+                        AutomationProperties.AutomationId="WaitlistLineCardView_StatusWordButton"
+                        AutomationProperties.HelpText="{Binding StatusWordHelpText, ElementName=Root}"
+                        AutomationProperties.Name="{Binding Order.StatusWord, ElementName=Root}"
+                        IsEnabled="{Binding Order.CanSetStatusCondition, ElementName=Root}"
+                        Tag="{Binding ConditionOptions, ElementName=Root}"
+                        Visibility="{Binding HasStatusWord, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Button.Flyout>
+                            <Flyout
+                                x:Name="StatusConditionFlyout"
+                                Opened="OnStatusConditionFlyoutOpened"
+                                Placement="Bottom">
+                                <cardControls:WaitlistStatusFlyout
+                                    x:Name="StatusConditionPicker"
+                                    ConditionChosen="OnStatusConditionChosen"
+                                    Conditions="{Binding ConditionOptions, ElementName=Root}" />
+                            </Flyout>
+                        </Button.Flyout>
+                        <TextBlock
+                            x:Name="StatusWordText"
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Foreground="{Binding StatusColumnBrush, ElementName=Root}"
+                            Text="{Binding Order.StatusWord, ElementName=Root}"
+                            TextAlignment="Center"
+                            TextWrapping="Wrap" />
+                    </Button>
 
-                <!--
-                    Row 2: the platform ring in its determinate state, read-only, filling as the request's
-                    allotment is used and carrying the row's time text inside it (FR-013, research R2). It is
-                    never the click target - the status word beside it is - and no percentage and no
-                    elapsed-time line is drawn anywhere in this zone (FR-021). The ring and its box carry an
-                    explicit size, because the platform control's own default is far smaller than the host: left
-                    unsized it draws a hairline no bigger than a glyph, which is what the box is there to say it
-                    must not be (D44). The track is painted so the unfilled part of the allotment is visible
-                    rather than invisible.
-                -->
-                <Grid
-                    x:Name="TimeRingHost"
-                    Width="72"
-                    Height="72"
-                    HorizontalAlignment="Center">
-                    <ProgressRing
-                        x:Name="TimeRing"
+                    <!--
+                        Row 2: the platform ring in its determinate state, read-only, filling as the request's
+                        allotment is used and carrying the row's time text inside it (FR-013, research R2). It is
+                        never the click target - the status word beside it is - and no percentage and no
+                        elapsed-time line is drawn anywhere in this zone (FR-021). The ring and its box carry an
+                        explicit size, because the platform control's own default is far smaller than the host: left
+                        unsized it draws a hairline no bigger than a glyph, which is what the box is there to say it
+                        must not be (D44). The track is painted so the unfilled part of the allotment is visible
+                        rather than invisible.
+                    -->
+                    <Grid
+                        x:Name="TimeRingHost"
                         Width="72"
                         Height="72"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        AutomationProperties.AutomationId="WaitlistLineCardView_TimeRing"
-                        AutomationProperties.Name="{Binding RingAccessibleName, ElementName=Root}"
-                        Background="{ThemeResource CardStrokeColorDefaultBrush}"
-                        Foreground="{Binding StatusColumnBrush, ElementName=Root}"
-                        IsIndeterminate="False"
-                        Maximum="1"
-                        Minimum="0"
-                        Value="{Binding Order.RingValue, ElementName=Root}" />
+                        HorizontalAlignment="Center">
+                        <ProgressRing
+                            x:Name="TimeRing"
+                            Width="72"
+                            Height="72"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            AutomationProperties.AutomationId="WaitlistLineCardView_TimeRing"
+                            AutomationProperties.Name="{Binding RingAccessibleName, ElementName=Root}"
+                            Background="{ThemeResource CardStrokeColorDefaultBrush}"
+                            Foreground="{Binding StatusColumnBrush, ElementName=Root}"
+                            IsIndeterminate="False"
+                            Maximum="1"
+                            Minimum="0"
+                            Value="{Binding Order.RingValue, ElementName=Root}" />
+                        <TextBlock
+                            x:Name="TimeRingText"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            FontSize="15"
+                            FontWeight="SemiBold"
+                            Text="{Binding Order.RingText, ElementName=Root}"
+                            TextAlignment="Center" />
+                    </Grid>
+
+                    <!--
+                        Rows 3 and 4: the person, and - once the request has closed - the requester (FR-022). A row
+                        with no value is removed rather than left blank (FR-018).
+                    -->
                     <TextBlock
-                        x:Name="TimeRingText"
+                        x:Name="StatusPersonText"
                         HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        FontSize="15"
-                        FontWeight="SemiBold"
-                        Text="{Binding Order.RingText, ElementName=Root}"
-                        TextAlignment="Center" />
-                </Grid>
+                        Text="{Binding Order.PersonText, ElementName=Root}"
+                        TextAlignment="Center"
+                        TextTrimming="CharacterEllipsis"
+                        Visibility="{Binding Order.HasPerson, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}" />
 
-                <!--
-                    Rows 3 and 4: the person, and - once the request has closed - the requester (FR-022). A row
-                    with no value is removed rather than left blank (FR-018).
-                -->
-                <TextBlock
-                    x:Name="StatusPersonText"
-                    HorizontalAlignment="Center"
-                    Text="{Binding Order.PersonText, ElementName=Root}"
-                    TextAlignment="Center"
-                    TextTrimming="CharacterEllipsis"
-                    Visibility="{Binding Order.HasPerson, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}" />
-
-                <TextBlock
-                    x:Name="StatusRequesterText"
-                    HorizontalAlignment="Center"
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Text="{Binding Order.RequesterText, ElementName=Root}"
-                    TextAlignment="Center"
-                    TextTrimming="CharacterEllipsis"
-                    Visibility="{Binding Order.HasRequester, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}" />
-            </StackPanel>
+                    <TextBlock
+                        x:Name="StatusRequesterText"
+                        HorizontalAlignment="Center"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{Binding Order.RequesterText, ElementName=Root}"
+                        TextAlignment="Center"
+                        TextTrimming="CharacterEllipsis"
+                        Visibility="{Binding Order.HasRequester, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}" />
+                </StackPanel>
+            </Border>
 
             <!--  The vertical rule between the status and detail zones (FR-001).  -->
             <Border

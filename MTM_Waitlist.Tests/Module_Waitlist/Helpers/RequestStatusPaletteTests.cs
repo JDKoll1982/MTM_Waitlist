@@ -2,6 +2,7 @@ using Microsoft.UI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Waitlist.Helpers;
+using MTM_Waitlist.Module_Waitlist.Models;
 
 using Windows.UI;
 
@@ -251,6 +252,46 @@ public sealed class RequestStatusPaletteTests
         Assert.IsTrue(
             RelativeLuminance(normal) > RelativeLuminance(overdue),
             "The overdue red is not darker than the neutral column, so the two separate by hue alone (FR-020).");
+    }
+
+    [TestMethod]
+    public void Helper_RequestStatusPaletteTests_EveryColumnThemeIsLegibleAsTextOnTheSurfaceItIsDrawnOn()
+    {
+        // FR-019, SC-007: the column's colour is the status word's *foreground*, so each theme has to be readable
+        // as text on the card it is actually drawn on. Two of them were not, because they were picked when the
+        // column was a coloured pill carrying white text: the condition red read at 2.7:1 as text on the light
+        // card and the overdue red at 2.4:1 on the dark one. Each theme therefore carries a value per surface,
+        // and this holds all six to the floor a foreground needs — measured, so a later change is a test result
+        // rather than an opinion.
+        var surfaces = new (string Name, Color Background, bool IsDark)[]
+        {
+            ("light", RequestStatusPalette.LightCardBackground, false),
+            ("dark", RequestStatusPalette.DarkCardBackground, true),
+        };
+
+        foreach (var (name, background, isDark) in surfaces)
+        {
+            foreach (var theme in new[] { StatusColumnTheme.Normal, StatusColumnTheme.HandlerCondition, StatusColumnTheme.Overdue })
+            {
+                var contrast = ContrastRatio(background, RequestStatusPalette.ColumnColorFor(theme, isDark));
+
+                Assert.IsTrue(
+                    contrast >= 4.5,
+                    $"The {theme} theme on the {name} surface reads at {contrast:F2}:1 against the card, below the 4.5:1 the status word needs (FR-019).");
+            }
+
+            var condition = RequestStatusPalette.ColumnColorFor(StatusColumnTheme.HandlerCondition, isDark);
+            var overdue = RequestStatusPalette.ColumnColorFor(StatusColumnTheme.Overdue, isDark);
+            var neutral = RequestStatusPalette.ColumnColorFor(StatusColumnTheme.Normal, isDark);
+
+            Assert.IsTrue(
+                RelativeLuminance(condition) > RelativeLuminance(overdue),
+                $"On the {name} surface the handler-condition red is not the lighter red, and FR-072 asks for it (SC-007).");
+
+            Assert.IsTrue(
+                RelativeLuminance(neutral) > RelativeLuminance(overdue),
+                $"On the {name} surface the overdue red is not the darker one, so the two separate by hue alone (FR-020).");
+        }
     }
 
     [TestMethod]

@@ -8,8 +8,19 @@ the owner to restate any of it.
 |---|---|
 | Branch | `012-waitlist-card-layout` |
 | Feature | `specs/012-waitlist-card-layout` |
-| Companion step | `implement` — **already** `implementing`, with 109 of 117 tasks ticked |
+| Companion step | `implement` — **already** `implementing`, with 112 of 117 tasks ticked |
 | Do **not** re-run | `specify`, `clarify`, `plan`, `tasks` for 012. The artifacts are settled and this branch is the record. |
+
+> **2026-10-16, on the plant host — read this before §1.** This machine **is** the plant host (`V-MTMFG-5`,
+> `172.16.1.104`), so the block §2 and §3 were written around no longer applies: `VISUAL` resolves to `172.16.1.75`,
+> `sqlcmd` connects as `SHOP2`, and the live `mtm_waitlist` validates against the repository. **T067, T068 and T071
+> are done and ticked**, with the codes recorded in `.github/memories/repo/infor-visual-disposition.md`.
+>
+> **Five tasks remain, and one thing blocks all five: a credential.** T048, T058, T069, T079 and T088 are each driven
+> through the running application, which signs in with its own account and PIN. Nothing in this environment can
+> supply that, and it must never be passed through an agent. Everything else those five need is here — the live
+> store, live Visual, and the UI tooling. So this file's §2 and §3 are now history; §4 is what is left, and it needs
+> a person at the keyboard.
 
 **The one-line summary.** Eight tasks were left unticked because the machine they were written on could not reach the
 plant: one Infor Visual SQL Server and no live `mtm_waitlist`. On the next machine both exist, so those eight become
@@ -26,10 +37,10 @@ artifacts fails in a way that is invisible at run time (see §2, and the defect 
    only adds what it does not cover.
 2. `specs/012-waitlist-card-layout/spec.md` — the requirements. FR-088 → FR-095 and FR-077 → FR-087 are the live-data
    ones; **SC-001 → SC-017** are what "verified" means.
-3. `specs/012-waitlist-card-layout/tasks.md` — the eight unticked tasks carry their own blocking reason in the text of
+3. `specs/012-waitlist-card-layout/tasks.md` — the unticked tasks carry their own blocking reason in the text of
    **T103**, which was written for exactly this hand-off. Read T103 before anything else.
 4. `.github/memories/repo/infor-visual-disposition.md` — the Infor Visual / WIP facts, the two open clarifiers, and
-   the exact shape of what T067 still has to confirm.
+   the codes T067 confirmed (that part is now answered, not pending).
 5. `Database/CopilotScripts/README.md` — the drift, deploy and verify scripts used in §2.
 6. `.github/copilot-instructions.md` — the rules for this repo, which apply unchanged on the next machine.
 
@@ -41,15 +52,20 @@ artifacts fails in a way that is invisible at run time (see §2, and the defect 
 |---|---|---|
 | **T048** | drive the status column through every state against a live store | needs a store with real requests in each state |
 | **T058** | drive the handler-condition flyout and confirm it survives a restart | needs a live store to write the condition to |
-| **T067** | run `Database/Validation/disposition_input_finished_goods/validate.sql` against Infor Visual | the Visual host does not resolve off the plant network |
-| **T068** | record the location codes T067 reports | depends on T067 |
-| **T069** | drive the picker for each job kind and check the four returning Items' cards | needs live job data from Visual |
-| **T071** | run `GetPartMatches.sql` against Infor Visual for an exact and a partial term | live Visual only — it has no cached shape **by design** (FR-084) |
+| **T067** | run `Database/Validation/disposition_input_finished_goods/validate.sql` against Infor Visual | **DONE 2026-10-16** on the plant host — the finished-goods class resolves to `002/FG` and `002/DC-FG`, `NCM%` is confirmed, and the assertion on part `24733431` reads 0 against a total of 90 |
+| **T068** | record the location codes T067 reports | **DONE 2026-10-16** — recorded in `.github/memories/repo/infor-visual-disposition.md` |
+| **T069** | drive the picker for each job kind and check the four returning Items' cards | needs live job data from Visual and a rendered picker |
+| **T071** | run `GetPartMatches.sql` against Infor Visual for an exact and a partial term | **DONE 2026-10-16** — run live: `MMC0000010` returned that one part, `MMC000001` returned all ten containing it, a term matching nothing returned no rows |
 | **T079** | one request per new answer, each checked on its card against SC-015 | needs a live store and a rendered card |
 | **T088** | keyboard operability, no clipped values at the default window size, usable with animations off | needs the rendered application |
 
-Everything else in the feature is built, and the non-live halves of T067/T079/T088 are already pinned by tests —
-each task's own text says which half is done, so read it rather than re-deriving the gap.
+Everything else in the feature is built, and the non-live halves of T079/T088 are already pinned by tests —
+each task's own text says which half is done, so read it rather than re-deriving the gap. T067 is now done live as
+well, so the codes it was written to discover are settled.
+
+**The one blocker left is a credential.** All five tasks still open are driven through the running application, and
+its own account and PIN are not available to an agent. Run `tools/ui-drive.ps1 -Action signin -Identifier <user>
+-Pin <pin>` yourself, or type the PIN at the prompt, and the five become a single sitting's work.
 
 ---
 
@@ -444,13 +460,21 @@ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
 
 ## 8. Pitfalls already paid for — do not re-derive them
 
-- **A full `dotnet build` reports 48 warnings and they are not yours.** Every one is `NU1902` / `NU1903` about
-  `System.Security.Cryptography.Pkcs` 9.0.4 — one moderate advisory (`GHSA-2fmv-rv2c-59x7`) and one **high**
-  (`GHSA-846f-f764-76mx`) — repeated across the projects and their target frameworks. They are NuGet *audit* findings
-  surfaced on restore, they pre-date this branch, and they are absent from an incremental build that does not
-  re-restore, which is why the same tree can report `0 Warning(s)` on one run and `48 Warning(s)` on the next.
-  **Zero errors is the signal that matters here.** Bumping the package is a repository-wide decision with its own
-  build risk and is deliberately not part of this work — report it, do not "tidy" it mid-run.
+- **A full `dotnet build` reported 56 audit warnings, and they are now fixed (2026-10-16, owner-requested).**
+  Every one was `NU1902` / `NU1903` about `System.Security.Cryptography.Pkcs` 9.0.4 — one moderate advisory
+  (`GHSA-2fmv-rv2c-59x7`) and one **high** (`GHSA-846f-f764-76mx`) — repeated across the projects and their target
+  frameworks. They are NuGet *audit* findings surfaced on restore, so the same tree can report `0 Warning(s)` on an
+  incremental build and the full set on the next restore.
+  **The cause was the package being transitive, not top-level.** Nothing in the repository referenced it; it arrives
+  through `Microsoft.Data.SqlClient` 6.1.1, which four projects reference directly and everything else inherits.
+  The fix is one pin in `Directory.Build.props`: `System.Security.Cryptography.Pkcs` **9.0.21**, the lowest release
+  outside all three vulnerable ranges (`8.0.0-8.0.1`, `9.0.0-9.0.20`, `10.0.0-10.0.12`, read from the advisory data
+  rather than from memory), chosen over 10.x to stay in the major `SqlClient` was compiled against.
+  Verified after the change: restore and build report **0 warnings / 0 errors**, and the full suite is unchanged at
+  `2171 passed / 0 failed / 43 skipped`. `Microsoft.Data.SqlClient` itself was deliberately **not** bumped — changing
+  the assembly the Infor Visual read depends on is a separate risk that the suite cannot validate.
+  If the build ever reports these again, the pin has been removed: check `Directory.Build.props` before looking
+  anywhere else.
 - **MySQL silently ignores surplus call parameters and reports success.** A caller passing an argument the routine
   does not declare loses that value with nothing logged, nothing thrown and nothing on screen. This is the T112
   defect and the reason §2 exists. After bringing any store current, **verify with the drift report, not with a

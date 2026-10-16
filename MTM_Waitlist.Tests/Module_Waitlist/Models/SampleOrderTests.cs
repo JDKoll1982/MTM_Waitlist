@@ -311,6 +311,27 @@ public sealed class SampleOrderTests
     }
 
     [TestMethod]
+    public void Model_SampleOrderTests_RemainingTimeAndAllotmentText_StatesWhatIsLeftAgainstWhatTheItemAllotted()
+    {
+        // The countdown on its own says nothing about how close a request is: nine minutes left is most of a
+        // fifteen-minute allotment and half of an eighteen-minute one. The row states both, in the one shape the
+        // countdown and the ring already speak, so the two figures can be read against each other (FR-017).
+        var due = new DateTimeOffset(2026, 10, 16, 12, 0, 0, TimeSpan.Zero);
+        var order = new SampleOrder
+        {
+            TargetTimeUtc = due,
+            AllottedMinutes = 15,
+        };
+
+        order.RefreshTimeDerivedText(due.AddMinutes(-9));
+
+        Assert.AreEqual(
+            "00:09 / 00:15",
+            order.RemainingTimeAndAllotmentText,
+            "The remaining-time row must state what is left against the minutes the Item allotted.");
+    }
+
+    [TestMethod]
     public void Model_SampleOrderTests_RefreshTimeDerivedText_KeepsAStoreSetOverdueFlag()
     {
         var now = new DateTimeOffset(2026, 9, 11, 14, 0, 0, TimeSpan.Zero);

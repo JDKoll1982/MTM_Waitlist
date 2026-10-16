@@ -58,10 +58,25 @@ public static class ImagePicturePolicy
     public const double AspectRatioTolerance = 0.02;
 
     /// <summary>
-    /// How much of a file is read to find its picture header. Generous by design: a JPEG's frame header sits after
-    /// its metadata segments, so the read has to clear an EXIF block or an embedded colour profile.
+    /// How much of a file is read to find its picture header.
     /// </summary>
-    private const int HeaderBytesToRead = 64 * 1024;
+    /// <remarks>
+    /// <para>
+    /// Generous by design: a JPEG's frame header sits after its metadata segments, so the read has to clear an
+    /// EXIF block or an embedded colour profile. It was 64 KB, and that is smaller than a picture taken on a
+    /// phone: a 2992×2992 Exif JPEG off the shop-floor camera carries a 53.7 KB APP1 block, a 15.6 KB APP4 block
+    /// and a second APP1, which puts its frame header at byte <b>72,258</b> — past the old window, so the file
+    /// could not be measured, was refused as "holds no picture", and every surface drew the placeholder for a
+    /// photograph that was sitting there intact. Measured 2026-10-16 on the Dunnage share, where it made most of
+    /// the parts in the image search look pictureless.
+    /// </para>
+    /// <para>
+    /// The read stops at the file's own length, and the walk stops as soon as it recognises a picture, so this
+    /// ceiling is paid only by a file whose metadata really is that large — and never by the JPEG that is
+    /// actually drawn, which is recognised or refused within the first hundred bytes.
+    /// </para>
+    /// </remarks>
+    private const int HeaderBytesToRead = 256 * 1024;
 
     /// <summary>
     /// Whether the file at <paramref name="path"/> is a picture this application will draw: it exists, its header

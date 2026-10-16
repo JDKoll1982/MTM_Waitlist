@@ -81,6 +81,29 @@ public sealed class ImageFileProbeTests
             "A frame header must still be found behind a large metadata segment.");
     }
 
+    /// <summary>
+    /// The metadata a real photograph carries is bigger than this fixture used to assume, and the reader's window
+    /// has to clear it.
+    /// </summary>
+    /// <remarks>
+    /// The window was 64 KB and the case above writes 20 KB, so the two agreed on a number smaller than any
+    /// photograph and the defect stayed hidden. A 2992x2992 picture off the shop-floor camera carries a 53.7 KB
+    /// EXIF block, a 15.6 KB APP4 block and a second APP1, which puts its frame header at byte <b>72,258</b>: past
+    /// that window, so the file could not be measured and every surface drew the placeholder for a photograph that
+    /// was sitting there intact. Measured 2026-10-16 on the Dunnage share. This is that shape, and it fails on the
+    /// 64 KB window.
+    /// </remarks>
+    [TestMethod]
+    public void Helper_ImageFileProbeTests_AFrameHeaderBehindMoreMetadataThanTheOldWindowIsStillFound()
+    {
+        var path = Path.Combine(_directory, "phone-camera.jpg");
+        ImageHeaderFixtures.WriteJpegHeader(path, 2992, 2992, metadataBytes: 80_000);
+
+        Assert.IsTrue(
+            ImageFileProbe.CarriesPicture(path),
+            "A photograph whose frame header sits behind 80 KB of metadata is still a picture, and refusing it draws a placeholder over real artwork.");
+    }
+
     [TestMethod]
     public void Helper_ImageFileProbeTests_AGifAndABmpCarryTheirDimensionsInTheirHeads()
     {

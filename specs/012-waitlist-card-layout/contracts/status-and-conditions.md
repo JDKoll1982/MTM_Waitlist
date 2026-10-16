@@ -68,6 +68,11 @@ The whole status column carries one of three distinct themes (FR-019):
 | handler-condition, a **lighter red** than the overdue theme | a handler-set condition is shown in row 1 (FR-072) |
 | overdue | the request is overdue and no handler condition is set (FR-014) |
 
+Each theme carries **one colour per surface**, because the column's colour is the status word's foreground and the
+application ships a light card and a dark one. The pair is held to 4.5:1 against the card it is drawn on, and both
+pairs keep the two ordering rules above and below — the condition red lighter than the overdue red, the overdue red
+the darker of the two — so a state is never read as the other on either surface.
+
 An overdue request remains distinguishable as its own state under every sort and never depends on the row's position
 (FR-020).
 
@@ -110,3 +115,19 @@ An overdue request remains distinguishable as its own state under every sort and
   `contracts/persistence.md`.
 - The lifecycle status is kept intact underneath a condition, because the precedence rule in section 2 needs the
   lifecycle word. A condition is never written over the lifecycle status.
+
+## 8. The lifetime of a condition
+
+- A condition belongs to the assignment it was reported against, so it does not outlive that assignment. Returning
+the request to the open pool — **Give back** — clears it, and row 1 reads the `Waiting` lifecycle word again instead
+of the condition the previous handler left on a job nobody holds (FR-106).
+- The clear travels with the assignee, in the one write that empties it:
+`sp_waitlist_request_status_update` clears `handler_status` whenever the incoming assignee is empty. It is
+deliberately **not** keyed on the status, because a request sits in `Pending` while its note is being written, and
+writing a note must not remove a condition.
+- **Accept and Complete carry the handler**, so both leave the condition alone: a completed request keeps the
+condition it was completed under.
+- The session's own row is cleared at the same moment, so the card repaints to `Waiting` without waiting for a
+re-read, and a re-read agrees with it because the store applied the same rule.
+- Nothing about **who is offered Give back**, or what it does to the lifecycle status, changes here: that gate and
+that transition are feature 003's (`contracts/action-contracts.md`, section 6).

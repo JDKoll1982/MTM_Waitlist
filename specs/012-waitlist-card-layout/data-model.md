@@ -28,6 +28,10 @@ Rules:
 
 - `handler_status` is separate from `status` on purpose. The lifecycle word underneath a condition is still
   needed, because the card has to know it when no condition is set (FR-012, research R4).
+- `handler_status` is cleared with the assignee: a condition describes the assigned handler's own work on the
+  request, so returning the request to the open pool removes it and the card reads the lifecycle word again
+  (FR-106). The clear is keyed on the incoming assignee rather than on the status, because a request sits in
+  `Pending` while its note is written and a note must not remove a condition.
 - `answers_json` exists because `input_value` holds exactly one answer and the die Items now ask two questions,
   while the four returning Items each ask one. The map is a label-to-value object, the same shape the schema
   already uses for structured declaration data (`detail_fields_json`, `options_json`) (research R5).

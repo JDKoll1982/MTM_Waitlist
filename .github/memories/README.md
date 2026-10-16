@@ -23,6 +23,11 @@ so those are machine-local and will NOT be committed when you push.
 - `repo/infor-visual-disposition.md` — Infor Visual status codes + FG/WIP/Outside derivation +
   MTM WIP Application facts + tooling quirks (file 14 Phase 6). Canonical long-form note:
   `Documents/Development/InforVisual/Phase6-Disposition-StatusCodes-Research.md`.
+- `repo/mysql-hosts-and-mock-capture.md` — the **two different** MySQL servers reachable from this
+  workstation (`localhost` = pristine 8.0.46 dev, `172.16.1.104` = plant 5.7.24 with the warm mirror), why
+  `localhost` is the safe place to prove an artifact loads, `capture_mock_seed_baseline.ps1`, and the two
+  capture traps (the row terminator leads the next record; a generating `SELECT` needs `QUOTE()` to emit
+  quotes).
 - `repo/copilot-cli-install.md` — how the GitHub Copilot CLI is really installed on this workstation:
   gh ≥ 2.102 makes `copilot` a built-in command, so the SpecKit Companion's hinted
   `gh extension install github/gh-copilot` cannot work; the fix is `npm install -g @github/copilot`.

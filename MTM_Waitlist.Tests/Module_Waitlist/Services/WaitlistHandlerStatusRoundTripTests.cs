@@ -131,4 +131,68 @@ public sealed class WaitlistHandlerStatusRoundTripTests
             row.StatusTheme,
             "The restored condition re-themes the whole status column as the lighter handler red (FR-072).");
     }
+
+    [TestMethod]
+    public async Task Database_WaitlistHandlerStatusRoundTripTests_Release_ClearsTheConditionInTheStoreSoTheCardReadsWaiting()
+    {
+        // The store, not the session's own row, is where this has to be true. A store that kept the condition would
+        // hand it straight back on the next list read, and the card would then show the previous handler's condition
+        // on a job nobody holds. The clear happens inside one UPDATE, so this is the only place the deployed
+        // procedure's own behaviour can be observed at all.
+        var submitted = await _service.SubmitAsync(
+            new WaitlistRequestDraft
+            {
+                Building = Building,
+                WorkCenter = "Press 12",
+                Category = "Deliver",
+                Item = "deliver-wrong-coil",
+                InputValue = "Wrong material at press",
+                ActiveSetupJobId = "IT-RELEASE",
+                WorkCenterName = "Press 12",
+                RequesterEmployeeNumber = RequesterEmployeeNumber,
+                RequesterEmployeeName = "IT Requester",
+                TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(15),
+            },
+            allowDuplicate: true);
+
+        Assert.AreEqual(
+            WaitlistRequestSubmitStatus.Success,
+            submitted.Status,
+            "The round trip needs one real request to report a condition against.");
+        _requestId = submitted.Request!.Id;
+
+        Assert.IsNotNull(
+            await _service.AcceptAsync(_requestId, HandlerEmployeeNumber, HandlerEmployeeName),
+            "The handler has to hold the job before a condition can be reported on it (FR-076).");
+        Assert.AreEqual(
+            1,
+            await _service.SetHandlerStatusAsync(_requestId, "Product Buried", HandlerEmployeeNumber),
+            "The condition has to be in the store before giving the job back can be shown to remove it.");
+
+        var released = await _service.ReleaseAsync(_requestId, HandlerEmployeeNumber, HandlerEmployeeName);
+        Assert.IsNotNull(released, "The assignee must be able to give the job back.");
+        Assert.IsNull(
+            released!.HandlerStatus,
+            "The row this session holds carries no condition once the job is back in the pool (FR-106).");
+
+        // The restart, as far as one process can stage it: nothing this session holds is kept, and the list is read
+        // again from the store.
+        _service.Reset();
+        await _service.RefreshFromDatabaseAsync(Building);
+
+        var stored = _service.GetRequest(_requestId);
+        Assert.IsNotNull(stored, "The released request must come back on the next list read.");
+        Assert.AreEqual("Pending", stored!.Status, "A release returns the job to the open list rather than canceling it.");
+        Assert.IsNull(stored.AssignedMaterialHandler, "And to nobody.");
+        Assert.IsNull(
+            stored.HandlerStatus,
+            "The store must clear the condition with the assignee instead of leaving it on a job nobody holds (FR-106).");
+
+        var row = WaitlistViewViewModel.CreateSessionOrder(stored);
+        Assert.AreEqual("Waiting", row.StatusWord, "So the card reads Waiting again (FR-012).");
+        Assert.AreEqual(
+            StatusColumnTheme.Normal,
+            row.StatusTheme,
+            "And the status column is back to its normal theme rather than themed for a condition nobody still holds.");
+    }
 }

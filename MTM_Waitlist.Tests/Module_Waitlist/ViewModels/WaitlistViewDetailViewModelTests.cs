@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Navigation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
@@ -28,7 +29,9 @@ public sealed class WaitlistViewDetailViewModelTests
 
         Assert.IsNotNull(viewModel.Item);
         Assert.AreEqual(item.Id, viewModel.Item!.Id);
-        Assert.IsTrue(viewModel.TemplateSections.Count >= 2);
+        // One card, not two: the second said only what the hero card above it already says (2026-10-16).
+        Assert.AreEqual(1, viewModel.TemplateSections.Count);
+        Assert.AreEqual("Request", viewModel.TemplateSections[0].Title);
     }
 
     [TestMethod]
@@ -45,10 +48,12 @@ public sealed class WaitlistViewDetailViewModelTests
 
         viewModel.OnNavigatedTo(item.Id);
 
-        // Every request renders the same two blocks: the Item the request names, then the request's own
-        // context. The first block's Item row is the Item's umbrella phrase, so the wrong-material Item reads
-        // its own pinned first line rather than the plain Category word (contract §2, FR-005).
-        Assert.AreEqual(2, viewModel.TemplateSections.Count);
+        // One block, not two: the Item the request names, and everything the request itself carries. The Item row
+        // is the Item's umbrella phrase, so the wrong-material Item reads its own pinned first line rather than
+        // the plain Category word (contract §2, FR-005). The second block that used to follow it stated the work
+        // centre, the person who asked and the remaining time — all three already on the hero card above — and is
+        // gone rather than emptied (2026-10-16).
+        Assert.AreEqual(1, viewModel.TemplateSections.Count);
         Assert.AreEqual("Request", viewModel.TemplateSections[0].Title);
         Assert.AreEqual("Wrong Coil Bring:", SectionField(viewModel.TemplateSections[0], "Item"));
         Assert.AreEqual("Wrong material at press", SectionField(viewModel.TemplateSections[0], "Request details"));
@@ -137,7 +142,9 @@ public sealed class WaitlistViewDetailViewModelTests
             WorkCenter = "100-03",
             Category = RequestCategory.Pickup.ToString(),
             Item = "pickup-coil",
-            ActiveSetupJobId = "WO-204",
+            // The stored job id is the work centre here on purpose: that is what every request raised before
+            // 2026-10-16 carries, and the Work order row has to read a work order for those rows too.
+            ActiveSetupJobId = "100-03",
             WorkCenterName = "100-03",
             RequesterEmployeeNumber = "6229",
             RequesterEmployeeName = "John Koll",
@@ -148,25 +155,38 @@ public sealed class WaitlistViewDetailViewModelTests
         var viewModel = new WaitlistViewDetailViewModel(
             new RecordingNavigationService(),
             new StubBuildingSelectionService(),
-            requestService: requestService);
+            requestService: requestService,
+            jobAvailabilityProvider: new StubJobAvailabilityProvider("WO-046885"));
 
         viewModel.OnNavigatedTo(requestId.GetHashCode());
 
         var requestSection = viewModel.TemplateSections.First(section =>
             string.Equals(section.Title, "Request", StringComparison.OrdinalIgnoreCase));
-        Assert.AreEqual("WO-204", SectionField(requestSection, "Work order"), "Work order should come from the request's active job id.");
-
-        var contextSection = viewModel.TemplateSections.First(section =>
-            string.Equals(section.Title, "Request context", StringComparison.OrdinalIgnoreCase));
-        Assert.AreEqual("100-03", SectionField(contextSection, "Work center"));
-        Assert.AreEqual("John Koll", SectionField(contextSection, "Requesting user"));
+        Assert.AreEqual(
+            "WO-046885",
+            SectionField(requestSection, "Work order"),
+            "The Work order row states the job's own work order, never the work centre the request stored.");
         Assert.IsNull(
-            SectionField(contextSection, "Employee number"),
-            "The page names the person who asked; it does not print their employee number as well.");
+            SectionField(requestSection, "Work center"),
+            "The hero card above already states the work centre, so this card does not say it again.");
+        Assert.IsNull(
+            SectionField(requestSection, "Remaining time"),
+            "Nor the remaining time, which the hero card states against its allotment.");
     }
 
     private static string? SectionField(WaitlistDetailTemplateSection section, string label)
         => section.Fields.FirstOrDefault(field => string.Equals(field.Label, label, StringComparison.OrdinalIgnoreCase))?.Value;
+
+    /// <summary>
+    /// The requesting work centre's job as this page reads it. It answers with the work order the job is for,
+    /// which is where the page's Work order row gets its value from: the request itself never stored a real one.
+    /// It answers synchronously, on purpose, so the page finishes its job read before the assertions run.
+    /// </summary>
+    private sealed class StubJobAvailabilityProvider(string workOrder) : IRequestJobPartAvailabilityProvider
+    {
+        public Task<RequestJobPartAvailability> GetAvailabilityAsync(string workCenter, CancellationToken cancellationToken = default) =>
+            Task.FromResult(RequestJobPartAvailability.None with { HasActiveJob = true, WorkOrder = workOrder });
+    }
 
     [TestMethod]
     public void ViewModel_WaitlistViewDetailViewModelTests_OnNavigatedTo_NoItemResolvedSetsFriendlyEmptyStateMessage()

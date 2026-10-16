@@ -762,6 +762,11 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
 
         // Release returns the job to the OPEN list: status -> Pending, assignee cleared, ReleasedUtc stamped.
         // It is NOT a cancellation and must never touch the cancellation metadata.
+        //
+        // The reported condition goes with the assignee. A condition is what the ASSIGNED handler said about this
+        // job, so giving the job back cannot leave it behind: the card would otherwise keep reading the previous
+        // handler's condition — and stay themed for it — on a job nobody holds, instead of Waiting again. The
+        // store applies the same rule in sp_waitlist_request_status_update, so a re-read agrees with this row.
         var updated = new WaitlistRequest
         {
             Id = existing.Id,
@@ -770,7 +775,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             Category = existing.Category,
             Item = existing.Item,
             InputValue = existing.InputValue,
-            HandlerStatus = existing.HandlerStatus,
+            HandlerStatus = null,
             Answers = existing.Answers,
             ActiveSetupJobId = existing.ActiveSetupJobId,
             WorkCenterName = existing.WorkCenterName,
@@ -816,9 +821,11 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
     /// status, the assignee or any other column (FR-072, FR-073).
     /// </para>
     /// <para>
-    /// The four conditions are the closed vocabulary (<see cref="HandlerStatusCatalog"/>), and the feature
-    /// defines no path that clears a condition back to none, so a value that is not one of the four is refused
-    /// here rather than written and cleared later.
+    /// The four conditions are the closed vocabulary (<see cref="HandlerStatusCatalog"/>), so a value that is not
+    /// one of the four is refused here rather than written. This method never clears a condition — but a condition
+    /// does not outlive the assignment it was reported against: <see cref="ReleaseAsync"/> clears it, and the store
+    /// clears it with the assignee on any transition that carries none, so giving a job back leaves the card reading
+    /// the lifecycle word again instead of the condition the previous handler left on it (FR-106).
     /// </para>
     /// </remarks>
     /// <returns>

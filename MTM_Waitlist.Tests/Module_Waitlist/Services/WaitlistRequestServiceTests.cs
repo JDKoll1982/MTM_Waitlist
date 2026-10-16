@@ -1044,6 +1044,41 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
+    public async Task Service_WaitlistRequestServiceTests_ReleaseAsync_ClearsTheHandlerConditionSoTheCardReadsWaitingAgain()
+    {
+        // Giving a job back hands it to nobody, and a condition describes the assigned handler's own work on it, so
+        // it must not stay behind. Left set, the card kept reading that condition — and stayed themed for it — on a
+        // job sitting in the open pool, instead of reading Waiting again.
+        var service = new WaitlistRequestService();
+        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var request = submitResult.Request!;
+
+        await service.AcceptAsync(request.Id, "6229", "John Koll");
+        Assert.AreEqual(
+            1,
+            await service.SetHandlerStatusAsync(request.Id, "Product Buried", "6229"),
+            "The condition has to be on the row before giving the job back can be shown to remove it.");
+
+        var released = await service.ReleaseAsync(request.Id, "6229", "John Koll");
+
+        Assert.IsNotNull(released);
+        Assert.IsNull(
+            released!.HandlerStatus,
+            "The reported condition goes with the assignee it was reported against (FR-106).");
+        Assert.AreEqual("Pending", released.Status, "Which is the open list rather than a cancellation.");
+
+        var row = WaitlistViewViewModel.CreateSessionOrder(released);
+        Assert.AreEqual(
+            "Waiting",
+            row.StatusWord,
+            "Row 1 reads the lifecycle word again rather than the condition the previous handler left on it (FR-012).");
+        Assert.AreEqual(
+            StatusColumnTheme.Normal,
+            row.StatusTheme,
+            "And the status column goes back to the normal theme with it, instead of staying themed for a condition.");
+    }
+
+    [TestMethod]
     public async Task Service_WaitlistRequestServiceTests_AcceptAsync_WhenTheRowIsNoLongerInTheStateTheHandlerSawReportsZeroAffectedRowsAndDoesNotReassignTheHandler()
     {
         // Outcome 7's assertion, made at the service/procedure seam rather than in the UI (FR-043, SC-019).

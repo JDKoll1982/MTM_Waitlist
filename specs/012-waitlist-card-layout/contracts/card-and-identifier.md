@@ -46,6 +46,11 @@ A closed request freezes the ring at the moment it closed and carries the time t
 (FR-016). The ring re-evaluates on the same one-minute tick that refreshes the row's other time text (FR-017). The
 status zone shows no percentage and no elapsed-time line (FR-021).
 
+The zone is drawn as an inset panel — a themed border and fill around the stack — so the column reads as its own
+surface against the card rather than a band of bare text. Both come from theme resources, so the panel follows the
+theme. The fill is deliberately neutral and never carries the state: the word and the ring are still the only things
+that say which state the row is in (FR-019), and the word still draws no pill of its own (FR-008).
+
 A cancelled request with no material handler reads the person who cancelled in row 3, with the requester in row 4.
 
 The status word, its precedence and the three column themes are pinned in

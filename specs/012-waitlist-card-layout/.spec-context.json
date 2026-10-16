@@ -938,11 +938,35 @@
       "kind": "complete",
       "by": "ai",
       "at": "2026-10-12T01:07:56.507Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T067",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-16T16:14:38.779Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T068",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-16T16:14:41.744Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T071",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-16T16:15:11.014Z"
     }
   ],
   "unattended": true,
   "telemetryInstanceId": "84ef144a-9dde-461c-988a-da92e90e6298",
-  "last_action": "implement closed at 83/93 ticked; full suite 2114 passed / 6 failed (the 6 pre-existing) / 47 skipped of 2167; build 0 warnings 0 errors; eight environment-limited tasks recorded as concerns",
+  "last_action": "T067, T068 and T071 ticked with live evidence; T048, T058, T069, T079 and T088 left open pending the app credential; suite 2171 passed / 0 failed / 43 skipped; live schema validator exit 0.",
   "coverage": {
     "FR-001": {
       "title": "A row is drawn as four zones, left to right, separated by vertical rules",
@@ -1553,6 +1577,10 @@
         "T071",
         "T074",
         "T078"
+      ],
+      "tests": [
+        "Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartMatches.sql (live run",
+        "not a unit test)"
       ]
     },
     "FR-083": {
@@ -1561,6 +1589,10 @@
         "T070",
         "T071",
         "T074"
+      ],
+      "tests": [
+        "Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartMatches.sql (live run",
+        "not a unit test)"
       ]
     },
     "FR-084": {
@@ -1568,6 +1600,10 @@
       "tasks": [
         "T071",
         "T074"
+      ],
+      "tests": [
+        "Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartMatches.sql (live run",
+        "not a unit test)"
       ]
     },
     "FR-085": {
@@ -1635,6 +1671,10 @@
         "T067",
         "T068",
         "T069"
+      ],
+      "tests": [
+        "Database/Validation/disposition_input_finished_goods/validate.sql (live validation script",
+        "not a unit test)"
       ]
     },
     "FR-091": {
@@ -1898,6 +1938,66 @@
     {
       "decision": "The app names people by name and never prints an employee number. The queue keeps recording the material handler as an employee number, because that is what the handler authorizations compare; the name is resolved beside it from the entry the handler themselves wrote, matched to that same handler number, by both request reads. PersonText reads the name and nothing else, and a claimed request whose handler carries no recorded name draws no person row rather than falling back to the number. The request detail page no longer draws its Employee number row.",
       "why": "A claimed card read 6229 under the ring where the name of the person holding the work belongs. The number was the only thing the row had, because that is how the assignment is stored."
+    },
+    {
+      "decision": "Keep the finished-goods predicate exactly as T065/T066 shipped it, in all four places that apply it.",
+      "why": "The live run met neither condition the hand-off named as proof the class is wrong: the assertion's finished-goods figure is a strict subset of the part total, and the class does match stocked locations.",
+      "rejected": "Rewriting the predicate to the DD-* bins, or to warehouse SHIP, so that a part held in a bin would sum as finished goods."
+    },
+    {
+      "decision": "Leave the classifier's rule wording to clarify; only the value handed to it changed.",
+      "why": "T067's own instruction is to record that decision and not re-open it, and FR-090's wording question is already carried as an open item.",
+      "rejected": "Amending RequestDispositionClassifier's wording inside this step."
+    },
+    {
+      "decision": "Continue spec 012 in place rather than minting a new feature directory.",
+      "why": "The request was to continue implementation, and NEXT-RUN.md's fresh-spec path is for the four open questions, not for 012's own remaining tasks.",
+      "rejected": "Letting the auto run mint specs/013-... from the words 'continue implementation'."
+    },
+    {
+      "decision": "Leave T048, T058, T069, T079 and T088 unticked.",
+      "why": "Each one needs a signed-in waitlist card, and the application's own account and PIN do not exist in this session. A credential must never be passed through the agent.",
+      "rejected": "Ticking them off the unit tests that already pin their non-live halves."
+    },
+    {
+      "decision": "Pinned System.Security.Cryptography.Pkcs to 9.0.21 in Directory.Build.props, at the owner request, to clear the 56 NU1902/NU1903 audit warnings a full build reported.",
+      "why": "The package is transitive through Microsoft.Data.SqlClient 6.1.1, so no project referenced it; 9.0.21 is the lowest release outside every vulnerable range and stays in the major SqlClient was compiled against. Build after the change reported 0 warnings and 0 errors, and the full suite was unchanged at 2171 passed.",
+      "rejected": "Bumping Microsoft.Data.SqlClient itself, which would change the assembly the Infor Visual read depends on, and jumping to Pkcs 10.x, which is a larger change than the advisories require."
+    },
+    {
+      "decision": "Applied the two-column ALTER to the live mtm_waitlist on the plant host, at the owner request, and recorded it with its reversal in LIVE-DB-AND-MOCK-UPDATES.md section 1.9.",
+      "why": "The live table was missing handler_status and answers_json while its routines already used both, so sp_waitlist_request_list failed with an unknown column and the waitlist screen could not be read at all. This repository has no migration runner, so a column add on an installed store is a manual change. Both definitions are copied verbatim from Database/Tables/18_waitlist_requests_queue/create.sql; the change is additive and no existing row moved.",
+      "rejected": "Reinstalling the table from seed, which would destroy the plant request rows, and leaving the gap for a redeploy, which would have kept the waitlist unreadable."
+    },
+    {
+      "decision": "The status zone of the waitlist card is now drawn as an inset panel: the element named StatusZone became a Border carrying a themed background, border brush, thickness and corner radius, with the existing stack inside it. Asked for by the owner, who could not read the column on the dark theme.",
+      "why": "The column was bare text on the card fill, so the status word and the ring had nothing to sit against. The panel uses CardBackgroundFillColorSecondaryBrush and CardStrokeColorDefaultBrush, both ThemeResources, so it follows light, dark and high contrast rather than being a dark-only colour. The fill is deliberately neutral: FR-019 keeps the state on the word and the ring, and FR-008 still forbids a pill around the word, so the panel never carries the state.",
+      "rejected": "Painting the panel in the status colour, which would have made a pill of the whole column and put two things on screen saying the same state; and a hard-coded dark fill, which would not have adapted to the light theme."
+    },
+    {
+      "decision": "The status column carries one colour per surface: the three themes keep their light values and gained a dark-surface value, and the card resolves the pair for its own ActualTheme, re-resolving when the theme changes under it.",
+      "why": "The palette was tuned when the column was a coloured pill carrying white text, so its colours cleared 4.5:1 against white. The pill is gone and the word is now the foreground, which inverts the requirement: measured, the handler-condition red read 2.7:1 as text on the light card and the overdue red 2.4:1 on the dark one. The light condition red was darkened to #C0392B, three dark-surface values were added (normal #B9C1CC, condition #FF9E8A, overdue #FF6B5A), and a new test holds all six to 4.5:1 against their own surface card while keeping the condition-lighter-than-overdue invariant on both.",
+      "rejected": "Leaving the light values alone and adding dark values only, which would have fixed the surface the owner reported and left the mirror image of the same defect on the other one; and reusing the existing SystemFillColor theme tokens, which are built to carry a dark glyph rather than to be one."
+    },
+    {
+      "decision": "Raised ImagePicturePolicy.HeaderBytesToRead from 64 KB to 256 KB, so a JPEG whose frame header sits behind a real camera metadata block can still be measured.",
+      "why": "The dunnage pictures that showed the placeholder all had image_path values that resolve to files present on the share and in the local cache, so the storage location was correct. They are refused because their frame header sits past the old 64 KB read window: a 2992x2992 Exif JPEG off the shop-floor camera carries a 53.7 KB APP1 block, a 15.6 KB APP4 block and a second APP1, putting its SOF at byte 72258, measured on the share. A file that cannot be measured is treated as holding no picture, so every surface drew the placeholder over an intact photograph. The read still stops at the file length and the walk stops as soon as a picture is recognised.",
+      "rejected": "Changing the dunnage image root or the stored image_path values, which an inspection of all 129 non-blank paths showed to be correct: every one exists on the share. Also rejected was leaving the window and cloning the metadata away, which would have hidden the fault behind a re-encode of 100 pictures."
+    },
+    {
+      "decision": "Giving a job back clears the handler-status condition: sp_waitlist_request_status_update nulls handler_status whenever the incoming assignee is empty, and ReleaseAsync clears it on the session row so the card repaints without waiting for a re-read. Recorded as FR-106.",
+      "why": "A handler reports a condition from the status word on the card, and returning the job to the pool left that condition on the row, so the card kept reading the previous handler condition - and stayed themed for it - on a job nobody held, instead of reading Waiting again. A condition describes the assigned handler own work on that request, so it cannot outlive the assignment.",
+      "rejected": "Keying the clear on the incoming status rather than on the assignee: a request sits in Pending while its note is written, so a status-keyed clear would remove a condition on an ordinary note. Also rejected was adding a parameter to the procedure: a signature change is not safe to deploy ahead of the application, because MySQL errors on too few arguments, and the drift report cannot see a body-only change anyway."
+    },
+    {
+      "decision": "The detail page Work order row reads the requesting job own work order from the active-setup-job snapshot, and the wizard now stores that same work order in active_setup_job_id instead of the work centre. Recorded as FR-108.",
+      "why": "All 8 live requests had active_setup_job_id equal to their work centre, because NewRequestFlowState.ToDraftFor wrote WorkCenter into a column named for the job, so the row printed 100-03 where WO-046885 belongs. Reading the job snapshot rather than the stored column is what also puts those pre-existing rows right, which the stored value could not do however the page rendered it.",
+      "rejected": "Reading the row from active_setup_job_id and only fixing the producer: that would leave every request already in the store printing its press, including the one under review. Also rejected was backfilling the 8 rows, which writes to the live store and would still only record today job."
+    },
+    {
+      "decision": "The New Request summary page job guard was left exactly as it was, still handed the work centre twice, and the weakness is documented in the code rather than fixed in this change.",
+      "why": "Handing it the real work order made ValidateCurrentJobState reject a blank job id, so two tests that drive a submission with no job read failed, and more importantly a failed job read or a work centre with no active job would have blocked work the floor can raise today. That is a floor-blocking regression nobody asked for.",
+      "rejected": "Guarding conditionally, passing the real job id only when it is non-blank, which is a validation that validates nothing on the path that matters. The real fix resolves the work centre active jobs in the summary step and compares, which is its own change."
     }
   ],
   "step_summaries": {
@@ -1910,10 +2010,13 @@
     },
     "implement": {
       "summary": "The waitlist line card rebuilt to its four-zone anatomy with an eight-state three-theme status column, a per-Item detail template for all 24 Items with geometry by cell count, a handler-condition flyout, the four returning pickups unhidden behind real job gates and their Part Type derived from the disposition stack, the five new New Request answers collected and persisted into answers_json, and the item seed, aggregates and contracts reconciled to all of it. 83 of 93 tasks ticked; the remaining 10 need a live store, a reachable Infor Visual host or a rendered app."
+    },
+    "specify": {
+      "summary": "Ran the live plant-system half of spec 012: the disposition codes are confirmed and recorded, the part-match read is verified live, and the live store validates. Five app-driven tasks remain open for want of the application's own account and PIN."
     }
   },
   "approach": "Four workstreams land the change: the card control and its host page are rebuilt into four zones, the status zone gains a determinate ProgressRing and a three-theme palette, the detail column becomes one DataTemplate per Item in a single resource dictionary, and every cell that has no source today gets one named mechanism (extend the label map, extend the snapshot, read from the plant system, derive through the existing disposition stack, or capture a new answer). Behind it, one new nullable column and two stored procedures carry the handler condition and the new answers, the seed is reconciled with the pre-spec's cell assignment, and the four hidden pickups are unhidden behind real job gates.",
-  "currentTask": "T117",
+  "currentTask": "T071",
   "task_summaries": {
     "T001": {
       "status": "DONE",
@@ -2834,6 +2937,27 @@
         "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs",
         "MTM_Waitlist.Tests/Module_Waitlist/Services/HandlerNameStoreReadTests.cs"
       ]
+    },
+    "T067": {
+      "status": "DONE",
+      "did": "Ran the live validation on the plant host: the finished-goods class resolves to 002/FG and 002/DC-FG, NCM% is confirmed, and the assertion on part 24733431 gives a finished-goods sum of 0 against a total of 90, which is a subset rather than the whole",
+      "files": [
+        "Database/Validation/disposition_input_finished_goods/validate.sql"
+      ]
+    },
+    "T068": {
+      "status": "DONE",
+      "did": "Recorded the confirmed codes: warehouses 002/SHIP, 022, DC-FG; FG locations 002/FG and 002/DC-FG; NCM locations NCM and NCM-VITS; LOCATION.TYPE F/R/T; PART_LOCATION.STATUS A/H/U; and the decision that the classifier rule wording stays with clarify",
+      "files": [
+        ".github/memories/repo/infor-visual-disposition.md"
+      ]
+    },
+    "T071": {
+      "status": "DONE",
+      "did": "Ran GetPartMatches.sql live against VISUAL: the exact term MMC0000010 returned that one part, the partial term MMC000001 returned all ten parts containing it, and a term matching nothing returned no rows",
+      "files": [
+        "Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartMatches.sql"
+      ]
     }
   },
   "verified": [
@@ -2855,11 +2979,11 @@
     },
     {
       "what": "full test suite",
-      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/run-tests.ps1 -All",
+      "command": "pwsh -NoProfile -ExecutionPolicy Bypass -File tools/run-tests.ps1 -All",
       "source": "derived",
       "exitCode": 0,
-      "durationSeconds": 58.5,
-      "result": "    + FullyQualifiedErrorId : NativeCommandError ·     Skipped: 47 ·  Total time: 42.0392 Seconds"
+      "durationSeconds": 54.1,
+      "result": "     Passed: 2171 ·     Skipped: 43 ·  Total time: 31.1877 Seconds"
     },
     {
       "what": "csharp and xaml naming guard (exits 1 on grandfathered findings)",
@@ -2934,8 +3058,8 @@
       "command": "pwsh -NoProfile -ExecutionPolicy Bypass -File .github/scripts/validate-csharp-xaml-naming.ps1",
       "source": "derived",
       "exitCode": 0,
-      "durationSeconds": 5.4,
-      "result": "C#/XAML naming compliance passed for 987 file(s). Grandfathered: 249. New: 0."
+      "durationSeconds": 5.5,
+      "result": "C#/XAML naming compliance passed for 999 file(s). Grandfathered: 249. New: 0."
     },
     {
       "what": "database schema validator",
@@ -3032,6 +3156,55 @@
       "warnings": [
         "exited 1"
       ]
+    },
+    {
+      "what": "SQL naming guard",
+      "command": "pwsh -NoProfile -ExecutionPolicy Bypass -File .github/scripts/validate-sql-naming.ps1",
+      "source": "derived",
+      "exitCode": 1,
+      "durationSeconds": 24.7,
+      "result": "- .\\Database\\Tables\\31_waitlist_request_item_configs\\create.sql:33 Boolean column 'requires_answer' must start with is_/has_ or end with _bool for typed setting values · - .\\Database\\Tables\\AllTables.sql:18 Boolean column 'require_password_change' must start with is_/has_ or end with _bool for typed setting values · - .\\Database\\Tables\\AllTables.sql:710 Boolean column 'requires_answer' must start with is_/has_ or end with _bool for typed setting values",
+      "warnings": [
+        "exited 1"
+      ]
+    },
+    {
+      "what": "live schema validator (read-only)",
+      "command": "pwsh -NoProfile -ExecutionPolicy Bypass -File .github/scripts/validate-database-schema.ps1",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 1.0,
+      "result": "[db-validate] MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING schema is valid. · [db-validate] Seed phase skipped: this run read the store and wrote nothing. Pass -ApplySeeds to apply seed data, which rewrites the seeded tables. · [db-validate] Database schema validation passed using MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING."
+    },
+    {
+      "what": "T067 live finished-goods/NCM code validation",
+      "command": "sqlcmd -S VISUAL -d MTMFG -U SHOP2 -W -s \"|\" -i Database/Validation/disposition_input_finished_goods/validate.sql -v PartNumber=24733431 -o %TEMP%\\t067-validate.txt",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 0.7,
+      "result": "no output"
+    },
+    {
+      "what": "T071 live GetPartMatches (exact MMC0000010, partial MMC000001, no-match term)",
+      "command": "pwsh -NoProfile -ExecutionPolicy Bypass -File C:\\Users\\jkoll\\AppData\\Local\\Temp\\t071-run.ps1",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 0.6,
+      "result": "  MMC0000014 ·   ... last: MMC0000019 · term=zzz-no-such-part rows=0"
+    },
+    {
+      "what": "Read the T067 output and judged it against the two conditions that would have proved the finished-goods class wrong. Neither happened: step 4's finished-goods sum (0) is not equal to the part total (90), and step 1 does match stocked locations (002/FG with 5,464 stocked parts). The predicate therefore stands as T065/T066 shipped it.",
+      "command": "n/a - judgement on the T067 output, not a run",
+      "result": "predicate kept unchanged; the only arm doing work here is LOCATION.ID IN ('FG','DC-FG'), and %NCM% is confirmed as the installation's non-conforming convention",
+      "warnings": [
+        "the two %FINISHED GOODS% description arms match nothing on this installation (no warehouse is described as finished goods) and are inert rather than wrong"
+      ]
+    },
+    {
+      "what": "This machine is the plant host: its own IPv4 addresses include 172.16.1.104, VISUAL resolves to 172.16.1.75, sqlcmd (ODBC 170) connects as SHOP2, and MySQL on 172.16.1.104:3306 accepts the configured root connection. The block recorded in NEXT-RUN.md - no Visual host, no live store - no longer applies.",
+      "command": "n/a - environment fact established while running T067 and T071",
+      "result": "the live half of US5 and US6 could be carried out",
+      "warnings": []
     }
   ],
   "concerns": [
@@ -3110,6 +3283,38 @@
     },
     {
       "note": "{\"concern\":\"Picture resolution no longer re-probes the share per part per extension and is reused by an action reload, so the status buttons no longer pay seconds for it. What remains on that path is real store latency: 0.05-0.11 s back-to-back, and about 1.2 s after a long quiet period because an idle MySQL connection has to be re-established. That is a connection warm-up rather than a defect, and it is stated rather than hidden.\",\"kind\":\"residual\"}"
+    },
+    {
+      "note": "T048, T058, T069, T079 and T088 stay unticked because every one of them is driven through the running application, and the app's own account and PIN are not available here. Nothing else blocks them: the live store is provisioned and validates, Infor Visual answers, and the tooling (tools/ui-drive.ps1) is documented. What is missing is one credential, supplied at run time by the person at the keyboard.",
+      "step": "implement"
+    },
+    {
+      "note": "The finished-goods class is narrow for this installation: two locations (002/FG and 002/DC-FG) out of 9,721 that hold stock. Part 24733431's 90 units sit in DD-* bins, so the corrected figure is 0 where the retired PART.QTY_ON_HAND figure was 90. That is the narrowing FR-090 asked for, but it is a behaviour change on real data and it is the reason the rule's wording stays open.",
+      "step": "implement"
+    },
+    {
+      "note": "LOCATION carries two rows for warehouse 002, one of them with the placeholder description 'VMFIXOHQ added this warehouse', so a join through WAREHOUSE can return that placeholder instead of 'SHIP'. Harmless for the finished-goods predicate because no warehouse is described as finished goods, but a future rule keyed on warehouse description would be reading a value that is not dependable.",
+      "step": "implement"
+    },
+    {
+      "note": "The SQL naming guard still exits 1 on the same 13 pre-existing findings it did before this branch (the queue-population filenames, the two Mock.Service/Restore scripts, and two boolean column names). None is new and none is attributable to this feature.",
+      "step": "implement"
+    },
+    {
+      "note": "PART_LOCATION.STATUS codes are now confirmed from ENUM_CODES (A=Available, H=On Hold, U=Unavailable), but no Infor Visual read in the repository carries that column, so the NCM arm still runs on the floor location signal alone. That is unchanged, not a regression.",
+      "step": "implement"
+    },
+    {
+      "note": "The two %FINISHED GOODS% description arms in the predicate match nothing on this installation and are inert. They are kept because they are what would catch a future location named for finished goods, which is stated in the memory note rather than silently dropped.",
+      "step": "implement"
+    },
+    {
+      "note": "T094 is ticked in tasks.md but has no entry in the step journal, so the two disagree by one: 112 boxes ticked against 111 summaries. The work it describes is present in the tree, so what is missing is the record, not the code. Left exactly as found rather than back-filled: a finish stamped now would carry today's clock for work done in an earlier sitting, which is the batched-timestamp defect the doctor exists to catch.",
+      "step": "implement"
+    },
+    {
+      "note": "A store read that fails is presented to the operator as an empty waitlist. The seam (MySqlHelperServer.ExecuteWithBoundedRetryAsync) catches every exception and returns a neutral result, so RefreshFromDatabaseAsync receives zero rows, clears the in-memory set and returns 0; nothing on the return path says a failure happened. IsWaitlistEmpty also defaults to true, so the empty panel is what the screen shows until a load completes and finds rows. Observed live on 2026-10-16 while the two missing columns made sp_waitlist_request_list fail: the screen read No Requests Right Now, with no store text and no retry button. The seam does also record Unavailable into the store-availability tracker, and InternalStoreUnavailableState does observe it, so the absent panel is not explained by reading alone and was not reproduced under control. The empty-list half by itself contradicts the picker contract, which says a store failure must never read as an empty list.",
+      "step": "implement"
     }
   ],
   "livingSpecs": {

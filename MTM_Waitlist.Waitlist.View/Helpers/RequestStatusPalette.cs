@@ -1,5 +1,8 @@
 using Microsoft.UI;
 using Microsoft.UI.Xaml.Media;
+
+using MTM_Waitlist.Module_Waitlist.Models;
+
 using Windows.UI;
 
 namespace MTM_Waitlist.Module_Waitlist.Helpers;
@@ -25,10 +28,20 @@ namespace MTM_Waitlist.Module_Waitlist.Helpers;
 /// darkest thing the column ever draws, so the two reds separate by lightness as well as by hue.
 /// </para>
 /// <para>
+/// <b>Every column colour is chosen as text on the card, and there is one per surface.</b> The three themes were
+/// first tuned when the column was a coloured pill carrying white text, so two of them were picked to clear
+/// 4.5:1 <em>against white</em>. The pill is gone (FR-008) and the word is now the <em>foreground</em>, which
+/// inverts the requirement: the handler-condition red read at 2.7:1 as text on the light card, and the overdue
+/// red at 2.4:1 on the dark one. Both were real states nobody could read, on the two surfaces the application
+/// ships. Each theme therefore carries a value for each surface, and each value clears 4.5:1 against
+/// <see cref="LightCardBackground"/> or <see cref="DarkCardBackground"/>. Both pairs keep the one invariant that
+/// matters — the condition red is the lighter red and the overdue red the darker one, on either surface.
+/// </para>
+/// <para>
 /// The colours are the accessible Fluent values rather than the light <c>SystemFillColor*</c> theme tokens.
 /// Those tokens are built to carry a <em>dark</em> glyph on top (that is how an <c>InfoBar</c> uses them), so
 /// white text on them fails contrast — <c>SystemFillColorCaution</c> is <c>#FCE100</c>, on which white is
-/// unreadable. These values all clear 4.5:1 against white, which is what a badge's text needs.
+/// unreadable.
 /// </para>
 /// <para>
 /// Brushes are created per call rather than cached in a static field because XAML objects carry thread
@@ -67,9 +80,10 @@ public static class RequestStatusPalette
     /// <remarks>
     /// Lighter than the overdue red in fact and not only in name — <c>RequestStatusPaletteTests</c> holds the two
     /// to that, because a condition mistaken for an overdue request, or the reverse, is the one confusion this
-    /// pair exists to prevent (SC-007).
+    /// pair exists to prevent (SC-007). Dark enough to read as text on a light card, which the lighter of the two
+    /// themes was not: it was chosen to carry white text and read at 2.7:1 as a foreground.
     /// </remarks>
-    public static Color HandlerConditionColumnColor => Color.FromArgb(255, 232, 115, 95);
+    public static Color HandlerConditionColumnColor => Color.FromArgb(255, 192, 57, 43);
 
     /// <summary>
     /// The <c>overdue</c> column theme: the deep red an overdue request is drawn in, and the darkest colour the
@@ -82,8 +96,40 @@ public static class RequestStatusPalette
     /// </remarks>
     public static Color OverdueColumnColor => Color.FromArgb(255, 176, 36, 24);
 
+    /// <summary>
+    /// The <c>normal</c> theme on the dark surface: the same neutral, lightened until it reads as text on the
+    /// dark card.
+    /// </summary>
+    public static Color NormalColumnColorOnDark => Color.FromArgb(255, 185, 193, 204);
+
+    /// <summary>
+    /// The <c>handler-condition</c> theme on the dark surface. Still lighter than the overdue theme there, which
+    /// is the invariant the two reds exist for.
+    /// </summary>
+    public static Color HandlerConditionColumnColorOnDark => Color.FromArgb(255, 255, 158, 138);
+
+    /// <summary>
+    /// The <c>overdue</c> theme on the dark surface: still the darker of the two reds, but light enough to be
+    /// read as the status word on a dark card.
+    /// </summary>
+    public static Color OverdueColumnColorOnDark => Color.FromArgb(255, 255, 107, 90);
+
     /// <summary>The badge's text colour. Every background above clears 4.5:1 against it.</summary>
     public static Color BadgeForeground => Colors.White;
+
+    /// <summary>
+    /// The card's own fill on the light surface, which is what the column's colours are read against.
+    /// </summary>
+    /// <remarks>
+    /// The Fluent <c>LayerFillColorDefault</c> value over the light window background, written out because
+    /// contrast arithmetic needs a background and a unit test has no theme to resolve a theme resource from. The
+    /// column's six colours are held to 4.5:1 against these two by <c>RequestStatusPaletteTests</c>, so a later
+    /// change to any of them is measured rather than eyeballed.
+    /// </remarks>
+    public static Color LightCardBackground => Color.FromArgb(255, 243, 243, 243);
+
+    /// <summary>The card's own fill on the dark surface, the counterpart of <see cref="LightCardBackground"/>.</summary>
+    public static Color DarkCardBackground => Color.FromArgb(255, 30, 30, 30);
 
     /// <summary>
     /// Maps a status to the role it should be painted with.
@@ -174,4 +220,38 @@ public static class RequestStatusPalette
     /// <summary>The badge's text brush. One colour, because every background is chosen to carry it.</summary>
     /// <returns>A new brush, created per call.</returns>
     public static Brush ForegroundBrush() => new SolidColorBrush(BadgeForeground);
+
+    /// <summary>
+    /// The colour one of the three column themes is drawn in, for the surface it is actually on.
+    /// </summary>
+    /// <param name="theme">The column theme the row is in.</param>
+    /// <param name="isDarkSurface">Whether the card the column is drawn on is the dark one.</param>
+    /// <returns>The colour to paint the status word and the ring in.</returns>
+    /// <remarks>
+    /// The surface is passed in rather than read from the application, because the theme is chosen per person and
+    /// applied to the shell's own element (<c>ThemeSelectorService</c>), so the application's requested theme is
+    /// not the theme a given card is drawn in. The card knows its own actual theme, so it is the one that answers
+    /// this.
+    /// </remarks>
+    public static Color ColumnColorFor(StatusColumnTheme theme, bool isDarkSurface) => theme switch
+    {
+        StatusColumnTheme.HandlerCondition => isDarkSurface
+            ? HandlerConditionColumnColorOnDark
+            : HandlerConditionColumnColor,
+        StatusColumnTheme.Overdue => isDarkSurface
+            ? OverdueColumnColorOnDark
+            : OverdueColumnColor,
+        _ => isDarkSurface
+            ? NormalColumnColorOnDark
+            : NormalColumnColor,
+    };
+
+    /// <summary>
+    /// The brush one of the three column themes is drawn in, for the surface it is actually on.
+    /// </summary>
+    /// <param name="theme">The column theme the row is in.</param>
+    /// <param name="isDarkSurface">Whether the card the column is drawn on is the dark one.</param>
+    /// <returns>A new brush, created per call.</returns>
+    public static Brush ColumnBrushFor(StatusColumnTheme theme, bool isDarkSurface) =>
+        new SolidColorBrush(ColumnColorFor(theme, isDarkSurface));
 }

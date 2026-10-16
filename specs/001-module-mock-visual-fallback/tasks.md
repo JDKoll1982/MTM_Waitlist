@@ -2408,6 +2408,24 @@ is a **capture** of the live mirror taken 2026-09-12 and carries 79,218 shape-4 
 the population read produces. Regenerating the capture needs the shared host; it is recorded here rather than
 changed in this run.
 
+**CLOSED 2026-10-16, on `V-MTMFG-5`.** The regeneration needed the host the mirror lives on, and by then the
+development session was running on it. `Database/CopilotScripts/capture_mock_seed_baseline.ps1` now performs the
+regeneration as a script, so it is repeatable and needs no hand-written SQL; the committed seed was re-captured
+with it and fell from **83,224 rows to 12,990**, shape 4 dropping from **79,218 to 1,623** as T150 intended.
+Every value is quoted by MySQL rather than by the script, so an apostrophe or a newline in a description
+round-trips, and the script refuses to write a capture whose row count does not equal the live `COUNT(*)`.
+
+**Verified, not assumed.** The regenerated file was loaded into a clean `mtm_mock` on the local MySQL **8.0.46**
+development instance — a different server from the plant host, so nothing warm was disturbed — after
+`rollback.sql` had cleared the committed seed content (which also proves that rollback still covers all seven
+shapes: 0 rows left). Each shape then matched the live **5.7.24** mirror on both `COUNT(*)` and a value
+fingerprint (`BIT_XOR(CRC32(CONCAT_WS('|', …)))` over the copied columns).
+
+**Shape 6 remains absent by choice.** The script can read `employee_by_number` — the mirror holds 2,091 rows —
+but excludes it by default, because that shape carries real employee numbers and names and the locked ruleset
+keeps raw production user data out of non-production seed content. `-IncludeEmployeeShape` is the opt-in, and
+until someone takes it a fresh install still serves an empty set for an employee-by-number fallback read.
+
 - [x] T161 (**FIXED 2026-09-12** — see Phase 29) `RestoreService` built the `mysql` client's connection from
   `_configurationAccessor().MySqlConnection` — the same defect T158 fixed in `BackupEngine` — so on this host a restore
   connected to `localhost` with no login and failed with `Access denied for user 'ODBC'@'localhost'`, while the safety

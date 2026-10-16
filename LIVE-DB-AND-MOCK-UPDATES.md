@@ -135,6 +135,43 @@ skip the `TRUNCATE`/`FOREIGN_KEY_CHECKS` block above it. Back the table up first
 CREATE TABLE config_settings_values_backup_20261014 AS SELECT * FROM config_settings_values;
 ```
 
+### 1.9 Applied 2026-10-16 — the two columns this branch adds to `waitlist_requests_queue`
+
+**Already done on the host. This is the record, and the reversal.** `specs/012-waitlist-card-layout` adds exactly
+two columns, and live had **neither** while its routines already used **both**. That combination is worse than a
+plain gap, because nothing here fails loudly in the app:
+
+- `sp_waitlist_request_list` failed outright with `Unknown column 'q.handler_status' in 'field list'` — so the
+  waitlist screen could not be read at all on this branch.
+- `sp_waitlist_request_handler_status_update` failed the same way, so a handler could never set a condition.
+- `sp_waitlist_request_insert` carries `p_answers_json`, so a new request would have failed on insert.
+
+Confirmed absent first (with the 21 request rows present), then applied as one statement:
+
+```sql
+ALTER TABLE mtm_waitlist.waitlist_requests_queue
+  ADD COLUMN answers_json JSON NULL
+    COMMENT 'The answers a request captured beyond input_value, keyed by the label the Item declared; NULL when the request captured none (FR-073, FR-087).' AFTER input_value,
+  ADD COLUMN handler_status VARCHAR(32) NULL
+    COMMENT 'The condition the assigned material handler reported: one of the four verbatim condition strings, or NULL when no condition is set. Deliberately separate from status (FR-012, FR-070).' AFTER status;
+```
+
+Both definitions are copied verbatim from `Database/Tables/18_waitlist_requests_queue/create.sql`, which is the
+source of truth for the table. Verified afterwards: the columns exist with those types and comments,
+`sp_waitlist_request_list` returns its 21 rows, and the handler-condition write reaches the store.
+
+**Reversal.** Dropping them discards operator data — any condition a handler has set, and any answers a request
+captured — so it is not a tidy-up:
+
+```sql
+ALTER TABLE mtm_waitlist.waitlist_requests_queue
+  DROP COLUMN handler_status,
+  DROP COLUMN answers_json;
+```
+
+There is no migration runner in this repository, so this was applied by hand rather than through an artifact. It is
+additive: no existing row changed, and both columns are nullable with no default.
+
 ---
 
 ## Part 2 — The Mock service on the host
@@ -269,3 +306,8 @@ for it is reporting success without swapping a snapshot.
 8. Force a refresh and confirm all six shapes report fresh content, `employee_by_number` included (2.3).
 9. Restart the desktop app and exercise sign-in, the previous-people list, and the machine-configuration
    reset.
+
+**Added to this list on 2026-10-16 (agent):** a **step 10**, §1.9 — the two columns
+`specs/012-waitlist-card-layout` adds to `waitlist_requests_queue`, applied by hand on the host. It is not in the
+original ordering because this file's check did not look at that table, and it was found by running the app: with
+the columns missing, the waitlist list read fails at the store. Steps 1–9 are unchanged.

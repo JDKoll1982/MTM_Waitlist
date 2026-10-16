@@ -30,6 +30,8 @@ public sealed class NewRequestFlowStateTests
             InputValue = "Wrong material at press",
             RequesterEmployeeNumber = "6229",
             RequesterEmployeeName = "John Koll",
+            // The job the work centre is running. This is the only thing that knows the request's work order.
+            Availability = RequestJobPartAvailability.None with { HasActiveJob = true, WorkOrder = "WO-046885" },
         };
 
         var draft = state.ToDraft();
@@ -39,7 +41,10 @@ public sealed class NewRequestFlowStateTests
         Assert.AreEqual("Other", draft.Category);
         Assert.AreEqual("other", draft.Item);
         Assert.AreEqual("Wrong material at press", draft.InputValue);
-        Assert.AreEqual("Press 12", draft.ActiveSetupJobId);
+        Assert.AreEqual(
+            "WO-046885",
+            draft.ActiveSetupJobId,
+            "The draft carries the job's own work order. It used to carry the work centre, so every stored request had its press where its work order belongs.");
         Assert.AreEqual("Press 12", draft.WorkCenterName);
         Assert.AreEqual("6229", draft.RequesterEmployeeNumber);
         Assert.AreEqual("John Koll", draft.RequesterEmployeeName);

@@ -76,6 +76,51 @@ $env:MYSQL_PWD='root'; pwsh -NoProfile -File Database/CopilotScripts/verify_mtm_
 
 ---
 
+## `capture_mock_seed_baseline.ps1`
+
+Re-captures `Database/Mock/Seeds/seed_visual_mirror_baseline/create.sql` from a live `mtm_mock` mirror, then
+regenerates `AllSeeds.sql` from it.
+
+That seed is a **capture**, not hand-written content: a fresh install has never been refreshed, so without
+baseline rows the very first fallback read would serve an empty set for every journey (FR-017). A capture goes
+stale whenever the mirror's own refreshes change shape, and this one had — it still carried 79,218 shape-4 rows
+that were overwhelmingly zero-stock, left over from before the population read was narrowed to locations holding
+stock (T150/T151). This script is the remedy that the note in
+`specs/001-module-mock-visual-fallback/tasks.md` left with the operator, because it needs the host the mirror
+lives on.
+
+**Read-only against the database.** It never writes to `mtm_mock`, and never touches the internal stores. The only
+files it writes are the seed and the master list generated from it.
+
+```powershell
+# Report what would be captured and write nothing
+pwsh -NoProfile -File Database/CopilotScripts/capture_mock_seed_baseline.ps1 -DryRun
+
+# Capture
+$env:MYSQL_PWD='root'; pwsh -NoProfile -File Database/CopilotScripts/capture_mock_seed_baseline.ps1
+```
+
+- Connection comes from `-Server`/`-User`/`-Password`, else `MTM_WAITLIST_DB_CONNECTION_STRING` (the
+  application's own source of truth, so a workstation pointed at a remote mirror captures that mirror), else
+  localhost/root.
+- MySQL quotes every value (`QUOTE`), so an apostrophe, a tab or a newline inside a description round-trips into
+  the file instead of breaking the statement. Every row is written with `is_seed_content = 1`: a copied row is
+  not a refresh, and that flag is what lets the read-status surface say "seeded content, not yet refreshed"
+  rather than reporting a fabricated cache age (FR-022).
+- **It refuses to write a capture it cannot prove.** The rows read must equal the live `COUNT(*)`; a shape the
+  mirror holds zero rows for is an error rather than a silent deletion of good baseline rows from the seed
+  (`-AllowEmptyShape` overrides only the second of those).
+- Shape 6 (`employee_by_number`) is **excluded by default**, because it carries real employee numbers and names
+  and the locked ruleset keeps raw production user data out of non-production seed content.
+  `-IncludeEmployeeShape` captures it anyway.
+- `rollback.sql` is not regenerated: it deletes by `is_seed_content = 1` per shape, so it already covers whatever
+  this writes.
+- `-SkipMasterRebuild` leaves `AllSeeds.sql` alone. Do not use it unless regenerating by hand — `AllSeeds.sql`
+  concatenates the seed verbatim and is stale the moment the seed changes, and `build_mtm_mock_masters.ps1 -Check`
+  is the gate that catches it.
+
+---
+
 ## `refresh_schema_drift.ps1`
 
 Reports — and optionally repairs — a store whose **deployed stored procedures have fallen behind the

@@ -167,7 +167,13 @@ public sealed class NewRequestFlowState
         Item = Item?.Id ?? string.Empty,
         InputValue = inputValue,
         Answers = CapturedAnswers(),
-        ActiveSetupJobId = WorkCenter.Trim(),
+        // The job's own work order, not the work centre. This column is named for the job the request was raised
+        // against, and until 2026-10-16 it was fed `WorkCenter` — so every stored request carried its press where
+        // its work order belongs, and the details page printed `100-03` in the Work order row. The job snapshot
+        // the flow resolved between the Category and Item steps is what knows the real `WO-######`; a work centre
+        // with no active job leaves it blank rather than filled with the press, and the page then draws no Work
+        // order row instead of a wrong one (FR-002, FR-053).
+        ActiveSetupJobId = (Availability.WorkOrder ?? string.Empty).Trim(),
         WorkCenterName = WorkCenter.Trim(),
         RequesterEmployeeNumber = RequesterEmployeeNumber.Trim(),
         RequesterEmployeeName = RequesterEmployeeName.Trim(),

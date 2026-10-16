@@ -80,9 +80,31 @@ public sealed class SampleOrder : INotifyPropertyChanged
                 // The ring overlays this text while the request is live, so a change here is a change there too
                 // (FR-015).
                 OnPropertyChanged(nameof(RingText));
+                OnPropertyChanged(nameof(RemainingTimeAndAllotmentText));
             }
         }
     }
+
+    /// <summary>
+    /// The remaining-time row's value: how long is left, against the minutes the Item allotted — "00:09 / 00:15"
+    /// (FR-017).
+    /// </summary>
+    /// <remarks>
+    /// The two figures belong together because the countdown alone says nothing about how close it is: nine
+    /// minutes left is most of an eleven-minute allotment and half of an eighteen-minute one, and the same
+    /// "00:09" reads as comfortable or as nearly out depending on the number it is measured against. The
+    /// allotment stated is the same one the ring's fraction uses, so the row and the ring can never disagree
+    /// about the scale. A row with no due time has no countdown and no allotment to state, so it shows what
+    /// <see cref="RemainingTimeText"/> says and nothing is appended to it (FR-002).
+    /// </remarks>
+    public string RemainingTimeAndAllotmentText =>
+        TargetTimeUtc is null
+            ? RemainingTimeText
+            : $"{RemainingTimeText} / {FormatMinutes(AllottedMinutes ?? DefaultAllottedMinutes)}";
+
+    /// <summary>Minutes as the same <c>mm:ss</c> shape the countdown and the ring use, so the two figures on the
+    /// row are directly comparable.</summary>
+    private static string FormatMinutes(int minutes) => $"{minutes / 60:00}:{minutes % 60:00}";
 
     private bool _isOverdue;
 
@@ -298,6 +320,9 @@ public sealed class SampleOrder : INotifyPropertyChanged
             if (SetField(ref _allottedMinutes, value))
             {
                 OnPropertyChanged(nameof(RingValue));
+                // The allotment is half of what the remaining-time row states, so a row whose Item configuration
+                // lands after the first paint has to raise it and not only the ring.
+                OnPropertyChanged(nameof(RemainingTimeAndAllotmentText));
             }
         }
     }
@@ -677,6 +702,7 @@ public sealed class SampleOrder : INotifyPropertyChanged
             // text is time-derived in two of its three states (the countdown, and the overrun once overdue).
             OnPropertyChanged(nameof(RingValue));
             OnPropertyChanged(nameof(RingText));
+            OnPropertyChanged(nameof(RemainingTimeAndAllotmentText));
         }
 
         return changed;

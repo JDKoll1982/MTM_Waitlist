@@ -33,12 +33,13 @@ namespace MTM_Waitlist.Module_Waitlist.Controls;
 public partial class WaitlistLineCardView : UserControl
 {
     /// <summary>
-    /// The converter parameter that states which of the palette's two readings is wanted: the status column's
-    /// own brush rather than the badge's text brush.
+    /// The one status palette converter; it holds no state, so one instance serves every card.
     /// </summary>
-    private const string StatusColumnThemeParameter = "StatusColumnTheme";
-
-    /// <summary>The one status palette converter; it holds no state, so one instance serves every card.</summary>
+    /// <remarks>
+    /// The parameters that say which of the palette's readings is wanted — the status column's own brush rather
+    /// than the badge's text brush, and which surface the card is drawn on — live on the converter, so the card
+    /// and the converter cannot drift apart.
+    /// </remarks>
     private static readonly RequestStatusToBrushConverter s_statusToBrushConverter = new();
 
     public static readonly DependencyProperty OrderProperty = DependencyProperty.Register(
@@ -105,6 +106,10 @@ public partial class WaitlistLineCardView : UserControl
         // recycles this container.
         Loaded += OnCardLoaded;
         Unloaded += OnCardUnloaded;
+
+        // The status column's colours have one value per surface, so a card already on screen has to re-resolve
+        // them when the background theme changes under it rather than keeping the pair it was built with.
+        ActualThemeChanged += OnActualThemeChanged;
 
         ApplyOrderState();
     }
@@ -296,13 +301,27 @@ public partial class WaitlistLineCardView : UserControl
             : "Waitlist_Card_Ring.TimeLeft".GetLocalized();
 
     /// <summary>
-    /// Paints the status column from the row's own theme, through the one status palette (FR-019).
+    /// Repaints the status column when the surface under the card changes.
     /// </summary>
+    private void OnActualThemeChanged(FrameworkElement sender, object args) => UpdateStatusColumnBrush();
+
+    /// <summary>
+    /// Paints the status column from the row's own theme and the surface the card is actually on, through the one
+    /// status palette (FR-019).
+    /// </summary>
+    /// <remarks>
+    /// The surface comes from the card's own <see cref="FrameworkElement.ActualTheme"/> rather than from the
+    /// application, because the background theme is chosen per person and applied to the shell's element, so the
+    /// two can differ. The palette answers a pair of colours for each of the three themes — one for a light card
+    /// and one for a dark one — so the word and the ring stay legible on either.
+    /// </remarks>
     private void UpdateStatusColumnBrush() =>
         StatusColumnBrush = s_statusToBrushConverter.Convert(
             Order?.StatusTheme ?? StatusColumnTheme.Normal,
             typeof(Brush),
-            StatusColumnThemeParameter,
+            ActualTheme == ElementTheme.Dark
+                ? RequestStatusToBrushConverter.StatusColumnThemeOnDarkParameter
+                : RequestStatusToBrushConverter.StatusColumnThemeParameter,
             string.Empty) as Brush
             ?? RequestStatusPalette.BackgroundBrushFor(Order?.Status);
 }

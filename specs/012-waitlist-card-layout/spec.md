@@ -277,6 +277,17 @@ Five answers join the New Request workflow, and each appears on the matching car
 - FR-104: Every new label MUST be a localized resource rather than a literal: the ring's accessible name, `Open details`, the new cell labels, the die-shop phrases, the four conditions and the new status words.
 - FR-105: Any animation the new card adds MUST respect the system's animations-off setting.
 
+**Added by the owner's review of the running card**
+
+- FR-106: The condition a material handler reports MUST be cleared when the request is returned to the open pool, so the card reads the `Waiting` lifecycle word again rather than the condition the previous handler left on a job nobody holds. A condition describes the assigned handler's own work on that request and MUST NOT outlive the assignment it was reported against. [Added 2026-10-16, owner direction, after reviewing a given-back job still reading its previous handler's condition.]
+
+**Added by the owner's review of the request detail page**
+
+- FR-107: The request detail page MUST render **one** card for the request itself. The work centre, the person who asked and the remaining time MUST be stated once, on the page's hero card, and MUST NOT be repeated in a second card below it. [Added 2026-10-16, owner direction.]
+- FR-108: The detail page's `Work order` row MUST state the work order the request's job is for, in the `WO-######` form the work-order reads use. It MUST NOT state the work centre, and where the job cannot be resolved the row MUST be left out rather than filled with anything else (FR-002, FR-101). [Added 2026-10-16, owner direction, after the row was found printing the press.]
+- FR-109: Each picture on the hero card MUST carry a small caption beneath it saying what it is, because a picture standing alone beside a title names nothing. [Added 2026-10-16, owner direction.]
+- FR-110: The hero card's `Remaining Time` value MUST state the time left **against the time the Item allotted**, so the countdown is readable as a proportion rather than as a number on its own. [Added 2026-10-16, owner direction.]
+
 ### Key Entities
 
 - **Request row**: one waiting request as it appears in the list. Holds its Item, its lifecycle state, its requesting work centre, the requester, the material handler, and when it was raised and closed.

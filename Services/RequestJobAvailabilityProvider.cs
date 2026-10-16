@@ -181,6 +181,11 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
             // (FR-053). A job with more than one die is represented by its first die for the single-die tokens;
             // the die step itself offers every one of them.
             JobPartNumber = snapshot.PartNumber ?? string.Empty,
+            // The job's own work order travels too: it is the only place a request can learn it, and the details
+            // page's Work order row reads it from here rather than from the request's stored job id — until
+            // 2026-10-16 the wizard wrote the work centre into that column, so a row reading it printed the press
+            // where a work order belongs (FR-053).
+            WorkOrder = (snapshot.WorkOrder ?? string.Empty).Trim(),
             DieNumber = dies.FirstOrDefault()?.PartNumber ?? string.Empty,
             DieLocation = dies.FirstOrDefault()?.Location ?? string.Empty,
             // The materials the job holds travel too. An Item whose identifier names the part it is about reads

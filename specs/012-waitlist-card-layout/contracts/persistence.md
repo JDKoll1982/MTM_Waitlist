@@ -1,6 +1,6 @@
 # Contract - The schema and procedure seam this change adds or reshapes
 
-The persistence surface behind `012-waitlist-card-layout`: one reshaped table, one new stored procedure, the two
+The persistence surface behind `012-waitlist-card-layout`: one reshaped table, one new stored procedure, the three
 existing procedures that carry the new values, three Infor Visual read shapes (two new, one corrected) plus one
 extended WIP-application read, and the artifact conventions that bind them.
 Names and paths below come from `plan.md` and `research.md` (R4, R5, R6, R7).
@@ -12,7 +12,7 @@ Names and paths below come from `plan.md` and `research.md` (R4, R5, R6, R7).
 
 | Column | Type | Holds |
 |---|---|---|
-| `handler_status` | `VARCHAR(32)` NULL | the one handler-set condition currently set against the request, or NULL when none is set |
+| `handler_status` | `VARCHAR(32)` NULL | the one handler-set condition currently set against the request, or NULL when none is set. Cleared with the assignee, so a request returned to the open pool carries none (FR-106) |
 | `answers_json` | nullable JSON | a label-to-value map of the request's captured answers, keyed by the declared field label |
 
 `handler_status` exists so a condition can be restored onto its row while the lifecycle status stays intact
@@ -30,6 +30,7 @@ pattern (`detail_fields_json`, `options_json`).
 | `sp_waitlist_request_handler_status_update` | new | writes `handler_status`, gated on the expected handler, and reports its affected-row count so a lost race is told rather than shown as success. The gate is **never** relaxed: unlike `sp_waitlist_request_status_update`'s `p_expected_status`, an absent or empty `p_expected_material_handler` matches nothing rather than meaning "unconditional", so a caller that does not know the handler cannot write a condition |
 | `sp_waitlist_request_list` | extended in place | returns `handler_status` and `answers_json` on every row, so the list read carries the new values back to the card |
 | `sp_waitlist_request_insert` | extended in place | carries `answers_json`, so the answers captured during New Request are persisted with the request |
+| `sp_waitlist_request_status_update` | extended in place | clears `handler_status` whenever the incoming assignee is empty, which is what returning a request to the open pool does (FR-106). **Keyed on the assignee parameter and not on the incoming status**: a request sits in `Pending` while its note is written, so a status-keyed clear would remove a condition on a note. Accept and Complete carry the handler, so both leave the condition alone. The clear reads the parameter rather than the `assigned_material_handler` column because a single-table `UPDATE` evaluates its `SET` list left to right, so the column would already hold the empty value this same statement wrote |
 
 Every data operation goes through a stored procedure. **No application code holds statement text**: there is no inline
 or hard-coded SQL in application code, and DML goes through the seam that reports the affected-row count, the same

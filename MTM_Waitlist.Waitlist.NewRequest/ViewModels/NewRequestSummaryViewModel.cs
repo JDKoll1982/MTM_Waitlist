@@ -342,6 +342,12 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
             return;
         }
 
+        // Left exactly as it was on purpose. This guard is meant to ask whether the request's job is still there,
+        // but it is handed the work centre twice, so it only establishes that the work centre is a non-blank value
+        // equal to itself — `ValidateActiveJobsForWorkCenter` never consults the store. Handing it the real job id
+        // instead was tried on 2026-10-16 and reverted: it turns a job read that failed, or a work centre with no
+        // active job, into a blocked submission, which would refuse work the floor can raise today. Fixing it
+        // properly means resolving the work centre's active jobs here and comparing, which is its own change.
         var jobValidation = NewRequestFlowRules.ValidateCurrentJobState(_state.WorkCenter, _state.WorkCenter);
         if (!jobValidation.IsValid)
         {

@@ -468,7 +468,9 @@ MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when override
 --   Owning artifact: Database/Tables/18_waitlist_requests_queue/create.sql, with its rollback beside it and its
 --     body registered in Database/Tables/AllTables.sql.
 --   `handler_status` is deliberately separate from `status`: the lifecycle word underneath a condition is still
---     needed, because the card has to know it when no condition is set (FR-012, research R4).
+--     needed, because the card has to know it when no condition is set (FR-012, research R4). It is cleared with
+--     the assignee, because a condition describes the assigned handler's own work on the job: giving the job back
+--     returns it to the open pool and the card reads Waiting again (FR-106).
 --   `answers_json` exists because `input_value` holds exactly one answer and the die Items now ask two questions,
 --     while each of the four returning Items asks one. The map is a label-to-value object, the same shape the
 --     schema already uses for structured declaration data (`detail_fields_json`, `options_json`) (FR-073,
@@ -509,7 +511,7 @@ SET
 SET
     @sql_stmt := IF(
         @has_handler_status_column = 0,
-        'ALTER TABLE waitlist_requests_queue ADD COLUMN handler_status VARCHAR(32) NULL COMMENT ''The condition the assigned material handler reported: one of the four verbatim condition strings, or NULL when no condition is set. Deliberately separate from status (FR-012, FR-070).'' AFTER status',
+        'ALTER TABLE waitlist_requests_queue ADD COLUMN handler_status VARCHAR(32) NULL COMMENT ''The condition the assigned material handler reported: one of the four verbatim condition strings, or NULL when no condition is set. Deliberately separate from status, and cleared with the assignee, because a condition describes the assigned handler''''s own work on the job (FR-012, FR-070, FR-106).'' AFTER status',
         'SELECT ''waitlist_requests_queue.handler_status already exists'''
     );
 
@@ -535,7 +537,7 @@ MODIFY COLUMN work_center_name VARCHAR(64) NOT NULL COMMENT 'Work center that su
 MODIFY COLUMN requester_employee_number VARCHAR(32) NOT NULL COMMENT 'Employee number of the requester.',
 MODIFY COLUMN requester_employee_name VARCHAR(128) NOT NULL COMMENT 'Display name of the requester.',
 MODIFY COLUMN status VARCHAR(32) NOT NULL DEFAULT 'Pending' COMMENT 'Lifecycle status, for example Pending, InProgress, Resolved, or Canceled.',
-MODIFY COLUMN handler_status VARCHAR(32) NULL COMMENT 'The condition the assigned material handler reported: one of the four verbatim condition strings, or NULL when no condition is set. Deliberately separate from status, because the lifecycle word is still needed when no condition is set (FR-012, FR-070).',
+MODIFY COLUMN handler_status VARCHAR(32) NULL COMMENT 'The condition the assigned material handler reported: one of the four verbatim condition strings, or NULL when no condition is set. Deliberately separate from status, because the lifecycle word is still needed when no condition is set, and cleared with the assignee, because a condition describes the assigned handler''s own work on the job (FR-012, FR-070, FR-106).',
 MODIFY COLUMN requested_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the request was submitted.',
 MODIFY COLUMN target_time_utc DATETIME NULL COMMENT 'UTC target completion time when one is supplied.',
 MODIFY COLUMN is_overdue TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'True when the request passed its target time without resolution.',

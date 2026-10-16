@@ -38,8 +38,25 @@ public sealed class RequestStatusToBrushConverter : IValueConverter
     /// <summary>The converter parameter that asks for the palette's text brush.</summary>
     private const string ForegroundParameter = "Foreground";
 
-    /// <summary>The converter parameter that asks for the whole status column's theme brush.</summary>
-    private const string StatusColumnThemeParameter = "StatusColumnTheme";
+    /// <summary>
+    /// The converter parameter that asks for the whole status column's theme brush on the <b>light</b> surface.
+    /// </summary>
+    /// <remarks>
+    /// This is the literal the palette has always answered, so a caller that does not know which surface it is
+    /// painting keeps the behaviour it had.
+    /// </remarks>
+    public const string StatusColumnThemeParameter = "StatusColumnTheme";
+
+    /// <summary>
+    /// The converter parameter that asks for the whole status column's theme brush on the <b>dark</b> surface.
+    /// </summary>
+    /// <remarks>
+    /// A caller that paints a dark card says so rather than the palette guessing from the application's theme:
+    /// the background theme is chosen per person and applied to the shell's own element
+    /// (<c>ThemeSelectorService</c>), so the application's requested theme and the theme a given card is drawn
+    /// in are two different questions.
+    /// </remarks>
+    public const string StatusColumnThemeOnDarkParameter = "StatusColumnThemeOnDark";
 
     /// <inheritdoc />
     public object Convert(object value, Type targetType, object parameter, string language) =>
@@ -73,9 +90,13 @@ public sealed class RequestStatusToBrushConverter : IValueConverter
     internal static Color ColourFor(object? value, object? parameter) =>
         IsParameter(parameter, ForegroundParameter)
             ? RequestStatusPalette.BadgeForeground
-            : IsParameter(parameter, StatusColumnThemeParameter)
-                ? ColumnColour(value)
-                : TryReadTheme(value, out var theme) ? ThemeColour(theme) : StatusColour(value);
+            : IsParameter(parameter, StatusColumnThemeOnDarkParameter)
+                ? ColumnColour(value, isDarkSurface: true)
+                : IsParameter(parameter, StatusColumnThemeParameter)
+                    ? ColumnColour(value, isDarkSurface: false)
+                    : TryReadTheme(value, out var theme)
+                        ? ThemeColour(theme, isDarkSurface: false)
+                        : StatusColour(value);
 
     /// <summary>
     /// The colour the whole status column is drawn in.
@@ -86,18 +107,14 @@ public sealed class RequestStatusToBrushConverter : IValueConverter
     /// palette answers nothing for is what leaves a status word and a ring nobody can see, so every one of the
     /// three themes resolves a real colour here (FR-019, FR-072).
     /// </remarks>
-    private static Color ColumnColour(object? value) =>
-        TryReadTheme(value, out var theme) ? ThemeColour(theme) : StatusColour(value);
+    private static Color ColumnColour(object? value, bool isDarkSurface) =>
+        TryReadTheme(value, out var theme) ? ThemeColour(theme, isDarkSurface) : StatusColour(value);
 
     /// <summary>
     /// The column's theme colour, from the palette (FR-019).
     /// </summary>
-    private static Color ThemeColour(StatusColumnTheme theme) => theme switch
-    {
-        StatusColumnTheme.HandlerCondition => RequestStatusPalette.HandlerConditionColumnColor,
-        StatusColumnTheme.Overdue => RequestStatusPalette.OverdueColumnColor,
-        _ => RequestStatusPalette.NormalColumnColor,
-    };
+    private static Color ThemeColour(StatusColumnTheme theme, bool isDarkSurface) =>
+        RequestStatusPalette.ColumnColorFor(theme, isDarkSurface);
 
     /// <summary>
     /// The colour for a state, whether it arrives as a role or as the status it belongs to. A condition takes the

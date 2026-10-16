@@ -56,6 +56,17 @@ public sealed record RequestJobPartAvailability(
     public bool HasOutsideServiceWorkToReturn { get; init; }
 
     /// <summary>
+    /// The requesting job's own work order, as <c>WO-######</c>, or empty when no job is known.
+    /// <para>
+    /// It travels with the snapshot because the job is the only thing that knows it: a request stores the work
+    /// centre it was raised at and the job that was active there, and nothing else on the request carries the
+    /// work order itself. A caller that cannot supply one leaves it empty, and the surfaces that show it omit
+    /// the row rather than printing something else in its place (FR-002).
+    /// </para>
+    /// </summary>
+    public string WorkOrder { get; init; } = string.Empty;
+
+    /// <summary>
     /// The item type the requesting job's part is derived to be — the single derivation behind `Item Type` on
     /// the component Items and `Part Type` on the four returning pickups (FR-091, FR-092).
     /// <para>

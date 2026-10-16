@@ -683,24 +683,38 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         // request was stored with, and the remaining rows are what the request itself carries. An Item's own
         // declared fields are the configuration-driven grid that lands on this page; until that grid is read,
         // this page states only what it can support and never draws an empty titled block.
+        //
+        // One card, not two (2026-10-16). The second card carried the work centre, the person who asked and the
+        // remaining time, and the hero card above this one already states all three — so every row on it said
+        // something the page had already said, and it is gone rather than emptied. Its remaining row, the job's
+        // work order, belongs on this card because it is what the request itself carries.
+        var request = ResolveRequest(Item);
         AddSection(
             "Request",
             "What this request asks for, and what the request itself carries.",
             ("Item", Item.Title),
             ("Identifier", Item.Subtitle),
             ("Request details", FieldValue(Item, "Request details")),
-            ("Work order", FieldValue(Item, "Work order")));
+            ("Work order", JobWorkOrder(request)));
+    }
 
-        AddSection(
-            "Request context",
-            "Who asked, where it goes, and how urgent it is.",
-            ("Work center", Item.RequestedPressName),
-            ("Requesting user", Item.RequestedByName),
-            // No employee-number row. The row above this one already names the person who asked, and a person is
-            // named by name — the number was a second way of saying the same thing, in the one form the screen
-            // must not use for a person. The handler is named where a handler belongs: on the card's person row
-            // and in the history below.
-            ("Remaining time", Item.RemainingTimeText));
+    /// <summary>
+    /// The work order the job this request belongs to is for, as <c>WO-######</c>, or null when the job is
+    /// unknown — which leaves the row undrawn rather than filled with something else (FR-002).
+    /// </summary>
+    /// <remarks>
+    /// It is read from the requesting work centre's <b>job snapshot</b>, the same source every other job-derived
+    /// value on this page reads, and <b>not</b> from <c>active_setup_job_id</c>. It must not be read from there:
+    /// until 2026-10-16 the wizard wrote the <i>work centre</i> into that column, so the row printed the press
+    /// where a work order belongs. Reading the job also puts the requests written before that fix right, because
+    /// their stored value is a work centre and could not have been rendered as a work order whatever this page
+    /// did. A work centre whose job cannot be read draws no row.
+    /// </remarks>
+    private string? JobWorkOrder(WaitlistRequest? request)
+    {
+        var workCenter = request?.WorkCenter ?? Item?.RequestedPressName;
+        var workOrder = ResolveJobAvailability(workCenter).WorkOrder;
+        return string.IsNullOrWhiteSpace(workOrder) ? null : workOrder.Trim();
     }
 
     /// <summary>
@@ -856,14 +870,6 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         LoadItemAndSections();
         await LoadDeclaredFieldRowsAsync().ConfigureAwait(true);
     }
-    private void AddRequestContextSection(SampleOrder item, string title, string summary)
-        => AddSection(
-            title,
-            summary,
-            ("Requested by", item.RequestedByName),
-            ("Press or resource", item.RequestedPressName),
-            ("Remaining time", item.RemainingTimeText));
-
     /// <summary>
     /// The label-to-value lookup used by every section loader. It has no fallback: a label with no source
     /// returns <see langword="null" /> and its row is not rendered (FR-002, contract C2).

@@ -6,6 +6,15 @@
 -- public_id alone is what let a second accept overwrite the first handler's assignment.
 -- p_expected_status is the state the caller saw. An absent or empty value keeps the unconditional behaviour for
 -- a caller that genuinely has no state to guard on.
+-- The handler's condition does not outlive the assignment it was reported against: whenever the incoming assignee
+-- is empty, the condition is cleared with it. Returning a job to the open pool (Give back) clears the assignee,
+-- so it clears the condition too, and the card reads the lifecycle word again -- Waiting -- rather than showing
+-- the condition the previous handler left on a job nobody holds (FR-106).
+--
+-- The clear is keyed on the PARAMETER and not on the assigned_material_handler COLUMN on purpose. A single-table
+-- UPDATE evaluates its SET list left to right, so an expression that named the column would read the value this
+-- same statement had just written -- which is NULL for every transition, because releasing always clears it -- and
+-- would clear the condition on Accept as well as on Give back.
 
 USE mtm_waitlist;
 
@@ -23,6 +32,11 @@ CREATE PROCEDURE sp_waitlist_request_status_update(
 UPDATE waitlist_requests_queue
 SET status = TRIM(p_status),
     assigned_material_handler = NULLIF(TRIM(COALESCE(p_assigned_material_handler, '')) COLLATE utf8mb4_unicode_ci, ''),
+    handler_status = CASE
+        WHEN NULLIF(TRIM(COALESCE(p_assigned_material_handler, '')) COLLATE utf8mb4_unicode_ci, '') IS NULL
+            THEN NULL
+        ELSE handler_status
+    END,
     note = COALESCE(NULLIF(TRIM(COALESCE(p_note, '')) COLLATE utf8mb4_unicode_ci, ''), note),
     accepted_utc = CASE
         WHEN UPPER(TRIM(p_status)) = 'ACCEPTED'

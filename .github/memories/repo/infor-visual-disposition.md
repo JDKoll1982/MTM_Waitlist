@@ -141,12 +141,32 @@ Phase 24 (the 2026-09-12 fix).
   `GetPartWarehouseQuantities.sql`. `PART.QTY_ON_HAND` must not return as this figure anywhere. Output column names
   and order are unchanged, so `VisualReadShapeCatalog`, the mirror table + stage, `sp_visual_disposition_input_refresh`
   and `sp_visual_disposition_input_get` did not move.
-- **The finished-goods/NCM codes are STILL UNCONFIRMED for this installation, and T067 has NOT been run.**
-  `Database/Validation/disposition_input_finished_goods/validate.sql` is written for the live plant system (steps:
-  the codes found, the NCM locations, the `ENUM_CODES` lists for `PART_LOCATION.STATUS` / `LOCATION.TYPE`, and one
-  known part's finished-goods sum next to `PART.QTY_ON_HAND`). It must be run **on that system**: no Visual host
-  resolves from this workstation (`No such host is known`) and there is no live `mtm_waitlist`, so neither it nor
-  T068's "codes match T067's output" nor T069's end-to-end pass can be carried out here. Until step 1/2 output is
-  read, treat `'FG'` / `'DC-FG'` and the `%FINISHED GOODS%` matches as **provisional**: if its step 4 reports the
-  finished-goods sum equal to the part total, or step 1 matches no stocked location, correct the predicate in both
-  scripts to the codes it reports.
+- **The finished-goods and NCM codes are CONFIRMED for this installation (T067 run 2026-10-16 against live).**
+  `Database/Validation/disposition_input_finished_goods/validate.sql` was run on the plant host itself
+  (`VISUAL` → `172.16.1.75`, `MTMFG`, sqlcmd ODBC 170). What it reported:
+
+  | Question | Answer found |
+  |---|---|
+  | Warehouses | `002` (two rows: `SHIP` and a placeholder `VMFIXOHQ added this warehouse`), `022` (placeholder), `DC-FG` = `VITS DRIVE LOCATION`. **No warehouse is described as finished goods.** |
+  | Stocked locations | 9,721; all but one in warehouse `002`. |
+  | Locations matching the finished-goods class | exactly **two**: `002/FG` (`Finished Goods`, 5,464 parts / 30,325 qty) and `002/DC-FG` (`VITS DRIVE LOCATION`, 51 parts / 0 qty). |
+  | `LOCATION.TYPE` | every one of the 13,058 locations is `R`. `ENUM_CODES`: `F`=Floor Stock, `R`=Regular, `T`=Transit. |
+  | `PART_LOCATION.STATUS` | `ENUM_CODES`: `A`=Available, `H`=On Hold, `U`=Unavailable. |
+  | NCM locations in use | `002/NCM` (`Nonconforming Product`, 1,636 parts / 119,759 qty), `002/NCM-VITS` (174 / 2,900), `DC-FG/NCM-VITS` (0 stock). |
+  | Assertion on part `24733431` | finished-goods sum **0**, sum over every location **90**, `PART.QTY_ON_HAND` **90** → verdict `OK`: the finished-goods figure is a strict subset of the part's total. |
+
+- **The predicate STANDS, unchanged, and T065/T066 stay as shipped.** The two conditions that would have proved it
+  wrong did not happen: step 4's finished-goods sum is not equal to the part total, and step 1 does match stocked
+  locations. The arm doing the work here is `LOCATION.ID IN ('FG','DC-FG')`; the `%FINISHED GOODS%` description arms
+  match only `FG`'s own description and no warehouse description, so they are inert on this installation but harmless
+  (they are what would catch a future location named for finished goods). `%NCM%` is confirmed as the installation's
+  non-conforming convention, so the `Location LIKE 'NCM%'` signal is right as written.
+- **The one behavioural consequence to know.** This installation's finished-goods class is narrow: two locations of
+  9,721 stocked ones. Part `24733431`'s 90 units sit in `DD-*` bins in warehouse `002`, none of which is a
+  finished-goods location, so the corrected figure is **0** where the retired `PART.QTY_ON_HAND` figure was **90**.
+  That narrowing is exactly what FR-090 asked for — a part whose stock is held away from finished goods must stop
+  reading as Finished Goods — and it is precisely why the classifier's rule *wording* stays with `clarify` rather than
+  being amended here (the decision T067 was told to record, not re-open).
+- **Still unread, and out of scope for `clarify`:** the Infor-side NCM signal (`PART_LOCATION.STATUS` against the
+  occupied `LOCATION`). Its code values are now confirmed (`A`/`H`/`U`), but no Visual read in the repository carries
+  that column, so the NCM arm continues to run on the floor location signal alone.
