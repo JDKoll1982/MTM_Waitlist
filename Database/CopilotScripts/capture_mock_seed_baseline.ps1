@@ -93,6 +93,7 @@ param(
     [string]$OutPath,
     [switch]$IncludeEmployeeShape,
     [switch]$AllowEmptyShape,
+    [switch]$AllowUnrefreshedMirror,
     [switch]$DryRun,
     [switch]$SkipMasterRebuild
 )
@@ -147,9 +148,11 @@ if (-not $MysqlExe) {
     }
 }
 
-# The application's own configuration is the source of truth for where the mirror is, so follow it
-# rather than assuming localhost: a workstation that reads a remote mirror must capture that mirror.
-if (-not $Server -or -not $User -or -not $Password) {
+# An explicitly provided credential wins. MYSQL_PWD in the environment is one, and every other script here sets
+# it, so a caller that has set it is not asking for the connection string to be consulted — which matters when
+# the connection string names a different server from the one being dealt with. Otherwise the application's own
+# configuration is the source of truth for where the mirror is, so follow it rather than assuming localhost.
+if (-not $env:MYSQL_PWD) {
     $cs = $env:MTM_WAITLIST_DB_CONNECTION_STRING
     if ($cs) {
         foreach ($token in ($cs -split ';')) {
@@ -194,9 +197,17 @@ function Invoke-MySqlScalar {
     if ($LASTEXITCODE -ne 0) {
         throw "mysql failed (exit $LASTEXITCODE):`n$($out -join [Environment]::NewLine)"
     }
-    # The leading comma keeps a single-line answer an array, so the caller's [0] is the value and
-    # not the value's first character.
-    return , @($out | ForEach-Object { "$_" })
+
+    # One element per row, and every caller collects the answer with `@()` so a single-row result is still an
+    # array rather than a bare string whose [0] would be its first CHARACTER.
+    #
+    # Do not `return , @(...)` here. The leading comma wraps the array in another array, PowerShell unrolls only
+    # the outer one, and the caller's `@()` then collects the WRAPPER: `$rows.Count` becomes 1 and `$rows[0]` is
+    # the whole result set. That is not theoretical — it made the list of mirror table names arrive as one string
+    # with the names joined by newlines, which was then interpolated into a FROM clause as a single identifier:
+    # `ERROR 1103 Incorrect table name 'visual_disposition_input_result visual_employee_...'`. Single-value counts
+    # hid it, because casting a one-element array to [int] happens to work.
+    return @($out | ForEach-Object { "$_" })
 }
 
 # Streams the generated tuples straight to a file: the client's stdout handle is redirected, so no
@@ -257,8 +268,8 @@ function Get-ColumnsOf {
 
     $sql = "SELECT column_name, data_type FROM information_schema.columns " +
            "WHERE table_schema = '$Database' AND table_name = '$Table' ORDER BY ordinal_position;"
-    $rows = Invoke-MySqlScalar -Sql $sql
-    if (-not $rows -or $rows.Count -eq 0) {
+    $rows = @(Invoke-MySqlScalar -Sql $sql)
+    if ($rows.Count -eq 0) {
         throw "Table `$Database.$Table` does not exist on $Server. Wrong server, or the mirror has not been deployed there."
     }
 
@@ -305,9 +316,30 @@ Write-Host "Capturing the mtm_mock baseline from ${Server}:${Port} as $User" -Fo
 Write-Host "  output : $OutPath"
 Write-Host ''
 
-$counts = Invoke-MySqlScalar -Sql "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '$Database' AND table_name LIKE 'visual_%';"
-if ([int]$counts[0] -eq 0) {
-    throw "No visual_* tables in `$Database` on $Server -- this does not look like the mtm_mock mirror."
+$mirrorTables = @(Invoke-MySqlScalar -Sql "SELECT table_name FROM information_schema.tables WHERE table_schema = '$Database' AND table_name LIKE 'visual\\_%\\_result';")
+if ($mirrorTables.Count -eq 0) {
+    Write-Host "Nothing to capture: the $Database database on $Server holds no mirror tables, so the committed seed is left as it is." -ForegroundColor Yellow
+    Remove-Item $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    exit 3
+}
+
+# A mirror holding nothing but seed content IS the committed seed, already loaded. Capturing it would copy the
+# file onto itself and restamp every row, which leaves a diff claiming a refresh happened when none did. A real
+# refresh writes `is_seed_content = 0`, so that flag is exactly the question to ask (FR-017). The probe is built
+# from the tables that actually exist, so a half-deployed mirror reports what it has instead of failing here.
+if (-not $AllowUnrefreshedMirror) {
+    $refreshedProbe = ($mirrorTables | ForEach-Object {
+            "SELECT COUNT(*) FROM $bt$Database$bt.$bt$_$bt WHERE is_seed_content = 0"
+        }) -join ' UNION ALL '
+    $refreshedRows = @(Invoke-MySqlScalar -Sql "$refreshedProbe;")
+    $refreshed = [long]$refreshedRows[0]
+
+    if ($refreshed -eq 0) {
+        Write-Host "Nothing to capture: the $Database database on $Server holds no refreshed content, only seed rows, so the committed seed is left as it is." -ForegroundColor Yellow
+        Write-Host '  A mirror that has never been refreshed has nothing newer to record. Pass -AllowUnrefreshedMirror to re-record the seed from itself.' -ForegroundColor DarkGray
+        Remove-Item $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+        exit 3
+    }
 }
 
 $committed = Get-CommittedSections -Path $OutPath
@@ -326,7 +358,7 @@ foreach ($shape in $shapeDefs) {
         continue
     }
 
-    $liveCount = [int](Invoke-MySqlScalar -Sql "SELECT COUNT(*) FROM $bt$Database$bt.$bt$($shape.Table)$bt;")[0]
+    $liveCount = [int](@(Invoke-MySqlScalar -Sql "SELECT COUNT(*) FROM $bt$Database$bt.$bt$($shape.Table)$bt;"))[0]
     if ($liveCount -eq 0 -and -not $AllowEmptyShape) {
         throw ("Shape $($shape.Number) ($($shape.Key)) holds 0 rows in `$Database` on $Server. " +
                "An empty shape nearly always means the wrong database or a mirror that has never refreshed, and " +
@@ -334,8 +366,8 @@ foreach ($shape in $shapeDefs) {
                "is genuinely correct.")
     }
 
-    $freshnessRows = Invoke-MySqlScalar -Sql "SELECT IFNULL(MAX(refreshed_utc),'-') FROM $bt$Database$bt.$bt$($shape.Table)$bt;"
-    $freshness = if ($freshnessRows -and $freshnessRows.Count -gt 0) { "$($freshnessRows[0])" } else { '-' }
+    $freshnessRows = @(Invoke-MySqlScalar -Sql "SELECT IFNULL(MAX(refreshed_utc),'-') FROM $bt$Database$bt.$bt$($shape.Table)$bt;")
+    $freshness = if ($freshnessRows.Count -gt 0) { "$($freshnessRows[0])" } else { '-' }
     if ($freshness -ne '-' -and ($liveFreshness -eq '' -or $freshness -gt $liveFreshness)) { $liveFreshness = $freshness }
 
     $columns = Get-ColumnsOf -Table $shape.Table

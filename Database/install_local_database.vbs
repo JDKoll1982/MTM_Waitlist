@@ -9,6 +9,13 @@ Option Explicit
 '                      existing cache rows are deliberately kept, because the
 '                      cache can be rebuilt by the service but is expensive to
 '                      refill, and the artifacts are re-runnable).
+'
+'                      JUST BEFORE this phase, mtm_mock's baseline seed is
+'                      re-recorded from the target's live cache by
+'                      CopilotScripts\capture_mock_seed_baseline.ps1, so the seed
+'                      matches the mirror it is about to be deployed beside. That
+'                      step is read-only against the database and can never fail
+'                      the install; see the RunSeedCapture block below.
 '   3. mtm_receiving_application - ADDITIVE ONLY. Deploys just the NEW stored
 '                      procedures this repository authors for the receiving
 '                      store. This installer never creates, drops or alters that
@@ -120,7 +127,9 @@ targetDescription = DescribeHost(targetHost)
 Dim proceed
 proceed = MsgBox("This will DROP and RECREATE database '" & dbName & "' on " & targetHost & "." & vbCrLf & vbCrLf & _
     "It will also create/update the '" & mockDbName & "' cache database in place." & vbCrLf & _
-    "Existing cached rows in '" & mockDbName & "' are kept." & vbCrLf & vbCrLf & _
+    "Existing cached rows in '" & mockDbName & "' are kept." & vbCrLf & _
+    "That cache's baseline seed is re-recorded from '" & targetHost & "' first, where the" & vbCrLf & _
+    "cache has been refreshed; a cache holding only seed rows has nothing newer to record." & vbCrLf & vbCrLf & _
     "Target: " & targetDescription & vbCrLf & vbCrLf & _
     "Do you want to continue?", vbYesNo + vbExclamation, "Dangerous Operation")
 If proceed <> vbYes Then
@@ -252,7 +261,17 @@ receivingScripts = CollectArtifactScripts("MTMReceivingApp\StoredProcedures")
 Dim failures
 failures = ""
 
+' What the seed capture below decided, for the closing summary.
+Dim seedCaptureNote
+seedCaptureNote = ""
+
 failures = failures & RunScriptPhase("APPLICATION DATABASE (" & dbName & ")", appScripts, mysqlPath, clientConfigPath, logPath, targetHost, dbPort)
+
+' Re-record the cache's baseline seed from the target this install is about to deploy to, BEFORE the cache
+' phase applies it. See the RunSeedCapture block below for why it is here, why it is read-only, and why it
+' can never fail the install.
+RunSeedCapture mockDbName, scriptDir, logPath, targetHost, dbPort, username, password, mysqlPath, shell
+
 failures = failures & RunScriptPhase("CACHE DATABASE (" & mockDbName & ")", mockScripts, mysqlPath, clientConfigPath, logPath, targetHost, dbPort)
 failures = failures & RunAdditivePhase("RECEIVING DATABASE - new procedures only (" & receivingDbName & ")", receivingDbName, receivingScripts, shell, mysqlPath, clientConfigPath, logPath, targetHost, dbPort)
 
@@ -264,7 +283,8 @@ If failures = "" Then
     WScript.Echo "Database install completed successfully (" & targetDescription & ")." & vbCrLf & _
         "  " & dbName & ": dropped and recreated" & vbCrLf & _
         "  " & mockDbName & ": created/updated in place" & vbCrLf & _
-        "  " & receivingDbName & ": new procedures added, nothing else touched" & vbCrLf & vbCrLf & _
+        "  " & receivingDbName & ": new procedures added, nothing else touched" & vbCrLf & _
+        "  " & seedCaptureNote & vbCrLf & vbCrLf & _
         "Log: " & logPath
     WScript.Quit 0
 Else
@@ -703,6 +723,132 @@ Function RunSql(shellObj, mysqlExe, clientConfig, scriptPath, logFile, hostName,
         " --default-character-set=utf8mb4 -h " & hostName & " -P " & CStr(portNumber) & " 2>&1"
 
     RunSql = RunCommandCapture(shellObj, cmd, logFile, "mysql output")
+End Function
+
+' ----------------------------------------------------------------------------
+' Re-record the cache's baseline seed from the target this install is about to
+' deploy to.
+'
+' The baseline seed is what a machine with a COLD cache serves: a fresh install
+' has never been refreshed, so without those rows the very first fallback read
+' would return an empty set for every journey (FR-017). A capture describes the
+' mirror it was taken FROM, so a capture taken months ago describes a mirror that
+' no longer exists -- the committed one was taken 2026-09-12 and had already gone
+' stale by 79,218 shape-4 rows that were overwhelmingly zero-stock. Regenerating
+' it here keeps the seed and the target in step, and it is the same step 0 that
+' CopilotScripts\deploy_mtm_mock.ps1 runs.
+'
+' READ-ONLY against the database, and it NEVER fails the install:
+'   exit 0  - the seed was re-recorded, and the cache phase below applies it.
+'   exit 3  - there is nothing to record: the target has no mirror yet, or its
+'             mirror holds only seed rows because it has never been refreshed.
+'             An ordinary outcome, and the usual one on a development machine.
+'   other   - a warning. The generator refuses to write unless the rows it read
+'             equal the live row count, so a failed run leaves the committed
+'             seed exactly as it is and the install carries on with it.
+'
+' The password reaches the generator through MYSQL_PWD in the process
+' environment, never as an argument: this installer writes every command it runs
+' to its log, and the process list is readable. Whatever was there before is put
+' back afterwards, so the mysql.exe calls keep taking their credential from the
+' client option file alone.
+' ----------------------------------------------------------------------------
+Sub RunSeedCapture(databaseName, baseDir, logFile, hostName, portNumber, userName, userPassword, mysqlExe, shellObj)
+    ' databaseName is named only so the log says which cache was looked at.
+    Dim captureScript
+    captureScript = baseDir & "\CopilotScripts\capture_mock_seed_baseline.ps1"
+
+    WriteLine logFile, ""
+    WriteLine logFile, "---- Cache baseline seed for " & databaseName & ": re-record from " & hostName & " ----"
+
+    If Not fso.FileExists(captureScript) Then
+        seedCaptureNote = "seed left as committed (" & captureScript & " is not present)"
+        WriteLine logFile, "SKIPPED: " & captureScript & " is not present, so the committed seed is deployed as it is."
+        Exit Sub
+    End If
+
+    Dim pwshPath
+    pwshPath = ResolvePowerShellPath(shellObj)
+    If pwshPath = "" Then
+        seedCaptureNote = "seed left as committed (PowerShell 7 was not found)"
+        WriteLine logFile, "SKIPPED: PowerShell 7 (pwsh) was not found, so the committed seed is deployed as it is."
+        Exit Sub
+    End If
+
+    Dim cmd
+    cmd = QuoteArg(pwshPath) & " -NoProfile -ExecutionPolicy Bypass -File " & QuoteArg(captureScript) & _
+        " -Server " & QuoteArg(hostName) & " -Port " & CStr(portNumber) & _
+        " -User " & QuoteArg(userName) & " -MysqlExe " & QuoteArg(mysqlExe)
+
+    Dim processEnvironment
+    Dim previousPassword
+    Set processEnvironment = shellObj.Environment("PROCESS")
+    previousPassword = processEnvironment("MYSQL_PWD")
+    processEnvironment("MYSQL_PWD") = userPassword
+
+    Dim captureExit
+    captureExit = RunCommandCapture(shellObj, cmd, logFile, "Seed capture")
+
+    If previousPassword = "" Then
+        processEnvironment.Remove("MYSQL_PWD")
+    Else
+        processEnvironment("MYSQL_PWD") = previousPassword
+    End If
+
+    If captureExit = 0 Then
+        seedCaptureNote = "baseline seed re-recorded from the target"
+        WriteLine logFile, "Seed re-recorded from " & hostName & "; the cache phase applies it."
+    ElseIf captureExit = 3 Then
+        seedCaptureNote = "baseline seed left as committed (nothing to re-record on the target)"
+        WriteLine logFile, "Nothing to capture on " & hostName & " (no mirror, or a mirror holding only seed rows); the committed seed is deployed as it is."
+    Else
+        seedCaptureNote = "baseline seed left as committed (the capture failed; see the log)"
+        WriteLine logFile, "WARNING: the seed capture failed (exit " & captureExit & "). The seed on disk is untouched, so the committed one is deployed."
+    End If
+End Sub
+
+' The PowerShell 7 runtime the seed capture needs. It must be pwsh (7+) and not
+' Windows PowerShell: the generator's master-list rebuild refuses to run under
+' 5.1, which would rewrite the generated files with a BOM and mojibake text.
+Function ResolvePowerShellPath(shellObj)
+    Dim execObj
+    Dim output
+    Dim lines
+    Dim candidate
+
+    ResolvePowerShellPath = ""
+
+    On Error Resume Next
+    Set execObj = shellObj.Exec("where pwsh.exe")
+    If Err.Number = 0 Then
+        output = execObj.StdOut.ReadAll()
+        If TrimOutput(output) <> "" Then
+            lines = Split(Replace(output, vbCr, ""), vbLf)
+            If UBound(lines) >= 0 Then
+                If fso.FileExists(Trim(lines(0))) Then
+                    ResolvePowerShellPath = Trim(lines(0))
+                End If
+            End If
+        End If
+    End If
+    Err.Clear
+    On Error GoTo 0
+
+    If ResolvePowerShellPath <> "" Then
+        Exit Function
+    End If
+
+    ' `where` misses the Store install when PATH is per-user, which is the common case on a workstation.
+    candidate = shellObj.ExpandEnvironmentStrings("%ProgramFiles%\PowerShell\7\pwsh.exe")
+    If fso.FileExists(candidate) Then
+        ResolvePowerShellPath = candidate
+        Exit Function
+    End If
+
+    candidate = shellObj.ExpandEnvironmentStrings("%LOCALAPPDATA%\Microsoft\WindowsApps\pwsh.exe")
+    If fso.FileExists(candidate) Then
+        ResolvePowerShellPath = candidate
+    End If
 End Function
 
 Function BuildPingCommand(mysqlExe, clientConfig, hostName, portNumber)

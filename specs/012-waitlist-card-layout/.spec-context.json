@@ -1998,6 +1998,16 @@
       "decision": "The New Request summary page job guard was left exactly as it was, still handed the work centre twice, and the weakness is documented in the code rather than fixed in this change.",
       "why": "Handing it the real work order made ValidateCurrentJobState reject a blank job id, so two tests that drive a submission with no job read failed, and more importantly a failed job read or a work centre with no active job would have blocked work the floor can raise today. That is a floor-blocking regression nobody asked for.",
       "rejected": "Guarding conditionally, passing the real job id only when it is non-blank, which is a validation that validates nothing on the path that matters. The real fix resolves the work centre active jobs in the summary step and compares, which is its own change."
+    },
+    {
+      "decision": "deploy_mtm_mock.ps1 now runs capture_mock_seed_baseline.ps1 as step 0, re-recording the baseline seed from the host being deployed to before applying it. The capture refuses a mirror holding only seed content (exit 3), and the deploy treats 3 as ordinary while any other failure is a warning, so a bad capture can never fail a deploy nor damage the committed seed.",
+      "why": "The baseline seed is what a cold cache serves, and a capture describes the mirror it was taken from - the committed one was taken 2026-09-12 and had already gone stale by 79,218 zero-stock shape-4 rows. Making the deploy re-record it keeps the seed and the host in step with no separate step to remember. It is read-only, and the capture own row-count check means a failure leaves the good seed on disk.",
+      "rejected": "Making the capture mandatory and fatal: a host with no mirror yet, or a development store seeded from the seed itself, would then never deploy. Also rejected was running it when MYSQL_PWD is unset, because the capture would fall back to MTM_WAITLIST_DB_CONNECTION_STRING and could read a different host mirror than the one being deployed to."
+    },
+    {
+      "decision": "install_local_database.vbs re-records the mtm_mock baseline seed immediately before its cache phase, through the same generator deploy_mtm_mock.ps1 runs as step 0. The password reaches the generator through MYSQL_PWD in the process environment, never as an argument, and the previous value is restored afterwards.",
+      "why": "The installer is what a person actually runs to deploy the databases and it applies Mock/AllSeeds.sql, so without re-recording first an install ships a capture that describes a mirror from months ago. The installer logs every command it runs, so an argument would put the credential both in its log and in the process list.",
+      "rejected": "Prompting yes/no for the capture on every install: the generator already refuses a mirror holding only seed rows, so a development machine skips it by itself and the prompt would be a click that always says yes. Also rejected was passing -Password on the command line, for the logging reason above."
     }
   ],
   "step_summaries": {

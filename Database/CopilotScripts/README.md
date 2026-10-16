@@ -18,16 +18,42 @@ working directory.
 
 Deploys every `mtm_mock` artifact in dependency order:
 
+0. `capture_mock_seed_baseline.ps1` — **re-records the baseline seed from the host being deployed to**
 1. `Bootstrap/create_database.sql`
 2. `Tables/<name>/create.sql` — one mirror + one stage twin per shape
 3. `StoredProcedures/<name>/create.sql` — the per-shape `sp_visual_<shape>_*` procedures and the two `sp_visual_read_shape_*` reporting procedures
 4. `Bootstrap/update_table_descriptions.sql`
 5. `Seeds/<name>/create.sql`
 
+**Step 0 is why this script should be the one you reach for.** The baseline seed is what a machine with a cold
+cache serves, and a capture describes the mirror it was taken from — so a capture that was taken last month
+describes a mirror that no longer exists. It is re-recorded from the host being deployed to, and step 6 then
+applies it.
+
+Step 0 **never fails the deploy**. It is read-only against the database, and the capture refuses to write unless
+the rows it read equal the live `COUNT(*)`, so a failed capture leaves the committed seed exactly as it was and
+this script deploys that instead of stopping. Two ordinary outcomes are reported and skipped, not treated as
+errors:
+
+- **nothing to capture** — the host has no mirror yet, or its mirror holds only seed content because it has never
+  been refreshed, so there is nothing newer to record (`capture_mock_seed_baseline.ps1` exits **3**);
+- **no credential to hand over** — the capture would have had to take its target's credential from
+  `MTM_WAITLIST_DB_CONNECTION_STRING`, which can name a different host. Set `MYSQL_PWD` or pass `-Password`.
+
 ```powershell
 $env:MYSQL_PWD='root'; ./Database/CopilotScripts/deploy_mtm_mock.ps1
 ./Database/CopilotScripts/deploy_mtm_mock.ps1 -Server localhost -Port 3306 -User root
+
+# Deploy the committed seed as it stands, without re-recording it from this host
+./Database/CopilotScripts/deploy_mtm_mock.ps1 -Server localhost -SkipSeedCapture
 ```
+
+Use `-SkipSeedCapture` when the host's mirror is the wrong source — a development store whose cache was filled
+from the seed in the first place — or when the seed is deliberately being carried between machines.
+
+> **This script drops and recreates every procedure** (`DROP PROCEDURE IF EXISTS`), including the refresh
+> procedures the cache service runs. Do not point it at a host whose cache is warm and in use if the intent is
+> only to check the artifacts.
 
 ## `build_mtm_mock_masters.ps1`
 
@@ -115,6 +141,21 @@ $env:MYSQL_PWD='root'; pwsh -NoProfile -File Database/CopilotScripts/capture_moc
   `-IncludeEmployeeShape` captures it anyway.
 - `rollback.sql` is not regenerated: it deletes by `is_seed_content = 1` per shape, so it already covers whatever
   this writes.
+- **Both deploy paths run this first**, so there is no separate step to remember. `deploy_mtm_mock.ps1` runs it as
+  its step 0, and the GUI installer `Database/install_local_database.vbs` runs it immediately before its cache
+  phase, which then applies whatever seed it wrote. Both treat exit 3 as ordinary and any other failure as a
+  warning, and neither can be failed by it. The installer hands the password over through `MYSQL_PWD` rather than
+  an argument, because it writes every command it runs to its log.
+- **Exit codes.** **0** the seed was written; **3** there is nothing here to capture and nothing was written — no
+  mirror tables at all, or a mirror holding only seed content because it has never been refreshed; **1** the
+  capture failed and the seed on disk is untouched. `deploy_mtm_mock.ps1` runs this as its step 0 and treats 3 as
+  ordinary and 1 as a warning, because a failed capture leaves a perfectly good seed behind.
+- **A seed-only mirror is refused by default**, since capturing it would copy the file onto itself and restamp
+  every row, leaving a diff that says a refresh happened when none did. A real refresh writes
+  `is_seed_content = 0`, so that flag is the question. `-AllowUnrefreshedMirror` captures anyway, for re-recording
+  the committed baseline from itself.
+- A credential already in `MYSQL_PWD` wins and the connection string is not consulted, so a caller that knows
+  which host it means is not second-guessed by one that names another.
 - `-SkipMasterRebuild` leaves `AllSeeds.sql` alone. Do not use it unless regenerating by hand — `AllSeeds.sql`
   concatenates the seed verbatim and is stale the moment the seed changes, and `build_mtm_mock_masters.ps1 -Check`
   is the gate that catches it.

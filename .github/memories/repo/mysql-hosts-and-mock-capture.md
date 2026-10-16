@@ -37,7 +37,7 @@ Read-only against the database. It refuses to write when the rows it read do not
 or when a shape is empty. Shape 6 (`employee_by_number`) is excluded by default — real employee data, and the
 locked ruleset keeps production user data out of seed content — opt in with `-IncludeEmployeeShape`.
 
-### Two traps this script fell into, worth knowing before writing another capture
+### Three traps this script fell into, worth knowing before writing another capture
 
 - **`mysql` batch output puts the row terminator BEFORE the next record, not after this one.** Splitting a
   stream on a custom record separator therefore leaves a leading `\r\n` on every record but the first, so
@@ -47,3 +47,23 @@ locked ruleset keeps production user data out of seed content — opt in with `-
 - **A SQL literal inside the generating `SELECT` is consumed by the parser.** To make the emitted text carry
   quotes — a `datetime` value, say — the expression must be `QUOTE('<value>')`, not `'<value>'`. The bare form
   emits `2026-10-16 12:43:32` and the client rejects the file at line 1 of the first statement.
+- **`return , @(...)` is not "keep it an array".** It wraps the array in *another* array; PowerShell unrolls only
+  the outer one, so the caller's `@()` collects the **wrapper**. `$rows.Count` reads 1 and `$rows[0]` is the whole
+  result set. Single-value counts hide this, because casting a one-element array to `[int]` happens to work — a
+  list is what exposes it. It shipped a list of table names into a `FROM` clause as one identifier:
+  `ERROR 1103 Incorrect table name 'visual_disposition_input_result visual_employee_by_number_result …'`, names
+  joined by newlines. Have the helper `return @(...)` (plain lines) and have every caller collect it with `@()`.
+
+**Both deploy paths run this script first**, so the seed is re-recorded from the host being deployed to and then
+  applied: `deploy_mtm_mock.ps1` as its step 0, and the GUI installer `Database/install_local_database.vbs`
+  immediately before its cache phase. Neither can be failed by it — it is read-only against the database, exit 3
+  (nothing to capture) is reported and skipped, and a failed capture leaves the committed seed untouched. In the
+  PowerShell path it is skipped entirely when no `MYSQL_PWD` is in play, because the capture would otherwise take
+  its credential from `MTM_WAITLIST_DB_CONNECTION_STRING` — which can name a different host. `-SkipSeedCapture`
+  opts out there.
+
+  The installer is **GUI-only**, so verifying a change to it needs a patched copy: fill in the credentials, force
+  `targetHost`, send `logPath` somewhere outside the repository, and replace the three phase calls with stubs
+  (matching their argument counts — VBScript has no optional or variadic parameters). Write that copy as
+  **ANSI (1252), not `Encoding.UTF8`**: the .NET UTF8 encoder emits a BOM, and `cscript` rejects the file with
+  `(1, 1) Invalid character`. Then run it with `cscript //nologo`.
