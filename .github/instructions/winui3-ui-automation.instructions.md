@@ -318,8 +318,8 @@ recorded, and it names the rows that were superseded by the startup rebuild.
   `xamlmcp check --json` "cannot be run here at all". The second half is **wrong for this profile**:
   `C:\Users\johnk\.dotnet\tools\xamlmcp.exe` exists and runs. The first half still holds — `Get-Command xamlmcp`
   finds nothing, so it must be invoked by full path. The original note was written against the `jkoll` work
-  profile and did not survive the profile change to `johnk`, which is exactly the hazard the Serena section of
-  `mcp-doc-research.instructions.md` warns about: **check, do not assume.**
+  profile and did not survive the profile change to `johnk`, which is exactly the hazard the MCP
+  registration audit in `mcp-doc-research.instructions.md` warns about: **check, do not assume.**
 - **What `check` reports here (2026-09-13):** `runtime pass (.NET 10.0.12)`,
   `server-version pass (1.0.0-preview.3+1718f946cb)`, `discovery-directory pass`,
   `desktop-instances warning — Removed 12 stale discovery record(s); found 0 live app(s)`.

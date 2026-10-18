@@ -29,16 +29,21 @@ are not the ones that get sacrificed.
 | --- | --- | --- |
 | Context7 (`io-github-upstash-context7-*`) | `vijaynirmal.context7-mcp-relay` | The repo constitution (Principle IV) makes MCP-first documentation lookup **non-negotiable** before writing code. |
 | Microsoft Learn (`microsoftdocs-mcp-*`) | Microsoft Learn MCP | Same constitution rule, for official Microsoft/Windows/WinUI guidance. |
-| Serena (`oraios-serena-*`) | Serena MCP | The repo's code-exploration server of record. The owner confirmed on 2026-10-11 that **Serena is kept**. |
 | GitHub (`github-mcp-server-*`, `issue_fetch`, `labels_fetch`, `notification_fetch`, `doSearch`) | built-in `github` MCP server | Used for issues, PRs and commit lookups. Note the repo prefers the `gh` CLI where it can, so if the budget ever gets tight again this group is the next place to narrow — via `github.copilot.chat.githubMcpServer.toolsets` rather than disabling it outright. |
 
-## Retired alongside this: CodeGraphy
+## Retired alongside this: CodeGraphy, and the code-exploration MCP server
 
-The owner also retired **CodeGraphy** in the same decision ("Keep Serena, lose Codegraphy"). CodeGraphy was a
+The owner retired **CodeGraphy** on 2026-10-11 ("lose Codegraphy"). CodeGraphy was a
 VS Code extension plus the `@codegraphy-dev/core` CLI, and it contributed a **skill**, not MCP tools — so
 retiring it freed no tool slots. Its section was removed from `.github/copilot-instructions.md`, which now
 records the retirement and forbids agents from invoking the CLI or skill. The globally installed CLI and
 skill live outside this repo and are not part of its workflow.
+
+On **2026-10-17** the owner retired the **MCP-based code-exploration server** as well. It is gone from the
+workspace `.vscode/mcp.json` and the user `mcp.json`, and its project-local config and memory folders were
+deleted from the repo. No group was re-enabled to fill the freed slots: code exploration now runs on the
+editor's built-in code intelligence plus `grep`/`glob`/`view`, which need no server and cannot be withheld by
+the 128-tool ceiling. Do not re-add an indexed code-exploration server without the owner's say-so.
 
 ## How to apply or reverse this
 

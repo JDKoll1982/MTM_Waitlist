@@ -1,6 +1,6 @@
 # MCP-First Documentation and Code Sample Retrieval
 Use available MCP servers to ground implementation decisions before writing or changing code.
-Canonical MCP-first policy (Serena, Context7, Microsoft Learn) is maintained in
+Canonical MCP-first policy (Context7, Microsoft Learn) is maintained in
 `.github/instructions/mcp-doc-research.instructions.md` — that file is the single source of truth
 for tool names and server roles. Do not restate it here.
 # Output Control Invariants
@@ -27,7 +27,7 @@ For this repository, prioritize MCP-backed validation for:
 - The workspace CSV MCP server is configured in `.mcp.json` as `csv-mcp-server`.
 - Its storage root is `docs/database`, which contains the schema exports split into folders by type (`tables/`, `column-details/`, `indexes/`, `foreign-keys/`, …). Each file is named `database-inforvisual-<type>-<object>.csv`.
 - Use the CSV server for CSV-specific profiling, filtering, sorting, grouping, validation, and export when its session can be loaded successfully.
-- Use Serena for repository code symbols, Context7 for library documentation, and Microsoft Learn for official Windows guidance; the CSV server complements those tools rather than replacing them.
+- Use code intelligence and search tools for repository code symbols, Context7 for library documentation, and Microsoft Learn for official Windows guidance; the CSV server complements those tools rather than replacing them.
 - Verified CSV server capability endpoint: `CSV Editor` version `1.0.0`, with load, filter, sort, group, statistics, profile, validation, quality, anomaly, and export capabilities.
 - Current limitation observed on 2026-08-03: `load_csv` fails before creating a session because the server emits a progress notification with text (`"Validating file..."`) where the MCP progress schema expects a numeric value. If this persists, use PowerShell/structured file reads for CSV inspection and record the failure rather than repeatedly retrying the same load operation.
 - Do not use CSV mutation tools (`update`, `add`, `remove`, `delete`, or export over source files) against the Infor schema exports unless the user explicitly requests a data change. Prefer read-only analysis and export to a separate temporary/output path.
@@ -46,18 +46,14 @@ For this repository, prioritize MCP-backed validation for:
 - When any `mcp_*` tool is missing, reports "currently disabled by the user", or throws an unexpected exception, **consult `/memories/repo/mcp-tooling.md` first** for the verified troubleshooting playbook (stale-tool-snapshot fix, CSV server limitation, XamlMcp notes) before re-deriving it from scratch.
 - Interaction notes (2026-08-22): Setup/New Request work center card selection is **model-driven** — the blue outline + blue photo frame bind to the item model's `IsSelected` (`WorkCenterSelectionItem`/`SetupWorkstation`), and the grids use `SelectionMode="None"` + `IsItemClickEnabled="True"` + `ItemClick` handlers. `action` select / `set-prop IsSelected` on a `GridViewItem` does **not** show the highlight; use a real click (`input` kind click) to trigger `ItemClick`. In New Request, clicking a card also advances to the next step — click then use **Back** to capture the selected card. Card templates now set `AutomationProperties.Name` (bound to the work center name); note `props` does not enumerate `AutomationProperties.*`, and `search` `name` matches `x:Name` only (`automationId` matches `AutomationProperties.AutomationId`) — use `search` `text` or `hit-test` to locate cards. For cropped on-disk screenshots, XamlMcp's `screenshot` returns a resource URI that can't be saved; use `scripts/ui-automation/capture_app_region.ps1` + `scripts/ui-automation/ocr_png.ps1` (see `/memories/repo/mcp-tooling.md`).
 
-## CodeGraphy — retired (owner decision, 2026-10-11)
-- **CodeGraphy is no longer used by this repo, and agents must not reach for it.** The owner retired it on
-  2026-10-11 when trimming the tool budget: Serena is the code-exploration MCP server of record here, and
-  CodeGraphy's graph duplicated that job.
-- Removed from the agent instructions, and the `.codegraphy/` workspace config is gone. The **global** CLI
-  (`codegraphy 5.0.4`) and the global agent skill at `~\.agents\skills\codegraphy` live outside this repository
-  and may still be installed on a machine; they are not part of this repo's workflow and nothing here should
-  invoke them.
-- Use **Serena** for symbol lookup and cross-file navigation, and `grep`/`glob`/`view` for text search. The
-  `codegraphy` skill and CLI invocation steps that used to be documented here are **withdrawn** — ignore any
-  older note (including `/memories/repo/codegraphy-setup.md`) that still tells you to run `codegraphy index`
-  before searching.
+## Code exploration — built-in tools only (owner decision, 2026-10-17)
+- **This repo carries no code-graph or indexed-exploration MCP server.** The MCP-based code-exploration
+  server was retired on 2026-10-17; do not re-add one, and do not depend on an external index being warm.
+- Use the editor's code intelligence (symbol lookup, find references) for navigation, and
+  `grep`/`glob`/`view` for text search and reading. Both are always available and need no setup.
+- The retired **CodeGraphy** decision (2026-10-11) stands for the same reason: its graph duplicated work the
+  built-in tools already do. Its `.codegraphy/` workspace config is gone, and older notes (including
+  `/memories/repo/codegraphy-setup.md`) must not be acted on.
 
 ---
 
@@ -118,12 +114,12 @@ For this repository, prioritize MCP-backed validation for:
 When executing complex, cross-file architectural edits, you must strictly move through these three sequential phases:
 
 1. **Phase 1: Blueprint Discovery**
-   - Use **Serena MCP** tool commands (`find_symbol`, `get_symbols_overview`) to map out the Views, ViewModels, and registration structures.
+   - Use code intelligence (symbol lookup, find references) and `grep`/`glob` to map out the Views, ViewModels, and registration structures.
    - Ground architectural choices using documentation snippets gathered from `mcp_context7_get-library-docs`.
    - You must map out your file dependencies completely before touching any codebase code.
 
 2. **Phase 2: Minimal Diff Application**
-   - Use Serena's code insertion tools if necessary, or apply small, high-fidelity edits matching the existing structural patterns of the project.
+   - Apply small, high-fidelity edits matching the existing structural patterns of the project.
    - Do not orphan classes; modify both the layout layers, view-model structures, and dependency injection entries in the same pass.
 
 3. **Phase 3: Compilation Validation**

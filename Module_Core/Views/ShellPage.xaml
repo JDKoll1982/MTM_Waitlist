@@ -275,8 +275,8 @@
             </NavigationView.Resources>
             <NavigationView.MenuItems>
                 <!--
-                TODO: Update item titles by updating <x:Uid>.Content entries in Strings/en-us/Resources.resw.
-                https://docs.microsoft.com/windows/uwp/app-resources/localize-strings-ui-manifest#refer-to-a-string-resource-identifier-from-xaml
+                Each item's title is its own x:Uid entry in Strings/en-us/Resources.resw — Shell_WaitlistView.Content
+                and Shell_ModuleSetup.Content — so no title text is written in this file.
 
                 The icons are font glyphs rather than the greyscale artwork in Assets/Icons. A bitmap is scaled up to
                 fill the pane's icon box and goes soft as the pane grows, which is what the pane was doing; a glyph is

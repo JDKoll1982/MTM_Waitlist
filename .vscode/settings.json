@@ -13,14 +13,6 @@
                 "deepseek/deepseek-v4-flash-vision-exp"
             ]
         },
-        "MTM_Waitlist/.vscode/mcp.json: oraios/serena": {
-            "allowedModels": [
-                "agent-host-copilotcli:deepseek/deepseek-v4-flash",
-                "deepseek/deepseek-v4-flash",
-                "agent-host-copilotcli:deepseek/deepseek-v4-flash-vision-exp",
-                "deepseek/deepseek-v4-flash-vision-exp"
-            ]
-        },
         "MTM_Waitlist/.vscode/mcp.json: csv-mcp-server": {
             "allowedModels": [
                 "copilotcli/auto",
@@ -44,5 +36,16 @@
     "chat.tools.terminal.autoApprove": {
         ".specify/scripts/bash/": true,
         ".specify/scripts/powershell/": true
-    }
+    },
+    "todo-tree.tree.scanMode": "workspace only",
+    "todo-tree.tree.showBadges": true,
+    "todo-tree.tree.showCountsInTree": true,
+    "todo-tree.general.tags": [
+        "BUG",
+        "HACK",
+        "FIXME",
+        "TODO",
+        "XXX",
+        "[ ]"
+    ]
 }

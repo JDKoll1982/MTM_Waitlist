@@ -181,3 +181,63 @@ Not done in this amendment (recorded so it is not assumed):
 
 Follow-up TODOs:
   • T137 — align `plan.md` with the current constitution version.
+
+## 1.2.1 → 2.0.0 (2026-10-17) — MAJOR
+
+Bump rationale: MAJOR — **Principle IV was redefined**, not merely reworded. The principle previously made a
+specific MCP server the mandated tool for repository exploration, and carried a mandatory self-healing
+procedure for that tool. Both are removed, so an agent that complied with the old text no longer complies
+with the new text, which is the backward-incompatible redefinition the Governance section reserves for a
+MAJOR bump.
+
+What prompted it: the owner retired the MCP-based code-exploration server on 2026-10-17 and asked for its
+references, registrations and project memory to be removed from the repository. The retirement was grounded
+in the same reasoning that retired CodeGraphy on 2026-10-11: an indexed exploration server duplicates work
+the editor's built-in code intelligence and `grep`/`glob`/`view` already do, and an index that can go stale
+or fail to launch is a dependency the work does not need.
+
+Applied:
+  • Principle IV — the mandated-source sentence now names Context7 and Microsoft Learn, and adds an explicit
+    obligation that repository facts come from the code itself, never from recollection. The NON-NEGOTIABLE
+    documentation rule, the model-memory prohibition, the deviating-workaround rule and the pointer to
+    `.github/instructions/mcp-doc-research.instructions.md` are unchanged.
+  • Principle IV — the mandatory self-healing procedure for the retired tool was deleted. The durable lesson
+    it carried (server commands hold workstation-absolute paths that break when the user-profile folder
+    changes) is preserved in `mcp-doc-research.instructions.md` as a general check-before-blame rule, so no
+    operator knowledge was lost with the tool.
+  • Rationale — restated around documentation grounding and current-source grounding instead of the retired
+    tool's configuration.
+
+Migrated before deletion: the retired tool's project memories were reviewed one by one. The WinUI naming
+lock and both database memories are already carried in full — and in their current form — by
+`.github/instructions/csharp-xaml-naming-rules.instructions.md` and
+`.github/instructions/database-schema-rules.instructions.md`, so nothing needed porting. The Module_Setup
+slice note was obsolete except for its build quirk (explicit `<Page>` items cause `NETSDK1022` duplicate-item
+errors), which is now recorded in the "Known Build Quirks" section of `.github/copilot-instructions.md`. The
+memory-maintenance note was tool-specific and was not migrated.
+
+Propagated:
+  ✅ `.github/instructions/mcp-doc-research.instructions.md` — tool section replaced by local exploration
+     guidance; registration table corrected; profile-path hazard retained.
+  ✅ `.github/copilot-instructions.md` — canonical-policy pointer, CSV-tools line, code-exploration section
+     and the multi-file workflow's discovery/edit phases.
+  ✅ `.github/agents/module-create.agent.md`, `.github/agents/module-setup.agent.md` — descriptions, tool
+     lists and required research phases.
+  ✅ `.github/skills/winui-agent/SKILL.md` — description and Phase 1 discovery step.
+  ✅ `.github/copilot-startup-steps.yaml` — retired tool removed from the advertised tool chains.
+  ✅ `.github/instructions/winui3-ui-automation.instructions.md` — cross-reference re-pointed.
+  ✅ `.github/memories/repo/tool-budget.md` and `repo/github-artifact-staleness.md` — tool-group tables and
+     recorded MCP scopes corrected, with the retirement recorded.
+  ✅ `.github/instructions/spec-kit.instructions.md` — constitution citation now v2.0.0 / 2026-10-17.
+  ✅ `.mcp.json`, `.vscode/mcp.json`, `.vscode/settings.json` — registrations removed.
+  ✅ Completed spec artifacts that named the retired tool were reworded to describe the same work without
+     the tool name (specs 001, 002, 003, 008, 010).
+
+Templates & dependent artifacts:
+  ✅ .specify/templates/*                — no template enumerates principles or tools; unaffected.
+  ⚠ specs/001-module-mock-visual-fallback/plan.md — still cites v1.0.0 and evaluates gates against six
+     principles (tracked as T137; unchanged by this amendment).
+
+Follow-up TODOs:
+  • T137 — align `plan.md` with the current constitution version.
+  • Restart the editor / start a new chat session so the tool list refreshes without the retired server.

@@ -1,15 +1,28 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.2.1 → 1.2.1 (no amendment — content restored verbatim after loss).
-Restored: 2026-10-17. `.specify/memory/constitution.md` had been overwritten with the unmodified
-template, and `.specify/memory/constitution-history.md` deleted, by the Spec Kit re-initialization in
-commit 3b5e12ec. This run restored both files from `3b5e12ec^`. No principle was added, removed,
-redefined, or weakened, and no new obligation was introduced; the version line is unchanged.
-Modified principles: none. Added sections: none. Removed sections: none.
-Deferred: none — `constitution-history.md` is restored alongside this file.
+Version change: 1.2.1 → 2.0.0 (MAJOR — Principle IV redefined: the mandated MCP-based code-exploration
+tool is removed from the required toolchain, and with it the mandatory self-healing procedure for that tool).
+The documentation-grounding obligations (Context7, Microsoft Learn, no decisions from model memory) are
+unchanged and remain NON-NEGOTIABLE.
+Rationale: the owner retired the MCP-based code-exploration server on 2026-10-17. Repository facts are now
+grounded in the code itself — code intelligence, `grep`/`glob`/`view` — rather than in an index that had to be
+repaired before it could be trusted.
+Modified principles: IV. Added sections: none. Removed sections: none.
+Propagated: `.github/instructions/mcp-doc-research.instructions.md`, `.github/copilot-instructions.md`,
+`.github/agents/module-create.agent.md`, `.github/agents/module-setup.agent.md`,
+`.github/skills/winui-agent/SKILL.md`, `.github/copilot-startup-steps.yaml`,
+`.github/instructions/winui3-ui-automation.instructions.md`,
+`.github/memories/repo/tool-budget.md`, `.github/memories/repo/github-artifact-staleness.md`, and
+`.github/instructions/spec-kit.instructions.md` (constitution version citation).
+Deferred: none.
 
 Prior report (retained):
+  1.2.1 restoration (2026-10-17) — no amendment; content restored verbatim after loss.
+  `.specify/memory/constitution.md` had been overwritten with the unmodified template, and
+  `.specify/memory/constitution-history.md` deleted, by the Spec Kit re-initialization in commit 3b5e12ec.
+  Both files were restored from `3b5e12ec^`.
+
   1.2.0 → 1.2.1 (PATCH — expression only; no principle added, removed, redefined, or weakened, and no
   new obligation introduced). Last amended: 2026-09-27.
   Modified: Principles III, IV, V and VII compressed to their normative core by removing wording that
@@ -70,9 +83,10 @@ schema discoverable; ad-hoc inline SQL bypasses both.
 
 ### IV. MCP-First, Grounded Decisions (NON-NEGOTIABLE)
 
-Before writing or changing code, decisions MUST be grounded in authoritative sources: Serena for
-indexed repository exploration, Context7 for library/framework documentation, and Microsoft Learn for
-Windows / WinUI / Windows App SDK guidance.
+Before writing or changing code, decisions MUST be grounded in authoritative sources: Context7 for
+library/framework documentation and Microsoft Learn for Windows / WinUI / Windows App SDK guidance.
+Repository facts MUST come from the code itself — code intelligence, `grep`/`glob`, and direct reads —
+never from recollection of an earlier session.
 
 When the agent is unsure about anything code-related, consulting Context7 and Microsoft Learn is
 NON-NEGOTIABLE: documentation MUST be preferred over model memory, model memory alone MUST NOT be
@@ -80,20 +94,15 @@ treated as grounds for a code decision, and substituting recall — or deferring
 user — MUST NOT replace a documentation lookup. This applies at minimum to API names and signatures,
 configuration, version migration, library-specific debugging, CLI usage, and platform guidance.
 
-Serena self-healing is mandatory: when Serena's location or installation cannot be discerned, the agent
-MUST NOT abandon the lookup — it MUST inspect and repair the configuration and retry — and if the retry
-still fails the agent MUST report the config path inspected, the change attempted, and the observed
-error rather than falling back to ungrounded guesswork.
-
 Workarounds that deviate from documented guidance MUST be recorded as such.
 
 Config-file locations, the profile-path procedure, and the repo-specific focus list are in
 `.github/instructions/mcp-doc-research.instructions.md`.
 
-Rationale: platform and library surfaces evolve, and this repo already carries profile-rooted Serena
-config paths that break when the machine's user profile changes; grounding decisions in retrieved
-documentation — and repairing the retrieval tool instead of bypassing it — prevents regressions that
-stem from stale assumptions.
+Rationale: platform and library surfaces evolve, and the servers this repo relies on are registered with
+workstation-absolute paths that break when the machine's user profile changes; grounding decisions in
+retrieved documentation — and grounding repository facts in current source instead of recall — prevents
+regressions that stem from stale assumptions.
 
 ### V. WinUI 3 Platform Conformance
 
@@ -203,4 +212,4 @@ ticked; unjustified violations block completion.
 Runtime development guidance remains in the repo instruction files, which MUST stay consistent with
 this constitution.
 
-**Version**: 1.2.1 | **Ratified**: 2026-09-09 | **Last Amended**: 2026-09-27
+**Version**: 2.0.0 | **Ratified**: 2026-09-09 | **Last Amended**: 2026-10-17

@@ -1,18 +1,5 @@
 {
   "mcpServers": {
-    "oraios/serena": {
-      "type": "local",
-      "command": "C:\\Users\\johnk\\.local\\bin\\serena.exe",
-      "args": [
-        "start-mcp-server",
-        "--context",
-        "claude-code",
-        "--project-from-cwd"
-      ],
-      "tools": [
-        "*"
-      ]
-    },
     "csv-mcp-server": {
       "type": "local",
       "command": "C:\\Users\\johnk\\AppData\\Local\\Microsoft\\WinGet\\Packages\\astral-sh.uv_Microsoft.Winget.Source_8wekyb3d8bbwe\\uv.exe",

@@ -22,9 +22,6 @@ environment:
   xamlNamespacePolicy: Microsoft.UI.Xaml only - never legacy Windows.UI.Xaml
 
 activeToolChains:
-  - name: Serena
-    role: repository symbol / cross-file navigation
-    registration: workspace MCP server oraios/serena (.vscode/mcp.json)
   - name: Context7
     role: library and framework documentation
     registration: user MCP server io.github.upstash/context7 (user mcp.json)

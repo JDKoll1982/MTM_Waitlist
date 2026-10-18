@@ -57,11 +57,20 @@ public interface IImageLocationService
     Task<bool> EnsureInitializedAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Checks if a work center ID is valid and exists in the catalog.
+    /// Checks whether a work center ID names a row in the work center catalog.
     /// </summary>
-    /// <param name="workCenterId">The numeric ID from setup_workstations_catalog</param>
-    /// <returns>True if the ID is valid; false otherwise</returns>
-    bool IsValidWorkCenterId(long workCenterId);
+    /// <param name="workCenterId">The numeric ID from <c>setup_work_centers_catalog</c></param>
+    /// <param name="cancellationToken">Cancellation token for the catalog read</param>
+    /// <returns>
+    /// <see langword="true"/> when the ID names a work center; <see langword="false"/> when it does not, when it
+    /// is not positive, or when the catalog could not be read.
+    /// </returns>
+    /// <remarks>
+    /// An inactive work center still exists, so the answer is "was there a row", not "is it working right now".
+    /// The read is the same <c>sp_setup_work_centers_exists_get</c> statement the image-override path validates
+    /// against; the work center catalog service itself answers by name and cannot resolve an ID.
+    /// </remarks>
+    Task<bool> IsValidWorkCenterIdAsync(long workCenterId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Resolves the effective image path for a work center.

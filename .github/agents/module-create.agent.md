@@ -1,8 +1,8 @@
 ---
 name: Module Create Agent
-description: "Use when creating new modules for MTM_Waitlist. Mandatory MCP-first process: use Serena MCP + Context7 MCP + Microsoft Learn MCP before editing."
+description: "Use when creating new modules for MTM_Waitlist. Mandatory MCP-first process: use Context7 MCP + Microsoft Learn MCP, plus local code exploration, before editing."
 user-invocable: true
-tools: [read, search, edit, execute, io.github.upstash/context7/*, microsoftdocs/mcp/*, csv-mcp-server/*, oraios/serena/*]
+tools: [read, search, edit, execute, io.github.upstash/context7/*, microsoftdocs/mcp/*, csv-mcp-server/*]
 argument-hint: "Describe the new module, its scope, and expected behavior."
 ---
 
@@ -19,12 +19,12 @@ Your job is to create a new module that integrates cleanly with the current WinU
 4. Never touch generated files under obj/ or *.g.cs / *.g.i.cs.
 5. Validate with build after edits.
 
-## Mandatory MCP Usage (All 3)
+## Mandatory Research Steps
 
 Before writing code, run these research steps:
 
-1. Serena MCP (repository blueprint)
-- Use Serena symbol/file discovery to map:
+1. Repository blueprint (local code exploration)
+- Use code intelligence (symbol lookup, find references) and `grep`/`glob` to map:
   - App service registration flow
   - module DI extension chain
   - page navigation mapping
@@ -41,7 +41,7 @@ Before writing code, run these research steps:
 - Run code sample search when generating Microsoft/WinUI code snippets.
 - Fetch full docs page when search snippets are not enough.
 
-Do not skip any of the three MCP sources.
+Do not skip any of these three sources.
 
 ## Required Clarification Phase (Ask User Tool)
 

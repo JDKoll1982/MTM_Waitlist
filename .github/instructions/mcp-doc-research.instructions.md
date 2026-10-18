@@ -15,11 +15,13 @@ This applies at minimum to: API names, signatures, and syntax; configuration and
 migration and breaking-change behaviour; library-specific debugging; CLI and tool usage; and official
 platform guidance.
 
-## Serena MCP (Repository Exploration)
+## Repository Exploration (local)
 
-- Use Serena MCP for indexed codebase exploration, symbol discovery, and faster cross-file navigation.
-- Prefer Serena-driven lookup before fallback text search when identifying existing implementations.
-- Use Serena findings to narrow and validate edits before applying code changes.
+- Use the editor's code-intelligence tools (symbol lookup, find references) for codebase structure, symbol
+  discovery, and cross-file navigation.
+- Use `grep`/`glob` for text search and `view` to read files.
+- Map the relevant Views, ViewModels and registration structures before editing, and use what you find to
+  narrow and validate edits before applying them.
 
 ### Where the doc servers actually live (verified 2026-09-13)
 
@@ -31,8 +33,11 @@ An audit of this machine found the registrations split across two files, which i
 | `microsoftdocs/mcp` (Microsoft Learn) | **user** `%APPDATA%\Code\User\mcp.json` | http → `https://learn.microsoft.com/api/mcp` |
 | `io.github.upstash/context7` | **user** `%APPDATA%\Code\User\mcp.json` | stdio, `npx @upstash/context7-mcp` |
 | `microsoft/playwright-mcp` | **user** `%APPDATA%\Code\User\mcp.json` | stdio, `npx @playwright/mcp` |
-| `oraios/serena` | **user** `%APPDATA%\Code\User\mcp.json` **and** workspace `.vscode/mcp.json` | stdio |
 | `csv-mcp-server`, `xamlmcp` | **workspace** `.vscode/mcp.json` | stdio |
+
+Server launch commands carry **workstation-absolute paths** (`C:\Users\<profile>\...`). A profile-folder
+change between environments (`jkoll` at work, `johnk` at home) breaks them, so a server that fails to launch
+must be checked against the current profile before anything else is blamed.
 
 Check both files before concluding a tool is missing, and check the *tool* name rather than the server name —
 the live MS Learn tools are `mcp_microsoft_lea_microsoft_docs_search`, `..._microsoft_code_sample_search` and
@@ -64,22 +69,6 @@ the live MS Learn tools are `mcp_microsoft_lea_microsoft_docs_search`, `..._micr
    same Microsoft Learn page returns the same content the MCP server would have served, and it worked twice on
    2026-09-13 (the `{x:Bind}` `UpdateSourceTrigger` default, and the Segoe Fluent Icons glyph list).
    State in the answer which source was used.
-
-### Serena self-healing (mandatory)
-
-When Serena fails such that its location or installation cannot be discerned — the tool cannot be found,
-or it resolves to a path that does not exist — do **not** abandon the lookup. Instead:
-
-1. Inspect Serena's configuration: `~/.serena/serena_config.yml`, plus project-level
-   `.serena/project.yml` or `.serena/project.local.yml` when present.
-2. Account for the user-profile folder changing between environments (`jkoll` at work, `johnk` at home).
-   That invalidates profile-rooted paths such as `C:\Users\<profile>\...` entries in the config and in
-   the MCP server launch command.
-3. Update the configuration accordingly.
-4. Retry the operation.
-
-If the retry still fails, report the config path inspected, the change attempted, and the observed error
-rather than falling back to ungrounded guesswork.
 
 ## General Libraries and Frameworks
 

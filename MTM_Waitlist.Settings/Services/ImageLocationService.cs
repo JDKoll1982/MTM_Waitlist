@@ -24,6 +24,14 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
     private const string WorkCentersCatalogProcedure = "sp_setup_work_centers_catalog_get";
 
     /// <summary>
+    /// The work center existence read, keyed by the numeric id — the only surface that can answer "is this id a
+    /// work center?", because the catalog service answers by name. It is the same statement the image-override
+    /// path validates against, and it is deliberately not filtered by <c>is_active</c>: an inactive work center
+    /// still exists, and reporting it missing would turn a temporary pause into a deleted row.
+    /// </summary>
+    private const string WorkCenterExistsProcedure = "sp_setup_work_centers_exists_get";
+
+    /// <summary>
     /// The authoritative request-type catalog read. It replaced <c>Assets/Config/waitlist-request-types.json</c>
     /// as the request-type source (T100) and returns each row's stable <c>public_id</c> GUID beside its
     /// configured <c>default_image_path</c>.
@@ -155,11 +163,11 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
     }
 
     /// <inheritdoc />
-    public bool IsValidWorkCenterId(long workCenterId)
+    public async Task<bool> IsValidWorkCenterIdAsync(long workCenterId, CancellationToken cancellationToken = default)
     {
         if (!_isInitialized)
         {
-            _logger.LogWarning("IsValidWorkCenterId called before initialization");
+            _logger.LogWarning("IsValidWorkCenterIdAsync called before initialization");
             return false;
         }
 
@@ -168,10 +176,30 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
             return false;
         }
 
-        // TODO: Implement work center validation against IWorkCenterCatalogService
-        // For now, accept all positive IDs; validation will be done in next phase
-        _logger.LogDebug("Validating work center ID: {WorkCenterId}", workCenterId);
-        return true;
+        try
+        {
+            var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+                WorkCenterExistsProcedure,
+                new Dictionary<string, object?> { ["p_id"] = workCenterId },
+                MySqlDatabaseTarget.MtmWaitlist,
+                cancellationToken).ConfigureAwait(false);
+
+            return rows.Count > 0;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            // A catalog that cannot be read says nothing about the ID, so the caller is told "not known" rather
+            // than being given a validation failure it would report as a deleted work center.
+            _logger.LogWarning(
+                ex,
+                "Could not validate work center ID {WorkCenterId}; reporting it as unknown.",
+                workCenterId);
+            return false;
+        }
     }
 
     /// <inheritdoc />

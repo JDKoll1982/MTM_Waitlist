@@ -36,9 +36,10 @@ and the annotations already neutralise the risk the deletion was meant to remove
 - **Reference facts:** .NET SDK `10.0.401`; TFM `net10.0-windows10.0.19041.0`;
   `Microsoft.WindowsAppSDK` **2.3.1**; canonical build
   `dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false`.
-- **MCP tool scopes.** Workspace `.vscode/mcp.json`: `csv-mcp-server`, `oraios/serena`, `xamlmcp`. User
+- **MCP tool scopes.** Workspace `.vscode/mcp.json`: `csv-mcp-server`, `xamlmcp`. User
   `%APPDATA%\Code\User\mcp.json`: `io.github.upstash/context7`, `microsoftdocs/mcp`,
-  `microsoft/playwright-mcp`, `oraios/serena`. **`mcp_context7/*`, `mcp_microsoft_lea/*`, `context7/*` and
+  `microsoft/playwright-mcp`. (The workspace and user files were trimmed again on 2026-10-17 when the
+  MCP-based code-exploration server was retired.) **`mcp_context7/*`, `mcp_microsoft_lea/*`, `context7/*` and
   `microsoft-learn/*` match no registered server** — they are not valid scopes.
 - **`XamlMcp` is not wired**: no `.cs`/`.xaml` reference, no `PackageReference`. The `xamlmcp` MCP server is
   registered but has nothing to attach to.
