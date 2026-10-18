@@ -1,7 +1,7 @@
 # Infor Visual / WIP disposition facts (file 14 Phase 6, verified 2026-09-08 against live data)
 
 > Durable copy — canonical long-form research note:
-> `Documents/Development/InforVisual/Phase6-Disposition-StatusCodes-Research.md`
+> `docs/research/research-inforvisual-phase6-disposition-status-codes.md`
 > Checklist: `WeekendProject/PromptFiles/14-57%-Phase2-UnifiedWaitlistCard.md`
 
 ## Phase 6 implementation state (2026-09-08) — checklist `14-57%`

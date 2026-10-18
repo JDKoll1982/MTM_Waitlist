@@ -29,7 +29,7 @@ Set these as **User**-scope variables (`HKCU\Environment`) so the per-user auto-
 | Variable | Value | Why the service needs it |
 |---|---|---|
 | `MTM_WAITLIST_DB_CONNECTION_STRING` | `Server=172.16.1.104;Port=3306;Database=mtm_waitlist;User Id=root;Password=root;AllowPublicKeyRetrieval=True;` | Documented resolution option 2: one shared MySQL connection string that `MySqlConnectionStringResolver` reuses for the `mtm_mock` cache **and** all four backed-up stores, overriding only the database name. Without it the service starts but reports "no mtm_mock connection" and refreshes nothing. |
-| `MTM_MYSQL_PASSWORD` | `root` | Documented option 3's secret path (settings host/login + this password). Named in `MTM_Waitlist.Mock.Service/README.md` §3. |
+| `MTM_MYSQL_PASSWORD` | `root` | Documented option 3's secret path (settings host/login + this password). Named in `docs/operations/operations-mock-service-deploy-and-run.md` §3. |
 | `INFOR_VISUAL_SQL_USER` | `SHOP2` | `VisualSourceSettings.UserId` defaults to **empty**, so the operator-supplied user must come from here (`VisualConnectionStringProvider` env precedence). Also the value `appsettings.json` already carries, so the app and the service agree. |
 | `INFOR_VISUAL_SQL_PASSWORD` | `SHOP` | Same resolution path; the Infor Visual password is never stored in the service configuration (FR-026). |
 

@@ -14,7 +14,7 @@ namespace MTM_Waitlist.Tests.Module_Shared;
 /// <remarks>
 /// <para>
 /// <b>Why this is asserted against the markup.</b> The gap this closes was found by walking the running app with
-/// <c>tools/uia-surface-audit.ps1</c>, which reads the live automation tree; that walk needs a store, a sign-in and
+/// <c>scripts/ui-automation/uia-surface-audit.ps1</c>, which reads the live automation tree; that walk needs a store, a sign-in and
 /// a machine, so it cannot be the thing that fails a build. What it found can be: each control here had no
 /// <c>AutomationProperties.Name</c> in its markup, and the reason is always structural rather than accidental - the
 /// control draws its caption as a child element, so the framework has no string to derive a name from.

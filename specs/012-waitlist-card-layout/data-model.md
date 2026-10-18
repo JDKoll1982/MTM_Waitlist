@@ -201,7 +201,7 @@ columns (FR-024, FR-007).
 
 ## 9. Per-Item cell reconciliation
 
-Section 5 of `WAITLIST-CARD-LAYOUT-PRE-SPEC.md` governs the cells. The seed
+Section 5 of `docs/research/research-waitlist-card-layout-pre-spec.md` governs the cells. The seed
 (`Database/Seeds/seed_waitlist_request_item_configs/create.sql`) is brought into line only where the card must
 show something the seed does not declare, or declares under another label. The seed's declared fields are read
 from that file; the work-centre fields it declares for many Items are never cells (FR-005).

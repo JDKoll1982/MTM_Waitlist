@@ -107,7 +107,7 @@ ViewModels/ShellViewModel.cs                    the building flyout's entries, w
 Services/DependencyInjection/ServiceRegistrationExtensions.cs  the new services and the one new page route
 Strings/en-us/Resources.resw                    every new label, action and refusal
 appsettings.json                                ImageStorage.ArchiveKeepDays moves to ninety
-tools/Move-PartPictureLayout.ps1                new: the run-once move, beside the existing capture tools
+scripts/database/Move-PartPictureLayout.ps1                new: the run-once move, beside the existing capture tools
 MTM_Waitlist.Tests/Module_Shared/               PartPictureLayout, AppStoragePaths, PartPictureCacheStore
 MTM_Waitlist.Tests/Module_Settings/             the resolver, the write service, the coverage service, the two
                                                 screens, the widened parity fixture, live procedure checks

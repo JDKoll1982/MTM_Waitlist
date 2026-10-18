@@ -113,7 +113,7 @@ added or changed inside it.
   name is changed, and neither can resolve to the other's file (FR-038).
 - **The move of everything already stored** is `sp_config_images_locations_paths_move`, which rewrites each
   recorded path and reports through affected rows, with its own paired `rollback.sql`; the files themselves are
-  moved by `tools/Move-PartPictureLayout.ps1`. **The seed that used to pair the row move is retired**
+  moved by `scripts/database/Move-PartPictureLayout.ps1`. **The seed that used to pair the row move is retired**
   (`Seeds/seed_picture_layout_move`, removed with its block in `AllSeeds.sql`): the application defaults out on
   first use, so no migration is needed to reach a working default, and a row whose file is absent already falls
   back to the application's own no-image path. `AllTables.sql`, `AllSPs.sql` and `AllSeeds.sql` are regenerated in
@@ -196,7 +196,7 @@ mechanism, which is data loss on a store somebody is using, and a checking tool 
 - **Ordering was a second hazard the same change removes.** Because a repair applied the object files exactly as
   written, a repository change that renames a column and updates the routines that name it was applied as
   routines-first on any store that still had the old column — which is the ordering the owner's own comparison warns
-  about (`LIVE-DB-AND-MOCK-UPDATES.md` Part 1, "Apply 1.1 before 1.3"). Repair no longer happens as a side effect
+  about (`docs/operations/operations-database-live-and-mock-updates.md` Part 1, "Apply 1.1 before 1.3"). Repair no longer happens as a side effect
   of a check, so the two are applied deliberately and in order.
 - Default-run behaviour on a current store is unchanged: it validates, reports, and exits 0. A store that is behind
   now says so instead of being silently migrated under the person checking it.

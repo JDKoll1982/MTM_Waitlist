@@ -8,7 +8,7 @@ namespace MTM_Waitlist.Mock.Service.Models;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The file this serializes into is read by <c>tools/measure-reliability-window.ps1</c> (T231), which is the
+/// The file this serializes into is read by <c>scripts/service/measure-reliability-window.ps1</c> (T231), which is the
 /// only reader that matters: the property names below are that tool's contract, and changing one without
 /// changing the tool silently turns a measured criterion back into an unmeasured one. The reader asserts it
 /// found records, so a rename shows up as a failure rather than as a perfect score.

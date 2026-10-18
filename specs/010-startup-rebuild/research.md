@@ -1,7 +1,7 @@
 # Phase 0 Research: Startup Rebuild
 
 The unknown list this phase had to resolve. Most of it was already resolved by the project owner in
-`STARTUP-REBUILD-BRIEF.md`, which locks twenty-four decisions in its S2 and works them out through S4 to S12.
+`docs/startup/startup-rebuild-design-brief.md`, which locks twenty-four decisions in its S2 and works them out through S4 to S12.
 Those are recorded here as decisions with their rationale rather than re-litigated. Four decisions are new in
 this plan because the brief left them open or did not name them: where the remembered sign-in is stored, how
 the ignored-locations restriction is expressed without breaking FR-030, which of the four privileged surfaces

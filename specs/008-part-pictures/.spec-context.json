@@ -809,7 +809,7 @@
       "note": "The plan database contract says the two write procedures change to write the history row. The implemented shape keeps both procedure bodies identical and adds two triggers instead, so AllSPs.sql and the schema validation (T027, T028) must carry the triggers as well as the procedures, and Bootstrap/update_table_descriptions.sql (T025) must still apply the new table to a store that already exists."
     },
     {
-      "note": "A hand-run move must set the session flag mtm_picture_layout_move on the same connection before calling sp_config_images_locations_paths_move, or the change record gains one row per pictured part. The paired seed does this; tools/Move-PartPictureLayout.ps1 (T023), which is not written yet, must too."
+      "note": "A hand-run move must set the session flag mtm_picture_layout_move on the same connection before calling sp_config_images_locations_paths_move, or the change record gains one row per pictured part. The paired seed does this; scripts/database/Move-PartPictureLayout.ps1 (T023), which is not written yet, must too."
     },
     {
       "note": "Two pre-existing tests were invalidated by this change and were updated rather than left failing: AppStoragePathsTests.Helper_AppStoragePathsTests_AStoredPicturePathIsJoinedToTheRoot now asserts both recorded layouts, and PermissionBaselineParityTests declares the picture entitlement widening in a named table instead of editing the retired list it compares against."
@@ -1573,7 +1573,7 @@
       "status": "DONE",
       "did": "Added the run-once picture-layout move: reports what it would move and what it moved, refuses to overwrite, leaves unrecognised folders alone, idempotent",
       "files": [
-        "tools/Move-PartPictureLayout.ps1"
+        "scripts/database/Move-PartPictureLayout.ps1"
       ]
     },
     "T024": {
@@ -2069,7 +2069,7 @@
       "status": "DONE",
       "did": "Walked the built app against the live store with the UI-Automation driver. Confirmed the part picture or the shared placeholder is drawn with no blank space on: the waitlist card list, the Settings part-picture entry, the Part Pictures screen, the Setup work centre page, and the New Request Work Center, Category, Item, Preview and Confirm steps. The walk found and fixed two real defects: the Settings part-picture entry shipped its resource key instead of words, and the markup scan never found the declared converter. The New Request dunnage, die and component steps and the Setup part and review steps were not reached by hand; the T084 scan covers every surface that binds a part picture.",
       "files": [
-        "tools/ui-drive.ps1"
+        "scripts/ui-automation/ui-drive.ps1"
       ]
     },
     "T089": {

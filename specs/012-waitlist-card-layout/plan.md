@@ -1,7 +1,7 @@
 # Implementation Plan: Waitlist Line Card Layout
 
 **Feature**: `specs/012-waitlist-card-layout/spec.md` | **Size**: oversized | **Workflow**: companion
-**Design source**: `WAITLIST-CARD-LAYOUT-PRE-SPEC.md` (decisions D1–D43; the spec is behavioural by design, so the technical substance of the per-Item cells lives in that record)
+**Design source**: `docs/research/research-waitlist-card-layout-pre-spec.md` (decisions D1–D43; the spec is behavioural by design, so the technical substance of the per-Item cells lives in that record)
 
 ## Scale note
 

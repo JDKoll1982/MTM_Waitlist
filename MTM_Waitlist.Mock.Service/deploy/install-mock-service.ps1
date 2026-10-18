@@ -20,7 +20,7 @@
          stale target behind;
       9. prints a PASS/FAIL summary and exits non-zero if anything failed.
 
-    The equivalent manual procedure is MTM_Waitlist.Mock.Service/README.md sections 2-4; that file
+    The equivalent manual procedure is docs/operations/operations-mock-service-deploy-and-run.md sections 2-4; that file
     remains the narrative authority, this script is the executable form of it.
 
 .GUIDED MODE - NO ARGUMENT

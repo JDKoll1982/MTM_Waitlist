@@ -261,4 +261,4 @@ real images come from each row's own legacy `ImagePath` (`pickup_ncm.png`).
 image dialogs rely on, since they legitimately show the placeholder as the effective path. Initializing the
 service during start-up — rejected: it moves the defect to the first load instead of fixing it. Populating the
 catalog — rejected: a data change that would hide a code defect. Full account:
-`defects/Closed-High-NewRequestVisitReplacesCardImagesWithThePlaceholder.md`.
+`docs/defects/defects-newrequest-high-visit-replaces-card-images-with-the-placeholder.md`.

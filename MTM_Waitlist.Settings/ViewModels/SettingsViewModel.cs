@@ -330,7 +330,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     /// <remarks>
     /// The three files it must contain are named after the size words — <c>Small.png</c>, <c>Medium.png</c> and
     /// <c>Large.png</c> — and the panel states them, because a folder whose contract is not written down is a
-    /// folder somebody fills with the wrong names. The contract is documented in <c>docs/IMAGE-NAMING.md</c>.
+    /// folder somebody fills with the wrong names. The contract is documented in <c>docs/guides/guides-pictures-image-naming.md</c>.
     /// </remarks>
     [ObservableProperty]
     public partial string HopperFolderInput

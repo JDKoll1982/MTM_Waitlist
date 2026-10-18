@@ -201,7 +201,7 @@ The shape lands in Foundational; this phase proves parity and keeps the counts h
 
 - [x] **T058** Reconcile the retired-key-file statement with the code · `.github/instructions/startup-rebuild.instructions.md` — DONE (2026-10-04): the instruction document was the stale side and was corrected to match the code — no key is copied or kept on the computer, the plant's shared key is read from its share, never written or held locally, and its path is never recorded. The spec's FR-035 was corrected as well, because as the pipeline first wrote it, it required the application to stop reading a shared key at all, which would have removed the shipped remembered-sign-in capability. Behaviour is unchanged. Original note: the instruction file says the shared key file is retired because nothing reads a key, while `RememberedSignInService` still reads one through `ISharedKeySource`/`SharedKeyFileSource` (registered in `ModuleDependencyInjectionExtensions`), and FR-035 forbids reading a shared key file while also requiring no behaviour change. Correcting either side is a behaviour or policy change, so it was reported rather than made
 - [x] **T059** Reconcile the launch-step contract table with the reordered catalogue · `specs/010-startup-rebuild/contracts/launch-step-contract.md`
-- [x] **T060** Update the living spec with this feature's deltas · `capabilities/startup-launch/spec.md`
+- [x] **T060** Update the living spec with this feature's deltas · `docs/living-specs/living-specs-capability-startup-launch.spec.md`
 - [x] **T061** Run the full test suite and the build guards · solution-wide
 
 ## Dependencies & Execution Order

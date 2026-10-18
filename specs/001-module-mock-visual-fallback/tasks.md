@@ -36,7 +36,7 @@ though the generic template marks tests optional. Verification tasks are marked 
 >
 > **The rule.** A dangling reference is **instruction**, **provenance**, or **already-retired**, and the three want
 > different answers: an instruction must be repaired or deleted, provenance needs a note saying the artefact is gone
-> and why, and a retired artefact needs only the reference removed. See `capabilities/DRIFT.md`.
+> and why, and a retired artefact needs only the reference removed. See `docs/living-specs/living-specs-drift-ledger.md`.
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -1323,7 +1323,7 @@ reachable MySQL/Infor Visual, so the live subset of T105 was not re-run).
 
 - **T120 (publish/deploy artifact)** — `MTM_Waitlist.Mock.Service/Properties/PublishProfiles/
   win-x64-selfcontained.pubxml` (unpackaged, self-contained, `win-x64`, folder publish) plus
-  `MTM_Waitlist.Mock.Service/README.md` (publish, deploy, first run, verify, uninstall). `quickstart.md` §2 step 1
+  `docs/operations/operations-mock-service-deploy-and-run.md` (publish, deploy, first run, verify, uninstall). `quickstart.md` §2 step 1
   now names both and shows the CLI equivalent.
 
 - **T121 (generated master lists)** — the deviation is recorded rather than reverted: a review note in
@@ -1606,7 +1606,7 @@ sk-e766f3651bb445f4baf2a10fa8998bee
 | §4 defect proof (SC-001/SC-002, FR-021) | Needs a signed-in application session; the app stops at the **Sign in** gate and no credential was used |
 | §5 backup/restore drill (SC-008/SC-009) | Needs a running service and a throwaway store. `mysqldump` is installed but off `PATH`, so only the `toolUnavailable` branch is reachable from here (which at least means the absence is *reported*, per FR-013, rather than worked around) |
 | §7 sixth-shape playbook (SC-012) | A maintainer-day exercise, not a mechanical gate |
-| SC-007 / SC-008 | **30-day observation windows — started 2026-09-12, not measured, and not measurable as built (corrected 2026-09-20).** `RefreshRunRecordStore` and `BackupArtifactStore` keep only the **latest** run per shape and per store, so there is no history to aggregate however long the service runs; the durable history is the JSONL `ServiceLog`, whose `RetentionDays` is a hard-coded **30** — the exact window the criterion measures — and `BackupPolicy.RetentionCount` defaults to **14** artifacts per store. Give the criteria a durable history first (see `specs/004` T230, T229). The metric itself is proven against a seeded 30-day history (`tools/measure-reliability-window.ps1`, `specs/004` T231) |
+| SC-007 / SC-008 | **30-day observation windows — started 2026-09-12, not measured, and not measurable as built (corrected 2026-09-20).** `RefreshRunRecordStore` and `BackupArtifactStore` keep only the **latest** run per shape and per store, so there is no history to aggregate however long the service runs; the durable history is the JSONL `ServiceLog`, whose `RetentionDays` is a hard-coded **30** — the exact window the criterion measures — and `BackupPolicy.RetentionCount` defaults to **14** artifacts per store. Give the criteria a durable history first (see `specs/004` T230, T229). The metric itself is proven against a seeded 30-day history (`scripts/service/measure-reliability-window.ps1`, `specs/004` T231) |
 
 **Net position: 110 of 111 tasks remain complete. T106 stays unticked**, now with an accurate description of what
 is blocked on a host-side deployment versus what can never be checked from a workstation.
@@ -1983,7 +1983,7 @@ the shape-only check this run proved is blind to this whole defect class.
   — **Done 2026-09-11** (verified below).
 
 **Evidence.** `MTM_Waitlist.Mock.Service/Properties/PublishProfiles/win-x64-selfcontained.pubxml` did **not** exist —
-the project had no `Properties` folder at all — while T120's execution note, `MTM_Waitlist.Mock.Service/README.md` §1
+the project had no `Properties` folder at all — while T120's execution note, `docs/operations/operations-mock-service-deploy-and-run.md` §1
 and `quickstart.md` §2 step 1 all name it, and the README's guarantee table rests on it. Running the documented command
 proved the consequence:
 
@@ -2080,7 +2080,7 @@ the launch path, and names the two secrets the configuration deliberately never 
   per FR-007/FR-012 and Constitution I (contradicts the previous "scratch script" state) — **Done 2026-09-11.**
 
 **Artifacts.** `MTM_Waitlist.Mock.Service/deploy/install-mock-service.ps1` and
-`MTM_Waitlist.Mock.Service/deploy/README.md`. Referenced from `MTM_Waitlist.Mock.Service/README.md` §1 (and §2–§4 as
+`docs/operations/operations-mock-service-install-script.md`. Referenced from `docs/operations/operations-mock-service-deploy-and-run.md` §1 (and §2–§4 as
 its narrative authority), `quickstart.md` §2, `.github/copilot-instructions.md`, and
 `.github/memories/repo/{workstation-secrets,infor-visual-disposition}.md`.
 
@@ -2148,7 +2148,7 @@ Summary line: `DEPLOYMENT OK — 21 checks, 0 warning(s).`
   write-only from this surface — the page can rotate it, and never displays the value"*, exposes only
   `RotateCredentialText` / `CredentialWriteOnlyText`, and `RotateCredentialAsync` does nothing but call
   `GenerateCredentialAsync()`. There is no reveal path anywhere.
-- But the documentation assumes the operator has it: `MTM_Waitlist.Mock.Service/README.md` §3 step 3 says *"record it
+- But the documentation assumes the operator has it: `docs/operations/operations-mock-service-deploy-and-run.md` §3 step 3 says *"record it
   out of band"*, §4 says to call `curl -H "X-MTM-Mock-Token: <credential>" .../api/status`, and the client reads the
   same value from `MTM_MOCK_SERVICE_TOKEN` (`MTM_Waitlist.Mock/Models/MockServiceClientOptions.cs`).
 - **Observed consequence:** after deploying, all three probed endpoints answered `401`, and the correct token is
@@ -3141,7 +3141,7 @@ served one of the two operator machines.
 | New parameter `-AdditionalDesktopPaths` | Defaults to `@('C:\Users\johnk\Desktop')`. Each entry gets the **same** shortcut: same name, same target (`pwsh`/`powershell`), same arguments, same working folder, same icon, same description. |
 | Best effort by construction | A profile that is not on the machine is a **`SKIP`** ("`…` is not on this machine"); a folder the account cannot write is a **`WARN`** carrying the reason. Neither can fail the deployment, so the cache host — which has no `johnk` profile — still reports `0 warning(s)`. |
 | Redirected desktop handling | Another profile's Desktop is often in OneDrive, and `[Environment]::GetFolderPath('Desktop')` only answers for the account running the script, so when the literal path is absent the script looks for `OneDrive*\Desktop` beside it and uses the first that exists. |
-| Docs | `deploy/README.md`: parameter-table row, step 8 row, and the "desktop shortcut it leaves behind" section now state the second, best-effort target. `VALIDATION-PROMPT-SERVER.md`: expected check count **24 → 25**. |
+| Docs | `docs/operations/operations-mock-service-install-script.md`: parameter-table row, step 8 row, and the "desktop shortcut it leaves behind" section now state the second, best-effort target. `VALIDATION-PROMPT-SERVER.md`: expected check count **24 → 25**. |
 
 **Verified.** The installer parses with `[System.Management.Automation.Language.Parser]::ParseFile` → **0 errors**. It was
 **not executed**, because at the time of this pass it still refused to run on a machine that is not the cache host —
@@ -3191,7 +3191,7 @@ a guard Phase 34 (T167) removes.
 | `Services/ServiceHostBuilder.cs`, `App.xaml.cs` | The gate is registered in the container and wired into the four consumers **only when `Build(..., gateOnHostCapabilities: true)` is passed**, which the service's own startup does. Tests keep the default, so no engine or endpoint test depends on what the machine running it can reach. |
 | `ViewModels/ServiceStatusViewModel.cs`, `ServiceSettingsViewModel.cs`, `Strings/en-us/Resources.resw` | The status surface gains a "Scheduled refresh" row and a per-store note saying backup and restore are disabled here; the settings surface refuses *Back up now* and *Restore* with the same reason instead of attempting them. |
 | `MTM_Waitlist.Mock.Service/deploy/install-mock-service.ps1` | The server-only guard becomes a **host disposition report**: `cache host`, `infor visual` and `mysql host` rows, each `PASS` or `WARN`, **never** a failure. `-AllowNonServerHost` is removed (there is nothing to bypass); `-VisualPort` is added. Deployment is now **27 checks**. |
-| `deploy/README.md`, `VALIDATION-PROMPT-SERVER.md` | The server-only policy is replaced by the capability policy, the removed switch and the retired exit code `2` are dropped, and the expected check count is updated. |
+| `docs/operations/operations-mock-service-install-script.md`, `VALIDATION-PROMPT-SERVER.md` | The server-only policy is replaced by the capability policy, the removed switch and the retired exit code `2` are dropped, and the expected check count is updated. |
 
 **Verified.** Build → `0 Warning(s) 0 Error(s)`. New tests: `ServiceCapabilityGatingTests` (9 — the measurement rules
 above, including the cache lifetime, the re-measure that picks up restored access, and both fail-open cases) and

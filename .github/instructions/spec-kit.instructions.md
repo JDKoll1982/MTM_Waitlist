@@ -13,8 +13,10 @@ then implement — in that order. Do not jump straight to code for work that war
 (Spec Kit is the spec-first layer on top of the repo's existing checklist workflow; it does not replace it.)
 
 ## Command ↔ agent map
-Each command exists as a prompt (`.github/prompts/speckit.<cmd>.prompt.md`) delegating to an agent
-(`.github/agents/speckit.<cmd>.agent.md`).
+Each command's instructions live in an agent file (`.github/agents/speckit.<cmd>.agent.md`), invoked by the
+matching skill (`.github/skills/speckit-<cmd>/SKILL.md`, explicit-invocation only). The former
+`.github/prompts/*.prompt.md` files were removed because agent-host harnesses do not load prompt files.
+Skills that still hold only frontmatter are unconverted skeletons; their agent file is the source of truth.
 
 - Core sequence: `constitution` → `specify` → `clarify` → `plan` → `tasks` → `analyze` → `implement`.
 - Supporting: `checklist`, `taskstoissues`.

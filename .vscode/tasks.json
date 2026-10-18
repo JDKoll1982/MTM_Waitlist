@@ -1,4 +1,4 @@
-{
+﻿{
 	"version": "2.0.0",
 	"tasks": [
 		{
@@ -87,23 +87,6 @@
 			}
 		},
 		{
-			"label": "Build MTM_Waitlist",
-			"type": "shell",
-			"command": "dotnet",
-			"args": [
-				"build",
-				"${workspaceFolder}/MTM_Waitlist.sln",
-				"-p:Configuration=Debug",
-				"-p:Platform=x64",
-				"/m:1",
-				"/nodeReuse:false"
-			],
-			"problemMatcher": [
-				"$msCompile"
-			],
-			"group": "build"
-		},
-		{
 			"label": "Probe startup logs",
 			"type": "shell",
 			"command": "powershell",
@@ -116,48 +99,12 @@
 			]
 		},
 		{
-			"label": "Run startup log probe",
-			"type": "shell",
-			"command": "cmd",
-			"args": [
-				"/c",
-				"tools\\run-probe.cmd"
-			]
-		},
-		{
-			"label": "Dump app crash events",
-			"type": "shell",
-			"command": "cmd",
-			"args": [
-				"/c",
-				"tools\\dump-crashes.cmd"
-			]
-		},
-		{
 			"label": "Dump WER reports",
 			"type": "shell",
 			"command": "cmd",
 			"args": [
 				"/c",
-				"tools\\dump-wer.cmd"
-			]
-		},
-		{
-			"label": "Record verification runs",
-			"type": "shell",
-			"command": "cmd",
-			"args": [
-				"/c",
-				"tools\\record-verify.cmd"
-			]
-		},
-		{
-			"label": "Remove recorder script",
-			"type": "shell",
-			"command": "cmd",
-			"args": [
-				"/c",
-				"del /q tools\\record-verify.cmd"
+				"scripts\\diagnostics\\dump-wer.cmd"
 			]
 		},
 		{
@@ -182,7 +129,7 @@
 				"-ExecutionPolicy",
 				"Bypass",
 				"-File",
-				"tools\\kill-tests.ps1"
+				"scripts\\build\\kill-tests.ps1"
 			],
 			"problemMatcher": []
 		},
@@ -208,7 +155,7 @@
 				"-ExecutionPolicy",
 				"Bypass",
 				"-File",
-				"tools\\run-tests.ps1",
+				"scripts\\build\\run-tests.ps1",
 				"-LogPath",
 				".specify\\log-hang.txt"
 			],
@@ -223,7 +170,7 @@
 				"-ExecutionPolicy",
 				"Bypass",
 				"-File",
-				"tools\\investigate-tests.ps1"
+				"scripts\\build\\investigate-tests.ps1"
 			],
 			"problemMatcher": []
 		},
@@ -236,7 +183,7 @@
 				"-ExecutionPolicy",
 				"Bypass",
 				"-File",
-				"tools\\run-tests.ps1",
+				"scripts\\build\\run-tests.ps1",
 				"-All",
 				"-LogPath",
 				".specify\\suite-hang.txt",
@@ -255,7 +202,7 @@
 				"-ExecutionPolicy",
 				"Bypass",
 				"-File",
-				"tools\\investigate-tests.ps1",
+				"scripts\\build\\investigate-tests.ps1",
 				"-LogPath",
 				".specify\\suite-hang.txt"
 			],
@@ -270,7 +217,7 @@
 				"-ExecutionPolicy",
 				"Bypass",
 				"-File",
-				"tools\\show-blame.ps1"
+				"scripts\\diagnostics\\show-blame.ps1"
 			],
 			"problemMatcher": []
 		},
@@ -283,7 +230,7 @@
 				"-ExecutionPolicy",
 				"Bypass",
 				"-File",
-				"tools\\run-tests.ps1",
+				"scripts\\build\\run-tests.ps1",
 				"-All",
 				"-LogPath",
 				".specify\\suite-timeout.txt",
@@ -302,7 +249,7 @@
 				"-ExecutionPolicy",
 				"Bypass",
 				"-File",
-				"tools\\investigate-tests.ps1",
+				"scripts\\build\\investigate-tests.ps1",
 				"-LogPath",
 				".specify\\suite-timeout.txt"
 			],
@@ -317,7 +264,7 @@
 				"-ExecutionPolicy",
 				"Bypass",
 				"-File",
-				"tools\\bisect-tests.ps1",
+				"scripts\\build\\bisect-tests.ps1",
 				"-TimeoutSeconds",
 				"180"
 			],
@@ -333,40 +280,12 @@
 				"-ExecutionPolicy",
 				"Bypass",
 				"-File",
-				"tools\\run-tests.ps1",
+				"scripts\\build\\run-tests.ps1",
 				"-All",
 				"-LogPath",
 				".specify\\all-tests.txt"
 			],
 			"group": "test"
-		},
-		{
-			"label": "Run dunnage regression test",
-			"type": "shell",
-			"command": "powershell",
-			"args": [
-				"-NoProfile",
-				"-ExecutionPolicy",
-				"Bypass",
-				"-File",
-				"tools\\run-tests.ps1",
-				"-Modules",
-				"AnUnwritableDestination",
-				"-LogPath",
-				".specify\\prefix-run.txt"
-			]
-		},
-		{
-			"label": "Build after dunnage fix",
-			"type": "shell",
-			"command": "powershell",
-			"args": [
-				"-NoProfile",
-				"-ExecutionPolicy",
-				"Bypass",
-				"-Command",
-				"$env:MSBUILDDISABLENODEREUSE=1; & 'C:\\Program Files\\dotnet\\dotnet.exe' build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false 2>&1 | Select-String -Pattern 'error|warning CS|Build succeeded|Build FAILED|Warning\\(s\\)|Error\\(s\\)' | Select-Object -First 40"
-			]
 		},
 		{
 			"label": "Check build",
@@ -377,50 +296,7 @@
 				"-ExecutionPolicy",
 				"Bypass",
 				"-File",
-				"tools\\check-build.ps1"
-			]
-		},
-		{
-			"label": "Run dunnage fix tests",
-			"type": "shell",
-			"command": "powershell",
-			"args": [
-				"-NoProfile",
-				"-ExecutionPolicy",
-				"Bypass",
-				"-File",
-				"tools\\run-tests.ps1",
-				"-Modules",
-				"ImageCacheSyncService,ImageCachePaths,PictureCacheStep,DunnageImagePathResolver,ImageStorageConfigurationResolver",
-				"-LogPath",
-				".specify\\dunnage-fix-tests.txt"
-			]
-		},
-		{
-			"label": "Run all tests after dunnage fix",
-			"type": "shell",
-			"command": "powershell",
-			"args": [
-				"-NoProfile",
-				"-ExecutionPolicy",
-				"Bypass",
-				"-File",
-				"tools\\run-tests.ps1",
-				"-All",
-				"-LogPath",
-				".specify\\dunnage-all-tests.txt"
-			]
-		},
-		{
-			"label": "Probe dunnage folders",
-			"type": "shell",
-			"command": "powershell",
-			"args": [
-				"-NoProfile",
-				"-ExecutionPolicy",
-				"Bypass",
-				"-File",
-				"tools\\probe-dunnage-folders.ps1"
+				"scripts\\build\\check-build.ps1"
 			]
 		},
 		{
@@ -432,7 +308,7 @@
 				"-ExecutionPolicy",
 				"Bypass",
 				"-File",
-				"tools\\show-app-version.ps1"
+				"scripts\\build\\show-app-version.ps1"
 			]
 		}
 	]

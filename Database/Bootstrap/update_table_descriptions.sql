@@ -911,7 +911,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 --     to the default asset (ImageLocationService.ResolveExistingPathAsync), so removing the seed falls back to the
 --     application's own defaults rather than to nothing.
 --     Retained, not retired: sp_config_images_locations_paths_move with its rollback, which the hand-run move
---     (tools/Move-PartPictureLayout.ps1) still uses, and Database/Validation/part_pictures_schema/validate.sql,
+--     (scripts/database/Move-PartPictureLayout.ps1) still uses, and Database/Validation/part_pictures_schema/validate.sql,
 --     which still asserts that pair exists.
 --   T198 then retired the three per-computer picture-source procedures, because the feature withdrew their owner:
 --     where a machine's pictures come from became a plant-wide answer, so no computer captures a folder of its own

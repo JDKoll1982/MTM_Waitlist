@@ -123,7 +123,7 @@ models and options deleted in T012, T013 and T014 · `MTM_Waitlist.Core/`, `Modu
 
 **⟶ Wait for Wave 7 to finish, then — tests, registry and documents (checklist 2.5):**
 - [x] **T025** [P] Delete the startup test files and every recording fake that exists only to serve them: the computer-gate, computer-registry, startup-coordinator and startup-recovery tests, the login and splash view-model tests, and the startup service tests (checklist 2.5a; the list includes `ViewModels/LoginViewModelTests.cs`, which S11.5.5 misclassifies as kept — see `specs/010-startup-rebuild/local-state-test-migration.md` §1C). · `MTM_Waitlist.Tests/Services/ComputerGateServiceTests.cs`, `MTM_Waitlist.Tests/Services/ComputerRegistryServiceTests.cs`, `MTM_Waitlist.Tests/Services/StartupCoordinatorTests.cs`, `MTM_Waitlist.Tests/Services/StartupRecoveryServiceTests.cs`, `MTM_Waitlist.Tests/ViewModels/LoginViewModelTests.cs`, `MTM_Waitlist.Tests/ViewModels/SplashViewModelTests.cs`, `MTM_Waitlist.Tests/Module_Startup/Services/SignOutServiceTests.cs`, `MTM_Waitlist.Tests/Module_Startup/Services/StartupArchiveCleanupTests.cs`, `MTM_Waitlist.Tests/Module_Startup/Services/TemporaryCredentialLimitTests.cs`
-- [x] **T026** [P] Delete the two retired capability folders — `startup`, and `startup-diagnostics`, whose matched `MTM_Waitlist.Startup/Services/StartupLog*.cs` files T133 deletes; their `living-specs.yml` entries and their `capabilities/DRIFT.md` rows are retired in the close-out phase, so the registry is edited once, at re-adoption (checklist 2.5c, deliberate deferral). · `capabilities/startup/`, `capabilities/startup-diagnostics/`
+- [x] **T026** [P] Delete the two retired capability folders — `startup`, and `startup-diagnostics`, whose matched `MTM_Waitlist.Startup/Services/StartupLog*.cs` files T133 deletes; their `living-specs.yml` entries and their `docs/living-specs/living-specs-drift-ledger.md` rows are retired in the close-out phase, so the registry is edited once, at re-adoption (checklist 2.5c, deliberate deferral). · `capabilities/startup/`, `capabilities/startup-diagnostics/`
 - [x] **T027** [P] Delete the retired flow documents (checklist 2.5d). · `STARTUP-FLOW.md`, `STARTUP-FLOW.html`, `STARTUP-FLOW.pdf`
 - [x] **T028** [P] Update the startup module mentions in the test-conventions instructions (checklist 2.5f). · `.github/instructions/test-conventions.instructions.md`
 
@@ -483,12 +483,12 @@ local settings type.
 ## Phase 9: Polish — acceptance surface, embed guide and close-out
 
 **Files**: `MTM_Waitlist.Tests/Module_Startup/EdgeCases/**`, `specs/010-startup-rebuild/acceptance.md`,
-`STARTUP-REBUILD-BRIEF.md`, `living-specs.yml`, `capabilities/DRIFT.md`, `capabilities/startup-launch/spec.md`,
+`docs/startup/startup-rebuild-design-brief.md`, `living-specs.yml`, `docs/living-specs/living-specs-drift-ledger.md`, `docs/living-specs/living-specs-capability-startup-launch.spec.md`,
 `.github/instructions/startup-rebuild.instructions.md`, `.github/instructions/winui3-ui-automation.instructions.md`,
 `README.md`, `CHANGELOG.md`.
 
 ### Tests
-- [x] **T159** [P] Expand S13 from its group summary into the plain list of the cases the three read-only sweeps found, and record the twenty-three cases in `spec.md`'s Edge Cases section as part of the same catalogue, then walk that list and write a test for each case that still applies, one test per case — the four spec cases T171 to T174 already own are covered by those tasks and are not written twice (checklist 9.1a, FR-031, SC-013). The list does not exist yet, so it is recorded here before anything is walked (checklist 9.1a, FR-031, SC-013). · `STARTUP-REBUILD-BRIEF.md`, `MTM_Waitlist.Tests/Module_Startup/EdgeCases/LaunchEdgeCaseTests.cs`
+- [x] **T159** [P] Expand S13 from its group summary into the plain list of the cases the three read-only sweeps found, and record the twenty-three cases in `spec.md`'s Edge Cases section as part of the same catalogue, then walk that list and write a test for each case that still applies, one test per case — the four spec cases T171 to T174 already own are covered by those tasks and are not written twice (checklist 9.1a, FR-031, SC-013). The list does not exist yet, so it is recorded here before anything is walked (checklist 9.1a, FR-031, SC-013). · `docs/startup/startup-rebuild-design-brief.md`, `MTM_Waitlist.Tests/Module_Startup/EdgeCases/LaunchEdgeCaseTests.cs`
 - [x] **T160** [P] Confirm the suite holds no disabled, skipped or commented-out startup test — a skipped case is a case dropped silently, which FR-031 forbids (checklist 9.1c, brief S16, FR-031, SC-013). · `MTM_Waitlist.Tests/**`
 
 ### Implementation
@@ -496,7 +496,7 @@ local settings type.
 **Wave 1 — independent (different files):**
 - [x] **T161** [P] Run against a fresh store and prove the machine-setup gate appears and cannot be bypassed (checklist 9.2a, SC-004). · `specs/010-startup-rebuild/acceptance.md`
 - [x] **T162** [P] Write the embed guide for the new module with an `applyTo`, covering the entry point, the host seam, the contracts it needs and their registration order, how to add a step, how to add a log entry and how to add a machine-configuration field, plus the invariants a later change must not break (checklist 10.1a–10.1d). · `.github/instructions/startup-rebuild.instructions.md`
-- [x] **T163** [P] Re-adopt a living spec for the new startup surface, retire both old capabilities' leftovers — the `startup` and `startup-diagnostics` rows in `living-specs.yml` and in `capabilities/DRIFT.md`'s two-capability table, whose matched files are gone — and confirm the registry matches the tree (checklist 10.2a, 10.2b; the deferred Phase 2 registry edit). · `capabilities/startup-launch/spec.md`, `living-specs.yml`, `capabilities/DRIFT.md`
+- [x] **T163** [P] Re-adopt a living spec for the new startup surface, retire both old capabilities' leftovers — the `startup` and `startup-diagnostics` rows in `living-specs.yml` and in `docs/living-specs/living-specs-drift-ledger.md`'s two-capability table, whose matched files are gone — and confirm the registry matches the tree (checklist 10.2a, 10.2b; the deferred Phase 2 registry edit). · `docs/living-specs/living-specs-capability-startup-launch.spec.md`, `living-specs.yml`, `docs/living-specs/living-specs-drift-ledger.md`
 - [x] **T164** [P] Record the rebuild in the changelog in the repo's end-user format (checklist 10.3a). · `CHANGELOG.md`
 - [x] **T165** [P] Update the README module list and remove every reference to the retired splash and sign-in surfaces (checklist 2.5f, 10.3b). · `README.md`
 - [x] **T166** [P] Correct the UI-automation instructions so they describe the new gate and the store-backed log panel instead of the retired splash, sign-in and log-directory path (checklist 2.5e, 6.6c, 10.3c). · `.github/instructions/winui3-ui-automation.instructions.md`
@@ -508,7 +508,7 @@ local settings type.
 - [x] **T174** [US3] Test that a sign-out whose restart fails still ends the session and tells the person to open the application again, rather than leaving a half-signed-out state (spec.md Edge Cases; FR-008, FR-011, SC-001). · `MTM_Waitlist.Tests/Module_Startup/EdgeCases/LaunchEdgeCaseTests.cs`
 
 **⟶ Wait for Wave 2 to finish, then:**
-- [x] **T167** Record in S13 the reason for every case that no longer applies, beside the case itself, rather than leaving it untested and unexplained (checklist 9.1b, FR-031, SC-013). · `STARTUP-REBUILD-BRIEF.md`
+- [x] **T167** Record in S13 the reason for every case that no longer applies, beside the case itself, rather than leaving it untested and unexplained (checklist 9.1b, FR-031, SC-013). · `docs/startup/startup-rebuild-design-brief.md`
 
 **⟶ Wait for Wave 3 to finish, then:**
 - **T168 — retired 2026-10-10**: the owner performs this by hand rather than as a task. It asked for the
@@ -1016,10 +1016,10 @@ different files and may run at the same time; Wave C waits for both, because it 
   · `MTM_Waitlist.Tests/Module_Startup/`
 - [x] **T245** Bring the surrounding record level with the change, so nothing anywhere still states the
   opposite: the startup instruction file's remembered-sign-in and key-file passages, the logging contract's
-  allowance for writing a key file's path, `capabilities/startup-launch/spec.md`'s unreadable-key-file scenario,
+  allowance for writing a key file's path, `docs/living-specs/living-specs-capability-startup-launch.spec.md`'s unreadable-key-file scenario,
   and `011`'s FR-035, which records that the shared key is read to honour a remembered sign-in (FR-043).
   · `.github/instructions/startup-rebuild.instructions.md`, `contracts/logging-contract.md`,
-  `capabilities/startup-launch/spec.md`, `specs/011-identifier-first-signin/spec.md`
+  `docs/living-specs/living-specs-capability-startup-launch.spec.md`, `specs/011-identifier-first-signin/spec.md`
 - [x] **T246** Run the whole suite and the build-gate audits after the withdrawal: `RetiredSymbolAuditTests`
   fails the build if the withdrawn names can return, `InlineSqlAuditTests` fails it if any data operation left a
   stored procedure behind, and the suite is green with the remembered-sign-in tests accounted for (FR-028,

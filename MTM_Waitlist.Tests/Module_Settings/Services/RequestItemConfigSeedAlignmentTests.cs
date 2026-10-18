@@ -21,7 +21,7 @@ namespace MTM_Waitlist.Tests.Module_Settings.Services;
 /// <remarks>
 /// <para>
 /// The expected side of every assertion is the settlement the specification wrote down —
-/// <c>data-model.md</c> §9's per-Item reconciliation and <c>WAITLIST-CARD-LAYOUT-PRE-SPEC.md</c> §5's cell table —
+/// <c>data-model.md</c> §9's per-Item reconciliation and <c>docs/research/research-waitlist-card-layout-pre-spec.md</c> §5's cell table —
 /// and the actual side is <b>read from the shipped seed and from the shipped card</b>: the seed's
 /// <c>create.sql</c> is parsed here, and the card is driven through
 /// <see cref="WaitlistViewViewModel.CreateSessionOrder"/> with the declarations that parse produced. So this is
@@ -41,7 +41,7 @@ public sealed class RequestItemConfigSeedAlignmentTests
 {
     /// <summary>
     /// The labels the card requires each Item to <b>declare</b>, from <c>data-model.md</c> §9's "Cells the card
-    /// requires" column and <c>WAITLIST-CARD-LAYOUT-PRE-SPEC.md</c> §5's cell table. The two die Items' third cell
+    /// requires" column and <c>docs/research/research-waitlist-card-layout-pre-spec.md</c> §5's cell table. The two die Items' third cell
     /// is the label-less die-shop phrase, so what they must declare is its answer's own label rather than the
     /// phrase — named through <see cref="WaitlistCardCellRules.DieShopAnswerLabel"/> so the seed and the card
     /// cannot spell it two different ways.
@@ -125,7 +125,7 @@ public sealed class RequestItemConfigSeedAlignmentTests
 
     /// <summary>
     /// The labels the card draws today whose value no source supplies yet (FR-058, D41,
-    /// <c>WAITLIST-CARD-LAYOUT-PRE-SPEC.md</c> §5.2): the quantity cells wait on D38's read mechanism and
+    /// <c>docs/research/research-waitlist-card-layout-pre-spec.md</c> §5.2): the quantity cells wait on D38's read mechanism and
     /// <c>Lugger Location</c> on a resolver arm. They stay declared so the cell appears the day the source lands,
     /// with no card change (FR-034).
     /// </summary>

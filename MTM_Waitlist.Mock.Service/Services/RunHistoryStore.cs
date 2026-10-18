@@ -30,7 +30,7 @@ namespace MTM_Waitlist.Mock.Service.Services;
 /// is serialized against every append, and replaces the file atomically so a reader never sees a partial one.
 /// </para>
 /// <para>
-/// <b>The property names are a contract.</b> <c>tools/measure-reliability-window.ps1</c> reads this file by name;
+/// <b>The property names are a contract.</b> <c>scripts/service/measure-reliability-window.ps1</c> reads this file by name;
 /// see <see cref="RunHistoryEntry"/>.
 /// </para>
 /// <para>

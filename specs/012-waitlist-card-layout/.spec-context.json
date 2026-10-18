@@ -1876,7 +1876,7 @@
     },
     {
       "decision": "Source 'Average coil weight' from the extended coil subordinate read as CAST(COALESCE(part.WEIGHT,0) AS decimal(20,8))",
-      "why": "R1 said to carry it on the existing snapshot rather than a second read, and VISUAL's PART.WEIGHT decimal(14,4) was confirmed in the schema export at Documents/Development/InforVisual/DatabaseCSVFiles/ColumnDetails/PART.csv, so the source is grounded rather than assumed",
+      "why": "R1 said to carry it on the existing snapshot rather than a second read, and VISUAL's PART.WEIGHT decimal(14,4) was confirmed in the schema export at docs/database/column-details/database-inforvisual-column-details-part.csv, so the source is grounded rather than assumed",
       "rejected": "resolving it from the receiving store's sp_receiving_history_average_coil_weight, which R1 rejected as a second read"
     },
     {
@@ -1951,7 +1951,7 @@
     },
     {
       "decision": "Continue spec 012 in place rather than minting a new feature directory.",
-      "why": "The request was to continue implementation, and NEXT-RUN.md's fresh-spec path is for the four open questions, not for 012's own remaining tasks.",
+      "why": "The request was to continue implementation, and docs/operations/operations-waitlist-next-run.md's fresh-spec path is for the four open questions, not for 012's own remaining tasks.",
       "rejected": "Letting the auto run mint specs/013-... from the words 'continue implementation'."
     },
     {
@@ -1965,7 +1965,7 @@
       "rejected": "Bumping Microsoft.Data.SqlClient itself, which would change the assembly the Infor Visual read depends on, and jumping to Pkcs 10.x, which is a larger change than the advisories require."
     },
     {
-      "decision": "Applied the two-column ALTER to the live mtm_waitlist on the plant host, at the owner request, and recorded it with its reversal in LIVE-DB-AND-MOCK-UPDATES.md section 1.9.",
+      "decision": "Applied the two-column ALTER to the live mtm_waitlist on the plant host, at the owner request, and recorded it with its reversal in docs/operations/operations-database-live-and-mock-updates.md section 1.9.",
       "why": "The live table was missing handler_status and answers_json while its routines already used both, so sp_waitlist_request_list failed with an unknown column and the waitlist screen could not be read at all. This repository has no migration runner, so a column add on an installed store is a manual change. Both definitions are copied verbatim from Database/Tables/18_waitlist_requests_queue/create.sql; the change is additive and no existing row moved.",
       "rejected": "Reinstalling the table from seed, which would destroy the plant request rows, and leaving the gap for a redeploy, which would have kept the waitlist unreadable."
     },
@@ -2030,10 +2030,10 @@
   "task_summaries": {
     "T001": {
       "status": "DONE",
-      "did": "Baseline recorded: build 0 warnings/0 errors; suite 1901 passed / 6 failed / 46 skipped - the 6 are one pre-existing cause, missing repo-root STARTUP-REBUILD-BRIEF.md read by Module_Startup AcceptanceSurfaceTests, unrelated to 012",
+      "did": "Baseline recorded: build 0 warnings/0 errors; suite 1901 passed / 6 failed / 46 skipped - the 6 are one pre-existing cause, missing repo-root docs/startup/startup-rebuild-design-brief.md read by Module_Startup AcceptanceSurfaceTests, unrelated to 012",
       "files": [
         "MTM_Waitlist.sln",
-        "tools/run-tests.ps1"
+        "scripts/build/run-tests.ps1"
       ]
     },
     "T002": {
@@ -2685,7 +2685,7 @@
     },
     "T089": {
       "status": "DONE",
-      "did": "Recorded the seven supersessions from WAITLIST-CARD-LAYOUT-PRE-SPEC.md section 6 in specs/004 contracts/card-and-identifier.md, each carrying its replacement inline and in a new summary section 10",
+      "did": "Recorded the seven supersessions from docs/research/research-waitlist-card-layout-pre-spec.md section 6 in specs/004 contracts/card-and-identifier.md, each carrying its replacement inline and in a new summary section 10",
       "files": [
         "specs/004-unified-card-item-picker/contracts/card-and-identifier.md"
       ]
@@ -2706,7 +2706,7 @@
     },
     "T092": {
       "status": "DONE",
-      "did": "Ran the suite and the four validators and recorded every Success Criterion. tools/run-tests.ps1 -All: 2167 total, 2114 passed, 6 failed, 47 skipped, and the 6 are exactly the pre-existing AcceptanceSurfaceTests failures over the missing repo-root STARTUP-REBUILD-BRIEF.md that were failing at T001's baseline - this feature introduced none. validate-database-schema.ps1 EXIT 0 (115 artifacts, 115 distinct objects; live validation skipped, no connection string). validate-csharp-xaml-naming.ps1 EXIT 1 with 267 findings, none attributable to this feature (I fixed the four it had introduced: two new public enums moved out of SampleOrder.cs into their own files, a test method name and an async TestCleanup renamed). validate-sql-naming.ps1 EXIT 1 with 13 findings, all in three grandfathered classes (7 *_population.sql filenames - my new part_warehouse_quantities_population.sql is the mandated mock-loader path, like its 6 siblings - 2 Mock.Service/Restore filenames, 4 boolean-name findings). So two of the four scripts cannot exit 0 for pre-existing reasons. SC recorded: SC-001/002/003/004/005/007/008/009/010/011/013 met and verified offline by the markup, geometry, palette, model, picker and resolver suites; SC-006 met offline by RequestStatusColumnTests with its loaded-store drive unrun; SC-012 met by markup with the disabled-button tooltip-on-hover leg unverified (platform behaviour); SC-015 met by the wizard suites with the rendered-card drive unrun; SC-016 met at the service seam with the live restart unrun; SC-014 and SC-017 unverified, both needing a rendered app",
+      "did": "Ran the suite and the four validators and recorded every Success Criterion. scripts/build/run-tests.ps1 -All: 2167 total, 2114 passed, 6 failed, 47 skipped, and the 6 are exactly the pre-existing AcceptanceSurfaceTests failures over the missing repo-root docs/startup/startup-rebuild-design-brief.md that were failing at T001's baseline - this feature introduced none. validate-database-schema.ps1 EXIT 0 (115 artifacts, 115 distinct objects; live validation skipped, no connection string). validate-csharp-xaml-naming.ps1 EXIT 1 with 267 findings, none attributable to this feature (I fixed the four it had introduced: two new public enums moved out of SampleOrder.cs into their own files, a test method name and an async TestCleanup renamed). validate-sql-naming.ps1 EXIT 1 with 13 findings, all in three grandfathered classes (7 *_population.sql filenames - my new part_warehouse_quantities_population.sql is the mandated mock-loader path, like its 6 siblings - 2 Mock.Service/Restore filenames, 4 boolean-name findings). So two of the four scripts cannot exit 0 for pre-existing reasons. SC recorded: SC-001/002/003/004/005/007/008/009/010/011/013 met and verified offline by the markup, geometry, palette, model, picker and resolver suites; SC-006 met offline by RequestStatusColumnTests with its loaded-store drive unrun; SC-012 met by markup with the disabled-button tooltip-on-hover leg unverified (platform behaviour); SC-015 met by the wizard suites with the rendered-card drive unrun; SC-016 met at the service seam with the live restart unrun; SC-014 and SC-017 unverified, both needing a rendered app",
       "files": [
         ".github/scripts/validate-csharp-xaml-naming.ps1",
         "MTM_Waitlist.Waitlist.View/Models/StatusColumnTheme.cs",
@@ -2728,9 +2728,9 @@
     },
     "T095": {
       "status": "DONE",
-      "did": "Restored the deleted STARTUP-REBUILD-BRIEF.md verbatim from f2202b4d^ and refreshed its stale SettingsViewModelTests citation, clearing the six pre-existing Service_AcceptanceSurfaceTests failures.",
+      "did": "Restored the deleted docs/startup/startup-rebuild-design-brief.md verbatim from f2202b4d^ and refreshed its stale SettingsViewModelTests citation, clearing the six pre-existing Service_AcceptanceSurfaceTests failures.",
       "files": [
-        "STARTUP-REBUILD-BRIEF.md"
+        "docs/startup/startup-rebuild-design-brief.md"
       ]
     },
     "T096": {
@@ -2775,7 +2775,7 @@
       "status": "DONE",
       "did": "Wrote the image naming contract: both roots, the part collections and prefix families, the application's own folders, the hopper folder and its three names, the dunnage root, the picture rules and the key-file exception, each read from the code that enforces it.",
       "files": [
-        "docs/IMAGE-NAMING.md"
+        "docs/guides/guides-pictures-image-naming.md"
       ]
     },
     "T099": {
@@ -2806,7 +2806,7 @@
         "Module_Waitlist/Controls/WaitlistLineCardView.xaml",
         "Module_Waitlist/Controls/WaitlistLineCardDetailTemplateSelector.cs",
         "MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs",
-        "WAITLIST-CARD-LAYOUT-PRE-SPEC.md",
+        "docs/research/research-waitlist-card-layout-pre-spec.md",
         "specs/012-waitlist-card-layout/spec.md",
         "specs/012-waitlist-card-layout/data-model.md",
         "specs/012-waitlist-card-layout/tasks.md"
@@ -2920,7 +2920,7 @@
         "MTM_Waitlist.Settings/Services/PartPictureResolver.cs",
         "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
         "MTM_Waitlist.Tests/Module_Settings/PictureShareReachabilityTests.cs",
-        "tools/measure-ui-responsiveness.ps1"
+        "scripts/ui-automation/measure-ui-responsiveness.ps1"
       ]
     },
     "T116": {
@@ -2989,7 +2989,7 @@
     },
     {
       "what": "full test suite",
-      "command": "pwsh -NoProfile -ExecutionPolicy Bypass -File tools/run-tests.ps1 -All",
+      "command": "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/build/run-tests.ps1 -All",
       "source": "derived",
       "exitCode": 0,
       "durationSeconds": 54.1,
@@ -3103,7 +3103,7 @@
     },
     {
       "what": "live card layout and gestures",
-      "command": "pwsh -File tools/ui-drive.ps1 -Action dump (signed in as JKOLL; geometry read from UI Automation)",
+      "command": "pwsh -File scripts/ui-automation/ui-drive.ps1 -Action dump (signed in as JKOLL; geometry read from UI Automation)",
       "source": "derived",
       "exitCode": 1,
       "durationSeconds": 0.4,
@@ -3114,7 +3114,7 @@
     },
     {
       "what": "no-data card centres its title and collapses the cells",
-      "command": "pwsh tools/ui-drive.ps1 signin + UI Automation geometry on request 24 (deliver-riser-table)",
+      "command": "pwsh scripts/ui-automation/ui-drive.ps1 signin + UI Automation geometry on request 24 (deliver-riser-table)",
       "source": "derived",
       "exitCode": 1,
       "durationSeconds": 25.0,
@@ -3125,7 +3125,7 @@
     },
     {
       "what": "cached-data notice has a 24px gap below it",
-      "command": "pwsh tools/ui-drive.ps1 signin + UI Automation geometry of ShellPage StatusInfoBar",
+      "command": "pwsh scripts/ui-automation/ui-drive.ps1 signin + UI Automation geometry of ShellPage StatusInfoBar",
       "source": "derived",
       "exitCode": 1,
       "durationSeconds": 0.3,
@@ -3211,7 +3211,7 @@
       ]
     },
     {
-      "what": "This machine is the plant host: its own IPv4 addresses include 172.16.1.104, VISUAL resolves to 172.16.1.75, sqlcmd (ODBC 170) connects as SHOP2, and MySQL on 172.16.1.104:3306 accepts the configured root connection. The block recorded in NEXT-RUN.md - no Visual host, no live store - no longer applies.",
+      "what": "This machine is the plant host: its own IPv4 addresses include 172.16.1.104, VISUAL resolves to 172.16.1.75, sqlcmd (ODBC 170) connects as SHOP2, and MySQL on 172.16.1.104:3306 accepts the configured root connection. The block recorded in docs/operations/operations-waitlist-next-run.md - no Visual host, no live store - no longer applies.",
       "command": "n/a - environment fact established while running T067 and T071",
       "result": "the live half of US5 and US6 could be carried out",
       "warnings": []
@@ -3223,7 +3223,7 @@
       "step": "implement"
     },
     {
-      "note": "Six pre-existing test failures remain, all one cause: Module_Startup AcceptanceSurfaceTests reads a repo-root STARTUP-REBUILD-BRIEF.md that does not exist. They were failing at T001's recorded baseline before any of this work (baseline 1901 passed / 6 failed / 46 skipped) and the final run reproduces exactly the same six (2114 passed / 6 failed / 47 skipped, 2167 total). This feature introduced zero new failures.",
+      "note": "Six pre-existing test failures remain, all one cause: Module_Startup AcceptanceSurfaceTests reads a repo-root docs/startup/startup-rebuild-design-brief.md that does not exist. They were failing at T001's recorded baseline before any of this work (baseline 1901 passed / 6 failed / 46 skipped) and the final run reproduces exactly the same six (2114 passed / 6 failed / 47 skipped, 2167 total). This feature introduced zero new failures.",
       "step": "implement"
     },
     {
@@ -3295,7 +3295,7 @@
       "note": "{\"concern\":\"Picture resolution no longer re-probes the share per part per extension and is reused by an action reload, so the status buttons no longer pay seconds for it. What remains on that path is real store latency: 0.05-0.11 s back-to-back, and about 1.2 s after a long quiet period because an idle MySQL connection has to be re-established. That is a connection warm-up rather than a defect, and it is stated rather than hidden.\",\"kind\":\"residual\"}"
     },
     {
-      "note": "T048, T058, T069, T079 and T088 stay unticked because every one of them is driven through the running application, and the app's own account and PIN are not available here. Nothing else blocks them: the live store is provisioned and validates, Infor Visual answers, and the tooling (tools/ui-drive.ps1) is documented. What is missing is one credential, supplied at run time by the person at the keyboard.",
+      "note": "T048, T058, T069, T079 and T088 stay unticked because every one of them is driven through the running application, and the app's own account and PIN are not available here. Nothing else blocks them: the live store is provisioned and validates, Infor Visual answers, and the tooling (scripts/ui-automation/ui-drive.ps1) is documented. What is missing is one credential, supplied at run time by the person at the keyboard.",
       "step": "implement"
     },
     {
@@ -3331,7 +3331,7 @@
     "skipped": [
       {
         "name": "startup-launch",
-        "reason": "this feature changed no file under MTM_Waitlist.Startup/** or Module_Startup/**, so the capability's behaviour is untouched. It is the only capability living-specs.yml registers; the waitlist card, Settings resolution, Database and Strings areas this feature did change have no living spec, which capabilities/DRIFT.md records as a standing opt-in gap rather than something this step should close on its own."
+        "reason": "this feature changed no file under MTM_Waitlist.Startup/** or Module_Startup/**, so the capability's behaviour is untouched. It is the only capability living-specs.yml registers; the waitlist card, Settings resolution, Database and Strings areas this feature did change have no living spec, which docs/living-specs/living-specs-drift-ledger.md records as a standing opt-in gap rather than something this step should close on its own."
       }
     ]
   }

@@ -50,7 +50,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
     private const string DefaultInput = "FGT0002000";
 
     /// <summary>
-    /// The settled cells of every Item, as <c>data-model.md</c> §9 and <c>WAITLIST-CARD-LAYOUT-PRE-SPEC.md</c>
+    /// The settled cells of every Item, as <c>data-model.md</c> §9 and <c>docs/research/research-waitlist-card-layout-pre-spec.md</c>
     /// §5.1 settle them. Where a label is being moved by the seed reconciliation (D33, T080) both spellings
     /// are listed, because both are a cell of that Item and neither may fall out of the card.
     /// </summary>

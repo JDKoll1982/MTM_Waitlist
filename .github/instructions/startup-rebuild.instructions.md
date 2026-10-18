@@ -9,7 +9,7 @@ Feature `010-startup-rebuild` replaced the whole previous launch surface. Read t
 `MTM_Waitlist.Startup/` or `Module_Startup/`, because the shape is deliberate and the guards fail the build when
 it is broken.
 
-Its living spec is `capabilities/startup-launch/spec.md`. The specification, plan and task list are under
+Its living spec is `docs/living-specs/living-specs-capability-startup-launch.spec.md`. The specification, plan and task list are under
 `specs/010-startup-rebuild/`.
 
 ## The entry point

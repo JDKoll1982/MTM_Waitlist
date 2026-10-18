@@ -142,7 +142,7 @@ None in the strict sense: every one of the 38 FRs and 17 SCs is cited by at leas
 | Exact imports | `^using Microsoft\.Extensions\.Logging;\s*$` | **31 files** | 31 — match (56 is the substring count) |
 | Local-state arithmetic | migration map §1A/§1B/§5 | 6 + 9 − 4 = 11 deleted (§1A ∪ §1B), 11 kept; 10 doubles across the 11 kept files, 5 replaced + 5 deleted, 4 already dead | 11/11 — match |
 | Database arithmetic | T020 (9) + T061 (1) procedures; T060+T061 (3) tables; T044 (4) + T046 (3) + T048 (1) + T049 (2) procedures; T044+T046 tables; T047 repurposed | 2 + 10 + 1 + 3 + 10 = 26 | 26 — match |
-| Cited paths | every backticked path in `tasks.md` | all existing deletion targets and kept files resolve; every miss is a file or folder the feature creates (`MTM_Waitlist.Logging/`, `MTM_Waitlist.Startup/Options/`, `MTM_Waitlist.Tests/Module_Startup/ViewModels/`, `…/EdgeCases/`, `capabilities/startup-launch/`, the four output docs); `living-specs.yml` is tracked and deleted in the working tree, which T163 handles | — |
+| Cited paths | every backticked path in `tasks.md` | all existing deletion targets and kept files resolve; every miss is a file or folder the feature creates (`MTM_Waitlist.Logging/`, `MTM_Waitlist.Startup/Options/`, `MTM_Waitlist.Tests/Module_Startup/ViewModels/`, `…/EdgeCases/`, `docs/living-specs/`, the four output docs); `living-specs.yml` is tracked and deleted in the working tree, which T163 handles | — |
 | T185 claim | `MTM_Waitlist.Module_Startup.Services` over non-startup `.cs` | 11 files name it (ShellPage.xaml.cs, 8 test files, 2 DI files) | claim of "the only place" — refuted (CG1) |
 
 ## Next Actions

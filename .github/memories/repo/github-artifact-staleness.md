@@ -65,4 +65,4 @@ That store is **machine-local and is not committed on push** — which is exactl
 corrected record exists. Per `.github/memories/README.md`, canonical repo facts belong in committed files
 under `.github/memories/` and the ephemeral store should point here rather than the other way round.
 
-Related: `capabilities/DRIFT.md` records the documentation-drift half of the same problem.
+Related: `docs/living-specs/living-specs-drift-ledger.md` records the documentation-drift half of the same problem.

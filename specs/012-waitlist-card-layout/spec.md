@@ -3,7 +3,7 @@
 **Feature Branch**: `012-waitlist-card-layout`
 **Created**: 2026-10-10
 **Status**: Draft
-**Input**: Redesign the waitlist list row into four zones fed by the request's own Item: an identity zone (picture, badge, requesting work centre), a status zone (status word, time ring, person), an Item-driven detail grid, and an action grid that re-centres as buttons become unavailable. Requirements source: the settled pre-specification `WAITLIST-CARD-LAYOUT-PRE-SPEC.md`, whose 39 decisions (D1 to D43, with deliberate gaps at D8, D9, D10 and D17) carry no open questions. Section numbers below refer to that document.
+**Input**: Redesign the waitlist list row into four zones fed by the request's own Item: an identity zone (picture, badge, requesting work centre), a status zone (status word, time ring, person), an Item-driven detail grid, and an action grid that re-centres as buttons become unavailable. Requirements source: the settled pre-specification `docs/research/research-waitlist-card-layout-pre-spec.md`, whose 39 decisions (D1 to D43, with deliberate gaps at D8, D9, D10 and D17) carry no open questions. Section numbers below refer to that document.
 
 ## User Scenarios & Testing
 

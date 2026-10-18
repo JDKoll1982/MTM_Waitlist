@@ -373,5 +373,5 @@ None. This rule is clean across the tree.
   format. The same shape applies to any further rule — estimate the blast radius, put it to the owner, take the
   rule, and re-measure this report from the guard's own output.
 - Rule 4 and Rule 5 are the smallest remaining, each mechanical. Rule 2's surviving findings are mostly
-  `TooltipResources*.resw`, which pair with the generators in `tools/`.
+  `TooltipResources*.resw`, which pair with the generators in `scripts/assets/`.
 - `MTM_Waitlist.Tests` carries 32 of the remaining findings.

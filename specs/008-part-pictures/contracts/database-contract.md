@@ -79,7 +79,7 @@ between them (research D13).
 1. **The reader resolves both layouts.** `AppStoragePaths.ResolvePicturePath` answers for a value that names the
    pre-move place and for one that names the post-move place, so no picture is unresolvable while the move is
    incomplete and no picture has to be set again by hand. This is what satisfies FR-036 unconditionally.
-2. **`tools/Move-PartPictureLayout.ps1` moves the files, and `Seeds/seed_picture_layout_move` rewrites the recorded
+2. **`scripts/database/Move-PartPictureLayout.ps1` moves the files, and `Seeds/seed_picture_layout_move` rewrites the recorded
    values.** The tool takes the configured root, reports what it will move and what it moved, refuses to overwrite an
    existing file, and leaves everything it does not recognise where it is. It is run once, by hand, reviewed, and it
    is never run from application startup, which the schema rules require.

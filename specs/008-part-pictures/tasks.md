@@ -122,7 +122,7 @@ phase.
   `MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs`
 - [x] **T023** [P] The run-once file move: takes the configured root, reports what it will move and what it moved,
   refuses to overwrite an existing file, leaves what it does not recognise where it is, and is never run from
-  application startup · `tools/Move-PartPictureLayout.ps1`
+  application startup · `scripts/database/Move-PartPictureLayout.ps1`
 
 **⟶ Wait for Wave 5 to finish, then:**
 
@@ -512,7 +512,7 @@ Cross-cutting cleanup, documentation, and validation against the specification's
 
 - [x] **T088** Drive the built application with the PowerShell UI-Automation recipe and confirm each converted surface
   draws a part's picture and the shared placeholder, with no blank space anywhere a part's picture belongs ·
-  `tools/ui-drive.ps1`
+  `scripts/ui-automation/ui-drive.ps1`
 
 **⟶ Wait for Wave 2 to finish, then:**
 

@@ -43,7 +43,7 @@ public sealed class ImageStorageOptions
     /// given as an absolute path.
     /// Default: <c>Waitlist\Hoppers</c> beneath the picture folder — the application's own collection, in the one
     /// folder set aside for hopper artwork. A plant-wide setting like the picture folder, and this is the fallback.
-    /// The files inside it are named after the size word they picture; the contract is <c>docs/IMAGE-NAMING.md</c>.
+    /// The files inside it are named after the size word they picture; the contract is <c>docs/guides/guides-pictures-image-naming.md</c>.
     /// </summary>
     public string HopperFolderPath { get; init; } = ConfigSettingKeys.ImageStorageHopperFolderPathDefault;
 

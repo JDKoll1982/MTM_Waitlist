@@ -23,7 +23,7 @@ beside the status file: `analysis-iteration1.md` … `analysis-iteration5.md`.
 yet — it sits at `ready-to-implement`, every task is unchecked — so the owner was asked how to proceed and
 directed that all findings be fixed in the spec documentation. The fixes therefore landed in `spec.md`,
 `plan.md`, `tasks.md`, `research.md`, `data-model.md`, three files under `contracts/`,
-`local-state-test-migration.md`, and the two owner instruments `STARTUP-REBUILD-BRIEF.md` and
+`local-state-test-migration.md`, and the two owner instruments `docs/startup/startup-rebuild-design-brief.md` and
 `STARTUP-REBUILD-CHECKLIST.md`.
 
 The previous run's log is preserved verbatim as `findings.fixed.earlier-run.md`.
@@ -185,7 +185,7 @@ without being staged. All three were restored from `HEAD` (`git restore`), and t
 that state were removed with it because they no longer describe the tree: T027 is a plain deletion again, and
 T163 no longer tells the implementer to restore the registry first. Verified after the restore: all three files
 are present, `git status` is clean for them, and the restored registry declares exactly the two capabilities
-`capabilities/DRIFT.md` describes.
+`docs/living-specs/living-specs-drift-ledger.md` describes.
 
 ### `IComputerRegistryService` was decided: rebuilt inside the Settings module
 
@@ -208,6 +208,6 @@ T187 already owned the work, and now owns a decided shape instead of a question.
 `contracts/sql-contracts.md`, plus the loop's own records: `analysis.md`,
 `analysis-iteration1.md` … `analysis-iteration5.md`, `analysis-pre-fix.md` (preserved from the earlier run) and
 `findings.fixed.earlier-run.md`.
-Repo root: `STARTUP-REBUILD-BRIEF.md`, `STARTUP-REBUILD-CHECKLIST.md`.
+Repo root: `docs/startup/startup-rebuild-design-brief.md`, `STARTUP-REBUILD-CHECKLIST.md`.
 Untouched by design: `specs/010-startup-rebuild/.spec-context.json`, whose recorded "179 tasks" line is
 generated companion state and will be rewritten by the next companion step.

@@ -2050,7 +2050,7 @@ history (T231); the real measurement stays owed and stays in `READINESS-CHECKLIS
   stale citations inside `specs/001-module-mock-visual-fallback/tasks.md` — **classify each as provenance** (a record
   of what was run) **or instruction** before rewriting, because the two want different answers. · `OPEN-TASKS.md`,
   `specs/001-module-mock-visual-fallback/tasks.md`
-  **DONE 2026-09-20.** Every citation is classified **provenance**, and the classification is stated where a reader will hit it: `OPEN-TASKS.md` section 5 item 6, plus a new banner at the top of `specs/001-module-mock-visual-fallback/tasks.md`, record that `VALIDATION-PROMPT-SERVER.md` was a one-shot host handover that **was executed**, so its absence is not missing work, and that `RELEASE-NOTES.md` is retired rather than lost. The rule the classification follows is written down in `capabilities/DRIFT.md` (instruction / provenance / already-retired).
+  **DONE 2026-09-20.** Every citation is classified **provenance**, and the classification is stated where a reader will hit it: `OPEN-TASKS.md` section 5 item 6, plus a new banner at the top of `specs/001-module-mock-visual-fallback/tasks.md`, record that `VALIDATION-PROMPT-SERVER.md` was a one-shot host handover that **was executed**, so its absence is not missing work, and that `RELEASE-NOTES.md` is retired rather than lost. The rule the classification follows is written down in `docs/living-specs/living-specs-drift-ledger.md` (instruction / provenance / already-retired).
 
 - [x] **T192** Restate the SC-007 / SC-008 follow-up honestly in one place: the windows opened **2026-09-12**, the
   re-check is **due 2026-10-12**, and they are **unmeasured** until then — **and state the real blocker, not just the
@@ -2074,11 +2074,11 @@ history (T231); the real measurement stays owed and stays in `READINESS-CHECKLIS
 
 - [x] **T195** Extend `FEATURES.md`'s maintainer index (it lists `specs/001` alone while its own defect table cites
   `specs/002` ten times) and drop the dead `RELEASE-NOTES.md` pointer, which is not in the tree. · `FEATURES.md`
-  **DONE 2026-09-20.** The maintainer index now lists `specs/001`-`004`, `defects/`, `WeekendProject/SpecTemplates/`, `OPEN-TASKS.md`, `OPEN-WORK-NEXT-SPEC.md` and `capabilities/DRIFT.md`, and the dead `RELEASE-NOTES.md` pointer is recorded as **not in the tree** with the live equivalents named.
+  **DONE 2026-09-20.** The maintainer index now lists `specs/001`-`004`, `defects/`, `WeekendProject/SpecTemplates/`, `OPEN-TASKS.md`, `OPEN-WORK-NEXT-SPEC.md` and `docs/living-specs/living-specs-drift-ledger.md`, and the dead `RELEASE-NOTES.md` pointer is recorded as **not in the tree** with the live equivalents named.
 
 - [x] **T196** Reconcile `FEATURES.md`'s defect-status column with the defect files themselves — it says the
   Cancel/Accept defect was closed by `specs/002` while the defect file says **`specs/003`**, with the actions
-  working. · `FEATURES.md`, `defects/Closed-High-Waitlist-CardCancelAndAcceptButtonsAreInert.md`
+  working. · `FEATURES.md`, `docs/defects/defects-waitlist-high-card-cancel-and-accept-buttons-are-inert.md`
   **DONE 2026-09-20.** The defect-status column was reconciled against the defect files: the Cancel/Accept defect is attributed to **`specs/003`** (as its own file says, with the actions working), the material-attributes and analytics entries were re-pointed, and the three not-yet-specified rows now name concrete specs or seed templates instead of placeholder names.
 
 - [x] **T197** Reconcile `WeekendProject/PromptFiles/07-8%-Phase2-fulfill.md` against `specs/003`: reconcile every
@@ -2126,9 +2126,9 @@ history (T231); the real measurement stays owed and stays in `READINESS-CHECKLIS
   `specs/005-setup-work-order-search/`
   **DONE 2026-09-20.** `specs/005-setup-work-order-search/ABANDONED.md` was created to record the abandoned 2026-09-13 run from its retained 58-line `.trace.jsonl` (45 `capture`, 5 `set`, 4 `lifecycle`, 2 `finish`, 2 `unknown`; `spec.md` never named, never written) and to state why the directory is kept. Verified it cannot create a false capability: `resolve-spec-paths.py --all --json` reports `orphans: []` and does not list `specs/005`. Verified the number is consumed: `create-new-feature.ps1` takes the highest number from the directories under `specs/`, so the next real spec is **`006`**.
 
-- [x] **T206** Restore or re-derive `capabilities/DRIFT.md`, named in repo memory as the drift **ledger of record**
+- [x] **T206** Restore or re-derive `docs/living-specs/living-specs-drift-ledger.md`, named in repo memory as the drift **ledger of record**
   and absent from the tree. · `capabilities/`
-  **DONE 2026-09-20.** `capabilities/DRIFT.md` created as the ledger of record: what the ledger is, how to run `drift.py` (with `python`, never `python3`), the blind spot, the file-level-glob-leaf hazard, coverage-link validation, the 2026-09-13 findings with their 2026-09-20 resolutions, and the instruction/provenance/already-retired classification rule. Verified `capabilities/DRIFT.md` is **inert** to the tooling -- a non-spec markdown file there matches neither `*.spec.md` nor `capabilities/<name>/spec.md`, so it cannot be mistaken for a capability.
+  **DONE 2026-09-20.** `docs/living-specs/living-specs-drift-ledger.md` created as the ledger of record: what the ledger is, how to run `drift.py` (with `python`, never `python3`), the blind spot, the file-level-glob-leaf hazard, coverage-link validation, the 2026-09-13 findings with their 2026-09-20 resolutions, and the instruction/provenance/already-retired classification rule. Verified `docs/living-specs/living-specs-drift-ledger.md` is **inert** to the tooling -- a non-spec markdown file there matches neither `*.spec.md` nor `capabilities/<name>/spec.md`, so it cannot be mistaken for a capability.
 
 - [x] **T207** State the living-spec blind spot where a reader will hit it: only `startup` and `startup-diagnostics`
   are registered, so drift across `MTM_Waitlist.Waitlist.View/**`, `Module_Waitlist/**`, `MTM_Waitlist.Core/**`,
@@ -2475,13 +2475,13 @@ four tasks give the criteria a durable input, prove the metric, and keep the unm
   reads, the outcome/reason vocabulary, cycle sharing, trigger separation, append-only growth, UTC normalization,
   credential redaction, corrupt-line tolerance and both retention edges; build **0 warnings / 0 errors**, suite
   **1141 passed / 0 failed / 27 skipped / 1168 total**. The loop was then closed by hand: a fixture wrote 270 lines
-  **through the real store** and `tools/measure-reliability-window.ps1 -Root <that folder>` read them and reported
+  **through the real store** and `scripts/service/measure-reliability-window.ps1 -Root <that folder>` read them and reported
   SC-007 **30 of 30 scheduled cycles, 100%, PASS** and SC-008 **120 windows, 4 of 4 stores, 0 missing artifacts,
   PASS**. That run proves the tool reads what the store writes — **it is a fixture, so it does not prove the service
   is reliable**, and the tool now labels its own output `Evidence: read from <path>` rather than `seeded` when it did
   not generate the file.
 - [x] **T231** **Land the seeded measurement and prove both thresholds bite** — **DONE 2026-09-20.**
-  `tools/measure-reliability-window.ps1` reads a run history (the shape T230 must write), seeds a 30-day one per
+  `scripts/service/measure-reliability-window.ps1` reads a run history (the shape T230 must write), seeds a 30-day one per
   scenario, and computes both criteria: SC-007 as *succeeded cycles / scheduled cycles ≥ 95% **and** every
   non-success attributable to a logged external-source outage*, SC-008 as *every scheduled window, for every store,
   produced an artifact with a non-zero size*. Four scenarios were run and the verdicts are the evidence —
@@ -2494,7 +2494,7 @@ four tasks give the criteria a durable input, prove the metric, and keep the unm
   where nothing ran leaves no record and would otherwise be invisible. **What this proves and does not prove:** it
   proves the metric is computable and the gate is enforceable; it is seeded data and therefore proves **nothing**
   about the service's real-world reliability. Run `-Scenario healthy -Generate` to reproduce, `-Generate` with the
-  others to see each failure mode. · `tools/measure-reliability-window.ps1`
+  others to see each failure mode. · `scripts/service/measure-reliability-window.ps1`
 - [x] **T232** **Keep the unmeasured part labelled unmeasured.** Wherever this work is summarised — `OPEN-TASKS.md`,
   `READINESS-CHECKLIST.md` and the `specs/001` status table — say plainly that the seeded run proves the *metric*,
   that the real 30-day result is still owed, and that it cannot be obtained until T230 lands and the service then
@@ -2503,7 +2503,7 @@ four tasks give the criteria a durable input, prove the metric, and keep the unm
   `specs/001-module-mock-visual-fallback/tasks.md`
   **Done 2026-09-20 — the three named places say it, and a sweep found four more claims that did not.** All three
   named summaries now carry the same three-part statement verbatim in substance: the **metric** is proven against a
-  seeded 30-day history by `tools/measure-reliability-window.ps1` and both thresholds demonstrably bite (93 % fails
+  seeded 30-day history by `scripts/service/measure-reliability-window.ps1` and both thresholds demonstrably bite (93 % fails
   SC-007; a non-outage skip fails SC-007 even at 97 %; one missing backup artifact fails SC-008); that proves the
   **gate, never the service**; and the **real** result is **owed** until T230 lands and the service then runs on the
   host for 30 days. `OPEN-TASKS.md` line 59 ends *"A green seeded run must not be reported as a passing criterion"*;

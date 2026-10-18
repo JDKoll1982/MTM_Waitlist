@@ -12,7 +12,7 @@ namespace MTM_Waitlist.Tests.Module_Mock_Service;
 /// </summary>
 /// <remarks>
 /// The assertions that matter most are the ones about the file's <b>shape</b>, not about the store's API. The
-/// history exists to be read by <c>tools/measure-reliability-window.ps1</c>, in another language that cannot
+/// history exists to be read by <c>scripts/service/measure-reliability-window.ps1</c>, in another language that cannot
 /// reference these types, so a renamed property or a reworded outcome silently turns a measured criterion back
 /// into an unmeasured one. These tests pin the contract.
 /// </remarks>

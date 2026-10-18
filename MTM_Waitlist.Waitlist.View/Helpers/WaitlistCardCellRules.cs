@@ -7,7 +7,7 @@ namespace MTM_Waitlist.Module_Waitlist.Helpers;
 /// <summary>
 /// The card's own rules for turning an Item's declared fields into the cells it draws — the half of the
 /// assignment that belongs to the card rather than to configuration
-/// (<c>specs/012-waitlist-card-layout/data-model.md</c> §9, <c>WAITLIST-CARD-LAYOUT-PRE-SPEC.md</c> §5).
+/// (<c>specs/012-waitlist-card-layout/data-model.md</c> §9, <c>docs/research/research-waitlist-card-layout-pre-spec.md</c> §5).
 /// </summary>
 /// <remarks>
 /// <para>

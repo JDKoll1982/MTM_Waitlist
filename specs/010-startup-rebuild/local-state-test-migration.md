@@ -7,7 +7,7 @@ mechanism is removed. It replaces the three conflicting figures that were in cir
 "18 test files with 115 local-settings references", tasks.md T157's "twelve behaviour-test files listed in
 S11.5.5", and a tree-wide string search that counted differently).
 
-Sources: `STARTUP-REBUILD-BRIEF.md` §S11.5.3, §S11.5.5; `tasks.md` T025, T134, T135, T137, T138, T139, T142,
+Sources: `docs/startup/startup-rebuild-design-brief.md` §S11.5.3, §S11.5.5; `tasks.md` T025, T134, T135, T137, T138, T139, T142,
 T157; `plan.md` Scope.
 
 Line numbers were taken from the working tree on 2026-09-26 and are 1-based and inclusive. A test method's

@@ -28,7 +28,7 @@ directory was cleaned afterwards, leaving only the journal.
   `write-context.py`: every capture script returns 0 on failure, so the trigger appears only in the
   specific line above it. The known triggers are `[WinError 5] Access is denied` renames while
   `.spec-context.json` is open in an editor, and the stale `python3` interpreter prerequisite in the
-  agent files. See `capabilities/DRIFT.md` and the companion notes it cites.
+  agent files. See `docs/living-specs/living-specs-drift-ledger.md` and the companion notes it cites.
 
 ## Consequences a reader must know
 

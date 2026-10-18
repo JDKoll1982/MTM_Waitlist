@@ -33,7 +33,7 @@ namespace MTM_Waitlist.Module_Waitlist.ViewModels;
 /// configured in one known place, named after the size word. The folder, the three size words and the file names
 /// all come from <see cref="PartPictureLayout"/>, which is also what the card reads, so the step and the card
 /// cannot ask for two different pictures for one size (D22, FR-078). The naming contract is documented in
-/// <c>docs/IMAGE-NAMING.md</c>.
+/// <c>docs/guides/guides-pictures-image-naming.md</c>.
 /// </para>
 /// </remarks>
 public partial class NewRequestHopperViewModel : ObservableRecipient, INavigationAware

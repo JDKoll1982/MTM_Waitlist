@@ -12,7 +12,7 @@ namespace MTM_Waitlist.Mock.Service.Models;
 /// past the retention without the compiler pointing at the contradiction.
 /// </para>
 /// <para>
-/// The same number appears as the <c>-Days</c> default of <c>tools/measure-reliability-window.ps1</c>, which is
+/// The same number appears as the <c>-Days</c> default of <c>scripts/service/measure-reliability-window.ps1</c>, which is
 /// a separate language and cannot reference this type. The tool asserts it found records, so a divergence shows
 /// up as a failed measurement rather than as a quietly perfect score.
 /// </para>

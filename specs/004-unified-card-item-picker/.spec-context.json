@@ -3413,7 +3413,7 @@
     },
     {
       "what": "T116 SC-003 uniform card shape in the running app",
-      "command": "PowerShell UIA ControlType.Text dump + tools/capture_app_window.ps1 + tools/ocr_png.ps1 (OCR under Windows PowerShell 5.1)",
+      "command": "PowerShell UIA ControlType.Text dump + scripts/ui-automation/capture_app_window.ps1 + scripts/ui-automation/ocr_png.ps1 (OCR under Windows PowerShell 5.1)",
       "result": "11 requests spanning Pickup, Deliver and Other Items rendered the identical card structure (status, Line 1, Line 2, Requested by, Press, Remaining time, Waiting) with no per-Item layout variant; screenshot 02-waitlist-cards.png",
       "warnings": []
     },
@@ -3435,7 +3435,7 @@
     },
     {
       "what": "T116 US5 picture screen shows per-Item pictures",
-      "command": "UIA: expand ImageLocationSettingsExpander -> Manage request item images -> read the dialog; capture tools/capture_app_window.ps1 + ocr_png.ps1",
+      "command": "UIA: expand ImageLocationSettingsExpander -> Manage request item images -> read the dialog; capture scripts/ui-automation/capture_app_window.ps1 + ocr_png.ps1",
       "result": "the Item Images dialog lists every Item under its Category with Inherited for Items that have no picture of their own and a resolved path for the six seeded request_item rows (Assets/RequestTypes/table-handling.png for both table Items), matching the 9 seeded config_images_locations rows; the picture save path was not exercised because its storage root X: is not mapped on this workstation",
       "warnings": []
     },

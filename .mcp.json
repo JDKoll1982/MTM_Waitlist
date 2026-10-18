@@ -15,7 +15,7 @@
     },
     "csv-mcp-server": {
       "type": "local",
-      "command": "C:\\ProgramData\\uv\\uv.exe",
+      "command": "C:\\Users\\johnk\\AppData\\Local\\Microsoft\\WinGet\\Packages\\astral-sh.uv_Microsoft.Winget.Source_8wekyb3d8bbwe\\uv.exe",
       "args": [
         "tool",
         "run",
@@ -28,7 +28,7 @@
         "INFO"
       ],
       "env": {
-        "CSV_STORAGE_PATH": "c:\\Users\\johnk\\source\\repos\\MTM_Waitlist\\Documents\\Development\\InforVisual\\DatabaseCSVFiles",
+        "CSV_STORAGE_PATH": "c:\\Users\\johnk\\source\\repos\\MTM_Waitlist\\docs\\database",
         "CSV_MAX_FILE_SIZE": "100",
         "CSV_BACKUP_ENABLED": "true",
         "CSV_SUPPORT_ABSOLUTE_PATHS": "true"

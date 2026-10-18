@@ -122,7 +122,7 @@ public static class ConfigSettingKeys
     /// after the size word. Owned by the storage screen (Settings, the storage panel) rather than compiled in, so
     /// where the hopper artwork lives is the owner's to change without a new release (FR-078). When set, overrides
     /// the value from appsettings.json. The naming contract for the files inside it is
-    /// <c>docs/IMAGE-NAMING.md</c>.
+    /// <c>docs/guides/guides-pictures-image-naming.md</c>.
     /// </para>
     /// Default: <see cref="ImageStorageHopperFolderPathDefault"/> (<c>Waitlist\Hoppers</c> beneath the picture
     /// folder).

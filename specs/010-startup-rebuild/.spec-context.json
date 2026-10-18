@@ -3043,7 +3043,7 @@
       "decision": "the schema validator was falsified on purpose before its clean run was believed: the same script run against mtm_mock reports 57 missing objects, which is what proves a zero-row result on mtm_waitlist means the store passes rather than the script not running"
     },
     {
-      "decision": "the two waitlist card markup tests were removed rather than repaired: Card_KeepsTheTitleOnItsOwnTopRow and Card_DrawsLine1AndLine2 asserted bindings the shipped card has not carried since the one-card shape landed, so they had been failing against the card rather than guarding it; the card's line layout is settled by WAITLIST-CARD-LAYOUT-PRE-SPEC.md and that feature's tests take this ground back, and the removal is recorded in the test file itself so the gap is deliberate and visible"
+      "decision": "the two waitlist card markup tests were removed rather than repaired: Card_KeepsTheTitleOnItsOwnTopRow and Card_DrawsLine1AndLine2 asserted bindings the shipped card has not carried since the one-card shape landed, so they had been failing against the card rather than guarding it; the card's line layout is settled by docs/research/research-waitlist-card-layout-pre-spec.md and that feature's tests take this ground back, and the removal is recorded in the test file itself so the gap is deliberate and visible"
     },
     {
       "decision": "the coverage record is a machine-read artifact, so every requirement's tasks and tests are now written in one form the checker can resolve: tasks as a list of TNNN ids, and tests as a single comma-separated string of fully-qualified 'path.cs::MethodName' references, each verified to exist. The earlier form had three encodings mixed together - bare method names, either a JSON list or a string, and refs joined by a semicolon - which is what made the report read '4 of 5 found' for FR-003 and '1 test not found' for FR-039. A retired requirement carries no tests value at all, because no test can cover a requirement that was withdrawn."
@@ -3081,7 +3081,7 @@
   ],
   "approach": "Delete the whole startup surface first and prove it with a placeholder window, then rebuild in place: a data-driven launch pipeline of named steps with an activity feed, two read-only identity contracts replacing StartupState, sessions on the new user_active_sessions table judged on the store clock, diagnostics on ops_startup_logs through one unconditional logging module in a new MTM_Waitlist.Logging library, and a pre-sign-in machine-setup gate that cannot be bypassed.",
   "context": [
-    "Owner design brief STARTUP-REBUILD-BRIEF.md sections S1 to S16 is the primary design source; the plan maps it rather than redesigning it.",
+    "Owner design brief docs/startup/startup-rebuild-design-brief.md sections S1 to S16 is the primary design source; the plan maps it rather than redesigning it.",
     "Owner execution checklist STARTUP-REBUILD-CHECKLIST.md, 179 tasks, 11 phases, 11 gates, is the instrument tasks.md must not contradict.",
     "Living spec capability startup read whole; it contributed the ordered-step, store-clock, unreadable-hardware-identity-admitted, three-destination, remedy-scope and best-effort-picture requirements.",
     "Resolved permission baseline from Database/Seeds/seed_permission_role_baselines/create.sql: permission.settings.ignored_locations is granted to seven roles and denied to two, while permission.settings.computers is already exactly IT Department and Developer.",
@@ -4473,7 +4473,7 @@
       "status": "DONE",
       "did": "S13 expanded into a walkable catalogue with a disposition per case, the same twenty-three cases recorded in spec.md, and a test for each case not already covered",
       "files": [
-        "STARTUP-REBUILD-BRIEF.md",
+        "docs/startup/startup-rebuild-design-brief.md",
         "MTM_Waitlist.Tests/Module_Startup/EdgeCases/LaunchEdgeCaseTests.cs",
         "specs/010-startup-rebuild/spec.md"
       ],
@@ -4505,11 +4505,11 @@
     },
     "T163": {
       "status": "DONE",
-      "did": "The rebuilt surface re-adopted as one capability replacing the two whose matched code is gone: the registry, the drift ledger and capabilities/startup-launch/spec.md",
+      "did": "The rebuilt surface re-adopted as one capability replacing the two whose matched code is gone: the registry, the drift ledger and docs/living-specs/living-specs-capability-startup-launch.spec.md",
       "files": [
         "living-specs.yml",
-        "capabilities/DRIFT.md",
-        "capabilities/startup-launch/spec.md"
+        "docs/living-specs/living-specs-drift-ledger.md",
+        "docs/living-specs/living-specs-capability-startup-launch.spec.md"
       ],
       "concerns": []
     },
@@ -4573,7 +4573,7 @@
       "status": "DONE",
       "did": "The five cases that no longer apply recorded with their reasons, and the two new ones named",
       "files": [
-        "STARTUP-REBUILD-BRIEF.md"
+        "docs/startup/startup-rebuild-design-brief.md"
       ],
       "concerns": []
     },
@@ -5031,10 +5031,10 @@
       "files": [
         ".github/instructions/startup-rebuild.instructions.md",
         "specs/010-startup-rebuild/contracts/logging-contract.md",
-        "capabilities/startup-launch/spec.md",
+        "docs/living-specs/living-specs-capability-startup-launch.spec.md",
         "specs/011-identifier-first-signin/spec.md",
         "STARTUP-REBUILD-CHECKLIST.md",
-        "STARTUP-REBUILD-BRIEF.md"
+        "docs/startup/startup-rebuild-design-brief.md"
       ]
     },
     "T243": {
@@ -5187,9 +5187,9 @@
       "resolution": "Sharpened and partly closed on 2026-10-10. The instrument that was meant to name this crash wrote the fault to a file under the application's own local folder, which was itself a violation: nothing may be kept on a computer (FR-025) and SC-016 says a fault is recorded nowhere on the machine. It also wrote the exception unredacted, so a message carrying a connection string would have reached the disk where the seam would have dropped it (FR-036). The record now goes to the store through the seam, forced out with a bounded flush before the process ends, and FaultRecordAuditTests pins that. What is still open: no fault has been raised since 2026-10-01 and the store holds no first-chance entry, so only a real fault will name it."
     },
     {
-      "note": "ACCEPTED — WAITLIST-CARD-LAYOUT-PRE-SPEC.md owns what the card's first two lines say; the test file names the removal so a later reader finds the pre-spec rather than assuming the layout was verified.",
+      "note": "ACCEPTED — docs/research/research-waitlist-card-layout-pre-spec.md owns what the card's first two lines say; the test file names the removal so a later reader finds the pre-spec rather than assuming the layout was verified.",
       "status": "accepted",
-      "resolution": "WAITLIST-CARD-LAYOUT-PRE-SPEC.md owns what the card's first two lines say; the test file names the removal so a later reader finds the pre-spec rather than assuming the layout was verified."
+      "resolution": "docs/research/research-waitlist-card-layout-pre-spec.md owns what the card's first two lines say; the test file names the removal so a later reader finds the pre-spec rather than assuming the layout was verified."
     }
   ],
   "verified": [
@@ -5595,7 +5595,7 @@
     },
     {
       "what": "the solution builds clean",
-      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File tools\\check-build.ps1",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\build\\check-build.ps1",
       "source": "derived",
       "exitCode": 0,
       "durationSeconds": 28.3,
@@ -5603,7 +5603,7 @@
     },
     {
       "what": "the migration, catalogue, message, audit and launch-step gates",
-      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File tools\\run-tests.ps1 -Modules Module_Mock,Module_Startup,RetiredSymbolAudit,InlineSqlAudit,LaunchStepWiring -LogPath .specify\\verify-gates.txt",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\build\\run-tests.ps1 -Modules Module_Mock,Module_Startup,RetiredSymbolAudit,InlineSqlAudit,LaunchStepWiring -LogPath .specify\\verify-gates.txt",
       "source": "derived",
       "exitCode": 0,
       "durationSeconds": 16.2,
@@ -5823,10 +5823,10 @@
       "keptOutOfOverviewBecause": "resolved or superseded, so the overview lists only what is still live"
     },
     {
-      "note": "RESOLVED — Both tests were removed by owner direction, with the reason recorded in the test file itself: they asserted a card layout the shipped card has not had since the one-card shape landed, and WAITLIST-CARD-LAYOUT-PRE-SPEC.md owns the line layout.",
+      "note": "RESOLVED — Both tests were removed by owner direction, with the reason recorded in the test file itself: they asserted a card layout the shipped card has not had since the one-card shape landed, and docs/research/research-waitlist-card-layout-pre-spec.md owns the line layout.",
       "step": "implement",
       "status": "resolved",
-      "resolution": "Both tests were removed by owner direction, with the reason recorded in the test file itself: they asserted a card layout the shipped card has not had since the one-card shape landed, and WAITLIST-CARD-LAYOUT-PRE-SPEC.md owns the line layout.",
+      "resolution": "Both tests were removed by owner direction, with the reason recorded in the test file itself: they asserted a card layout the shipped card has not had since the one-card shape landed, and docs/research/research-waitlist-card-layout-pre-spec.md owns the line layout.",
       "closedOn": "2026-10-10",
       "keptOutOfOverviewBecause": "resolved or superseded, so the overview lists only what is still live"
     },

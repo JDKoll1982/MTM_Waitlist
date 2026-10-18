@@ -268,7 +268,7 @@ before. A test may **not** assert an Item's field list, and may not assert the p
 ## 10. Superseded by `012-waitlist-card-layout` — the seven rules, each with its replacement
 
 Recorded 2026-10-10 (FR-096 to FR-102). This is the list a later reader should check before treating any rule in
-this file as current. The authority for it is `WAITLIST-CARD-LAYOUT-PRE-SPEC.md` §6, "What this reverses", and the
+this file as current. The authority for it is `docs/research/research-waitlist-card-layout-pre-spec.md` §6, "What this reverses", and the
 live contract is `specs/012-waitlist-card-layout/contracts/card-and-identifier.md`.
 
 | # | The rule as this file had it | Superseded by |

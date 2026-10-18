@@ -8,7 +8,7 @@ exempt: ["*.config.*", "*.test.*", "**/migrations/**"]
 # MTM_Waitlist.Setup/**, Module_Setup/**, Database/**, Strings/**, Views/**, ViewModels/**.
 # Adopting an area is opt-in via /speckit.companion.living-adopt.
 # The standing record -- what is watched, what was found, and this blind spot -- is
-# `capabilities/DRIFT.md`. Read it before trusting a green run.
+# `docs/living-specs/living-specs-drift-ledger.md`. Read it before trusting a green run.
 #
 # 2026-09-27 (feature 010, task T163): the two capabilities this file used to declare, `startup`
 # and `startup-diagnostics`, were retired with the code they matched. The rebuilt surface is one
@@ -18,3 +18,6 @@ exempt: ["*.config.*", "*.test.*", "**/migrations/**"]
 capabilities:
   - name: startup-launch
     match: ["MTM_Waitlist.Startup/**", "Module_Startup/**"]
+    # Declared explicitly: the spec lives with the rest of the documentation under docs/,
+    # not at the default `capabilities/<name>/<name>.spec.md` path.
+    spec: docs/living-specs/living-specs-capability-startup-launch.spec.md

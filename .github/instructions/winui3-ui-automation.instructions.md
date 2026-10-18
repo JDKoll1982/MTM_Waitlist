@@ -327,7 +327,7 @@ recorded, and it names the rows that were superseded by the startup rebuild.
   appears in no `.cs` or `.csproj` file, so `list-apps` will stay empty until the `#if DEBUG` attach and the
   package reference are restored. The 12 stale discovery records are leftovers from when it *was* attached
   (it was verified working on 2026-08-22).
-- **To capture a screenshot without guessing at timing**, use `tools/capture_app_window.ps1`. It takes
+- **To capture a screenshot without guessing at timing**, use `scripts/ui-automation/capture_app_window.ps1`. It takes
   `-Maximize` and a `-WaitSeconds` budget and waits for a non-zero `MainWindowHandle`, because the process
   exists well before its window does — the shell is not shown until the startup session has been validated
   against the database, which measured **longer than 9 seconds** on 2026-09-13. Capturing on a fixed sleep

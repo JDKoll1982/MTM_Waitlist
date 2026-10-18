@@ -1,127 +1,156 @@
-﻿*Recommended Markdown Viewer: [Markdown Editor](https://marketplace.visualstudio.com/items?itemName=MadsKristensen.MarkdownEditor2)*
+﻿# MTM Waitlist
 
-## Getting Started
+A WinUI 3 plant-floor application for the manufacturing floor: operators, setup leads and handlers raise
+waitlist requests for a part at a work centre, and the floor works them through accept, give back, cancel,
+complete, detail and print. It runs unpackaged on .NET 10 and talks to MySQL for its own stores and to
+Infor Visual for ERP data.
 
-Browse and address `TODO:` comments in `View -> Task List` to learn the codebase and understand next steps for turning the generated code into production code.
+## Requirements
 
-Explore the [WinUI Gallery](https://www.microsoft.com/store/productId/9P3JFPWWDZRC) to learn about available controls and design patterns.
-
-Relaunch Template Studio to modify the project by right-clicking on the project in `View -> Solution Explorer` then selecting `Add -> New Item (Template Studio)`.
-
-## Project Structure (per-module class libraries)
-
-This repo uses a modular, per-module class-library layout. The WinExe **app** (`MTM_Waitlist.csproj`) is the **composition root** — it owns all `Views`, `Controls`, XAML, `App.xaml`, DI wiring, page/navigation registration, and resources — and references every module library. Testable non-view code lives in class libraries that both the app and the test project reference:
-
-- **`MTM_Waitlist.Core`** — core infrastructure, shared contracts/interfaces, and app-agnostic services (e.g. `NavigationService`, `PageService`, `AppServiceLocator`, `IMySqlHelperServer`). Referenced by all modules; references no feature module.
-- **`MTM_Waitlist.Shared`** — shared services/models used across modules (e.g. `TooltipService`, `ControlInspectorService`). Depends on `Core`.
-- **`MTM_Waitlist.Mock`** — the in-app Infor Visual read fallback: the shape catalog, the live-read executor, and one `IVisualReadFallback<TRequest,TRow>` per read shape. A read is served from the `mtm_mock` mirror with an identical result shape when the reachability probe has settled that Infor Visual is unreachable (established during startup, so the shell never opens mid-decision) or when a live attempt finds it unreachable; a reachable-but-empty result is never replaced. No demo/mock mode exists (`RetiredSymbolAuditTests` enforces this). Depends on `Core`.
-- **`MTM_Waitlist.Mock.Service`** — the on-host tray-only service that keeps `mtm_mock` warm (3-hour default cadence on the local-midnight grid), exposes a token-gated HTTP API, and backs up the four MySQL stores. Deployed unpackaged and self-contained; see `MTM_Waitlist.Mock.Service/README.md`.
-- **`MTM_Waitlist.Logging`** — the diagnostics seam every module writes through: `ILogService`, the `ILogger` provider that sends a call site's output to the same store, the exception-chain serializer and the gatherer that supplies the runtime, view and store context. It exists as its own library so the shell, Settings and the module libraries can record without referencing the launch, and it depends on `Core` alone.
-- **`MTM_Waitlist.Startup`** — the launch: the step sequence as data, the runner that holds each step to its stated maximum, the append-only activity feed the launch surface binds to, this machine's configuration, the person and machine identity contracts, the session and the sign-in steps. The host calls it through one method and two events; the surfaces it shows live in the app under `Module_Startup/Views` (the launch surface, machine setup, sign-in and the blocked state). See `.github/instructions/startup-rebuild.instructions.md`.
-- **Feature modules** (self-contained; reference only `Core` + `Shared`): `MTM_Waitlist.Setup`, `MTM_Waitlist.Settings`, `MTM_Waitlist.Reporting`, and the split `MTM_Waitlist.Waitlist.*` (`View`, `NewRequest`, `Controls`).
-- **`MTM_Waitlist.Tests`** references the module libraries directly — **not** the WinExe app — so `dotnet test` does not recompile the app's XAML (this avoids the locked `input.json` / dual-build race that occurs when tests pull the app project into their build graph).
-
-Namespaces remain `MTM_Waitlist.Module_*.*` across the split, so XAML `{x:Bind}` bindings and test `using` lines are unchanged. The app (`ServiceRegistrationExtensions`) wires all module DI (`Add*ModuleServices`) and configures `PageService` page mappings.
-
-## Infor Visual cache (`mtm_mock`)
-
-External Infor Visual reads are the only reads that use a cache. The five read shapes the application depends on are
-resolved through `MTM_Waitlist.Mock`, which attempts the live Visual query and — **only when Infor Visual is
-unreachable** — serves the same result shape from the `mtm_mock` mirror. There is no manual mode and no user action;
-the user sees the identical result, and a read-only status indicator reports that cached data is in use and how old
-it is.
-
-| Piece | Where |
+| | |
 |---|---|
-| Mirror schema + procedures | `Database/Mock/` (`Tables/`, `StoredProcedures/`, `Seeds/`, `Bootstrap/`) |
-| In-app fallback | `MTM_Waitlist.Mock/` (`IVisualReadFallback<TRequest,TRow>`, one per shape) |
-| On-host refresh + API + backups | `MTM_Waitlist.Mock.Service/` (see its `README.md`) |
-| **On-host deployment** | `MTM_Waitlist.Mock.Service/deploy/install-mock-service.ps1` (see its `README.md`) |
-| Feature specification | `specs/001-module-mock-visual-fallback/` |
+| OS | Windows 10 1809 (build 17763) or later |
+| SDK | .NET 10 SDK |
+| Runtime (build machine) | none beyond the SDK - the app and the Windows App SDK are both published self-contained |
+| Database (running the app) | MySQL 5.7 reachable at the configured host, plus Infor Visual SQL Server |
 
-### Deploying the on-host service
-
-`MTM_Waitlist.Mock.Service/deploy/install-mock-service.ps1` is the deployment step: it publishes, stops any running
-instance, deletes the previous deployment, copies to `C:\Services\MTM_Waitlist.Mock.Service\`, verifies the deployment
-is complete and self-contained, installs and **proves** the environment secrets, then starts the service and
-health-checks it (tray-only, port bound, `401` without an operator, single-instance). It exits non-zero if any check
-fails, and does not start the service when the deployment itself is broken.
-
-**Server-only — `172.16.1.104` / `V-MTMFG-5`.** The script refuses to run unless one of the *local* machine's IPv4
-addresses is the expected server address, because the service belongs on the host that reaches MySQL and Infor Visual.
-**The agent must not run it (or bypass the guard with `-AllowNonServerHost`) unless VS Code is running on that server.**
-Details: `MTM_Waitlist.Mock.Service/deploy/README.md`.
-
-### Deploying the desktop application
-
-The app is **unpackaged** (`WindowsPackageType=None`), so there is no MSIX install step: it is deployed by publishing
-and copying the folder to the operator's **per-user** app folder.
+## Build and test
 
 ```powershell
-# from the repository root
-# publish with the profile; without it MSBuild reports NETSDK1198 and silently produces a framework-dependent build
+dotnet build MTM_Waitlist.sln
+dotnet test MTM_Waitlist.Tests\MTM_Waitlist.Tests.csproj
+```
+
+Run the app straight from the build output - no packaging step is involved (`WindowsPackageType` is `None`):
+
+```powershell
+dotnet run --project MTM_Waitlist.csproj
+```
+
+The test project references the module class libraries **directly, never the WinExe app**, so a test run does
+not recompile the app's XAML. That is deliberate: pulling the app project into the test build graph causes a
+locked `input.json` / dual-build race.
+
+## Solution layout
+
+`MTM_Waitlist.csproj` is the **composition root**: it owns every view, control, XAML file, `App.xaml`, the DI
+container, page/navigation registration and the resource dictionaries, and it references every module library.
+Testable non-view code lives in the libraries below, which both the app and the tests reference.
+
+| Project | Responsibility |
+|---|---|
+| `MTM_Waitlist.Core` | Infrastructure and shared contracts - `NavigationService`, `PageService`, the service locator, the MySQL helper seam. References no feature module. |
+| `MTM_Waitlist.Shared` | Cross-module services and helpers - storage paths, the picture layout contract, tooltip and control-inspector services. Depends on `Core`. |
+| `MTM_Waitlist.Logging` | The diagnostics seam every module writes through: `ILogService`, the `ILogger` provider, the exception-chain serializer and the runtime/view/store context gatherer. Depends on `Core` alone. |
+| `MTM_Waitlist.Startup` | The launch: the step sequence as data, the runner that holds each step to its stated maximum, the append-only activity feed, this machine's configuration, identity and sign-in. The host calls it through one method and two events. |
+| `MTM_Waitlist.Mock` | The in-app Infor Visual read fallback - the shape catalog, the live-read executor and one `IVisualReadFallback<TRequest,TRow>` per read shape. |
+| `MTM_Waitlist.Mock.Service` | The on-host tray-only service that keeps the `mtm_mock` mirror warm, exposes a token-gated HTTP API and backs up the four MySQL stores. Runs on the MySQL/Infor Visual host, not on a workstation. |
+| `MTM_Waitlist.Setup` | Work-order setup: search a work order, pick a work centre and dunnage, save the setup pair assignments. |
+| `MTM_Waitlist.Settings` | Settings and administration: storage paths, request-item configuration, permissions, search, About. |
+| `MTM_Waitlist.Waitlist.View` | The waitlist list, its line cards, the status flyout and the detail surface. |
+| `MTM_Waitlist.Waitlist.NewRequest` | Raising a request: part, work centre, quantity, hopper artwork, review. |
+| `MTM_Waitlist.Waitlist.Controls` | Controls shared by the waitlist surfaces. |
+| `MTM_Waitlist.Reporting` | Reporting surfaces. |
+| `MTM_Waitlist.Tests` | All tests, organised per module. |
+
+Namespaces stay `MTM_Waitlist.Module_*.*` across the split, so XAML `{x:Bind}` paths and test `using` lines are
+unaffected. `ServiceRegistrationExtensions` wires every module's DI (`Add*ModuleServices`) and the `PageService`
+page mappings.
+
+Views stay in the app under `Module_*/Views`; page and view-model registration happens in `App.xaml.cs`
+(`AddTransient` / `AddSingleton` plus the `PageService` map), and navigation resolves a page by its view model's
+full name through `NavigationService`.
+
+## Data access
+
+**Internal stores are always live.** `mtm_waitlist`, `mtm_wip_application_winforms` and
+`mtm_receiving_application` are read and written live on every operation. A failure is reported as a per-screen
+unavailable state with a manual retry - never as sample rows and never as a persistent banner.
+
+**Only Infor Visual reads use a cache.** The five read shapes the app depends on resolve through
+`MTM_Waitlist.Mock`, which attempts the live Visual query and serves the same result shape from the `mtm_mock`
+mirror only when the reachability probe has settled that Infor Visual is unreachable, or when a live attempt
+finds it unreachable. A reachable-but-empty result is a real answer and is never replaced. There is no manual
+mode, and no user action: the person sees the identical result, with a read-only indicator saying cached data is
+in use and how old it is. The application never refreshes the mirror - that is the on-host service's job.
+
+**Every data operation goes through a stored procedure.** Inline SQL fails the build (`InlineSqlAuditTests`), and
+every schema artifact ships `create.sql` and `rollback.sql` in the same change. Master files under `Database/`
+(`AllTables.sql`, `AllSPs.sql`, `AllSeeds.sql`) are generated by
+`Database/CopilotScripts/build_mtm_mock_masters.ps1` - do not edit them by hand.
+
+## Deployment
+
+### Desktop client
+
+The app is unpackaged and self-contained, so deployment is publish-and-copy - no MSIX, no elevation:
+
+```powershell
+# without the profile MSBuild reports NETSDK1198 and silently produces a framework-dependent build
 dotnet publish MTM_Waitlist.csproj -p:PublishProfile=win-x64-selfcontained
-# -> bin\publish\win-x64\   (the whole folder is the deployment)
 
 $target = "$env:LOCALAPPDATA\Programs\MTM_Waitlist"
 New-Item -ItemType Directory -Force -Path $target | Out-Null
 Copy-Item .\bin\publish\win-x64\* $target -Recurse -Force
 ```
 
-| Property | Value | Why |
-|---|---|---|
-| Install location | `%LOCALAPPDATA%\Programs\MTM_Waitlist` | Per user, so installing or updating needs no elevation, and the binaries stay separate from the app's own data (`%LOCALAPPDATA%\MTM_Waitlist\ApplicationData`). |
-| `SelfContained` | `true` | A workstation needs **no .NET runtime prerequisite**. |
-| `WindowsAppSDKSelfContained` | `true` | Same guarantee for the Windows App SDK. |
-| `WindowsPackageType` | `None` | Unpackaged: no MSIX identity, signing, or Store packaging is involved. |
+Close the app first - the copy fails on the locked `MTM_Waitlist.exe`. A deployed client also needs
+`MTM_MOCK_SERVICE_ENDPOINT` and `MTM_MOCK_SERVICE_USER` (or the equivalent `MockServiceClient` section) before it
+can ask the service for an early refresh.
 
-Close the app before copying over an existing install — the copy fails on the locked `MTM_Waitlist.exe`.
+### On-host cache service
 
-A deployed client also needs `MTM_MOCK_SERVICE_ENDPOINT` and `MTM_MOCK_SERVICE_USER` (or the equivalent
-`MockServiceClient` section) before it can ask the service for an early refresh; the two settings and the panel that
-uses them are described under **Cached Infor Visual data** on the app's Settings page.
+`MTM_Waitlist.Mock.Service/deploy/install-mock-service.ps1` publishes, redeploys, installs and proves the
+environment secrets, starts the service and health-checks it. It is **server-only**: it refuses to run unless one
+of the local machine's IPv4 addresses is the expected cache host, because the service belongs on the host that
+reaches MySQL and Infor Visual. See
+[operations-mock-service-install-script.md](docs/operations/operations-mock-service-install-script.md).
 
-Rules that must not be broken:
+## Documentation
 
-- The internal stores (`mtm_waitlist`, `mtm_wip_application_winforms`, `mtm_receiving_application`) are **always**
-  read and written live — the cache is never consulted for them, and a failure is reported as a per-screen
-  unavailable state with a manual retry (never sample rows, never a persistent banner).
-- The cache is only consulted on **unreachability**. A reachable-but-empty live result is a real answer.
-- The application never refreshes the cache; that is the on-host service's job, on its own schedule.
-- Every data operation goes through a stored procedure — `InlineSqlAuditTests` fails the build on inline SQL, and
-  `RetiredSymbolAuditTests` fails it if any retired sample/demo symbol returns.
+All project documentation lives under [docs/](docs/), in one folder per category, with every file named
+`<category>-<feature>-<name>.<ext>`.
 
-Master lists under `Database/Mock/` (`AllTables.sql`, `AllSPs.sql`, `AllSeeds.sql`) are **generated** by
-`Database/CopilotScripts/build_mtm_mock_masters.ps1`; do not edit them by hand. The deviation from the locked ruleset
-is recorded in `Database/Database-Ruleset.md`.
+| Folder | What is in it |
+|---|---|
+| [docs/database/](docs/database/) | The Infor Visual schema export - 5,866 CSVs, one folder per export type (`tables/`, `column-details/`, `indexes/`, `foreign-keys/`, …). This is the CSV MCP server's storage root, configured in `.mcp.json`. |
+| [docs/defects/](docs/defects/) | Closed defect records, one per defect, with severity in the file name. |
+| [docs/guides/](docs/guides/) | Task guides: [picture file naming](docs/guides/guides-pictures-image-naming.md) and [LABELVIEW label printing integration](docs/guides/guides-labelprinting-labelview-integration.md). |
+| [docs/living-specs/](docs/living-specs/) | The living-spec capability for `startup-launch` and the [drift ledger](docs/living-specs/living-specs-drift-ledger.md) that records what the drift detector can and cannot see. |
+| [docs/modules/](docs/modules/) | Per-module test notes for the Mock library and the Mock service. |
+| [docs/operations/](docs/operations/) | Runbooks: [live database and Mock host updates](docs/operations/operations-database-live-and-mock-updates.md), the [Mock service deploy and run guide](docs/operations/operations-mock-service-deploy-and-run.md), the [installer](docs/operations/operations-mock-service-install-script.md) and the [plant-host next run](docs/operations/operations-waitlist-next-run.md). |
+| [docs/reference/](docs/reference/) | The split Infor VISUAL system-wide user guide, one chapter per file, starting at [the index](docs/reference/reference-inforvisual-index.md). |
+| [docs/research/](docs/research/) | Research and decision records: [Phase 6 disposition status codes](docs/research/research-inforvisual-phase6-disposition-status-codes.md) and the [waitlist card layout pre-spec](docs/research/research-waitlist-card-layout-pre-spec.md). |
+| [docs/startup/](docs/startup/) | The [startup rebuild design brief](docs/startup/startup-rebuild-design-brief.md) that the launch surface is built from. |
+| [docs/scripts/](docs/scripts/) | [Script index](docs/scripts/scripts-automation-index.md) and [UI Automation guide](docs/scripts/scripts-automation-ui-automation.md) for everything under [scripts/](scripts/). |
 
-## External Integrations
+Adjacent, and deliberately not moved into `docs/`:
 
-### Tables Ready
+- [specs/](specs/) - Spec Kit features (`spec.md`, `plan.md`, `tasks.md`, contracts, checklists) and their run
+  journals. One folder per feature, numbered in order.
+- [Database/](Database/) - schema artifacts and the [database ruleset](Database/Database-Ruleset.md).
+- [.github/](.github/) - agent instructions, prompts, skills and repo memories.
 
-- API key: `5a657e2e-c68e-484c-9249-9db7049a5ada`
+## Working in this repository
 
-## Publishing
+- **Spec first.** Anything non-trivial runs through Spec Kit in order: `constitution` -> `specify` -> `clarify` ->
+  `plan` -> `tasks` -> `analyze` -> `implement`. See `.github/instructions/spec-kit.instructions.md`.
+- **Docs serve the build rule, not the reverse.** A gate in `MTM_Waitlist.Tests` fails the build if a retired
+  sample/demo symbol returns (`RetiredSymbolAuditTests`) or if inline SQL appears (`InlineSqlAuditTests`).
+  `AcceptanceSurfaceTests` reads [the startup brief](docs/startup/startup-rebuild-design-brief.md) from disk, so
+  that file's section headings are part of the build.
+- **Localization.** UI strings resolve through `"ResourceKey".GetLocalized()`; resources live in
+  [Strings/](Strings/).
 
-For projects with MSIX packaging, right-click on the application project and select `Package and Publish -> Create App Packages...` to create an MSIX package.
+## Troubleshooting
 
-For projects without MSIX packaging, follow the [deployment guide](https://docs.microsoft.com/windows/apps/windows-app-sdk/deploy-unpackaged-apps) or add the `Self-Contained` Feature to enable xcopy deployment.
-
-## CI Pipelines
-
-See [README.md](https://github.com/microsoft/TemplateStudio/blob/main/docs/WinUI/pipelines/README.md) for guidance on building and testing projects in CI pipelines.
-
-## WinUI 3 Dynamic Scaling & Accessibility Standouts
-
-- Hardcoded pixel boundaries for layout-critical Width or Height values are forbidden for page, card, list, and form containers. Use fluid sizing (Auto and star columns/rows) with bounded constraints such as MinWidth, MinHeight, MaxWidth, and MaxHeight.
-- Interactive overlay elements (such as floating action buttons) must define AdaptiveTrigger-backed visual states and must pair each overlay footprint with a matching bottom list/content padding offset so scrollable content always clears the overlay.
-- Text-heavy layouts must be resilient to 150%+ text scaling by using ThemeResource-backed text styles, explicit MaxWidth constraints for identity and header text, and TextTrimming set to CharacterEllipsis when no-wrap behavior is required.
-- Overflow-prone detail regions should use scrolling containers or wrapping text patterns so users on low-resolution displays can still reach all interactive and informational elements.
+| Symptom | Cause |
+|---|---|
+| `PRI175` / `PRI224 root node not found` | Stale PRI artifacts, or a running `MTM_Waitlist.exe` locking the output. Stop the app, delete `*.pri` under `obj/` and `bin/`, rebuild. |
+| `WMC9999: Could not find any resources ... ErrorMessages.resources` | A **masked XAML error**, not an environment fault - this machine's `XamlCompiler` is missing its satellite resource, so a real XAML problem has no way to be reported. Bisect the recently changed XAML, or introduce a deliberate C# error so the compiler names the file. |
+| A `[RelayCommand]` binding does nothing | CommunityToolkit.Mvvm strips a trailing `Async` from the method name, so `ContinueToReviewAsync()` binds as `ContinueToReviewCommand`, not `ContinueToReviewAsyncCommand`. |
+| `NETSDK1198` on publish | The publish profile was omitted - pass `-p:PublishProfile=win-x64-selfcontained`. |
 
 ## Changelog
 
-See [releases](https://github.com/microsoft/TemplateStudio/releases) and [milestones](https://github.com/microsoft/TemplateStudio/milestones).
-
-## Feedback
-
-Bugs and feature requests should be filed at https://aka.ms/templatestudio.
+User-facing changes are recorded in [CHANGELOG.md](CHANGELOG.md).

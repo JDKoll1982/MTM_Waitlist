@@ -153,7 +153,7 @@ public sealed class AcceptanceSurfaceTests
     /// <remarks>
     /// <para>
     /// The two lists are matched on the order the specification states them in, which is the mapping
-    /// <c>STARTUP-REBUILD-BRIEF.md</c> S13.1 declares: its rows 1 to 24 are the specification's twenty-four edge
+    /// <c>docs/startup/startup-rebuild-design-brief.md</c> S13.1 declares: its rows 1 to 24 are the specification's twenty-four edge
     /// cases in its own order, and any further row is a case the specification no longer lists and that the
     /// catalogue keeps as the record of a withdrawal. The catalogue may therefore be longer than the
     /// specification, and must never be shorter.
@@ -246,7 +246,7 @@ public sealed class AcceptanceSurfaceTests
     [TestMethod]
     public void Service_AcceptanceSurfaceTests_TheCatalogue_StatesThatTheOriginalSweepBreakdownWasNotRecovered()
     {
-        var brief = File.ReadAllText(Path.Combine(Root, "STARTUP-REBUILD-BRIEF.md"));
+        var brief = File.ReadAllText(Path.Combine(Root, "docs/startup/startup-rebuild-design-brief.md"));
 
         StringAssert.Contains(
             brief,
@@ -260,7 +260,7 @@ public sealed class AcceptanceSurfaceTests
     [TestMethod]
     public void Service_AcceptanceSurfaceTests_TheRetiredCases_EachStateWhyTheyNoLongerApply()
     {
-        var brief = File.ReadAllText(Path.Combine(Root, "STARTUP-REBUILD-BRIEF.md"));
+        var brief = File.ReadAllText(Path.Combine(Root, "docs/startup/startup-rebuild-design-brief.md"));
 
         StringAssert.Contains(
             brief,
@@ -310,7 +310,7 @@ public sealed class AcceptanceSurfaceTests
 
     private static List<(int Number, string Case, string Disposition)> CatalogueRows()
     {
-        var brief = File.ReadAllText(Path.Combine(Root, "STARTUP-REBUILD-BRIEF.md"));
+        var brief = File.ReadAllText(Path.Combine(Root, "docs/startup/startup-rebuild-design-brief.md"));
 
         var start = brief.IndexOf("### S13.1 The walkable catalogue", StringComparison.Ordinal);
 

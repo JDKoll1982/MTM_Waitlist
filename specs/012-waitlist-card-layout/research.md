@@ -167,7 +167,7 @@ here, with what they bind, because a decision that lives only in the code is a d
 **`Waitlist\Hoppers`**, under the configured picture folder, one file per size named after the size word —
 `Small.png`, `Medium.png`, `Large.png`. The folder is configurable on Settings → Storage Paths
 (`image_storage.hopper_folder_path`, default `Waitlist\Hoppers`), and the naming contract is
-`docs/IMAGE-NAMING.md`. One source serves both surfaces: the New Request hopper step and the card's `Size` cell
+`docs/guides/guides-pictures-image-naming.md`. One source serves both surfaces: the New Request hopper step and the card's `Size` cell
 resolve through the same scope and the same key, so they cannot ask for two different pictures (FR-078).
 
 *Rationale*: the size word is already the answer the flow records and the key the card reads, so making it the

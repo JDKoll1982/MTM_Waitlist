@@ -8,7 +8,7 @@ so those are machine-local and will NOT be committed when you push.
 
 **Convention:**
 - Keep canonical repo facts in committed files under `.github/memories/` (this folder) and/or
-  `Documents/Development/**`. Anything here is saved on `git push`.
+  `docs/**`. Anything here is saved on `git push`.
 - When the Copilot memory tool is used in a session, prefer pointing its `/memories/repo/*` notes at
   these committed files rather than treating the ephemeral store as the source of truth.
 - Sanitize credentials: reference dev accounts/env vars/appsettings rather than echoing passwords.
@@ -22,7 +22,7 @@ so those are machine-local and will NOT be committed when you push.
   deleted — do not delete them).
 - `repo/infor-visual-disposition.md` — Infor Visual status codes + FG/WIP/Outside derivation +
   MTM WIP Application facts + tooling quirks (file 14 Phase 6). Canonical long-form note:
-  `Documents/Development/InforVisual/Phase6-Disposition-StatusCodes-Research.md`.
+  `docs/research/research-inforvisual-phase6-disposition-status-codes.md`.
 - `repo/mysql-hosts-and-mock-capture.md` — the **two different** MySQL servers reachable from this
   workstation (`localhost` = pristine 8.0.46 dev, `172.16.1.104` = plant 5.7.24 with the warm mirror), why
   `localhost` is the safe place to prove an artifact loads, `capture_mock_seed_baseline.ps1`, and the two

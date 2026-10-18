@@ -111,7 +111,7 @@ snapshot or the complete new one — never a mixture and never an empty table (F
 > than deploying to the wrong machine.
 
 1. Build and publish `MTM_Waitlist.Mock.Service` (unpackaged, self-contained `win-x64`) onto the MySQL host.
-   The deploy artifact and its instructions are `MTM_Waitlist.Mock.Service/README.md`; the publish profile is
+   The deploy artifact and its instructions are `docs/operations/operations-mock-service-deploy-and-run.md`; the publish profile is
    `MTM_Waitlist.Mock.Service/Properties/PublishProfiles/win-x64-selfcontained.pubxml`. The CLI equivalent is:
 
    ```powershell

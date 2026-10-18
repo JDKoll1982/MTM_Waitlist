@@ -98,7 +98,7 @@ limit. That is the one open verification debt this file reports rather than hide
 - The artifacts are consistent enough to begin `/speckit.implement`; nothing the passes found blocks it.
 - One verification debt is stated above: re-run `/speckit.analyze` once to close the unverified final round.
 - The `startup-diagnostics` capability retirement belongs to T026/T163 when the feature is implemented; the
-  registry and `capabilities/DRIFT.md` are deliberately edited once, at re-adoption.
+  registry and `docs/living-specs/living-specs-drift-ledger.md` are deliberately edited once, at re-adoption.
 
 ## Owner-directed close-out, 2026-09-26
 
