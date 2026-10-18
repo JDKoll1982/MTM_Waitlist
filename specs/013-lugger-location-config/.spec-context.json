@@ -1,0 +1,18 @@
+{
+  "workflow": "companion",
+  "specName": "013-lugger-location-config",
+  "branch": "013-lugger-location-config",
+  "selectedAt": "2026-10-18T01:56:19.252Z",
+  "currentStep": "specify",
+  "status": "specified",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-10-18T01:57:05.312Z"
+    }
+  ],
+  "telemetryInstanceId": "35ccd855-8e51-49e5-b35b-dd0f0d8b649b"
+}
