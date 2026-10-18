@@ -37,7 +37,8 @@ so those are machine-local and will NOT be committed when you push.
   DeepSeek V4.1 Flash** (`deepseek/deepseek-flash`), the model table that distinguishes it from
   `deepseek/deepseek-v4-flash` (v4), and the prohibition on substituting a GitHub-hosted model.
 - `repo/tool-budget.md` — which tool groups were disabled to get under the model's 128-tool ceiling
-  (owner decisions, 2026-10-11) and which must never be disabled.
+  (owner decisions, 2026-10-11), which must never be disabled, and the 2026-10-17 retirement of the
+  MCP-based code-exploration server (exploration now runs on built-in code intelligence and search).
 - `repo/workstation-elevation.md` — which account to use when administrator rights are needed on this
   workstation, when elevation is *not* needed, and the owner-approved exception that lets it name a password.
 - `repo/workstation-secrets.md` — the `MTM_Waitlist.Mock.Service` host's per-user environment variables,

@@ -77,7 +77,7 @@ Resolved follow-ups:
      Verified: `resolve-template.ps1 tasks-template` exits 0 and emits the real template markdown
      (18,858 bytes), and the function returns a single `System.String`.
   ✅ `.github/instructions/mcp-doc-research.instructions.md` now mirrors Principle IV as amended: the
-     NON-NEGOTIABLE Context7 / Microsoft Learn rule, the mandatory Serena location-and-config self-healing
+     NON-NEGOTIABLE Context7 / Microsoft Learn rule, the mandatory tool location-and-config self-healing
      procedure (including the `jkoll` ↔ `johnk` profile-folder case), and a Repo-Specific Focus list that
      describes the shipped cached-fallback boundary instead of the retired demo toggles.
 
@@ -100,7 +100,7 @@ Follow-up TODOs: none — every follow-up recorded by the 1.1.0 report is closed
 
 ## 1.0.0 → 1.1.0 — MINOR (superseded wording retained for traceability)
 
-Bump rationale: MINOR — Principle IV materially expanded to NON-NEGOTIABLE and the mandatory Serena
+Bump rationale: MINOR — Principle IV materially expanded to NON-NEGOTIABLE and the mandatory tool
 self-healing rule added. No principle removed and no existing obligation weakened or redefined
 incompatibly, so this is not a MAJOR change.
 
@@ -111,7 +111,7 @@ removed, redefined, or weakened; no obligation diminished.
 
 Applied:
   • Sync Impact Report history extracted to this file; the constitution keeps a 3-line pointer.
-  • Principle IV compressed; the 4-step Serena self-healing procedure and the repo-specific focus list
+  • Principle IV compressed; the 4-step tool self-healing procedure and the repo-specific focus list
     delegate to `.github/instructions/mcp-doc-research.instructions.md` (the MUST obligations remain).
   • Duplicated build-command string in Development Workflow now references Principle VI.
   • Deterministic rewrites: spec-exception definition (I), DPAPI specification (Security & Secrets),
@@ -144,7 +144,7 @@ Applied:
     filenames are enumerated in `database-schema-rules.instructions.md` is not accurate: that file names
     only `Bootstrap/update_table_descriptions.sql` and the per-artifact layout. Dropping the enumeration
     would have lost the specificity the "lists stay in sync" obligation depends on.
-  • Principle IV — the enumerated "applies at minimum to" list and the step-by-step Serena self-healing
+  • Principle IV — the enumerated "applies at minimum to" list and the step-by-step tool self-healing
     narration were compressed. The NON-NEGOTIABLE Context7 / Microsoft Learn rule, the model-memory
     prohibition, the mandatory self-healing requirement with its report-the-config-path obligation, the
     deviating-workaround-recording rule, and the pointer to
