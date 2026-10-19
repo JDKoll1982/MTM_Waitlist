@@ -153,7 +153,11 @@ public sealed class SharedControlsMarkupTests
             "AutoScrollTextView.xaml.cs"));
 
         StringAssert.Contains(codeBehind, "IterationBehavior.Forever", "The pass repeats for as long as the line is on screen.");
-        StringAssert.Contains(codeBehind, "SetIsTranslationEnabled(Track, true)", "The track is what moves, not one copy of the value.");
+        StringAssert.Contains(codeBehind, "Track.StartAnimation(pass)", "The track is what moves, not one copy of the value.");
+        StringAssert.Contains(
+            codeBehind,
+            "Target = \"Translation\"",
+            "The pass drives the element's Translation; naming that property on the composition visual is refused at run time.");
         StringAssert.Contains(codeBehind, "Echo.Visibility", "The copy that follows is shown only while the track is moving.");
     }
 

@@ -329,10 +329,41 @@ public sealed class RequestJobFieldValuesTests
     public void Service_RequestJobFieldValuesTests_Resolve_UnknownOrEmptyLabelYieldsNothing()
     {
         // A label this snapshot cannot supply is omitted rather than drawn as a blank standing in for a value.
-        // `Lugger Location` is declared but has no source anywhere, so it is absent by design (research R1).
-        Assert.IsNull(RequestJobFieldValues.Resolve("Lugger Location", DieJob()));
         Assert.IsNull(RequestJobFieldValues.Resolve("Quantity", DieJob()));
         Assert.IsNull(RequestJobFieldValues.Resolve(string.Empty, DieJob()));
         Assert.IsNull(RequestJobFieldValues.Resolve(null, DieJob()));
+    }
+
+    [TestMethod]
+    public void Service_RequestJobFieldValuesTests_Resolve_LuggerLocationIsTheLuggerTheSnapshotWasHanded()
+    {
+        // `pickup-scrap` declares `Lugger Location` with source `job`, so the row reads the lugger the availability
+        // was handed for the job's own scrap type rather than the Item's own display name (FR-022, FR-026).
+        var scrap = RequestJobPartAvailability.None with
+        {
+            HasActiveJob = true,
+            ScrapType = "3003 Aluminum",
+            LuggerLocation = "Door 6 Lugger",
+        };
+
+        foreach (var label in new[] { "Lugger Location", "lugger location", "  LUGGER LOCATION  " })
+        {
+            Assert.AreEqual(
+                "Door 6 Lugger",
+                RequestJobFieldValues.Resolve(label, scrap),
+                "The declared label `Lugger Location` does not read the lugger the snapshot carries (FR-022).");
+        }
+    }
+
+    [TestMethod]
+    public void Service_RequestJobFieldValuesTests_Resolve_NoLuggerAnswerYieldsNothingSoNoCellIsDrawn()
+    {
+        // A scrap type with no arrangement, and a job with no real scrap decision, both leave the value null, and
+        // the cell is then omitted rather than filled with a dash, a blank or a guess (FR-025, FR-026).
+        var gap = RequestJobPartAvailability.None with { HasActiveJob = true, ScrapType = "Galvanized Steel" };
+
+        Assert.IsNull(RequestJobFieldValues.Resolve("Lugger Location", gap));
+        Assert.IsNull(RequestJobFieldValues.Resolve("Lugger Location", RequestJobPartAvailability.None));
+        Assert.IsNull(RequestJobFieldValues.Resolve("Lugger Location", job: null));
     }
 }

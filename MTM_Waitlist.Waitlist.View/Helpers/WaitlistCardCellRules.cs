@@ -20,14 +20,11 @@ namespace MTM_Waitlist.Module_Waitlist.Helpers;
 /// means every field they declare today is excluded until the seed and the answer arrive.
 /// </para>
 /// <para>
-/// Two cells have no source today and are handled here rather than in configuration: <c>Destination</c> on
+/// Two cells have no source of their own and are handled here rather than in configuration: <c>Destination</c> on
 /// <c>deliver-flatstock</c> resolves from the request's own requesting work centre, because every Deliver
 /// Item is delivered to the work centre that asked for it and nothing asks the requester where it goes
 /// (FR-042, FR-057); and the die Items' die-shop cell is drawn label-less, as the phrase itself, only when
-/// that checkbox's answer was given (FR-055, FR-081). <c>Lugger Location</c> on <c>pickup-scrap</c> is the third
-/// such cell and is listed in <see cref="s_pendingSourceLabels"/>: its source is designed but not yet built, so
-/// the cell is drawn with a plainly-worded placeholder instead of being hidden (FR-034). A future source deletes
-/// that one entry, adds its resolver arm, and the real value appears with no card change at all (FR-058).
+/// that checkbox's answer was given (FR-055, FR-081).
 /// </para>
 /// </remarks>
 public static class WaitlistCardCellRules
@@ -55,16 +52,6 @@ public static class WaitlistCardCellRules
     /// there" on a deliver, and a single wording would make the same tick answer two different things (FR-081).
     /// </summary>
     public const string LocatedInDieShopPromptKey = "NewRequest_Die.DieShopPromptLocated";
-
-    /// <summary>
-    /// The resource key of the phrase drawn in the place of a cell whose source is designed but not yet built.
-    /// </summary>
-    /// <remarks>
-    /// It is a message, never a data value: it says plainly that this cell is still being built, so nobody reads it
-    /// as the scrap lugger's location. It is deliberately not a dash or a blank, because a blank cell is
-    /// indistinguishable from a source that answered nothing.
-    /// </remarks>
-    public const string PendingSourceKey = "Waitlist_Card_PendingSource.InDevelopment";
 
     /// <summary>
     /// The labels whose declared field is never a cell, whatever the Item: the requesting work centre is the
@@ -107,29 +94,6 @@ public static class WaitlistCardCellRules
     private static readonly string[] s_returningPickupCells = ["part type", "# of skids"];
 
     /// <summary>
-    /// The declared fields whose <b>source is designed but not yet built</b>, per Item, so their cell is drawn with
-    /// a plainly-worded placeholder instead of being hidden.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// <b>TODO (feature 012 follow-up, FR-034): implement the scrap lugger's location.</b> <c>Lugger Location</c> on
-    /// <c>pickup-scrap</c> is declared by the seed with source <c>job</c>, and nothing yet reads it: the Scrap Item's
-    /// location has to come from wherever the scrap lugger is standing, which no read shape answers today. Until
-    /// that source exists the cell shows <see cref="PendingSourceKey"/> so the person can see the cell is coming
-    /// rather than seeing nothing.
-    /// </para>
-    /// <para>
-    /// <b>When the source lands, this list is the only thing that changes.</b> Delete the entry, add the resolver
-    /// arm in <c>RequestJobFieldValues</c> (module <c>MTM_Waitlist.Settings</c>), and the cell starts drawing the
-    /// real location with no card change at all — the template and the panel already carry the slot (FR-058).
-    /// </para>
-    /// </remarks>
-    private static readonly Dictionary<string, string[]> s_pendingSourceLabels = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ["pickup-scrap"] = ["lugger location"],
-    };
-
-    /// <summary>
     /// The declared fields the card does not draw, per Item, as each declaration spells them today. Every one
     /// is left declared in configuration (§9): <c>Description</c> on the dunnage Items is provably unfillable
     /// (FR-095), <c>Quantity</c> on the die Items and <c>Reason</c> on the wrong-part Items are not part of
@@ -153,6 +117,22 @@ public static class WaitlistCardCellRules
     private const string RequestWorkCentreLabel = "destination";
 
     /// <summary>
+    /// The cells a card places in a fixed slot rather than in declared order, per Item, in the slot order they
+    /// must appear in. The position in the array is the panel slot: index 0 is the top-left cell, index 1 the
+    /// cell beside it.
+    /// </summary>
+    /// <remarks>
+    /// The scrap card's two cells read as one statement — the material, then where it is dumped — so the lugger
+    /// sits in the second column beside the scrap type whatever order the Item's declaration happens to carry.
+    /// Without this the pair follows configuration, and a store whose declaration lists the lugger first would
+    /// draw the two in the other order on the same card the plant reads every shift.
+    /// </remarks>
+    private static readonly Dictionary<string, string[]> s_pinnedSlots = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["pickup-scrap"] = ["scrap type", "lugger location"],
+    };
+
+    /// <summary>
     /// The declared label the two hopper Items answer their size under. The cell's value is the size word, and
     /// that same word is the key the size's reference picture is filed under (FR-077, FR-078, D22).
     /// </summary>
@@ -162,6 +142,72 @@ public static class WaitlistCardCellRules
     /// <param name="itemCode">The request's Item code.</param>
     public static bool DrawsNoCells(string? itemCode) =>
         Matches(s_collapsingItems, itemCode);
+
+    /// <summary>
+    /// The slot a cell takes on its Item's detail panel, or <see langword="null" /> when the declared order
+    /// decides. A slot is a row-major position: 0 is the top-left cell and 1 the cell beside it.
+    /// </summary>
+    /// <param name="itemCode">The request's Item code.</param>
+    /// <param name="label">The label the field was declared under.</param>
+    public static int? FixedSlot(string? itemCode, string? label)
+    {
+        if (string.IsNullOrWhiteSpace(label)
+            || !s_pinnedSlots.TryGetValue(ItemCode(itemCode), out var pinned))
+        {
+            return null;
+        }
+
+        var slot = Array.FindIndex(pinned, candidate => Matches([candidate], label));
+
+        return slot < 0 ? null : slot;
+    }
+
+    /// <summary>
+    /// The cells in the order the panel draws them: a cell with a <see cref="FixedSlot"/> takes that slot, and
+    /// every other cell fills the remaining slots in its declared order.
+    /// </summary>
+    /// <remarks>
+    /// The reordering is stable and never adds or drops a cell, so an Item with nothing pinned — every Item but
+    /// the scrap one — comes back exactly as it was given. A pinned cell is placed only when its slot exists in
+    /// a panel this short, which is what keeps a lone cell on the top row rather than leaving a hole above it.
+    /// </remarks>
+    /// <param name="itemCode">The request's Item code.</param>
+    /// <param name="cells">The cells the row resolved, in declared order.</param>
+    /// <returns>The same cells, in the order the panel draws them.</returns>
+    public static IReadOnlyList<WaitlistLineCardCell> OrderForPanel(
+        string? itemCode,
+        IReadOnlyList<WaitlistLineCardCell> cells)
+    {
+        if (cells is null || cells.Count < 2)
+        {
+            return cells ?? Array.Empty<WaitlistLineCardCell>();
+        }
+
+        var slots = new WaitlistLineCardCell?[cells.Count];
+        var unpinned = new List<WaitlistLineCardCell>(cells.Count);
+
+        foreach (var cell in cells)
+        {
+            if (FixedSlot(itemCode, cell.Label) is int slot && slots[slot] is null)
+            {
+                slots[slot] = cell;
+            }
+            else
+            {
+                unpinned.Add(cell);
+            }
+        }
+
+        for (int slot = 0, next = 0; slot < slots.Length; slot++)
+        {
+            if (slots[slot] is null)
+            {
+                slots[slot] = unpinned[next++];
+            }
+        }
+
+        return slots.Select(cell => cell!).ToArray();
+    }
 
     /// <summary>
     /// Whether one declared field of an Item is a cell the card draws, so every declared field the card does
@@ -335,36 +381,6 @@ public static class WaitlistCardCellRules
     /// <param name="itemCode">The request's Item code.</param>
     private static bool IsDieItem(string? itemCode) =>
         ItemCode(itemCode) is "pickup-die" or "deliver-die";
-
-    /// <summary>
-    /// Whether a declared field is one whose source is <b>designed but not yet built</b>, so its cell is drawn with
-    /// the plainly-worded placeholder rather than being hidden or filled with a guess (FR-034).
-    /// </summary>
-    /// <param name="itemCode">The request's Item code.</param>
-    /// <param name="label">The label the field was declared under.</param>
-    /// <returns><see langword="true"/> for a cell that is waiting on its source.</returns>
-    public static bool IsPendingSourceField(string? itemCode, string? label) =>
-        !string.IsNullOrWhiteSpace(label)
-        && s_pendingSourceLabels.TryGetValue(itemCode?.Trim() ?? string.Empty, out var labels)
-        && Matches(labels, label);
-
-    /// <summary>
-    /// The placeholder a cell whose source is not yet built draws, resolved from its own resource, or
-    /// <see langword="null"/> when the field is not one of those cells (FR-104).
-    /// </summary>
-    /// <param name="itemCode">The request's Item code.</param>
-    /// <param name="label">The label the field was declared under.</param>
-    public static string? PendingSourcePhrase(string? itemCode, string? label)
-    {
-        if (!IsPendingSourceField(itemCode, label))
-        {
-            return null;
-        }
-
-        var phrase = PendingSourceKey.GetLocalized();
-
-        return string.IsNullOrWhiteSpace(phrase) ? PendingSourceKey : phrase;
-    }
 
     /// <summary>
     /// The declared fields whose value is <b>known to be unfillable</b>, per Item, so their absence is a stated

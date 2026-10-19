@@ -46,6 +46,7 @@ public sealed class PermissionRegistryTests
         "permission.admin.users",
         "permission.admin.reset_password",
         "permission.admin.permissions",
+        "permission.settings.lugger_arrangement",
     };
 
     /// <summary>
@@ -206,6 +207,30 @@ public sealed class PermissionRegistryTests
         CollectionAssert.DoesNotContain(memberNames, "Baseline");
         CollectionAssert.DoesNotContain(memberNames, "RoleBaselines");
         CollectionAssert.DoesNotContain(memberNames, "Roles");
+    }
+
+    /// <summary>
+    /// The twentieth key: the arrangement's own permission, held by Material Handler Lead and above. Its label and
+    /// gates come from the suffix rule like every other key, its gates name both screens that read it, and an
+    /// unreachable store grants nobody the arrangement (FR-028, FR-029).
+    /// </summary>
+    [TestMethod]
+    public void Service_PermissionRegistryTests_Declaration_PinsTheLuggerArrangementKey()
+    {
+        var entry = PermissionRegistry.Find(PermissionKeys.SettingsLuggerArrangement);
+
+        Assert.IsNotNull(entry, "The arrangement's permission is declared.");
+        Assert.AreEqual("permission.settings.lugger_arrangement", entry.Key);
+        Assert.AreEqual(PermissionRegistry.Area.Settings, entry.BelongsTo);
+        Assert.IsFalse(entry.Fallback, "An outage must not hand anybody the arrangement (plan, permission fallback).");
+        Assert.AreEqual("Permission_settings_lugger_arrangement.Label", entry.LabelResourceKey);
+        Assert.AreEqual("Permission_settings_lugger_arrangement.Gates", entry.GatesResourceKey);
+        CollectionAssert.Contains(entry.GateSites.ToArray(), "SettingsViewModel");
+        CollectionAssert.Contains(entry.GateSites.ToArray(), "LuggerArrangementViewModel");
+
+        var resourceKeys = ReadResourceKeys();
+        Assert.IsTrue(resourceKeys.Contains(entry.LabelResourceKey), $"'{entry.LabelResourceKey}' is missing.");
+        Assert.IsTrue(resourceKeys.Contains(entry.GatesResourceKey), $"'{entry.GatesResourceKey}' is missing.");
     }
 
     private static List<string> ReadResourceKeys()

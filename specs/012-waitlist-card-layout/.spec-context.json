@@ -962,6 +962,14 @@
       "kind": "complete",
       "by": "ai",
       "at": "2026-10-16T16:15:11.014Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T048",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-19T11:08:49.236Z"
     }
   ],
   "unattended": true,
@@ -2026,14 +2034,14 @@
     }
   },
   "approach": "Four workstreams land the change: the card control and its host page are rebuilt into four zones, the status zone gains a determinate ProgressRing and a three-theme palette, the detail column becomes one DataTemplate per Item in a single resource dictionary, and every cell that has no source today gets one named mechanism (extend the label map, extend the snapshot, read from the plant system, derive through the existing disposition stack, or capture a new answer). Behind it, one new nullable column and two stored procedures carry the handler condition and the new answers, the seed is reconciled with the pre-spec's cell assignment, and the four hidden pickups are unhidden behind real job gates.",
-  "currentTask": "T071",
+  "currentTask": "T048",
   "task_summaries": {
     "T001": {
       "status": "DONE",
-      "did": "Baseline recorded: build 0 warnings/0 errors; suite 1901 passed / 6 failed / 46 skipped - the 6 are one pre-existing cause, missing repo-root docs/startup/startup-rebuild-design-brief.md read by Module_Startup AcceptanceSurfaceTests, unrelated to 012",
+      "did": "Baseline recorded: build 0 warnings/0 errors; suite 1901 passed / 6 failed / 46 skipped - the 6 are one pre-existing cause, missing repo-root STARTUP-REBUILD-BRIEF.md read by Module_Startup AcceptanceSurfaceTests, unrelated to 012",
       "files": [
         "MTM_Waitlist.sln",
-        "scripts/build/run-tests.ps1"
+        "tools/run-tests.ps1"
       ]
     },
     "T002": {
@@ -2685,7 +2693,7 @@
     },
     "T089": {
       "status": "DONE",
-      "did": "Recorded the seven supersessions from docs/research/research-waitlist-card-layout-pre-spec.md section 6 in specs/004 contracts/card-and-identifier.md, each carrying its replacement inline and in a new summary section 10",
+      "did": "Recorded the seven supersessions from WAITLIST-CARD-LAYOUT-PRE-SPEC.md section 6 in specs/004 contracts/card-and-identifier.md, each carrying its replacement inline and in a new summary section 10",
       "files": [
         "specs/004-unified-card-item-picker/contracts/card-and-identifier.md"
       ]
@@ -2706,7 +2714,7 @@
     },
     "T092": {
       "status": "DONE",
-      "did": "Ran the suite and the four validators and recorded every Success Criterion. scripts/build/run-tests.ps1 -All: 2167 total, 2114 passed, 6 failed, 47 skipped, and the 6 are exactly the pre-existing AcceptanceSurfaceTests failures over the missing repo-root docs/startup/startup-rebuild-design-brief.md that were failing at T001's baseline - this feature introduced none. validate-database-schema.ps1 EXIT 0 (115 artifacts, 115 distinct objects; live validation skipped, no connection string). validate-csharp-xaml-naming.ps1 EXIT 1 with 267 findings, none attributable to this feature (I fixed the four it had introduced: two new public enums moved out of SampleOrder.cs into their own files, a test method name and an async TestCleanup renamed). validate-sql-naming.ps1 EXIT 1 with 13 findings, all in three grandfathered classes (7 *_population.sql filenames - my new part_warehouse_quantities_population.sql is the mandated mock-loader path, like its 6 siblings - 2 Mock.Service/Restore filenames, 4 boolean-name findings). So two of the four scripts cannot exit 0 for pre-existing reasons. SC recorded: SC-001/002/003/004/005/007/008/009/010/011/013 met and verified offline by the markup, geometry, palette, model, picker and resolver suites; SC-006 met offline by RequestStatusColumnTests with its loaded-store drive unrun; SC-012 met by markup with the disabled-button tooltip-on-hover leg unverified (platform behaviour); SC-015 met by the wizard suites with the rendered-card drive unrun; SC-016 met at the service seam with the live restart unrun; SC-014 and SC-017 unverified, both needing a rendered app",
+      "did": "Ran the suite and the four validators and recorded every Success Criterion. tools/run-tests.ps1 -All: 2167 total, 2114 passed, 6 failed, 47 skipped, and the 6 are exactly the pre-existing AcceptanceSurfaceTests failures over the missing repo-root STARTUP-REBUILD-BRIEF.md that were failing at T001's baseline - this feature introduced none. validate-database-schema.ps1 EXIT 0 (115 artifacts, 115 distinct objects; live validation skipped, no connection string). validate-csharp-xaml-naming.ps1 EXIT 1 with 267 findings, none attributable to this feature (I fixed the four it had introduced: two new public enums moved out of SampleOrder.cs into their own files, a test method name and an async TestCleanup renamed). validate-sql-naming.ps1 EXIT 1 with 13 findings, all in three grandfathered classes (7 *_population.sql filenames - my new part_warehouse_quantities_population.sql is the mandated mock-loader path, like its 6 siblings - 2 Mock.Service/Restore filenames, 4 boolean-name findings). So two of the four scripts cannot exit 0 for pre-existing reasons. SC recorded: SC-001/002/003/004/005/007/008/009/010/011/013 met and verified offline by the markup, geometry, palette, model, picker and resolver suites; SC-006 met offline by RequestStatusColumnTests with its loaded-store drive unrun; SC-012 met by markup with the disabled-button tooltip-on-hover leg unverified (platform behaviour); SC-015 met by the wizard suites with the rendered-card drive unrun; SC-016 met at the service seam with the live restart unrun; SC-014 and SC-017 unverified, both needing a rendered app",
       "files": [
         ".github/scripts/validate-csharp-xaml-naming.ps1",
         "MTM_Waitlist.Waitlist.View/Models/StatusColumnTheme.cs",
@@ -2728,9 +2736,9 @@
     },
     "T095": {
       "status": "DONE",
-      "did": "Restored the deleted docs/startup/startup-rebuild-design-brief.md verbatim from f2202b4d^ and refreshed its stale SettingsViewModelTests citation, clearing the six pre-existing Service_AcceptanceSurfaceTests failures.",
+      "did": "Restored the deleted STARTUP-REBUILD-BRIEF.md verbatim from f2202b4d^ and refreshed its stale SettingsViewModelTests citation, clearing the six pre-existing Service_AcceptanceSurfaceTests failures.",
       "files": [
-        "docs/startup/startup-rebuild-design-brief.md"
+        "STARTUP-REBUILD-BRIEF.md"
       ]
     },
     "T096": {
@@ -2775,7 +2783,7 @@
       "status": "DONE",
       "did": "Wrote the image naming contract: both roots, the part collections and prefix families, the application's own folders, the hopper folder and its three names, the dunnage root, the picture rules and the key-file exception, each read from the code that enforces it.",
       "files": [
-        "docs/guides/guides-pictures-image-naming.md"
+        "docs/IMAGE-NAMING.md"
       ]
     },
     "T099": {
@@ -2806,7 +2814,7 @@
         "Module_Waitlist/Controls/WaitlistLineCardView.xaml",
         "Module_Waitlist/Controls/WaitlistLineCardDetailTemplateSelector.cs",
         "MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardMarkupTests.cs",
-        "docs/research/research-waitlist-card-layout-pre-spec.md",
+        "WAITLIST-CARD-LAYOUT-PRE-SPEC.md",
         "specs/012-waitlist-card-layout/spec.md",
         "specs/012-waitlist-card-layout/data-model.md",
         "specs/012-waitlist-card-layout/tasks.md"
@@ -2920,7 +2928,7 @@
         "MTM_Waitlist.Settings/Services/PartPictureResolver.cs",
         "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
         "MTM_Waitlist.Tests/Module_Settings/PictureShareReachabilityTests.cs",
-        "scripts/ui-automation/measure-ui-responsiveness.ps1"
+        "tools/measure-ui-responsiveness.ps1"
       ]
     },
     "T116": {
@@ -2967,6 +2975,14 @@
       "did": "Ran GetPartMatches.sql live against VISUAL: the exact term MMC0000010 returned that one part, the partial term MMC000001 returned all ten parts containing it, and a term matching nothing returned no rows",
       "files": [
         "Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartMatches.sql"
+      ]
+    },
+    "T048": {
+      "status": "DONE",
+      "did": "Drove all seven status-column states through the real list procedure, the service's own mapper and the card row against the dev store; 8 new tests pin each claim, and mutating either pre-fix defect fails them.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Helpers/RequestStatusColumnDevStoreTests.cs",
+        "MTM_Waitlist.Waitlist.View/Services/WaitlistRequestService.cs"
       ]
     }
   },
@@ -3117,7 +3133,7 @@
       "command": "pwsh scripts/ui-automation/ui-drive.ps1 signin + UI Automation geometry on request 24 (deliver-riser-table)",
       "source": "derived",
       "exitCode": 1,
-      "durationSeconds": 25.0,
+      "durationSeconds": 25,
       "result": "\u001b[31;1m\u001b[0m\u001b[36;1m\u001b[36;1m 204 | \u001b[0m     \u001b[36;1mthrow \"No $What with automation id '$Id' appeared within $WaitSec\u001b[0m …\u001b[0m · \u001b[31;1m\u001b[0m\u001b[36;1m\u001b[36;1m\u001b[0m\u001b[36;1m\u001b[0m\u001b[36;1m     | \u001b[31;1m     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\u001b[0m · \u001b[31;1m\u001b[0m\u001b[36;1m\u001b[36;1m\u001b[0m\u001b[36;1m\u001b[0m\u001b[36;1m\u001b[31;1m\u001b[31;1m\u001b[36;1m     | \u001b[31;1mNo identifier field with automation id 'SignInWindow_Identifier' appeared within 24 s. Windows: MTM_Waitlist\u001b[0m",
       "warnings": [
         "exited 1"
@@ -3139,7 +3155,7 @@
       "command": "act on the card and poll UI Automation until it changes - 0.05s / 0.11s back-to-back / 1.17s after 170s quiet",
       "source": "derived",
       "exitCode": 1,
-      "durationSeconds": 0.0,
+      "durationSeconds": 0,
       "result": "'act' is not recognized as an internal or external command, · operable program or batch file.",
       "warnings": [
         "exited 1"
@@ -3150,7 +3166,7 @@
       "command": "UI Automation walk of all three cards after signing in",
       "source": "derived",
       "exitCode": 1,
-      "durationSeconds": 0.0,
+      "durationSeconds": 0,
       "result": "'UI' is not recognized as an internal or external command, · operable program or batch file.",
       "warnings": [
         "exited 1"
@@ -3161,7 +3177,7 @@
       "command": "UI Automation sweep of the card list found three 'John Koll' person rows, no bare-number text and no '6229', and the detail page's Request context section draws no Employee number row",
       "source": "derived",
       "exitCode": 1,
-      "durationSeconds": 0.0,
+      "durationSeconds": 0,
       "result": "'UI' is not recognized as an internal or external command, · operable program or batch file.",
       "warnings": [
         "exited 1"
@@ -3183,7 +3199,7 @@
       "command": "pwsh -NoProfile -ExecutionPolicy Bypass -File .github/scripts/validate-database-schema.ps1",
       "source": "derived",
       "exitCode": 0,
-      "durationSeconds": 1.0,
+      "durationSeconds": 1,
       "result": "[db-validate] MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING schema is valid. · [db-validate] Seed phase skipped: this run read the store and wrote nothing. Pass -ApplySeeds to apply seed data, which rewrites the seeded tables. · [db-validate] Database schema validation passed using MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING."
     },
     {
@@ -3334,5 +3350,6 @@
         "reason": "this feature changed no file under MTM_Waitlist.Startup/** or Module_Startup/**, so the capability's behaviour is untouched. It is the only capability living-specs.yml registers; the waitlist card, Settings resolution, Database and Strings areas this feature did change have no living spec, which docs/living-specs/living-specs-drift-ledger.md records as a standing opt-in gap rather than something this step should close on its own."
       }
     ]
-  }
+  },
+  "assistant": "ide-chat"
 }

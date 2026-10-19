@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="MTM_Waitlist.Module_Settings.Views.LuggerEditorDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    AutomationProperties.AutomationId="LuggerEditorDialog_Dialog"
+    CloseButtonText="{x:Bind ViewModel.CloseEditorActionText}"
+    DefaultButton="Close"
+    HorizontalAlignment="Center"
+    VerticalAlignment="Center">
+
+    <!--
+        One lugger's editor (013-lugger-location-config, FR-019, FR-030, FR-031). The lugger is the card that opened
+        this window, so there is no picker: every action below applies to the lugger the window is named for.
+    -->
+    <StackPanel MinWidth="420" Spacing="14">
+        <TextBlock
+            Style="{ThemeResource BodyTextBlockStyle}"
+            Text="{x:Bind ViewModel.MessageText, Mode=OneWay}"
+            TextWrapping="Wrap" />
+
+        <ComboBox
+            AutomationProperties.AutomationId="LuggerArrangementPage_Status"
+            Header="{x:Bind ViewModel.StatusLabelText}"
+            ItemsSource="{x:Bind ViewModel.StatusOptions}"
+            SelectedItem="{x:Bind ViewModel.StatusInput, Mode=TwoWay}" />
+
+        <TextBox
+            AutomationProperties.AutomationId="LuggerArrangementPage_Reason"
+            Header="{x:Bind ViewModel.ReasonLabelText}"
+            IsEnabled="{x:Bind ViewModel.IsReasonRequired, Mode=OneWay}"
+            Text="{x:Bind ViewModel.ReasonInput, Mode=TwoWay}" />
+
+        <Button
+            AutomationProperties.AutomationId="LuggerArrangementPage_SetStatus"
+            HorizontalAlignment="Left"
+            Command="{x:Bind ViewModel.SetStatusCommand}"
+            Content="{x:Bind ViewModel.StatusActionText}" />
+
+        <!-- The scrapped material this lugger takes, chosen from the catalogue the setup workflow recognises. -->
+        <ComboBox
+            AutomationProperties.AutomationId="LuggerArrangementPage_ScrapType"
+            Header="{x:Bind ViewModel.ScrapTypeLabelText}"
+            ItemsSource="{x:Bind ViewModel.ScrapTypeOptions, Mode=OneWay}"
+            SelectedItem="{x:Bind ViewModel.ScrapTypeInput, Mode=TwoWay}" />
+
+        <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button
+                AutomationProperties.AutomationId="LuggerArrangementPage_Assign"
+                Command="{x:Bind ViewModel.AssignScrapTypeCommand}"
+                Content="{x:Bind ViewModel.AssignActionText}" />
+            <Button
+                AutomationProperties.AutomationId="LuggerArrangementPage_Unassign"
+                Command="{x:Bind ViewModel.UnassignScrapTypeCommand}"
+                Content="{x:Bind ViewModel.UnassignActionText}" />
+            <!-- Offered only when there is a backup to promote this lugger ahead of (FR-006, FR-018). -->
+            <Button
+                AutomationProperties.AutomationId="LuggerArrangementPage_Promote"
+                Command="{x:Bind ViewModel.PromoteLuggerCommand}"
+                Content="{x:Bind ViewModel.PromoteActionText}"
+                Visibility="{x:Bind ViewModel.CanPromote, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+        </StackPanel>
+
+        <Button
+            AutomationProperties.AutomationId="LuggerArrangementPage_Remove"
+            HorizontalAlignment="Left"
+            Command="{x:Bind ViewModel.RemoveLuggerCommand}"
+            Content="{x:Bind ViewModel.RemoveActionText}" />
+    </StackPanel>
+</ContentDialog>

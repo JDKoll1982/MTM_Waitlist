@@ -33,6 +33,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     private readonly IUrgencyDeadlineService? _urgencyDeadlineService;
     private readonly MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore? _messageSeenStore;
     private readonly IWaitlistSortPreferenceService? _sortPreferenceService;
+    private readonly MTM_Waitlist.Module_Waitlist.Services.ILuggerChangeNoticeService? _luggerChangeNoticeService;
 
     /// <summary>
     /// The order this viewer's list is shown in, resolved from their remembered choice the first time the list
@@ -113,6 +114,12 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     public ObservableCollection<SampleOrder> Source { get; } = new ObservableCollection<SampleOrder>();
     public ObservableCollection<SampleOrder> SearchSuggestions { get; } = new();
 
+    /// <summary>
+    /// The arrangement changes this session has been told about and has not dismissed, oldest first. The strip
+    /// draws one bar per entry, so two changes draw two bars (FR-033, FR-036).
+    /// </summary>
+    public ObservableCollection<LuggerChangeNotice> LuggerChangeNotices { get; } = new();
+
     [ObservableProperty]
     public partial bool IsWaitlistEmpty { get; private set; } = true;
 
@@ -152,7 +159,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         IRequestJobPartAvailabilityProvider? jobAvailabilityProvider = null,
         IPermissionService? permissionService = null,
         IPartPictureResolver? partPictureResolver = null,
-        IRequestItemConfigurationService? itemConfigurationService = null)
+        IRequestItemConfigurationService? itemConfigurationService = null,
+        MTM_Waitlist.Module_Waitlist.Services.ILuggerChangeNoticeService? luggerChangeNoticeService = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(buildingSelectionService);
@@ -173,6 +181,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         _jobAvailabilityProvider = jobAvailabilityProvider;
         _partPictureResolver = partPictureResolver;
         _itemConfigurationService = itemConfigurationService;
+        _luggerChangeNoticeService = luggerChangeNoticeService;
 
         // This screen's own internal-store unavailable state (FR-021): the waitlist list reads
         // mtm_waitlist live, so a failure is reported here, with a retry that re-runs this screen's load.
@@ -607,6 +616,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         }
 
         await LoadOrdersAsync(_buildingSelectionService.SelectedBuilding);
+        await OpenLuggerChangeNoticesAsync();
         StartMinuteTicker();
     }
 
@@ -686,6 +696,144 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         }
 
         RefreshTimeDerivedText();
+        _ = PollLuggerChangeNoticesAsync();
+    }
+
+    /// <summary>
+    /// Takes this session's notice watermark as the list opens, so a change recorded before the person was using
+    /// the list is never shown to them as though it had just happened (FR-037). A person who may not handle
+    /// requests is not asked for anything and is shown no bar (FR-038).
+    /// </summary>
+    public async Task OpenLuggerChangeNoticesAsync()
+    {
+        if (_luggerChangeNoticeService is null)
+        {
+            return;
+        }
+
+        try
+        {
+            if (!await CanHandleRequestsAsync().ConfigureAwait(false))
+            {
+                await ApplyLuggerChangeNoticesAsync(Array.Empty<LuggerChangeNotice>()).ConfigureAwait(false);
+                return;
+            }
+
+            var notices = await _luggerChangeNoticeService.OpenSessionAsync().ConfigureAwait(false);
+            await ApplyLuggerChangeNoticesAsync(notices).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            // A strip that cannot be opened costs the notice, not the list.
+            AppLog.Error("Waitlist", ex, "Opening the lugger change notices failed; the strip stays empty.");
+        }
+    }
+
+    /// <summary>
+    /// Asks the notice seam for the changes made since the list opened, once per minute tick, and shows every
+    /// notice the session still holds (FR-033). Only a person who holds <c>permission.requests.handle</c> is
+    /// asked; an unreachable store answers no notice rather than an invented one.
+    /// </summary>
+    public async Task PollLuggerChangeNoticesAsync()
+    {
+        if (_luggerChangeNoticeService is null)
+        {
+            return;
+        }
+
+        try
+        {
+            if (!await CanHandleRequestsAsync().ConfigureAwait(false))
+            {
+                await ApplyLuggerChangeNoticesAsync(Array.Empty<LuggerChangeNotice>()).ConfigureAwait(false);
+                return;
+            }
+
+            var notices = await _luggerChangeNoticeService.PollAsync().ConfigureAwait(false);
+            await ApplyLuggerChangeNoticesAsync(notices).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("Waitlist", ex, "Polling the lugger change notices failed; this tick shows nothing new.");
+        }
+    }
+
+    /// <summary>
+    /// Records that the person closed one notice's bar, so it is not offered again for the rest of the session
+    /// (FR-036). The page calls this only when the bar's own close button raised the close.
+    /// </summary>
+    [RelayCommand]
+    private async Task DismissLuggerChangeNoticeAsync(LuggerChangeNotice? notice)
+    {
+        if (notice is null)
+        {
+            return;
+        }
+
+        if (_luggerChangeNoticeService is not null)
+        {
+            try
+            {
+                var remaining = await _luggerChangeNoticeService
+                    .DismissAsync(notice.Id, raisedByCloseButton: true)
+                    .ConfigureAwait(false);
+                await ApplyLuggerChangeNoticesAsync(remaining).ConfigureAwait(false);
+                return;
+            }
+            catch (Exception ex)
+            {
+                AppLog.Error("Waitlist", ex, "Recording the dismissed lugger change notice failed; the bar is closed for this list.");
+            }
+        }
+
+        LuggerChangeNotices.Remove(notice);
+    }
+
+    /// <summary>
+    /// Makes the strip match the notices the session still holds. Bars that are already up are left alone, so a
+    /// poll adds the new ones and removes only the dismissed ones rather than rebuilding the strip every minute.
+    /// </summary>
+    private async Task ApplyLuggerChangeNoticesAsync(IReadOnlyList<LuggerChangeNotice> notices)
+    {
+        void Apply()
+        {
+            for (var index = LuggerChangeNotices.Count - 1; index >= 0; index--)
+            {
+                if (!notices.Any(notice => notice.Id == LuggerChangeNotices[index].Id))
+                {
+                    LuggerChangeNotices.RemoveAt(index);
+                }
+            }
+
+            foreach (var notice in notices.OrderBy(notice => notice.Id))
+            {
+                if (!LuggerChangeNotices.Any(held => held.Id == notice.Id))
+                {
+                    LuggerChangeNotices.Add(notice);
+                }
+            }
+        }
+
+        if (_dispatcherQueue is DispatcherQueue dispatcher)
+        {
+            var tcs = new TaskCompletionSource();
+            dispatcher.TryEnqueue(() =>
+            {
+                try
+                {
+                    Apply();
+                }
+                finally
+                {
+                    tcs.SetResult();
+                }
+            });
+            await tcs.Task;
+        }
+        else
+        {
+            Apply();
+        }
     }
 
     /// <summary>
@@ -1154,7 +1302,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             candidates.Add(ResolveDeclaredCell(field, request, jobAvailability));
         }
 
-        return WaitlistLineCardCell.CellsToDraw(candidates);
+        return WaitlistCardCellRules.OrderForPanel(request.Item, WaitlistLineCardCell.CellsToDraw(candidates));
     }
 
     /// <summary>
@@ -1188,20 +1336,6 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
                 Value = WaitlistCardCellRules.IsDieShopAnswerGiven(given)
                     ? WaitlistCardCellRules.DieShopPhrase(request.Item) ?? string.Empty
                     : string.Empty,
-                Order = field.Order,
-            };
-        }
-
-        // A cell whose source is designed but not yet built draws a plainly-worded placeholder rather than being
-        // hidden, so the person can see the cell is coming (FR-034). It is a message about the cell, never a value
-        // read from anywhere, and it is not recorded as a failure: nothing has failed, the source is simply not
-        // built yet. Delete the field from `WaitlistCardCellRules.s_pendingSourceLabels` once its source lands.
-        if (WaitlistCardCellRules.IsPendingSourceField(request.Item, label))
-        {
-            return new WaitlistLineCardCell
-            {
-                Label = label,
-                Value = WaitlistCardCellRules.PendingSourcePhrase(request.Item, label) ?? string.Empty,
                 Order = field.Order,
             };
         }

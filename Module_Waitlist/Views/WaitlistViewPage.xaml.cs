@@ -47,6 +47,24 @@ public sealed partial class WaitlistViewPage : Page
     private void OnCardStatusConditionChosen(object? sender, (SampleOrder Row, string Condition) selection) =>
         ViewModel.SetStatusConditionCommand.Execute((selection.Row, selection.Condition));
 
+    /// <summary>
+    /// The notice strip's close: only the bar's own close button is a dismissal (FR-036). A bar closed for any
+    /// other reason — a reload, a layout change — is not recorded against the person, so nothing is dismissed by
+    /// accident. No operating-system notification is raised for any of these changes (FR-034).
+    /// </summary>
+    private void OnLuggerNoticeClosing(InfoBar sender, InfoBarClosingEventArgs args)
+    {
+        if (args.Reason != InfoBarCloseReason.CloseButton)
+        {
+            return;
+        }
+
+        if (sender.DataContext is LuggerChangeNotice notice)
+        {
+            ViewModel.DismissLuggerChangeNoticeCommand.Execute(notice);
+        }
+    }
+
     // The card body no longer opens the request: the card's own `Open details` button is the one path that
     // does, through the navigation service. The list keeps its row selection so a Shift+click on the picture
     // is still the gesture that enlarges it, and nothing acts on the selection itself (FR-003, FR-068, FR-069).

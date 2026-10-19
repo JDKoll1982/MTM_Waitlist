@@ -157,6 +157,14 @@ public sealed record RequestJobPartAvailability(
     public string ScrapType { get; init; } = string.Empty;
 
     /// <summary>
+    /// The lugger the requesting job's scrap is dumped into, as the arrangement read named it, or <see langword="null" />
+    /// when nothing names one — the job has no real scrap decision, or its scrap type has no lugger assigned. The
+    /// scrap Item's <c>Lugger Location</c> cell reads this, and a null leaves the cell out rather than filling it
+    /// with a substitute value (FR-022, FR-025, FR-026).
+    /// </summary>
+    public string? LuggerLocation { get; init; }
+
+    /// <summary>
     /// Every die assigned to the requesting job, in the job's own order (FR-054).
     /// <para>
     /// This is the list the die step shows as selectable cards, and the list an Item whose configuration names

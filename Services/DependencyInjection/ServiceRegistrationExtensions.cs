@@ -237,7 +237,10 @@ public static partial class ServiceRegistrationExtensions
             partPictureResolver: provider.GetRequiredService<MTM_Waitlist.Module_Core.Contracts.Services.IPartPictureResolver>(),
             // The Item's declaration is where the card's cells come from, so a null seam here would leave every
             // card drawing no detail cell at all while the screen still looked wired (FR-025).
-            itemConfigurationService: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestItemConfigurationService>()));
+            itemConfigurationService: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestItemConfigurationService>(),
+            // A null notice seam would leave the strip permanently empty, so the change notice the handler is
+            // owed would never be drawn while the screen still looked wired (FR-033).
+            luggerChangeNoticeService: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.ILuggerChangeNoticeService>()));
         services.AddTransient<WaitlistViewPage>();
         services.AddTransient<ShellPage>();
         services.AddTransient<ShellViewModel>();
@@ -259,6 +262,11 @@ public static partial class ServiceRegistrationExtensions
         RegisterPartPictureServices(services);
         RegisterPartPictureScreen(services);
         RegisterPartPictureCache(services);
+
+        // The scrap-lugger arrangement (feature 013): the service now, and the Settings page when its story phase
+        // lands. The two declarations are separate so the page's file can be added without a second edit here.
+        RegisterLuggerArrangementServices(services);
+        RegisterLuggerArrangementPage(services);
 
         // Configuration
         services.Configure<WaitlistDatabaseOptions>(context.Configuration.GetSection(nameof(WaitlistDatabaseOptions)));
@@ -385,4 +393,15 @@ public static partial class ServiceRegistrationExtensions
     /// drawn rather than in one pass at startup.
     /// </summary>
     static partial void RegisterPartPictureCache(IServiceCollection services);
+
+    /// <summary>
+    /// The scrap-lugger arrangement's service, in its own file beside this one so no later phase edits the
+    /// service list.
+    /// </summary>
+    static partial void RegisterLuggerArrangementServices(IServiceCollection services);
+
+    /// <summary>
+    /// The lugger arrangement's Settings page and its route, contributed by the story phase that builds them.
+    /// </summary>
+    static partial void RegisterLuggerArrangementPage(IServiceCollection services);
 }

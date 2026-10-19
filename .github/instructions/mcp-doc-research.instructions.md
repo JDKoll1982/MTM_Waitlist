@@ -33,7 +33,10 @@ An audit of this machine found the registrations split across two files, which i
 | `microsoftdocs/mcp` (Microsoft Learn) | **user** `%APPDATA%\Code\User\mcp.json` | http → `https://learn.microsoft.com/api/mcp` |
 | `io.github.upstash/context7` | **user** `%APPDATA%\Code\User\mcp.json` | stdio, `npx @upstash/context7-mcp` |
 | `microsoft/playwright-mcp` | **user** `%APPDATA%\Code\User\mcp.json` | stdio, `npx @playwright/mcp` |
-| `csv-mcp-server`, `xamlmcp` | **workspace** `.vscode/mcp.json` | stdio |
+| `csv-mcp-server` | **workspace** `.vscode/mcp.json` | stdio |
+
+`xamlmcp` is no longer registered in `.vscode/mcp.json`: its 24 tools were removed to keep the chat tool count
+under the 128-tool cap applied to BYOK models. Restore the entry when those tools are needed.
 
 Server launch commands carry **workstation-absolute paths** (`C:\Users\<profile>\...`). A profile-folder
 change between environments (`jkoll` at work, `johnk` at home) breaks them, so a server that fails to launch

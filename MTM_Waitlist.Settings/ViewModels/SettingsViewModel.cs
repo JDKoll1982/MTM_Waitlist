@@ -43,8 +43,15 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     internal const string PartPictureManagerViewModelName = "MTM_Waitlist.Module_Settings.ViewModels.PartPictureManagerViewModel";
 
     /// <summary>
-    /// Every permission this screen asks about, in one read: the four Settings subjects it gates itself, the two
-    /// Administration entries it offers, and the two its child view models gate on (FR-056).
+    /// The lugger arrangement's view model, routed the same way (013-lugger-location-config). The edit itself lives
+    /// on that screen's view model, which refuses the route for a person who does not hold its own key.
+    /// </summary>
+    internal const string LuggerArrangementViewModelName = "MTM_Waitlist.Module_Settings.ViewModels.LuggerArrangementViewModel";
+
+
+    /// <summary>
+    /// Every permission this screen asks about, in one read: the four Settings subjects it gates itself, the three
+    /// navigation entries it offers, and the two its child view models gate on (FR-056).
     /// </summary>
     /// <remarks>
     /// This is a list of permission keys the declaration holds, not a list of role names: a gate that kept its own
@@ -65,6 +72,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         PermissionKeys.SettingsComputers,
         PermissionKeys.AdminUsers,
         PermissionKeys.AdminPermissions,
+        PermissionKeys.SettingsLuggerArrangement,
     ];
 
     /// <summary>
@@ -97,6 +105,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         nameof(IsUserManagementEntryVisible),
         nameof(IsPermissionsEntryVisible),
         nameof(IsPartPicturesEntryVisible),
+        nameof(IsLuggerArrangementEntryVisible),
     ];
 
     private readonly IThemeSelectorService _themeSelectorService;
@@ -437,6 +446,17 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     }
 
     /// <summary>
+    /// Whether the signed-in person may open the lugger arrangement, from
+    /// <c>permission.settings.lugger_arrangement</c> (FR-028). The card is drawn from this answer alone and is not
+    /// drawn at all when it is false, because a shown-but-disabled card is the state FR-029 forbids.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool CanOpenLuggerArrangement
+    {
+        get; set;
+    }
+
+    /// <summary>
     /// The dunnage-type visibility panel shares the hot work centres' permission, because it decides the same
     /// thing about the same screen and was never a second gate.
     /// </summary>
@@ -522,10 +542,12 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     }
 
     /// <summary>
-    /// The Administration category: shown when the reader may open at least one of its two entries and may find
-    /// it, and not at all when they may open neither (FR-081).
+    /// The Administration category: shown when the reader may open at least one of its entries and may find it, and
+    /// not at all when they may open none of them (FR-081).
     /// </summary>
-    public bool IsAdministrationCategoryVisible => IsUserManagementEntryVisible || IsPermissionsEntryVisible;
+    public bool IsAdministrationCategoryVisible => IsUserManagementEntryVisible ||
+        IsPermissionsEntryVisible ||
+        IsLuggerArrangementEntryVisible;
 
     /// <summary>
     /// The Users entry. It navigates rather than expanding, so it is a card rather than an expander, and it is
@@ -559,6 +581,22 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     [RelayCommand]
     private void OpenPermissions() => _navigationService.NavigateTo(PermissionsViewModelName);
 
+    /// <summary>
+    /// Opens the lugger arrangement (FR-030). The route is refused on the same permission answer the card is drawn
+    /// from, so a person who does not hold the key cannot be taken there even if the command is reached some other
+    /// way (FR-029).
+    /// </summary>
+    [RelayCommand]
+    private void OpenLuggerArrangement()
+    {
+        if (!CanOpenLuggerArrangement)
+        {
+            return;
+        }
+
+        _navigationService.NavigateTo(LuggerArrangementViewModelName);
+    }
+
     /// <summary>The Administration category's heading, resolved from the resource map.</summary>
     public string AdministrationCategoryTitle => "Administration_Category.Title".GetLocalized();
 
@@ -573,6 +611,27 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
     /// <summary>What the Permissions entry opens, in a sentence.</summary>
     public string PermissionsEntryDescription => "Administration_Permissions.Description".GetLocalized();
+
+    /// <summary>
+    /// The lugger arrangement entry (013-lugger-location-config, FR-030). Offered to an account holding its own
+    /// permission and absent for an account without it, exactly as the two Administration entries are.
+    /// </summary>
+    public bool IsLuggerArrangementEntryVisible => CanOpenLuggerArrangement && MatchesSearch(
+        "lugger",
+        "luggers",
+        "scrap",
+        "dump",
+        "arrangement",
+        "location",
+        "locations",
+        "handler",
+        "handlers");
+
+    /// <summary>The lugger entry's title.</summary>
+    public string LuggerArrangementEntryTitle => "Settings_Lugger_Arrangement.EntryTitle".GetLocalized();
+
+    /// <summary>What the lugger entry opens, in a sentence.</summary>
+    public string LuggerArrangementEntryDescription => "Settings_Lugger_Arrangement.EntryDescription".GetLocalized();
 
     /// <summary>
     /// The part-picture entry (008-part-pictures, FR-024). Offered to an account holding the picture entitlement
@@ -1033,6 +1092,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
             CanRequestCacheRefresh = answers[PermissionKeys.SettingsCacheRefresh];
             CanOpenUserManagement = answers[PermissionKeys.AdminUsers];
             CanOpenPermissions = answers[PermissionKeys.AdminPermissions];
+            CanOpenLuggerArrangement = answers[PermissionKeys.SettingsLuggerArrangement];
 
             UrgencyAllotments.ApplyPermission(answers[PermissionKeys.SettingsUrgencyMinutes]);
             ComputerManagement.ApplyPermission(answers[PermissionKeys.SettingsComputers]);

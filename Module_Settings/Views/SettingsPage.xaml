@@ -1240,9 +1240,9 @@
             </StackPanel>
 
             <!--
-                Administration: two entries, and both of them navigate rather than expanding — so they are
-                SettingsCards rather than expanders, each wrapped in x:Load (which requires an x:Name) and each
-                shown only to a reader who may open it. A reader entitled to neither does not see the category.
+                Administration: the entries navigate rather than expanding — so they are SettingsCards rather than
+                expanders, each wrapped in x:Load (which requires an x:Name) and each shown only to a reader who may
+                open it. A reader entitled to none of them does not see the category.
             -->
             <StackPanel
                 Grid.Row="4"
@@ -1289,6 +1289,31 @@
                     </wct:SettingsCard.Description>
                     <wct:SettingsCard.HeaderIcon>
                         <SymbolIcon Symbol="Permissions" />
+                    </wct:SettingsCard.HeaderIcon>
+                </wct:SettingsCard>
+
+                <!--
+                    The lugger arrangement (013-lugger-location-config, FR-030). Drawn only for a person holding
+                    permission.settings.lugger_arrangement, from the view model's own answer: a person below a
+                    Material Handler Lead sees no entry at all, because a shown-but-disabled card is the state
+                    FR-029 forbids. Its markup is the Permissions card's shape, so the three entries read alike.
+                -->
+                <wct:SettingsCard
+                    x:Name="LuggerArrangementEntryCard"
+                    x:Load="{x:Bind ViewModel.IsLuggerArrangementEntryVisible, Mode=OneWay}"
+                    AutomationProperties.AutomationId="SettingsPage_LuggerArrangementEntry"
+                    AutomationProperties.Name="{x:Bind ViewModel.LuggerArrangementEntryTitle}"
+                    HorizontalAlignment="Stretch"
+                    IsClickEnabled="True"
+                    Command="{x:Bind ViewModel.OpenLuggerArrangementCommand}">
+                    <wct:SettingsCard.Header>
+                        <TextBlock Text="{x:Bind ViewModel.LuggerArrangementEntryTitle}" />
+                    </wct:SettingsCard.Header>
+                    <wct:SettingsCard.Description>
+                        <TextBlock Text="{x:Bind ViewModel.LuggerArrangementEntryDescription}" />
+                    </wct:SettingsCard.Description>
+                    <wct:SettingsCard.HeaderIcon>
+                        <SymbolIcon Symbol="Bullets" />
                     </wct:SettingsCard.HeaderIcon>
                 </wct:SettingsCard>
             </StackPanel>

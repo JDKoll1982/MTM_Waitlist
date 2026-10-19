@@ -58,9 +58,38 @@
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
 
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!--
+          The lugger-arrangement notice strip (FR-033, FR-034). One informational bar per undismissed change,
+          drawn in the application and never as an operating-system notification. The bar is closable, and the
+          dismissal is recorded only when its own close button raised the close (FR-036).
+        -->
+        <ItemsControl
+            x:Name="LuggerNoticeStrip"
+            Grid.Row="0"
+            Margin="12,12,12,0"
+            ItemsSource="{x:Bind ViewModel.LuggerChangeNotices, Mode=OneWay}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="models:LuggerChangeNotice">
+                    <InfoBar
+                        Margin="0,0,0,4"
+                        Closing="OnLuggerNoticeClosing"
+                        IsClosable="True"
+                        IsOpen="True"
+                        Message="{x:Bind Text}"
+                        Severity="Informational" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
         <ListView
             AutomationProperties.AutomationId="WaitlistViewPage_CardList"
             x:Name="WaitlistListView"
+            Grid.Row="1"
             Padding="6,12,6,92"
             ItemTemplate="{StaticResource WaitlistLineCardTemplate}"
             ItemsSource="{x:Bind ViewModel.Source, Mode=OneWay}"
@@ -99,6 +128,7 @@
         -->
         <InfoBar
             x:Name="StoreUnavailableBar"
+            Grid.Row="1"
             Margin="12,12,12,0"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Top"
@@ -117,6 +147,7 @@
 
         <Grid
             x:Name="EmptyWaitlistState"
+            Grid.Row="1"
             Visibility="{x:Bind ViewModel.IsWaitlistEmpty, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
             IsHitTestVisible="False"
             HorizontalAlignment="Stretch"
@@ -175,6 +206,7 @@
         <Button
             AutomationProperties.AutomationId="WaitlistViewPage_AddRequestButton"
             x:Name="WaitlistFab"
+            Grid.Row="1"
             Width="56"
             Height="56"
             Click="OnAddRequestClick"

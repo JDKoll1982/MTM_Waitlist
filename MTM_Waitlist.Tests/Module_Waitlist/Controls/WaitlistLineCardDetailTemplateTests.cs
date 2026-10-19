@@ -30,8 +30,8 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.Controls;
 /// The <b>resolution</b> half drives <see cref="WaitlistViewViewModel.ResolveDeclaredCells"/> against the
 /// <b>shipped</b> declaration seed, so what is checked is the cells the real configuration produces rather
 /// than a copy of it: every drawn label is one of the Item's settled cells, every declared field the card
-/// does not show stays undrawn, and the two cells with no source of their own — <c>Destination</c> and
-/// <c>Lugger Location</c> — behave as the spec writes them (FR-054 to FR-060, FR-089).
+/// does not show stays undrawn, and the one cell whose value the requesting job's arrangement decides —
+/// <c>Lugger Location</c> on <c>pickup-scrap</c> — names the lugger the arrangement settled (FR-022 to FR-027).
 /// </para>
 /// </remarks>
 [TestClass]
@@ -780,11 +780,11 @@ public sealed class WaitlistLineCardDetailTemplateTests
 
     /// <summary>
     /// `Destination` is drawn on `deliver-flatstock` alone, resolved from the request's own requesting work
-    /// centre rather than from anything the requester was asked, and `Lugger Location` is declared and drawn with
-    /// the plainly-worded placeholder its unbuilt source leaves it with (FR-034, FR-042, FR-057, FR-089).
+    /// centre rather than from anything the requester was asked, and the scrap card's `Lugger Location` names the
+    /// lugger the arrangement settled for the job's scrap type (FR-022, FR-027, FR-042, FR-057).
     /// </summary>
     [TestMethod]
-    public void ViewModel_WaitlistLineCardDetailTemplateTests_ResolveDeclaredCells_DrawsDestinationFromTheRequestAndPlacesTheLuggerLocation()
+    public void ViewModel_WaitlistLineCardDetailTemplateTests_ResolveDeclaredCells_DrawsDestinationFromTheRequestAndNamesTheScrapsLugger()
     {
         var answers = Answers([("Destination", "Somewhere else"), (WaitlistCardCellRules.DieShopAnswerLabel, "true")]);
 
@@ -813,34 +813,129 @@ public sealed class WaitlistLineCardDetailTemplateTests
                 "Destination is read from an answer, which is the question that was retired (FR-057, FR-089).");
         }
 
-        // Lugger Location stays declared on the scrap Item, and its cell is now DRAWN with a plainly-worded
-        // placeholder because its source is designed but not yet built: hiding it told the person nothing, while a
-        // placeholder says the cell is coming. The future source is a resolver arm and no card change (FR-034).
+        // `Lugger Location` stays declared on the scrap Item and is drawn from the value the arrangement read
+        // handed the snapshot, so the handler reads the lugger to walk to; the label is still the declared one and
+        // the card's layout does not change (FR-022, FR-027).
         Assert.IsTrue(
             WaitlistCardCellRules.IsCell("pickup-scrap", "Lugger Location"),
-            "Lugger Location is no longer a cell of `pickup-scrap`, so a future source could not reveal it without a card change (FR-034).");
+            "Lugger Location is no longer a cell of `pickup-scrap`, so the resolved lugger could never reach the card (FR-027).");
+
+        var scrapDeclaration = Declaration(
+            "pickup-scrap",
+            ("Scrap type", RequestItemFieldDefinition.Sources.Job, 1, false),
+            ("Lugger Location", RequestItemFieldDefinition.Sources.Job, 2, false));
 
         var scrap = WaitlistViewViewModel.CreateSessionOrder(
             Shape("pickup-scrap"),
-            Job(),
-            Declaration(
-                "pickup-scrap",
-                ("Scrap type", RequestItemFieldDefinition.Sources.Job, 1, false),
-                ("Lugger Location", RequestItemFieldDefinition.Sources.Job, 2, false)));
+            ScrapJob(),
+            scrapDeclaration);
 
         var lugger = scrap.Cells.SingleOrDefault(cell => string.Equals(cell.Label, "Lugger Location", StringComparison.OrdinalIgnoreCase));
 
         Assert.IsNotNull(
             lugger,
-            "Lugger Location is not drawn, so the person sees no cell at all where a value is coming (FR-034).");
+            "The scrap card draws no Lugger Location cell although the arrangement named a lugger for the job's scrap type (FR-022).");
         Assert.AreEqual(
-            WaitlistCardCellRules.PendingSourcePhrase("pickup-scrap", "Lugger Location"),
+            "Door 6 Lugger",
             lugger!.Value,
-            "The Lugger Location cell does not draw the in-development placeholder, so it would be showing a value nothing produced (FR-034, FR-089).");
-        Assert.IsTrue(scrap.Cells.Any(cell => string.Equals(cell.Label, "Scrap type", StringComparison.OrdinalIgnoreCase)), "The scrap Item's own Scrap Type cell went missing with it (FR-034).");
+            "The Lugger Location cell does not draw the lugger the snapshot carries, so the handler is sent nowhere (FR-022).");
+        Assert.IsTrue(scrap.Cells.Any(cell => string.Equals(cell.Label, "Scrap type", StringComparison.OrdinalIgnoreCase)), "The scrap Item's own Scrap Type cell went missing with it (FR-030).");
+    }
+
+    /// <summary>
+    /// The scrap card reads as one statement — the material, then where it is dumped — so `Lugger Location` is
+    /// drawn in the second column beside `Scrap type`, in the top row, whatever order the Item's declaration
+    /// happens to carry.
+    /// </summary>
+    [TestMethod]
+    public void ViewModel_WaitlistLineCardDetailTemplateTests_ResolveDeclaredCells_PlacesTheLuggerInTheSecondColumnBesideTheScrapType()
+    {
+        // The shipped declaration: scrap type first, the lugger last, with the three fields the card excludes
+        // sitting between them.
+        var shipped = WaitlistViewViewModel.CreateSessionOrder(
+            Shape("pickup-scrap"),
+            ScrapJob(),
+            Declaration(
+                "pickup-scrap",
+                ("Scrap Type", RequestItemFieldDefinition.Sources.Job, 1, false),
+                ("Quantity involved", RequestItemFieldDefinition.Sources.Job, 2, false),
+                ("Scrap lugger", RequestItemFieldDefinition.Sources.Job, 3, false),
+                ("Pickup work center", RequestItemFieldDefinition.Sources.Fixed, 4, false),
+                ("Lugger Location", RequestItemFieldDefinition.Sources.Job, 5, false)));
+
+        Assert.AreEqual(2, shipped.Cells.Count, "The scrap card draws a cell other than the scrap type and the lugger (FR-030, FR-027).");
+        Assert.AreEqual("Scrap Type", shipped.Cells[0].Label, "The scrap card no longer opens with the scrap type, so the lugger is not the second column (FR-027).");
+        Assert.AreEqual("Lugger Location", shipped.Cells[1].Label, "The lugger is not drawn beside the scrap type (FR-022, FR-027).");
+
+        // A store whose declaration lists the two the other way round draws the same card: the pair's order is
+        // the card's rule, not the configuration's.
+        var reversed = WaitlistViewViewModel.CreateSessionOrder(
+            Shape("pickup-scrap"),
+            ScrapJob(),
+            Declaration(
+                "pickup-scrap",
+                ("Lugger Location", RequestItemFieldDefinition.Sources.Job, 1, false),
+                ("Scrap Type", RequestItemFieldDefinition.Sources.Job, 2, false)));
+
+        Assert.AreEqual("Scrap Type", reversed.Cells[0].Label, "The lugger took the first column because the declaration listed it first.");
+        Assert.AreEqual("Lugger Location", reversed.Cells[1].Label, "The lugger is not the second column when the declaration lists it first.");
+
+        // And the second column of the top row is where the template draws the second cell.
+        Assert.AreEqual(0, WaitlistCardCellLayout.RowFor(1), "The second cell is not on the panel's top row.");
+        Assert.AreEqual(1, WaitlistCardCellLayout.ColumnFor(1), "The second cell is not in the panel's second column.");
+        Assert.AreEqual(1, WaitlistCardCellLayout.ColumnSpanFor(1, 2), "A two-cell panel draws each cell in its own column rather than spanning.");
+    }
+
+    /// <summary>
+    /// A scrap card whose job carries no lugger — no scrap decision, or a scrap type the arrangement has no lugger
+    /// for — draws no lugger cell at all, never a dash and never a blank, and no card anywhere still draws the
+    /// retired "In development" placeholder (FR-025, FR-026, FR-039).
+    /// </summary>
+    [TestMethod]
+    public void ViewModel_WaitlistLineCardDetailTemplateTests_ResolveDeclaredCells_OmitsTheLuggerCellWhenNothingResolvedAndNeverDrawsInDevelopment()
+    {
+        var scrapDeclaration = Declaration(
+            "pickup-scrap",
+            ("Scrap type", RequestItemFieldDefinition.Sources.Job, 1, false),
+            ("Lugger Location", RequestItemFieldDefinition.Sources.Job, 2, false));
+
+        // The job's scrap type is real, and the arrangement answered no lugger for it: the cell is absent rather
+        // than filled with a substitute value (FR-026).
+        var gap = WaitlistViewViewModel.CreateSessionOrder(
+            Shape("pickup-scrap"),
+            Job() with { ScrapType = "Galvanized Steel" },
+            scrapDeclaration);
+
         Assert.IsFalse(
-            WaitlistCardCellRules.IsPendingSourceField("pickup-scrap", "Scrap type"),
-            "Scrap Type is treated as a cell waiting on its source, but its source resolves today (FR-034).");
+            gap.Cells.Any(cell => string.Equals(cell.Label, "Lugger Location", StringComparison.OrdinalIgnoreCase)),
+            "A scrap type with no lugger still draws a Lugger Location cell, so a substitute value reached the card (FR-026).");
+        Assert.IsTrue(
+            gap.Cells.Any(cell => string.Equals(cell.Label, "Scrap type", StringComparison.OrdinalIgnoreCase)),
+            "The scrap card lost its Scrap Type cell along with the missing lugger (FR-030).");
+
+        // A job with no real scrap decision is the other way the value stays null (FR-025).
+        var noDecision = WaitlistViewViewModel.CreateSessionOrder(
+            Shape("pickup-scrap"),
+            Job() with { ScrapType = "Scrap Type Required" },
+            scrapDeclaration);
+
+        Assert.IsFalse(
+            noDecision.Cells.Any(cell => string.Equals(cell.Label, "Lugger Location", StringComparison.OrdinalIgnoreCase)),
+            "A job with no scrap decision still draws a Lugger Location cell (FR-025).");
+
+        // The placeholder's wording has no cell left to serve: no Item draws it anywhere. The phrase's resource key
+        // is checked too, because a resurrected branch would draw the key itself once the retired resource is gone
+        // (FR-039).
+        foreach (var item in RequestItemCatalog.Items)
+        {
+            foreach (var cell in DrawnCells(item.Id))
+            {
+                Assert.IsFalse(
+                    cell.Value.Contains("In development", StringComparison.OrdinalIgnoreCase)
+                        || cell.Value.Contains("PendingSource", StringComparison.OrdinalIgnoreCase),
+                    $"`{item.Id}` draws '{cell.Value}', which is the retired in-development placeholder rather than a value (FR-039).");
+            }
+        }
     }
 
     /// <summary>
@@ -1199,6 +1294,16 @@ public sealed class WaitlistLineCardDetailTemplateTests
         DieNumber = "FGT0002000",
         DieLocation = "DIE SHOP",
         DunnageParts = [new RequestDunnagePart { PartNumber = "DUN0000100", HomeLocation = "A-12" }],
+    };
+
+    /// <summary>
+    /// The same job with a real scrap decision and the lugger the arrangement settled for it, which is what the
+    /// scrap card's `Lugger Location` cell reads (FR-022).
+    /// </summary>
+    private static RequestJobPartAvailability ScrapJob() => Job() with
+    {
+        ScrapType = "3003 Aluminum",
+        LuggerLocation = "Door 6 Lugger",
     };
 
     /// <summary>Captures what the facade forwards to the store's log, so a warning can be observed without a store.</summary>

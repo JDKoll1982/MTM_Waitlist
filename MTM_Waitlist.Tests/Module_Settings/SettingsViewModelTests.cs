@@ -543,6 +543,118 @@ public sealed class SettingsViewModelTests
         Assert.IsFalse(viewModel.IsUrgencyAllotmentsPanelVisible);
     }
 
+    /// <summary>
+    /// T049 (FR-028, FR-029). The lugger arrangement's entry is drawn for a person holding
+    /// <c>permission.settings.lugger_arrangement</c> and is absent for everybody else.
+    /// </summary>
+    [TestMethod]
+    public void ViewModel_SettingsViewModelTests_TheLuggerArrangementEntry_IsDrawnOnlyWhenItsPermissionIsHeld()
+    {
+        var held = BuildViewModel(new InMemoryScopedPreferenceStore(), [PermissionKeys.SettingsLuggerArrangement]);
+        var withheld = BuildViewModel(new InMemoryScopedPreferenceStore(), [PermissionKeys.AdminPermissions]);
+
+        Assert.IsTrue(
+            held.CanOpenLuggerArrangement,
+            "The gate is the lugger permission itself, not a role name kept on this screen (FR-028).");
+        Assert.IsTrue(held.IsLuggerArrangementEntryVisible, "A holder is offered the entry.");
+
+        Assert.IsFalse(withheld.CanOpenLuggerArrangement);
+        Assert.IsFalse(
+            withheld.IsLuggerArrangementEntryVisible,
+            "A person below the gate is not offered the entry at all (FR-029).");
+    }
+
+    /// <summary>
+    /// T049 (FR-029). Absent, not shown-but-disabled: the entry's visibility is the only channel this screen has
+    /// for it, and there is no separate enable flag that would draw it in a dead state.
+    /// </summary>
+    [TestMethod]
+    public void ViewModel_SettingsViewModelTests_TheLuggerArrangementEntry_IsAbsentRatherThanDisabled()
+    {
+        var withheld = BuildViewModel(new InMemoryScopedPreferenceStore(), [PermissionKeys.AdminPermissions]);
+
+        Assert.IsFalse(
+            withheld.IsLuggerArrangementEntryVisible,
+            "The card is not drawn for a person who does not hold the key.");
+
+        var enableFlag = typeof(SettingsViewModel)
+            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .FirstOrDefault(property => property.Name.Contains("LuggerArrangement", StringComparison.Ordinal)
+                && property.Name.Contains("Enabled", StringComparison.Ordinal));
+
+        Assert.IsNull(
+            enableFlag,
+            "There is no separate enabled flag, because a disabled card is the state FR-029 forbids.");
+    }
+
+    /// <summary>T049 (FR-030). The entry's route is the view model's full name, as every page in this application is routed.</summary>
+    [TestMethod]
+    public void ViewModel_SettingsViewModelTests_TheLuggerArrangementRoute_IsItsViewModelsFullName()
+    {
+        Assert.AreEqual(
+            "MTM_Waitlist.Module_Settings.ViewModels.LuggerArrangementViewModel",
+            SettingsViewModel.LuggerArrangementViewModelName,
+            "The route constant names the view model the page service is configured with.");
+    }
+
+    /// <summary>T049 (FR-030). The entry navigates rather than expanding, on the route the constant names.</summary>
+    [TestMethod]
+    public async Task ViewModel_SettingsViewModelTests_OpeningTheLuggerArrangement_NavigatesToItsRoute()
+    {
+        var navigation = new RecordingNavigationService();
+        var viewModel = BuildViewModel(
+            new InMemoryScopedPreferenceStore(),
+            [PermissionKeys.SettingsLuggerArrangement],
+            navigationService: navigation);
+        viewModel.OnNavigatedTo(new object());
+        await viewModel.PermissionLoad;
+
+        viewModel.OpenLuggerArrangementCommand.Execute(null);
+
+        CollectionAssert.Contains(
+            navigation.RequestedPageKeys,
+            SettingsViewModel.LuggerArrangementViewModelName,
+            "The entry opens the arrangement rather than unfolding a panel.");
+    }
+
+    /// <summary>T049 (FR-029). Reaching the route another way is refused on the same permission answer.</summary>
+    [TestMethod]
+    public void ViewModel_SettingsViewModelTests_OpeningWithoutThePermission_DoesNotNavigate()
+    {
+        var navigation = new RecordingNavigationService();
+        var viewModel = BuildViewModel(
+            new InMemoryScopedPreferenceStore(),
+            [PermissionKeys.AdminPermissions],
+            navigationService: navigation);
+
+        viewModel.OpenLuggerArrangementCommand.Execute(null);
+
+        Assert.AreEqual(
+            0,
+            navigation.RequestedPageKeys.Count,
+            "A person who does not hold the key is not taken to the arrangement by any route.");
+    }
+
+    /// <summary>T049 (FR-028). The screen asks for the lugger key with the keys it already reads, in the one read.</summary>
+    [TestMethod]
+    public void ViewModel_SettingsViewModelTests_ThePermissionRead_CarriesTheLuggerArrangementKey()
+    {
+        var declared = DeclaredPermissionKeys();
+
+        CollectionAssert.Contains(
+            declared.ToList(),
+            PermissionKeys.SettingsLuggerArrangement,
+            "The gate is read in the screen's single permission call, not in a layout pass (FR-056).");
+    }
+
+    private static IReadOnlyList<string> DeclaredPermissionKeys()
+    {
+        var field = typeof(SettingsViewModel).GetField("s_permissionKeys", BindingFlags.NonPublic | BindingFlags.Static);
+        Assert.IsNotNull(field, "The declared permission list is missing; the gate would never be read.");
+
+        return (IReadOnlyList<string>)(field.GetValue(null) ?? Array.Empty<string>());
+    }
+
     private static IReadOnlyList<string> DeclaredSearchAwareProperties()
     {
         var field = typeof(SettingsViewModel).GetField("s_searchAwareProperties", BindingFlags.NonPublic | BindingFlags.Static);
@@ -804,7 +916,8 @@ public sealed class SettingsViewModelTests
         IMockServiceRefreshClient? refreshClient = null,
         IImageStorageConfigurationResolver? imageStorageConfigurationResolver = null,
         IConfigSettingsValueService? configSettingsValueService = null,
-        IImageCacheSyncService? imageCacheSyncService = null)
+        IImageCacheSyncService? imageCacheSyncService = null,
+        RecordingNavigationService? navigationService = null)
     {
         var viewModel = BuildViewModelWithoutLoading(
             settings,
@@ -812,7 +925,8 @@ public sealed class SettingsViewModelTests
             refreshClient,
             imageStorageConfigurationResolver,
             configSettingsValueService,
-            imageCacheSyncService);
+            imageCacheSyncService,
+            navigationService);
 
         // The stub answers from an already-completed task, so this settles synchronously and no test has to
         // sleep waiting for a gate to make up its mind.
@@ -830,7 +944,8 @@ public sealed class SettingsViewModelTests
         IMockServiceRefreshClient? refreshClient = null,
         IImageStorageConfigurationResolver? imageStorageConfigurationResolver = null,
         IConfigSettingsValueService? configSettingsValueService = null,
-        IImageCacheSyncService? imageCacheSyncService = null)
+        IImageCacheSyncService? imageCacheSyncService = null,
+        RecordingNavigationService? navigationService = null)
     {
         var person = new FakePersonIdentity();
         var computerManagement = new ComputerManagementViewModel(new FakeComputerRegistryService(), new FakeMachineFacts());
@@ -850,7 +965,7 @@ public sealed class SettingsViewModelTests
             new FakeDunnageTypeVisibilityCatalogService(),
             new NewRequestAlertService(settings),
             permissions,
-            new RecordingNavigationService(),
+            navigationService ?? new RecordingNavigationService(),
             person,
             computerManagement,
             urgencyAllotments,

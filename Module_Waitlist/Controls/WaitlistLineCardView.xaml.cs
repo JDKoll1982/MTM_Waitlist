@@ -24,11 +24,6 @@ namespace MTM_Waitlist.Module_Waitlist.Controls;
 /// uses, so the card and the rest of the application can never disagree about what a state looks like
 /// (FR-019).
 /// </para>
-/// <para>
-/// The card carries no print action (FR-067). Printing a label belongs to the request's own page, where the
-/// detail a label needs is, so nothing here draws a control that cannot do anything and nothing here records a
-/// TODO about one.
-/// </para>
 /// </remarks>
 public partial class WaitlistLineCardView : UserControl
 {

@@ -154,14 +154,14 @@ public static class RequestJobFieldValues
             // FR-089).
             "home location" => Join(job.DunnageParts.Select(part => part.HomeLocation)),
 
+            // Where the job's scrap is dumped: the lugger the arrangement named for the job's own scrap type,
+            // resolved when the list loaded (FR-022, FR-023). A type the arrangement has no lugger for, and a job
+            // with no real scrap decision, answer nothing — the cell is then left out rather than filled with a
+            // dash, a blank or a guess (FR-025, FR-026).
+            "lugger location" => Trimmed(job.LuggerLocation),
+
             // Any other declared job label is a value this snapshot does not carry. It resolves to nothing, and
             // its row is omitted rather than drawn empty.
-            //
-            // TODO (feature 012 follow-up, FR-034): add the `lugger location` arm here. `pickup-scrap` declares it
-            // with source `job`, and nothing answers it yet: the scrap lugger's location has to come from wherever
-            // the lugger is standing, which no read shape reports today. Until the arm exists the card draws its
-            // "in development" placeholder — see `WaitlistCardCellRules.s_pendingSourceLabels`, which is the one
-            // other place to change. Adding this arm and deleting that entry is the whole fix.
             _ => null,
         };
     }

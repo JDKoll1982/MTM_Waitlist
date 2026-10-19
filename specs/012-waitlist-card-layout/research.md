@@ -28,7 +28,7 @@ derive, captured answer, or absent by design.
 | `# of Skids` (the four returning pickups) | nothing | Captured answer, defaulting to 1, added to each of the four declarations |
 | `Weight of Coil` (`assist-coil-turn`) | nothing | Required captured numeric answer, added to the declaration. Deliberately not the job's average coil weight (FR-054) |
 | The die-shop cell (both die Items) | nothing | Captured answer: the checkbox's flag, added to the declaration, with the phrase chosen by the Item's category from a resource key |
-| `Lugger Location` (`pickup-scrap`) | no source anywhere | Absent by design. The declaration stays; the resolver has no arm, so the cell is hidden. The reveal path is that a future source adds a resolver arm and the cell appears with no card change |
+| `Lugger Location` (`pickup-scrap`) | no source in this feature | Superseded by 013-lugger-location-config. The source is configuration: the lugger arrangement assigns each scrap type an ordered set of luggers, and the card draws the one holding that type's dump point. The reveal path is a snapshot read per list load plus one resolver arm reading the availability's `LuggerLocation`, so the cell appears on the next load with no card change |
 | `Description` (dunnage Items) | declared, provably unfillable | Absent by design, same path as above (see R8) |
 
 **Rationale**: the pre-spec's own rule is that anything the job cannot carry is read from the source that holds it,

@@ -10,6 +10,95 @@
 
 ---
 
+## 2026-10-18 — the lugger arrangement is a wall of cards you can drag into order
+
+**What changed:** the **Lugger arrangement** page in Settings was rebuilt around its cards. Each lugger is now its
+own card carrying the lugger's name, its status in the status's own colour, the scrap types it takes, and its own
+**Edit** and **Rename** buttons. The editor opens as a window over the page instead of being drawn underneath it,
+and a new **Add lugger** button at the bottom of the cards does the same for a lugger that does not exist yet.
+
+**Why it matters:** the arrangement is about individual doors. Editing one meant picking it out of a list first,
+and the page drew a second list of scrap types that repeated what the cards already said.
+
+**What to expect:**
+
+- **Each card is one lugger**, and the status colour tells you at a glance whether it can take material. The cards
+  are drawn three across and stretch to fill the panel, so a wide window shows the whole arrangement without a
+  strip of empty space beside it.
+- **Edit opens that lugger's window.** It offers the status with its reason, the scrap types to assign or unassign,
+  and removing the lugger. It never asks which lugger you meant, and the scrap type is a drop-down rather than a
+  typed field.
+- **Make dump point only appears when it can do something** — when the chosen scrap type has a backup lugger
+  assigned and this lugger is not already the dump point.
+- **Rename sits beside Edit on the card**, and **Add lugger** is at the bottom.
+- **Drag a card to move it.** Press and hold the card's background, then drag it to another card's place; the new
+  order is saved, so it survives a reload. The buttons on a card keep their own clicks, so nothing opens by accident.
+- **Move up and Move down are gone**, replaced by the drag.
+- The separate scrap-type list is gone: each card already names the scrap types it takes.
+- **A change that cannot be saved no longer empties the page.** The cards stay as the store holds them and the page
+  says the change was not saved, instead of clearing the arrangement and reporting it as unreadable. When the cause
+  is that the database is missing part of the arrangement, the page says that too, because no amount of retrying a
+  change will fix it.
+- **Changes now save on a computer that is not on the plant network.** Reading the arrangement already knew to use
+  the local database when the plant server could not be reached; saving did not, so every edit timed out against a
+  server the machine could not see. Saving now follows the same rule as reading.
+
+---
+
+## 2026-10-18 — the scrap card puts the lugger beside the scrap type
+
+**What changed:** on a scrap request's card, `Lugger Location` is now drawn in the second column, directly beside
+`Scrap Type`, instead of following whatever order the Item's configuration happened to list its fields in.
+
+**Why it matters:** the two cells read as one sentence — the material, then where it is dumped — so a handler reads
+them left to right without hunting for the lugger. The placement is now a card rule, which means it holds on every
+store, including one whose scrap Item lists the lugger before the scrap type.
+
+**What to expect:** a scrap card whose job has a real scrap decision shows `Scrap Type` on the left and the lugger's
+name on the right, on the same line. If the job has no scrap decision, or the scrap type has no lugger configured,
+the lugger cell is still absent rather than blank, and the scrap type keeps the left column.
+
+---
+
+## 2026-10-17 — a scrap card now says which lugger to walk to, and a lead can keep that list straight
+
+**What changed:** the `Lugger Location` cell on a scrap request's card used to read "In development". It now names the
+lugger that job's scrap goes into, for example `Door 6 Lugger`, so a handler knows where to walk without asking.
+Settings also gained a **Lugger arrangement** page, opened by a Material Handler Lead and above, where the luggers,
+their status and the scrap types each one takes are kept up to date.
+
+**Why it matters:** the luggers move, get emptied, get repainted and get swapped between doors. Until now the
+application had nothing to say about which one a given scrap type used, so the cell could only admit it was unbuilt.
+
+**What to expect:**
+
+- **The scrap card names the lugger.** Each scrap type dumps through the lugger the arrangement assigns to it, and
+  the card shows that lugger's name. If the job recorded no scrap decision, or the type has no lugger configured, the
+  cell is simply not drawn rather than showing an empty value.
+- **A lugger's own status decides who is next, and nobody reconciles it by hand.** A lugger is `Available`,
+  `Backup`, `Full` or `Do Not Use`. Marking one `Full` or `Do Not Use` moves the dump point to the next usable lugger
+  for every scrap type that lugger takes, and a lugger that is emptied does not take the role back from whoever now
+  holds it. `Do Not Use` asks for a reason, and the reason stays with the change record.
+- **When no lugger can take the material, the card says so.** It names the first lugger for that type with its status
+  beside it, for example `Door 9 Lugger (Full)`, instead of going blank.
+- **A lead maintains the arrangement in Settings.** They can add a lugger, rename one, remove one, set a status, and
+  assign, order, unassign or promote the luggers for a scrap type. Every change records who made it and when, and
+  shows on the next card load with no restart.
+- **Handlers are told when the arrangement changes.** A person working the waitlist sees a small closable note above
+  the list naming what changed, once per change, within a minute. Closing it dismisses it for that person for the
+  session. Nothing is sent as an operating-system notification, and a change made before the list was opened is not
+  replayed.
+- **Nobody below Material Handler Lead can open the arrangement.** The entry is not shown to them, and the route is
+  refused even if reached another way.
+
+**Who is affected:** material handlers (the card and the notice strip), and Material Handler Leads and above (the new
+Settings page).
+
+**If the store is unreachable:** the arrangement page shows its own unavailable message with a retry, and the card
+simply draws no lugger cell. Nothing invents a lugger or shows a sample list.
+
+---
+
 ## 2026-10-10 — the waitlist card is rebuilt around what you need to see, and a handler can say what is wrong
 
 **What changed:** the waitlist card is now four panels instead of a picture, a stack of labels and a row of buttons.

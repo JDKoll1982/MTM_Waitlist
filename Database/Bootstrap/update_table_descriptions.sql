@@ -601,6 +601,36 @@ MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the conf
 MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the configuration row was last updated.';
 
 -- ============================================================
+-- waitlist_lugger_locations, waitlist_lugger_scrap_assignments, waitlist_lugger_arrangement_changes
+--   - feature 013-lugger-location-config (FR-001, FR-005, FR-032)
+-- ============================================================
+-- Three new tables, described here in the one form this file uses for every table: `ALTER TABLE ... COMMENT =`.
+-- That statement replaces whatever comment the table already carries, so a table that is already described is
+-- simply re-described, the text is left exactly as it was, and the file can be run again without a change.
+--   Owning artifacts: Database/Tables/36_waitlist_lugger_locations/create.sql,
+--     Database/Tables/37_waitlist_lugger_scrap_assignments/create.sql and
+--     Database/Tables/38_waitlist_lugger_arrangement_changes/create.sql, with their rollbacks beside them and
+--     their bodies registered in Database/Tables/AllTables.sql. Each description repeats its artifact's own
+--     COMMENT word for word, so the two cannot come to say different things.
+--   waitlist_lugger_locations holds the named luggers themselves: the name the lead maintains and the handler
+--     reads on the card, the lugger's own operating status and the reason recorded where it is `Do Not Use`, and
+--     its place in the display order (FR-001). The dump-point role is deliberately not a column here, because
+--     one status column cannot say that a lugger dumps one scrap type and backs up another.
+--   waitlist_lugger_scrap_assignments holds one row per scrap type and lugger pairing: the spelling the lead
+--     entered, the normalised key the card's lookup matches on, the dump-point role and the order the system
+--     tries the luggers in. Its `lugger_id` is the one foreign key, so removing a lugger takes its assignments
+--     with it rather than leaving one pointing at nothing (FR-005).
+--   waitlist_lugger_arrangement_changes is append-only: every edit to the other two is recorded there as what
+--     changed, from what to what, by whom and when, so a wrong lugger can be traced to the edit that caused it
+--     (FR-032), and the notice poll reads it above a watermark held on `id`.
+
+ALTER TABLE waitlist_lugger_locations COMMENT = 'One row per named scrap lugger: name, own status and reason, display order.';
+
+ALTER TABLE waitlist_lugger_scrap_assignments COMMENT = 'One row per scrap type and lugger pairing: entered spelling, normalised key, dump-point role and try order.';
+
+ALTER TABLE waitlist_lugger_arrangement_changes COMMENT = 'Append-only record of every edit to the lugger arrangement: what changed, from what to what, by whom and when.';
+
+-- ============================================================
 -- config_images_locations_history - feature 008-part-pictures
 -- ============================================================
 -- New table. The owning artifact is Database/Tables/33_config_images_locations_history/create.sql; the guarded

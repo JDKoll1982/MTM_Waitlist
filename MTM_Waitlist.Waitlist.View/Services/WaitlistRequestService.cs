@@ -87,7 +87,16 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         return loaded.Count;
     }
 
-    private static WaitlistRequest? MapRowToRequest(IReadOnlyDictionary<string, object?> row)
+    /// <summary>
+    /// Turns one row of <c>sp_waitlist_request_list</c> into the request the card is built from.
+    /// </summary>
+    /// <remarks>
+    /// Internal rather than private because it is the one mapper between the store's row shape and the card, and a
+    /// check that drives the card from a live store has to map its rows exactly as the list does rather than
+    /// through a second copy that can drift from this one (the suite reaches internals through
+    /// <c>InternalsVisibleTo</c>).
+    /// </remarks>
+    internal static WaitlistRequest? MapRowToRequest(IReadOnlyDictionary<string, object?> row)
     {
         var publicId = ReadString(row, "public_id");
         if (!Guid.TryParse(publicId, out var requestId))

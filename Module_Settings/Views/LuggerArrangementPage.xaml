@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="MTM_Waitlist.Module_Settings.Views.LuggerArrangementPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:MTM_Waitlist.Module_Settings.Models"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    mc:Ignorable="d">
+
+    <!--
+        The lugger arrangement (013-lugger-location-config, FR-030, FR-031).
+
+        The page is the arrangement itself: one card per lugger, each carrying its own Edit and Rename actions, and
+        the cards can be dragged into a new order. Everything a card changes is edited in a dialog opened from that
+        card, so the page never asks the reader to pick a lugger it could have named for them.
+
+        Every line comes from the view model. The page holds no rule of its own: what may be changed, what the store
+        refused and whether the store answered at all are all answered there, so the same answer cannot be
+        interpreted two ways.
+    -->
+    <Page.Resources>
+        <!-- The chrome the arrangement panel wears. -->
+        <Style x:Key="ArrangementCardChrome" TargetType="Border">
+            <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+            <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="16" />
+        </Style>
+
+        <!--
+            One lugger, drawn as a card. The tile fills the cell its grid gives it, so every card in a row is the
+            same shape; the inset accent bar is painted in the lugger's own status colour, so a blocked lugger is
+            visible before its words are read.
+        -->
+        <Style x:Key="ArrangementTile" TargetType="Border">
+            <Setter Property="Margin" Value="0,0,12,12" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorSecondaryBrush}" />
+            <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+        </Style>
+
+        <!-- A tile carries its own chrome, so its container adds no hover, selection or focus box of its own. -->
+        <Style x:Key="ArrangementTileItemContainerStyle" TargetType="GridViewItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GridViewItem">
+                        <ListViewItemPresenter
+                            ContentMargin="0"
+                            ContentTransitions="{TemplateBinding ContentTransitions}"
+                            PointerOverBackground="Transparent"
+                            PressedBackground="Transparent"
+                            SelectedBackground="Transparent"
+                            SelectedPointerOverBackground="Transparent"
+                            SelectedPressedBackground="Transparent"
+                            SelectedBorderThickness="0"
+                            RevealBorderThickness="0"
+                            SelectionCheckMarkVisualEnabled="False" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+
+    <Grid x:Name="RootPage" Padding="24">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" VerticalScrollMode="Enabled">
+            <StackPanel MaxWidth="960" Spacing="16">
+
+                <TextBlock Style="{ThemeResource TitleTextBlockStyle}" Text="{x:Bind ViewModel.TitleText}" />
+
+                <!-- A reader who may not open the arrangement is told so rather than shown a screen they cannot use. -->
+                <InfoBar
+                    x:Name="NotEntitledBar"
+                    x:Load="{x:Bind ViewModel.NotEntitled, Mode=OneWay}"
+                    IsClosable="False"
+                    IsOpen="True"
+                    Message="{x:Bind ViewModel.MessageText, Mode=OneWay}"
+                    Severity="Warning"
+                    Title="{x:Bind ViewModel.TitleText}" />
+
+                <!-- What the page says about the last thing that happened, and that it is still working. -->
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <muxc:ProgressRing
+                        Width="20"
+                        Height="20"
+                        IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Style="{ThemeResource BodyTextBlockStyle}"
+                        Text="{x:Bind ViewModel.MessageText, Mode=OneWay}"
+                        TextWrapping="Wrap" />
+                </StackPanel>
+
+                <!-- A store that cannot be reached is stated, and the only thing offered is the reader's retry. -->
+                <InfoBar
+                    x:Name="UnavailableBar"
+                    AutomationProperties.AutomationId="LuggerArrangementPage_Unavailable"
+                    x:Load="{x:Bind ViewModel.IsStoreUnavailable, Mode=OneWay}"
+                    IsClosable="False"
+                    IsOpen="True"
+                    Message="{x:Bind ViewModel.UnavailableText}"
+                    Severity="Error"
+                    Title="{x:Bind ViewModel.TitleText}" />
+
+                <Button
+                    AutomationProperties.AutomationId="LuggerArrangementPage_Retry"
+                    Command="{x:Bind ViewModel.LoadCommand}"
+                    Content="{x:Bind ViewModel.RetryActionText}"
+                    Visibility="{x:Bind ViewModel.IsStoreUnavailable, Mode=OneWay}" />
+
+                <!-- The arrangement: every lugger as its own card (FR-030, FR-019). -->
+                <Border
+                    x:Name="SummaryPanel"
+                    x:Load="{x:Bind ViewModel.IsEntitled, Mode=OneWay}"
+                    Style="{StaticResource ArrangementCardChrome}">
+                    <StackPanel Spacing="12">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Style="{ThemeResource BodyStrongTextBlockStyle}"
+                            Text="{x:Bind ViewModel.NameLabelText}" />
+
+                        <!--
+                            The cards are the arrangement. Dragging one onto another's place reorders them: the
+                            platform starts the drag from the card's own background once the press is held, and the
+                            buttons on the card take their own clicks, so nothing here opens by accident. The store
+                            renumbers the order behind the dropped card.
+                        -->
+                        <GridView
+                            AutomationProperties.AutomationId="LuggerArrangementPage_Summary"
+                            AllowDrop="True"
+                            CanDragItems="True"
+                            CanReorderItems="True"
+                            DragItemsCompleted="OnLuggerDragItemsCompleted"
+                            IsItemClickEnabled="False"
+                            Loaded="OnLuggerGridLoaded"
+                            SizeChanged="OnLuggerGridSizeChanged"
+                            ItemContainerStyle="{StaticResource ArrangementTileItemContainerStyle}"
+                            ItemsSource="{x:Bind ViewModel.Luggers, Mode=OneWay}"
+                            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                            ScrollViewer.HorizontalScrollMode="Disabled"
+                            ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                            ScrollViewer.VerticalScrollMode="Disabled"
+                            SelectionMode="None">
+                            <GridView.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <ItemsWrapGrid
+                                        ItemHeight="208"
+                                        MaximumRowsOrColumns="3"
+                                        Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </GridView.ItemsPanel>
+                            <GridView.ItemTemplate>
+                                <DataTemplate x:DataType="models:LuggerArrangementRow">
+                                    <Border
+                                        AutomationProperties.Name="{x:Bind Name}"
+                                        Style="{StaticResource ArrangementTile}">
+                                        <Grid ColumnSpacing="0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="6" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <Border
+                                                Grid.Column="0"
+                                                Background="{x:Bind StatusBadgeBackground, Converter={StaticResource HexColorToBrushConverter}}" />
+
+                                            <!--
+                                                The card's words fill it and its two actions sit on its own bottom edge, so
+                                                Edit and Rename line up across a row however long a lugger's name is.
+                                            -->
+                                            <Grid
+                                                Grid.Column="1"
+                                                Padding="12"
+                                                RowSpacing="8">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="*" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+
+                                                <StackPanel
+                                                    Grid.Row="0"
+                                                    Spacing="6">
+                                                    <TextBlock
+                                                        MaxLines="2"
+                                                        Style="{ThemeResource SubtitleTextBlockStyle}"
+                                                        Text="{x:Bind Name}"
+                                                        TextWrapping="Wrap" />
+
+                                                    <Border
+                                                        HorizontalAlignment="Left"
+                                                        Padding="8,2"
+                                                        Background="{x:Bind StatusBadgeBackground, Converter={StaticResource HexColorToBrushConverter}}"
+                                                        CornerRadius="4">
+                                                        <TextBlock
+                                                            MaxLines="2"
+                                                            Style="{ThemeResource CaptionTextBlockStyle}"
+                                                            Foreground="{x:Bind StatusBadgeForeground, Converter={StaticResource HexColorToBrushConverter}}"
+                                                            Text="{x:Bind StatusAndReasonText}"
+                                                            TextWrapping="Wrap" />
+                                                    </Border>
+
+                                                    <TextBlock
+                                                        MaxLines="2"
+                                                        Style="{ThemeResource BodyTextBlockStyle}"
+                                                        Text="{x:Bind ScrapTypesText}"
+                                                        TextWrapping="Wrap" />
+                                                </StackPanel>
+
+                                                <StackPanel
+                                                    Grid.Row="1"
+                                                    Orientation="Horizontal"
+                                                    Spacing="8">
+                                                    <Button
+                                                        MinWidth="88"
+                                                        AutomationProperties.AutomationId="LuggerArrangementPage_OpenEditor"
+                                                        Click="OnEditLuggerClick"
+                                                        Content="{x:Bind EditActionText}" />
+                                                    <Button
+                                                        MinWidth="88"
+                                                        AutomationProperties.AutomationId="LuggerArrangementPage_Rename"
+                                                        Click="OnRenameLuggerClick"
+                                                        Content="{x:Bind RenameActionText}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </GridView.ItemTemplate>
+                        </GridView>
+
+                        <Button
+                            AutomationProperties.AutomationId="LuggerArrangementPage_Add"
+                            HorizontalAlignment="Left"
+                            Click="OnAddLuggerClick"
+                            Content="{x:Bind ViewModel.AddActionText}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+    </Grid>
+</Page>

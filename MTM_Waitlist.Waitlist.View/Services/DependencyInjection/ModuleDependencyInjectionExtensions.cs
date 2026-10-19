@@ -12,6 +12,7 @@ public static class ModuleDependencyInjectionExtensions
         services.AddSingleton<WaitlistModuleService>();
         services.AddSingleton<IWaitlistRequestService, WaitlistRequestService>();
         services.AddSingleton<IWaitlistMessageSeenStore, LocalWaitlistMessageSeenStore>();
+        services.AddSingleton<ILuggerChangeNoticeService, LuggerChangeNoticeService>();
         services.AddSingleton<IWaitlistInventoryService, WaitlistInventoryService>();
         services.AddSingleton<IAverageCoilWeightService, AverageCoilWeightService>();
         return services;

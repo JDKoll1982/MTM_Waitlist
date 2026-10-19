@@ -1,4 +1,6 @@
+using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
@@ -28,19 +30,23 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
     private readonly IActiveJobItemResolverService _activeJobItemResolver;
     private readonly RequestDispositionResolver _dispositionResolver;
     private readonly IAverageCoilWeightService _averageCoilWeightService;
+    private readonly ILuggerArrangementService _luggerArrangement;
 
     public RequestJobAvailabilityProvider(
         IActiveJobItemResolverService activeJobItemResolver,
         RequestDispositionResolver dispositionResolver,
-        IAverageCoilWeightService averageCoilWeightService)
+        IAverageCoilWeightService averageCoilWeightService,
+        ILuggerArrangementService luggerArrangement)
     {
         ArgumentNullException.ThrowIfNull(activeJobItemResolver);
         ArgumentNullException.ThrowIfNull(dispositionResolver);
         ArgumentNullException.ThrowIfNull(averageCoilWeightService);
+        ArgumentNullException.ThrowIfNull(luggerArrangement);
 
         _activeJobItemResolver = activeJobItemResolver;
         _dispositionResolver = dispositionResolver;
         _averageCoilWeightService = averageCoilWeightService;
+        _luggerArrangement = luggerArrangement;
     }
 
     /// <inheritdoc />
@@ -57,7 +63,8 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
         }
 
         availability = await ApplyDispositionAsync(availability, snapshot, cancellationToken).ConfigureAwait(false);
-        return await ApplyCoilAverageWeightAsync(availability, cancellationToken).ConfigureAwait(false);
+        availability = await ApplyCoilAverageWeightAsync(availability, cancellationToken).ConfigureAwait(false);
+        return await ApplyLuggerLocationAsync(availability, workCenter, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -101,6 +108,62 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
                 $"The average coil weight for coil '{availability.CoilPartNumber}' could not be read from the receiving store, so the card's `Average coil weight` cell is left empty.");
             return availability;
         }
+    }
+
+    /// <summary>
+    /// Names the lugger the job's scrap is dumped into, from the arrangement as it stands now.
+    /// <para>
+    /// The arrangement is read through its own seam, once for the availability this call builds, so a card shows
+    /// the lugger named when the list loaded rather than anything the request stored; a status change or a rename
+    /// therefore shows on the next load (FR-023). The job's real scrap type is the key: it is matched ignoring
+    /// letter case and surrounding spaces, and nothing else (FR-009, FR-022).
+    /// </para>
+    /// <para>
+    /// Two absences are not the same. A job with no real scrap decision is the designed absence and resolves
+    /// nothing, so the cell is simply left out (FR-025). A real scrap type with no lugger assigned is a
+    /// configuration gap: it is recorded once through <see cref="AppLog.Warn"/>, naming the scrap type and the work
+    /// centre so the arrangement can be corrected, and the value stays null so no substitute reaches the card
+    /// (FR-026). An arrangement that could not be read at all arrives as an empty snapshot, which is an outage
+    /// rather than a gap — the list keeps working with no value and no warning is raised about configuration that
+    /// was never seen.
+    /// </para>
+    /// </summary>
+    private async Task<RequestJobPartAvailability> ApplyLuggerLocationAsync(
+        RequestJobPartAvailability availability,
+        string? workCenter,
+        CancellationToken cancellationToken)
+    {
+        if (availability.ScrapType.Length == 0)
+        {
+            return availability;
+        }
+
+        LuggerArrangementSnapshot arrangement;
+        try
+        {
+            arrangement = await _luggerArrangement.GetSnapshotAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error(
+                "Waitlist",
+                ex,
+                $"The scrap lugger arrangement could not be read, so the `Lugger Location` cell for scrap type '{availability.ScrapType}' at work center '{workCenter}' is left out.");
+            return availability;
+        }
+
+        var resolution = arrangement.Resolve(availability.ScrapType);
+
+        if (resolution.IsConfigurationGap && arrangement.Rows.Count > 0)
+        {
+            AppLog.Warn(
+                "Waitlist",
+                $"The scrap type '{availability.ScrapType}' has no lugger assigned, so the `Lugger Location` cell at work center '{workCenter}' is left out. Assign the type to a lugger in the lugger arrangement so handlers know where to walk.");
+        }
+
+        return resolution.LuggerLocation is null
+            ? availability
+            : availability with { LuggerLocation = resolution.LuggerLocation };
     }
 
     /// <summary>

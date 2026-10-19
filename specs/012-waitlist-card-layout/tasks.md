@@ -197,7 +197,7 @@ word, ring contents, person row and column theme.
 
 **Wave 3:**
 
-- [ ] **T048** [US2] Verify the column end to end on the built card: a live unclaimed request reads `Waiting` with the requester in row 3, a claimed one reads the handler, an overdue request with no condition reads `Overdue` with the overrun in the ring and the overdue theme, a completed request freezes the ring on the time taken with the handler in row 3 and the requester in row 4, a cancelled request reads the handler or the canceller, and a request carrying a condition reads only that condition in the lighter red theme. · FR-011, FR-014, FR-015, FR-022, FR-023 · Verify: the states are driven against the dev store and each one checked against SC-006 and SC-007.
+- [x] **T048** [US2] Verify the column end to end on the built card: a live unclaimed request reads `Waiting` with the requester in row 3, a claimed one reads the handler, an overdue request with no condition reads `Overdue` with the overrun in the ring and the overdue theme, a completed request freezes the ring on the time taken with the handler in row 3 and the requester in row 4, a cancelled request reads the handler or the canceller, and a request carrying a condition reads only that condition in the lighter red theme. · FR-011, FR-014, FR-015, FR-022, FR-023 · Verify: the states are driven against the dev store and each one checked against SC-006 and SC-007.
 
 **Checkpoint:** the status column reads correctly in every state, the empty person row is absent rather than blank, and
 the two red treatments are never both shown. US2 is independently functional and testable here.

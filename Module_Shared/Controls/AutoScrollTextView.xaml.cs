@@ -3,7 +3,7 @@ using System.Numerics;
 using Microsoft.UI.Composition;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Hosting;
+using Microsoft.UI.Xaml.Media;
 
 using Windows.Foundation;
 using Windows.UI.ViewManagement;
@@ -87,6 +87,10 @@ public sealed partial class AutoScrollTextView : UserControl
     private bool _isScrolling;
     private double _cycle;
 
+    // The pass that is running, kept so it can be stopped by identity: stopping an element animation names the
+    // animation, not the property it drives.
+    private CompositionAnimation? _pass;
+
     public AutoScrollTextView()
     {
         InitializeComponent();
@@ -116,7 +120,16 @@ public sealed partial class AutoScrollTextView : UserControl
         set => SetValue(GapProperty, value);
     }
 
-    private void OnLoaded(object sender, RoutedEventArgs e) => ScheduleDecision();
+    /// <summary>
+    /// Coming back into a tree — which is what a list does to a container it recycles — resumes a scroll that was
+    /// stopped on the way out. The decision itself is still standing, so the pass restarts from it rather than
+    /// waiting for a re-measure that a same-size return would never ask for.
+    /// </summary>
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        ScheduleDecision();
+        ApplyScroll();
+    }
 
     private void OnUnloaded(object sender, RoutedEventArgs e) => StopScrolling();
 
@@ -257,15 +270,13 @@ public sealed partial class AutoScrollTextView : UserControl
 
     private void StartScrolling(double cycle)
     {
-        // The compositor drives the track's Translation channel, which a XAML element only offers once it has been
-        // switched on for that element. Doing it per pass is idempotent and keeps the switch next to its use.
-        ElementCompositionPreview.SetIsTranslationEnabled(Track, true);
-
-        var track = ElementCompositionPreview.GetElementVisual(Track);
-
-        track.StopAnimation("Translation");
-
-        var pass = track.Compositor.CreateVector3KeyFrameAnimation();
+        // The track moves on its own Translation. In WinUI 3 that property belongs to the UIElement, not to the
+        // composition visual behind it, so the animation is started on the element with Translation named as its
+        // target. Reaching for the visual instead — the UWP recipe, GetElementVisual plus a property name — is
+        // refused at run time with "the specified property was not found or cannot be animated" (observed
+        // 2026-10-18), because a visual has no Translation to animate.
+        var pass = CompositionTarget.GetCompositorForCurrentThread().CreateVector3KeyFrameAnimation();
+        pass.Target = "Translation";
         pass.Duration = TimeSpan.FromSeconds(Math.Clamp(
             cycle / ScrollPixelsPerSecond,
             s_shortestPass.TotalSeconds,
@@ -278,8 +289,9 @@ public sealed partial class AutoScrollTextView : UserControl
         pass.InsertKeyFrame(1f, new Vector3((float)-cycle, 0f, 0f));
         pass.IterationBehavior = AnimationIterationBehavior.Forever;
 
-        track.StartAnimation("Translation", pass);
+        Track.StartAnimation(pass);
 
+        _pass = pass;
         _isScrolling = true;
     }
 
@@ -290,16 +302,22 @@ public sealed partial class AutoScrollTextView : UserControl
             return;
         }
 
-        try
+        var pass = _pass;
+        _pass = null;
+
+        if (pass is not null)
         {
-            // Stopping the animation returns the channel to its base value, which is the element's own Translation
-            // of zero: no separate reset is needed, and none is writable from here. This also runs when the control
-            // is leaving the tree, where the element visual may already be gone.
-            ElementCompositionPreview.GetElementVisual(Track).StopAnimation("Translation");
-        }
-        catch (Exception)
-        {
-            // Nothing is running that could be stopped; there is no state left to correct either way.
+            try
+            {
+                // Stopping returns the element's Translation to its own value, which is zero: no separate reset is
+                // needed, and none is writable from here. This also runs when the control is leaving the tree,
+                // where the element may already be gone.
+                Track.StopAnimation(pass);
+            }
+            catch (Exception)
+            {
+                // Nothing is running that could be stopped; there is no state left to correct either way.
+            }
         }
 
         _isScrolling = false;

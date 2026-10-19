@@ -5,14 +5,6 @@
     },
     "python-envs.defaultEnvManager": "ms-python.python:system",
     "chat.mcp.serverSampling": {
-        "MTM_Waitlist/.vscode/mcp.json: xamlmcp": {
-            "allowedModels": [
-                "agent-host-copilotcli:deepseek/deepseek-v4-flash",
-                "deepseek/deepseek-v4-flash",
-                "agent-host-copilotcli:deepseek/deepseek-v4-flash-vision-exp",
-                "deepseek/deepseek-v4-flash-vision-exp"
-            ]
-        },
         "MTM_Waitlist/.vscode/mcp.json: csv-mcp-server": {
             "allowedModels": [
                 "copilotcli/auto",
@@ -47,5 +39,8 @@
         "TODO",
         "XXX",
         "[ ]"
-    ]
+    ],
+    // The built-in GitHub MCP server adds 18 tools; disabling it keeps the chat tool
+    // count under the 128-tool BYOK model limit. Use the `gh` CLI instead.
+    "chat.agentHost.githubMcpServer.enabled": false
 }

@@ -125,14 +125,13 @@ public sealed class RequestItemConfigSeedAlignmentTests
 
     /// <summary>
     /// The labels the card draws today whose value no source supplies yet (FR-058, D41,
-    /// <c>docs/research/research-waitlist-card-layout-pre-spec.md</c> §5.2): the quantity cells wait on D38's read mechanism and
-    /// <c>Lugger Location</c> on a resolver arm. They stay declared so the cell appears the day the source lands,
-    /// with no card change (FR-034).
+    /// <c>docs/research/research-waitlist-card-layout-pre-spec.md</c> §5.2): the quantity cells wait on D38's read mechanism.
+    /// They stay declared so the cell appears the day the source lands, with no card change (FR-034).
     /// </summary>
     /// <remarks>
-    /// <c>Lugger Location</c> is the one of these the card now <b>draws</b>: it carries the in-development
-    /// placeholder rather than being hidden, because hiding it told the person nothing (FR-034). The quantity cells
-    /// are still hidden, and stay hidden until their read lands.
+    /// The quantity cells are hidden until their read lands. <c>Lugger Location</c> is no longer one of them: the
+    /// requesting job's scrap type resolves it through the lugger arrangement, so the card draws it with a real
+    /// value (FR-022, FR-026).
     /// </remarks>
     private static readonly string[] s_labelsWithNoSourceYet =
     [
@@ -142,9 +141,9 @@ public sealed class RequestItemConfigSeedAlignmentTests
     ];
 
     /// <summary>
-    /// The declared labels whose cell the card draws with the in-development placeholder, because their source is
-    /// designed but not built (FR-034). They are declared like any other cell, so the day the source lands the real
-    /// value appears with no configuration change.
+    /// The declared labels the card draws from a value the requesting job supplies rather than from an answer, so
+    /// they are drawn only when the job carries one. They are declared like any other cell, so a job that does carry
+    /// the value draws it with no configuration change (FR-022, FR-034).
     /// </summary>
     private static readonly string[] s_labelsWaitingOnTheirSource =
     [
@@ -236,9 +235,8 @@ public sealed class RequestItemConfigSeedAlignmentTests
             + Environment.NewLine
             + string.Join(Environment.NewLine, unexpected));
 
-        // A cell whose source is designed but not built is DRAWN, carrying the in-development placeholder, rather
-        // than hidden. That is what makes it visible to the person as a cell that is coming, and it is why these
-        // labels are absent from `s_labelsWithNoSourceYet` above (FR-034).
+        // A cell whose value the job supplies is drawn only when the job carries one, and this job carries the
+        // lugger the arrangement named for its scrap type, so the cell appears with a real value (FR-022, FR-026).
         foreach (var (itemCode, labels) in s_cellsTheCardRequires)
         {
             var drawn = DrawnLabels(declarations, itemCode);
@@ -248,7 +246,7 @@ public sealed class RequestItemConfigSeedAlignmentTests
                 CollectionAssert.Contains(
                     drawn.ToArray(),
                     waiting,
-                    $"`{itemCode}` does not draw its `{waiting}` cell, so a cell whose source is still being built is hidden from the person instead of showing them it is coming (FR-034).");
+                    $"`{itemCode}` does not draw its `{waiting}` cell, so a value the job supplies never reaches the card (FR-022, FR-026).");
             }
         }
     }
@@ -641,7 +639,8 @@ public sealed class RequestItemConfigSeedAlignmentTests
         CoilAverageWeight = "4200 lb",
         FlatstockPartNumber = "MMF0000500",
         JobPartNumber = "MMC0001000",
-        ScrapType = "Scrap Type Required",
+        ScrapType = "3003 Aluminum",
+        LuggerLocation = "Door 6 Lugger",
         DieNumber = "FGT0002000",
         DieLocation = "DIE SHOP",
         DunnageParts = [new RequestDunnagePart { PartNumber = "DUN0000100", HomeLocation = "A-12" }],

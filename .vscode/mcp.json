@@ -20,13 +20,6 @@
 				"CSV_BACKUP_ENABLED": "true",
 				"CSV_SUPPORT_ABSOLUTE_PATHS": "true"
 			}
-		},
-		"xamlmcp": {
-			"type": "stdio",
-			"command": "C:\\Users\\johnk\\.dotnet\\tools\\xamlmcp.exe",
-			"args": [
-				"--enable-driver"
-			]
 		}
 	}
 }
