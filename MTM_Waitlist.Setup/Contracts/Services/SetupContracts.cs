@@ -28,6 +28,8 @@ public interface ISetupWorkCenterService
     Task<SetupSelectionResult> UpdateWorkCenterAsync(string workstationId, string workstationName, string building, CancellationToken cancellationToken = default);
 
     Task<SetupSelectionResult> RemoveWorkCenterAsync(string workstationId, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<SetupWorkCenterHistoryEntry>> GetWorkCenterHistoryAsync(string workCenterName, CancellationToken cancellationToken = default);
 }
 
 public interface IDunnageWorkflowService

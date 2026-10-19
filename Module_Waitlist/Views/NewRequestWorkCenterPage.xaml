@@ -45,18 +45,18 @@
                     CornerRadius="12">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="300" />
+                            <ColumnDefinition Width="140" />
                             <ColumnDefinition Width="1" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <!-- Left pane: square work center photo with a neutral frame. -->
+                        <!-- Left pane: compact rectangular work center photo (Shift+click shows it in full). -->
                         <Border
                             Grid.Column="0"
                             Padding="8"
                             CornerRadius="12,0,0,12"
                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                            <Grid>
+                            <Grid VerticalAlignment="Center" Height="110">
                                 <Border
                                     CornerRadius="10"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -212,7 +212,7 @@
                             SizeChanged="WorkCenterGridView_SizeChanged">
                             <GridView.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <ItemsWrapGrid Orientation="Horizontal" />
+                                    <ItemsWrapGrid HorizontalAlignment="Center" MaximumRowsOrColumns="3" Orientation="Horizontal" />
                                 </ItemsPanelTemplate>
                             </GridView.ItemsPanel>
                         </GridView>
@@ -245,7 +245,7 @@
                             SizeChanged="WorkCenterGridView_SizeChanged">
                             <GridView.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <ItemsWrapGrid Orientation="Horizontal" />
+                                    <ItemsWrapGrid HorizontalAlignment="Center" MaximumRowsOrColumns="3" Orientation="Horizontal" />
                                 </ItemsPanelTemplate>
                             </GridView.ItemsPanel>
                         </GridView>

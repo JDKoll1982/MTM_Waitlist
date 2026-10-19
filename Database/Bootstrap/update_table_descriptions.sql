@@ -296,6 +296,8 @@ MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last updated the 
 MODIFY COLUMN created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when row was created.',
 MODIFY COLUMN updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when row was last updated.';
 
+-- setup_job_history is read per work center by sp_setup_job_history_by_work_center_get (Work Center history page);
+-- the table itself is unchanged.
 ALTER TABLE setup_job_history COMMENT = 'Historical setup job events and saved setup snapshots.';
 
 ALTER TABLE setup_job_history

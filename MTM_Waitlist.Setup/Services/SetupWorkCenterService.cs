@@ -139,6 +139,31 @@ public sealed class SetupWorkCenterService : ISetupWorkCenterService
         };
     }
 
+    public async Task<IReadOnlyList<SetupWorkCenterHistoryEntry>> GetWorkCenterHistoryAsync(string workCenterName, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(workCenterName))
+        {
+            return Array.Empty<SetupWorkCenterHistoryEntry>();
+        }
+
+        var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+            "sp_setup_job_history_by_work_center_get",
+            new Dictionary<string, object?> { ["p_work_center"] = workCenterName.Trim() },
+            MySqlDatabaseTarget.MtmWaitlist,
+            cancellationToken).ConfigureAwait(false);
+
+        return rows
+            .Select(row => new SetupWorkCenterHistoryEntry
+            {
+                EventAction = GetValue(row, "event_action"),
+                WorkOrder = GetValue(row, "work_order"),
+                PartNumber = GetValue(row, "part_number"),
+                SequenceNumber = GetValue(row, "sequence_number"),
+                ChangedUtc = ParseUtcDateTime(GetValue(row, "changed_utc")),
+            })
+            .ToArray();
+    }
+
     private static string GetValue(IReadOnlyDictionary<string, object?> row, string key)
     {
         if (!row.TryGetValue(key, out var value) || value is null)

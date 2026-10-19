@@ -79,6 +79,7 @@ public static partial class ServiceRegistrationExtensions
             pageService.Configure<NewRequestResultViewModel, NewRequestResultPage>();
             pageService.Configure<SettingsViewModel, SettingsPage>();
             pageService.Configure<SetupWorkCenterViewModel, SetupWorkCenterPage>();
+            pageService.Configure<SetupWorkCenterHistoryViewModel, SetupWorkCenterHistoryPage>();
             pageService.Configure<SetupWorkOrderViewModel, SetupWorkOrderPage>();
             pageService.Configure<SetupPartSelectionViewModel, SetupPartSelectionPage>();
             pageService.Configure<SetupSequenceSelectionViewModel, SetupSequenceSelectionPage>();
@@ -158,6 +159,7 @@ public static partial class ServiceRegistrationExtensions
         services.AddTransient<SettingsPage>();
         services.AddTransient<SetupWorkOrderViewModel>();
         services.AddTransient<SetupWorkCenterViewModel>();
+        services.AddTransient<SetupWorkCenterHistoryViewModel>();
         services.AddTransient<SetupPartSelectionViewModel>();
         services.AddTransient<SetupSequenceSelectionViewModel>();
         services.AddTransient<SetupDunnageTypeViewModel>();
@@ -167,6 +169,7 @@ public static partial class ServiceRegistrationExtensions
         services.AddTransient<SetupDunnageImageSearchDialog>();
         services.AddTransient<SetupWorkOrderPage>();
         services.AddTransient<SetupWorkCenterPage>();
+        services.AddTransient<SetupWorkCenterHistoryPage>();
         services.AddTransient<SetupPartSelectionPage>();
         services.AddTransient<SetupSequenceSelectionPage>();
         services.AddTransient<SetupDunnageTypePage>();

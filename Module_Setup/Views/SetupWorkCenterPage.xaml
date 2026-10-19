@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Setup.Models"
+    xmlns:shared="using:MTM_Waitlist.Module_Shared.Services"
     xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
     mc:Ignorable="d">
 
@@ -50,18 +51,18 @@
                     </Border.ContextFlyout>
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="300" />
+                            <ColumnDefinition Width="140" />
                             <ColumnDefinition Width="1" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <!-- Left pane: square work center photo with a neutral frame. -->
+                        <!-- Left pane: compact rectangular work center photo (Shift+click shows it in full). -->
                         <Border
                             Grid.Column="0"
                             Padding="8"
                             CornerRadius="12,0,0,12"
                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                            <Grid>
+                            <Grid VerticalAlignment="Center" Height="110">
                                 <Border
                                     CornerRadius="10"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -96,14 +97,45 @@
                                 <!-- The card's five values are drawn by the one-line scrolling control (009 B1/B2): a
                                      work-centre name or a job summary that runs long scrolls across its own line
                                      instead of wrapping and pushing the card taller. -->
-                                <sharedControls:AutoScrollTextView
-                                    FontSize="20"
-                                    FontWeight="SemiBold"
-                                    Text="{x:Bind Name}" />
-                                <sharedControls:AutoScrollTextView
-                                    Margin="0,2,0,8"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Text="{x:Bind Building}" />
+                                <Grid ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <sharedControls:AutoScrollTextView
+                                        Grid.Row="0"
+                                        Grid.Column="0"
+                                        FontSize="20"
+                                        FontWeight="SemiBold"
+                                        Text="{x:Bind Name}" />
+                                    <sharedControls:AutoScrollTextView
+                                        Grid.Row="1"
+                                        Grid.Column="0"
+                                        Margin="0,2,0,8"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="{x:Bind Building}" />
+                                    <Button
+                                        Grid.Row="0"
+                                        Grid.RowSpan="2"
+                                        Grid.Column="1"
+                                        Width="36"
+                                        Height="36"
+                                        Padding="0"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        AutomationProperties.AutomationId="SetupWorkCenterPage_ViewHistoryButton"
+                                        AutomationProperties.Name="View History"
+                                        Click="OnViewHistoryClick"
+                                        Tag="{x:Bind}"
+                                        shared:TooltipBehavior.FallbackText="View this work center's setup history."
+                                        shared:TooltipBehavior.ResourceKey="Setup_WorkCenterViewHistory.Tooltip">
+                                        <FontIcon FontSize="16" Glyph="&#xE81C;" />
+                                    </Button>
+                                </Grid>
                                 <Border Height="1" Margin="0,0,0,8" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
 
                                 <TextBlock Text="Current Job" Style="{StaticResource SetupFieldLabelStyle}" />
@@ -116,9 +148,6 @@
 
                                 <TextBlock Text="Last Updated" Style="{StaticResource SetupFieldLabelStyle}" />
                                 <sharedControls:AutoScrollTextView Margin="0,2,0,6" FontWeight="SemiBold" Text="{x:Bind LastUpdatedDisplay}" />
-                                <Border Height="1" Margin="0,0,0,8" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
-
-                                <Button Margin="0,4,0,0" Content="View History" HorizontalAlignment="Left" />
                             </StackPanel>
                         </Border>
                     </Grid>
@@ -171,7 +200,7 @@
                             SizeChanged="WorkCenterGridView_SizeChanged">
                             <GridView.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <ItemsWrapGrid Orientation="Horizontal" />
+                                    <ItemsWrapGrid HorizontalAlignment="Center" MaximumRowsOrColumns="3" Orientation="Horizontal" />
                                 </ItemsPanelTemplate>
                             </GridView.ItemsPanel>
                         </GridView>
@@ -204,7 +233,7 @@
                             SizeChanged="WorkCenterGridView_SizeChanged">
                             <GridView.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <ItemsWrapGrid Orientation="Horizontal" />
+                                    <ItemsWrapGrid HorizontalAlignment="Center" MaximumRowsOrColumns="3" Orientation="Horizontal" />
                                 </ItemsPanelTemplate>
                             </GridView.ItemsPanel>
                         </GridView>

@@ -10,13 +10,10 @@ namespace MTM_Waitlist.Module_Waitlist.Views;
 
 public sealed partial class NewRequestWorkCenterPage : Page
 {
-    // Responsive grid: card cell widths are recomputed from the grid's actual width so
-    // the layout fills the available space and never clips at any resolution/window size.
-    // The left photo column is fixed (300), so narrowing these also narrows the text panel.
-    private const double MinItemWidth = 520;
-    private const double MaxItemWidth = 580;
-    private const double ItemHeight = 300;
-    private const double ItemGap = 16; // card Margin of 8 on each side.
+    // Unified grid: always three card columns, each a third of the container's width so the grid
+    // fills the collapsible container edge to edge and stays centred.
+    private const int ColumnCount = 3;
+    private const double ItemHeight = 240;
 
     public NewRequestWorkCenterViewModel ViewModel
     {
@@ -91,10 +88,7 @@ public sealed partial class NewRequestWorkCenterPage : Page
             return;
         }
 
-        var columns = Math.Max(1, (int)Math.Floor((availableWidth + ItemGap) / (MinItemWidth + ItemGap)));
-        var itemWidth = columns == 1
-            ? Math.Min(availableWidth, MaxItemWidth)
-            : Math.Clamp((availableWidth - (columns - 1) * ItemGap) / columns, MinItemWidth, MaxItemWidth);
+        var itemWidth = Math.Floor(availableWidth / ColumnCount) - 1;
 
         var hotPanel = HotWorkCentersGridView.ItemsPanelRoot;
         var otherPanel = OtherWorkCentersGridView.ItemsPanelRoot;

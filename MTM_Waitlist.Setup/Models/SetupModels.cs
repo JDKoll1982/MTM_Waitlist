@@ -235,6 +235,27 @@ public sealed class SetupWorkCenter : ObservableObject
         : LastUpdatedUtc.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt");
 }
 
+/// <summary>One recorded setup event for a work center, shown on the Work Center history page.</summary>
+public sealed class SetupWorkCenterHistoryEntry
+{
+    public string EventAction { get; init; } = string.Empty;
+
+    public string WorkOrder { get; init; } = string.Empty;
+
+    public string PartNumber { get; init; } = string.Empty;
+
+    public string SequenceNumber { get; init; } = string.Empty;
+
+    public DateTime? ChangedUtc { get; init; }
+
+    public string ChangedDisplay => ChangedUtc is null
+        ? "Unknown"
+        : ChangedUtc.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt");
+}
+
+/// <summary>Navigation parameter that tells the history page which work center to show.</summary>
+public sealed record SetupWorkCenterHistoryNavigationData(string WorkCenterName, string Building);
+
 public sealed class SetupPartResult
 {
     /// <summary>The prefix every automation name on this list is built from.</summary>
