@@ -229,6 +229,8 @@ public sealed class SetupWorkCenter : ObservableObject
         ? "None"
         : CurrentPartNumber;
 
+    public string TitleDisplay => string.IsNullOrWhiteSpace(Building) ? Name : $"{Name} - {Building}";
+
     /// <summary>Local date-and-time label for the "Last Updated" row.</summary>
     public string LastUpdatedDisplay => LastUpdatedUtc is null
         ? "Never"

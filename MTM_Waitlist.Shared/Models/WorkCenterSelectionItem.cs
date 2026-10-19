@@ -53,6 +53,8 @@ public sealed partial class WorkCenterSelectionItem : ObservableObject
         : CurrentPartNumber;
 
     /// <summary>Local date-and-time label for the "Last Updated" row.</summary>
+    public string TitleDisplay => string.IsNullOrWhiteSpace(Building) ? WorkCenterName : $"{WorkCenterName} - {Building}";
+
     public string LastUpdatedDisplay => LastUpdatedUtc is null
         ? "Never"
         : LastUpdatedUtc.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt");

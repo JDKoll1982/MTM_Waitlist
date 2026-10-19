@@ -13,7 +13,7 @@ public sealed partial class NewRequestWorkCenterPage : Page
     // Unified grid: always three card columns, each a third of the container's width so the grid
     // fills the collapsible container edge to edge and stays centred.
     private const int ColumnCount = 3;
-    private const double ItemHeight = 240;
+    private const double ItemHeight = 190;
 
     public NewRequestWorkCenterViewModel ViewModel
     {
