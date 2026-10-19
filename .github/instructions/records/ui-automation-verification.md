@@ -46,3 +46,30 @@ shell, so the two open items were walked on the current Debug build:
 | `showCmd` on a maximized window | **consistent** — `3`, with `GetWindowRect` `3456x1408` and a `760x500` restore rectangle |
 | Reaching the shell needs credentials | **incorrect as written** — it needs no sign-in; corrected in step 1 |
 | The recipe needs no app change to work | **correct** — the run used the shipped artifact unchanged |
+
+---
+
+## Driven runs after the 2026-10-19 repairs (home workstation, `johnk`)
+
+The recipes were re-exercised on the home workstation after six driver faults were fixed (each is recorded in
+`.github/memories/repo/ui-automation-drive.md` and §11 of `docs/scripts/scripts-automation-ui-automation.md`):
+
+| Claim | Result (2026-10-19) |
+|---|---|
+| `-Action launch` finds the exe with no `-Exe` argument | **correct after the fix** — it resolved `bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.exe`; before the fix it expanded to `C:\..\..\bin\...` and failed `Test-Path` |
+| The app reaches its store with no `MTM_WAITLIST_DB_CONNECTION_STRING` | **correct** — the driver reports "store: from the app's own appsettings.json" and the run reaches the sign-in stage |
+| Reaching the shell needs a credential | **still correct, and the 2026-09-20 row saying otherwise is superseded** — the shell was reached only by signing in as `JOHNK` with the PIN supplied per run. Nothing auto-signs-in any more |
+| A toggle button can be driven | **correct after the fix** — `ShellPage_MyRequestsToggleDefault` answers `TogglePattern` and neither `Invoke` nor `SelectionItem` |
+| `click-item` on a wizard category | **correct after the fix** — polls up to `-FindSeconds`; the single-look version reported `no ListItem matched [Pickup]` on a page that was still drawing |
+| A typed value reaches the request | **correct after the fix** — `# of Skids` typed `4` against a `NumberBox` stored `{"# of Skids": "4"}` and drew the cell as `Skids = 4`; the `ValuePattern`-only version silently stored `1` |
+| The full surface walk | **correct** — signed in, audited **25 of 29 surfaces**, **0 findings**, app closed itself |
+| A password field's read-back | **masked (`●●●●`)** — accepted by length; treating the mask as a failed entry produced a false warning and a redundant `SetValue` |
+
+Also measured on the same day while verifying feature 012 with these scripts:
+
+- **Condition round-trip (SC-016):** a chosen condition reached `handler_status` in `mtm_waitlist.waitlist_requests_queue`,
+  the card's status column moved from the overdue red `#B02418` to the handler-condition red `#C0392B` on both the word
+  and the ring, a second choice replaced the first, and all four conditions were restored after a restart on the four
+  rows they were set against.
+- **Keyboard only:** focusing an operable status word and pressing Enter opened `Choose a condition`; Tab walked the
+  four conditions in their settled order; Escape closed it without choosing.

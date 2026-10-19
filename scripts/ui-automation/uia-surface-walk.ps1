@@ -28,7 +28,11 @@
 
 [CmdletBinding()]
 param(
-    [string]$User = 'JKOLL',
+    # The account to sign in as. The store holds more than one person, and the one whose rows this machine can drive
+    # is the person signed in here, not a name baked into a committed script: a hardcoded name meant the walk signed
+    # in as an account this workstation does not hold and then reported the shell as never appearing, which reads like
+    # a broken app rather than a wrong argument. MTM_WAITLIST_DEV_USER overrides it, -User overrides both.
+    [string]$User = $(if ($env:MTM_WAITLIST_DEV_USER) { $env:MTM_WAITLIST_DEV_USER } else { $env:USERNAME }),
 
     # Read from the environment rather than defaulted, for the same reason ui-settings-drive.ps1 does: this file is
     # committed, and a working PIN in source is a credential in source.
@@ -265,7 +269,15 @@ foreach ($step in $steps) {
         Invoke-MtmElement -Element (Wait-MtmById -Id 'SignInWindow_ContinueButton' -What 'continue button') -What 'Continue'
         Set-MtmText -Element (Wait-MtmById -Id 'SignInWindow_Credential' -What 'PIN field') -Text $Pin
         Invoke-MtmElement -Element (Wait-MtmById -Id 'SignInWindow_SignInButton' -What 'sign-in button') -What 'Sign in'
-        [void](Wait-MtmShell -TimeoutSeconds 120)
+        try {
+            [void](Wait-MtmShell -TimeoutSeconds 120)
+        }
+        catch {
+            # The usual cause is not the app: a credential the store does not accept leaves the app sitting on the
+            # sign-in stage, and the bare "shell never appeared" reads like a launch failure. Name the account and the
+            # way to change it, because nothing else in the output distinguishes the two.
+            throw "Signed in as '$User', and the shell did not appear within 120 s. That account or PIN was refused, or this computer has no configuration. Pass -User or set MTM_WAITLIST_DEV_USER to the account the store holds."
+        }
         $signedIn = $true
     }
 

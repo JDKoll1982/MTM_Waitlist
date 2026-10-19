@@ -44,10 +44,13 @@ catch up, which removes the need for blind sleeps.
 ## 1. Launch the app
 
 ```powershell
-$exe = "c:\Users\jkoll\source\repos\MTM_Waitlist\bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.exe"
-Start-Process $exe
+Start-Process "bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.exe"
 ```
 
+- **Resolve the path from the repository, do not paste an absolute one.** An earlier version of this block named
+  `c:\Users\jkoll\...`, which is wrong on any machine whose profile is not `jkoll`, and it fails as "the exe is
+  missing" rather than as "the path is stale". `scripts/ui-automation/ui-drive.ps1 -Action launch` resolves it for
+  you, and prefers the app's own `appsettings.json` for its store unless you override it.
 - The project is `<OutputType>WinExe</OutputType>`, so `Start-Process` returns immediately and the
   shell prompt comes back. That is expected, not a failure, and console output is not captured.
 - For behavior that runs before the shell loads, use startup diagnostics instead of stdout. The static seam
@@ -303,10 +306,13 @@ a sizing change did or did not take effect.
 ## Verification status
 
 The measurement log for every recipe above — what was exercised, on which machine, and what it
-returned on 2026-09-11 and 2026-09-20 — is kept in
+returned on 2026-09-11, 2026-09-20 and **2026-10-19** — is kept in
 [`records/ui-automation-verification.md`](records/ui-automation-verification.md). Read it before
 trusting or changing a recipe: it is where the two long-open items and their resolution are
-recorded, and it names the rows that were superseded by the startup rebuild.
+recorded, it names the rows that were superseded by the startup rebuild, and its 2026-10-19 section is
+the post-repair re-run: launch without `-Exe`, store from `appsettings.json`, a driven toggle, a polled
+wizard step, a typed skid count reaching the store, and the whole surface walk green (25 of 29 surfaces,
+0 findings).
 
 ## Relationship to XamlMcp
 
@@ -364,3 +370,49 @@ recorded, and it names the rows that were superseded by the startup rebuild.
 - Always close the app when finished so no orphan process is left holding database connections.
 - Prefer a build plus a focused test for logic. Use UI automation for what only the running app can
   prove.
+
+## Roadblocks that stopped a driven run, and why
+
+Each of these was found the hard way on 2026-10-19, driving feature 012's verification on the home workstation
+(`johnk`). They are recorded because every one of them complains in the app's voice — "the shell never appeared",
+"no ListItem matched", "a request that ignores what you typed" — while the fault is in the driver. All are fixed in
+`scripts/ui-automation/`. The working recipe and the full per-roadblock detail are in
+[`repo/ui-automation-drive.md`](../memories/repo/ui-automation-drive.md) and
+[`scripts-automation-ui-automation.md` §11](../../docs/scripts/scripts-automation-ui-automation.md).
+
+- **The launcher's executable path was empty.** `ui-drive.ps1` defaulted `-Exe` to `"$PSScriptRoot\..\..\bin\..."`,
+  and `$PSScriptRoot` is **not populated in a parameter default** — the path resolved to `C:\..\..\bin\...` and every
+  launch failed the `Test-Path` guard. `-Exe` is resolved after the param block now. The other two scripts already
+  did this; if you write another, do the same. Count the levels from `$PSScriptRoot` (`…\scripts\ui-automation`):
+  **two** parents reach the repo.
+- **A missing connection string threw.** `-Action launch` threw when neither `-ConnectionString` nor
+  `MTM_WAITLIST_DB_CONNECTION_STRING` was set, on a machine that carries neither. The app resolves its own store from
+  `appsettings.json`, so the override is optional and nothing is overridden when nothing is offered.
+- **The walk signed in as an account the machine does not hold.** `-User` defaulted to a literal `JKOLL`; the store
+  on this workstation has `JOHNK`. The walk then waited two minutes for a shell that could never appear and reported
+  it as a launch failure. `-User` now defaults to `MTM_WAITLIST_DEV_USER` and then to `%USERNAME%`, and a sign-in that
+  does not reach the shell names the account it tried. **A failed sign-in is a credential problem first:** read the
+  sign-in window (`-Action dump`) and confirm the identifier before suspecting the app, and remember the store asks
+  for a new password after repeated failures.
+- **A toggle button answered neither `Invoke` nor `SelectionItem`.** WinUI's own header switches
+  (`ShellPage_MyRequestsToggleDefault`, `ShellPage_SortButtonDefault`) advertise `TogglePattern`. Without that arm,
+  `Invoke-MtmElement` refused a control that is plainly operable. It is tried after `Invoke` and `SelectionItem`.
+- **Look twice.** A wizard step draws its controls a moment after the page around them; a single UIA walk finds only
+  the navigation pane and calls the step missing. `click-item`/`click-button` poll for up to `-FindSeconds`
+  (default 10), and their failure message says "within 10 s" so a real absence stays distinguishable.
+- **Write the text, do not assign it.** `ValuePattern.SetValue` sets a control's value model without producing a
+  keystroke, and a commit-on-parse control (the skid count `NumberBox` is one) submits the number it parsed from its
+  own text — so a request raised by this route silently carried the default `1` while nothing reported a problem.
+  `Set-MtmText` types with the keyboard, `-Commit` adds the Tab that commits, and the value is read back and warned
+  about if it did not take. **A password field reads back as `●●●●`**: accept a mask whose length matches, or every
+  correct PIN looks like a refused one.
+- **`NOT REACHED` in a walk summary is not a failure.** Those steps name example items and work centres that may no
+  longer exist on the current data. Read the summary line — surfaces audited and findings — and treat the names as
+  examples to refresh.
+
+Two facts about the app itself, not the driver:
+
+- **The waitlist filter is a toggle and it starts ON.** "Show only my requests" on a store with no open work for the
+  signed-in person renders `No Requests Right Now`; toggling it is the difference between an empty list and a list.
+- **The app is single-instance.** A second launch says "already running" and dumps the existing window, so a cold
+  start is `-Action kill` first, and always close the app when finished so no orphan holds store connections.

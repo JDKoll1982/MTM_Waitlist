@@ -29,8 +29,8 @@ that does:
 | `Wait-MtmUiSettled -Root [-StableMilliseconds]` | The tree has stopped changing, so the page is ready to be read. |
 | `Wait-MtmSettledAnchor -AnchorId` | The named control exists **and** the page is still. Use this before auditing a page that loads asynchronously. |
 | `Get-MtmElementCount -Root` | How many elements the window holds - the cheap signal the settle wait watches. |
-| `Invoke-MtmElement -Element` | Presses a control: `Invoke` when it accepts one, `SelectionItem.Select()` when it is a nav entry or a row. |
-| `Set-MtmText -Element -Text` | Types into a field through `ValuePattern`, so the field's own validation runs. |
+| `Invoke-MtmElement -Element` | Presses a control: `Invoke` when it accepts one, `SelectionItem.Select()` when it is a nav entry or a row, `Toggle()` when it is a toggle button. The toggle arm matters because WinUI's own header switches (`Show only my requests`, `Sort by`) are toggle buttons that answer neither of the other two, and driving one used to fail with "accepts neither Invoke nor SelectionItem" on a control that is plainly operable. |
+| `Set-MtmText -Element -Text [-Commit]` | Types into a field, then checks it took: focus, select-all, characters, and with `-Commit` the Tab a person's own click would produce. It used to write through `ValuePattern` alone, and a control that parses its text on commit never sees a write — the skid count accepted `1` → `4` in the value model, read `4` back when asked, and submitted `1`. `ValuePattern` is now only the fallback, and a value that still does not take is reported rather than silently ignored. |
 | `Stop-MtmApp` | Ends the process and waits for it to actually be gone. |
 
 ### Timing, and why it is not a pile of `Start-Sleep`
@@ -68,7 +68,7 @@ performed.
 
 ```powershell
 pwsh -File scripts/ui-automation/ui-drive.ps1 -Action launch
-pwsh -File scripts/ui-automation/ui-drive.ps1 -Action signin -Identifier JKOLL -Pin $pin -Label 02-signed-in
+pwsh -File scripts/ui-automation/ui-drive.ps1 -Action signin -Identifier $env:USERNAME -Pin $pin -Label 02-signed-in
 pwsh -File scripts/ui-automation/ui-drive.ps1 -Action dump     -Label 03-waitlist
 pwsh -File scripts/ui-automation/ui-drive.ps1 -Action click-item   -Name '100-03'        -Label 04-workcenter
 pwsh -File scripts/ui-automation/ui-drive.ps1 -Action click-button -Name 'Add Waitlist Item' -Label 05-wizard
@@ -79,7 +79,7 @@ pwsh -File scripts/ui-automation/ui-drive.ps1 -Action kill
 
 | Action | Notes |
 | --- | --- |
-| `launch` | Starts the exe with the connection string taken from `MTM_WAITLIST_DB_CONNECTION_STRING` (never from a command line), then dumps the window it finds. Does nothing if the app is already running. |
+| `launch` | Starts the exe, then dumps the window it finds. Does nothing if the app is already running. The executable path is resolved by the script, so `-Exe` is only needed to point at a different build. A store override is **optional**: pass `-ConnectionString`, or set `MTM_WAITLIST_DB_CONNECTION_STRING`, and the script points the app at it; with neither, the app uses its own `appsettings.json`, which is the normal case. |
 | `signin` | Both stages: identifier, Continue, PIN, Sign in, then waits for the shell. |
 | `dump` | Writes the window's list items, buttons, edit fields and texts to the evidence file. |
 | `click-item` / `click-button` | Match by accessible name: exact first, then prefix, then contains. Pass several comma-separated candidates to try in order. |
@@ -88,8 +88,20 @@ pwsh -File scripts/ui-automation/ui-drive.ps1 -Action kill
 | `kill` | Ends the process and waits for it to be gone. |
 
 Useful switches: `-NoEvidence` skips the dump (the walk marks each click); `-WaitSeconds` raises the budget for
-launch and sign-in; `-EvidenceDir` puts the evidence somewhere else; `-Name` accepts several candidates separated by
-commas.
+launch and sign-in; `-FindSeconds` (default 10) is how long a named control is waited for after the shell is up;
+`-EvidenceDir` puts the evidence somewhere else; `-Name` accepts several candidates separated by commas.
+
+`click-item` and `click-button` **poll** for their control rather than looking once. A wizard step draws its cards a
+moment after the page around them, and a single look found only the navigation pane — so a step that was about to
+work was reported as `no ListItem matched [Pickup]` on a page whose `Pickup` card appeared a fifth of a second later.
+
+### The account to sign in as
+
+Every walk signs in, and the account is **not** hardcoded. `-User` defaults to `MTM_WAITLIST_DEV_USER` and then to
+this machine's own `%USERNAME%`, because the store holds more than one person and the walk can only drive the rows of
+the person signed in here. A name baked into the script meant the walk signed in as an account the workstation does
+not hold, wait 120 s for a shell that could never appear, and report it as the app failing to start. A sign-in that
+does not reach the shell now says so and names the account it tried.
 
 > The PIN is passed in, never defaulted. This folder is committed, and a working PIN in source is a credential in
 > source. `ui-settings-drive.ps1` reads it from `MTM_WAITLIST_DEV_PIN` for the same reason.
@@ -311,3 +323,29 @@ belonged in the card rebuild, not in the thread.
   changes the page; polling a stale element is how a walk reports a control that is plainly on screen.
 - **`ControlType` is returned as a fresh instance on every read**, so comparing control types by instance never
   matches. Compare `ProgrammaticName`, as `uia-surface-audit.ps1` does.
+
+---
+
+## 11. Roadblocks that stopped a driven run, and how each was cleared
+
+All of these were found on 2026-10-19 driving feature 012's verification, and all are fixed in the scripts. They are
+listed together because every one of them complains in the app's voice — "the shell never appeared", "no ListItem
+matched", "a request that ignores what you typed" — while the fault is in the driver. The same list, with the recipe
+that works on this workstation, is kept in `.github/memories/repo/ui-automation-drive.md`.
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| `Executable not found: C:\..\..\bin\...` or `Test-Path … outside the base 'C:'` | `-Exe` defaulted to `"$PSScriptRoot\..\..\bin\..."` **in the param block**, where `$PSScriptRoot` is empty | resolved after dot-sourcing; `$PSScriptRoot` is `…\scripts\ui-automation`, so **two** parents reach the repo |
+| `No connection string. Pass -ConnectionString …` | the driver threw when neither the switch nor the variable was set | optional now: with neither, the app uses its own `appsettings.json` |
+| `The shell ('ShellPage_Navigation' never appeared) did not come up within 120 s` after `signing in` | `-User` was a literal account this workstation's store does not hold | defaults to `MTM_WAITLIST_DEV_USER`, then `%USERNAME%`; a failed sign-in names the account it tried |
+| `accepts neither Invoke nor SelectionItem` on a plain button | WinUI header switches advertise `TogglePattern` only | `Toggle()` is tried after `Invoke` and `SelectionItem.Select()` |
+| `No ListItem matched [Pickup]. Available: Waitlist \| Work Center Setup \| Settings` on a category page | a single look at a page that draws its cards a moment later | `click-item`/`click-button` poll for up to `-FindSeconds` (default 10) |
+| the request carries the default even though the field was written | `ValuePattern` sets a value model without a keystroke, and a `NumberBox` submits the number it parsed from its own text | type with the keyboard, `-Commit` to Tab out, read back, warn if it did not take; a masked PIN (`●●●●`) is accepted by length |
+| `NOT REACHED` steps in the walk summary | the walk's own example items and work centres no longer exist on the current data | read the summary — surfaces audited and findings — not the list alone |
+
+Two facts worth carrying beyond the fixes:
+
+- **The waitlist filter is a toggle, and it starts ON.** "Show only my requests" on a store with no open work for the
+  signed-in person renders `No Requests Right Now`; toggling it is the difference between an empty list and a list.
+- **The app is single-instance.** `-Action launch` says "already running" and dumps the existing window rather than
+  starting a second one, so a cold start is `-Action kill` first.
