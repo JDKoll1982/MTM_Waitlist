@@ -59,10 +59,12 @@
                     <Button
                         AutomationProperties.AutomationId="NewRequestResultPage_AddAnotherRequestButton"
                         Content="Add Another Request"
+                        ContentTemplate="{StaticResource ActionBarSubmitTemplate}"
                         Command="{x:Bind ViewModel.AddAnotherRequestCommand}" />
                     <Button
                         AutomationProperties.AutomationId="NewRequestResultPage_ReturnToWaitlistButton"
                         Content="Return to Waitlist"
+                        ContentTemplate="{StaticResource ActionBarReturnTemplate}"
                         Command="{x:Bind ViewModel.ReturnToWaitlistCommand}"
                         Style="{StaticResource AccentButtonStyle}" />
                 </StackPanel>
@@ -75,10 +77,12 @@
                     <Button
                         AutomationProperties.AutomationId="NewRequestResultPage_CancelButton"
                         Content="Cancel"
+                        ContentTemplate="{StaticResource ActionBarCancelTemplate}"
                         Command="{x:Bind ViewModel.CancelToWaitlistCommand}" />
                     <Button
                         AutomationProperties.AutomationId="NewRequestResultPage_ContinueButton"
                         Content="Continue"
+                        ContentTemplate="{StaticResource ActionBarContinueTemplate}"
                         Command="{x:Bind ViewModel.ContinueDuplicateCommand}"
                         Style="{StaticResource AccentButtonStyle}" />
                 </StackPanel>
@@ -91,10 +95,12 @@
                     <Button
                         AutomationProperties.AutomationId="NewRequestResultPage_CloseButton"
                         Content="Close"
+                        ContentTemplate="{StaticResource ActionBarCancelTemplate}"
                         Command="{x:Bind ViewModel.CancelToWaitlistCommand}" />
                     <Button
                         AutomationProperties.AutomationId="NewRequestResultPage_RetryButton"
                         Content="Retry"
+                        ContentTemplate="{StaticResource ActionBarStartOverTemplate}"
                         Command="{x:Bind ViewModel.RetryCommand}"
                         Style="{StaticResource AccentButtonStyle}" />
                 </StackPanel>

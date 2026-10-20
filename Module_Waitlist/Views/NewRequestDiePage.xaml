@@ -133,16 +133,19 @@
                 AutomationProperties.AutomationId="NewRequestDiePage_BackButton"
                 x:Uid="NewRequest_Die_BackButton"
                 Content="Back"
+                ContentTemplate="{StaticResource ActionBarBackTemplate}"
                 Command="{x:Bind ViewModel.BackCommand}" />
             <Button
                 AutomationProperties.AutomationId="NewRequestDiePage_SelectAllButton"
                 x:Uid="NewRequest_Die_SelectAllButton"
                 Content="Select all"
+                ContentTemplate="{StaticResource ActionBarSelectAllTemplate}"
                 Command="{x:Bind ViewModel.SelectAllCommand}" />
             <Button
                 AutomationProperties.AutomationId="NewRequestDiePage_ContinueButton"
                 x:Uid="NewRequest_Die_ContinueButton"
                 Content="Continue"
+                ContentTemplate="{StaticResource ActionBarContinueTemplate}"
                 Command="{x:Bind ViewModel.ContinueCommand}"
                 Style="{StaticResource AccentButtonStyle}" />
         </StackPanel>

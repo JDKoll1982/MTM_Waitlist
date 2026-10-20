@@ -21,6 +21,28 @@ public sealed class RequestJobFieldValuesTests
     };
 
     [TestMethod]
+    public void Service_RequestJobFieldValuesTests_Resolve_ComponentDescriptionAndQuantityComeFromTheComponentTheRequestNames()
+    {
+        var job = RequestJobPartAvailability.None.WithComponentFacts(
+            [new("FGT0002000", new RequestComponentFacts("Rear bracket", "1,200"))]);
+        var answers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { ["Component"] = "fgt0002000" };
+
+        Assert.AreEqual("Rear bracket", RequestJobFieldValues.Resolve("Part description", job, answers));
+        Assert.AreEqual("1,200", RequestJobFieldValues.Resolve("Total Qty In House", job, answers));
+    }
+
+    [TestMethod]
+    public void Service_RequestJobFieldValuesTests_Resolve_ComponentFactsAreAbsentWhenTheComponentHasNone()
+    {
+        var job = RequestJobPartAvailability.None.WithComponentFacts(
+            [new("FGT0002000", new RequestComponentFacts("Rear bracket", "1,200"))]);
+        var answers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { ["Component"] = "FGT0009999" };
+
+        Assert.IsNull(RequestJobFieldValues.Resolve("Part description", job, answers));
+        Assert.IsNull(RequestJobFieldValues.Resolve("Total Qty In House", job, null));
+    }
+
+    [TestMethod]
     public void Service_RequestJobFieldValuesTests_Resolve_PartTypeAndItemTypeReadTheSnapshotsDerivation()
     {
         // The four returning pickups declare `Part Type` and the component Items declare `Item Type`, and both

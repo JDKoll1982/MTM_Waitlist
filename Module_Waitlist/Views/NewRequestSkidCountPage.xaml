@@ -49,11 +49,13 @@
                 AutomationProperties.AutomationId="NewRequestSkidCountPage_BackButton"
                 x:Uid="NewRequest_SkidCount_BackButton"
                 Content="Back"
+                ContentTemplate="{StaticResource ActionBarBackTemplate}"
                 Command="{x:Bind ViewModel.BackCommand}" />
             <Button
                 AutomationProperties.AutomationId="NewRequestSkidCountPage_ContinueButton"
                 x:Uid="NewRequest_SkidCount_ContinueButton"
                 Content="Continue"
+                ContentTemplate="{StaticResource ActionBarContinueTemplate}"
                 Command="{x:Bind ViewModel.ContinueCommand}"
                 Style="{StaticResource AccentButtonStyle}" />
         </StackPanel>

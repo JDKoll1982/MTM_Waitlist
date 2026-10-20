@@ -152,10 +152,10 @@
         </TabView>
 
         <StackPanel Grid.Row="1" Style="{StaticResource SetupActionBarStyle}">
-            <Button AutomationProperties.AutomationId="SetupReviewPage_EditButton" x:Uid="Setup_Action_Edit" Content="Edit" Command="{x:Bind ViewModel.EditCommand}" />
-            <Button AutomationProperties.AutomationId="SetupReviewPage_ConfirmButton" x:Uid="Setup_Action_Confirm" Content="Confirm" Command="{x:Bind ViewModel.ConfirmCommand}" Visibility="{x:Bind ViewModel.ConfirmButtonVisibility, Mode=OneWay}" />
-            <Button AutomationProperties.AutomationId="SetupReviewPage_CancelButton" x:Uid="Setup_Action_Cancel" Content="Cancel" Command="{x:Bind ViewModel.CancelReplacementCommand}" Visibility="{x:Bind ViewModel.ReplacementConfirmationVisibility, Mode=OneWay}" />
-            <Button AutomationProperties.AutomationId="SetupReviewPage_ReplaceButton" x:Uid="Setup_Action_Replace" Content="Replace" Command="{x:Bind ViewModel.ReplaceCommand}" Visibility="{x:Bind ViewModel.ReplacementConfirmationVisibility, Mode=OneWay}" />
+            <Button AutomationProperties.AutomationId="SetupReviewPage_EditButton" x:Uid="Setup_Action_Edit" Content="Edit" ContentTemplate="{StaticResource ActionBarEditTemplate}" Command="{x:Bind ViewModel.EditCommand}" />
+            <Button AutomationProperties.AutomationId="SetupReviewPage_ConfirmButton" x:Uid="Setup_Action_Confirm" Content="Confirm" ContentTemplate="{StaticResource ActionBarConfirmTemplate}" Command="{x:Bind ViewModel.ConfirmCommand}" Visibility="{x:Bind ViewModel.ConfirmButtonVisibility, Mode=OneWay}" />
+            <Button AutomationProperties.AutomationId="SetupReviewPage_CancelButton" x:Uid="Setup_Action_Cancel" Content="Cancel" ContentTemplate="{StaticResource ActionBarCancelTemplate}" Command="{x:Bind ViewModel.CancelReplacementCommand}" Visibility="{x:Bind ViewModel.ReplacementConfirmationVisibility, Mode=OneWay}" />
+            <Button AutomationProperties.AutomationId="SetupReviewPage_ReplaceButton" x:Uid="Setup_Action_Replace" Content="Replace" ContentTemplate="{StaticResource ActionBarSubstituteTemplate}" Command="{x:Bind ViewModel.ReplaceCommand}" Visibility="{x:Bind ViewModel.ReplacementConfirmationVisibility, Mode=OneWay}" />
         </StackPanel>
     </Grid>
 </Page>

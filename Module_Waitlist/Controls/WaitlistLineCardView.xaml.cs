@@ -92,6 +92,13 @@ public partial class WaitlistLineCardView : UserControl
 
     private SampleOrder? _subscribedOrder;
 
+    /// <summary>Whether the identifier is drawn as a link to the part's stock window (Deliver Component only).</summary>
+    public static readonly DependencyProperty HasStockLinkProperty = DependencyProperty.Register(
+        nameof(HasStockLink),
+        typeof(bool),
+        typeof(WaitlistLineCardView),
+        new PropertyMetadata(false));
+
     public WaitlistLineCardView()
     {
         InitializeComponent();
@@ -152,6 +159,12 @@ public partial class WaitlistLineCardView : UserControl
         set => SetValue(HasIdentifierProperty, value);
     }
 
+    public bool HasStockLink
+    {
+        get => (bool)GetValue(HasStockLinkProperty);
+        set => SetValue(HasStockLinkProperty, value);
+    }
+
     public string RingAccessibleName
     {
         get => (string)GetValue(RingAccessibleNameProperty);
@@ -199,6 +212,24 @@ public partial class WaitlistLineCardView : UserControl
         if (Order is { } order && HandlerStatusCatalog.IsCondition(condition))
         {
             StatusConditionChosen?.Invoke(this, (order, condition));
+        }
+    }
+
+    private async void OnPartLinkClick(object sender, RoutedEventArgs e)
+    {
+        if (Order?.StockLookupPartNumber is not { Length: > 0 } part || XamlRoot is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var dialog = new MTM_Waitlist.Module_Waitlist.Views.PartStockDialog(App.GetService<PartStockDialogViewModel>());
+            await dialog.ShowForAsync(part, XamlRoot);
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("WaitlistLineCard", ex, $"The stock window for part '{part}' could not be shown.");
         }
     }
 
@@ -279,7 +310,9 @@ public partial class WaitlistLineCardView : UserControl
 
         HasStatusWord = !string.IsNullOrWhiteSpace(order?.StatusWord);
         HasRequestingWorkCenter = !string.IsNullOrWhiteSpace(order?.RequestedPressName);
-        HasIdentifier = !string.IsNullOrWhiteSpace(order?.Subtitle);
+        HasStockLink = !string.IsNullOrWhiteSpace(order?.StockLookupPartNumber)
+            && !string.IsNullOrWhiteSpace(order?.Subtitle);
+        HasIdentifier = !string.IsNullOrWhiteSpace(order?.Subtitle) && !HasStockLink;
 
         UpdateRingAccessibleName();
         UpdateStatusColumnBrush();

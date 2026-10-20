@@ -90,12 +90,6 @@
                                         Foreground="{ThemeResource TextFillColorPrimaryBrush}"
                                         TextAlignment="Center"
                                         Text="{Binding Name}" />
-                                    <sharedControls:AutoScrollTextView
-                                        HorizontalAlignment="Stretch"
-                                        FontSize="13"
-                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                        TextAlignment="Center"
-                                        Text="{Binding Summary}" />
                                 </StackPanel>
                             </Border>
                         </DataTemplate>
@@ -109,6 +103,7 @@
                 AutomationProperties.AutomationId="NewRequestJobTypePage_BackButton"
                 x:Uid="NewRequest_Category_BackButton"
                 Content="Back"
+                ContentTemplate="{StaticResource ActionBarBackTemplate}"
                 Command="{x:Bind ViewModel.BackCommand}" />
         </StackPanel>
     </Grid>

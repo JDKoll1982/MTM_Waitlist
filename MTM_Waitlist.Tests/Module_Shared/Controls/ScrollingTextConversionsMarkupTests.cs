@@ -29,8 +29,7 @@ public sealed class ScrollingTextConversionsMarkupTests
         (
             "Module_Setup/Views/SetupWorkCenterPage.xaml",
             [
-                "{x:Bind Name}",
-                "{x:Bind Building}",
+                "{x:Bind TitleDisplay}",
                 "{x:Bind CurrentJobSummary}",
                 "{x:Bind CurrentPartSummary}",
                 "{x:Bind LastUpdatedDisplay}",
@@ -43,8 +42,7 @@ public sealed class ScrollingTextConversionsMarkupTests
         (
             "Module_Waitlist/Views/NewRequestWorkCenterPage.xaml",
             [
-                "{x:Bind WorkCenterName}",
-                "{x:Bind Building}",
+                "{x:Bind TitleDisplay}",
                 "{x:Bind CurrentJobSummary}",
                 "{x:Bind CurrentPartSummary}",
                 "{x:Bind LastUpdatedDisplay}",
@@ -52,8 +50,8 @@ public sealed class ScrollingTextConversionsMarkupTests
         ("Module_Waitlist/Views/NewRequestComponentPage.xaml", ["{x:Bind Title}"]),
         ("Module_Waitlist/Views/NewRequestDunnagePage.xaml", ["{x:Bind Title}", "{x:Bind Summary}"]),
         ("Module_Waitlist/Views/NewRequestDiePage.xaml", ["{x:Bind Title}", "{x:Bind Summary}"]),
-        ("Module_Waitlist/Views/NewRequestItemPage.xaml", ["{Binding DisplayName}", "{Binding Summary}"]),
-        ("Module_Waitlist/Views/NewRequestJobTypePage.xaml", ["{Binding Name}", "{Binding Summary}"]),
+        ("Module_Waitlist/Views/NewRequestItemPage.xaml", ["{Binding DisplayName}"]),
+        ("Module_Waitlist/Views/NewRequestJobTypePage.xaml", ["{Binding Name}"]),
         (
             "Module_Settings/Views/PartPictureManagerPage.xaml",
             ["{x:Bind Title}", "{x:Bind Detail}", "{x:Bind RelativePath}"]),

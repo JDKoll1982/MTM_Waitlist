@@ -107,16 +107,19 @@
                 AutomationProperties.AutomationId="NewRequestPartSearchPage_BackButton"
                 x:Uid="NewRequest_PartSearch_BackButton"
                 Content="Back"
+                ContentTemplate="{StaticResource ActionBarBackTemplate}"
                 Command="{x:Bind ViewModel.BackCommand}" />
             <Button
                 AutomationProperties.AutomationId="NewRequestPartSearchPage_SearchButton"
                 x:Uid="NewRequest_PartSearch_SearchButton"
                 Content="Search"
+                ContentTemplate="{StaticResource ActionBarSearchTemplate}"
                 Command="{x:Bind ViewModel.SearchCommand}" />
             <Button
                 AutomationProperties.AutomationId="NewRequestPartSearchPage_ContinueButton"
                 x:Uid="NewRequest_PartSearch_ContinueButton"
                 Content="Continue"
+                ContentTemplate="{StaticResource ActionBarContinueTemplate}"
                 Command="{x:Bind ViewModel.ContinueCommand}"
                 Style="{StaticResource AccentButtonStyle}" />
         </StackPanel>

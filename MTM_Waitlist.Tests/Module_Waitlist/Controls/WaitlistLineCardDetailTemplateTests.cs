@@ -23,7 +23,7 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.Controls;
 /// Two halves. The <b>markup</b> half reads the per-Item template dictionary from disk as XML, because it
 /// lives in the application project this suite deliberately does not reference: it pins that the dictionary
 /// carries one template for each of the twenty-four Items, that every template draws its cells through the
-/// one shared cell (label on top, value beneath, no label at all on the die-shop cell), and that each slot's
+/// one shared cell (label and value on one line, no label at all on the die-shop cell), and that each slot's
 /// span and visibility are read off the row's own cell count.
 /// </para>
 /// <para>
@@ -59,17 +59,17 @@ public sealed class WaitlistLineCardDetailTemplateTests
         ["pickup-coil"] = ["Coil number", "Quantity in house", "Coil description", "Average coil weight"],
         ["pickup-die"] = ["Die", "Die Location", "Pickup location"],
         ["pickup-component"] = ["Component", "Total Qty In House", "Item Type"],
-        ["pickup-fg"] = ["Part Type", "# of Skids"],
-        ["pickup-ncm"] = ["Part Type", "# of Skids"],
-        ["pickup-wip"] = ["Part Type", "# of Skids"],
-        ["pickup-outside-service"] = ["Part Type", "# of Skids"],
+        ["pickup-fg"] = ["Part", "Part Type", "# of Skids"],
+        ["pickup-ncm"] = ["Part", "Part Type", "# of Skids"],
+        ["pickup-wip"] = ["Part", "Part Type", "# of Skids"],
+        ["pickup-outside-service"] = ["Part", "Part Type", "# of Skids"],
         ["pickup-riser-table"] = [],
         ["pickup-dunnage"] = ["Dunnage part", "Home Location", "Home location"],
         ["pickup-scrap"] = ["Scrap Type", "Scrap type", "Lugger Location"],
         ["pickup-hopper"] = ["Size"],
         ["deliver-coil"] = ["Coil number", "Quantity in house", "Coil description", "Average coil weight"],
         ["deliver-flatstock"] = ["Part", "Quantity", "Destination"],
-        ["deliver-component"] = ["Component", "Total Qty In House", "Item Type"],
+        ["deliver-component"] = ["Part description", "Total Qty In House", "Item Type"],
         ["deliver-die"] = ["Die", "Die Location", "Pickup location"],
         ["deliver-dunnage"] = ["Dunnage part", "Home Location", "Home location"],
         ["deliver-wrong-coil"] = ["Coil number", "Correct coil"],
@@ -91,7 +91,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
         ["pickup-die"] = ["Quantity"],
         ["deliver-die"] = ["Quantity"],
         ["pickup-component"] = ["Part description", "Quantity"],
-        ["deliver-component"] = ["Part description", "Quantity"],
+        ["deliver-component"] = ["Component", "Quantity"],
         ["pickup-dunnage"] = ["Description", "Quantity on hand"],
         ["deliver-dunnage"] = ["Description", "Quantity on hand"],
         ["pickup-scrap"] = ["Quantity involved", "Scrap lugger"],
@@ -149,12 +149,12 @@ public sealed class WaitlistLineCardDetailTemplateTests
     }
 
     /// <summary>
-    /// Every template draws its cells through the one shared cell: the label on top with the value beneath and
-    /// the two touching, the label taken from the cell's own declaration rather than written into the markup,
-    /// and no label at all on the label-less die-shop cell (FR-028, FR-055, FR-059, FR-104).
+    /// Every template draws its cells through the one shared cell: the label on the same line as its value, the
+    /// two read as `Label: value`, the label taken from the cell's own declaration rather than written into the
+    /// markup, and no label at all on the label-less die-shop cell (FR-028, FR-055, FR-059, FR-104).
     /// </summary>
     [TestMethod]
-    public void UI_WaitlistLineCardDetailTemplateTests_EveryTemplate_DrawsItsCellsLabelOnTopAndValueBeneath()
+    public void UI_WaitlistLineCardDetailTemplateTests_EveryTemplate_DrawsItsCellsLabelAndValueOnOneLine()
     {
         var dictionary = LoadTemplateDictionary();
         var cell = TemplateFor(dictionary, CellTemplateKey);
@@ -168,6 +168,10 @@ public sealed class WaitlistLineCardDetailTemplateTests
             (string?)label!.Attribute("Text") ?? string.Empty,
             LabelConverterKey,
             "The cell's label is not resolved through the resource mechanism, so a declaration naming a resource would show its key (FR-104).");
+        StringAssert.Contains(
+            (string?)label.Attribute("Text") ?? string.Empty,
+            "ConverterParameter=separator",
+            "The label carries no separator, so it would run straight into its value instead of reading `Label: value` (FR-028).");
 
         var values = cell
             .Descendants(s_presentation + "TextBlock")
@@ -177,14 +181,22 @@ public sealed class WaitlistLineCardDetailTemplateTests
         Assert.AreEqual(1, values.Count, "The shared cell must draw the cell's value exactly once (FR-028).");
         Assert.IsTrue(
             label.IsBefore(values[0]),
-            "The label is not drawn above the value (FR-028).");
+            "The label is not drawn ahead of the value (FR-028).");
 
-        var stack = label.Parent!;
+        var row = label.Parent!;
 
         Assert.AreEqual(
+            "Grid",
+            row.Name.LocalName,
+            "The label and its value are stacked rather than read on one line (FR-028).");
+        Assert.AreEqual(
+            "1",
+            (string?)values[0].Attribute("Grid.Column"),
+            "The value is not the second column of the label's own row, so the two do not read as `Label: value` (FR-028).");
+        Assert.AreEqual(
             0d,
-            double.Parse((string?)stack.Attribute("Spacing") ?? "0", CultureInfo.InvariantCulture),
-            "The label does not abut its value: the cell leaves a gap between the two (FR-028).");
+            double.Parse((string?)row.Attribute("ColumnSpacing") ?? "0", CultureInfo.InvariantCulture),
+            "The label and its value are pushed apart: the separator already carries the space between them (FR-028).");
 
         // The one cell with no label at all is the die-shop cell, and its label is hidden rather than blanked.
         StringAssert.Contains(
@@ -192,18 +204,19 @@ public sealed class WaitlistLineCardDetailTemplateTests
             "IsLabelLess",
             "The cell's label is not hidden for the label-less cell, so the die-shop phrase would carry an empty label above it (FR-055).");
 
-        // Each cell closes itself off from its neighbours along its top and its left edge, and the grids below
-        // carry no spacing of their own: the two together are what draws one continuous line between two cells
-        // and one under the title, rather than a gap with a floating rule in it (FR-028).
+        // Each cell closes itself off from the cell above it and the cell to its left, and from nothing else, so
+        // the cell area carries no border around its outside edge: the thickness is decided by the slot the cell
+        // was laid out in, through one converter, rather than by an offset per slot in every Item's template
+        // (FR-028).
         foreach (var (key, anatomy) in new[] { (CellTemplateKey, "the plain cell"), (ScrollingCellTemplateKey, "the scrolling cell"), (PictureCellTemplateKey, "the picture cell") })
         {
             var root = TemplateFor(dictionary, key).Elements().Single();
 
             Assert.AreEqual("Border", root.Name.LocalName, $"{anatomy} is not closed off by a border, so nothing separates two cells (FR-028).");
-            Assert.AreEqual(
-                "1,1,0,0",
-                (string?)root.Attribute("BorderThickness"),
-                $"{anatomy}'s separator is not a hairline along its top and left edge (FR-028).");
+            StringAssert.Contains(
+                (string?)root.Attribute("BorderThickness") ?? string.Empty,
+                "WaitlistCardCellBorderConverter",
+                $"{anatomy}'s separator is a fixed thickness rather than the one its slot calls for, so the cell area would keep a border around its outside edge (FR-028).");
             Assert.IsNotNull(
                 root.Attribute("BorderBrush"),
                 $"{anatomy}'s separator is drawn in no colour, so it would be invisible (FR-028).");

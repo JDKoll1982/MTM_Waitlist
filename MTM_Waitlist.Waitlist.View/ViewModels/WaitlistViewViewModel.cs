@@ -1144,6 +1144,9 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             RequestId = request.Id,
             ItemCode = request.Item,
             MaterialPartNumber = materialPartNumber ?? string.Empty,
+            StockLookupPartNumber = string.Equals(request.Item, "deliver-component", StringComparison.OrdinalIgnoreCase)
+                ? context.Component?.Trim() ?? string.Empty
+                : string.Empty,
             MaterialPartScope = materialPartNumber is null ? string.Empty : PartPictureLayout.VisualPartScope,
             RequesterEmployeeNumber = request.RequesterEmployeeNumber,
             AssignedMaterialHandler = request.AssignedMaterialHandler,
@@ -1371,7 +1374,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             // A label the requesting job does not carry is the designed absence, not a fault: a job with no die
             // draws no Die cell and nothing is logged for it (FR-057, RequestJobFieldValues). The label that
             // resolves is the declared one, and an answer captured under it outranks the job's own (FR-082).
-            var jobValue = RequestJobFieldValues.Resolve(label, jobAvailability, request.Answers);
+            var jobValue = RequestJobFieldValues.Resolve(label, jobAvailability, AnswersWithComponent(request));
             return new WaitlistLineCardCell { Label = label, Value = jobValue ?? string.Empty, Order = field.Order };
         }
 
@@ -1392,6 +1395,34 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             $"its declared source '{source}' is not one this build can read");
 
         return new WaitlistLineCardCell { Label = label, Order = field.Order };
+    }
+
+    /// <summary>
+    /// The request's captured answers with the one answer the flow asked for added under <c>Component</c>, for an
+    /// Item that names a component. The request stores that answer on itself rather than among the labelled ones,
+    /// and the component's description and quantity are looked up by it.
+    /// </summary>
+    private static IReadOnlyDictionary<string, string>? AnswersWithComponent(WaitlistRequest request)
+    {
+        var item = request.Item ?? string.Empty;
+        if (!item.EndsWith("-component", StringComparison.OrdinalIgnoreCase)
+            || string.IsNullOrWhiteSpace(request.InputValue)
+            || (request.Answers is not null && request.Answers.Keys.Any(key => string.Equals(key?.Trim(), "Component", StringComparison.OrdinalIgnoreCase))))
+        {
+            return request.Answers;
+        }
+
+        var merged = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        if (request.Answers is not null)
+        {
+            foreach (var answer in request.Answers)
+            {
+                merged[answer.Key] = answer.Value;
+            }
+        }
+
+        merged["Component"] = request.InputValue.Trim();
+        return merged;
     }
 
     /// <summary>

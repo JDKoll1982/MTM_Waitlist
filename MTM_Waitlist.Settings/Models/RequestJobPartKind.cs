@@ -47,9 +47,9 @@ public enum RequestJobPartKind
     RequiresActiveJob,
 
     /// <summary>
-    /// Visible only when the requesting job has <b>finished goods to return</b> — stock completed at a
-    /// finished-goods location. This is the work the <c>pickup-fg</c> Item names, so the Item is offered on the
-    /// job's real work rather than hidden by a fixed list (FR-094).
+    /// The requesting job's finished parts — the work the <c>pickup-fg</c> Item names. The picker offers that
+    /// Item on any active job, because the job's own product is the work it names; this flag records what the
+    /// derivation found, which the card's <c>Part Type</c> cell reads, and does not hide the Item (FR-094).
     /// </summary>
     FinishedGoodsToReturn,
 
@@ -61,8 +61,8 @@ public enum RequestJobPartKind
     NonconformingStockToReturn,
 
     /// <summary>
-    /// Visible only when the requesting job has <b>work in progress</b> — quantity still open on the work order.
-    /// This is the work the <c>pickup-wip</c> Item names (FR-094).
+    /// The requesting job's work in progress — the work the <c>pickup-wip</c> Item names. Like the finished-parts
+    /// pickup, the Item is offered on any active job and this flag records what the derivation found (FR-094).
     /// </summary>
     WorkInProgressToReturn,
 

@@ -51,17 +51,17 @@ public sealed class RequestItemConfigSeedAlignmentTests
         ["pickup-coil"] = ["Coil number", "Quantity in house", "Coil description", "Average coil weight"],
         ["pickup-die"] = ["Die", "Die Location", WaitlistCardCellRules.DieShopAnswerLabel],
         ["pickup-component"] = ["Component", "Total Qty In House", "Item Type"],
-        ["pickup-fg"] = ["Part Type", "# of Skids"],
-        ["pickup-ncm"] = ["Part Type", "# of Skids"],
-        ["pickup-wip"] = ["Part Type", "# of Skids"],
-        ["pickup-outside-service"] = ["Part Type", "# of Skids"],
+        ["pickup-fg"] = ["Part", "Part Type", "# of Skids"],
+        ["pickup-ncm"] = ["Part", "Part Type", "# of Skids"],
+        ["pickup-wip"] = ["Part", "Part Type", "# of Skids"],
+        ["pickup-outside-service"] = ["Part", "Part Type", "# of Skids"],
         ["pickup-riser-table"] = [],
         ["pickup-dunnage"] = ["Dunnage part", "Home Location"],
         ["pickup-scrap"] = ["Scrap Type", "Lugger Location"],
         ["pickup-hopper"] = ["Size"],
         ["deliver-coil"] = ["Coil number", "Quantity in house", "Coil description", "Average coil weight"],
         ["deliver-flatstock"] = ["Part", "Quantity", "Destination"],
-        ["deliver-component"] = ["Component", "Total Qty In House", "Item Type"],
+        ["deliver-component"] = ["Part description", "Total Qty In House", "Item Type"],
         ["deliver-die"] = ["Die", "Die Location", WaitlistCardCellRules.DieShopAnswerLabel],
         ["deliver-dunnage"] = ["Dunnage part", "Home Location"],
         ["deliver-wrong-coil"] = ["Coil number", "Correct coil"],
@@ -121,6 +121,8 @@ public sealed class RequestItemConfigSeedAlignmentTests
         ["deliver-dunnage"] = [("Home location", "Home Location")],
         ["pickup-scrap"] = [("Scrap type", "Scrap Type")],
         ["assist-coil-turn"] = [("Coil number", "Coil Number")],
+        ["pickup-fg"] = [("Part number", "Part")],
+        ["pickup-wip"] = [("Part and quantity", "Part")],
     };
 
     /// <summary>
@@ -644,6 +646,10 @@ public sealed class RequestItemConfigSeedAlignmentTests
         DieNumber = "FGT0002000",
         DieLocation = "DIE SHOP",
         DunnageParts = [new RequestDunnagePart { PartNumber = "DUN0000100", HomeLocation = "A-12" }],
+        ComponentFacts = new Dictionary<string, RequestComponentFacts>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["FGT0002000"] = new RequestComponentFacts("Rear bracket", string.Empty),
+        },
     };
 
     /// <summary>

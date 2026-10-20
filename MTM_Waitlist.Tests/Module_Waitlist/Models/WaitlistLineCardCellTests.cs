@@ -14,9 +14,9 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.Models;
 public sealed class WaitlistLineCardCellTests
 {
     /// <summary>
-    /// FR-028 and FR-055: every cell is a label on top with its value beneath, apart from the die-shop cell,
-    /// which carries no label because its phrase is the whole of it. The label-less cell is the die-shop cell
-    /// and nothing else, so a cell built with a label is never label-less.
+    /// FR-028 and FR-055: every cell reads as `Label: value` on one line, apart from the die-shop cell, which
+    /// carries no label because its phrase is the whole of it. The label-less cell is the die-shop cell and nothing
+    /// else, so a cell built with a label is never label-less.
     /// </summary>
     [TestMethod]
     public void Model_WaitlistLineCardCellTests_WaitlistLineCardCell_IsLabelLessForTheDieShopCellAndNoOther()
@@ -43,6 +43,53 @@ public sealed class WaitlistLineCardCellTests
             "The die-shop cell is the one cell with no label; its phrase is drawn as the value (FR-028, FR-055).");
         Assert.AreEqual("Take To Die Shop", dieShopCell.Value, "The die-shop cell's value is the phrase itself.");
         Assert.IsTrue(dieShopCell.HasValue, "A label-less cell still has to have resolved something to be drawn.");
+    }
+
+    /// <summary>
+    /// FR-028: a cell draws a hairline only where another cell meets it — along the top of the second row and the
+    /// left of the second column — so the cell area carries no border around its own outside edge.
+    /// </summary>
+    [TestMethod]
+    public void Model_WaitlistLineCardCellTests_CellsToDraw_OnlyTheCellsWithANeighbourDrawAHairline()
+    {
+        var cells = WaitlistLineCardCell.CellsToDraw(
+        [
+            new WaitlistLineCardCell { Label = "One", Value = "1", Order = 1 },
+            new WaitlistLineCardCell { Label = "Two", Value = "2", Order = 2 },
+            new WaitlistLineCardCell { Label = "Three", Value = "3", Order = 3 },
+            new WaitlistLineCardCell { Label = "Four", Value = "4", Order = 4 },
+        ]);
+
+        Assert.AreEqual(4, cells.Count);
+        Assert.IsFalse(cells[0].DrawsLeftHairline, "The cell in the first row and first column has no neighbour above or to its left, so it draws no hairline.");
+        Assert.IsFalse(cells[0].DrawsTopHairline, "The cell in the first row and first column has no neighbour above or to its left, so it draws no hairline.");
+        Assert.IsTrue(cells[1].DrawsLeftHairline, "The cell beside another one is not separated from it.");
+        Assert.IsFalse(cells[1].DrawsTopHairline, "A cell on the first row draws no hairline above it, or the cell area would carry a border around its outside edge.");
+        Assert.IsFalse(cells[2].DrawsLeftHairline, "The first cell of the second row draws no hairline on its left, or the cell area would carry a border on its outside edge.");
+        Assert.IsTrue(cells[2].DrawsTopHairline, "The second row is not separated from the first.");
+        Assert.IsTrue(cells[3].DrawsLeftHairline && cells[3].DrawsTopHairline, "The fourth cell is separated from the two cells it meets.");
+    }
+
+    /// <summary>
+    /// FR-026: a short panel keeps the same rule, so a single cell spans the width with no border around it and a
+    /// three-cell panel's spanning cell draws only the line above it.
+    /// </summary>
+    [TestMethod]
+    public void Model_WaitlistLineCardCellTests_CellsToDraw_AShortPanelDrawsNoOuterBorder()
+    {
+        var single = WaitlistLineCardCell.CellsToDraw([new WaitlistLineCardCell { Label = "One", Value = "1" }]);
+        Assert.IsFalse(single[0].DrawsLeftHairline || single[0].DrawsTopHairline, "The only cell of a one-cell panel draws no hairline at all.");
+
+        var three = WaitlistLineCardCell.CellsToDraw(
+        [
+            new WaitlistLineCardCell { Label = "One", Value = "1", Order = 1 },
+            new WaitlistLineCardCell { Label = "Two", Value = "2", Order = 2 },
+            new WaitlistLineCardCell { Label = "Three", Value = "3", Order = 3 },
+        ]);
+
+        Assert.IsTrue(three[1].DrawsLeftHairline, "The second cell of the top row is not separated from the first.");
+        Assert.IsFalse(three[2].DrawsLeftHairline, "The spanning cell draws a hairline on its left, so the cell area would carry a border on its outside edge.");
+        Assert.IsTrue(three[2].DrawsTopHairline, "The spanning cell is not separated from the row above it.");
     }
 
     /// <summary>

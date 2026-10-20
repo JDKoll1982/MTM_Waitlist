@@ -187,6 +187,12 @@ public sealed class SampleOrder : INotifyPropertyChanged
     public string MaterialPartNumber { get; set; } = string.Empty;
 
     /// <summary>
+    /// The part whose stock the card's identifier opens a lookup for, or empty when the card's identifier is plain
+    /// text. Only the Deliver Component card sets it: its identifier is the component the operator picked.
+    /// </summary>
+    public string StockLookupPartNumber { get; set; } = string.Empty;
+
+    /// <summary>
     /// The store scope the material part belongs to — which of the systems it is a part of. Empty when the
     /// request names no part. A Visual part and a WIP part that share a number are two parts, so the scope
     /// travels beside the number and never instead of it (FR-002).

@@ -107,6 +107,7 @@
                 AutomationProperties.AutomationId="NewRequestComponentPage_BackButton"
                 x:Uid="NewRequest_Component_BackButton"
                 Content="Back"
+                ContentTemplate="{StaticResource ActionBarBackTemplate}"
                 Command="{x:Bind ViewModel.BackCommand}" />
         </StackPanel>
     </Grid>

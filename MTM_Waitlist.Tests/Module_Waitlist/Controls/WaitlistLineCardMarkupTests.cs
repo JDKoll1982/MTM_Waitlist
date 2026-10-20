@@ -338,6 +338,28 @@ public sealed class WaitlistLineCardMarkupTests
     }
 
     [TestMethod]
+    public void UI_WaitlistLineCardMarkupTests_Card_TheStatusWordPaintsNoBackgroundInAnyState()
+    {
+        var word = Named(Named(LoadCard(), "StatusZone"), "StatusWordButton");
+
+        var brushes = word
+            .Descendants()
+            .Where(element => element.Name.LocalName == "SolidColorBrush" && (string?)element.Attribute(s_xaml + "Key") is { } key
+                && key.StartsWith("ButtonBackground", StringComparison.Ordinal))
+            .ToList();
+
+        foreach (var state in new[] { "ButtonBackground", "ButtonBackgroundPointerOver", "ButtonBackgroundPressed", "ButtonBackgroundDisabled" })
+        {
+            var painted = brushes.Where(brush => (string?)brush.Attribute(s_xaml + "Key") == state).ToList();
+
+            Assert.IsTrue(painted.Count >= 3, $"The status word's button overrides `{state}` in fewer than the three theme dictionaries, so a theme still paints the platform's own fill behind the word (FR-008).");
+            Assert.IsTrue(
+                painted.All(brush => (string?)brush.Attribute("Color") == "Transparent"),
+                $"The status word's button paints a `{state}` fill behind the word (FR-008).");
+        }
+    }
+
+    [TestMethod]
     public void UI_WaitlistLineCardMarkupTests_Card_DrawsTheStatusWordAsPlainTextWithNoLabel()
     {
         var status = Named(LoadCard(), "StatusZone");
@@ -523,7 +545,8 @@ public sealed class WaitlistLineCardMarkupTests
                         || attribute.Name.LocalName == "Command")
                     .ToList();
 
-                var isTheOneInteractiveElement = (string?)element.Attribute(s_xaml + "Name") == "StatusWordButton";
+                // The part link is a button too, so it takes its own click rather than opening the request.
+                var isTheOneInteractiveElement = (string?)element.Attribute(s_xaml + "Name") is "StatusWordButton" or "DetailIdentifierLink";
 
                 Assert.IsTrue(
                     clickable.Count == 0 || isTheOneInteractiveElement,
@@ -546,11 +569,11 @@ public sealed class WaitlistLineCardMarkupTests
         Assert.AreEqual("Grid", detail.Name.LocalName, "The detail zone is not an inner grid (FR-024).");
         Assert.AreEqual(
             2,
-            detail.Descendants(s_presentation + "ColumnDefinition").Count(),
+            detail.Elements(s_presentation + "Grid.ColumnDefinitions").Elements(s_presentation + "ColumnDefinition").Count(),
             "The detail zone's inner grid is not two columns wide (FR-024).");
         Assert.AreEqual(
             3,
-            detail.Descendants(s_presentation + "RowDefinition").Count(),
+            detail.Elements(s_presentation + "Grid.RowDefinitions").Elements(s_presentation + "RowDefinition").Count(),
             "The detail zone's inner grid is not three rows tall (FR-024).");
 
         var title = Named(detail, "DetailTitleRow");
@@ -570,18 +593,35 @@ public sealed class WaitlistLineCardMarkupTests
             "Order.Subtitle",
             "The title row does not carry the request's own identifier (FR-007).");
 
-        // The pair is stacked, centred, and the word is the larger of the two: side by side they read as one
-        // sentence, and the identifier is the part of it a person is looking for (FR-007).
-        Assert.AreNotEqual(
-            "Horizontal",
-            (string?)title.Attribute("Orientation"),
-            "The title pair is laid out side by side rather than as two lines (FR-007).");
-        Assert.AreEqual("Center", (string?)category.Attribute("TextAlignment"), "The title word is not centred over the cells (FR-007).");
-        Assert.AreEqual("Center", (string?)identifier.Attribute("TextAlignment"), "The identifier is not centred beneath the title word (FR-007).");
+        // The pair reads on one line - `Pickup 22-74371-075` - centred as a pair, both halves drawn the same way so
+        // the line reads as one title rather than as a heading with a subtitle beside it (FR-007).
+        Assert.AreEqual(
+            "Center",
+            (string?)title.Attribute("HorizontalAlignment"),
+            "The title pair is not centred over the cells (FR-007).");
+        Assert.AreEqual(
+            "1",
+            (string?)identifier.Attribute("Grid.Column"),
+            "The identifier is not drawn beside the Item's word, so the title reads as two lines rather than one (FR-007).");
         Assert.IsTrue(
-            double.Parse((string?)category.Attribute("FontSize") ?? "0", System.Globalization.CultureInfo.InvariantCulture)
-                > double.Parse((string?)identifier.Attribute("FontSize") ?? "0", System.Globalization.CultureInfo.InvariantCulture),
-            "The two lines of the title pair are the same size, so they read as one sentence again (FR-007).");
+            category.IsBefore(identifier),
+            "The identifier is drawn before the Item's word, so the line does not lead with the Item (FR-007).");
+        Assert.AreEqual(
+            "Center",
+            (string?)category.Attribute("VerticalAlignment"),
+            "The Item's word is not centred on the title line (FR-007).");
+        Assert.AreEqual(
+            "Center",
+            (string?)identifier.Attribute("VerticalAlignment"),
+            "The identifier is not centred on the title line (FR-007).");
+        Assert.AreEqual(
+            (string?)category.Attribute("FontSize"),
+            (string?)identifier.Attribute("FontSize"),
+            "The Item's word and its identifier are drawn at different sizes, so the one line reads as two (FR-007).");
+        Assert.AreEqual(
+            (string?)category.Attribute("FontWeight"),
+            (string?)identifier.Attribute("FontWeight"),
+            "The Item's word and its identifier are drawn at different weights, so the one line reads as two (FR-007).");
 
         var cells = Named(detail, "DetailCells");
 

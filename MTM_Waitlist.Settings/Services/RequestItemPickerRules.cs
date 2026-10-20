@@ -7,7 +7,8 @@ namespace MTM_Waitlist.Module_Settings.Services;
 /// Category→Item picker (Phase 3) and the uniform card renderer (Phase 4) consume. Encodes the
 /// CSV columns that are not already on <see cref="RequestItemDefinition"/>:
 ///   • auto-populated Item visibility — a job-part item appears only if the requesting job has that part
-///   • the four returning pickups appear when the requesting job has the work they name (FR-094)
+///   • the finished-parts and WIP pickups appear on any active job, because the job's own product is the work
+///     they name; the NCM and outside-service pickups appear on the signal each one names (FR-094)
 ///   • always-available manual equipment/consumable Items (Riser Table / Hopper / Scrap / Other)
 ///   • Deliver destination is always the requesting work center (no user entry)
 /// Deterministic and DB-free so the rules are unit-testable before any UI wiring.
@@ -22,7 +23,8 @@ public static class RequestItemPickerRules
     /// The four previously-hidden pickups answer here on the work the requesting job actually has — finished
     /// goods to return, non-conforming stock, work in progress, subcontracted work — rather than on a fixed list
     /// of Item codes (FR-094). A hidden Item and a missing row stay different states: the four are still
-    /// catalogued, and what keeps one out is a job that has none of the work it names.
+    /// catalogued, and what keeps one out is a job that has none of the work it names — for the finished-parts
+    /// and WIP pickups that means no active job at all, since the job's own product is the work they name.
     /// </para>
     /// </summary>
     public static RequestJobPartKind RequiredJobPart(RequestItemDefinition item)
@@ -43,7 +45,7 @@ public static class RequestItemPickerRules
             // 'Scrap Type Required' placeholder, which means no decision was made (FR-031, contract §5).
             "pickup-scrap" => RequestJobPartKind.Scrap,
             "assist-table-place" or "assist-table-remove" => RequestJobPartKind.AnySubordinate,
-            // The four returning pickups: each is offered on the work it names and on nothing else (FR-094).
+            // The finished-parts and WIP pickups gate on the job itself; the two that name a signal keep it.
             "pickup-fg" => RequestJobPartKind.FinishedGoodsToReturn,
             "pickup-ncm" => RequestJobPartKind.NonconformingStockToReturn,
             "pickup-wip" => RequestJobPartKind.WorkInProgressToReturn,
@@ -93,11 +95,16 @@ public static class RequestItemPickerRules
             RequestJobPartKind.Scrap => availability.HasScrapDecision,
             RequestJobPartKind.AnySubordinate => availability.HasAnySubordinate,
             RequestJobPartKind.RequiresActiveJob => availability.HasActiveJob,
-            // The four returning pickups read the work the requesting job has, which the disposition derivation
-            // populates (FR-094).
-            RequestJobPartKind.FinishedGoodsToReturn => availability.HasFinishedGoodsToReturn,
+            // The finished-parts and WIP pickups are the job's own product, so an active job is the work they
+            // name and both are offered on it. The derivation that separates the two leans on finished-goods
+            // location names that are not confirmed for this installation, and it needs the plant system to
+            // answer at all, so gating the choice on it hid a pickup the shop plainly had to raise. What the
+            // derivation does still decide is the `Part Type` the card shows, which stays hidden when it names
+            // nothing (FR-091, FR-094).
+            RequestJobPartKind.FinishedGoodsToReturn or RequestJobPartKind.WorkInProgressToReturn => availability.HasActiveJob,
+            // Non-conforming stock and subcontracted work are read from signals that are confirmed — the
+            // location the stock occupies and the operation's vendor fields — so those two keep their own gate.
             RequestJobPartKind.NonconformingStockToReturn => availability.HasNonconformingStockToReturn,
-            RequestJobPartKind.WorkInProgressToReturn => availability.HasWorkInProgressToReturn,
             RequestJobPartKind.OutsideServiceWorkToReturn => availability.HasOutsideServiceWorkToReturn,
             _ => true,
         };

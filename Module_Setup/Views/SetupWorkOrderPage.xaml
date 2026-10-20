@@ -109,9 +109,9 @@
             IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
 
         <StackPanel Grid.Row="2" Style="{StaticResource SetupActionBarStyle}">
-            <Button AutomationProperties.AutomationId="SetupWorkOrderPage_BackButton" x:Uid="Setup_Action_BackToWorkstations" Content="Back" Command="{x:Bind ViewModel.BackToWorkCentersCommand}" />
-            <Button AutomationProperties.AutomationId="SetupWorkOrderPage_CancelButton" x:Uid="Setup_Action_Cancel" Content="Cancel" Command="{x:Bind ViewModel.CancelCommand}" />
-            <Button AutomationProperties.AutomationId="SetupWorkOrderPage_SearchButton" x:Uid="Setup_Action_Search" Content="Search" Command="{x:Bind ViewModel.SearchCommand}" IsEnabled="{x:Bind ViewModel.IsIdle, Mode=OneWay}" />
+            <Button AutomationProperties.AutomationId="SetupWorkOrderPage_BackButton" x:Uid="Setup_Action_BackToWorkstations" Content="Back" ContentTemplate="{StaticResource ActionBarBackTemplate}" Command="{x:Bind ViewModel.BackToWorkCentersCommand}" />
+            <Button AutomationProperties.AutomationId="SetupWorkOrderPage_CancelButton" x:Uid="Setup_Action_Cancel" Content="Cancel" ContentTemplate="{StaticResource ActionBarCancelTemplate}" Command="{x:Bind ViewModel.CancelCommand}" />
+            <Button AutomationProperties.AutomationId="SetupWorkOrderPage_SearchButton" x:Uid="Setup_Action_Search" Content="Search" ContentTemplate="{StaticResource ActionBarSearchTemplate}" Command="{x:Bind ViewModel.SearchCommand}" IsEnabled="{x:Bind ViewModel.IsIdle, Mode=OneWay}" />
         </StackPanel>
     </Grid>
 </Page>

@@ -62,7 +62,37 @@ public static class RequestJobFieldValues
             return null;
         }
 
-        return Captured(label, answers) ?? JobValue(label, job);
+        return Captured(label, answers) ?? ComponentValue(label, job, answers) ?? JobValue(label, job);
+    }
+
+    /// <summary>
+    /// The two cells that describe the component a request is about: its description and the total quantity on
+    /// hand. The component is the one the requester picked (the <c>Component</c> answer); a component the job
+    /// does not carry facts for resolves to nothing, so the cell is left out.
+    /// </summary>
+    private static string? ComponentValue(
+        string label,
+        RequestJobPartAvailability? job,
+        IReadOnlyDictionary<string, string>? answers)
+    {
+        if (job is null)
+        {
+            return null;
+        }
+
+        var declared = label.Trim().ToLowerInvariant();
+        if (declared is not ("part description" or "total qty in house"))
+        {
+            return null;
+        }
+
+        var component = Captured("Component", answers);
+        if (component is null || !job.ComponentFacts.TryGetValue(component, out var facts))
+        {
+            return null;
+        }
+
+        return declared == "part description" ? Trimmed(facts.Description) : Trimmed(facts.TotalQuantityOnHand);
     }
 
     /// <summary>

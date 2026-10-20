@@ -265,6 +265,7 @@
             <Button
                 AutomationProperties.AutomationId="NewRequestWorkCenterPage_CancelButton"
                 Content="Cancel"
+                ContentTemplate="{StaticResource ActionBarCancelTemplate}"
                 Command="{x:Bind ViewModel.CancelCommand}"
                 Style="{StaticResource AccentButtonStyle}" />
         </StackPanel>

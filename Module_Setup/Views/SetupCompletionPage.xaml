@@ -49,8 +49,8 @@
         </Border>
 
         <StackPanel Grid.Row="1" Style="{StaticResource SetupActionBarStyle}">
-            <Button AutomationProperties.AutomationId="SetupCompletionPage_StartOverButton" x:Uid="Setup_Completion_Action_StartOver" Content="Start Over" Command="{x:Bind ViewModel.StartOverCommand}" />
-            <Button AutomationProperties.AutomationId="SetupCompletionPage_ReturnToWaitlistButton" x:Uid="Setup_Completion_Action_ReturnToWaitlist" Content="Return to Waitlist" Command="{x:Bind ViewModel.ReturnToWaitlistCommand}" />
+            <Button AutomationProperties.AutomationId="SetupCompletionPage_StartOverButton" x:Uid="Setup_Completion_Action_StartOver" Content="Start Over" ContentTemplate="{StaticResource ActionBarStartOverTemplate}" Command="{x:Bind ViewModel.StartOverCommand}" />
+            <Button AutomationProperties.AutomationId="SetupCompletionPage_ReturnToWaitlistButton" x:Uid="Setup_Completion_Action_ReturnToWaitlist" Content="Return to Waitlist" ContentTemplate="{StaticResource ActionBarReturnTemplate}" Command="{x:Bind ViewModel.ReturnToWaitlistCommand}" />
         </StackPanel>
     </Grid>
 </Page>

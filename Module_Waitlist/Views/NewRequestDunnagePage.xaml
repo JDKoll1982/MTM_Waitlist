@@ -117,11 +117,13 @@
                 AutomationProperties.AutomationId="NewRequestDunnagePage_BackButton"
                 x:Uid="NewRequest_Dunnage_BackButton"
                 Content="Back"
+                ContentTemplate="{StaticResource ActionBarBackTemplate}"
                 Command="{x:Bind ViewModel.BackCommand}" />
             <Button
                 AutomationProperties.AutomationId="NewRequestDunnagePage_SubstituteButton"
                 x:Uid="NewRequest_Dunnage_SubstituteButton"
                 Content="Use substitute…"
+                ContentTemplate="{StaticResource ActionBarSubstituteTemplate}"
                 Command="{x:Bind ViewModel.UseSubstituteCommand}" />
         </StackPanel>
     </Grid>

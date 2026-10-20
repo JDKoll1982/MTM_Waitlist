@@ -868,10 +868,10 @@
     <value>Dunnage</value>
   </data>
   <data name="RequestItem_pickup_scrap.DisplayName" xml:space="preserve">
-    <value>Scrap / Offal removal</value>
+    <value>Scrap</value>
   </data>
   <data name="RequestItem_pickup_hopper.DisplayName" xml:space="preserve">
-    <value>Pickup Hopper (do not return)</value>
+    <value>Pickup Hopper</value>
   </data>
   <data name="RequestItem_deliver_coil.DisplayName" xml:space="preserve">
     <value>Coil</value>
@@ -880,7 +880,7 @@
     <value>Riser Table</value>
   </data>
   <data name="RequestItem_deliver_hopper.DisplayName" xml:space="preserve">
-    <value>Hopper (scrap)</value>
+    <value>Hopper</value>
   </data>
   <data name="RequestItem_deliver_flatstock.DisplayName" xml:space="preserve">
     <value>Flatstock</value>
@@ -1133,6 +1133,48 @@
   </data>
   <data name="Waitlist_Card_OpenDetails.Text" xml:space="preserve">
     <value>Open details</value>
+  </data>
+  <data name="PartStock_Dialog.Title" xml:space="preserve">
+    <value>Part stock</value>
+  </data>
+  <data name="PartStock_Dialog.Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="PartStock_Dialog.SourceLabel" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="PartStock_Dialog.SourceWipApp" xml:space="preserve">
+    <value>WIP App</value>
+  </data>
+  <data name="PartStock_Dialog.SourceVisualLive" xml:space="preserve">
+    <value>Infor Visual</value>
+  </data>
+  <data name="PartStock_Dialog.SourceVisualCached" xml:space="preserve">
+    <value>Infor Visual (saved copy)</value>
+  </data>
+  <data name="PartStock_Dialog.CachedAsOf" xml:space="preserve">
+    <value>Infor Visual could not be reached. Showing the saved copy from {0}.</value>
+  </data>
+  <data name="PartStock_Dialog.CachedUnknownAge" xml:space="preserve">
+    <value>Infor Visual could not be reached. Showing the saved copy.</value>
+  </data>
+  <data name="PartStock_Dialog.TotalLabel" xml:space="preserve">
+    <value>Total on hand</value>
+  </data>
+  <data name="PartStock_Dialog.LocationHeader" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="PartStock_Dialog.QuantityHeader" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="PartStock_Dialog.Loading" xml:space="preserve">
+    <value>Looking up this part...</value>
+  </data>
+  <data name="PartStock_Dialog.NoStock" xml:space="preserve">
+    <value>No stock is recorded for this part.</value>
+  </data>
+  <data name="PartStock_Dialog.Unavailable" xml:space="preserve">
+    <value>The stock for this part could not be read right now.</value>
   </data>
   <data name="Waitlist_Card_Ring.TimeLeft" xml:space="preserve">
     <value>Time left on this request</value>

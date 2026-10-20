@@ -28,6 +28,7 @@
 
     <waitlistConverters:WaitlistCardCellLabelConverter x:Key="WaitlistCardCellLabelConverter" />
     <waitlistConverters:WaitlistCardCellSpanConverter x:Key="WaitlistCardCellSpanConverter" />
+    <waitlistConverters:WaitlistCardCellBorderConverter x:Key="WaitlistCardCellBorderConverter" />
     <waitlistConverters:WaitlistCardCellVisibilityConverter x:Key="WaitlistCardCellVisibilityConverter" />
     <settingsConverters:BoolToVisibilityConverter x:Key="WaitlistCardCellLabelVisibilityConverter" />
 
@@ -40,29 +41,35 @@
 
     <!--
         One cell: the label the declaration carries on top, its value beneath, the two touching, the pair centred
-        in its own slot and closed off from its neighbours by a hairline along its top and its left edge.
+        in its own slot, and a hairline along its top and left edge only where another cell meets it - never
+        around the outside of the cell area (FR-028).
     -->
     <DataTemplate x:Key="WaitlistLineCardDetailCell">
         <Border
             Padding="10,2"
-            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-            BorderThickness="1,1,0,0">
-            <StackPanel HorizontalAlignment="Center" Spacing="0">
+            BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
+            BorderThickness="{Binding Converter={StaticResource WaitlistCardCellBorderConverter}}">
+            <Grid HorizontalAlignment="Center" ColumnSpacing="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
                 <TextBlock
+                    VerticalAlignment="Center"
                     FontSize="13"
                     FontWeight="SemiBold"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Text="{Binding Label, Converter={StaticResource WaitlistCardCellLabelConverter}}"
-                    TextAlignment="Center"
+                    Text="{Binding Label, Converter={StaticResource WaitlistCardCellLabelConverter}, ConverterParameter=separator}"
                     TextTrimming="CharacterEllipsis"
                     Visibility="{Binding IsLabelLess, Converter={StaticResource WaitlistCardCellLabelVisibilityConverter}, ConverterParameter=Invert}" />
                 <TextBlock
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
                     FontSize="15"
                     Text="{Binding Value}"
-                    TextAlignment="Center"
                     TextTrimming="CharacterEllipsis"
                     TextWrapping="NoWrap" />
-            </StackPanel>
+            </Grid>
         </Border>
     </DataTemplate>
 
@@ -73,21 +80,27 @@
     <DataTemplate x:Key="WaitlistLineCardDetailScrollingCell">
         <Border
             Padding="10,2"
-            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-            BorderThickness="1,1,0,0">
-            <StackPanel HorizontalAlignment="Center" Spacing="0">
+            BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
+            BorderThickness="{Binding Converter={StaticResource WaitlistCardCellBorderConverter}}">
+            <Grid ColumnSpacing="0" HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
                 <TextBlock
+                    VerticalAlignment="Center"
                     FontSize="13"
                     FontWeight="SemiBold"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Text="{Binding Label, Converter={StaticResource WaitlistCardCellLabelConverter}}"
-                    TextAlignment="Center"
+                    Text="{Binding Label, Converter={StaticResource WaitlistCardCellLabelConverter}, ConverterParameter=separator}"
                     TextTrimming="CharacterEllipsis"
                     Visibility="{Binding IsLabelLess, Converter={StaticResource WaitlistCardCellLabelVisibilityConverter}, ConverterParameter=Invert}" />
                 <sharedControls:AutoScrollTextView
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
                     FontSize="15"
                     Text="{Binding Value}" />
-            </StackPanel>
+            </Grid>
         </Border>
     </DataTemplate>
 
@@ -102,33 +115,38 @@
     <DataTemplate x:Key="WaitlistLineCardDetailPictureCell">
         <Border
             Padding="10,2"
-            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-            BorderThickness="1,1,0,0">
-            <StackPanel HorizontalAlignment="Center" Spacing="0">
+            BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
+            BorderThickness="{Binding Converter={StaticResource WaitlistCardCellBorderConverter}}">
+            <Grid HorizontalAlignment="Center" ColumnSpacing="6">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
                 <TextBlock
+                    VerticalAlignment="Center"
                     FontSize="13"
                     FontWeight="SemiBold"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Text="{Binding Label, Converter={StaticResource WaitlistCardCellLabelConverter}}"
-                    TextAlignment="Center"
+                    Text="{Binding Label, Converter={StaticResource WaitlistCardCellLabelConverter}, ConverterParameter=separator}"
                     TextTrimming="CharacterEllipsis"
                     Visibility="{Binding IsLabelLess, Converter={StaticResource WaitlistCardCellLabelVisibilityConverter}, ConverterParameter=Invert}" />
-                <StackPanel Orientation="Horizontal" Spacing="6">
-                    <sharedControls:ClickToEnlargeImageView
-                        Width="28"
-                        Height="28"
-                        VerticalAlignment="Center"
-                        AutomationProperties.AutomationId="WaitlistLineCardDetailCell_ReferenceImage"
-                        Source="{Binding EffectiveReferenceImagePath, Converter={StaticResource WaitlistCardCellReferenceImageConverter}}"
-                        Stretch="Uniform" />
-                    <TextBlock
-                        FontSize="15"
-                        VerticalAlignment="Center"
-                        Text="{Binding Value}"
-                        TextTrimming="CharacterEllipsis"
-                        TextWrapping="NoWrap" />
-                </StackPanel>
-            </StackPanel>
+                <sharedControls:ClickToEnlargeImageView
+                    Grid.Column="1"
+                    Width="28"
+                    Height="28"
+                    VerticalAlignment="Center"
+                    AutomationProperties.AutomationId="WaitlistLineCardDetailCell_ReferenceImage"
+                    Source="{Binding EffectiveReferenceImagePath, Converter={StaticResource WaitlistCardCellReferenceImageConverter}}"
+                    Stretch="Uniform" />
+                <TextBlock
+                    Grid.Column="2"
+                    VerticalAlignment="Center"
+                    FontSize="15"
+                    Text="{Binding Value}"
+                    TextTrimming="CharacterEllipsis"
+                    TextWrapping="NoWrap" />
+            </Grid>
         </Border>
     </DataTemplate>
 

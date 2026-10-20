@@ -31,12 +31,14 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
     private readonly RequestDispositionResolver _dispositionResolver;
     private readonly IAverageCoilWeightService _averageCoilWeightService;
     private readonly ILuggerArrangementService _luggerArrangement;
+    private readonly IPartStockService? _partStockService;
 
     public RequestJobAvailabilityProvider(
         IActiveJobItemResolverService activeJobItemResolver,
         RequestDispositionResolver dispositionResolver,
         IAverageCoilWeightService averageCoilWeightService,
-        ILuggerArrangementService luggerArrangement)
+        ILuggerArrangementService luggerArrangement,
+        IPartStockService? partStockService = null)
     {
         ArgumentNullException.ThrowIfNull(activeJobItemResolver);
         ArgumentNullException.ThrowIfNull(dispositionResolver);
@@ -47,6 +49,7 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
         _dispositionResolver = dispositionResolver;
         _averageCoilWeightService = averageCoilWeightService;
         _luggerArrangement = luggerArrangement;
+        _partStockService = partStockService;
     }
 
     /// <inheritdoc />
@@ -63,8 +66,50 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
         }
 
         availability = await ApplyDispositionAsync(availability, snapshot, cancellationToken).ConfigureAwait(false);
+        availability = await ApplyComponentQuantitiesAsync(availability, cancellationToken).ConfigureAwait(false);
         availability = await ApplyCoilAverageWeightAsync(availability, cancellationToken).ConfigureAwait(false);
         return await ApplyLuggerLocationAsync(availability, workCenter, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Fills each component's total quantity on hand from the system that owns the part (the WIP Application when
+    /// its floor holds the part, Infor Visual otherwise). A component whose stock cannot be read keeps an empty
+    /// quantity, so its cell is left out rather than showing a guess.
+    /// </summary>
+    private async Task<RequestJobPartAvailability> ApplyComponentQuantitiesAsync(
+        RequestJobPartAvailability availability,
+        CancellationToken cancellationToken)
+    {
+        if (_partStockService is null || availability.ComponentFacts.Count == 0)
+        {
+            return availability;
+        }
+
+        try
+        {
+            var reads = availability.ComponentFacts.Select(async pair =>
+            {
+                var stock = await _partStockService.GetStockAsync(pair.Key, cancellationToken).ConfigureAwait(false);
+                if (!stock.WasRead)
+                {
+                    return pair;
+                }
+
+                var quantity = stock.TotalQuantity.ToString("#,0.##", System.Globalization.CultureInfo.CurrentCulture);
+                return new KeyValuePair<string, RequestComponentFacts>(pair.Key, pair.Value with { TotalQuantityOnHand = quantity });
+            });
+
+            return availability.WithComponentFacts(await Task.WhenAll(reads).ConfigureAwait(false));
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("WaitlistNewRequest", ex, "The components' quantities on hand could not be read, so their quantity cells are left out.");
+            return availability;
+        }
     }
 
     /// <summary>
@@ -233,6 +278,13 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
             // enumerated answer with no list of its own takes its choices from here (FR-035), which is how
             // `pickup-component`'s details step can be completed at all.
             .WithComponentPartNumbers(snapshot.Components.Select(component => component.PartNumber))
+            // Each component's description comes from the same subordinate read; its quantity on hand is filled in
+            // afterwards by the provider, because it is read from the system that owns the part.
+            .WithComponentFacts(snapshot.Components
+                .Where(component => !string.IsNullOrWhiteSpace(component.PartNumber))
+                .Select(component => new KeyValuePair<string, RequestComponentFacts>(
+                    component.PartNumber,
+                    new RequestComponentFacts(component.Description?.Trim() ?? string.Empty, string.Empty))))
             // The job's assigned dunnage parts travel the same way: they are the dunnage step's cards, and the
             // list an Item naming the `dunnage` list draws its choices from (FR-035, FR-048).
             .WithDunnageParts(snapshot.DunnageParts.Select(MapDunnagePart))

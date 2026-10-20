@@ -188,6 +188,7 @@ public static partial class ServiceRegistrationExtensions
             jobAvailabilityProvider: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestJobPartAvailabilityProvider>(),
             partPictureResolver: provider.GetRequiredService<MTM_Waitlist.Module_Core.Contracts.Services.IPartPictureResolver>()));
         services.AddTransient<WaitlistViewDetailPage>();
+        services.AddTransient<MTM_Waitlist.Module_Waitlist.ViewModels.PartStockDialogViewModel>();
         services.AddTransient<NewRequestWorkCenterViewModel>();
         services.AddTransient<NewRequestWorkCenterPage>();
         services.AddTransient<NewRequestJobTypeViewModel>();

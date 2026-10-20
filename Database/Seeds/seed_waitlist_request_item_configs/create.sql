@@ -111,7 +111,7 @@ VALUES
 ('c1000000-0000-4000-8000-000000000004', 'pickup-fg', 'Pickup', 'direct-to-confirmation', 0, NULL, NULL,
  0, 200, NULL,
  JSON_ARRAY(
-   JSON_OBJECT('label','Part number','value_type','string','source','job','order',1,'is_required',FALSE),
+   JSON_OBJECT('label','Part','value_type','string','source','job','order',1,'is_required',FALSE),
    JSON_OBJECT('label','Quantity remaining','value_type','string','source','job','order',2,'is_required',FALSE),
    JSON_OBJECT('label','Part description','value_type','string','source','job','order',3,'is_required',FALSE),
    JSON_OBJECT('label','Customer','value_type','string','source','job','order',4,'is_required',FALSE),
@@ -135,7 +135,7 @@ VALUES
 ('c1000000-0000-4000-8000-000000000006', 'pickup-wip', 'Pickup', 'direct-to-confirmation', 0, NULL, NULL,
  0, 200, NULL,
  JSON_ARRAY(
-   JSON_OBJECT('label','Part and quantity','value_type','string','source','job','order',1,'is_required',FALSE),
+   JSON_OBJECT('label','Part','value_type','string','source','job','order',1,'is_required',FALSE),
    JSON_OBJECT('label','Pickup work center','value_type','string','source','fixed','order',2,'is_required',FALSE),
    JSON_OBJECT('label','WIP destination','value_type','string','source','job','order',3,'is_required',FALSE),
    JSON_OBJECT('label','Operation sequence','value_type','string','source','job','order',4,'is_required',FALSE),

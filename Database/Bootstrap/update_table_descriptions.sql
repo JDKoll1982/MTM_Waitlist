@@ -1006,3 +1006,7 @@ SET FOREIGN_KEY_CHECKS = 1;
 --     Correction to an earlier note in this block: the semicolon in the comment that used to sit here was NOT
 --     what made the validator fail. Its statement splitter masks comments and quoted literals before looking for
 --     delimiters, so that semicolon was already harmless. Removing it is a tidy-up, not a fix.
+
+-- 2026-10-20: seed_waitlist_request_item_configs and seed_waitlist_request_item_configs_label_move now declare the part
+--     the work centre is making as `Part` on pickup-fg and pickup-wip (was `Part number` / `Part and quantity`),
+--     so all four returning pickups draw Part, Part Type and # of Skids. No schema change.

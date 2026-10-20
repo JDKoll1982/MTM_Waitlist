@@ -40,7 +40,7 @@
         MinHeight="136"
         Padding="10"
         Background="{ThemeResource LayerFillColorDefaultBrush}"
-        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+        BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
         BorderThickness="1"
         CornerRadius="10">
         <!--
@@ -137,17 +137,17 @@
                 x:Name="IdentityStatusRule"
                 Grid.Column="2"
                 Width="1"
-                Background="{ThemeResource CardStrokeColorDefaultBrush}" />
+                Background="{ThemeResource SurfaceStrokeColorDefaultBrush}" />
 
             <!--
                 Zone 2, status: a centred stack of the status word, the ring, the person and - for a closed
                 request - the requester (FR-011). The whole column carries one of three themes, so the word and
                 the ring can never disagree about which state the row is in (FR-019).
 
-                The zone is drawn as an inset panel, so the column reads as its own surface against the card
-                instead of a band of bare text. The fill is deliberately neutral and comes from the theme, not
-                from the status: the state is still carried by the word and the ring alone (FR-019), and the
-                panel follows the theme rather than being a colour that only works on one of them.
+                The zone carries no outline of its own: the vertical rule beside it is the one line between the
+                two zones, and a panel border a few pixels in from it read as a second, doubled rule. The state is
+                still carried by the word and the ring alone (FR-019), and the column needs no fill or frame of
+                its own to be read as a column.
             -->
             <Border
                 x:Name="StatusZone"
@@ -157,9 +157,6 @@
                 Padding="8,6"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                BorderThickness="1"
                 CornerRadius="8">
                 <StackPanel
                     HorizontalAlignment="Center"
@@ -199,6 +196,48 @@
                                     Conditions="{Binding ConditionOptions, ElementName=Root}" />
                             </Flyout>
                         </Button.Flyout>
+                        <!--
+                            The word is plain text, so the button paints nothing in any state. The platform's style
+                            fills the resting, hovered, pressed and disabled states from these brushes, which a local
+                            `Background` alone does not override; all three theme dictionaries carry the override so
+                            the word stays transparent in every theme.
+                        -->
+                        <Button.Resources>
+                            <ResourceDictionary>
+                                <ResourceDictionary.ThemeDictionaries>
+                                    <ResourceDictionary x:Key="Default">
+                                        <SolidColorBrush x:Key="ButtonBackground" Color="Transparent" />
+                                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="Transparent" />
+                                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="Transparent" />
+                                        <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="Transparent" />
+                                        <SolidColorBrush x:Key="ButtonBorderBrush" Color="Transparent" />
+                                        <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="Transparent" />
+                                        <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="Transparent" />
+                                        <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="Transparent" />
+                                    </ResourceDictionary>
+                                    <ResourceDictionary x:Key="Light">
+                                        <SolidColorBrush x:Key="ButtonBackground" Color="Transparent" />
+                                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="Transparent" />
+                                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="Transparent" />
+                                        <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="Transparent" />
+                                        <SolidColorBrush x:Key="ButtonBorderBrush" Color="Transparent" />
+                                        <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="Transparent" />
+                                        <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="Transparent" />
+                                        <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="Transparent" />
+                                    </ResourceDictionary>
+                                    <ResourceDictionary x:Key="HighContrast">
+                                        <SolidColorBrush x:Key="ButtonBackground" Color="Transparent" />
+                                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="Transparent" />
+                                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="Transparent" />
+                                        <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="Transparent" />
+                                        <SolidColorBrush x:Key="ButtonBorderBrush" Color="Transparent" />
+                                        <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="Transparent" />
+                                        <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="Transparent" />
+                                        <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="Transparent" />
+                                    </ResourceDictionary>
+                                </ResourceDictionary.ThemeDictionaries>
+                            </ResourceDictionary>
+                        </Button.Resources>
                         <TextBlock
                             x:Name="StatusWordText"
                             FontSize="16"
@@ -232,7 +271,7 @@
                             VerticalAlignment="Center"
                             AutomationProperties.AutomationId="WaitlistLineCardView_TimeRing"
                             AutomationProperties.Name="{Binding RingAccessibleName, ElementName=Root}"
-                            Background="{ThemeResource CardStrokeColorDefaultBrush}"
+                            Background="{ThemeResource SurfaceStrokeColorDefaultBrush}"
                             Foreground="{Binding StatusColumnBrush, ElementName=Root}"
                             IsIndeterminate="False"
                             Maximum="1"
@@ -276,7 +315,7 @@
                 x:Name="StatusDetailRule"
                 Grid.Column="4"
                 Width="1"
-                Background="{ThemeResource CardStrokeColorDefaultBrush}" />
+                Background="{ThemeResource SurfaceStrokeColorDefaultBrush}" />
 
             <!--
                 Zone 3, identity-and-detail: an inner grid of three rows and two columns (FR-024). Row 1 always
@@ -306,33 +345,59 @@
                 </Grid.ColumnDefinitions>
 
                 <!--
-                    The title pair, stacked and centred: the Item's own word on the first line and the request's
-                    identifier beneath it (FR-007). Side by side they read as one sentence and the identifier is
-                    the part a reader is looking for, so the two lines are what the card draws - the word large
-                    and the identifier smaller, both centred over the cells below.
+                    The title pair, read on one line and drawn the same way on both halves:
+                    `Pickup 22-74371-075`, centred over the cells below (FR-007, D45).
                 -->
-                <StackPanel
+                <Grid
                     x:Name="DetailTitleRow"
                     Grid.Row="0"
                     Grid.Column="0"
                     Grid.ColumnSpan="2"
-                    HorizontalAlignment="Stretch"
-                    Spacing="0">
+                    HorizontalAlignment="Center"
+                    ColumnSpacing="6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
                     <TextBlock
                         x:Name="DetailCategoryWord"
-                        FontSize="26"
+                        VerticalAlignment="Center"
+                        FontSize="22"
                         FontWeight="SemiBold"
                         Text="{Binding Order.Title, ElementName=Root}"
-                        TextAlignment="Center"
                         TextTrimming="CharacterEllipsis" />
                     <TextBlock
                         x:Name="DetailIdentifier"
-                        FontSize="20"
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        FontSize="22"
+                        FontWeight="SemiBold"
                         Text="{Binding Order.Subtitle, ElementName=Root}"
-                        TextAlignment="Center"
                         TextTrimming="CharacterEllipsis"
                         Visibility="{Binding HasIdentifier, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}" />
-                </StackPanel>
+
+                    <!--
+                        On a Deliver Component card the identifier is a link: it opens the window that says where
+                        the part is stored and how much is on hand. The remaining cards keep the plain text above.
+                    -->
+                    <HyperlinkButton
+                        x:Name="DetailIdentifierLink"
+                        Grid.Column="2"
+                        Padding="0"
+                        VerticalAlignment="Center"
+                        AutomationProperties.AutomationId="WaitlistLineCardView_PartLink"
+                        AutomationProperties.Name="{Binding Order.Subtitle, ElementName=Root}"
+                        Click="OnPartLinkClick"
+                        shared:TooltipBehavior.ResourceKey="Waitlist_Card_PartStockLink.Tooltip"
+                        Visibility="{Binding HasStockLink, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <TextBlock
+                            FontSize="22"
+                            FontWeight="SemiBold"
+                            Text="{Binding Order.Subtitle, ElementName=Root}"
+                            TextTrimming="CharacterEllipsis" />
+                    </HyperlinkButton>
+                </Grid>
 
                 <!--
                     The cell area, and the only thing that separates it from the title above it: the gap is a
@@ -358,7 +423,7 @@
                 x:Name="DetailActionRule"
                 Grid.Column="6"
                 Width="1"
-                Background="{ThemeResource CardStrokeColorDefaultBrush}" />
+                Background="{ThemeResource SurfaceStrokeColorDefaultBrush}" />
 
             <!--
                 Zone 4, action: up to five square buttons in three columns and two rows, in row-major order -

@@ -6,15 +6,15 @@ using MTM_Waitlist.Module_Settings.Services;
 namespace MTM_Waitlist.Tests.Module_Settings.Models;
 
 /// <summary>
-/// The part's derived item type is written onto the snapshot the picker and the card read, and the four returning
-/// pickups are offered on that same derivation (FR-091, FR-094). The composition root resolves it and hands it
-/// over through <c>WithDisposition</c>, so this pins what the picker is handed for each derived state.
+/// The part's derived item type is written onto the snapshot the picker and the card read (FR-091). The
+/// composition root resolves it and hands it over through <c>WithDisposition</c>, so this pins what the picker is
+/// handed for each derived state, and what each state does and does not offer (FR-094).
 /// </summary>
 [TestClass]
 public sealed class RequestJobAvailabilityDispositionTests
 {
     [TestMethod]
-    public void Service_RequestJobAvailabilityDispositionTests_WithDisposition_EachStateLightsItsOwnReturningPickup()
+    public void Service_RequestJobAvailabilityDispositionTests_WithDisposition_EachStateRecordsItsOwnGate()
     {
         var cases = new (RequestDisposition Disposition, string ItemId)[]
         {
@@ -30,23 +30,38 @@ public sealed class RequestJobAvailabilityDispositionTests
 
             Assert.AreEqual(disposition, availability.Disposition);
             Assert.IsTrue(
-                RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById(itemId)!, availability),
-                $"'{itemId}' must be offered for a job the derivation reads as {disposition}.");
+                GateFor(itemId, availability),
+                $"'{itemId}' records no gate for a job the derivation reads as {disposition}.");
 
             foreach (var (_, otherId) in cases.Where(candidate => !string.Equals(candidate.ItemId, itemId, StringComparison.Ordinal)))
             {
                 Assert.IsFalse(
-                    RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById(otherId)!, availability),
-                    $"'{otherId}' must not be offered for a job the derivation reads as {disposition}.");
+                    GateFor(otherId, availability),
+                    $"'{otherId}' records a gate for a job the derivation reads as {disposition}.");
             }
         }
+    }
+
+    [TestMethod]
+    public void Service_RequestJobAvailabilityDispositionTests_WithDisposition_AnActiveJobStillOffersTheJobsOwnProduct()
+    {
+        // A request may name finished parts or WIP whatever the derivation made of the part: the two pickups name
+        // the job's own product, so the job is what offers them, and a derivation that cannot say where the stock
+        // sits does not take the choice away (FR-094).
+        var job = RequestJobPartAvailability.All.WithDisposition(RequestDisposition.Unknown);
+
+        Assert.IsTrue(job.HasActiveJob);
+        Assert.IsTrue(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-fg")!, job));
+        Assert.IsTrue(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-wip")!, job));
+        Assert.IsFalse(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-ncm")!, job));
+        Assert.IsFalse(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-outside-service")!, job));
     }
 
     [TestMethod]
     public void Service_RequestJobAvailabilityDispositionTests_WithDisposition_NothingDerivedLightsNoReturningPickup()
     {
         // A read that failed, a job the plant does not know, or a snapshot built before the derivation ran: the
-        // four Items stay hidden and nothing is invented in their place (FR-089).
+        // gates stay false and nothing is invented in their place (FR-089).
         var availability = RequestJobPartAvailability.All.WithDisposition(RequestDisposition.Unknown);
 
         Assert.AreEqual(RequestDisposition.Unknown, availability.Disposition);
@@ -78,8 +93,18 @@ public sealed class RequestJobAvailabilityDispositionTests
         Assert.IsTrue(availability.HasComponent);
         Assert.IsFalse(availability.HasFlatstock);
         Assert.IsFalse(availability.HasDunnage);
-        Assert.IsFalse(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-fg")!, availability));
+        Assert.IsTrue(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-fg")!, availability));
         Assert.IsTrue(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-wip")!, availability));
         Assert.IsTrue(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-coil")!, availability));
     }
+
+    /// <summary>The derivation gate an Item records, as opposed to whether the picker offers it.</summary>
+    private static bool GateFor(string itemId, RequestJobPartAvailability availability) => itemId switch
+    {
+        "pickup-fg" => availability.HasFinishedGoodsToReturn,
+        "pickup-ncm" => availability.HasNonconformingStockToReturn,
+        "pickup-wip" => availability.HasWorkInProgressToReturn,
+        "pickup-outside-service" => availability.HasOutsideServiceWorkToReturn,
+        _ => throw new ArgumentOutOfRangeException(nameof(itemId), itemId, "Not a returning pickup."),
+    };
 }

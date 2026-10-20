@@ -243,4 +243,7 @@
   <data name="Setup_WorkCenterViewHistory.Tooltip" xml:space="preserve">
     <value>View History Button</value>
   </data>
+  <data name="Waitlist_Card_PartStockLink.Tooltip" xml:space="preserve">
+    <value>Part Number Stock Link</value>
+  </data>
 </root>

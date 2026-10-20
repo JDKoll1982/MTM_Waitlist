@@ -30,9 +30,13 @@ public sealed record RequestJobPartAvailability(
     public bool HasAnySubordinate => HasCoil || HasFlatstock || HasDie || HasComponent || HasDunnage;
 
     /// <summary>
-    /// Whether the requesting job has <b>finished goods</b> to pick up — stock completed at a finished-goods
-    /// location. This is the work the <c>pickup-fg</c> Item names, so the Item is offered on the job's real work
-    /// rather than hidden by a fixed list (FR-094).
+    /// Whether the derivation read the requesting job's part as <b>finished goods</b> — stock completed at a
+    /// finished-goods location.
+    /// <para>
+    /// The <c>pickup-fg</c> Item is offered on any active job rather than on this flag (see
+    /// <c>RequestItemPickerRules.IsVisible</c>), because the finished-goods location names it is read from are not
+    /// confirmed for this installation. What this flag still feeds is the card's <c>Part Type</c> cell.
+    /// </para>
     /// </summary>
     public bool HasFinishedGoodsToReturn { get; init; }
 
@@ -44,8 +48,9 @@ public sealed record RequestJobPartAvailability(
     public bool HasNonconformingStockToReturn { get; init; }
 
     /// <summary>
-    /// Whether the requesting job has <b>work in progress</b> to pick up — quantity still open on the work order.
-    /// This is the work the <c>pickup-wip</c> Item names (FR-094).
+    /// Whether the derivation read the requesting job's part as <b>work in progress</b> — quantity still open on
+    /// the work order. The <c>pickup-wip</c> Item is offered on any active job rather than on this flag, for the
+    /// same reason as <see cref="HasFinishedGoodsToReturn"/>; the flag still feeds the card's <c>Part Type</c>.
     /// </summary>
     public bool HasWorkInProgressToReturn { get; init; }
 
@@ -88,6 +93,31 @@ public sealed record RequestJobPartAvailability(
     /// </para>
     /// </summary>
     public IReadOnlyList<string> ComponentPartNumbers { get; init; } = Array.Empty<string>();
+
+    /// <summary>
+    /// What is known about each of the job's components, keyed by part number (case-insensitive): its description
+    /// and the total quantity on hand. A component the job lists but whose facts could not be read is absent, so
+    /// its cell is left out rather than filled with a guess.
+    /// </summary>
+    public IReadOnlyDictionary<string, RequestComponentFacts> ComponentFacts { get; init; } = NoComponentFacts.Value;
+
+    // Held in a nested type so it is built on first use, whatever order the static members of this record initialise in.
+    private static class NoComponentFacts
+    {
+        public static readonly IReadOnlyDictionary<string, RequestComponentFacts> Value =
+            new Dictionary<string, RequestComponentFacts>(StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>A copy of this snapshot carrying the given component facts, keyed case-insensitively by part number.</summary>
+    public RequestJobPartAvailability WithComponentFacts(IEnumerable<KeyValuePair<string, RequestComponentFacts>>? facts) => this with
+    {
+        ComponentFacts = facts is null
+            ? NoComponentFacts.Value
+            : facts
+                .Where(pair => !string.IsNullOrWhiteSpace(pair.Key))
+                .GroupBy(pair => pair.Key.Trim(), StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(group => group.Key, group => group.First().Value, StringComparer.OrdinalIgnoreCase),
+    };
 
     /// <summary>
     /// The number of the coil the requesting job carries (its <c>MMC</c> subordinate), or empty when it has none.
