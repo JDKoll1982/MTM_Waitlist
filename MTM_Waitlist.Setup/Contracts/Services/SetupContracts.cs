@@ -19,6 +19,27 @@ public interface ISubordinatePartService
     Task<IReadOnlyList<SetupSubordinatePart>> GetSubordinatePartsAsync(string normalizedWorkOrder, string partNumber, string sequenceNumber, CancellationToken cancellationToken = default);
 }
 
+/// <summary>
+/// Reads the open work orders a setup run can start from. It is a separate seam from
+/// <see cref="IInforVisualLookupService"/> because it answers a question that is not about one order: the
+/// operator does not know the number yet, which is why the dialog exists.
+/// </summary>
+public interface IWorkOrderSearchService
+{
+    /// <summary>
+    /// Finds the open, addressable work orders matching the given fragments. An empty fragment means "no
+    /// constraint" on that column, and all three empty means "the first two hundred open orders".
+    /// </summary>
+    /// <param name="workOrderText">What the operator typed for the work order; matched fuzzily.</param>
+    /// <param name="partFilter">A part-number fragment.</param>
+    /// <param name="customerFilter">A customer-name fragment; a name, never an id.</param>
+    Task<IReadOnlyList<SetupWorkOrderSearchResult>> SearchWorkOrdersAsync(
+        string workOrderText,
+        string partFilter,
+        string customerFilter,
+        CancellationToken cancellationToken = default);
+}
+
 public interface ISetupWorkCenterService
 {
     Task<IReadOnlyList<SetupWorkCenter>> GetWorkCentersAsync(CancellationToken cancellationToken = default);

@@ -395,8 +395,8 @@ Each of these was found the hard way on 2026-10-19, driving feature 012's verifi
   sign-in window (`-Action dump`) and confirm the identifier before suspecting the app, and remember the store asks
   for a new password after repeated failures.
 - **A toggle button answered neither `Invoke` nor `SelectionItem`.** WinUI's own header switches
-  (`ShellPage_MyRequestsToggleDefault`, `ShellPage_SortButtonDefault`) advertise `TogglePattern`. Without that arm,
-  `Invoke-MtmElement` refused a control that is plainly operable. It is tried after `Invoke` and `SelectionItem`.
+  (`ShellPage_LocalWorkCentersToggleDefault`, `ShellPage_SortButtonDefault`) advertise `TogglePattern`. Without that
+  arm, `Invoke-MtmElement` refused a control that is plainly operable. It is tried after `Invoke` and `SelectionItem`.
 - **Look twice.** A wizard step draws its controls a moment after the page around them; a single UIA walk finds only
   the navigation pane and calls the step missing. `click-item`/`click-button` poll for up to `-FindSeconds`
   (default 10), and their failure message says "within 10 s" so a real absence stays distinguishable.
@@ -412,7 +412,8 @@ Each of these was found the hard way on 2026-10-19, driving feature 012's verifi
 
 Two facts about the app itself, not the driver:
 
-- **The waitlist filter is a toggle and it starts ON.** "Show only my requests" on a store with no open work for the
-  signed-in person renders `No Requests Right Now`; toggling it is the difference between an empty list and a list.
+- **The waitlist filter is a toggle and it starts OFF.** Turned on, it narrows the list to this computer's Local Work
+  Centers (its hot work centers), so a store whose open work sits elsewhere renders `No Requests Right Now`; turning
+  it off is the difference between an empty list and a list.
 - **The app is single-instance.** A second launch says "already running" and dumps the existing window, so a cold
   start is `-Action kill` first, and always close the app when finished so no orphan holds store connections.

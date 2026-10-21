@@ -15,6 +15,7 @@
 --   T014  five mirror tables + five stage twins
 --   011   sixth mirror table (employee_by_number) + its stage twin
 --   012   seventh mirror table (part_warehouse_quantities) + its stage twin
+--   013   eighth mirror table (work_order_search) + its stage twin
 -- ============================================================
 
 USE mtm_mock;
@@ -208,5 +209,43 @@ MODIFY COLUMN id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Surrogate prim
 MODIFY COLUMN part_number VARCHAR(64) NOT NULL COMMENT 'Part number; both the read input and the returned part.',
 MODIFY COLUMN warehouse_quantity DECIMAL(18,4) NOT NULL DEFAULT 0 COMMENT 'The part-wide on-hand sum over every location, filtered by location class. The card''s `Quantity in house` and `Quantity` cells read it (FR-090).',
 MODIFY COLUMN finished_goods_quantity DECIMAL(18,4) NOT NULL DEFAULT 0 COMMENT 'The same sum restricted to finished-goods locations; what `Item Type` and `Total Qty In House` need (FR-090, D38).',
+MODIFY COLUMN refreshed_utc DATETIME NOT NULL COMMENT 'UTC time of the refresh that produced this row.',
+MODIFY COLUMN is_seed_content TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 for baseline seed rows; 0 for refreshed content.';
+
+-- ------------------------------------------------------------
+-- Shape 8: work_order_search
+-- ------------------------------------------------------------
+
+ALTER TABLE visual_work_order_search_result COMMENT = 'Cached Infor Visual work-order search result (shape 8 mirror); complete snapshot, replaced atomically.';
+
+ALTER TABLE visual_work_order_search_result
+MODIFY COLUMN id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
+MODIFY COLUMN work_order_text VARCHAR(32) NOT NULL COMMENT 'Declared input, holding the row''s own work order; the search filters on work_order.',
+MODIFY COLUMN part_filter VARCHAR(64) NOT NULL COMMENT 'Declared input, holding the row''s own part number; the search filters on part_number.',
+MODIFY COLUMN customer_filter VARCHAR(120) NOT NULL COMMENT 'Declared input, holding the row''s own customer name; the search filters on customer_name.',
+MODIFY COLUMN work_order VARCHAR(32) NOT NULL COMMENT 'Canonical WO-###### base id of the open work order.',
+MODIFY COLUMN part_number VARCHAR(64) NOT NULL COMMENT 'The part the work order builds; a search input and a returned column.',
+MODIFY COLUMN part_description VARCHAR(255) NULL COMMENT 'Part description (empty string when Visual has none).',
+MODIFY COLUMN customer_name VARCHAR(120) NULL COMMENT 'The customer''s real name from CUST_ORDER_ALLOC.CUST_NAME, never the customer id; empty for a stock order.',
+MODIFY COLUMN work_center VARCHAR(32) NULL COMMENT 'Primary work center (first operation resource) for the order.',
+MODIFY COLUMN status VARCHAR(4) NULL COMMENT 'Visual work-order status code: R released, U unreleased, F firmed.',
+MODIFY COLUMN want_date DATE NULL COMMENT 'The order''s desired want date, used as the secondary sort.',
+MODIFY COLUMN refreshed_utc DATETIME NOT NULL COMMENT 'UTC time of the refresh that produced this row.',
+MODIFY COLUMN is_seed_content TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 for baseline seed rows; 0 for refreshed content.';
+
+ALTER TABLE visual_work_order_search_result_stage COMMENT = 'Staging twin used by sp_visual_work_order_search_refresh for the atomic live-table swap.';
+
+ALTER TABLE visual_work_order_search_result_stage
+MODIFY COLUMN id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
+MODIFY COLUMN work_order_text VARCHAR(32) NOT NULL COMMENT 'Declared input, holding the row''s own work order; the search filters on work_order.',
+MODIFY COLUMN part_filter VARCHAR(64) NOT NULL COMMENT 'Declared input, holding the row''s own part number; the search filters on part_number.',
+MODIFY COLUMN customer_filter VARCHAR(120) NOT NULL COMMENT 'Declared input, holding the row''s own customer name; the search filters on customer_name.',
+MODIFY COLUMN work_order VARCHAR(32) NOT NULL COMMENT 'Canonical WO-###### base id of the open work order.',
+MODIFY COLUMN part_number VARCHAR(64) NOT NULL COMMENT 'The part the work order builds; a search input and a returned column.',
+MODIFY COLUMN part_description VARCHAR(255) NULL COMMENT 'Part description (empty string when Visual has none).',
+MODIFY COLUMN customer_name VARCHAR(120) NULL COMMENT 'The customer''s real name from CUST_ORDER_ALLOC.CUST_NAME, never the customer id; empty for a stock order.',
+MODIFY COLUMN work_center VARCHAR(32) NULL COMMENT 'Primary work center (first operation resource) for the order.',
+MODIFY COLUMN status VARCHAR(4) NULL COMMENT 'Visual work-order status code: R released, U unreleased, F firmed.',
+MODIFY COLUMN want_date DATE NULL COMMENT 'The order''s desired want date, used as the secondary sort.',
 MODIFY COLUMN refreshed_utc DATETIME NOT NULL COMMENT 'UTC time of the refresh that produced this row.',
 MODIFY COLUMN is_seed_content TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 for baseline seed rows; 0 for refreshed content.';

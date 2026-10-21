@@ -236,9 +236,9 @@ function Invoke-MtmElement {
         return
     }
 
-    # A ToggleButton offers neither, and WinUI's own header toggles ("Show only my requests", the sort control) are
-    # ordinary toggle buttons. Without this arm, driving them failed with "accepts neither Invoke nor SelectionItem"
-    # even though the control is plainly operable - the pattern it advertises is Toggle.
+    # A ToggleButton offers neither, and WinUI's own header toggles ("Show only this computer's Local Work Centers",
+    # the sort control) are ordinary toggle buttons. Without this arm, driving them failed with "accepts neither
+    # Invoke nor SelectionItem" even though the control is plainly operable - the pattern it advertises is Toggle.
     $pattern = $null
     $ok = $false
     try { $ok = $Element.TryGetCurrentPattern($UiaToggle, [ref]$pattern) } catch { $ok = $false }

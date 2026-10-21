@@ -80,7 +80,7 @@ redeploys `mtm_mock` **from the master lists only**, then asserts:
 
 | Check | Requirement |
 |---|---|
-| 14 tables, 16 procedures deploy | Schema + procedure completeness (seven shapes) |
+| 16 tables, 18 procedures deploy | Schema + procedure completeness (eight shapes) |
 | The freshness report enumerates every shape | A shape the report omits is reported as seed-only content however successfully it refreshes |
 | Every shape refreshes and reads back with an identical result shape | FR-004 |
 | No transient `_prev` table persists | FR-006 / SC-005 |

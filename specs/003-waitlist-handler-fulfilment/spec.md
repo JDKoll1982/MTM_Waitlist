@@ -131,8 +131,8 @@ both, named with its sender.
   work.
 - A request is cancelled by its requester after a handler accepted it. The action must be refused, and the
   card must reflect that the request is no longer waiting.
-- The request list is empty, or a filter such as "My Requests" leaves no rows. The existing friendly empty
-  state must still be shown and must not be replaced by this feature's ordering or action work.
+- The request list is empty, or a filter such as the Local Work Centers switch leaves no rows. The existing friendly
+  empty state must still be shown and must not be replaced by this feature's ordering or action work.
 - A screen has been open for several minutes so the remaining-time values on screen are stale. Actions
   must be authorized against the stored state, not the stale screen, and a refused action must say so.
 - The same row is refreshed while an action is in flight. The list must settle on the stored result rather
@@ -314,7 +314,7 @@ was asked for after using it, both stay legible.
   for a future handoff, but no handoff behaviour is specified here.
 - **The status model, the audit trail and the state transitions already exist and are tested.** This
   feature wires them to the screens; it does not re-implement them.
-- **Ordering applies to the shared available-request list**, including when the "My Requests" filter is
+- **Ordering applies to the shared available-request list**, including when the Local Work Centers filter is
   active, since that filter narrows the same list rather than producing a different one.
 - **Refusal messages reuse the plain-language messaging the cancel path already produces**, extended with
   wording for the accept, complete and release refusals.

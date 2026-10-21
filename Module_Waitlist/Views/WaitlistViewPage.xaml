@@ -194,7 +194,7 @@
                             Grid.Row="2"
                             HorizontalAlignment="Center"
                             Style="{ThemeResource BodyTextBlockStyle}"
-                            Text="Tap the + button to add the first request for this Work Center."
+                            Text="{x:Bind ViewModel.EmptyStateMessage, Mode=OneWay}"
                             TextAlignment="Center"
                             TextWrapping="WrapWholeWords" />
                     </Grid>

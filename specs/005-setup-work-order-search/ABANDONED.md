@@ -1,5 +1,15 @@
 # ABANDONED — `specs/005-setup-work-order-search`
 
+> **Delivered elsewhere, 2026-10-21.** The capability this directory described was implemented as a
+> **magnifier beside the Work Order box** on Start Setup, not as the "type a partial, leave the field, modal
+> appears" trigger written up below. The operator opens a search window and searches by work-order number
+> (fuzzily), part number or customer name; a chosen line fills the box and the page's existing search runs.
+> The entry box's own rule and auto-search are untouched. Implementation: read shape `work_order_search`
+> (`Database/InforVisual/Queues/Module_Setup/Queries/GetWorkOrderSearch.sql` and its mirror artifacts),
+> `SetupLookupService.SearchWorkOrdersAsync`, `SetupWorkOrderSearchDialogViewModel`,
+> `Module_Setup/Views/SetupWorkOrderSearchDialog`. The documents in this directory remain the record of the
+> abandoned design and are **not** the specification of what shipped.
+
 **This is not a feature. There is no spec here, and there never was.**
 
 A `/speckit.specify` run for a *Setup work-order search* feature was started on **2026-09-13 at 23:19:48Z**

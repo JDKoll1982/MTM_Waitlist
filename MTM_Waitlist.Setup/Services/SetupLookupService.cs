@@ -25,30 +25,75 @@ namespace MTM_Waitlist.Module_Setup.Services;
 /// its location is shown as it comes (FR-019).
 /// </para>
 /// </remarks>
-public sealed class SetupLookupService : IInforVisualLookupService, ISubordinatePartService
+public sealed class SetupLookupService : IInforVisualLookupService, ISubordinatePartService, IWorkOrderSearchService
 {
     private const decimal LowStockThreshold = 10m;
 
     private readonly IVisualReadFallback<VisualWorkOrderLookupRequest, VisualWorkOrderLookupRow> _workOrderLookupFallback;
     private readonly IVisualReadFallback<VisualOperationSequenceRequest, VisualOperationSequenceRow> _operationSequencesFallback;
     private readonly IVisualReadFallback<VisualSubordinatePartRequest, VisualSubordinatePartRow> _subordinatePartsFallback;
+    private readonly IVisualReadFallback<VisualWorkOrderSearchRequest, VisualWorkOrderSearchRow> _workOrderSearchFallback;
 
     /// <summary>Creates the lookup service.</summary>
     /// <param name="workOrderLookupFallback">Shape 1, work-order parts.</param>
     /// <param name="operationSequencesFallback">Shape 2, operation sequences.</param>
     /// <param name="subordinatePartsFallback">Shape 3, subordinate parts.</param>
+    /// <param name="workOrderSearchFallback">Shape 8, the work-order search the entry dialog runs.</param>
     public SetupLookupService(
         IVisualReadFallback<VisualWorkOrderLookupRequest, VisualWorkOrderLookupRow> workOrderLookupFallback,
         IVisualReadFallback<VisualOperationSequenceRequest, VisualOperationSequenceRow> operationSequencesFallback,
-        IVisualReadFallback<VisualSubordinatePartRequest, VisualSubordinatePartRow> subordinatePartsFallback)
+        IVisualReadFallback<VisualSubordinatePartRequest, VisualSubordinatePartRow> subordinatePartsFallback,
+        IVisualReadFallback<VisualWorkOrderSearchRequest, VisualWorkOrderSearchRow> workOrderSearchFallback)
     {
         ArgumentNullException.ThrowIfNull(workOrderLookupFallback);
         ArgumentNullException.ThrowIfNull(operationSequencesFallback);
         ArgumentNullException.ThrowIfNull(subordinatePartsFallback);
+        ArgumentNullException.ThrowIfNull(workOrderSearchFallback);
 
         _workOrderLookupFallback = workOrderLookupFallback;
         _operationSequencesFallback = operationSequencesFallback;
         _subordinatePartsFallback = subordinatePartsFallback;
+        _workOrderSearchFallback = workOrderSearchFallback;
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<SetupWorkOrderSearchResult>> SearchWorkOrdersAsync(
+        string workOrderText,
+        string partFilter,
+        string customerFilter,
+        CancellationToken cancellationToken = default)
+    {
+        AppLog.Info("SetupLookup", $"SearchWorkOrdersAsync started. WorkOrderText='{workOrderText}', Part='{partFilter}', Customer='{customerFilter}'.");
+        try
+        {
+            var rows = await _workOrderSearchFallback
+                .ReadAsync(
+                    new VisualWorkOrderSearchRequest(
+                        workOrderText?.Trim() ?? string.Empty,
+                        partFilter?.Trim() ?? string.Empty,
+                        customerFilter?.Trim() ?? string.Empty),
+                    cancellationToken)
+                .ConfigureAwait(false);
+
+            return rows
+                .Select(row => new SetupWorkOrderSearchResult
+                {
+                    WorkOrder = row.WorkOrder,
+                    PartNumber = row.PartNumber,
+                    PartDescription = row.PartDescription,
+                    CustomerName = row.CustomerName,
+                    WorkCenter = row.WorkCenter,
+                    Status = row.Status,
+                    WantDate = row.WantDate,
+                })
+                .Where(item => !string.IsNullOrWhiteSpace(item.WorkOrder))
+                .ToArray();
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("SetupLookup", ex, "SearchWorkOrdersAsync failed.");
+            return Array.Empty<SetupWorkOrderSearchResult>();
+        }
     }
 
     /// <inheritdoc />

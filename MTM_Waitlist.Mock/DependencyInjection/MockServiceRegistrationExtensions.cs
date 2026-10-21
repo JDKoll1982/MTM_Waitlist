@@ -60,7 +60,7 @@ public static class MockServiceRegistrationExtensions
         services.AddSingleton<IVisualVerdictPrimer>(provider =>
             (VisualReachabilityProbeHost)provider.GetRequiredService<IVisualReachabilityProbeHost>());
 
-        // One fallback per read shape. A seventh shape adds one line here and changes nothing else.
+        // One fallback per read shape. An eighth shape adds one line here and changes nothing else.
         services.AddSingleton<IVisualReadFallback<VisualWorkOrderLookupRequest, VisualWorkOrderLookupRow>, VisualWorkOrderLookupFallback>();
         services.AddSingleton<IVisualReadFallback<VisualOperationSequenceRequest, VisualOperationSequenceRow>, VisualOperationSequencesFallback>();
         services.AddSingleton<IVisualReadFallback<VisualSubordinatePartRequest, VisualSubordinatePartRow>, VisualSubordinatePartsFallback>();
@@ -68,6 +68,7 @@ public static class MockServiceRegistrationExtensions
         services.AddSingleton<IVisualReadFallback<VisualDispositionInputRequest, VisualDispositionInputRow>, VisualDispositionInputFallback>();
         services.AddSingleton<IVisualReadFallback<VisualEmployeeByNumberRequest, VisualEmployeeByNumberRow>, VisualEmployeeByNumberFallback>();
         services.AddSingleton<IVisualReadFallback<VisualPartWarehouseQuantitiesRequest, VisualPartWarehouseQuantitiesRow>, VisualPartWarehouseQuantitiesFallback>();
+        services.AddSingleton<IVisualReadFallback<VisualWorkOrderSearchRequest, VisualWorkOrderSearchRow>, VisualWorkOrderSearchFallback>();
 
         // On-demand refresh client (T119). It resolves its endpoint and the user name it presents from the
         // environment first and the MockServiceClient section second; with neither installed it reports

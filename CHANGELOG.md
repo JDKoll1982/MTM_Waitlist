@@ -10,6 +10,62 @@
 
 ---
 
+## 2026-10-21 — you can look a work order up by number, part or customer instead of remembering it
+
+**What changed:** the Work Order box on **Start Setup** now has a magnifier beside it. It opens **Find a Work
+Order**, where you type any part of the work order number, the part number, or the customer's name, and the open
+orders that match are listed with their part, customer, work centre, status and want date. Pick a line — or
+double-click it, or press **Use Work Order** — and the order's number goes into the box and the normal search runs.
+
+**Why it matters:** the number was the one thing you had to know before you could start. Now you can find it from
+what you do know: the part you are running, or who the order is for. Nothing about the box itself changed — it still
+formats what you type and still runs the same lookup — this is an extra way to find the number.
+
+**What to expect:**
+
+- **The work-order box matches loosely.** `0752`, `WO-0752` and `752` all find the `WO-0752xx` orders, and an exact
+  number sorts to the top.
+- **The customer is the customer's real name** — `Volvo - Mack Trucks (45)`, not an account number. Searching a
+  customer finds the orders allocated to that customer.
+- **Only orders you can actually start** are listed: open work orders (released, unreleased or firmed) in the
+  `WO-######` form the box accepts. Closed and cancelled orders are not offered.
+- **A stock order shows no customer**, so it does not appear when a customer is typed.
+- **The list is capped at 200 lines**, newest want date first, so a very broad search stays quick.
+- **Press Enter in any of the three boxes to search.** The window opens on the open orders, so it is useful before
+  you type anything.
+- **It still works when Infor Visual is down** once the cache has been refreshed on the plant server; until that
+  first refresh the window has nothing cached to show and says the work orders could not be read.
+
+---
+
+## 2026-10-21 — the header switch shows the requests this computer's work centers are waiting on
+
+**What changed:** the switch in the waitlist header used to narrow the list to the requests you raised yourself. It
+now narrows it to the requests waiting at **your Local Work Centers** — the work centers assigned to the computer you
+are standing at. Its label says which way it is set: **All Requests** when it is off, **Local Work Centers** when it
+is on.
+
+**Why it matters:** the question at the machine is not "what did I send" but "what is waiting for the work centers
+this computer runs". Someone covering several presses can now see just that list, and someone at a single press sees
+only their own queue instead of the whole building.
+
+**What to expect:**
+
+- **It starts off, showing everything.** Turn it on to see the requests whose work center is one of this computer's
+  Local Work Centers, as assigned in Settings.
+- **The assignment is read when the list loads,** so a change to which work centers this computer serves is picked up
+  on the next load rather than needing a restart.
+- **The label beside the switch always says what you are looking at** — `All Requests` or `Local Work Centers` — and
+  the switch's accessible name is "Show only this computer's Local Work Centers".
+- **A filtered list that finds nothing says so.** Instead of the usual prompt to add a request, the empty screen
+  explains that nothing is waiting at this computer's Local Work Centers and that turning the filter off shows every
+  work center.
+- **The filter is matched on the work center's name,** so a name typed with stray spaces or in different case still
+  matches the request.
+- Sorting, search, and the card actions are unchanged, and the filter applies to whatever the list is showing.
+
+---
+
 ## 2026-10-18 — the lugger arrangement is a wall of cards you can drag into order
 
 **What changed:** the **Lugger arrangement** page in Settings was rebuilt around its cards. Each lugger is now its

@@ -15,6 +15,7 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
     private readonly INavigationService _navigationService;
     private readonly ISetupWorkflowService _workflowService;
     private readonly IWorkOrderValidationService _workOrderValidationService;
+    private readonly ISetupDialogService _dialogService;
     private readonly SemaphoreSlim _searchGate = new(1, 1);
     private CancellationTokenSource _lifecycleCts = new();
     private bool _isClosing;
@@ -111,11 +112,13 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
     public SetupWorkOrderViewModel(
         INavigationService navigationService,
         ISetupWorkflowService workflowService,
-        IWorkOrderValidationService workOrderValidationService)
+        IWorkOrderValidationService workOrderValidationService,
+        ISetupDialogService dialogService)
     {
         _navigationService = navigationService;
         _workflowService = workflowService;
         _workOrderValidationService = workOrderValidationService;
+        _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
     }
 
     public void OnNavigatedTo(object parameter)
@@ -146,6 +149,33 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
     [RelayCommand]
     private async Task SearchAsync()
     {
+        await ExecuteSearchAsync().ConfigureAwait(true);
+    }
+
+    /// <summary>
+    /// Opens the work-order search window and, when the operator picks an order, puts its number in the box and
+    /// runs this page's own search.
+    /// </summary>
+    /// <remarks>
+    /// The chosen value is the canonical <c>WO-######</c> the search only ever returns, and the lookup is the one
+    /// <see cref="ExecuteSearchAsync"/> already performs — so the box's format rule, the auto-search on blur and
+    /// everything downstream are untouched. This adds a way to find the number, not a second way to look it up.
+    /// </remarks>
+    [RelayCommand]
+    private async Task FindWorkOrderAsync()
+    {
+        if (_isClosing || _lifecycleCts.IsCancellationRequested)
+        {
+            return;
+        }
+
+        var chosen = await _dialogService.ShowWorkOrderSearchDialogAsync().ConfigureAwait(true);
+        if (chosen is null || string.IsNullOrWhiteSpace(chosen.WorkOrder) || _isClosing || _lifecycleCts.IsCancellationRequested)
+        {
+            return;
+        }
+
+        WorkOrderInput = chosen.WorkOrder;
         await ExecuteSearchAsync().ConfigureAwait(true);
     }
 

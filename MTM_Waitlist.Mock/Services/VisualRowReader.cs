@@ -51,6 +51,37 @@ internal static class VisualRowReader
         };
     }
 
+    /// <summary>
+    /// <summary>
+    /// Reads a nullable date/time, or <see langword="null"/> when the column is absent, null, or unparseable.
+    /// </summary>
+    /// <remarks>
+    /// Infor Visual returns the value as a <see cref="DateTime"/> with no offset, and the mirror returns the same
+    /// wall-clock instant from a MySQL <c>DATETIME</c> column. Both are treated as an unspecified-offset instant
+    /// so the two sources produce the same value — the comparison FR-004 requires — and the screen decides how to
+    /// present it.
+    /// </remarks>
+    public static DateTimeOffset? GetNullableDateTimeOffset(IReadOnlyDictionary<string, object?> row, string key)
+    {
+        if (!row.TryGetValue(key, out var value) || value is null || value is DBNull)
+        {
+            return null;
+        }
+
+        return value switch
+        {
+            DateTimeOffset offsetValue => offsetValue,
+            DateTime dateTimeValue => new DateTimeOffset(DateTime.SpecifyKind(dateTimeValue, DateTimeKind.Unspecified), TimeSpan.Zero),
+            _ => DateTimeOffset.TryParse(
+                Convert.ToString(value, CultureInfo.InvariantCulture),
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out var parsed)
+                ? parsed
+                : null,
+        };
+    }
+
     /// <summary>Reads a flag, or <see langword="false"/> when the column is absent, null, or unparseable.</summary>
     public static bool GetBoolean(IReadOnlyDictionary<string, object?> row, string key)
     {

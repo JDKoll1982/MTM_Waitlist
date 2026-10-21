@@ -18,6 +18,12 @@ public interface ISetupDialogService
     Task<SetupDunnagePart?> ShowDunnageImageSearchDialogAsync();
 
     /// <summary>
+    /// Shows the work-order search window and returns the order the user picked, or <c>null</c> when the
+    /// window was dismissed or no XAML root is available.
+    /// </summary>
+    Task<SetupWorkOrderSearchResult?> ShowWorkOrderSearchDialogAsync();
+
+    /// <summary>
     /// Asks the user whether to continue without selecting dunnage.
     /// Returns <c>true</c> to continue, <c>false</c> to cancel. Returns <c>true</c>
     /// when no XAML root is available (for example a headless test host).

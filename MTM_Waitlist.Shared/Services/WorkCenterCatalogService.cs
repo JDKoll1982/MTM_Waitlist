@@ -88,6 +88,29 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
         return computers;
     }
 
+    public async Task<IReadOnlyList<string>> GetHotWorkCenterNamesAsync(string workstationName, CancellationToken cancellationToken = default)
+    {
+        var normalizedWorkstationName = string.IsNullOrWhiteSpace(workstationName)
+            ? await ResolveCurrentComputerNameAsync(cancellationToken).ConfigureAwait(false)
+            : workstationName.Trim();
+
+        var hotRows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
+            HotWorkCentersGetProcedure,
+            new Dictionary<string, object?>
+            {
+                ["p_computer_name"] = normalizedWorkstationName,
+            },
+            MySqlDatabaseTarget.MtmWaitlist,
+            cancellationToken).ConfigureAwait(false);
+
+        return hotRows
+            .Select(row => GetValue(row, "work_center_name"))
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Select(value => value.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
     public async Task<WorkCenterCatalogResult> GetCatalogAsync(string workstationName, CancellationToken cancellationToken = default)
     {
         var normalizedWorkstationName = string.IsNullOrWhiteSpace(workstationName)

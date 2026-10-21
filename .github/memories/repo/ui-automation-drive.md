@@ -15,7 +15,7 @@ Recorded 2026-10-19 while verifying feature 012 (`specs/012-waitlist-card-layout
 $d = 'scripts\ui-automation\ui-drive.ps1'
 powershell -NoProfile -ExecutionPolicy Bypass -File $d -Action launch
 powershell -NoProfile -ExecutionPolicy Bypass -File $d -Action signin -Identifier $env:USERNAME -Pin <pin>
-powershell -NoProfile -ExecutionPolicy Bypass -File $d -Action click-button -Name 'Show only my requests'
+powershell -NoProfile -ExecutionPolicy Bypass -File $d -Action click-button -Name 'Show only this computer''s Local Work Centers'
 powershell -NoProfile -ExecutionPolicy Bypass -File $d -Action dump -Label 01-waitlist
 powershell -NoProfile -ExecutionPolicy Bypass -File $d -Action kill
 ```
@@ -30,8 +30,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File $d -Action kill
   whichever the command block you are copying from shows.
 - The app is **single-instance**: `-Action launch` prints "already running" rather than starting a second window,
   so anything that needs a cold start is `-Action kill` first.
-- The **waitlist filter matters**. The shell opens with "Show only my requests" ON, and on this store that reads
-  `No Requests Right Now` for an account with no open work. Toggle it before concluding the list is empty.
+- The **waitlist filter matters**. The shell opens with "Show only this computer's Local Work Centers" OFF, and
+  turning it on narrows the list to the hot work centers assigned to this machine — on a store whose open work sits
+  elsewhere that reads `No Requests Right Now`. Toggle it before concluding the list is empty.
 - **Close the app when finished** so no orphan process holds store connections.
 
 ## Roadblocks
@@ -77,10 +78,10 @@ A sign-in that does not reach the shell now throws a message naming the account 
 
 ### 4. `Invoke-MtmElement` refused WinUI's own toggle buttons
 
-**Symptom:** `The button 'Show only my requests' ('Show only my requests', ControlType.Button) accepts neither
-Invoke nor SelectionItem.`
+**Symptom:** `The button 'Show only this computer's Local Work Centers' ('Show only this computer's Local Work
+Centers', ControlType.Button) accepts neither Invoke nor SelectionItem.`
 
-**Cause:** the toggle arm was missing. WinUI's header switches (`ShellPage_MyRequestsToggleDefault`,
+**Cause:** the toggle arm was missing. WinUI's header switches (`ShellPage_LocalWorkCentersToggleDefault`,
 `ShellPage_SortButtonDefault`) advertise **`TogglePattern`** and nothing else, so a control that is plainly
 operable was reported as unreachable.
 

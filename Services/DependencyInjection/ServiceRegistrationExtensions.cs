@@ -167,6 +167,8 @@ public static partial class ServiceRegistrationExtensions
         services.AddTransient<SetupCompletionViewModel>();
         services.AddTransient<SetupDunnageImageSearchDialogViewModel>();
         services.AddTransient<SetupDunnageImageSearchDialog>();
+        services.AddTransient<SetupWorkOrderSearchDialogViewModel>();
+        services.AddTransient<SetupWorkOrderSearchDialog>();
         services.AddTransient<SetupWorkOrderPage>();
         services.AddTransient<SetupWorkCenterPage>();
         services.AddTransient<SetupWorkCenterHistoryPage>();
@@ -244,7 +246,10 @@ public static partial class ServiceRegistrationExtensions
             itemConfigurationService: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestItemConfigurationService>(),
             // A null notice seam would leave the strip permanently empty, so the change notice the handler is
             // owed would never be drawn while the screen still looked wired (FR-033).
-            luggerChangeNoticeService: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.ILuggerChangeNoticeService>()));
+            luggerChangeNoticeService: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.ILuggerChangeNoticeService>(),
+            // A null seam here leaves the Local Work Centers filter matching nothing at all, so the header
+            // switch would look wired and always empty the list.
+            workCenterCatalogService: provider.GetRequiredService<MTM_Waitlist.Module_Shared.Services.IWorkCenterCatalogService>()));
         services.AddTransient<WaitlistViewPage>();
         services.AddTransient<ShellPage>();
         services.AddTransient<ShellViewModel>();

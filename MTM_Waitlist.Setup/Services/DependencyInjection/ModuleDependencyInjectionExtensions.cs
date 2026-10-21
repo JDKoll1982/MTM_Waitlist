@@ -16,6 +16,7 @@ public static class ModuleDependencyInjectionExtensions
         services.AddSingleton<ISetupWorkCenterService, SetupWorkCenterService>();
         services.AddSingleton<IInforVisualLookupService, SetupLookupService>();
         services.AddSingleton<ISubordinatePartService, SetupLookupService>();
+        services.AddSingleton<IWorkOrderSearchService, SetupLookupService>();
         services.AddSingleton<IDunnageWorkflowService, DunnageWorkflowService>();
         services.AddSingleton<IActiveJobCoordinatorService, SetupActiveJobCoordinatorService>();
         services.AddSingleton<ISetupPersistenceService, SetupPersistenceService>();

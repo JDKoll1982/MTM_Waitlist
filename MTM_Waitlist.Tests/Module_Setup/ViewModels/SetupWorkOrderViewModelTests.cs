@@ -77,7 +77,8 @@ public sealed class SetupWorkOrderViewModelTests
         var viewModel = new SetupWorkOrderViewModel(
             new NoOpNavigationService(),
             workflow,
-            new WorkOrderValidationService());
+            new WorkOrderValidationService(),
+            new NoOpSetupDialogService());
         var notified = new List<string?>();
         viewModel.PropertyChanged += (_, e) => notified.Add(e.PropertyName);
         viewModel.WorkOrderInput = "55691";
@@ -102,13 +103,53 @@ public sealed class SetupWorkOrderViewModelTests
             "IsIdle is what the Search action binds, so it must not reach a closed view either.");
     }
 
+    [TestMethod]
+    public async Task ViewModel_SetupWorkOrderViewModelTests_FindWorkOrder_ChosenOrderFillsTheBoxAndRunsThePagesOwnSearch()
+    {
+        var workflow = new RecordingSetupWorkflowService();
+        var chooser = new StubDialogService
+        {
+            WorkOrder = new SetupWorkOrderSearchResult { WorkOrder = "WO-075201", PartNumber = "105803-08" },
+        };
+        var viewModel = new SetupWorkOrderViewModel(
+            new NoOpNavigationService(),
+            workflow,
+            new WorkOrderValidationService(),
+            chooser);
+
+        await viewModel.FindWorkOrderCommand.ExecuteAsync(null);
+
+        Assert.AreEqual("WO-075201", viewModel.WorkOrderInput, "the chosen number is what the box shows");
+        Assert.AreEqual(
+            "WO-075201",
+            workflow.InputReceived,
+            "the order is looked up by the page's own search, so nothing about the lookup changed");
+    }
+
+    [TestMethod]
+    public async Task ViewModel_SetupWorkOrderViewModelTests_FindWorkOrder_DismissedWindowLeavesTheBoxAndTheLookupAlone()
+    {
+        var workflow = new RecordingSetupWorkflowService();
+        var viewModel = new SetupWorkOrderViewModel(
+            new NoOpNavigationService(),
+            workflow,
+            new WorkOrderValidationService(),
+            new StubDialogService { WorkOrder = null });
+
+        await viewModel.FindWorkOrderCommand.ExecuteAsync(null);
+
+        Assert.AreEqual(string.Empty, viewModel.WorkOrderInput);
+        Assert.IsNull(workflow.InputReceived, "nothing was chosen, so nothing is looked up");
+    }
+
     private static (SetupWorkOrderViewModel ViewModel, RecordingSetupWorkflowService Workflow) CreateViewModel()
     {
         var workflow = new RecordingSetupWorkflowService();
         var viewModel = new SetupWorkOrderViewModel(
             new NoOpNavigationService(),
             workflow,
-            new WorkOrderValidationService());
+            new WorkOrderValidationService(),
+            new NoOpSetupDialogService());
         return (viewModel, workflow);
     }
 
@@ -168,6 +209,18 @@ public sealed class SetupWorkOrderViewModelTests
 
         public Task<SetupSaveResult> SaveAsync(bool forceReplace = false, CancellationToken cancellationToken = default) =>
             Task.FromResult(new SetupSaveResult { Success = true });
+    }
+
+    /// <summary>Hands back a work order as if the search window had been used, or nothing if it was dismissed.</summary>
+    private sealed class StubDialogService : ISetupDialogService
+    {
+        public SetupWorkOrderSearchResult? WorkOrder { get; init; }
+
+        public Task<SetupDunnagePart?> ShowDunnageImageSearchDialogAsync() => Task.FromResult<SetupDunnagePart?>(null);
+
+        public Task<SetupWorkOrderSearchResult?> ShowWorkOrderSearchDialogAsync() => Task.FromResult(WorkOrder);
+
+        public Task<bool> ConfirmNoDunnageAsync() => Task.FromResult(true);
     }
 
     private sealed class NoOpNavigationService : INavigationService

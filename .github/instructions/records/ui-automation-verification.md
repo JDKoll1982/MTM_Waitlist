@@ -59,7 +59,7 @@ The recipes were re-exercised on the home workstation after six driver faults we
 | `-Action launch` finds the exe with no `-Exe` argument | **correct after the fix** — it resolved `bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.exe`; before the fix it expanded to `C:\..\..\bin\...` and failed `Test-Path` |
 | The app reaches its store with no `MTM_WAITLIST_DB_CONNECTION_STRING` | **correct** — the driver reports "store: from the app's own appsettings.json" and the run reaches the sign-in stage |
 | Reaching the shell needs a credential | **still correct, and the 2026-09-20 row saying otherwise is superseded** — the shell was reached only by signing in as `JOHNK` with the PIN supplied per run. Nothing auto-signs-in any more |
-| A toggle button can be driven | **correct after the fix** — `ShellPage_MyRequestsToggleDefault` answers `TogglePattern` and neither `Invoke` nor `SelectionItem` |
+| A toggle button can be driven | **correct after the fix** — `ShellPage_LocalWorkCentersToggleDefault` answers `TogglePattern` and neither `Invoke` nor `SelectionItem` |
 | `click-item` on a wizard category | **correct after the fix** — polls up to `-FindSeconds`; the single-look version reported `no ListItem matched [Pickup]` on a page that was still drawing |
 | A typed value reaches the request | **correct after the fix** — `# of Skids` typed `4` against a `NumberBox` stored `{"# of Skids": "4"}` and drew the cell as `Skids = 4`; the `ValuePattern`-only version silently stored `1` |
 | The full surface walk | **correct** — signed in, audited **25 of 29 surfaces**, **0 findings**, app closed itself |

@@ -41,6 +41,24 @@ public sealed class SetupDialogService : ISetupDialogService
     }
 
     /// <inheritdoc />
+    public async Task<SetupWorkOrderSearchResult?> ShowWorkOrderSearchDialogAsync()
+    {
+        var xamlRoot = (App.MainWindow?.Content as FrameworkElement)?.XamlRoot;
+        if (xamlRoot is null)
+        {
+            // No active XAML root (for example a headless test host); no dialog can be shown.
+            return null;
+        }
+
+        var dialog = App.GetService<SetupWorkOrderSearchDialog>();
+        dialog.XamlRoot = xamlRoot;
+
+        await dialog.ShowAsync();
+
+        return dialog.SelectedWorkOrder;
+    }
+
+    /// <inheritdoc />
     public async Task<bool> ConfirmNoDunnageAsync()
     {
         var xamlRoot = (App.MainWindow?.Content as FrameworkElement)?.XamlRoot;

@@ -5,6 +5,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Services;
+using MTM_Waitlist.Module_Shared.Models;
+using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
@@ -1371,9 +1373,9 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public void Service_WaitlistRequestServiceTests_WaitlistViewViewModel_FilterToMyRequestsNarrowsToSignedInUserRows()
+    public void Service_WaitlistRequestServiceTests_WaitlistViewViewModel_FilterToLocalWorkCentersNarrowsToThisComputersWorkCenters()
     {
-        var mine = WaitlistViewViewModel.CreateSessionOrder(new WaitlistRequest
+        var local = WaitlistViewViewModel.CreateSessionOrder(new WaitlistRequest
         {
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
@@ -1384,7 +1386,7 @@ public sealed class WaitlistRequestServiceTests
             RequesterEmployeeNumber = "6229",
             RequesterEmployeeName = "John Koll",
         });
-        var other = WaitlistViewViewModel.CreateSessionOrder(new WaitlistRequest
+        var elsewhere = WaitlistViewViewModel.CreateSessionOrder(new WaitlistRequest
         {
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
@@ -1397,19 +1399,27 @@ public sealed class WaitlistRequestServiceTests
         });
         var staticRow = new SampleOrder { Id = 1, Title = "Static", RequestedByName = "Current user" };
 
-        var filtered = WaitlistViewViewModel.FilterToMyRequests(new[] { mine, other, staticRow }, "6229");
+        // The configured name is padded and in another case on purpose: the assignment is typed by hand in
+        // Settings, and a filter that only matched an exact spelling would empty the list on a stray space.
+        var filtered = WaitlistViewViewModel.FilterToLocalWorkCenters(new[] { local, elsewhere, staticRow }, new[] { " press 12 " });
 
         Assert.AreEqual(1, filtered.Count);
-        Assert.AreEqual("6229", filtered[0].RequesterEmployeeNumber);
+        Assert.AreEqual("Press 12", filtered[0].RequestedPressName);
     }
 
     [TestMethod]
-    public async Task Service_WaitlistRequestServiceTests_WaitlistViewViewModel_ShowMyRequestsOnlyNarrowsLoadedSourceToCurrentUser()
+    public async Task Service_WaitlistRequestServiceTests_WaitlistViewViewModel_ShowLocalWorkCentersOnlyNarrowsLoadedSourceToThisComputersWorkCenters()
     {
         var buildingSelectionService = new StubBuildingSelectionService("Expo Drive");
         var requestService = new WaitlistRequestService();
         var person = new FakePersonIdentity { EmployeeNumber = "6229" };
-        var viewModel = new WaitlistViewViewModel(new NoOpNavigationService(), buildingSelectionService, requestService, personIdentity: person);
+        var catalog = new StubWorkCenterCatalogService("Press 12");
+        var viewModel = new WaitlistViewViewModel(
+            new NoOpNavigationService(),
+            buildingSelectionService,
+            requestService,
+            personIdentity: person,
+            workCenterCatalogService: catalog);
 
         viewModel.OnNavigatedTo(null!);
         await viewModel.RefreshAsync();
@@ -1430,11 +1440,15 @@ public sealed class WaitlistRequestServiceTests
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, submitOther.Status);
         await Task.Delay(50);
 
-        viewModel.ShowMyRequestsOnly = true;
+        Assert.IsTrue(
+            viewModel.Source.Any(order => order.RequestedPressName == "Press 15"),
+            "The unfiltered list must hold the other work center's request, so the filter is what removes it.");
+
+        viewModel.ShowLocalWorkCentersOnly = true;
         await Task.Delay(50);
 
         Assert.IsTrue(viewModel.Source.Count > 0);
-        Assert.IsTrue(viewModel.Source.All(order => order.RequesterEmployeeNumber == "6229"));
+        Assert.IsTrue(viewModel.Source.All(order => order.RequestedPressName == "Press 12"));
     }
 
     [TestMethod]
@@ -1841,6 +1855,27 @@ public sealed class WaitlistRequestServiceTests
         IsOverdue = false,
         AssignedMaterialHandler = "M. Lewis",
     };
+
+    private sealed class StubWorkCenterCatalogService : IWorkCenterCatalogService
+    {
+        private readonly string[] _hotWorkCenters;
+
+        public StubWorkCenterCatalogService(params string[] hotWorkCenters) => _hotWorkCenters = hotWorkCenters;
+
+        public string GetCurrentComputerName() => "test-workstation";
+
+        public Task<IReadOnlyList<ComputerOption>> GetAvailableComputersAsync(CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<ComputerOption>>(Array.Empty<ComputerOption>());
+
+        public Task<WorkCenterCatalogResult> GetCatalogAsync(string workstationName, CancellationToken cancellationToken = default) =>
+            Task.FromResult(new WorkCenterCatalogResult { HotWorkCenters = _hotWorkCenters });
+
+        public Task<IReadOnlyList<string>> GetHotWorkCenterNamesAsync(string workstationName, CancellationToken cancellationToken = default) =>
+            Task.FromResult<IReadOnlyList<string>>(_hotWorkCenters);
+
+        public Task<string?> SaveHotWorkCentersAsync(string workstationName, IReadOnlyCollection<string> hotWorkCenters, CancellationToken cancellationToken = default) =>
+            Task.FromResult<string?>(null);
+    }
 
     private sealed class NoOpNavigationService : INavigationService
     {

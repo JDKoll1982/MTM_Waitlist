@@ -179,7 +179,9 @@ public sealed class SetupWorkflowServiceTests
             new FakeVisualReadFallback<VisualOperationSequenceRequest, VisualOperationSequenceRow>(
                 request => SetupLookupFixtureData.GetSequences(request.NormalizedWorkOrder, request.PartNumber)),
             new FakeVisualReadFallback<VisualSubordinatePartRequest, VisualSubordinatePartRow>(
-                request => SetupLookupFixtureData.GetSubordinateParts(request.NormalizedWorkOrder, request.PartNumber, request.SequenceNumber)));
+                request => SetupLookupFixtureData.GetSubordinateParts(request.NormalizedWorkOrder, request.PartNumber, request.SequenceNumber)),
+            new FakeVisualReadFallback<VisualWorkOrderSearchRequest, VisualWorkOrderSearchRow>(
+                _ => Array.Empty<VisualWorkOrderSearchRow>()));
         var dunnageWorkflowService = new DunnageWorkflowService(mySqlHelperServer, permissionService: new AlwaysPermittingPermissionService());
         var activeJobCoordinatorService = new SetupActiveJobCoordinatorService();
         var persistenceService = new SetupPersistenceService(activeJobCoordinatorService, mySqlHelperServer);

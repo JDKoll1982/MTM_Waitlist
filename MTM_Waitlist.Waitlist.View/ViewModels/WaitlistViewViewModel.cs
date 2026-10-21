@@ -15,6 +15,7 @@ using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Shared.Helpers;
+using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Waitlist.Helpers;
 using MTM_Waitlist.Module_Waitlist.Models;
 
@@ -34,6 +35,18 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     private readonly MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore? _messageSeenStore;
     private readonly IWaitlistSortPreferenceService? _sortPreferenceService;
     private readonly MTM_Waitlist.Module_Waitlist.Services.ILuggerChangeNoticeService? _luggerChangeNoticeService;
+
+    /// <summary>
+    /// The reader of this computer's Local Work Centers. The list's own filter narrows to them, so a null seam
+    /// leaves the filter matching nothing rather than guessing which work centers this machine serves.
+    /// </summary>
+    private readonly IWorkCenterCatalogService? _workCenterCatalogService;
+
+    /// <summary>
+    /// The Local Work Centers (hot work centers) assigned to this computer, read on each cold load. Empty until the
+    /// first read completes, and empty on a host whose machine configuration assigns none.
+    /// </summary>
+    private HashSet<string> _localWorkCenterNames = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// The order this viewer's list is shown in, resolved from their remembered choice the first time the list
@@ -124,17 +137,31 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     public partial bool IsWaitlistEmpty { get; private set; } = true;
 
     /// <summary>
-    /// When true, the list is narrowed to the signed-in user's own submitted requests
-    /// (the "My Requests" quick view). Toggling reloads the current building's list.
+    /// When true, the list is narrowed to the requests whose work center is one of this computer's Local Work
+    /// Centers (its hot work centers). Toggling reloads the current building's list.
     /// </summary>
+    /// <remarks>
+    /// This replaced a "My Requests" filter that narrowed to the signed-in person's own submissions. The floor's
+    /// question was never "what did I raise" but "what is waiting for the work centers this machine runs", which
+    /// is the one thing the computer's own configuration can answer.
+    /// </remarks>
     [ObservableProperty]
-    public partial bool ShowMyRequestsOnly { get; set; }
+    public partial bool ShowLocalWorkCentersOnly { get; set; }
 
-    partial void OnShowMyRequestsOnlyChanged(bool value)
+    partial void OnShowLocalWorkCentersOnlyChanged(bool value)
     {
-        AppLog.Info("Waitlist", $"My-Requests filter {(value ? "enabled" : "disabled")} for requester '{_currentRequesterEmployeeNumber}'.");
+        AppLog.Info("Waitlist", $"Local-Work-Centers filter {(value ? "enabled" : "disabled")} for {_localWorkCenterNames.Count} configured Local Work Center(s).");
+        OnPropertyChanged(nameof(EmptyStateMessage));
         _ = LoadOrdersAsync(_buildingSelectionService.SelectedBuilding);
     }
+
+    /// <summary>
+    /// The sentence under the empty state's title. A filtered list says what the filter left out, so an empty
+    /// screen is never read as "nothing is waiting anywhere".
+    /// </summary>
+    public string EmptyStateMessage => ShowLocalWorkCentersOnly
+        ? "Waitlist_EmptyState_Filtered.Message".GetLocalized()
+        : "Waitlist_EmptyState.Message".GetLocalized();
 
     public string SelectedBuilding => _buildingSelectionService.SelectedBuilding;
 
@@ -160,7 +187,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         IPermissionService? permissionService = null,
         IPartPictureResolver? partPictureResolver = null,
         IRequestItemConfigurationService? itemConfigurationService = null,
-        MTM_Waitlist.Module_Waitlist.Services.ILuggerChangeNoticeService? luggerChangeNoticeService = null)
+        MTM_Waitlist.Module_Waitlist.Services.ILuggerChangeNoticeService? luggerChangeNoticeService = null,
+        IWorkCenterCatalogService? workCenterCatalogService = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(buildingSelectionService);
@@ -182,6 +210,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         _partPictureResolver = partPictureResolver;
         _itemConfigurationService = itemConfigurationService;
         _luggerChangeNoticeService = luggerChangeNoticeService;
+        _workCenterCatalogService = workCenterCatalogService;
 
         // This screen's own internal-store unavailable state (FR-021): the waitlist list reads
         // mtm_waitlist live, so a failure is reported here, with a retry that re-runs this screen's load.
@@ -948,6 +977,13 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             _maxAllottedCache.Clear();
             _jobAvailabilityCache.Clear();
             _resolvedPictureCache.Clear();
+
+            // Its own read, and only while the filter is on: a list that is not narrowing to this computer's work
+            // centers has no use for the assignment, and every live read this screen pays for is felt on a card.
+            if (ShowLocalWorkCentersOnly)
+            {
+                await LoadLocalWorkCenterNamesAsync().ConfigureAwait(false);
+            }
         }
 
         var now = DateTimeOffset.UtcNow;
@@ -966,10 +1002,10 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             return;
         }
 
-        // "My Requests": keep only the signed-in user's own submitted request rows.
-        if (ShowMyRequestsOnly)
+        // "Local Work Centers": keep only the rows whose work center is one this computer serves.
+        if (ShowLocalWorkCentersOnly)
         {
-            newItems = newItems.Where(order => IsRequesterOrder(order, _currentRequesterEmployeeNumber)).ToList();
+            newItems = newItems.Where(order => IsLocalWorkCenterOrder(order, _localWorkCenterNames)).ToList();
         }
 
         // The order the viewer left the list in, applied to every build of it: the same rows in the same order
@@ -982,7 +1018,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         await ApplyHandlerActionStateAsync(newItems, DateTimeOffset.UtcNow).ConfigureAwait(false);
 
         await ApplySourceUpdateAsync(newItems, refreshVersion);
-        AppLog.Info("Waitlist", $"Loaded building '{building}'. SessionRequests={activeRequestCount}, TotalRows={Source.Count}, MyRequestsOnly={ShowMyRequestsOnly}, SearchQuery='{SearchQuery}'.");
+        AppLog.Info("Waitlist", $"Loaded building '{building}'. SessionRequests={activeRequestCount}, TotalRows={Source.Count}, LocalWorkCentersOnly={ShowLocalWorkCentersOnly}, LocalWorkCenterCount={_localWorkCenterNames.Count}, SearchQuery='{SearchQuery}'.");
         UpdateSearchSuggestions(SearchQuery);
     }
 
@@ -1806,17 +1842,72 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     }
 
     /// <summary>
-    /// Narrows a set of rows to those submitted by the given requester (used by the "My
-    /// Requests" quick view). A row with no requester identity is excluded.
+    /// Reads the Local Work Centers (hot work centers) assigned to this computer. Called on each cold load, which is
+    /// this screen's refresh point, so a machine whose assignment was changed in Settings is picked up on the next
+    /// load rather than needing a restart.
     /// </summary>
-    public static IReadOnlyList<SampleOrder> FilterToMyRequests(IEnumerable<SampleOrder> source, string requesterEmployeeNumber)
+    /// <remarks>
+    /// A failed read keeps the set the last successful read produced rather than emptying it: an empty set would
+    /// turn the filter into a screen that always says nothing is waiting, which is the one answer a failed read
+    /// cannot support. On a host with no reader at all (a unit test) the set stays empty, and the filter is only
+    /// reachable through the toggle, which a test sets deliberately.
+    /// </remarks>
+    private async Task LoadLocalWorkCenterNamesAsync()
+    {
+        if (_workCenterCatalogService is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var workstationName = _workCenterCatalogService.GetCurrentComputerName();
+            var hotWorkCenters = await _workCenterCatalogService
+                .GetHotWorkCenterNamesAsync(workstationName)
+                .ConfigureAwait(false);
+
+            _localWorkCenterNames = new HashSet<string>(
+                hotWorkCenters
+                    .Where(name => !string.IsNullOrWhiteSpace(name))
+                    .Select(name => name.Trim()),
+                StringComparer.OrdinalIgnoreCase);
+
+            AppLog.Info("Waitlist", $"Local Work Centers loaded. Workstation='{workstationName}', Count={_localWorkCenterNames.Count}.");
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("Waitlist", ex, "Reading this computer's Local Work Centers failed; the list is keeping the assignment it last read.");
+        }
+    }
+
+    /// <summary>
+    /// Whether a row is for one of the given Local Work Centers. A row that names no work center is not one of
+    /// them: the filter may only include a work center it can actually match.
+    /// </summary>
+    public static bool IsLocalWorkCenterOrder(SampleOrder order, IEnumerable<string> localWorkCenterNames)
+    {
+        if (order is null || localWorkCenterNames is null)
+        {
+            return false;
+        }
+
+        var workCenter = order.RequestedPressName?.Trim() ?? string.Empty;
+        return !string.IsNullOrWhiteSpace(workCenter)
+            && localWorkCenterNames.Any(name => string.Equals(name?.Trim(), workCenter, StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// Narrows a set of rows to those whose work center is one of the given Local Work Centers (used by the
+    /// screen's own filter).
+    /// </summary>
+    public static IReadOnlyList<SampleOrder> FilterToLocalWorkCenters(IEnumerable<SampleOrder> source, IEnumerable<string> localWorkCenterNames)
     {
         if (source is null)
         {
             return Array.Empty<SampleOrder>();
         }
 
-        return source.Where(order => IsRequesterOrder(order, requesterEmployeeNumber)).ToArray();
+        return source.Where(order => IsLocalWorkCenterOrder(order, localWorkCenterNames)).ToArray();
     }
 
     public Task RefreshAsync() => LoadOrdersAsync(_buildingSelectionService.SelectedBuilding);

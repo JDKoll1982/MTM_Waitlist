@@ -29,7 +29,7 @@ that does:
 | `Wait-MtmUiSettled -Root [-StableMilliseconds]` | The tree has stopped changing, so the page is ready to be read. |
 | `Wait-MtmSettledAnchor -AnchorId` | The named control exists **and** the page is still. Use this before auditing a page that loads asynchronously. |
 | `Get-MtmElementCount -Root` | How many elements the window holds - the cheap signal the settle wait watches. |
-| `Invoke-MtmElement -Element` | Presses a control: `Invoke` when it accepts one, `SelectionItem.Select()` when it is a nav entry or a row, `Toggle()` when it is a toggle button. The toggle arm matters because WinUI's own header switches (`Show only my requests`, `Sort by`) are toggle buttons that answer neither of the other two, and driving one used to fail with "accepts neither Invoke nor SelectionItem" on a control that is plainly operable. |
+| `Invoke-MtmElement -Element` | Presses a control: `Invoke` when it accepts one, `SelectionItem.Select()` when it is a nav entry or a row, `Toggle()` when it is a toggle button. The toggle arm matters because WinUI's own header switches (`Show only this computer's Local Work Centers`, `Sort by`) are toggle buttons that answer neither of the other two, and driving one used to fail with "accepts neither Invoke nor SelectionItem" on a control that is plainly operable. |
 | `Set-MtmText -Element -Text [-Commit]` | Types into a field, then checks it took: focus, select-all, characters, and with `-Commit` the Tab a person's own click would produce. It used to write through `ValuePattern` alone, and a control that parses its text on commit never sees a write — the skid count accepted `1` → `4` in the value model, read `4` back when asked, and submitted `1`. `ValuePattern` is now only the fallback, and a value that still does not take is reported rather than silently ignored. |
 | `Stop-MtmApp` | Ends the process and waits for it to actually be gone. |
 
@@ -345,7 +345,8 @@ that works on this workstation, is kept in `.github/memories/repo/ui-automation-
 
 Two facts worth carrying beyond the fixes:
 
-- **The waitlist filter is a toggle, and it starts ON.** "Show only my requests" on a store with no open work for the
-  signed-in person renders `No Requests Right Now`; toggling it is the difference between an empty list and a list.
+- **The waitlist filter is a toggle, and it starts OFF.** Turned on, it narrows the list to this computer's Local
+  Work Centers (its hot work centers), so a store whose open work sits at other work centers renders
+  `No Requests Right Now`; turning it off is the difference between an empty list and a list.
 - **The app is single-instance.** `-Action launch` says "already running" and dumps the existing window rather than
   starting a second one, so a cold start is `-Action kill` first.
