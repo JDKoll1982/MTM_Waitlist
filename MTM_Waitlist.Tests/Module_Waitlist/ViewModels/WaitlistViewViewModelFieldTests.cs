@@ -571,7 +571,6 @@ public sealed class WaitlistViewViewModelFieldTests
 
         public Task<WaitlistRequestSubmitResult> SubmitAsync(
             WaitlistRequestDraft draft,
-            bool allowDuplicate,
             CancellationToken cancellationToken = default) => throw new NotSupportedException("This test drives one condition write.");
 
         public Task<bool> TransitionStatusAsync(

@@ -33,19 +33,23 @@ public sealed class PartStockServiceTests
         var visualLocations = new FakeVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow>(
         [
             new VisualInventoryLocationRow { PartNumber = "FGT0002000", Location = "RACK-1", OnHandQuantity = 40m },
-            new VisualInventoryLocationRow { PartNumber = "FGT0002000", Location = "HIDDEN", OnHandQuantity = 9m },
+            new VisualInventoryLocationRow { PartNumber = "FGT0002000", Location = "WC", OnHandQuantity = 9m },
         ]);
         var quantities = new FakeVisualReadFallback<VisualPartWarehouseQuantitiesRequest, VisualPartWarehouseQuantitiesRow>(
         [
             new VisualPartWarehouseQuantitiesRow { PartNumber = "FGT0002000", WarehouseQuantity = 49m },
         ]);
 
-        var snapshot = await Create(new StubWipReader([]), visualLocations, quantities, ["HIDDEN"]).GetStockAsync("FGT0002000");
+        var snapshot = await Create(new StubWipReader([]), visualLocations, quantities).GetStockAsync("FGT0002000");
 
         Assert.AreEqual(PartStockSource.Visual, snapshot.Source);
         Assert.IsFalse(snapshot.IsCachedData);
         Assert.AreEqual(49m, snapshot.TotalQuantity);
-        CollectionAssert.AreEqual(new[] { "RACK-1" }, snapshot.Locations.Select(row => row.Location).ToArray());
+
+        // `WC` is one of the plant's ignored locations, which the detail page's grid hides. This window asks where
+        // the material is held, so it shows it: the rows it draws and the total beside them have to agree.
+        CollectionAssert.AreEqual(new[] { "RACK-1", "WC" }, snapshot.Locations.Select(row => row.Location).ToArray());
+        Assert.AreEqual(49m, snapshot.Locations.Sum(row => row.Quantity));
     }
 
     [TestMethod]
@@ -100,14 +104,77 @@ public sealed class PartStockServiceTests
         Assert.IsFalse(viewModel.HasLocations);
     }
 
+    [TestMethod]
+    public async Task Service_PartStockServiceTests_LoadAsync_ShowsTheLocationTheDetailPagesGridWouldHide()
+    {
+        // The plant's ignored locations (WC, NCM, SHIP…) are hidden from the detail page's inventory grid, but this
+        // window asks where the material is held, so it shows every location that holds it. A0006376159-Blank is
+        // the live case: all 2,885 of its units sit in `WC`, and hiding that location left the window saying
+        // "No stock is recorded" beside a card that read 2,885.
+        var visualLocations = new FakeVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow>(
+        [
+            new VisualInventoryLocationRow { PartNumber = "A0006376159-Blank", Location = "WC", OnHandQuantity = 2885m },
+        ]);
+        var quantities = new FakeVisualReadFallback<VisualPartWarehouseQuantitiesRequest, VisualPartWarehouseQuantitiesRow>(
+        [
+            new VisualPartWarehouseQuantitiesRow { PartNumber = "A0006376159-Blank", WarehouseQuantity = 2885m },
+        ]);
+        var viewModel = new PartStockDialogViewModel(Create(new StubWipReader([]), visualLocations, quantities));
+
+        await viewModel.LoadAsync("A0006376159-Blank");
+
+        Assert.IsTrue(viewModel.HasLocations, "The location holding the stock is shown, ignored or not.");
+        Assert.AreEqual(1, viewModel.Locations.Count);
+        Assert.AreEqual("WC", viewModel.Locations[0].Location);
+        StringAssert.Contains(viewModel.Locations[0].QuantityText, "2,885");
+        Assert.IsFalse(viewModel.HasEmptyText, "A part with a location to show is not explained away as having none.");
+        StringAssert.Contains(viewModel.TotalText, "2,885");
+    }
+
+    [TestMethod]
+    public async Task Service_PartStockServiceTests_LoadAsync_WhenTheTotalIsKnownButNoLocationCameBackStillShowsTheTotal()
+    {
+        // The part-wide read and the location read are two reads: the total can answer while the locations come
+        // back empty. That is not "no stock", and the window says so rather than contradicting the figure it draws.
+        var visualLocations = new FakeVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow>([]);
+        var quantities = new FakeVisualReadFallback<VisualPartWarehouseQuantitiesRequest, VisualPartWarehouseQuantitiesRow>(
+        [
+            new VisualPartWarehouseQuantitiesRow { PartNumber = "A0006376159-Blank", WarehouseQuantity = 2885m },
+        ]);
+        var viewModel = new PartStockDialogViewModel(Create(new StubWipReader([]), visualLocations, quantities));
+
+        await viewModel.LoadAsync("A0006376159-Blank");
+
+        Assert.IsFalse(viewModel.HasLocations);
+        Assert.IsTrue(viewModel.HasTotal, "The part-wide total is shown even with no location row beside it.");
+        Assert.IsTrue(viewModel.ShowsStockRows, "The total row is drawn on its own rather than nothing at all.");
+        StringAssert.Contains(viewModel.TotalText, "2,885");
+        Assert.IsTrue(viewModel.HasEmptyText, "The empty list is explained rather than left blank.");
+        Assert.AreNotEqual("PartStock_Dialog.NoStock", viewModel.EmptyText, "A part holding stock is never reported as holding none.");
+    }
+
+    [TestMethod]
+    public async Task Service_PartStockServiceTests_LoadAsync_WhenThePartHoldsNothingSaysThereIsNoStock()
+    {
+        var visualLocations = new FakeVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow>(
+        [
+            new VisualInventoryLocationRow { PartNumber = "FGT0002000", Location = "RACK-1", OnHandQuantity = 0m },
+        ]);
+        var viewModel = new PartStockDialogViewModel(Create(new StubWipReader([]), visualLocations));
+
+        await viewModel.LoadAsync("FGT0002000");
+
+        Assert.IsFalse(viewModel.HasLocations);
+        Assert.AreEqual("0", viewModel.TotalText, "A part stocked nowhere answers zero rather than being left unknown.");
+        Assert.AreEqual("PartStock_Dialog.NoStock", viewModel.EmptyText);
+    }
+
     private static PartStockService Create(
         IWipPartStockReader wip,
         IVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow>? locations,
-        IVisualReadFallback<VisualPartWarehouseQuantitiesRequest, VisualPartWarehouseQuantitiesRow>? quantities = null,
-        IReadOnlyList<string>? ignored = null) =>
+        IVisualReadFallback<VisualPartWarehouseQuantitiesRequest, VisualPartWarehouseQuantitiesRow>? quantities = null) =>
         new(
             wip,
-            new StubIgnoredLocations(ignored ?? []),
             locations ?? new FakeVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow>([]),
             quantities ?? new FakeVisualReadFallback<VisualPartWarehouseQuantitiesRequest, VisualPartWarehouseQuantitiesRow>([]));
 
@@ -126,22 +193,6 @@ public sealed class PartStockServiceTests
 
         public Task<IReadOnlyList<WipLocationQuantity>> GetLocationsAsync(string partNumber, CancellationToken cancellationToken = default) =>
             _failure is null ? Task.FromResult(_rows) : Task.FromException<IReadOnlyList<WipLocationQuantity>>(_failure);
-    }
-
-    private sealed class StubIgnoredLocations : IIgnoredLocationsService
-    {
-        private readonly IReadOnlyList<string> _ignored;
-
-        public StubIgnoredLocations(IReadOnlyList<string> ignored) => _ignored = ignored;
-
-        public Task<IReadOnlyList<string>> GetIgnoredLocationsAsync(CancellationToken cancellationToken = default) =>
-            Task.FromResult(_ignored);
-
-        public Task<bool> IsLocationIgnoredAsync(string location, CancellationToken cancellationToken = default) =>
-            Task.FromResult(_ignored.Contains(location, StringComparer.OrdinalIgnoreCase));
-
-        public Task<bool> SaveIgnoredLocationsAsync(IReadOnlyList<string> locations, CancellationToken cancellationToken = default) =>
-            Task.FromResult(false);
     }
 
     private sealed class CachedLocationsFallback : IVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow>

@@ -82,6 +82,15 @@ public sealed partial class PartStockDialogViewModel : ObservableObject
     /// <summary>Whether there is at least one location to show.</summary>
     public bool HasLocations => Locations.Count > 0;
 
+    /// <summary>Whether the part-wide total is known and can be shown.</summary>
+    public bool HasTotal => !IsLoading && !string.IsNullOrEmpty(TotalText);
+
+    /// <summary>
+    /// Whether the window has a stock row to draw — a location, or the total on its own when the location read
+    /// returned no row while the part-wide read still answered.
+    /// </summary>
+    public bool ShowsStockRows => HasLocations || HasTotal;
+
     /// <summary>Whether to show the empty-state text.</summary>
     public bool HasEmptyText => !IsLoading && !string.IsNullOrEmpty(EmptyText);
 
@@ -95,6 +104,8 @@ public sealed partial class PartStockDialogViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(HasEmptyText));
         OnPropertyChanged(nameof(HasAnswer));
+        OnPropertyChanged(nameof(HasTotal));
+        OnPropertyChanged(nameof(ShowsStockRows));
     }
 
     partial void OnEmptyTextChanged(string value) => OnPropertyChanged(nameof(HasEmptyText));
@@ -102,6 +113,12 @@ public sealed partial class PartStockDialogViewModel : ObservableObject
     partial void OnSourceTextChanged(string value) => OnPropertyChanged(nameof(HasAnswer));
 
     partial void OnSourceNoteTextChanged(string value) => OnPropertyChanged(nameof(HasSourceNote));
+
+    partial void OnTotalTextChanged(string value)
+    {
+        OnPropertyChanged(nameof(HasTotal));
+        OnPropertyChanged(nameof(ShowsStockRows));
+    }
 
     /// <summary>Looks the part up and fills the window. Never throws.</summary>
     /// <param name="partNumber">The part to look up.</param>
@@ -111,7 +128,7 @@ public sealed partial class PartStockDialogViewModel : ObservableObject
         PartNumber = partNumber?.Trim() ?? string.Empty;
         IsLoading = true;
         Locations.Clear();
-        OnPropertyChanged(nameof(HasLocations));
+        NotifyLocationsChanged();
         EmptyText = string.Empty;
 
         try
@@ -151,17 +168,32 @@ public sealed partial class PartStockDialogViewModel : ObservableObject
             Locations.Add(new PartStockLocationItem(row.Location, row.Quantity.ToString(QuantityFormat, CultureInfo.CurrentCulture)));
         }
 
-        OnPropertyChanged(nameof(HasLocations));
+        NotifyLocationsChanged();
 
         if (!stock.WasRead)
         {
             SourceText = string.Empty;
             EmptyText = "PartStock_Dialog.Unavailable".GetLocalized();
         }
+        else if (Locations.Count > 0)
+        {
+            EmptyText = string.Empty;
+        }
         else
         {
-            EmptyText = Locations.Count == 0 ? "PartStock_Dialog.NoStock".GetLocalized() : string.Empty;
+            // Nothing is hidden from this window's list, so an empty list beside a total can only mean the total
+            // came from the part-wide read while the location read returned no row at all. Say that rather than
+            // claiming "no stock" beside a figure that says otherwise.
+            EmptyText = stock.TotalQuantity > 0m
+                ? "PartStock_Dialog.NoLocations".GetLocalized()
+                : "PartStock_Dialog.NoStock".GetLocalized();
         }
+    }
+
+    private void NotifyLocationsChanged()
+    {
+        OnPropertyChanged(nameof(HasLocations));
+        OnPropertyChanged(nameof(ShowsStockRows));
     }
 
     private static string SourceTextFor(PartStockSnapshot stock) => stock.Source switch

@@ -95,7 +95,7 @@
         <ScrollViewer
             MaxHeight="280"
             VerticalScrollBarVisibility="Auto"
-            Visibility="{x:Bind ViewModel.HasLocations, Mode=OneWay}">
+            Visibility="{x:Bind ViewModel.ShowsStockRows, Mode=OneWay}">
             <StackPanel>
                 <ItemsControl
                     x:Name="LocationList"
@@ -128,7 +128,7 @@
                     Padding="0,6"
                     BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}"
                     BorderThickness="0,1,0,0"
-                    Visibility="{x:Bind ViewModel.HasAnswer, Mode=OneWay}">
+                    Visibility="{x:Bind ViewModel.HasTotal, Mode=OneWay}">
                     <Grid ColumnSpacing="12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />

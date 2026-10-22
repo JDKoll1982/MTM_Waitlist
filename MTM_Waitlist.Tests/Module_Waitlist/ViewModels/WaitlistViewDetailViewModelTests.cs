@@ -80,7 +80,7 @@ public sealed class WaitlistViewDetailViewModelTests
             RequesterEmployeeName = "John Koll",
         };
 
-        var submit = await requestService.SubmitAsync(draft, allowDuplicate: true);
+        var submit = await requestService.SubmitAsync(draft);
         Assert.IsNotNull(submit.Request);
         return submit.Request!;
     }
@@ -113,7 +113,7 @@ public sealed class WaitlistViewDetailViewModelTests
             RequesterEmployeeNumber = "6229",
             RequesterEmployeeName = "John Koll",
         };
-        var submit = await requestService.SubmitAsync(draft, allowDuplicate: false);
+        var submit = await requestService.SubmitAsync(draft);
         var requestId = submit.Request!.Id;
 
         // No sample rows exist any more: the item must be resolved from the request service.
@@ -149,7 +149,7 @@ public sealed class WaitlistViewDetailViewModelTests
             RequesterEmployeeNumber = "6229",
             RequesterEmployeeName = "John Koll",
         };
-        var submit = await requestService.SubmitAsync(draft, allowDuplicate: false);
+        var submit = await requestService.SubmitAsync(draft);
         var requestId = submit.Request!.Id;
 
         var viewModel = new WaitlistViewDetailViewModel(

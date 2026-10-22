@@ -42,6 +42,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
     private const string CellTemplateKey = "WaitlistLineCardDetailCell";
     private const string ScrollingCellTemplateKey = "WaitlistLineCardDetailScrollingCell";
     private const string PictureCellTemplateKey = "WaitlistLineCardDetailPictureCell";
+    private const string CellTemplateSelectorKey = "WaitlistCardCellTemplateSelector";
     private const string SpanConverterKey = "WaitlistCardCellSpanConverter";
     private const string VisibilityConverterKey = "WaitlistCardCellVisibilityConverter";
     private const string LabelConverterKey = "WaitlistCardCellLabelConverter";
@@ -149,6 +150,62 @@ public sealed class WaitlistLineCardDetailTemplateTests
     }
 
     /// <summary>
+    /// The three cell templates share one type scale, one gap between the label and its value, and one left edge,
+    /// so a description cell and a plain cell beside it do not read at two different sizes or sit on two different
+    /// axes (FR-028, FR-053).
+    /// </summary>
+    /// <remarks>
+    /// The left edge is not a preference here. A description cell's value field is stretched to the full slot so a
+    /// long line can overflow and scroll, which means it cannot centre what it draws; a centred neighbour beside it
+    /// would put the two halves of one row on different axes. Every cell therefore starts from the same edge.
+    /// </remarks>
+    [TestMethod]
+    public void UI_WaitlistLineCardDetailTemplateTests_EveryCellTemplate_SharesTheOneTypeScaleGapAndLeftEdge()
+    {
+        foreach (var (key, anatomy) in new[]
+        {
+            (CellTemplateKey, "the plain cell"),
+            (ScrollingCellTemplateKey, "the scrolling cell"),
+            (PictureCellTemplateKey, "the picture cell"),
+        })
+        {
+            var root = TemplateFor(LoadTemplateDictionary(), key).Elements().Single();
+            var grid = root.Elements().Single();
+
+            Assert.AreEqual(
+                "12,5",
+                (string?)root.Attribute("Padding"),
+                $"{anatomy} does not carry the cell's own padding, so its text sits against the rule beside it (FR-028).");
+            Assert.IsTrue(
+                double.Parse((string?)grid.Attribute("ColumnSpacing") ?? "0", CultureInfo.InvariantCulture) >= 6d,
+                $"{anatomy} draws its label and value with no column gap, so the separator's trailing space is collapsed and the pair reads run-together (FR-028).");
+
+            Assert.AreEqual(
+                "Stretch",
+                (string?)grid.Attribute("HorizontalAlignment"),
+                $"{anatomy} does not start its label and value at the cell's left edge, so one row of cells sits on two axes (FR-028).");
+
+            var label = root
+                .Descendants(s_presentation + "TextBlock")
+                .Single(text => ((string?)text.Attribute("Text"))?.Contains("Label", StringComparison.Ordinal) == true);
+
+            Assert.AreEqual(
+                "12",
+                (string?)label.Attribute("FontSize"),
+                $"{anatomy} draws its label at a different size from the other cells, so the panel has no single type scale (FR-028).");
+
+            var value = root
+                .Descendants()
+                .Single(element => ((string?)element.Attribute("Text"))?.Contains("Value", StringComparison.Ordinal) == true);
+
+            Assert.AreEqual(
+                "15",
+                (string?)value.Attribute("FontSize"),
+                $"{anatomy} draws its value at a different size from the other cells, so the panel has no single type scale (FR-028).");
+        }
+    }
+
+    /// <summary>
     /// Every template draws its cells through the one shared cell: the label on the same line as its value, the
     /// two read as `Label: value`, the label taken from the cell's own declaration rather than written into the
     /// markup, and no label at all on the label-less die-shop cell (FR-028, FR-055, FR-059, FR-104).
@@ -193,10 +250,29 @@ public sealed class WaitlistLineCardDetailTemplateTests
             "1",
             (string?)values[0].Attribute("Grid.Column"),
             "The value is not the second column of the label's own row, so the two do not read as `Label: value` (FR-028).");
+
+        // The gap between the label and its value is layout, not a character: the separator the label carries ends
+        // with a space, and a trailing space at the end of a line is collapsed, so `Part Type: WIP` was drawn as
+        // `Part Type:WIP`. A real column gap is the only thing that survives that.
+        Assert.IsTrue(
+            double.Parse((string?)row.Attribute("ColumnSpacing") ?? "0", CultureInfo.InvariantCulture) >= 6d,
+            "The label and its value are drawn with no column gap, so the separator's trailing space is collapsed and the pair reads run-together (FR-028).");
+
+        // The cell's two halves are told apart by weight, size and colour rather than by position alone: the label
+        // sits small and secondary, the value larger, semibold and in the primary text colour, so the answer reads
+        // first and the question that produced it second.
         Assert.AreEqual(
-            0d,
-            double.Parse((string?)row.Attribute("ColumnSpacing") ?? "0", CultureInfo.InvariantCulture),
-            "The label and its value are pushed apart: the separator already carries the space between them (FR-028).");
+            "12",
+            (string?)label.Attribute("FontSize"),
+            "The cell's label is drawn at the wrong size for the card's type scale (FR-028).");
+        Assert.AreEqual(
+            "15",
+            (string?)values[0].Attribute("FontSize"),
+            "The cell's value is drawn at the wrong size for the card's type scale (FR-028).");
+        StringAssert.Contains(
+            (string?)values[0].Attribute("FontWeight") ?? string.Empty,
+            "SemiBold",
+            "The cell's value is not drawn a weight heavier than the body, so the label and the value read as one run of text (FR-028).");
 
         // The one cell with no label at all is the die-shop cell, and its label is hidden rather than blanked.
         StringAssert.Contains(
@@ -246,12 +322,17 @@ public sealed class WaitlistLineCardDetailTemplateTests
 
             foreach (var slot in slots)
             {
-                var presenter = (string?)slot.Attribute("ContentTemplate") ?? string.Empty;
+                // A cell's line is chosen by the cell itself through the cell selector, which resolves to one of
+                // the two shared line templates; the hopper Items' pictured cell names its template outright.
+                var presenter = (string?)slot.Attribute("ContentTemplateSelector") is { Length: > 0 } selector
+                    ? selector
+                    : (string?)slot.Attribute("ContentTemplate") ?? string.Empty;
 
                 Assert.IsTrue(
                     presenter.Contains(CellTemplateKey, StringComparison.Ordinal)
                         || presenter.Contains(ScrollingCellTemplateKey, StringComparison.Ordinal)
-                        || presenter.Contains(PictureCellTemplateKey, StringComparison.Ordinal),
+                        || presenter.Contains(PictureCellTemplateKey, StringComparison.Ordinal)
+                        || presenter.Contains(CellTemplateSelectorKey, StringComparison.Ordinal),
                     $"`{key}` draws a cell through something other than a shared cell, so the anatomy differs per Item (FR-028).");
 
                 // A cell that kept to its own height would leave the rule between two rows of cells stopping at
@@ -312,24 +393,49 @@ public sealed class WaitlistLineCardDetailTemplateTests
     }
 
     /// <summary>
-    /// `other` draws the request description in full and scrolling rather than clipped, through the application's
-    /// shared scrolling text control (FR-053).
+    /// Every cell whose value is a description is drawn in full and scrolling rather than clipped, through the
+    /// application's shared scrolling text control, and the choice is made by the cell rather than pinned per slot
+    /// (FR-053).
     /// </summary>
+    /// <remarks>
+    /// <c>other</c> was the first description on a card, and its template named the scrolling cell outright — which
+    /// left the part description on <c>deliver-component</c> and the coil description on both coil Items clipped
+    /// with an ellipsis. Every slot now asks the cell selector, and the cell's own label decides, so an Item added
+    /// later inherits the behaviour without its template being edited.
+    /// </remarks>
     [TestMethod]
-    public void UI_WaitlistLineCardDetailTemplateTests_Other_DrawsTheRequestDescriptionInFullThroughTheScrollingText()
+    public void UI_WaitlistLineCardDetailTemplateTests_EveryDescriptionCell_IsDrawnInFullThroughTheScrollingText()
     {
         var dictionary = LoadTemplateDictionary();
-        var other = TemplateFor(dictionary, "WaitlistLineCardDetail_other");
 
-        var slot = Slots(other)[0];
+        // The selector is declared after the two line templates it names, and both are wired: a selector with no
+        // templates would draw nothing where a cell belongs.
+        var selector = dictionary.Root!
+            .Elements()
+            .SingleOrDefault(element => element.Name.LocalName == "WaitlistCardCellTemplateSelector");
+        Assert.IsNotNull(selector, "The cell selector is not declared, so a cell's own label cannot choose its line (FR-053).");
+        StringAssert.Contains((string?)selector!.Attribute("PlainTemplate") ?? string.Empty, CellTemplateKey, "The selector's plain line is not the shared cell.");
+        StringAssert.Contains((string?)selector.Attribute("ScrollingTemplate") ?? string.Empty, ScrollingCellTemplateKey, "The selector's scrolling line is not the shared scrolling cell.");
 
-        StringAssert.Contains(
-            (string?)slot.Attribute("ContentTemplate") ?? string.Empty,
-            ScrollingCellTemplateKey,
-            "`other`'s description is drawn as a fixed cell, so a long description would be clipped rather than scrolled (FR-053).");
+        // Every slot asks it: no Item pins a line template of its own any more, and no Item can forget to.
+        foreach (var (key, template) in DetailTemplates())
+        {
+            foreach (var slot in Slots(template))
+            {
+                if (((string?)slot.Attribute("ContentTemplate") ?? string.Empty).Contains(PictureCellTemplateKey, StringComparison.Ordinal))
+                {
+                    continue;
+                }
 
+                StringAssert.Contains(
+                    (string?)slot.Attribute("ContentTemplateSelector") ?? string.Empty,
+                    CellTemplateSelectorKey,
+                    $"`{key}` draws a cell through a pinned template, so a description in that slot would be clipped rather than scrolled (FR-053).");
+            }
+        }
+
+        // The scrolling line itself is the shared control, drawing the cell's own value.
         var scrolling = TemplateFor(dictionary, ScrollingCellTemplateKey);
-
         var scroller = scrolling
             .Descendants()
             .SingleOrDefault(element => element.Name.LocalName == "AutoScrollTextView");
@@ -341,16 +447,36 @@ public sealed class WaitlistLineCardDetailTemplateTests
             (string?)scroller!.Attribute("Text") ?? string.Empty,
             "Value",
             "The scrolling cell does not draw the cell's own value (FR-053).");
+    }
 
-        var elsewhere = DetailTemplates()
-            .Where(pair => pair.Key != "WaitlistLineCardDetail_other")
-            .SelectMany(pair => Slots(pair.Value))
-            .Count(slot => ((string?)slot.Attribute("ContentTemplate"))?.Contains(ScrollingCellTemplateKey, StringComparison.Ordinal) == true);
+    /// <summary>
+    /// The rule the selector reads: a cell whose label says its value is a description scrolls, and no other cell
+    /// does (FR-053).
+    /// </summary>
+    [TestMethod]
+    public void UI_WaitlistLineCardDetailTemplateTests_OnlyDescriptionValues_AreDrawnByTheScrollingText()
+    {
+        // Every description label the shipped declarations carry, drawn on a card or not.
+        foreach (var label in new[] { "Request description", "Part description", "Coil description", "Description", "COIL DESCRIPTION" })
+        {
+            Assert.IsTrue(
+                WaitlistCardCellRules.DrawsScrollingText(label),
+                $"'{label}' is a description, so its value must scroll rather than be clipped (FR-053).");
+            Assert.IsTrue(
+                new WaitlistLineCardCell { Label = label, Value = "a sentence" }.UsesScrollingText,
+                $"A cell declared as '{label}' does not ask the card for the scrolling line (FR-053).");
+        }
 
-        Assert.AreEqual(
-            0,
-            elsewhere,
-            "A fixed-value cell is drawn as the scrolling line, which is for the request description alone (FR-053).");
+        // Nothing else does: a code, a count, a place and a phrase stay on the fixed line.
+        foreach (var label in new[] { "Part", "Total Qty In House", "Item Type", "Die Location", "Lugger Location", "Scrap Type", "Size", "# of Skids", "" })
+        {
+            Assert.IsFalse(
+                WaitlistCardCellRules.DrawsScrollingText(label),
+                $"'{label}' is not a description, so it must not take the scrolling line (FR-053).");
+            Assert.IsFalse(
+                new WaitlistLineCardCell { Label = label, Value = "a value" }.UsesScrollingText,
+                $"A cell declared as '{label}' asks for the scrolling line and does not hold a description (FR-053).");
+        }
     }
 
     /// <summary>
@@ -1111,6 +1237,82 @@ public sealed class WaitlistLineCardDetailTemplateTests
             source,
             "SelectTemplateCore(object item)",
             "The selector no longer answers the one-argument template question, which other presenters ask (FR-025).");
+    }
+
+    /// <summary>
+    /// The cell selector, which every slot of every Item's template asks, has to answer both template questions for
+    /// the same reason the per-Item selector does: a <c>ContentControl</c> asks the two-argument one, and the base
+    /// implementation answers that with null — which makes the presenter draw the cell's type name where its label
+    /// and value belong (FR-028, FR-053).
+    /// </summary>
+    [TestMethod]
+    public void UI_WaitlistLineCardDetailTemplateTests_CellSelector_AnswersBothTemplateQuestionOverloads()
+    {
+        var path = Path.Combine(
+            RepositoryPatternScan.FindRepositoryRoot(),
+            "Module_Waitlist",
+            "Controls",
+            "WaitlistCardCellTemplateSelector.cs");
+
+        Assert.IsTrue(File.Exists(path), $"The cell template selector is gone from '{path}' (FR-053).");
+
+        var source = File.ReadAllText(path);
+
+        StringAssert.Contains(
+            source,
+            "SelectTemplateCore(object item, DependencyObject container)",
+            "The cell selector overrides only the one-argument template question, so a ContentControl would be handed "
+            + "no cell template at all and every card would draw a type name where its label and value belong (FR-053).");
+
+        StringAssert.Contains(
+            source,
+            "SelectTemplateCore(object item)",
+            "The cell selector no longer answers the one-argument template question (FR-053).");
+    }
+
+    /// <summary>
+    /// Every description the shipped seed puts on a card asks for the scrolling line, and nothing else on those
+    /// cards does — the rule is read from the declarations the app actually ships, not from a copy of them
+    /// (FR-053).
+    /// </summary>
+    [TestMethod]
+    public void UI_WaitlistLineCardDetailTemplateTests_EveryShippedDescriptionCell_AsksForTheScrollingLine()
+    {
+        // The job a component's two cells read, so `deliver-component`'s part description resolves.
+        var job = Job() with
+        {
+            ComponentFacts = new Dictionary<string, RequestComponentFacts>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["FGT0002000"] = new RequestComponentFacts(
+                    "BLANK, 16GA, UNPAINTED, 42.5 X 18.25",
+                    "2,885"),
+            },
+        };
+
+        foreach (var (itemCode, label) in new[]
+        {
+            ("pickup-coil", "Coil description"),
+            ("deliver-coil", "Coil description"),
+            ("deliver-component", "Part description"),
+            ("other", "Request description"),
+        })
+        {
+            var cells = WaitlistLineCardCell.CellsToDraw(
+                WaitlistViewViewModel
+                    .CreateSessionOrder(Shape(itemCode), job, SeedDeclarations()[itemCode])
+                    .Cells);
+
+            var description = cells.SingleOrDefault(cell => string.Equals(cell.Label?.Trim(), label, StringComparison.OrdinalIgnoreCase));
+
+            Assert.IsNotNull(description, $"`{itemCode}` no longer draws its '{label}' cell, so this test proves nothing about it.");
+            Assert.IsTrue(
+                description!.UsesScrollingText,
+                $"`{itemCode}`'s '{label}' is drawn as a fixed cell, so a long description is clipped rather than scrolled (FR-053).");
+            Assert.AreEqual(
+                1,
+                cells.Count(cell => cell.UsesScrollingText),
+                $"`{itemCode}` asks for the scrolling line on more than its description (FR-053).");
+        }
     }
 
     /// <summary>The per-Item detail templates, keyed exactly the way the card's selector looks them up.</summary>

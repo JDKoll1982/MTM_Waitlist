@@ -64,6 +64,32 @@ public sealed class InventoryLocationFilteringTests
         Assert.AreEqual(0, result.Count);
     }
 
+    [TestMethod]
+    public void Service_InventoryLocationFilteringTests_HoldingLocations_ShowsEveryLocationHoldingStockIncludingIgnoredOnes()
+    {
+        var result = InventoryLocationFiltering.HoldingLocations(MixedRows());
+
+        // Every plant code the grid hides is still a location the part is held in: the Part stock window asks that
+        // question, so only the zero-quantity row is dropped.
+        CollectionAssert.AreEquivalent(
+            new[] { "V-A0-01", "V-A0-04", "V-B2-10", "WC", "NCM", "V-WC", "NCM-VITS", "SHIP" },
+            result.Select(r => r.Location).ToArray());
+        Assert.IsFalse(result.Any(r => r.OnHandQuantity < 1m));
+    }
+
+    [TestMethod]
+    public void Service_InventoryLocationFilteringTests_HoldingLocations_SortsByLocationAndHandlesNullRows()
+    {
+        var rows = new[]
+        {
+            new InventoryLocationRow { PartNumber = "P", Location = "WC", OnHandQuantity = 2885m },
+            new InventoryLocationRow { PartNumber = "P", Location = "RACK-1", OnHandQuantity = 40m },
+        };
+
+        CollectionAssert.AreEqual(new[] { "RACK-1", "WC" }, InventoryLocationFiltering.HoldingLocations(rows).Select(r => r.Location).ToArray());
+        Assert.AreEqual(0, InventoryLocationFiltering.HoldingLocations(null!).Count);
+    }
+
     /// <summary>
     /// Inline stand-in for the retired sample inventory-location catalog: the same mixed set of rows
     /// (ignored locations, a zero-quantity row, and on-hand rows) so the live filtering rule stays covered.

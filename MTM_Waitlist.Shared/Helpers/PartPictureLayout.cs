@@ -42,15 +42,17 @@ public static class PartPictureLayout
 
     /// <summary>
     /// The folder holding the hopper reference pictures, inside the application's own collection
-    /// (<c>Waitlist/Hoppers</c>).
+    /// (<c>Waitlist/hopper</c>).
     /// </summary>
     /// <remarks>
     /// The hopper pictures are keyed by the <b>size word</b> rather than by a part number, because what they
     /// picture is the size a person chose and not a part: <c>Small</c>, <c>Medium</c> and <c>Large</c>, one file
     /// each (D22, FR-077, FR-078). That is why they sit in a folder of their own instead of under one of the
     /// part-number family folders, and why the scope below is deliberately not one of the part scopes.
+    /// The spelling matches <see cref="AppStoragePaths.HopperFolderDefault"/>, which is the folder the artwork
+    /// already lives in on the share.
     /// </remarks>
-    public const string HoppersFolder = "Hoppers";
+    public const string HoppersFolder = "hopper";
 
     /// <summary>
     /// The file-name stem of each hopper picture, in the order the size choices are offered. The stem is the
@@ -149,7 +151,7 @@ public static class PartPictureLayout
             return WipCollection;
         }
 
-        // A hopper size's picture lives in the application's own collection, in the `Hoppers` folder. It is not a
+        // A hopper size's picture lives in the application's own collection, in the `hopper` folder. It is not a
         // part, so it is answered before the part-family rules below rather than by them.
         if (IsHopperSizeScope(normalized))
         {
@@ -265,7 +267,7 @@ public static class PartPictureLayout
             return null;
         }
 
-        // A hopper size is filed by its size word in the `Hoppers` folder, never by a part-number family: there is
+        // A hopper size is filed by its size word in the `hopper` folder, never by a part-number family: there is
         // no part here to derive a family from, and "Large" must not be filed under the catch-all as if it were an
         // unrecognised part (D22, FR-078).
         if (IsHopperSizeScope(scope))
@@ -324,7 +326,7 @@ public static class PartPictureLayout
     /// </summary>
     /// <param name="size">The size word.</param>
     /// <returns>
-    /// The relative path, for example <c>Waitlist/Hoppers/Large.png</c>, or <see langword="null"/> when the value
+    /// The relative path, for example <c>Waitlist/hopper/Large.png</c>, or <see langword="null"/> when the value
     /// is not one of the three sizes.
     /// </returns>
     public static string? HopperPictureRelativePath(string? size)

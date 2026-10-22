@@ -122,11 +122,11 @@ public partial class ShellViewModel : ObservableRecipient
 
     /// <summary>Label text reflecting the current filter: "Local Work Centers" when filtering, else "All Requests".</summary>
     public string LocalWorkCentersFilterLabel => (ShowLocalWorkCentersOnly
-        ? "Shell_LocalWorkCentersFilter.On.Label"
-        : "Shell_LocalWorkCentersFilter.Off.Label").GetLocalized();
+        ? "Shell_LocalWorkCentersFilter_On.Label"
+        : "Shell_LocalWorkCentersFilter_Off.Label").GetLocalized();
 
     /// <summary>The switch's accessible name, so it says what it narrows rather than what it is.</summary>
-    public string LocalWorkCentersFilterAutomationName => "Shell_LocalWorkCentersFilter.AutomationProperties.Name".GetLocalized();
+    public string LocalWorkCentersFilterAutomationName => "Shell_LocalWorkCentersFilter_AutomationProperties.Name".GetLocalized();
 
     partial void OnShowLocalWorkCentersOnlyChanged(bool value) => OnPropertyChanged(nameof(LocalWorkCentersFilterLabel));
 

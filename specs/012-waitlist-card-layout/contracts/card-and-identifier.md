@@ -61,8 +61,10 @@ The status word, its precedence and the three column themes are pinned in
 An inner grid of three rows and two columns (FR-024). Row 1 always spans both columns and holds **the category word
 and the request's own identifier** (FR-007). The detail cells occupy rows 2 and 3.
 
-The cells a card shows are determined by the request's Item and are never chosen per row (FR-025). Every cell is a
-label on top with its value beneath, apart from the label-less die-shop cell (FR-028).
+The cells a card shows are determined by the request's Item and are never chosen per row (FR-025). Every cell reads
+`Label: value` on one line — the label small, secondary and semibold, the value a step larger, semibold and in the
+primary text colour, with a real gap between them and the pair starting from the cell's left edge — apart from the
+label-less die-shop cell (FR-028).
 
 **Geometry by the number of cells the Item declares** (FR-026, FR-027):
 

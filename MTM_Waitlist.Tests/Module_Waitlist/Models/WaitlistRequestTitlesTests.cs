@@ -298,6 +298,55 @@ public sealed class WaitlistRequestTitlesTests
         Assert.AreEqual("Steel Offal", result.Text);
     }
 
+    [TestMethod]
+    public void Model_WaitlistRequestTitlesTests_ResolveMaterialPartNumber_ComponentRequestsAreAboutTheComponentTheOperatorChose()
+    {
+        // The component Items name the component on their second line, so the part the card pictures and the part
+        // it names have to be that same component. Reading the job's own part number here pictured one part and
+        // named another, which left the Deliver Component card drawing the no-image placeholder while its own
+        // identifier read a part that has a picture (FR-019).
+        foreach (var itemId in new[] { "pickup-component", "deliver-component" })
+        {
+            var request = new WaitlistRequest { Item = itemId, InputValue = "A0006376159-Blank" };
+
+            var part = WaitlistRequestTitles.ResolveMaterialPartNumber(request, ComponentJob());
+
+            Assert.AreEqual("A0006376159-Blank", part, $"'{itemId}' is about the component the operator chose.");
+        }
+    }
+
+    [TestMethod]
+    public void Model_WaitlistRequestTitlesTests_ResolveMaterialPartNumber_AComponentRequestThatChoseNothingNamesNoPart()
+    {
+        var request = new WaitlistRequest { Item = "deliver-component", InputValue = "   " };
+
+        var part = WaitlistRequestTitles.ResolveMaterialPartNumber(request, ComponentJob());
+
+        Assert.IsNull(part, "No answer is not a part: the card draws the shared placeholder rather than a guess.");
+    }
+
+    [TestMethod]
+    public void Model_WaitlistRequestTitlesTests_ResolveMaterialPartNumber_AnItemWithNoRequestInHandStillNamesTheJobPart()
+    {
+        // The confirmation step asks before a request exists, so the Item-and-job overload has to keep answering
+        // for the Items whose part comes from the job.
+        var item = Find("pickup-wip");
+
+        var part = WaitlistRequestTitles.ResolveMaterialPartNumber(item, ComponentJob());
+
+        Assert.AreEqual("PART-9004", part, "An Item whose identifier names no captured answer still names the job's part.");
+    }
+
+    [TestMethod]
+    public void Model_WaitlistRequestTitlesTests_ResolveMaterialPartNumber_JobPartRequestsKeepNamingTheJobPart()
+    {
+        var request = new WaitlistRequest { Item = "pickup-wip", InputValue = "IGNORED-ANSWER" };
+
+        var part = WaitlistRequestTitles.ResolveMaterialPartNumber(request, ComponentJob());
+
+        Assert.AreEqual("PART-9004", part, "An Item whose identifier names no component still names the job's own part.");
+    }
+
     /// <summary>A job carrying a die, as the composition root maps it onto the wizard's snapshot.</summary>
     private static RequestJobPartAvailability DieJob() => RequestJobPartAvailability.None with
     {

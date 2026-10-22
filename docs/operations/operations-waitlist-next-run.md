@@ -337,8 +337,9 @@ credential the store refuses leaves the app sitting on the sign-in stage, which 
 
 T079's first item is the one that was missing a mechanism until T097 built it, so it is the item to watch: the hopper
 `Size` cell must enlarge its size's reference picture the way the card's other pictures do. The pictures live in the
-`Waitlist\Hoppers` folder under the configured picture folder, one file per size word (`Small.png`, `Medium.png`,
-`Large.png`); the folder is a setting on **Settings → Storage Paths** and the naming contract is
+`Waitlist\hopper` folder under the picture root, one file per size word (`Small.png`, `Medium.png`,
+`Large.png`); the folder is a setting on **Settings → Storage Paths** with a **Browse** button beside it, its shipped
+default is the share's own `...\Images\Waitlist\hopper` path, and the naming contract is
 `docs/guides/guides-pictures-image-naming.md`. If a size's picture is absent the shared placeholder must draw — that is FR-080, not a defect.
 
 Tick each task **only** with the evidence in hand, and put the evidence in the task's own line — the file's own rule

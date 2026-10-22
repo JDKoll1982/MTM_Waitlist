@@ -93,16 +93,20 @@ draws the same one every time. `.webp`, `.bmp` and `.gif` are **not** accepted a
 These three names are lower-case here and are compared case-insensitively, but keep the spelling above: the same
 folder name in two cases is two folders on the share.
 
-### 3.1 Hopper reference pictures — `Waitlist\Hoppers`
+### 3.1 Hopper reference pictures — `Waitlist\hopper`
 
 The hopper size pictures are the one group keyed by **something other than a part number**: they picture the size
 a person chose, so they are named after the size word.
 
 ```
-<picture folder>\Waitlist\Hoppers\Small.png
-<picture folder>\Waitlist\Hoppers\Medium.png
-<picture folder>\Waitlist\Hoppers\Large.png
+<picture root>\Waitlist\hopper\Small.png
+<picture root>\Waitlist\hopper\Medium.png
+<picture root>\Waitlist\hopper\Large.png
 ```
+
+On this site the picture root is `\\mtmanu-fs01\Expo Drive\MH_RESOURCE\Material_Handler\MTM Applications\MTM Waitlist
+Application\Images` (reached as `X:\MH_RESOURCE\...\Images` on a machine that maps `X:`), so the three files sit at
+`X:\MH_RESOURCE\Material_Handler\MTM Applications\MTM Waitlist Application\Images\Waitlist\hopper`.
 
 Rules specific to this folder:
 
@@ -110,9 +114,11 @@ Rules specific to this folder:
   `.png` extension. These three words are the size answers the New Request wizard records, and the same words are
   what the card resolves, so a file named `MEDIUM.png`, `Medium Hopper.png` or `Med.png` is never found.
 - **The extension is `.png`.** The part-picture rule above accepts three extensions; this folder expects `.png`.
-- The folder is **configurable** on Settings → Storage Paths, under *Hopper picture folder*. Its default is the
-  relative path `Waitlist\Hoppers`, read beneath the picture folder. An absolute path is used as given, and the
-  picture folder is then not consulted. Do not leave it blank — the panel refuses an empty value.
+- The folder is **configurable** on Settings → Storage Paths, under *Hopper picture folder*, and the box has a
+  **Browse** button that opens a folder dialog at whatever the box currently holds. Its shipped default is the
+  share's own `...\Images\Waitlist\hopper` path, written in full rather than relative to the picture folder, so a
+  machine that has never opened the panel still draws the size pictures. A relative path is still read beneath the
+  picture folder, and an absolute path is used as given. Do not leave it blank — the panel refuses an empty value.
 - If a size's picture is missing or unusable, the card and the wizard draw the shared placeholder rather than a
   blank. Nothing is substituted, and nothing is logged as a fault.
 - These pictures are held to the picture rules in §5, like every other picture.

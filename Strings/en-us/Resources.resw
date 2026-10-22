@@ -1199,6 +1199,9 @@
   <data name="PartStock_Dialog.NoStock" xml:space="preserve">
     <value>No stock is recorded for this part.</value>
   </data>
+  <data name="PartStock_Dialog.NoLocations" xml:space="preserve">
+    <value>This part's stock is not held in any location this lookup can show.</value>
+  </data>
   <data name="PartStock_Dialog.Unavailable" xml:space="preserve">
     <value>The stock for this part could not be read right now.</value>
   </data>
@@ -2383,6 +2386,12 @@
   </data>
   <data name="Settings_StoragePaths_HopperFolder.Hint" xml:space="preserve">
     <value>The three hopper size pictures live here, one file per size named after it: Small.png, Medium.png and Large.png. A relative path is read under the picture folder.</value>
+  </data>
+  <data name="Settings_StoragePaths_HopperFolderBrowse.Text" xml:space="preserve">
+    <value>Browse…</value>
+  </data>
+  <data name="Settings_StoragePaths_HopperFolderBrowse.Name" xml:space="preserve">
+    <value>Browse for the hopper picture folder</value>
   </data>
   <data name="Settings_StoragePaths_HopperFolderNeeded.Text" xml:space="preserve">
     <value>A hopper picture folder is needed before this can be saved.</value>

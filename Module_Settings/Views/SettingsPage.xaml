@@ -280,11 +280,24 @@
                             Description="{x:Bind ViewModel.StoragePathsHopperFolderHint}"
                             Header="{x:Bind ViewModel.StoragePathsHopperFolderLabel}"
                             HorizontalContentAlignment="Stretch">
-                            <TextBox
-                                AutomationProperties.AutomationId="SettingsPage_StoragePaths_HopperFolderBox"
-                                AutomationProperties.Name="{x:Bind ViewModel.StoragePathsHopperFolderLabel}"
-                                MinWidth="420"
-                                Text="{x:Bind ViewModel.HopperFolderInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox
+                                    AutomationProperties.AutomationId="SettingsPage_StoragePaths_HopperFolderBox"
+                                    AutomationProperties.Name="{x:Bind ViewModel.StoragePathsHopperFolderLabel}"
+                                    MinWidth="420"
+                                    Text="{x:Bind ViewModel.HopperFolderInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                <Button
+                                    AutomationProperties.AutomationId="SettingsPage_StoragePaths_HopperFolderBrowseButton"
+                                    AutomationProperties.Name="{x:Bind ViewModel.StoragePathsHopperFolderBrowseName}"
+                                    Grid.Column="1"
+                                    MinWidth="100"
+                                    Command="{x:Bind ViewModel.BrowseHopperFolderCommand}"
+                                    Content="{x:Bind ViewModel.StoragePathsHopperFolderBrowseLabel}" />
+                            </Grid>
                         </wct:SettingsCard>
 
                         <wct:SettingsCard Header="{x:Bind ViewModel.StoragePathsArchiveKeepDaysLabel}">

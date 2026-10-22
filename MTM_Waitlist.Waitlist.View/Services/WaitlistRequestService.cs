@@ -1039,7 +1039,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         };
     }
 
-    public async Task<WaitlistRequestSubmitResult> SubmitAsync(WaitlistRequestDraft draft, bool allowDuplicate, CancellationToken cancellationToken = default)
+    public async Task<WaitlistRequestSubmitResult> SubmitAsync(WaitlistRequestDraft draft, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -1075,9 +1075,11 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             && string.Equals(request.Item, resolvedItem, StringComparison.OrdinalIgnoreCase)
             && string.Equals(request.InputValue ?? string.Empty, normalizedDraftInput ?? string.Empty, StringComparison.OrdinalIgnoreCase));
 
-        if (duplicate is not null && !allowDuplicate)
+        // A duplicate is refused outright: there is no override path, because two active requests for the same
+        // work centre, item and answer are two jobs the floor would have to do twice for one need.
+        if (duplicate is not null)
         {
-            AppLog.Info("WaitlistRequest", $"Duplicate request detected. Building='{draft.Building}', WorkCenter='{draft.WorkCenter}', Category='{draft.Category}', Item='{resolvedItem}'.");
+            AppLog.Info("WaitlistRequest", $"Duplicate request refused. Building='{draft.Building}', WorkCenter='{draft.WorkCenter}', Category='{draft.Category}', Item='{resolvedItem}'.");
             return WaitlistRequestSubmitResult.DuplicateWarning(duplicate);
         }
 

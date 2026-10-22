@@ -178,7 +178,7 @@ public sealed class WaitlistViewDetailBlockStateTests
 
         public virtual Task<int> RefreshFromDatabaseAsync(string? building = null, CancellationToken cancellationToken = default) => Task.FromResult(0);
 
-        public virtual Task<WaitlistRequestSubmitResult> SubmitAsync(WaitlistRequestDraft draft, bool allowDuplicate, CancellationToken cancellationToken = default)
+        public virtual Task<WaitlistRequestSubmitResult> SubmitAsync(WaitlistRequestDraft draft, CancellationToken cancellationToken = default)
             => throw new NotSupportedException();
 
         public virtual Task<bool> TransitionStatusAsync(Guid requestId, string status, string? cancellationReason = null, string? canceledByEmployeeNumber = null, CancellationToken cancellationToken = default)

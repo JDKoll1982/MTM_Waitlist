@@ -33,7 +33,8 @@ public sealed class NewRequestResultNavigationData
 /// Terminal step of the New Request wizard. Replaces the duplicate-warning, submission
 /// complete, and submission failure <c>ContentDialog</c>s that lived in
 /// <c>WaitlistViewPage</c>: it renders the outcome and offers the matching actions
-/// (Continue for a duplicate, Retry for a failure, Return/Add Another for success).
+/// (Return for a refused duplicate, Retry for a failure, Return/Add Another for success).
+/// A refused duplicate offers no way to raise it anyway.
 /// </summary>
 public partial class NewRequestResultViewModel : ObservableRecipient, INavigationAware
 {
@@ -131,18 +132,12 @@ public partial class NewRequestResultViewModel : ObservableRecipient, INavigatio
     }
 
     [RelayCommand]
-    private async Task ContinueDuplicateAsync()
-    {
-        await ResubmitAsync(allowDuplicate: true).ConfigureAwait(true);
-    }
-
-    [RelayCommand]
     private async Task RetryAsync()
     {
-        await ResubmitAsync(allowDuplicate: false).ConfigureAwait(true);
+        await ResubmitAsync().ConfigureAwait(true);
     }
 
-    private async Task ResubmitAsync(bool allowDuplicate)
+    private async Task ResubmitAsync()
     {
         if (_state is null)
         {
@@ -152,7 +147,7 @@ public partial class NewRequestResultViewModel : ObservableRecipient, INavigatio
         IsBusy = true;
         try
         {
-            var result = await _requestService.SubmitAsync(_state.ToDraft(), allowDuplicate).ConfigureAwait(true);
+            var result = await _requestService.SubmitAsync(_state.ToDraft()).ConfigureAwait(true);
             if (result.Status == WaitlistRequestSubmitStatus.Success)
             {
                 ApplyPhase(NewRequestResultPhase.Success, result.Message);

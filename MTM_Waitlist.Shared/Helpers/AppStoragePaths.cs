@@ -43,6 +43,20 @@ public static class AppStoragePaths
     public const string DunnageRootDefault =
         @"\\mtmanu-fs01\Expo Drive\Software Development\Live Applications\Shared\Images\Dunnage";
 
+    /// <summary>
+    /// The folder holding the three hopper reference pictures, one file per size word
+    /// (<c>Small.png</c>, <c>Medium.png</c>, <c>Large.png</c>).
+    /// </summary>
+    /// <remarks>
+    /// Written as the share's own name and in full rather than as a path relative to
+    /// <see cref="ImagesRootDefault"/>, because it is the one picture folder the plant names without asking: the
+    /// artwork was already on the share under <c>Images\Waitlist\hopper</c> before this application had a box for
+    /// it, so the shipped default points straight at it and a machine that has never opened the storage panel still
+    /// draws the size pictures. A drive letter would not do that — <c>X:</c> is only meaningful on a machine that
+    /// has the mapping.
+    /// </remarks>
+    public const string HopperFolderDefault = ImagesRootDefault + @"\Waitlist\hopper";
+
     /// <summary>The sub-folder beside the pictures that a replaced picture is archived into.</summary>
     public const string ArchiveFolderName = "Archive";
 

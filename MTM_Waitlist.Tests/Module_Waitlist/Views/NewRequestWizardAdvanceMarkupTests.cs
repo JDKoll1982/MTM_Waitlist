@@ -81,6 +81,20 @@ public sealed class NewRequestWizardAdvanceMarkupTests
             "The listed answer needs its click handler wired: picking one is the way out of this step.");
     }
 
+    /// <summary>
+    /// The result step's duplicate face offers no way to raise the request the guard just refused: the refusal is
+    /// the end of that request, not a question with a second, permissive answer.
+    /// </summary>
+    [TestMethod]
+    public void UI_NewRequestWizardAdvanceMarkupTests_ResultStep_OffersNoWayToRaiseARefusedDuplicate()
+    {
+        var markup = ReadMarkup("NewRequestResultPage.xaml");
+
+        Assert.IsFalse(
+            markup.Contains("ContinueDuplicate", StringComparison.Ordinal),
+            "The result page must not offer an action that raises a request the duplicate guard refused.");
+    }
+
     private static string ReadMarkup(string fileName)
     {
         var path = Path.Combine(RepositoryPatternScan.FindRepositoryRoot(), "Module_Waitlist", "Views", fileName);

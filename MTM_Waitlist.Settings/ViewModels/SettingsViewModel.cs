@@ -123,6 +123,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     private readonly IImageCacheSyncService? _imageCacheSyncService;
     private readonly IPictureEnlargePreference? _pictureEnlargePreference;
     private readonly ILogStoreLevelService? _logStoreLevelService;
+    private readonly IFolderBrowserService? _folderBrowserService;
 
     // Suppresses the OnNewRequestAlertsEnabledChanged side effect while the initial value is loaded in the
     // constructor, so opening the page does not log a misleading "changed" or re-persist.
@@ -880,6 +881,17 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     /// </summary>
     public string StoragePathsHopperFolderHint => "Settings_StoragePaths_HopperFolder.Hint".GetLocalized();
 
+    /// <summary>The label on the button that opens a folder dialog beside the hopper-picture-folder box.</summary>
+    public string StoragePathsHopperFolderBrowseLabel =>
+        "Settings_StoragePaths_HopperFolderBrowse.Text".GetLocalized();
+
+    /// <summary>
+    /// What a screen reader announces for that button, which names the box it fills rather than repeating the
+    /// button's own word.
+    /// </summary>
+    public string StoragePathsHopperFolderBrowseName =>
+        "Settings_StoragePaths_HopperFolderBrowse.Name".GetLocalized();
+
     /// <summary>The label on the retention-period box.</summary>
     public string StoragePathsArchiveKeepDaysLabel => "Settings_StoragePaths_ArchiveKeepDays.Label".GetLocalized();
 
@@ -970,7 +982,8 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         IConfigSettingsValueService? configSettingsValueService = null,
         IImageCacheSyncService? imageCacheSyncService = null,
         IPictureEnlargePreference? pictureEnlargePreference = null,
-        ILogStoreLevelService? logStoreLevelService = null)
+        ILogStoreLevelService? logStoreLevelService = null,
+        IFolderBrowserService? folderBrowserService = null)
     {
         AppLog.Info("SettingsViewModel", "Constructor started.");
         _themeSelectorService = themeSelectorService;
@@ -991,6 +1004,10 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         _imageCacheSyncService = imageCacheSyncService;
         _pictureEnlargePreference = pictureEnlargePreference;
         _logStoreLevelService = logStoreLevelService;
+
+        // Optional for the same reason as the resolver: a host with no folder dialog still opens this screen. The
+        // box is then typed into and the Browse button does nothing, which is what a missing dialog amounts to.
+        _folderBrowserService = folderBrowserService;
         ComputerManagement = computerManagement;
         UrgencyAllotments = urgencyAllotments;
 
@@ -1991,6 +2008,43 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         finally
         {
             IsPictureCacheBusy = false;
+        }
+    }
+
+    /// <summary>
+    /// Opens the folder dialog at the hopper picture folder and puts the folder the person chose in the box.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The dialog starts at what the box already holds, and at the shipped share folder when the box is empty, so
+    /// picking a sub-folder of the artwork starts where the artwork is rather than wherever the last dialog was
+    /// left.
+    /// </para>
+    /// <para>
+    /// A closed dialog, a dialog that could not be shown and a host with no dialog all leave the box exactly as it
+    /// was: choosing nothing is an ordinary answer, and a typed path must not be lost because a mapped drive was
+    /// not available. Nothing is stored here — the Save button beside the box still decides that (FR-078).
+    /// </para>
+    /// </remarks>
+    [RelayCommand]
+    private async Task BrowseHopperFolderAsync()
+    {
+        if (_folderBrowserService is null)
+        {
+            return;
+        }
+
+        var startingFolder = string.IsNullOrWhiteSpace(HopperFolderInput)
+            ? ConfigSettingKeys.ImageStorageHopperFolderPathDefault
+            : HopperFolderInput.Trim();
+
+        var chosen = await _folderBrowserService
+            .PickFolderAsync(startingFolder, CancellationToken.None)
+            .ConfigureAwait(true);
+
+        if (!string.IsNullOrWhiteSpace(chosen))
+        {
+            HopperFolderInput = chosen;
         }
     }
 

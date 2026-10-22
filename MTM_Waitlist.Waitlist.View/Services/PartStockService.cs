@@ -1,6 +1,5 @@
 using MTM_Waitlist.Mock.Contracts;
 using MTM_Waitlist.Mock.Models;
-using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
@@ -32,32 +31,33 @@ public sealed class WipPartStockReader : IWipPartStockReader
 /// A part belongs to the WIP Application when its floor holds stock of it; every other part is read from Infor
 /// Visual, whose locations come through the same fallback the detail page uses (shape 4) and whose total is the
 /// part-wide warehouse quantity (shape 7). A Visual answer says whether it was served live or from the mirror.
+/// <para>
+/// <b>No location is hidden from this answer.</b> The window asks where the material is held, and it draws those
+/// rows beside the part-wide total the card already reports, so the two must agree: the plant's ignored-locations
+/// set belongs to the detail page's inventory grid, and applying it here emptied the list for every part held
+/// only in one of those locations while the total beside it stayed at 2,885.
+/// </para>
 /// </remarks>
 public sealed class PartStockService : IPartStockService
 {
     private readonly IWipPartStockReader _wipReader;
-    private readonly IIgnoredLocationsService _ignoredLocationsService;
     private readonly IVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow> _locationsFallback;
     private readonly IVisualReadFallback<VisualPartWarehouseQuantitiesRequest, VisualPartWarehouseQuantitiesRow> _quantitiesFallback;
 
     /// <summary>Creates the service.</summary>
     /// <param name="wipReader">The WIP floor's per-location read.</param>
-    /// <param name="ignoredLocationsService">The shared ignored-locations set, applied to Visual rows.</param>
     /// <param name="locationsFallback">Visual shape 4, inventory locations.</param>
     /// <param name="quantitiesFallback">Visual shape 7, part warehouse quantities.</param>
     public PartStockService(
         IWipPartStockReader wipReader,
-        IIgnoredLocationsService ignoredLocationsService,
         IVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow> locationsFallback,
         IVisualReadFallback<VisualPartWarehouseQuantitiesRequest, VisualPartWarehouseQuantitiesRow> quantitiesFallback)
     {
         ArgumentNullException.ThrowIfNull(wipReader);
-        ArgumentNullException.ThrowIfNull(ignoredLocationsService);
         ArgumentNullException.ThrowIfNull(locationsFallback);
         ArgumentNullException.ThrowIfNull(quantitiesFallback);
 
         _wipReader = wipReader;
-        _ignoredLocationsService = ignoredLocationsService;
         _locationsFallback = locationsFallback;
         _quantitiesFallback = quantitiesFallback;
     }
@@ -103,15 +103,13 @@ public sealed class PartStockService : IPartStockService
             .ReadWithProvenanceAsync(new VisualInventoryLocationRequest(part), cancellationToken)
             .ConfigureAwait(false);
 
-        var ignored = await _ignoredLocationsService.GetIgnoredLocationsAsync(cancellationToken).ConfigureAwait(false);
-        var rows = InventoryLocationFiltering.Apply(
+        var rows = InventoryLocationFiltering.HoldingLocations(
             read.Value.Select(row => new InventoryLocationRow
             {
                 PartNumber = row.PartNumber,
                 Location = row.Location,
                 OnHandQuantity = row.OnHandQuantity,
-            }),
-            ignored);
+            }));
 
         var locations = rows.Select(row => new PartStockLocation(row.Location, row.OnHandQuantity)).ToArray();
         var total = await ReadVisualTotalAsync(part, locations, cancellationToken).ConfigureAwait(false);

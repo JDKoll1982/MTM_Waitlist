@@ -125,6 +125,25 @@ internal sealed class FakeImageStorageConfigurationResolver : IImageStorageConfi
     }
 }
 
+internal sealed class FakeFolderBrowserService : IFolderBrowserService
+{
+    /// <summary>What the dialog answers; <c>null</c> is a dialog closed without a choice.</summary>
+    public string? ChosenFolder { get; set; }
+
+    /// <summary>The folder the dialog was asked to open at, which is what the box already held.</summary>
+    public string? LastStartingFolder { get; private set; }
+
+    public int PickCallCount { get; private set; }
+
+    public Task<string?> PickFolderAsync(string? startingFolder, CancellationToken cancellationToken)
+    {
+        PickCallCount++;
+        LastStartingFolder = startingFolder;
+
+        return Task.FromResult(ChosenFolder);
+    }
+}
+
 internal sealed class FakeImageOverrideReadService : IImageOverrideReadService
 {
     private readonly Dictionary<string, ImageOverride> _overrides = new(StringComparer.OrdinalIgnoreCase);

@@ -1,5 +1,7 @@
 namespace MTM_Waitlist.Module_Settings.Models;
 
+using MTM_Waitlist.Module_Shared.Helpers;
+
 /// <summary>
 /// Represents a configuration setting stored in config_settings_values table.
 /// Used for retrieving and managing overridable configuration values from the database.
@@ -124,16 +126,22 @@ public static class ConfigSettingKeys
     /// the value from appsettings.json. The naming contract for the files inside it is
     /// <c>docs/guides/guides-pictures-image-naming.md</c>.
     /// </para>
-    /// Default: <see cref="ImageStorageHopperFolderPathDefault"/> (<c>Waitlist\Hoppers</c> beneath the picture
-    /// folder).
+    /// Default: <see cref="ImageStorageHopperFolderPathDefault"/>
+    /// (<c>\\mtmanu-fs01\Expo Drive\MH_RESOURCE\…\Images\Waitlist\hopper</c>).
     /// </summary>
     public const string ImageStorageHopperFolderPath = "image_storage.hopper_folder_path";
 
     /// <summary>
-    /// The hopper picture folder this application ships with, relative to the picture folder, and the one place the
-    /// figure is written: the storage screen's box and the compiled fallback both read it from here.
+    /// The hopper picture folder this application ships with, given as the share's own path, and the one place the
+    /// figure is written: the storage screen's box, the folder dialog and the compiled fallback all read it from
+    /// here.
     /// </summary>
-    public const string ImageStorageHopperFolderPathDefault = @"Waitlist\Hoppers";
+    /// <remarks>
+    /// Absolute rather than relative to the picture folder: this is the folder the hopper artwork already lives in,
+    /// so a machine that has never been told otherwise still finds the three size pictures. The spelling of the
+    /// path itself belongs to <see cref="AppStoragePaths.HopperFolderDefault"/>.
+    /// </remarks>
+    public const string ImageStorageHopperFolderPathDefault = AppStoragePaths.HopperFolderDefault;
 
     /// <summary>
     /// The root the dunnage pictures sit under, one folder per dunnage type and part beneath it.

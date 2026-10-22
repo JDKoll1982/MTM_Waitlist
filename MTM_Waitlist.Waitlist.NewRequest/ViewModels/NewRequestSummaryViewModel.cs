@@ -218,7 +218,11 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
         IsStatusError = false;
         StatusMessage = string.Empty;
 
-        PartNumber = WaitlistRequestTitles.ResolveMaterialPartNumber(state.Item, state.Availability) ?? string.Empty;
+        // The same rule the waitlist card reads, asked with the request the step is about to raise: a component
+        // Item's part is the answer the operator gave, which only a request carries (FR-019, FR-035).
+        PartNumber = WaitlistRequestTitles.ResolveMaterialPartNumber(
+            new WaitlistRequest { Item = state.Item.Id, InputValue = state.InputValue },
+            state.Availability) ?? string.Empty;
         PartPicturePath = ImagePicturePolicy.NoImagePath;
         if (HasPart)
         {
@@ -368,7 +372,7 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
 
             foreach (var draft in drafts)
             {
-                result = await _requestService.SubmitAsync(draft, allowDuplicate: false).ConfigureAwait(true);
+                result = await _requestService.SubmitAsync(draft).ConfigureAwait(true);
                 if (result.Status != WaitlistRequestSubmitStatus.Success)
                 {
                     // A die that could not be raised stops the run rather than being skipped silently: the

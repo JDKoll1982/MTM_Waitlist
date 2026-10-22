@@ -24,7 +24,7 @@ public sealed class WaitlistRequestServiceTests
         var service = new WaitlistRequestService();
         var draft = CreateDraft();
 
-        var result = await service.SubmitAsync(draft, allowDuplicate: false);
+        var result = await service.SubmitAsync(draft);
 
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, result.Status);
         Assert.IsNotNull(result.Request);
@@ -40,7 +40,7 @@ public sealed class WaitlistRequestServiceTests
         var deadline = new UrgencyDeadlineService(new UrgencySettingsService(new FakeRequestItemAllottedMinutesStore()));
         var service = new WaitlistRequestService(null, null, deadline);
 
-        var result = await service.SubmitAsync(DeadlineLessDraft(), allowDuplicate: false);
+        var result = await service.SubmitAsync(DeadlineLessDraft());
 
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, result.Status);
         Assert.IsNotNull(result.Request!.TargetTimeUtc, "A deadline should be derived when the draft has none.");
@@ -56,7 +56,7 @@ public sealed class WaitlistRequestServiceTests
         var service = new WaitlistRequestService(null, null, deadline);
 
         // CreateDraft already carries an explicit TargetTimeUtc; it must be preserved, not overwritten.
-        var result = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var result = await service.SubmitAsync(CreateDraft());
 
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, result.Status);
         Assert.IsNotNull(result.Request!.TargetTimeUtc);
@@ -66,7 +66,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_UpdateNote_SetsNoteOnRequestAndRecordsAudit()
     {
         var service = new WaitlistRequestService();
-        var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submit = await service.SubmitAsync(CreateDraft());
         var id = submit.Request!.Id;
 
         var updated = await service.UpdateNoteAsync(id, "Forklift ordered for pickup");
@@ -81,7 +81,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_UpdateNote_EmptyClearsNote()
     {
         var service = new WaitlistRequestService();
-        var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submit = await service.SubmitAsync(CreateDraft());
         var id = submit.Request!.Id;
 
         await service.UpdateNoteAsync(id, "a note");
@@ -108,7 +108,7 @@ public sealed class WaitlistRequestServiceTests
         var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
         var service = new WaitlistRequestService(helper);
 
-        var result = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var result = await service.SubmitAsync(CreateDraft());
 
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, result.Status);
         Assert.IsNotNull(result.Request);
@@ -124,7 +124,7 @@ public sealed class WaitlistRequestServiceTests
         // caller that never drew the screen — or drew it from stale data — is still refused (FR-056, FR-117).
         var service = new WaitlistRequestService(permissionService: new RefusingPermissionService());
 
-        var submitted = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submitted = await service.SubmitAsync(CreateDraft());
         var requestId = submitted.Request!.Id;
 
         var result = await service.AcceptAsync(requestId, "9001", "Morgan Reyes");
@@ -137,18 +137,22 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public async Task Service_WaitlistRequestServiceTests_SubmitAsync_ReturnsDuplicateWarningThenAllowsOverrideAsync()
+    public async Task Service_WaitlistRequestServiceTests_SubmitAsync_RefusesADuplicateActiveRequestAsync()
     {
+        // A duplicate is refused outright: there is no accept path that raises it anyway. One active request per
+        // (building, work centre, item, answer) is the whole of the rule.
         var service = new WaitlistRequestService();
         var draft = CreateDraft();
 
-        await service.SubmitAsync(draft, allowDuplicate: false);
-        var warning = await service.SubmitAsync(draft, allowDuplicate: false);
-        var overrideResult = await service.SubmitAsync(draft, allowDuplicate: true);
+        var first = await service.SubmitAsync(draft);
+        var refused = await service.SubmitAsync(draft);
+        var refusedAgain = await service.SubmitAsync(draft);
 
-        Assert.AreEqual(WaitlistRequestSubmitStatus.DuplicateWarningRequired, warning.Status);
-        Assert.AreEqual(WaitlistRequestSubmitStatus.Success, overrideResult.Status);
-        Assert.AreEqual(2, service.GetActiveRequests("Expo Drive").Count);
+        Assert.AreEqual(WaitlistRequestSubmitStatus.Success, first.Status);
+        Assert.AreEqual(WaitlistRequestSubmitStatus.DuplicateWarningRequired, refused.Status);
+        Assert.AreEqual(WaitlistRequestSubmitStatus.DuplicateWarningRequired, refusedAgain.Status);
+        Assert.AreEqual(first.Request!.Id, refused.Request!.Id, "The refusal must name the active request it matched.");
+        Assert.AreEqual(1, service.GetActiveRequests("Expo Drive").Count, "No duplicate request may be raised.");
     }
 
     [TestMethod]
@@ -173,8 +177,8 @@ public sealed class WaitlistRequestServiceTests
             AssignedMaterialHandler = draft.AssignedMaterialHandler,
         };
 
-        var firstResult = await service.SubmitAsync(draft, allowDuplicate: false);
-        var secondResult = await service.SubmitAsync(differentDetailDraft, allowDuplicate: false);
+        var firstResult = await service.SubmitAsync(draft);
+        var secondResult = await service.SubmitAsync(differentDetailDraft);
 
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, firstResult.Status);
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, secondResult.Status);
@@ -186,7 +190,7 @@ public sealed class WaitlistRequestServiceTests
     {
         var service = new WaitlistRequestService();
 
-        var result = await service.SubmitAsync(new WaitlistRequestDraft(), allowDuplicate: false);
+        var result = await service.SubmitAsync(new WaitlistRequestDraft());
 
         Assert.AreEqual(WaitlistRequestSubmitStatus.ValidationFailure, result.Status);
         Assert.AreEqual(0, service.GetActiveRequests().Count);
@@ -202,7 +206,7 @@ public sealed class WaitlistRequestServiceTests
         var mySqlHelperServer = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>(), affectedRows: 0);
         var service = new WaitlistRequestService(mySqlHelperServer);
 
-        var result = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var result = await service.SubmitAsync(CreateDraft());
 
         Assert.AreEqual(WaitlistRequestSubmitStatus.PersistenceFailure, result.Status);
         Assert.AreEqual("Production waitlist persistence is not configured or failed. Re-check the helper-server route and database contract.", result.Message);
@@ -314,7 +318,7 @@ public sealed class WaitlistRequestServiceTests
         var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
         var service = new WaitlistRequestService(helper);
 
-        var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submit = await service.SubmitAsync(CreateDraft());
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, submit.Status);
         helper.NonQueryProcedures.Clear();
 
@@ -328,7 +332,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_AuditTrail_RecordsFromToStatusAcrossLifecycle()
     {
         var service = new WaitlistRequestService();
-        var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submit = await service.SubmitAsync(CreateDraft());
         var requestId = submit.Request!.Id;
 
         await service.TransitionStatusAsync(requestId, "Accepted");
@@ -350,7 +354,7 @@ public sealed class WaitlistRequestServiceTests
         var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
         var service = new WaitlistRequestService(helper);
 
-        var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submit = await service.SubmitAsync(CreateDraft());
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, submit.Status);
         helper.NonQueryProcedures.Clear();
 
@@ -440,7 +444,7 @@ public sealed class WaitlistRequestServiceTests
             CancellationReason = null,
         };
 
-        var result = await service.SubmitAsync(draft, allowDuplicate: false);
+        var result = await service.SubmitAsync(draft);
 
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, result.Status);
         Assert.IsNotNull(result.Request);
@@ -471,7 +475,7 @@ public sealed class WaitlistRequestServiceTests
             RequesterEmployeeName = "John Koll",
         };
 
-        var result = await service.SubmitAsync(draft, allowDuplicate: false);
+        var result = await service.SubmitAsync(draft);
 
         Assert.AreEqual(WaitlistRequestSubmitStatus.ValidationFailure, result.Status);
         Assert.AreEqual("A valid active setup job is required before submitting a waitlist request.", result.Message);
@@ -596,7 +600,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_GetMyRequests_FiltersToRequesterAcrossStatusesAndBuilding()
     {
         var service = new WaitlistRequestService();
-        var minePending = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var minePending = await service.SubmitAsync(CreateDraft());
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, minePending.Status);
 
         // Accept then submit a second of our own that we cancel, plus another requester's row.
@@ -613,8 +617,7 @@ public sealed class WaitlistRequestServiceTests
                 RequesterEmployeeNumber = "6229",
                 RequesterEmployeeName = "John Koll",
                 RequestedUtc = DateTimeOffset.UtcNow,
-            },
-            allowDuplicate: false);
+            });
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, mineCanceled.Status);
         await service.CancelOwnRequestAsync(mineCanceled.Request!.Id, "6229", "No longer needed");
 
@@ -630,8 +633,7 @@ public sealed class WaitlistRequestServiceTests
                 RequesterEmployeeNumber = "5000",
                 RequesterEmployeeName = "Other User",
                 RequestedUtc = DateTimeOffset.UtcNow,
-            },
-            allowDuplicate: false);
+            });
 
         var mine = service.GetMyRequests("6229", "Expo Drive");
         Assert.AreEqual(2, mine.Count);
@@ -645,7 +647,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_GetMyRequests_UnknownRequesterReturnsEmpty()
     {
         var service = new WaitlistRequestService();
-        await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        await service.SubmitAsync(CreateDraft());
 
         Assert.AreEqual(0, service.GetMyRequests("999999").Count);
     }
@@ -966,7 +968,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_TransitionStatusAsync_ChangesPendingToAcceptedCompletedAndCanceled()
     {
         var service = new WaitlistRequestService();
-        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submitResult = await service.SubmitAsync(CreateDraft());
         var request = submitResult.Request!;
 
         var accepted = await service.TransitionStatusAsync(request.Id, "Accepted");
@@ -989,7 +991,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_AcceptAsync_AssignsToHandlerAndMarksInProgress()
     {
         var service = new WaitlistRequestService();
-        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submitResult = await service.SubmitAsync(CreateDraft());
         var request = submitResult.Request!;
 
         var accepted = await service.AcceptAsync(request.Id, "9001", "Hana Handler");
@@ -1016,7 +1018,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_AcceptAsync_NamesTheHandlerOnTheCardRatherThanNumberingThem()
     {
         var service = new WaitlistRequestService();
-        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submitResult = await service.SubmitAsync(CreateDraft());
         var request = submitResult.Request!;
 
         var accepted = await service.AcceptAsync(request.Id, "6229", "John Koll");
@@ -1033,7 +1035,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_ReleaseAsync_ClearsTheHandlerNameWithTheHandler()
     {
         var service = new WaitlistRequestService();
-        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submitResult = await service.SubmitAsync(CreateDraft());
         var request = submitResult.Request!;
 
         await service.AcceptAsync(request.Id, "6229", "John Koll");
@@ -1052,7 +1054,7 @@ public sealed class WaitlistRequestServiceTests
         // it must not stay behind. Left set, the card kept reading that condition — and stayed themed for it — on a
         // job sitting in the open pool, instead of reading Waiting again.
         var service = new WaitlistRequestService();
-        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submitResult = await service.SubmitAsync(CreateDraft());
         var request = submitResult.Request!;
 
         await service.AcceptAsync(request.Id, "6229", "John Koll");
@@ -1089,7 +1091,7 @@ public sealed class WaitlistRequestServiceTests
         // losing handler believe they hold work they do not.
         var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
         var service = new WaitlistRequestService(helper);
-        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submitResult = await service.SubmitAsync(CreateDraft());
         var request = submitResult.Request!;
 
         // The first handler's accept landed; the row is no longer Pending, so the second accept affects nothing.
@@ -1127,7 +1129,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_AcceptAsync_NotAvailableReturnsNull()
     {
         var service = new WaitlistRequestService();
-        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submitResult = await service.SubmitAsync(CreateDraft());
         var request = submitResult.Request!;
 
         var accepted = await service.AcceptAsync(request.Id, "9001");
@@ -1141,7 +1143,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_CompleteAsync_OnlyAssignedHandlerCanComplete()
     {
         var service = new WaitlistRequestService();
-        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submitResult = await service.SubmitAsync(CreateDraft());
         var request = submitResult.Request!;
         await service.AcceptAsync(request.Id, "9001");
 
@@ -1160,7 +1162,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_ReleaseAsync_ReturnsToOpenListNotACancellation()
     {
         var service = new WaitlistRequestService();
-        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submitResult = await service.SubmitAsync(CreateDraft());
         var request = submitResult.Request!;
         await service.AcceptAsync(request.Id, "9001");
 
@@ -1192,7 +1194,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_ReleaseAsync_NonAssigneeReturnsNull()
     {
         var service = new WaitlistRequestService();
-        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submitResult = await service.SubmitAsync(CreateDraft());
         var request = submitResult.Request!;
         await service.AcceptAsync(request.Id, "9001");
 
@@ -1215,7 +1217,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_TransitionStatusAsync_SetsAcceptedAndCompletedTimestamps()
     {
         var service = new WaitlistRequestService();
-        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submitResult = await service.SubmitAsync(CreateDraft());
         var request = submitResult.Request!;
 
         var accepted = await service.TransitionStatusAsync(request.Id, "Accepted");
@@ -1255,7 +1257,7 @@ public sealed class WaitlistRequestServiceTests
             Note = "Handler follow-up note",
         };
 
-        var result = await service.SubmitAsync(draft, allowDuplicate: false);
+        var result = await service.SubmitAsync(draft);
 
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, result.Status, result.Message);
         Assert.IsNotNull(result.Request);
@@ -1266,7 +1268,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_TransitionStatusAsync_WhenCanceledRecordsCancellationMetadata()
     {
         var service = new WaitlistRequestService();
-        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submitResult = await service.SubmitAsync(CreateDraft());
         var request = submitResult.Request!;
 
         var accepted = await service.TransitionStatusAsync(request.Id, "Accepted");
@@ -1288,7 +1290,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_TransitionStatusAsync_WhenCanceledRecordsMaterialHandlerNotificationPayload()
     {
         var service = new WaitlistRequestService();
-        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submitResult = await service.SubmitAsync(CreateDraft());
         var request = submitResult.Request!;
 
         await service.TransitionStatusAsync(request.Id, "Accepted");
@@ -1310,7 +1312,7 @@ public sealed class WaitlistRequestServiceTests
         var changeCount = 0;
         service.RequestsChanged += (_, _) => changeCount++;
 
-        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submitResult = await service.SubmitAsync(CreateDraft());
         var request = submitResult.Request!;
 
         Assert.AreEqual(1, changeCount);
@@ -1323,7 +1325,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_GetAuditTrail_RecordsRequestCreationAndLifecycleTransitions()
     {
         var service = new WaitlistRequestService();
-        var submitResult = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submitResult = await service.SubmitAsync(CreateDraft());
         var request = submitResult.Request!;
 
         await service.TransitionStatusAsync(request.Id, "Accepted");
@@ -1343,7 +1345,7 @@ public sealed class WaitlistRequestServiceTests
         var requestService = new WaitlistRequestService();
         var viewModel = new WaitlistViewViewModel(new NoOpNavigationService(), buildingSelectionService, requestService);
 
-        await requestService.SubmitAsync(CreateDraft(), allowDuplicate: true);
+        await requestService.SubmitAsync(CreateDraft());
         var expoTask = InvokeLoad(viewModel, "Expo Drive");
         buildingSelectionService.SelectedBuilding = "VITS";
         var vitsTask = InvokeLoad(viewModel, "VITS");
@@ -1365,7 +1367,7 @@ public sealed class WaitlistRequestServiceTests
         // OnNavigatedTo; without this it never picks up the submitted request.
         viewModel.OnNavigatedTo(null!);
         await viewModel.RefreshAsync();
-        var submitResult = await requestService.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submitResult = await requestService.SubmitAsync(CreateDraft());
         await Task.Delay(50);
 
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, submitResult.Status);
@@ -1424,7 +1426,7 @@ public sealed class WaitlistRequestServiceTests
         viewModel.OnNavigatedTo(null!);
         await viewModel.RefreshAsync();
         var myDraft = CreateDraft();
-        var submitMine = await requestService.SubmitAsync(myDraft, allowDuplicate: false);
+        var submitMine = await requestService.SubmitAsync(myDraft);
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, submitMine.Status);
         var submitOther = await requestService.SubmitAsync(new WaitlistRequestDraft
         {
@@ -1436,7 +1438,7 @@ public sealed class WaitlistRequestServiceTests
             WorkCenterName = "Press 15",
             RequesterEmployeeNumber = "5000",
             RequesterEmployeeName = "Other User",
-        }, allowDuplicate: false);
+        });
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, submitOther.Status);
         await Task.Delay(50);
 
@@ -1456,7 +1458,7 @@ public sealed class WaitlistRequestServiceTests
     {
         var service = new WaitlistRequestService();
 
-        await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        await service.SubmitAsync(CreateDraft());
         service.Reset();
 
         Assert.AreEqual(0, service.GetActiveRequests().Count);
@@ -1466,7 +1468,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_CancelOwnRequestAsync_CreatorCancelsOwnWaitingRequestSucceedsAndRecordsCancelled()
     {
         var service = new WaitlistRequestService();
-        var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submit = await service.SubmitAsync(CreateDraft());
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, submit.Status);
 
         var result = await service.CancelOwnRequestAsync(submit.Request!.Id, "6229", "No longer needed");
@@ -1487,7 +1489,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_CancelOwnRequestAsync_NonCreatorIsDenied()
     {
         var service = new WaitlistRequestService();
-        var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submit = await service.SubmitAsync(CreateDraft());
 
         var result = await service.CancelOwnRequestAsync(submit.Request!.Id, "5000");
 
@@ -1499,7 +1501,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_CancelOwnRequestAsync_AfterAcceptIsDenied()
     {
         var service = new WaitlistRequestService();
-        var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submit = await service.SubmitAsync(CreateDraft());
         await service.TransitionStatusAsync(submit.Request!.Id, "Accepted");
 
         var result = await service.CancelOwnRequestAsync(submit.Request!.Id, "6229");
@@ -1524,7 +1526,7 @@ public sealed class WaitlistRequestServiceTests
         var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
         var service = new WaitlistRequestService(helper);
 
-        var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submit = await service.SubmitAsync(CreateDraft());
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, submit.Status);
         helper.NonQueryProcedures.Clear();
 
@@ -1541,7 +1543,7 @@ public sealed class WaitlistRequestServiceTests
     {
         var service = new WaitlistRequestService();
 
-        var mine = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var mine = await service.SubmitAsync(CreateDraft());
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, mine.Status);
         var other = await service.SubmitAsync(new WaitlistRequestDraft
         {
@@ -1553,7 +1555,7 @@ public sealed class WaitlistRequestServiceTests
             WorkCenterName = "Press 15",
             RequesterEmployeeNumber = "5000",
             RequesterEmployeeName = "Other User",
-        }, allowDuplicate: false);
+        });
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, other.Status);
 
         // My Requests narrows to the signed-in user only.
@@ -1577,7 +1579,7 @@ public sealed class WaitlistRequestServiceTests
     {
         var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
         var service = new WaitlistRequestService(helper);
-        var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submit = await service.SubmitAsync(CreateDraft());
         var request = submit.Request!;
 
         var rowsAffected = await service.SetHandlerStatusAsync(request.Id, "Product Buried", "M. Lewis");
@@ -1604,7 +1606,7 @@ public sealed class WaitlistRequestServiceTests
     {
         var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
         var service = new WaitlistRequestService(helper);
-        var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submit = await service.SubmitAsync(CreateDraft());
         var request = submit.Request!;
 
         var reported = await service.SetHandlerStatusAsync(request.Id, "Product Buried", "M. Lewis");
@@ -1630,7 +1632,7 @@ public sealed class WaitlistRequestServiceTests
         // losing caller is told by the count rather than shown a success it did not get (FR-076).
         var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
         var service = new WaitlistRequestService(helper);
-        var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submit = await service.SubmitAsync(CreateDraft());
         var request = submit.Request!;
         helper.AffectedRows = 0;
 
@@ -1651,7 +1653,7 @@ public sealed class WaitlistRequestServiceTests
     {
         var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
         var service = new WaitlistRequestService(helper);
-        var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submit = await service.SubmitAsync(CreateDraft());
         var request = submit.Request!;
         helper.NonQueryCalls.Clear();
 
@@ -1752,7 +1754,7 @@ public sealed class WaitlistRequestServiceTests
             },
         };
 
-        var submit = await service.SubmitAsync(draft, allowDuplicate: false);
+        var submit = await service.SubmitAsync(draft);
 
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, submit.Status);
         var insert = helper.NonQueryCalls.Last(call => call.Procedure == "sp_waitlist_request_insert");
@@ -1774,7 +1776,7 @@ public sealed class WaitlistRequestServiceTests
         var helper = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
         var service = new WaitlistRequestService(helper);
 
-        var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submit = await service.SubmitAsync(CreateDraft());
 
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, submit.Status);
         var insert = helper.NonQueryCalls.Last(call => call.Procedure == "sp_waitlist_request_insert");
@@ -1796,7 +1798,7 @@ public sealed class WaitlistRequestServiceTests
         var notifier = new FakeNewRequestAlertNotifier();
         var service = new WaitlistRequestService(null, notifier);
 
-        var submit = await service.SubmitAsync(CreateDraft(), allowDuplicate: false);
+        var submit = await service.SubmitAsync(CreateDraft());
 
         Assert.AreEqual(WaitlistRequestSubmitStatus.Success, submit.Status);
         Assert.IsNotNull(submit.Request);
@@ -1810,7 +1812,7 @@ public sealed class WaitlistRequestServiceTests
         var notifier = new FakeNewRequestAlertNotifier();
         var service = new WaitlistRequestService(null, notifier);
 
-        var submit = await service.SubmitAsync(new WaitlistRequestDraft(), allowDuplicate: false);
+        var submit = await service.SubmitAsync(new WaitlistRequestDraft());
 
         Assert.AreEqual(WaitlistRequestSubmitStatus.ValidationFailure, submit.Status);
         Assert.AreEqual(0, notifier.Notified.Count);

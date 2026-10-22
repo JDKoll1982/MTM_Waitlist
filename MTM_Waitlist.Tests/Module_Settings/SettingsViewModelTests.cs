@@ -769,7 +769,7 @@ public sealed class SettingsViewModelTests
 
         viewModel.PictureFolderInput = @"\\share\pictures";
         viewModel.DunnageRootInput = @"\\share\dunnage";
-        viewModel.HopperFolderInput = @"Waitlist\Hoppers";
+        viewModel.HopperFolderInput = ConfigSettingKeys.ImageStorageHopperFolderPathDefault;
         viewModel.ArchiveKeepDaysInput = 90;
         viewModel.SaveStoragePathsCommand.Execute(null);
 
@@ -780,7 +780,7 @@ public sealed class SettingsViewModelTests
             saved[ConfigSettingKeys.DunnageRootPath].SettingValue,
             "the dunnage root is held once for the plant, like the picture folder beside it (FR-040)");
         Assert.AreEqual(
-            @"Waitlist\Hoppers",
+            ConfigSettingKeys.ImageStorageHopperFolderPathDefault,
             saved[ConfigSettingKeys.ImageStorageHopperFolderPath].SettingValue,
             "the hopper picture folder is held once for the plant, so the card and the wizard read the same artwork (FR-078)");
         Assert.AreEqual(90L, saved[ConfigSettingKeys.ImageStorageArchiveKeepDays].SettingValueInt);
@@ -818,6 +818,80 @@ public sealed class SettingsViewModelTests
             "Settings_StoragePaths_HopperFolderNeeded.Text",
             viewModel.StoragePathsStatusMessage,
             "The refusal does not name the hopper folder, so the person has to guess which box is at fault (FR-078).");
+    }
+
+    /// <summary>
+    /// The folder dialog beside the hopper box opens at the folder the box already names, so the person starts on
+    /// the artwork rather than wherever the last dialog was left.
+    /// </summary>
+    [TestMethod]
+    public void ViewModel_SettingsViewModelTests_TheHopperFolderDialogStartsAtTheFolderTheBoxNames()
+    {
+        var resolver = new FakeImageStorageConfigurationResolver
+        {
+            HopperFolderPath = @"\\mtmanu-fs01\Expo Drive\MH_RESOURCE\Images\Waitlist\hopper",
+        };
+        var browser = new FakeFolderBrowserService();
+
+        var viewModel = BuildViewModel(
+            new InMemoryScopedPreferenceStore(),
+            [PermissionKeys.SettingsStoragePaths],
+            imageStorageConfigurationResolver: resolver,
+            folderBrowserService: browser);
+
+        viewModel.HopperFolderInput = resolver.HopperFolderPath;
+        viewModel.BrowseHopperFolderCommand.ExecuteAsync(null).GetAwaiter().GetResult();
+
+        Assert.AreEqual(
+            resolver.HopperFolderPath,
+            browser.LastStartingFolder,
+            "The dialog must open where the box points, which is how a share is browsed at all.");
+    }
+
+    /// <summary>
+    /// The folder a person picks is put in the box and nothing is stored until Save is chosen.
+    /// </summary>
+    [TestMethod]
+    public void ViewModel_SettingsViewModelTests_TheChosenHopperFolderGoesInTheBoxAndIsNotStored()
+    {
+        var configuration = new FakeConfigSettingsValueService();
+        var browser = new FakeFolderBrowserService { ChosenFolder = @"\\share\hopper2" };
+
+        var viewModel = BuildViewModel(
+            new InMemoryScopedPreferenceStore(),
+            [PermissionKeys.SettingsStoragePaths],
+            configSettingsValueService: configuration,
+            imageStorageConfigurationResolver: new FakeImageStorageConfigurationResolver(),
+            folderBrowserService: browser);
+
+        viewModel.BrowseHopperFolderCommand.ExecuteAsync(null).GetAwaiter().GetResult();
+
+        Assert.AreEqual(@"\\share\hopper2", viewModel.HopperFolderInput);
+        Assert.AreEqual(0, configuration.SavedValues.Count, "Choosing a folder is not saving it.");
+    }
+
+    /// <summary>
+    /// A dialog closed without a choice leaves the box exactly as it was.
+    /// </summary>
+    /// <remarks>
+    /// Closing the dialog is an ordinary answer meaning "leave what I typed alone": clearing the box on it would
+    /// lose a path because a network drive was not mapped.
+    /// </remarks>
+    [TestMethod]
+    public void ViewModel_SettingsViewModelTests_AClosedHopperFolderDialogLeavesTheBoxAlone()
+    {
+        var browser = new FakeFolderBrowserService { ChosenFolder = null };
+
+        var viewModel = BuildViewModel(
+            new InMemoryScopedPreferenceStore(),
+            [PermissionKeys.SettingsStoragePaths],
+            imageStorageConfigurationResolver: new FakeImageStorageConfigurationResolver(),
+            folderBrowserService: browser);
+
+        viewModel.HopperFolderInput = @"\\share\typed";
+        viewModel.BrowseHopperFolderCommand.ExecuteAsync(null).GetAwaiter().GetResult();
+
+        Assert.AreEqual(@"\\share\typed", viewModel.HopperFolderInput);
     }
 
     /// <summary>
@@ -917,16 +991,18 @@ public sealed class SettingsViewModelTests
         IImageStorageConfigurationResolver? imageStorageConfigurationResolver = null,
         IConfigSettingsValueService? configSettingsValueService = null,
         IImageCacheSyncService? imageCacheSyncService = null,
-        RecordingNavigationService? navigationService = null)
+        RecordingNavigationService? navigationService = null,
+        IFolderBrowserService? folderBrowserService = null)
     {
         var viewModel = BuildViewModelWithoutLoading(
-            settings,
-            heldPermissionKeys,
-            refreshClient,
-            imageStorageConfigurationResolver,
-            configSettingsValueService,
-            imageCacheSyncService,
-            navigationService);
+           settings,
+           heldPermissionKeys,
+           refreshClient,
+           imageStorageConfigurationResolver,
+           configSettingsValueService,
+           imageCacheSyncService,
+           navigationService,
+           folderBrowserService);
 
         // The stub answers from an already-completed task, so this settles synchronously and no test has to
         // sleep waiting for a gate to make up its mind.
@@ -945,7 +1021,8 @@ public sealed class SettingsViewModelTests
         IImageStorageConfigurationResolver? imageStorageConfigurationResolver = null,
         IConfigSettingsValueService? configSettingsValueService = null,
         IImageCacheSyncService? imageCacheSyncService = null,
-        RecordingNavigationService? navigationService = null)
+        RecordingNavigationService? navigationService = null,
+        IFolderBrowserService? folderBrowserService = null)
     {
         var person = new FakePersonIdentity();
         var computerManagement = new ComputerManagementViewModel(new FakeComputerRegistryService(), new FakeMachineFacts());
@@ -972,7 +1049,8 @@ public sealed class SettingsViewModelTests
             refreshClient ?? new FakeMockServiceRefreshClient(),
             imageStorageConfigurationResolver,
             configSettingsValueService,
-            imageCacheSyncService);
+            imageCacheSyncService,
+            folderBrowserService: folderBrowserService);
     }
 
     /// <summary>

@@ -27,7 +27,12 @@ public interface IWaitlistRequestService
 
     Task<int> RefreshFromDatabaseAsync(string? building = null, CancellationToken cancellationToken = default);
 
-    Task<WaitlistRequestSubmitResult> SubmitAsync(WaitlistRequestDraft draft, bool allowDuplicate, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Raises the request. A request that matches one still active on building, work centre, item and captured
+    /// answer is never raised: the refusal comes back as
+    /// <see cref="WaitlistRequestSubmitStatus.DuplicateWarningRequired"/> and there is no override.
+    /// </summary>
+    Task<WaitlistRequestSubmitResult> SubmitAsync(WaitlistRequestDraft draft, CancellationToken cancellationToken = default);
 
     Task<bool> TransitionStatusAsync(Guid requestId, string status, string? cancellationReason = null, string? canceledByEmployeeNumber = null, CancellationToken cancellationToken = default);
 

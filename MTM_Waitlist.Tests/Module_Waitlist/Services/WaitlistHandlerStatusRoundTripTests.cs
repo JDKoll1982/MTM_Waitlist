@@ -88,8 +88,7 @@ public sealed class WaitlistHandlerStatusRoundTripTests
                 RequesterEmployeeNumber = RequesterEmployeeNumber,
                 RequesterEmployeeName = "IT Requester",
                 TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(15),
-            },
-            allowDuplicate: true);
+            });
 
         Assert.AreEqual(
             WaitlistRequestSubmitStatus.Success,
@@ -152,8 +151,7 @@ public sealed class WaitlistHandlerStatusRoundTripTests
                 RequesterEmployeeNumber = RequesterEmployeeNumber,
                 RequesterEmployeeName = "IT Requester",
                 TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(15),
-            },
-            allowDuplicate: true);
+            });
 
         Assert.AreEqual(
             WaitlistRequestSubmitStatus.Success,

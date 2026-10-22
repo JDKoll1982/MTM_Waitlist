@@ -118,20 +118,42 @@ public static class WaitlistRequestTitles
     /// <param name="jobAvailability">The requesting job, which is where a material the request never stored comes from.</param>
     /// <returns>The part number, or <see langword="null"/>.</returns>
     /// <remarks>
-    /// This is the same value the card's identifier resolves <c>{part_number}</c> from — the coil or the flatstock
-    /// the job holds, or the job's own part number for an Item that is about no particular material — stated once
-    /// so the picture the card draws and the part the card names can never disagree (FR-005, FR-019). A request
-    /// that names no material answers null rather than a guess, and its card draws the one shared placeholder
-    /// instead of artwork chosen on its behalf (FR-014, FR-020).
+    /// This is the same value the card's identifier resolves from — the component the operator chose for a
+    /// component Item, the coil or the flatstock the job holds, or the job's own part number for an Item that is
+    /// about no particular material — stated once so the picture the card draws and the part the card names can
+    /// never disagree (FR-005, FR-019). A request that names no material answers null rather than a guess, and its
+    /// card draws the one shared placeholder instead of artwork chosen on its behalf (FR-014, FR-020).
     /// </remarks>
     public static string? ResolveMaterialPartNumber(
         WaitlistRequest? request,
         RequestJobPartAvailability? jobAvailability = null)
-        => ResolveMaterialPartNumber(request?.ItemDefinition, jobAvailability);
+    {
+        var item = request?.ItemDefinition;
+        if (item is null)
+        {
+            return null;
+        }
+
+        // A component Item asks which component the operator needs, so the part it is about is the answer they gave
+        // and not a job value: its identifier names `{component}`, never `{part_number}`, and the two are answered
+        // here so the card's picture and its second line cannot name two parts (FR-035, FR-019).
+        if (NamesToken(item, "component"))
+        {
+            return Trimmed(request!.InputValue);
+        }
+
+        if (NamesToken(item, "part_number") is false)
+        {
+            return null;
+        }
+
+        return Trimmed(PartNumberFor(item, jobAvailability));
+    }
 
     /// <summary>
-    /// The same rule, stated on the Item, so a surface that is drawing a request the store has not been asked
-    /// about yet — the confirmation step — names and pictures the same part the card will.
+    /// The same rule for the Items whose part comes from the job alone, so a surface that has no request in hand
+    /// — the confirmation step before the request exists — can still ask it. A component Item answers nothing
+    /// here: its part is the operator's answer, which only the request carries.
     /// </summary>
     /// <param name="item">The catalogued Item the request was raised with.</param>
     /// <param name="jobAvailability">The requesting job.</param>

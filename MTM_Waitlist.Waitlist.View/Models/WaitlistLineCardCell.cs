@@ -103,6 +103,17 @@ public sealed class WaitlistLineCardCell
         !string.IsNullOrWhiteSpace(ReferencePartNumber) && !string.IsNullOrWhiteSpace(ReferencePartScope);
 
     /// <summary>
+    /// Whether the cell's value is a description, which the card draws through the application's shared one-line
+    /// scrolling text control rather than clipping it with an ellipsis (FR-053).
+    /// </summary>
+    /// <remarks>
+    /// It is derived from the label the cell was produced for rather than set by each surface, so the card, the
+    /// request page and any later reader of a cell agree about which values scroll. See
+    /// <see cref="WaitlistCardCellRules.DrawsScrollingText"/> for the rule itself.
+    /// </remarks>
+    public bool UsesScrollingText => WaitlistCardCellRules.DrawsScrollingText(Label);
+
+    /// <summary>
     /// The picture the cell's value draws: the hopper's reference image, and the application's one shared
     /// no-image placeholder when the size's picture is missing or unusable (FR-078, FR-080). The converter
     /// applies the picture rule as well, so a path naming an unreadable file lands on the placeholder too.

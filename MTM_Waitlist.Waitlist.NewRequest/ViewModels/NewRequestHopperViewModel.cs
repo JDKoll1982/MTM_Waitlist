@@ -29,7 +29,7 @@ namespace MTM_Waitlist.Module_Waitlist.ViewModels;
 /// </para>
 /// <para>
 /// <b>Where a size's image comes from.</b> The step asks the picture reader for the picture filed under the size's
-/// own name in the hopper folder — <c>Waitlist/Hoppers/Small.png</c>, and so on — so a reference image per size is
+/// own name in the hopper folder — <c>Waitlist/hopper/Small.png</c>, and so on — so a reference image per size is
 /// configured in one known place, named after the size word. The folder, the three size words and the file names
 /// all come from <see cref="PartPictureLayout"/>, which is also what the card reads, so the step and the card
 /// cannot ask for two different pictures for one size (D22, FR-078). The naming contract is documented in

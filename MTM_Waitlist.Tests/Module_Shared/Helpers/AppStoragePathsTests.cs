@@ -29,6 +29,10 @@ public sealed class AppStoragePathsTests
         Assert.IsTrue(
             AppStoragePaths.DunnageRootDefault.StartsWith(@"\\", StringComparison.Ordinal),
             "The dunnage root must be a share name, not a drive letter.");
+        Assert.AreEqual(
+            @"\\mtmanu-fs01\Expo Drive\MH_RESOURCE\Material_Handler\MTM Applications\MTM Waitlist Application\Images\Waitlist\hopper",
+            AppStoragePaths.HopperFolderDefault,
+            "The hopper pictures sit beside the other pictures on the share, in the folder the artwork already lives in.");
     }
 
     /// <summary>

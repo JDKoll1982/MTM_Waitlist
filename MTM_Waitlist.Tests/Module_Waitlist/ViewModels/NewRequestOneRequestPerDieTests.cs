@@ -160,7 +160,7 @@ public sealed class NewRequestOneRequestPerDieTests
 
         public Task<int> RefreshFromDatabaseAsync(string? building = null, CancellationToken cancellationToken = default) => Task.FromResult(0);
 
-        public Task<WaitlistRequestSubmitResult> SubmitAsync(WaitlistRequestDraft draft, bool allowDuplicate, CancellationToken cancellationToken = default)
+        public Task<WaitlistRequestSubmitResult> SubmitAsync(WaitlistRequestDraft draft, CancellationToken cancellationToken = default)
         {
             Submitted.Add(draft);
             return Task.FromResult(WaitlistRequestSubmitResult.Success(new WaitlistRequest

@@ -59,7 +59,7 @@ The detail grid is determined by the request's Item, never chosen per row. An It
 3. **Given** an Item declaring two cells, **When** its card is drawn, **Then** the bottom row is collapsed.
 4. **Given** an Item declaring one cell, **When** its card is drawn, **Then** that cell spans the full width.
 5. **Given** an Item declaring no cells, **When** its card is drawn, **Then** both lower rows are absent and the title row occupies the vacated space as one full-width row.
-6. **Given** any cell, **When** it is drawn, **Then** its label sits on top with its value beneath.
+6. **Given** any cell, **When** it is drawn, **Then** its label and its value read on one line, the label small and secondary, the value larger and semibold, with a real gap between them.
 7. **Given** two requests of the same Item, **When** both are drawn, **Then** their panels have the same shape and the same height.
 8. **Given** a die request and a coil request, **When** both are drawn, **Then** `Die Location` appears only on the die request.
 9. **Given** a cell whose source cannot be read, **When** the card is drawn, **Then** the cell is absent and a warning is written to the database log.
@@ -177,7 +177,7 @@ Five answers join the New Request workflow, and each appears on the matching car
 - FR-025: The cells a card shows MUST be determined by the request's Item and MUST NOT be chosen per row.
 - FR-026: The grid's geometry MUST follow the number of cells the Item fills: four cells as two rows of two; three cells with the third spanning the bottom row; two cells with the bottom row collapsed; one cell spanning the full width; no cells with both lower rows removed.
 - FR-027: With no cells, the title row MUST take the vacated space as one full-width row.
-- FR-028: Every cell MUST be a label on top with its value beneath, apart from the label-less die-shop cell.
+- FR-028: Every cell MUST read `Label: value` on one line, apart from the label-less die-shop cell: the label small, secondary and semibold, the value a step larger, semibold and in the primary text colour, with a real gap between the two that does not depend on the separator's trailing space, and the pair starting from the cell's left edge. [Amended 2026-10-22, owner direction, replacing the earlier "label on top with its value beneath": the shipped cards have drawn the pair on one line since the cell area returned to the card, and with only a trailing space between them the pair read `Part Type:WIP`. The left edge was added the same day: a description cell's value field is stretched to its slot so a long line can scroll, which means it cannot centre what it draws, and a centred neighbour beside it put the two halves of one row on two axes.]
 - FR-029: `Die Location` MUST be shown on the two die Items and on no other Item.
 
 **Detail cells by Item**
@@ -287,6 +287,10 @@ Five answers join the New Request workflow, and each appears on the matching car
 - FR-108: The detail page's `Work order` row MUST state the work order the request's job is for, in the `WO-######` form the work-order reads use. It MUST NOT state the work centre, and where the job cannot be resolved the row MUST be left out rather than filled with anything else (FR-002, FR-101). [Added 2026-10-16, owner direction, after the row was found printing the press.]
 - FR-109: Each picture on the hero card MUST carry a small caption beneath it saying what it is, because a picture standing alone beside a title names nothing. [Added 2026-10-16, owner direction.]
 - FR-110: The hero card's `Remaining Time` value MUST state the time left **against the time the Item allotted**, so the countdown is readable as a proportion rather than as a number on its own. [Added 2026-10-16, owner direction.]
+
+**Added by the owner's review of the card's description cells**
+
+- FR-111: Every card cell whose value is a **description** MUST be drawn in full by the one-line scrolling control rather than clipped with an ellipsis, and the rule MUST follow the value rather than the Item: the request description on `other`, the part description on `deliver-component`, and the coil description on both coil Items. It MUST NOT be pinned per panel slot, because a description sits in the third slot on a coil card and the first on a component card, and it moves as soon as a value ahead of it is missing. This broadens FR-053 from `other` alone. [Added 2026-10-22, owner direction, after a component card clipped its part description.]
 
 ### Key Entities
 

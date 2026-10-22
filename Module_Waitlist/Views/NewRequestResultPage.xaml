@@ -75,15 +75,10 @@
                     Spacing="12"
                     Visibility="{x:Bind ViewModel.IsDuplicate, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <Button
-                        AutomationProperties.AutomationId="NewRequestResultPage_CancelButton"
-                        Content="Cancel"
-                        ContentTemplate="{StaticResource ActionBarCancelTemplate}"
-                        Command="{x:Bind ViewModel.CancelToWaitlistCommand}" />
-                    <Button
-                        AutomationProperties.AutomationId="NewRequestResultPage_ContinueButton"
-                        Content="Continue"
-                        ContentTemplate="{StaticResource ActionBarContinueTemplate}"
-                        Command="{x:Bind ViewModel.ContinueDuplicateCommand}"
+                        AutomationProperties.AutomationId="NewRequestResultPage_DuplicateReturnToWaitlistButton"
+                        Content="Return to Waitlist"
+                        ContentTemplate="{StaticResource ActionBarReturnTemplate}"
+                        Command="{x:Bind ViewModel.ReturnToWaitlistCommand}"
                         Style="{StaticResource AccentButtonStyle}" />
                 </StackPanel>
 
