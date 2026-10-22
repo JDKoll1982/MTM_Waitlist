@@ -211,6 +211,82 @@ public sealed class WaitlistRequestTitlesTests
         JobPartNumber = "PART-9004",
     };
 
+    /// <summary>
+    /// A job whose dunnage parts carry pictures, one of which has none: the operator's answer is matched to the
+    /// job's own list, so the two cases can be told apart.
+    /// </summary>
+    private static RequestJobPartAvailability DunnageJob() => (RequestJobPartAvailability.None with
+    {
+        HasActiveJob = true,
+        HasDunnage = true,
+        JobPartNumber = "PART-9004",
+    }).WithDunnageParts(
+    [
+        new RequestDunnagePart { PartNumber = "DN-STL-4", ImagePath = @"X:\Dunnage\Parts\Steel Rack.png" },
+        new RequestDunnagePart { PartNumber = "DN-BOX-2" },
+    ]);
+
+    [TestMethod]
+    public void Model_WaitlistRequestTitlesTests_ResolveDunnagePartPicturePath_AnswersTheChosenPartsPictureForBothDunnageItems()
+    {
+        // The dunnage Items name `{dunnage_part}` and not `{part_number}`, so the material-part rule answers
+        // nothing for them and the card drew the placeholder even when the chosen part had a picture. The picture
+        // has to follow the part the second line names (FR-019).
+        foreach (var itemId in new[] { "pickup-dunnage", "deliver-dunnage" })
+        {
+            var request = new WaitlistRequest { Item = itemId, InputValue = "DN-STL-4" };
+
+            var picture = WaitlistRequestTitles.ResolveDunnagePartPicturePath(
+                WaitlistRequestTitles.ResolveContext(request, DunnageJob()),
+                DunnageJob());
+
+            Assert.AreEqual(
+                @"X:\Dunnage\Parts\Steel Rack.png",
+                picture,
+                $"'{itemId}' draws the picture of the part its identifier names.");
+        }
+    }
+
+    [TestMethod]
+    public void Model_WaitlistRequestTitlesTests_ResolveDunnagePartPicturePath_AChoosablePartWithNoPictureAnswersNothing()
+    {
+        // A part the job carries but nobody pictured is not a picture: the card draws the one shared placeholder
+        // rather than a blank or something chosen on the part's behalf (FR-014, FR-020).
+        var request = new WaitlistRequest { Item = "deliver-dunnage", InputValue = "DN-BOX-2" };
+
+        Assert.IsNull(
+            WaitlistRequestTitles.ResolveDunnagePartPicturePath(
+                WaitlistRequestTitles.ResolveContext(request, DunnageJob()),
+                DunnageJob()),
+            "A part with no picture leaves the card on the shared placeholder.");
+    }
+
+    [TestMethod]
+    public void Model_WaitlistRequestTitlesTests_ResolveDunnagePartPicturePath_AnAnswerTheJobDoesNotCarryAnswersNothing()
+    {
+        var request = new WaitlistRequest { Item = "deliver-dunnage", InputValue = "DN-UNKNOWN-9" };
+
+        Assert.IsNull(
+            WaitlistRequestTitles.ResolveDunnagePartPicturePath(
+                WaitlistRequestTitles.ResolveContext(request, DunnageJob()),
+                DunnageJob()),
+            "A part the job does not carry has no picture here, so nothing is guessed.");
+    }
+
+    [TestMethod]
+    public void Model_WaitlistRequestTitlesTests_ResolveDunnagePartPicturePath_AnItemThatAsksForNoDunnageAnswersNothing()
+    {
+        // The rule is asked for every request, so an Item whose templates name no dunnage part must not pick up
+        // the picture of a part some other Item chose.
+        var request = new WaitlistRequest { Item = "pickup-coil", InputValue = "DN-STL-4" };
+
+        Assert.IsNull(
+            WaitlistRequestTitles.ResolveDunnagePartPicturePath(
+                WaitlistRequestTitles.ResolveContext(request, DunnageJob()),
+                DunnageJob()),
+            "A coil request is not about a dunnage part, whatever its answer happens to spell.");
+    }
+
     [TestMethod]
     public void Model_WaitlistRequestTitlesTests_ResolveLine2_ComponentRequestsShowThePartTheOperatorChose()
     {

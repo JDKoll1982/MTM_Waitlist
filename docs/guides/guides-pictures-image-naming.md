@@ -11,7 +11,7 @@ renamed folder or a re-cased file name stops working without any error being rai
 - Storage paths and defaults: `MTM_Waitlist.Shared/Helpers/AppStoragePaths.cs`
 - Picture acceptance rule: `MTM_Waitlist.Shared/Helpers/ImagePicturePolicy.cs`,
   `MTM_Waitlist.Settings/Models/ImageValidation.cs`
-- Folder settings live on **Settings → Storage Paths** in the application.
+- Folder settings live on **Settings → Pictures → Where the picture files are kept** in the application.
 
 ---
 
@@ -114,11 +114,12 @@ Rules specific to this folder:
   `.png` extension. These three words are the size answers the New Request wizard records, and the same words are
   what the card resolves, so a file named `MEDIUM.png`, `Medium Hopper.png` or `Med.png` is never found.
 - **The extension is `.png`.** The part-picture rule above accepts three extensions; this folder expects `.png`.
-- The folder is **configurable** on Settings → Storage Paths, under *Hopper picture folder*, and the box has a
-  **Browse** button that opens a folder dialog at whatever the box currently holds. Its shipped default is the
-  share's own `...\Images\Waitlist\hopper` path, written in full rather than relative to the picture folder, so a
-  machine that has never opened the panel still draws the size pictures. A relative path is still read beneath the
-  picture folder, and an absolute path is used as given. Do not leave it blank — the panel refuses an empty value.
+- The folder is **configurable** on Settings → Pictures → *Where the picture files are kept*, under *Hopper picture
+  folder*, and the box has a **Browse** button that opens a folder dialog at whatever the box currently holds. Its
+  shipped default is the share's own `...\Images\Waitlist\hopper` path, written in full rather than relative to the
+  picture folder, so a machine that has never opened the panel still draws the size pictures. A relative path is
+  still read beneath the picture folder, and an absolute path is used as given. Do not leave it blank — the panel
+  refuses an empty value.
 - If a size's picture is missing or unusable, the card and the wizard draw the shared placeholder rather than a
   blank. Nothing is substituted, and nothing is logged as a fault.
 - These pictures are held to the picture rules in §5, like every other picture.

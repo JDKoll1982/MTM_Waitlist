@@ -322,16 +322,20 @@
                 spans both columns and carries the request's category word and its own identifier (FR-007); the
                 cells the Item declares occupy rows 2 and 3. Which cells those are is the Item's decision and is
                 never chosen per row, so the cell area is resolved through the per-Item template selector
-                (FR-025). An Item with no cells draws none of them and its rows collapse to nothing, and the
-                zone's alignment is what the title pair does with the space that leaves: centred in the card
-                when the row resolved no data at all, at the top over its cells when it did (FR-026, FR-027).
+                (FR-025). An Item with no cells draws none of them and its rows collapse to nothing.
+
+                The grid as a whole is centred in its area, whatever it is holding. It was once centred only when
+                the row resolved no data and pinned to the top otherwise, which left a card holding two cells
+                sitting against the top of a taller section with an empty stretch beneath it - the grid looked
+                dropped in from above rather than placed in its area. Centring the block keeps a short grid in the
+                middle and leaves a full one with even margins (FR-027).
                 The rows are spaced by the cells themselves rather than by this grid, so a zone with no cells
                 has no spacing to leave behind either.
             -->
             <Grid
                 x:Name="DetailZone"
                 Grid.Column="5"
-                VerticalAlignment="{Binding Order.Cells.Count, ElementName=Root, Converter={StaticResource WaitlistCardTitleAlignmentConverter}}"
+                VerticalAlignment="Center"
                 ColumnSpacing="0"
                 RowSpacing="0">
                 <Grid.RowDefinitions>

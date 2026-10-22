@@ -33,6 +33,31 @@
             <Setter Property="CornerRadius" Value="8" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
+
+        <!--
+            Pictures panel row chrome.
+
+            The merged panel holds three cards, and between them a dozen rows of "label, description, control". The
+            measurements live here rather than on each row, so a folder box and the Browse button beside it sit in
+            one straight column instead of every row inventing its own width.
+        -->
+        <Style x:Key="SettingsFormRowStyle" TargetType="Grid">
+            <Setter Property="ColumnSpacing" Value="16" />
+        </Style>
+
+        <Style x:Key="SettingsRowTitleStyle" TargetType="TextBlock">
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+
+        <Style x:Key="SettingsFolderBoxStyle" TargetType="TextBox">
+            <Setter Property="MinWidth" Value="300" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="SettingsFolderButtonStyle" TargetType="Button">
+            <Setter Property="MinWidth" Value="96" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
     </Page.Resources>
 
     <!--
@@ -181,34 +206,27 @@
                     Style="{ThemeResource BodyStrongTextBlockStyle}"
                     Text="Operations" />
 
-                <!-- Part pictures (008-part-pictures). Offered only to an account holding the picture entitlement;
-                     the gate is the permission key, read from the store, not a list of role names. -->
-                <wct:SettingsCard
-                    x:Name="PartPicturesEntryCard"
-                    x:Load="{x:Bind ViewModel.IsPartPicturesEntryVisible, Mode=OneWay}"
-                    AutomationProperties.AutomationId="SettingsPage_PartPicturesEntry"
-                    AutomationProperties.Name="{x:Bind ViewModel.PartPicturesEntryTitle}"
-                    HorizontalAlignment="Stretch"
-                    IsClickEnabled="True"
-                    Command="{x:Bind ViewModel.OpenPartPicturesCommand}">
-                    <wct:SettingsCard.Header>
-                        <TextBlock Text="{x:Bind ViewModel.PartPicturesEntryTitle}" />
-                    </wct:SettingsCard.Header>
-                    <wct:SettingsCard.Description>
-                        <TextBlock Text="{x:Bind ViewModel.PartPicturesEntryDescription}" />
-                    </wct:SettingsCard.Description>
-                    <wct:SettingsCard.HeaderIcon>
-                        <SymbolIcon Symbol="Pictures" />
-                    </wct:SettingsCard.HeaderIcon>
-                </wct:SettingsCard>
+                <!--
+                    Pictures (008-part-pictures). One collapsible panel for everything picture-related, so a reader
+                    looks in one place instead of four: which picture an item or a work center resolves, where the
+                    picture files are kept, and the copies kept on this computer.
 
-                <!-- Image location settings -->
+                    The three cards inside keep the entitlements they had rather than the panel's. The picture
+                    entitlement (permission.settings.part_pictures) reaches the assignments and the part-picture
+                    screen; the storage entitlement (permission.settings.storage_paths) reaches the folders and the
+                    cache (FR-017, FR-024, FR-025). A reader holding one of them sees the panel and only the card
+                    they may use, and the panel is absent when neither is held.
+
+                    Rows are hidden with Visibility, never x:Load: an element inside a SettingsExpander's item
+                    collection is not in the page's namescope, and x:Load resolves it with FindName, which
+                    terminates the process (verified 2026-09-24).
+                -->
                 <wct:SettingsExpander
-                    AutomationProperties.AutomationId="SettingsPage_ImageLocationExpander"
-                    x:Name="ImageLocationSettingsExpander"
-                    x:Load="{x:Bind ViewModel.IsImageLocationSettingsPanelVisible, Mode=OneWay}"
-                    Description="Manage the default visuals used for item and work-center image overrides for authorized staff."
-                    Header="Image Location Settings"
+                    AutomationProperties.AutomationId="SettingsPage_ImagesExpander"
+                    x:Name="ImagesExpander"
+                    x:Load="{x:Bind ViewModel.IsImagesPanelVisible, Mode=OneWay}"
+                    Description="{x:Bind ViewModel.ImagesPanelDescription}"
+                    Header="{x:Bind ViewModel.ImagesPanelTitle}"
                     HorizontalAlignment="Stretch"
                     IsExpanded="False">
                     <wct:SettingsExpander.HeaderIcon>
@@ -216,199 +234,449 @@
                     </wct:SettingsExpander.HeaderIcon>
 
                     <wct:SettingsExpander.Items>
+                        <!-- Which picture an item or a work center resolves -->
                         <wct:SettingsCard
-                            Description="Manage the picture each item uses. An item with no picture of its own shows its category's picture, so nothing configured for the item replaces a picture the request already resolves."
-                            Header="Item Images">
-                            <Button
-                                AutomationProperties.AutomationId="SettingsPage_Images_ManageItemsButton"
-                                AutomationProperties.Name="Manage request item images"
-                                MinWidth="120"
-                                Click="RequestItemImages_Click"
-                                Content="Manage items" />
-                        </wct:SettingsCard>
-
-                        <wct:SettingsCard
-                            Description="Review and override the images used for active work-center selections and detail pages."
-                            Header="Work Center Images">
-                            <Button
-                                AutomationProperties.AutomationId="SettingsPage_Images_ManageWorkCentersButton"
-                                AutomationProperties.Name="Manage work center images"
-                                MinWidth="120"
-                                Click="WorkCenterImages_Click"
-                                Content="Manage" />
-                        </wct:SettingsCard>
-                    </wct:SettingsExpander.Items>
-                </wct:SettingsExpander>
-
-                <!-- Where pictures are kept (008-part-pictures, T022). The picture folder, the key folder and the
-                     period a replaced picture is kept, on the storage entitlement rather than the picture
-                     entitlement, because FR-017 reserves the folders to IT Department and Developer while FR-025
-                     widens the picture entitlement past them. -->
-                <wct:SettingsExpander
-                    AutomationProperties.AutomationId="SettingsPage_StoragePathsExpander"
-                    x:Name="StoragePathsExpander"
-                    x:Load="{x:Bind ViewModel.IsStoragePathsPanelVisible, Mode=OneWay}"
-                    Description="{x:Bind ViewModel.StoragePathsPanelDescription}"
-                    Header="{x:Bind ViewModel.StoragePathsPanelTitle}"
-                    HorizontalAlignment="Stretch"
-                    IsExpanded="False">
-                    <wct:SettingsExpander.HeaderIcon>
-                        <SymbolIcon Symbol="Folder" />
-                    </wct:SettingsExpander.HeaderIcon>
-
-                    <wct:SettingsExpander.Items>
-                        <wct:SettingsCard Header="{x:Bind ViewModel.StoragePathsImageFolderLabel}">
-                            <TextBox
-                                AutomationProperties.AutomationId="SettingsPage_StoragePaths_ImageFolderBox"
-                                AutomationProperties.Name="{x:Bind ViewModel.StoragePathsImageFolderLabel}"
-                                MinWidth="420"
-                                Text="{x:Bind ViewModel.PictureFolderInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        </wct:SettingsCard>
-
-                        <wct:SettingsCard Header="{x:Bind ViewModel.StoragePathsDunnageRootLabel}">
-                            <TextBox
-                                AutomationProperties.AutomationId="SettingsPage_StoragePaths_DunnageRootBox"
-                                AutomationProperties.Name="{x:Bind ViewModel.StoragePathsDunnageRootLabel}"
-                                MinWidth="420"
-                                Text="{x:Bind ViewModel.DunnageRootInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        </wct:SettingsCard>
-
-                        <!-- The hopper reference pictures (012-waitlist-card-layout, FR-078). A folder of its own
-                             because the three files are named after the size a person chose, not after a part. -->
-                        <wct:SettingsCard
+                            AutomationProperties.AutomationId="SettingsPage_Images_AssignmentsCard"
                             ContentAlignment="Vertical"
-                            Description="{x:Bind ViewModel.StoragePathsHopperFolderHint}"
-                            Header="{x:Bind ViewModel.StoragePathsHopperFolderLabel}"
-                            HorizontalContentAlignment="Stretch">
-                            <Grid ColumnSpacing="8">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBox
-                                    AutomationProperties.AutomationId="SettingsPage_StoragePaths_HopperFolderBox"
-                                    AutomationProperties.Name="{x:Bind ViewModel.StoragePathsHopperFolderLabel}"
-                                    MinWidth="420"
-                                    Text="{x:Bind ViewModel.HopperFolderInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                <Button
-                                    AutomationProperties.AutomationId="SettingsPage_StoragePaths_HopperFolderBrowseButton"
-                                    AutomationProperties.Name="{x:Bind ViewModel.StoragePathsHopperFolderBrowseName}"
-                                    Grid.Column="1"
-                                    MinWidth="100"
-                                    Command="{x:Bind ViewModel.BrowseHopperFolderCommand}"
-                                    Content="{x:Bind ViewModel.StoragePathsHopperFolderBrowseLabel}" />
+                            HorizontalContentAlignment="Stretch"
+                            Visibility="{x:Bind ViewModel.IsPictureAssignmentsVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <wct:SettingsCard.Header>
+                                <TextBlock
+                                    x:Uid="Settings_Images_AssignmentsTitle"
+                                    Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                    Text="Pictures the app shows"
+                                    TextWrapping="Wrap" />
+                            </wct:SettingsCard.Header>
+                            <wct:SettingsCard.Description>
+                                <TextBlock
+                                    x:Uid="Settings_Images_AssignmentsDescription"
+                                    Style="{StaticResource SettingsDescriptionStyle}"
+                                    Text="Which picture an item or a work center resolves. An item with no picture of its own shows its category's picture." />
+                            </wct:SettingsCard.Description>
+
+                            <Grid RowSpacing="18">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <Grid
+                                    Grid.Row="0"
+                                    Style="{StaticResource SettingsFormRowStyle}"
+                                    Visibility="{x:Bind ViewModel.IsImageLocationSettingsPanelVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock
+                                            x:Uid="Settings_Images_ItemPicturesTitle"
+                                            Style="{StaticResource SettingsRowTitleStyle}"
+                                            Text="Item pictures" />
+                                        <TextBlock
+                                            x:Uid="Settings_Images_ItemPicturesDescription"
+                                            Style="{StaticResource SettingsDescriptionStyle}"
+                                            Text="Manage the picture each item uses across the request screens and the waitlist." />
+                                    </StackPanel>
+                                    <Button
+                                        AutomationProperties.AutomationId="SettingsPage_Images_ManageItemsButton"
+                                        AutomationProperties.Name="Manage request item pictures"
+                                        x:Uid="Settings_Images_ItemPicturesAction"
+                                        Grid.Column="1"
+                                        MinWidth="180"
+                                        VerticalAlignment="Center"
+                                        Click="RequestItemImages_Click"
+                                        Content="Manage items" />
+                                </Grid>
+
+                                <Grid
+                                    Grid.Row="1"
+                                    Style="{StaticResource SettingsFormRowStyle}"
+                                    Visibility="{x:Bind ViewModel.IsImageLocationSettingsPanelVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock
+                                            x:Uid="Settings_Images_WorkCenterPicturesTitle"
+                                            Style="{StaticResource SettingsRowTitleStyle}"
+                                            Text="Work center pictures" />
+                                        <TextBlock
+                                            x:Uid="Settings_Images_WorkCenterPicturesDescription"
+                                            Style="{StaticResource SettingsDescriptionStyle}"
+                                            Text="Review and override the pictures used for active work-center selections and detail pages." />
+                                    </StackPanel>
+                                    <Button
+                                        AutomationProperties.AutomationId="SettingsPage_Images_ManageWorkCentersButton"
+                                        AutomationProperties.Name="Manage work center images"
+                                        x:Uid="Settings_Images_WorkCenterPicturesAction"
+                                        Grid.Column="1"
+                                        MinWidth="180"
+                                        VerticalAlignment="Center"
+                                        Click="WorkCenterImages_Click"
+                                        Content="Manage work centers" />
+                                </Grid>
+
+                                <Grid
+                                    Grid.Row="2"
+                                    Style="{StaticResource SettingsFormRowStyle}"
+                                    Visibility="{x:Bind ViewModel.IsPartPicturesEntryVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock
+                                            Style="{StaticResource SettingsRowTitleStyle}"
+                                            Text="{x:Bind ViewModel.PartPicturesEntryTitle}" />
+                                        <TextBlock
+                                            Style="{StaticResource SettingsDescriptionStyle}"
+                                            Text="{x:Bind ViewModel.PartPicturesEntryDescription}" />
+                                    </StackPanel>
+                                    <Button
+                                        AutomationProperties.AutomationId="SettingsPage_PartPicturesEntry"
+                                        AutomationProperties.Name="Open the part picture screen"
+                                        x:Uid="Settings_Images_PartPicturesAction"
+                                        Grid.Column="1"
+                                        MinWidth="180"
+                                        VerticalAlignment="Center"
+                                        Command="{x:Bind ViewModel.OpenPartPicturesCommand}"
+                                        Content="Open part pictures" />
+                                </Grid>
                             </Grid>
                         </wct:SettingsCard>
 
-                        <wct:SettingsCard Header="{x:Bind ViewModel.StoragePathsArchiveKeepDaysLabel}">
-                            <NumberBox
-                                AutomationProperties.AutomationId="SettingsPage_StoragePaths_KeepDaysBox"
-                                AutomationProperties.Name="{x:Bind ViewModel.StoragePathsArchiveKeepDaysLabel}"
-                                MinWidth="140"
-                                Minimum="1"
-                                SpinButtonPlacementMode="Compact"
-                                Value="{x:Bind ViewModel.ArchiveKeepDaysInput, Mode=TwoWay}" />
-                        </wct:SettingsCard>
-
+                        <!--
+                            Where the picture files are kept (008-part-pictures, T022). The picture folder, the
+                            dunnage root, the hopper folder and the period a replaced picture is kept, on the
+                            storage entitlement rather than the picture entitlement, because FR-017 reserves the
+                            folders to IT Department and Developer while FR-025 widens the picture entitlement past
+                            them. Each box has a folder dialog beside it, because a share path typed from memory is
+                            the commonest way these boxes go wrong.
+                        -->
                         <wct:SettingsCard
+                            AutomationProperties.AutomationId="SettingsPage_Images_FoldersCard"
                             ContentAlignment="Vertical"
-                            HorizontalContentAlignment="Stretch">
-                            <StackPanel Spacing="8">
+                            HorizontalContentAlignment="Stretch"
+                            Visibility="{x:Bind ViewModel.IsStoragePathsPanelVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <wct:SettingsCard.Header>
+                                <TextBlock
+                                    x:Uid="Settings_Images_FoldersTitle"
+                                    Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                    Text="Where the picture files are kept"
+                                    TextWrapping="Wrap" />
+                            </wct:SettingsCard.Header>
+                            <wct:SettingsCard.Description>
+                                <TextBlock
+                                    x:Uid="Settings_Images_FoldersDescription"
+                                    Style="{StaticResource SettingsDescriptionStyle}"
+                                    Text="The folders every picture is read from, and how long a replaced picture is kept. A hopper folder given as a relative path is read under the picture folder." />
+                            </wct:SettingsCard.Description>
+
+                            <Grid RowSpacing="18">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <Grid Grid.Row="0" Style="{StaticResource SettingsFormRowStyle}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock
+                                            Style="{StaticResource SettingsRowTitleStyle}"
+                                            Text="{x:Bind ViewModel.StoragePathsImageFolderLabel}" />
+                                        <TextBlock
+                                            x:Uid="Settings_Images_PictureFolderDescription"
+                                            Style="{StaticResource SettingsDescriptionStyle}"
+                                            Text="The single folder every picture sits under on the share." />
+                                    </StackPanel>
+                                    <StackPanel
+                                        Grid.Column="1"
+                                        Orientation="Horizontal"
+                                        Spacing="8">
+                                        <TextBox
+                                            AutomationProperties.AutomationId="SettingsPage_StoragePaths_ImageFolderBox"
+                                            AutomationProperties.Name="{x:Bind ViewModel.StoragePathsImageFolderLabel}"
+                                            Style="{StaticResource SettingsFolderBoxStyle}"
+                                            Text="{x:Bind ViewModel.PictureFolderInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                        <Button
+                                            AutomationProperties.AutomationId="SettingsPage_Images_PictureFolderBrowseButton"
+                                            AutomationProperties.Name="Browse for the picture folder"
+                                            Style="{StaticResource SettingsFolderButtonStyle}"
+                                            Command="{x:Bind ViewModel.BrowsePictureFolderCommand}"
+                                            Content="{x:Bind ViewModel.ImagesBrowseLabel}"
+                                            Visibility="{x:Bind ViewModel.CanBrowseFolders, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <Grid Grid.Row="1" Style="{StaticResource SettingsFormRowStyle}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock
+                                            Style="{StaticResource SettingsRowTitleStyle}"
+                                            Text="{x:Bind ViewModel.StoragePathsDunnageRootLabel}" />
+                                        <TextBlock
+                                            x:Uid="Settings_Images_DunnageRootDescription"
+                                            Style="{StaticResource SettingsDescriptionStyle}"
+                                            Text="The root the dunnage pictures are read from, one folder per dunnage type and part beneath it." />
+                                    </StackPanel>
+                                    <StackPanel
+                                        Grid.Column="1"
+                                        Orientation="Horizontal"
+                                        Spacing="8">
+                                        <TextBox
+                                            AutomationProperties.AutomationId="SettingsPage_StoragePaths_DunnageRootBox"
+                                            AutomationProperties.Name="{x:Bind ViewModel.StoragePathsDunnageRootLabel}"
+                                            Style="{StaticResource SettingsFolderBoxStyle}"
+                                            Text="{x:Bind ViewModel.DunnageRootInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                        <Button
+                                            AutomationProperties.AutomationId="SettingsPage_Images_DunnageRootBrowseButton"
+                                            AutomationProperties.Name="Browse for the dunnage picture root"
+                                            Style="{StaticResource SettingsFolderButtonStyle}"
+                                            Command="{x:Bind ViewModel.BrowseDunnageRootCommand}"
+                                            Content="{x:Bind ViewModel.ImagesBrowseLabel}"
+                                            Visibility="{x:Bind ViewModel.CanBrowseFolders, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <!-- The hopper reference pictures (012-waitlist-card-layout, FR-078). A folder of its
+                                     own because the three files are named after the size a person chose, not after
+                                     a part, so the naming contract is written into the row. -->
+                                <Grid Grid.Row="2" Style="{StaticResource SettingsFormRowStyle}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock
+                                            Style="{StaticResource SettingsRowTitleStyle}"
+                                            Text="{x:Bind ViewModel.StoragePathsHopperFolderLabel}" />
+                                        <TextBlock
+                                            Style="{StaticResource SettingsDescriptionStyle}"
+                                            Text="{x:Bind ViewModel.StoragePathsHopperFolderHint}" />
+                                    </StackPanel>
+                                    <StackPanel
+                                        Grid.Column="1"
+                                        Orientation="Horizontal"
+                                        Spacing="8">
+                                        <TextBox
+                                            AutomationProperties.AutomationId="SettingsPage_StoragePaths_HopperFolderBox"
+                                            AutomationProperties.Name="{x:Bind ViewModel.StoragePathsHopperFolderLabel}"
+                                            Style="{StaticResource SettingsFolderBoxStyle}"
+                                            Text="{x:Bind ViewModel.HopperFolderInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                        <Button
+                                            AutomationProperties.AutomationId="SettingsPage_StoragePaths_HopperFolderBrowseButton"
+                                            AutomationProperties.Name="{x:Bind ViewModel.StoragePathsHopperFolderBrowseName}"
+                                            Style="{StaticResource SettingsFolderButtonStyle}"
+                                            Command="{x:Bind ViewModel.BrowseHopperFolderCommand}"
+                                            Content="{x:Bind ViewModel.StoragePathsHopperFolderBrowseLabel}"
+                                            Visibility="{x:Bind ViewModel.CanBrowseFolders, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <Grid Grid.Row="3" Style="{StaticResource SettingsFormRowStyle}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock
+                                            Style="{StaticResource SettingsRowTitleStyle}"
+                                            Text="{x:Bind ViewModel.StoragePathsArchiveKeepDaysLabel}" />
+                                        <TextBlock
+                                            x:Uid="Settings_Images_KeepDaysDescription"
+                                            Style="{StaticResource SettingsDescriptionStyle}"
+                                            Text="How long a replaced picture is set aside before the cleanup removes it." />
+                                    </StackPanel>
+                                    <NumberBox
+                                        AutomationProperties.AutomationId="SettingsPage_StoragePaths_KeepDaysBox"
+                                        AutomationProperties.Name="{x:Bind ViewModel.StoragePathsArchiveKeepDaysLabel}"
+                                        Grid.Column="1"
+                                        MinWidth="140"
+                                        VerticalAlignment="Center"
+                                        Minimum="1"
+                                        SpinButtonPlacementMode="Compact"
+                                        Value="{x:Bind ViewModel.ArchiveKeepDaysInput, Mode=TwoWay}" />
+                                </Grid>
+
                                 <StackPanel
-                                    Orientation="Horizontal"
+                                    Grid.Row="4"
                                     Spacing="8">
-                                    <Button
-                                        AutomationProperties.AutomationId="SettingsPage_StoragePaths_SaveButton"
-                                        AutomationProperties.Name="{x:Bind ViewModel.StoragePathsSaveLabel}"
-                                        MinWidth="150"
-                                        Click="SaveStoragePaths_Click"
-                                        Content="{x:Bind ViewModel.StoragePathsSaveLabel}" />
-                                    <ProgressRing
-                                        Width="20"
-                                        Height="20"
-                                        IsActive="{x:Bind ViewModel.IsStoragePathsBusy, Mode=OneWay}" />
+                                    <StackPanel
+                                        Orientation="Horizontal"
+                                        Spacing="8">
+                                        <Button
+                                            AutomationProperties.AutomationId="SettingsPage_StoragePaths_SaveButton"
+                                            AutomationProperties.Name="{x:Bind ViewModel.StoragePathsSaveLabel}"
+                                            MinWidth="180"
+                                            Click="SaveStoragePaths_Click"
+                                            Content="{x:Bind ViewModel.StoragePathsSaveLabel}" />
+                                        <ProgressRing
+                                            Width="20"
+                                            Height="20"
+                                            IsActive="{x:Bind ViewModel.IsStoragePathsBusy, Mode=OneWay}" />
+                                    </StackPanel>
+
+                                    <TextBlock
+                                        Style="{StaticResource SettingsDescriptionStyle}"
+                                        Text="{x:Bind ViewModel.StoragePathsStoreIsTruthText}" />
+
+                                    <TextBlock
+                                        Style="{StaticResource SettingsDescriptionStyle}"
+                                        Text="{x:Bind ViewModel.StoragePathsStatusMessage, Mode=OneWay}" />
                                 </StackPanel>
-
-                                <TextBlock
-                                    MaxWidth="680"
-                                    Text="{x:Bind ViewModel.StoragePathsStoreIsTruthText}"
-                                    TextWrapping="Wrap" />
-
-                                <TextBlock
-                                    MaxWidth="680"
-                                    Text="{x:Bind ViewModel.StoragePathsStatusMessage, Mode=OneWay}"
-                                    TextWrapping="Wrap" />
-                            </StackPanel>
-                        </wct:SettingsCard>
-                    </wct:SettingsExpander.Items>
-                </wct:SettingsExpander>
-
-                <!-- Picture cache -->
-                <wct:SettingsExpander
-                    AutomationProperties.AutomationId="SettingsPage_PictureCacheExpander"
-                    x:Name="PictureCacheExpander"
-                    x:Load="{x:Bind ViewModel.IsPictureCachePanelVisible, Mode=OneWay}"
-                    Description="Pictures are copied onto this computer when the application starts, so the waitlist draws them from local disk instead of reaching across the network for each one. A picture that has changed on the share is copied again, and a copy whose picture has gone is removed. Nothing else is touched."
-                    Header="Picture Cache"
-                    HorizontalAlignment="Stretch"
-                    IsExpanded="False">
-                    <wct:SettingsExpander.HeaderIcon>
-                        <SymbolIcon Symbol="Download" />
-                    </wct:SettingsExpander.HeaderIcon>
-
-                    <wct:SettingsExpander.Items>
-                        <wct:SettingsCard
-                            Description="Applies to every computer, not just this one. Turned off, pictures are read from the network share."
-                            Header="Cache pictures on this computer">
-                            <ToggleSwitch
-                                AutomationProperties.AutomationId="SettingsPage_PictureCache_Toggle"
-                                AutomationProperties.Name="Cache pictures on this computer"
-                                IsOn="{x:Bind ViewModel.IsPictureCacheEnabled, Mode=TwoWay}"
-                                OffContent="Off"
-                                OnContent="On" />
+                            </Grid>
                         </wct:SettingsCard>
 
+                        <!-- The copies made on this computer, on the storage entitlement for the same reason as
+                             the folders above (research D10): the folder a machine copies from is a storage
+                             control, not a picture-permission one. -->
                         <wct:SettingsCard
-                            Description="Where the copies are kept. Each picture keeps the folder it has on the share, so the two trees read the same way."
-                            Header="Cache folder">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <TextBox
-                                    AutomationProperties.AutomationId="SettingsPage_PictureCache_FolderBox"
-                                    AutomationProperties.Name="Picture cache folder"
-                                    MinWidth="320"
-                                    PlaceholderText="%LOCALAPPDATA%\MTM_Waitlist\ImageCache"
-                                    Text="{x:Bind ViewModel.PictureCacheFolderInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                <Button
-                                    AutomationProperties.AutomationId="SettingsPage_PictureCache_SaveFolderButton"
-                                    AutomationProperties.Name="Save picture cache folder"
-                                    MinWidth="90"
-                                    Click="SavePictureCacheFolder_Click"
-                                    Content="Save" />
-                            </StackPanel>
-                        </wct:SettingsCard>
-
-                        <wct:SettingsCard
-                            Description="Runs the same copy the application runs when it starts, without waiting for a restart."
-                            Header="Copy pictures now">
-                            <StackPanel
-                                Orientation="Horizontal"
-                                Spacing="8">
-                                <Button
-                                    AutomationProperties.AutomationId="SettingsPage_PictureCache_RefreshButton"
-                                    AutomationProperties.Name="Copy pictures now"
-                                    MinWidth="110"
-                                    Click="RefreshPictureCache_Click"
-                                    Content="Copy now" />
-                                <ProgressRing
-                                    Width="20"
-                                    Height="20"
-                                    IsActive="{x:Bind ViewModel.IsPictureCacheBusy, Mode=OneWay}" />
+                            AutomationProperties.AutomationId="SettingsPage_Images_CacheCard"
+                            ContentAlignment="Vertical"
+                            HorizontalContentAlignment="Stretch"
+                            Visibility="{x:Bind ViewModel.IsPictureCachePanelVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <wct:SettingsCard.Header>
                                 <TextBlock
-                                    MaxWidth="420"
-                                    VerticalAlignment="Center"
-                                    Text="{x:Bind ViewModel.PictureCacheStatusMessage, Mode=OneWay}"
+                                    x:Uid="Settings_Images_CacheTitle"
+                                    Style="{ThemeResource BodyStrongTextBlockStyle}"
+                                    Text="Copies on this computer"
                                     TextWrapping="Wrap" />
-                            </StackPanel>
+                            </wct:SettingsCard.Header>
+                            <wct:SettingsCard.Description>
+                                <TextBlock
+                                    x:Uid="Settings_Images_CacheDescription"
+                                    Style="{StaticResource SettingsDescriptionStyle}"
+                                    Text="Pictures are copied onto this computer when the application starts, so the waitlist draws them from local disk instead of reaching across the network for each one. A picture that has changed on the share is copied again, and a copy whose picture has gone is removed. Nothing else is touched." />
+                            </wct:SettingsCard.Description>
+
+                            <Grid RowSpacing="18">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <Grid Grid.Row="0" Style="{StaticResource SettingsFormRowStyle}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock
+                                            x:Uid="Settings_Images_CacheToggleTitle"
+                                            Style="{StaticResource SettingsRowTitleStyle}"
+                                            Text="Cache pictures on this computer" />
+                                        <TextBlock
+                                            x:Uid="Settings_Images_CacheToggleDescription"
+                                            Style="{StaticResource SettingsDescriptionStyle}"
+                                            Text="Applies to every computer, not just this one. Turned off, pictures are read from the network share." />
+                                    </StackPanel>
+                                    <ToggleSwitch
+                                        AutomationProperties.AutomationId="SettingsPage_PictureCache_Toggle"
+                                        AutomationProperties.Name="Cache pictures on this computer"
+                                        Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        IsOn="{x:Bind ViewModel.IsPictureCacheEnabled, Mode=TwoWay}"
+                                        OffContent="Off"
+                                        OnContent="On" />
+                                </Grid>
+
+                                <Grid Grid.Row="1" Style="{StaticResource SettingsFormRowStyle}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock
+                                            x:Uid="Settings_Images_CacheFolderTitle"
+                                            Style="{StaticResource SettingsRowTitleStyle}"
+                                            Text="Cache folder" />
+                                        <TextBlock
+                                            x:Uid="Settings_Images_CacheFolderDescription"
+                                            Style="{StaticResource SettingsDescriptionStyle}"
+                                            Text="Where the copies are kept. Each picture keeps the folder it has on the share, so the two trees read the same way." />
+                                    </StackPanel>
+                                    <StackPanel
+                                        Grid.Column="1"
+                                        Orientation="Horizontal"
+                                        Spacing="8">
+                                        <TextBox
+                                            AutomationProperties.AutomationId="SettingsPage_PictureCache_FolderBox"
+                                            AutomationProperties.Name="Picture cache folder"
+                                            Style="{StaticResource SettingsFolderBoxStyle}"
+                                            PlaceholderText="%LOCALAPPDATA%\MTM_Waitlist\ImageCache"
+                                            Text="{x:Bind ViewModel.PictureCacheFolderInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                        <Button
+                                            AutomationProperties.AutomationId="SettingsPage_PictureCache_BrowseFolderButton"
+                                            AutomationProperties.Name="Browse for the picture cache folder"
+                                            Style="{StaticResource SettingsFolderButtonStyle}"
+                                            Command="{x:Bind ViewModel.BrowsePictureCacheFolderCommand}"
+                                            Content="{x:Bind ViewModel.ImagesBrowseLabel}"
+                                            Visibility="{x:Bind ViewModel.CanBrowseFolders, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                        <Button
+                                            AutomationProperties.AutomationId="SettingsPage_PictureCache_SaveFolderButton"
+                                            AutomationProperties.Name="Save picture cache folder"
+                                            x:Uid="Settings_Images_CacheFolderSave"
+                                            MinWidth="80"
+                                            VerticalAlignment="Center"
+                                            Click="SavePictureCacheFolder_Click"
+                                            Content="Save" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <Grid Grid.Row="2" Style="{StaticResource SettingsFormRowStyle}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="2">
+                                        <TextBlock
+                                            x:Uid="Settings_Images_CacheCopyTitle"
+                                            Style="{StaticResource SettingsRowTitleStyle}"
+                                            Text="Copy pictures now" />
+                                        <TextBlock
+                                            x:Uid="Settings_Images_CacheCopyDescription"
+                                            Style="{StaticResource SettingsDescriptionStyle}"
+                                            Text="Runs the same copy the application runs when it starts, without waiting for a restart." />
+                                    </StackPanel>
+                                    <StackPanel
+                                        Grid.Column="1"
+                                        Orientation="Horizontal"
+                                        Spacing="8">
+                                        <Button
+                                            AutomationProperties.AutomationId="SettingsPage_PictureCache_RefreshButton"
+                                            AutomationProperties.Name="Copy pictures now"
+                                            x:Uid="Settings_Images_CacheCopyAction"
+                                            MinWidth="140"
+                                            VerticalAlignment="Center"
+                                            Click="RefreshPictureCache_Click"
+                                            Content="Copy now" />
+                                        <ProgressRing
+                                            Width="20"
+                                            Height="20"
+                                            VerticalAlignment="Center"
+                                            IsActive="{x:Bind ViewModel.IsPictureCacheBusy, Mode=OneWay}" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <TextBlock
+                                    Grid.Row="3"
+                                    Style="{StaticResource SettingsDescriptionStyle}"
+                                    Text="{x:Bind ViewModel.PictureCacheStatusMessage, Mode=OneWay}" />
+                            </Grid>
                         </wct:SettingsCard>
                     </wct:SettingsExpander.Items>
                 </wct:SettingsExpander>

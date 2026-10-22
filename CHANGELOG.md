@@ -10,7 +10,27 @@
 
 ---
 
-## 2026-10-21 — you can look a work order up by number, part or customer instead of remembering it
+## 2026-10-22 — a dunnage request now shows the picture of the dunnage part you asked for
+
+**What changed:** the waitlist card for a **Pickup Dunnage** or **Deliver Dunnage** request used to draw the
+no-image picture every time, even when the dunnage part had a picture. It now draws that part's picture, the same
+one the dunnage step of a new request shows.
+
+**Why it matters:** the picture is how a handler recognises the thing to go and fetch. A dunnage request whose card
+said "no picture" while the part's picture existed made the card look like a part nobody had pictured, and the
+handler had nothing to recognise until they read the part number.
+
+**What to expect:**
+
+- **The picture is the part the second line names.** A request that reads `Dunnage part: 40 x 48` draws the
+  picture of that dunnage part, on the card and on the request page.
+- **A part with no picture still shows the no-image picture,** exactly as before — including a dunnage part the
+  requesting job does not carry and nobody pictured.
+- **Nothing else about the card changed:** the two lines, the status word, the ring and the detail cells read what
+  they read before.
+
+---
+
 
 **What changed:** the Work Order box on **Start Setup** now has a magnifier beside it. It opens **Find a Work
 Order**, where you type any part of the work order number, the part number, or the customer's name, and the open

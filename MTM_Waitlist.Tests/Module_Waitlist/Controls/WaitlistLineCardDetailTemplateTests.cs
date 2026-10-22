@@ -151,13 +151,13 @@ public sealed class WaitlistLineCardDetailTemplateTests
 
     /// <summary>
     /// The three cell templates share one type scale, one gap between the label and its value, and one left edge,
-    /// so a description cell and a plain cell beside it do not read at two different sizes or sit on two different
-    /// axes (FR-028, FR-053).
+    /// so a description cell and a plain cell beside it do not read at two different sizes or start at two
+    /// different places (FR-028, FR-053).
     /// </summary>
     /// <remarks>
-    /// The left edge is not a preference here. A description cell's value field is stretched to the full slot so a
-    /// long line can overflow and scroll, which means it cannot centre what it draws; a centred neighbour beside it
-    /// would put the two halves of one row on different axes. Every cell therefore starts from the same edge.
+    /// The left edge is the cells' own; the card centres the grid they sit in, which is what keeps a panel whose
+    /// lower row is empty in the middle of its section rather than against the top of it (FR-027). Centring each
+    /// pair inside its cell was tried and rejected: it puts the six cells' contents on six different axes.
     /// </remarks>
     [TestMethod]
     public void UI_WaitlistLineCardDetailTemplateTests_EveryCellTemplate_SharesTheOneTypeScaleGapAndLeftEdge()
@@ -183,7 +183,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
             Assert.AreEqual(
                 "Stretch",
                 (string?)grid.Attribute("HorizontalAlignment"),
-                $"{anatomy} does not start its label and value at the cell's left edge, so one row of cells sits on two axes (FR-028).");
+                $"{anatomy} does not start its label and value at the cell's left edge, so one row of cells starts at one place and the next at another (FR-028).");
 
             var label = root
                 .Descendants(s_presentation + "TextBlock")
@@ -517,13 +517,6 @@ public sealed class WaitlistLineCardDetailTemplateTests
                 cells > 2,
                 WaitlistCardCellLayout.CarriesBottomRow(cells),
                 $"With {cells} cells the panel's bottom row is drawn when it should collapse, or the reverse (FR-026).");
-
-            // No cells is the same statement as no data: the title pair is then the whole of the zone's
-            // content and is centred in the card, and any other count keeps it over its cells (FR-027).
-            Assert.AreEqual(
-                cells == 0,
-                WaitlistCardCellLayout.TitleIsCentred(cells),
-                $"With {cells} cells the title pair is centred when it should sit over its cells, or the reverse (FR-027).");
         }
 
         // And every template reads that rule off the row's own cell count rather than hard-setting a shape.

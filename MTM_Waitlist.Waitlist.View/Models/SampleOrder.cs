@@ -200,7 +200,8 @@ public sealed class SampleOrder : INotifyPropertyChanged
     public string MaterialPartScope { get; set; } = string.Empty;
 
     /// <summary>
-    /// The material part's picture, resolved by the list before this row reached the bound collection. Carried
+    /// The material part's picture, resolved by the list before this row reached the bound collection — or, for a
+    /// dunnage request, the chosen dunnage part's picture, which only the requesting job can answer. Carried
     /// rather than computed: the model is plain data and knows neither a storage root nor a picture rule.
     /// Empty when nothing resolved, which draws the shared placeholder.
     /// </summary>
@@ -209,8 +210,9 @@ public sealed class SampleOrder : INotifyPropertyChanged
     public string WorkCenterImagePath { get; set; } = string.Empty;
 
     /// <summary>
-    /// The picture the card draws: the <b>material part's</b> picture, and the application's one shared
-    /// no-image placeholder when the request names no part or its part cannot be pictured.
+    /// The picture the card draws: the <b>part the request is about</b> — the material part, or the dunnage part
+    /// an operator chose — and the application's one shared no-image placeholder when the request names no part
+    /// or its part cannot be pictured.
     /// </summary>
     /// <remarks>
     /// The picture for the kind of request is deliberately not drawn here. A card that showed its Item's artwork

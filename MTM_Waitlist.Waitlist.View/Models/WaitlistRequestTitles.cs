@@ -151,6 +151,45 @@ public static class WaitlistRequestTitles
     }
 
     /// <summary>
+    /// The picture of the <b>dunnage part</b> the operator chose, or <see langword="null"/> when the request names
+    /// no dunnage part or its part carries no picture.
+    /// </summary>
+    /// <param name="context">The values the Item's templates resolve against, whose <c>dunnage_part</c> answer is
+    /// the part the operator ended on.</param>
+    /// <param name="jobAvailability">The requesting job, which is where a dunnage part's picture is held.</param>
+    /// <returns>The chosen part's picture as an absolute path, or <see langword="null"/>.</returns>
+    /// <remarks>
+    /// <para>
+    /// A dunnage request is about the dunnage part the operator picked, so the card draws that part's picture —
+    /// the same part its second line names. Without this the dunnage Items resolve to no picture at all: their
+    /// identifier names <c>{dunnage_part}</c> and not <c>{part_number}</c>, so
+    /// <see cref="ResolveMaterialPartNumber"/> answers nothing for them and the card always drew the placeholder
+    /// even when the part had a picture (FR-019).
+    /// </para>
+    /// <para>
+    /// The path is read from the job rather than resolved by the part-picture resolver, because a dunnage part's
+    /// picture is stored against the receiving store's dunnage catalogue and lives under the dunnage picture root,
+    /// not under the part-picture storage the resolver owns. The job snapshot already carries it, resolved and
+    /// checked, so this costs no read of its own.
+    /// </para>
+    /// </remarks>
+    public static string? ResolveDunnagePartPicturePath(
+        RequestItemLine2Context? context,
+        RequestJobPartAvailability? jobAvailability)
+    {
+        var dunnagePartNumber = Trimmed(context?.DunnagePart);
+        if (dunnagePartNumber is null || jobAvailability is null)
+        {
+            return null;
+        }
+
+        var part = jobAvailability.DunnageParts.FirstOrDefault(candidate =>
+            string.Equals(candidate?.PartNumber?.Trim(), dunnagePartNumber, StringComparison.OrdinalIgnoreCase));
+
+        return Trimmed(part?.ImagePath);
+    }
+
+    /// <summary>
     /// The same rule for the Items whose part comes from the job alone, so a surface that has no request in hand
     /// — the confirmation step before the request exists — can still ask it. A component Item answers nothing
     /// here: its part is the operator's answer, which only the request carries.

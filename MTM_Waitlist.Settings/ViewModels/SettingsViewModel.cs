@@ -858,17 +858,10 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         "item",
         "work center");
 
-    /// <summary>The storage panel's heading.</summary>
-    public string StoragePathsPanelTitle => "Settings_StoragePaths_SectionTitle.Text".GetLocalized();
-
-    /// <summary>What the storage panel holds, in a sentence.</summary>
-    public string StoragePathsPanelDescription => "Settings_StoragePaths_Description.Text".GetLocalized();
-
     /// <summary>The label on the picture-folder box.</summary>
     public string StoragePathsImageFolderLabel => "Settings_StoragePaths_ImageFolder.Label".GetLocalized();
 
-    /// <summary>The label on the key-folder box.</summary>
-
+    /// <summary>The label on the dunnage-picture-root box.</summary>
     public string StoragePathsDunnageRootLabel => "Settings_StoragePaths_DunnageRoot.Label".GetLocalized();
 
     /// <summary>The label on the hopper-picture-folder box (FR-078).</summary>
@@ -945,6 +938,40 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
             "images",
             "pictures");
 
+    /// <summary>
+    /// The single Pictures panel: the picture assignments, the picture folders and the copies kept on this
+    /// computer sit behind one heading rather than behind three.
+    /// </summary>
+    /// <remarks>
+    /// The panel is the union of its cards and is never gated on its own. Each card inside it keeps the
+    /// entitlement it had, so a person holding only the picture entitlement, or only the storage one, sees the
+    /// panel and only the card they may use (FR-017, FR-024, FR-025).
+    /// </remarks>
+    public bool IsImagesPanelVisible =>
+        IsPartPicturesEntryVisible
+        || IsImageLocationSettingsPanelVisible
+        || IsStoragePathsPanelVisible
+        || IsPictureCachePanelVisible;
+
+    /// <summary>Whether the Pictures panel offers the card holding the picture assignments.</summary>
+    public bool IsPictureAssignmentsVisible =>
+        IsImageLocationSettingsPanelVisible || IsPartPicturesEntryVisible;
+
+    /// <summary>The Pictures panel's heading.</summary>
+    public string ImagesPanelTitle => "Settings_Images_SectionTitle.Text".GetLocalized();
+
+    /// <summary>What the Pictures panel holds, in a sentence.</summary>
+    public string ImagesPanelDescription => "Settings_Images_Description.Text".GetLocalized();
+
+    /// <summary>The caption on every folder choice in the Pictures panel.</summary>
+    public string ImagesBrowseLabel => "Settings_Images_Browse.Text".GetLocalized();
+
+    /// <summary>
+    /// Whether this host can show a folder dialog at all. A host with no dialog draws no Browse button, because a
+    /// button that would do nothing reads as a broken screen rather than as an unregistered service.
+    /// </summary>
+    public bool CanBrowseFolders => _folderBrowserService is not null;
+
     public bool IsComputersPanelVisible => ComputerManagement.CanManageComputers && MatchesSearch(
         "computer",
         "computers",
@@ -953,7 +980,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         "display name",
         string.Join(" ", ComputerManagement.Computers.Select(record => record.GetDisplayLabel())));
 
-    public bool IsOperationsCategoryVisible => IsHotWorkCentersPanelVisible || IsDunnageTypeVisibilityPanelVisible || IsImageLocationSettingsPanelVisible || IsPictureCachePanelVisible || IsPartPicturesEntryVisible || IsComputersPanelVisible || IsIgnoredLocationsPanelVisible || IsSessionLengthPanelVisible || IsDeveloperLogPanelVisible || IsLogStoreLevelPanelVisible || IsNewRequestAlertsPanelVisible || IsUrgencyAllotmentsPanelVisible;
+    public bool IsOperationsCategoryVisible => IsHotWorkCentersPanelVisible || IsDunnageTypeVisibilityPanelVisible || IsImagesPanelVisible || IsComputersPanelVisible || IsIgnoredLocationsPanelVisible || IsSessionLengthPanelVisible || IsDeveloperLogPanelVisible || IsLogStoreLevelPanelVisible || IsNewRequestAlertsPanelVisible || IsUrgencyAllotmentsPanelVisible;
 
     public bool IsAboutCategoryVisible => IsAboutPanelVisible;
 
@@ -2027,16 +2054,44 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     /// </para>
     /// </remarks>
     [RelayCommand]
-    private async Task BrowseHopperFolderAsync()
+    private Task BrowseHopperFolderAsync() => BrowseIntoAsync(
+        HopperFolderInput,
+        chosen => HopperFolderInput = chosen,
+        ConfigSettingKeys.ImageStorageHopperFolderPathDefault);
+
+    /// <summary>Opens the folder dialog at the picture folder and puts the chosen folder in the box.</summary>
+    [RelayCommand]
+    private Task BrowsePictureFolderAsync() => BrowseIntoAsync(
+        PictureFolderInput,
+        chosen => PictureFolderInput = chosen);
+
+    /// <summary>Opens the folder dialog at the dunnage picture root and puts the chosen folder in the box.</summary>
+    [RelayCommand]
+    private Task BrowseDunnageRootAsync() => BrowseIntoAsync(
+        DunnageRootInput,
+        chosen => DunnageRootInput = chosen);
+
+    /// <summary>Opens the folder dialog at the cache folder and puts the chosen folder in the box.</summary>
+    [RelayCommand]
+    private Task BrowsePictureCacheFolderAsync() => BrowseIntoAsync(
+        PictureCacheFolderInput,
+        chosen => PictureCacheFolderInput = chosen);
+
+    /// <summary>
+    /// Asks for a folder, starting where the box points, and hands the answer to the caller.
+    /// </summary>
+    /// <remarks>
+    /// One implementation for every box in the Pictures panel, so all four behave the same way: nothing chosen
+    /// leaves the box alone, and nothing is stored — the Save beside the box is what stores a path.
+    /// </remarks>
+    private async Task BrowseIntoAsync(string? current, Action<string> apply, string? fallback = null)
     {
         if (_folderBrowserService is null)
         {
             return;
         }
 
-        var startingFolder = string.IsNullOrWhiteSpace(HopperFolderInput)
-            ? ConfigSettingKeys.ImageStorageHopperFolderPathDefault
-            : HopperFolderInput.Trim();
+        var startingFolder = string.IsNullOrWhiteSpace(current) ? fallback : current.Trim();
 
         var chosen = await _folderBrowserService
             .PickFolderAsync(startingFolder, CancellationToken.None)
@@ -2044,7 +2099,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
         if (!string.IsNullOrWhiteSpace(chosen))
         {
-            HopperFolderInput = chosen;
+            apply(chosen);
         }
     }
 
@@ -2282,6 +2337,8 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         }
 
         // The category aggregates are computed from the panels above, so they announce after them.
+        OnPropertyChanged(nameof(IsImagesPanelVisible));
+        OnPropertyChanged(nameof(IsPictureAssignmentsVisible));
         OnPropertyChanged(nameof(IsAppearanceCategoryVisible));
         OnPropertyChanged(nameof(IsOperationsCategoryVisible));
         OnPropertyChanged(nameof(IsAboutCategoryVisible));

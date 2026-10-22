@@ -1174,6 +1174,12 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         // A request that names no material carries none, and its card draws the one shared placeholder (FR-020).
         var materialPartNumber = WaitlistRequestTitles.ResolveMaterialPartNumber(request, jobAvailability);
 
+        // A dunnage request carries no material part, but it is just as much about one thing the operator picked:
+        // the dunnage part, which is the part its second line names. Its picture is carried here for the same
+        // reason the material part's is resolved where the job is in hand — neither surface's picture resolver can
+        // see the dunnage catalogue, so a dunnage card would otherwise always draw the placeholder.
+        var dunnagePartPicturePath = WaitlistRequestTitles.ResolveDunnagePartPicturePath(context, jobAvailability);
+
         var item = new SampleOrder
         {
             Id = request.Id.GetHashCode(),
@@ -1184,6 +1190,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
                 ? context.Component?.Trim() ?? string.Empty
                 : string.Empty,
             MaterialPartScope = materialPartNumber is null ? string.Empty : PartPictureLayout.VisualPartScope,
+            // Empty for every request that is not about a dunnage part, which draws the one shared placeholder.
+            ResolvedPartImagePath = dunnagePartPicturePath ?? string.Empty,
             RequesterEmployeeNumber = request.RequesterEmployeeNumber,
             AssignedMaterialHandler = request.AssignedMaterialHandler,
             AssignedMaterialHandlerName = request.AssignedMaterialHandlerName,
@@ -1663,8 +1671,10 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     /// <summary>
     /// Resolves the row's <b>material part's</b> picture and carries it on the row, so the card draws a value it
     /// was handed. A request that names no material, and a material whose picture cannot be resolved, both leave
-    /// the row empty — and the card then draws the one shared placeholder rather than a picture of the kind of
-    /// request or the part's family (FR-014, FR-019, FR-020).
+    /// the row as it was — and the card then draws the one shared placeholder rather than a picture of the kind of
+    /// request or the part's family (FR-014, FR-019, FR-020). A dunnage request is left alone here for the same
+    /// reason: it names no material part, and the dunnage part's picture is already carried by
+    /// <see cref="CreateSessionOrder"/>, which is where the requesting job is in hand.
     /// </summary>
     /// <remarks>
     /// A resolver that cannot answer is not worth failing the whole list for: the row keeps its placeholder, the

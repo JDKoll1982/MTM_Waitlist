@@ -45,13 +45,13 @@
 
     <!--
         One cell: the label the declaration carries, then its value on the same line, a real gap between them, the
-        pair left-justified in its own slot, and a hairline along its top and left edge only where another cell
+        pair read from the cell's left edge, and a hairline along its top and left edge only where another cell
         meets it - never around the outside of the cell area (FR-028).
 
-        Every cell lines its pair up from the left, the scrolling description cell included: that cell's value
-        field has to be as wide as the slot for a long description to overflow and scroll, so it cannot centre what
-        it draws. A centred pair beside it would put the two cells of one row on two different axes, so the plain
-        and pictured cells start at the same edge rather than matching a centre the card cannot keep.
+        Left is where the pair starts, and the whole cell area is left-aligned with it: the grid those cells sit in
+        is the thing the card centres, in its own area, so a panel whose lower row is empty keeps its cells in the
+        middle of the section instead of against the top of it. Centring each pair instead was tried and put the
+        six cells' contents on six different axes (FR-027).
 
         The pair is told apart the way a modern data row is: the label small, secondary and semibold, the value a
         step larger, semibold and in the primary text colour, so the answer reads first and the question that
@@ -96,8 +96,9 @@
         says its value is a description.
 
         Its value column is `*` rather than `Auto`, which is what gives the line a field narrower than the words in
-        it: a control measured to its own text would never overflow and so would never scroll. That is the one
-        difference from the plain cell's anatomy, and it is why this is a template of its own.
+        it: a control measured to its own text would never overflow and so would never scroll. The label still
+        starts at the cell's left edge like every other cell, so the pair reads the same way across the panel.
+        That is the one difference from the plain cell's anatomy, and it is why this is a template of its own.
     -->
     <DataTemplate x:Key="WaitlistLineCardDetailScrollingCell">
         <Border

@@ -636,19 +636,17 @@ public sealed class WaitlistLineCardMarkupTests
             "Order",
             "The cell area is not handed the row it must draw (FR-025).");
 
-        // A row that resolved no data centres its title pair in the card, and the zone's alignment follows the
-        // row's own cell count rather than being fixed: a title pair left at the top of a full-height zone reads
-        // as a card whose contents failed to load (FR-027).
-        var alignment = (string?)detail.Attribute("VerticalAlignment") ?? string.Empty;
+        // The grid as a whole is centred in its area, whether or not its lower rows are filled: a card holding two
+        // cells was pinned to the top of a taller section and its grid read as dropped in from above rather than
+        // placed in its area (FR-027).
+        Assert.AreEqual(
+            "Center",
+            (string?)detail.Attribute("VerticalAlignment") ?? string.Empty,
+            "The detail grid is not centred in its area, so a grid whose lower row is empty sits against the top of the section (FR-027).");
 
-        StringAssert.Contains(
-            alignment,
-            "WaitlistCardTitleAlignmentConverter",
-            "The detail zone's alignment is fixed, so a row that resolved no data leaves its title pair at the top (FR-027).");
-        StringAssert.Contains(
-            alignment,
-            "Cells.Count",
-            "The zone's alignment is not decided by whether the row filled any cells, so a row with data could be centred (FR-027).");
+        Assert.IsFalse(
+            ((string?)detail.Attribute("VerticalAlignment") ?? string.Empty).Contains("Cells.Count", StringComparison.Ordinal),
+            "The grid's alignment still follows the row's cell count, so a short grid and a full one are placed differently (FR-027).");
 
         // The rows a row with no data vacates leave nothing behind: the zone adds no spacing of its own, and the
         // gap between the title and the cells is owned by the cell area, which is collapsed on the same count

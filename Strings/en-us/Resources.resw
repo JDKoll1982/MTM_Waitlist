@@ -2369,11 +2369,88 @@
   <data name="Settings_PartPictures_Missing_NotListable.Text" xml:space="preserve">
     <value>{0} part numbers cannot be listed here: they are not read by any list this application already holds. Type one in above to give it a picture.</value>
   </data>
-  <data name="Settings_StoragePaths_SectionTitle.Text" xml:space="preserve">
-    <value>Where pictures are kept</value>
+  <!-- The single Pictures panel: the picture assignments, the picture folders and the copies kept on this
+       computer, behind one heading. -->
+  <data name="Settings_Images_SectionTitle.Text" xml:space="preserve">
+    <value>Pictures</value>
   </data>
-  <data name="Settings_StoragePaths_Description.Text" xml:space="preserve">
-    <value>The folder every picture sits under, the folder holding the key files, and how long a replaced picture is kept.</value>
+  <data name="Settings_Images_Description.Text" xml:space="preserve">
+    <value>The pictures the application shows, where the picture files are kept, and the copies made on this computer.</value>
+  </data>
+  <data name="Settings_Images_Browse.Text" xml:space="preserve">
+    <value>Browse…</value>
+  </data>
+  <data name="Settings_Images_AssignmentsTitle.Text" xml:space="preserve">
+    <value>Pictures the app shows</value>
+  </data>
+  <data name="Settings_Images_AssignmentsDescription.Text" xml:space="preserve">
+    <value>Which picture an item or a work center resolves. An item with no picture of its own shows its category's picture.</value>
+  </data>
+  <data name="Settings_Images_ItemPicturesTitle.Text" xml:space="preserve">
+    <value>Item pictures</value>
+  </data>
+  <data name="Settings_Images_ItemPicturesDescription.Text" xml:space="preserve">
+    <value>Manage the picture each item uses across the request screens and the waitlist.</value>
+  </data>
+  <data name="Settings_Images_ItemPicturesAction.Content" xml:space="preserve">
+    <value>Manage items</value>
+  </data>
+  <data name="Settings_Images_WorkCenterPicturesTitle.Text" xml:space="preserve">
+    <value>Work center pictures</value>
+  </data>
+  <data name="Settings_Images_WorkCenterPicturesDescription.Text" xml:space="preserve">
+    <value>Review and override the pictures used for active work-center selections and detail pages.</value>
+  </data>
+  <data name="Settings_Images_WorkCenterPicturesAction.Content" xml:space="preserve">
+    <value>Manage work centers</value>
+  </data>
+  <data name="Settings_Images_PartPicturesAction.Content" xml:space="preserve">
+    <value>Open part pictures</value>
+  </data>
+  <data name="Settings_Images_FoldersTitle.Text" xml:space="preserve">
+    <value>Where the picture files are kept</value>
+  </data>
+  <data name="Settings_Images_FoldersDescription.Text" xml:space="preserve">
+    <value>The folders every picture is read from, and how long a replaced picture is kept. A hopper folder given as a relative path is read under the picture folder.</value>
+  </data>
+  <data name="Settings_Images_PictureFolderDescription.Text" xml:space="preserve">
+    <value>The single folder every picture sits under on the share.</value>
+  </data>
+  <data name="Settings_Images_DunnageRootDescription.Text" xml:space="preserve">
+    <value>The root the dunnage pictures are read from, one folder per dunnage type and part beneath it.</value>
+  </data>
+  <data name="Settings_Images_KeepDaysDescription.Text" xml:space="preserve">
+    <value>How long a replaced picture is set aside before the cleanup removes it.</value>
+  </data>
+  <data name="Settings_Images_CacheTitle.Text" xml:space="preserve">
+    <value>Copies on this computer</value>
+  </data>
+  <data name="Settings_Images_CacheDescription.Text" xml:space="preserve">
+    <value>Pictures are copied onto this computer when the application starts, so the waitlist draws them from local disk instead of reaching across the network for each one. A picture that has changed on the share is copied again, and a copy whose picture has gone is removed. Nothing else is touched.</value>
+  </data>
+  <data name="Settings_Images_CacheToggleTitle.Text" xml:space="preserve">
+    <value>Cache pictures on this computer</value>
+  </data>
+  <data name="Settings_Images_CacheToggleDescription.Text" xml:space="preserve">
+    <value>Applies to every computer, not just this one. Turned off, pictures are read from the network share.</value>
+  </data>
+  <data name="Settings_Images_CacheFolderTitle.Text" xml:space="preserve">
+    <value>Cache folder</value>
+  </data>
+  <data name="Settings_Images_CacheFolderDescription.Text" xml:space="preserve">
+    <value>Where the copies are kept. Each picture keeps the folder it has on the share, so the two trees read the same way.</value>
+  </data>
+  <data name="Settings_Images_CacheFolderSave.Content" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Settings_Images_CacheCopyTitle.Text" xml:space="preserve">
+    <value>Copy pictures now</value>
+  </data>
+  <data name="Settings_Images_CacheCopyDescription.Text" xml:space="preserve">
+    <value>Runs the same copy the application runs when it starts, without waiting for a restart.</value>
+  </data>
+  <data name="Settings_Images_CacheCopyAction.Content" xml:space="preserve">
+    <value>Copy now</value>
   </data>
   <data name="Settings_StoragePaths_ImageFolder.Label" xml:space="preserve">
     <value>Picture folder</value>

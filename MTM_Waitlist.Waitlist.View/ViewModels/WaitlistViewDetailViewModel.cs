@@ -1021,7 +1021,11 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
             || string.IsNullOrWhiteSpace(item.MaterialPartNumber)
             || string.IsNullOrWhiteSpace(item.MaterialPartScope))
         {
-            return string.Empty;
+            // A row that names no material part has nothing to resolve here, so it keeps the picture it was handed.
+            // A dunnage request's picture is the chosen dunnage part's, carried by the row because the requesting
+            // job was the only place it could be read; answering empty would take that picture away on the way to
+            // the page.
+            return item.ResolvedPartImagePath;
         }
 
         try

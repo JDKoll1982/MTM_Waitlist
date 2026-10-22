@@ -63,8 +63,9 @@ and the request's own identifier** (FR-007). The detail cells occupy rows 2 and 
 
 The cells a card shows are determined by the request's Item and are never chosen per row (FR-025). Every cell reads
 `Label: value` on one line — the label small, secondary and semibold, the value a step larger, semibold and in the
-primary text colour, with a real gap between them and the pair starting from the cell's left edge — apart from the
-label-less die-shop cell (FR-028).
+primary text colour, with a real gap between them and the pair starting at the cell's left edge — apart from the
+label-less die-shop cell (FR-028). The grid those cells sit in is centred in its area, so a panel whose lower row is
+empty stays in the middle of the section (FR-027).
 
 **Geometry by the number of cells the Item declares** (FR-026, FR-027):
 
