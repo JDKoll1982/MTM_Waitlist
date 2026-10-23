@@ -68,6 +68,9 @@ public static class RequestDispositionMapper
             NextOperationResourceId = GetString(row, "NextOperationResourceId"),
             HasRemainingOperation = GetNullableBool(row, "HasRemainingOperation"),
             HasCustomerDemand = GetNullableBool(row, "HasCustomerDemand"),
+            ProductCode = GetString(row, "ProductCode"),
+            CommodityCode = GetString(row, "CommodityCode"),
+            PartDescription = GetString(row, "PartDescription"),
         };
     }
 

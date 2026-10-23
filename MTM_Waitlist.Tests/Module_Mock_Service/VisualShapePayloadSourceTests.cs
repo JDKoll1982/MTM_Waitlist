@@ -71,7 +71,10 @@ public sealed class VisualShapePayloadSourceTests
             ("HasOutsideVendorOperation", true),
             ("NextOperationResourceId", "OUTSIDE_SERVICE"),
             ("HasRemainingOperation", 1),
-            ("HasCustomerDemand", 1)));
+            ("HasCustomerDemand", 1),
+            ("ProductCode", "FG_PRESS"),
+            ("CommodityCode", "E Stamped Item"),
+            ("PartDescription", "Bracket-Shipping")));
 
         var source = new VisualShapePayloadSource(executor, NullLogger<VisualShapePayloadSource>.Instance);
         var payload = await source.BuildRefreshPayloadAsync(RequireShape("disposition_input"));
@@ -98,7 +101,10 @@ public sealed class VisualShapePayloadSourceTests
             ("HasOutsideVendorOperation", false),
             ("NextOperationResourceId", null),
             ("HasRemainingOperation", 0),
-            ("HasCustomerDemand", 0)));
+            ("HasCustomerDemand", 0),
+            ("ProductCode", "RM_PRESS"),
+            ("CommodityCode", "M Matl Coil"),
+            ("PartDescription", "Coil, .018 X 24.203")));
 
         var source = new VisualShapePayloadSource(executor, NullLogger<VisualShapePayloadSource>.Instance);
         var payload = await source.BuildRefreshPayloadAsync(RequireShape("disposition_input"));
@@ -227,5 +233,6 @@ public sealed class VisualShapePayloadSourceTests
         }
     }
 }
+
 
 

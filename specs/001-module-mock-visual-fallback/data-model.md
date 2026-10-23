@@ -190,6 +190,9 @@ Source: `Module_Waitlist/Queries/GetDispositionInput.sql` · Caller: `RequestDis
 | `next_operation_resource_id` | `VARCHAR(16) NULL` | out — `RESOURCE_ID` of the first open operation after the job's own; `OUTSIDE_SERVICE` means Outside Service (research 2026-10-23) |
 | `has_remaining_operation` | `TINYINT(1) NULL` | out — 1 = an open operation remains **after** the job's own → WIP; 0 = nothing follows; NULL = the routing was not read |
 | `has_customer_demand` | `TINYINT(1) NULL` | out — 1 = the part has customer-order lines in Visual (it is a part the plant sells); NULL = not read. Decides Finished Goods against WIP once nothing follows the job's own operation |
+| `product_code` | `VARCHAR(64) NULL` | out — `PART.PRODUCT_CODE`, the plant's part category (`FG_PRESS`, `RM_PRESS`, `MFG_TOOLING`, `FG_DIE`, `RM_DIE`, `EXP_*`) |
+| `commodity_code` | `VARCHAR(64) NULL` | out — `PART.COMMODITY_CODE`, the material or part kind (`E Stamped Item`, `M Matl Coil`, `M Fast Fastener`, …) |
+| `part_description` | `VARCHAR(256) NULL` | out — `PART.DESCRIPTION`, whose words break a customer-supplied tie |
 | `refreshed_utc` | DATETIME NOT NULL | metadata |
 | `is_seed_content` | TINYINT(1) NOT NULL DEFAULT 0 | metadata |
 

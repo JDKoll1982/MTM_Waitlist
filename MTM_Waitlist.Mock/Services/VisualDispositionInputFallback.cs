@@ -57,5 +57,8 @@ public sealed class VisualDispositionInputFallback
         NextOperationResourceId = VisualRowReader.GetNullableString(row, "NextOperationResourceId"),
         HasRemainingOperation = VisualRowReader.GetNullableBoolean(row, "HasRemainingOperation"),
         HasCustomerDemand = VisualRowReader.GetNullableBoolean(row, "HasCustomerDemand"),
+        ProductCode = VisualRowReader.GetString(row, "ProductCode"),
+        CommodityCode = VisualRowReader.GetString(row, "CommodityCode"),
+        PartDescription = VisualRowReader.GetString(row, "PartDescription"),
     };
 }

@@ -121,7 +121,10 @@ public static class VisualReadShapeCatalog
                 new VisualShapeColumn("HasOutsideVendorOperation", "bit"),
                 new VisualShapeColumn("NextOperationResourceId", "nvarchar(16)"),
                 new VisualShapeColumn("HasRemainingOperation", "bit"),
-                new VisualShapeColumn("HasCustomerDemand", "bit")
+                new VisualShapeColumn("HasCustomerDemand", "bit"),
+                new VisualShapeColumn("ProductCode", "nvarchar(64)"),
+                new VisualShapeColumn("CommodityCode", "nvarchar(64)"),
+                new VisualShapeColumn("PartDescription", "nvarchar(256)")
             ]
         },
         new VisualReadShape

@@ -56,7 +56,8 @@ CALL sp_visual_inventory_locations_get('VAL-P1');
 CALL sp_visual_disposition_input_refresh(
     '[{"WorkOrder":"VAL-WO","PartNumber":"VAL-P1","WorkCenter":"100-12","WorkOrderStatus":"R",
        "OpenWorkOrderQuantity":40,"FinishedGoodsQuantity":12.5,"HasOutsideVendorOperation":1,
-       "NextOperationResourceId":"OUTSIDE_SERVICE","HasRemainingOperation":1,"HasCustomerDemand":1}]');
+       "NextOperationResourceId":"OUTSIDE_SERVICE","HasRemainingOperation":1,"HasCustomerDemand":1,
+       "ProductCode":"FG_PRESS","CommodityCode":"E Stamped Item","PartDescription":"Bracket, Validation"}]');
 SELECT '5. disposition_input' AS shape;
 CALL sp_visual_disposition_input_get('VAL-WO', 'VAL-P1', '100-12');
 

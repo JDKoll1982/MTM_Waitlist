@@ -172,11 +172,16 @@ public static class RequestJobFieldValues
             "coil description" => Trimmed(job.CoilDescription),
             "average coil weight" => Trimmed(job.CoilAverageWeight),
 
-            // The item type of the job's part: the component Items declare `Item Type` and the four returning
-            // pickups declare `Part Type`, and both read the one derivation the snapshot carries rather than a
-            // second derivation of their own (FR-091, FR-092, research R1). A disposition nothing has derived
-            // answers nothing, so the cell is left out rather than filled with a guess (FR-089).
-            "part type" or "item type" => RequestDispositionLabels.Of(job.Disposition),
+            // The kind of part the job makes, read from the plant's own PRODUCT_CODE and COMMODITY_CODE. This is
+            // what the card's `Part Type` cell draws (redefined 2026-10-23): coil, flatstock, hardware, stamped
+            // part and so on. It answers nothing when neither code named a kind, so the cell is left out rather
+            // than filled with a guess (FR-089).
+            "part type" => RequestPartTypeLabels.Of(job.PartType),
+
+            // The item type of the component Items, which reads the job's product disposition — what state the part
+            // the job is making is in. A disposition nothing has derived answers nothing, so the cell is left out
+            // rather than filled with a guess (FR-089).
+            "item type" => RequestDispositionLabels.Of(job.Disposition),
 
             // Where the job's dunnage lives: one entry per part, so the dunnage Items' row names every home
             // location the job records, in the job's own order. A job whose parts record none yields nothing —

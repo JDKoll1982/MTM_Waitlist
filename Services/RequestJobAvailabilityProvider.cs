@@ -228,27 +228,29 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
         string? workCenter,
         CancellationToken cancellationToken)
     {
-        RequestDisposition disposition;
+        RequestJobClassification classification;
         try
         {
-            disposition = await _dispositionResolver
-                .GetDispositionAsync(snapshot.WorkOrder, snapshot.PartNumber, workCenter, cancellationToken)
+            classification = await _dispositionResolver
+                .GetClassificationAsync(snapshot.WorkOrder, snapshot.PartNumber, workCenter, cancellationToken)
                 .ConfigureAwait(false);
         }
         catch (Exception ex)
         {
             // The derivation needs both the plant system and the floor store, and neither may take the snapshot
             // down with it: without it the part-kind gates are exactly what they were before, the four returning
-            // pickups stay hidden, and the failure is recorded rather than turned into a value nothing supports
-            // (FR-089). The caller's own catch is the last resort, not the first.
+            // pickups stay hidden, no item type is reported, and the failure is recorded rather than turned into a
+            // value nothing supports (FR-089). The caller's own catch is the last resort, not the first.
             AppLog.Error(
                 "WaitlistNewRequest",
                 ex,
-                $"The disposition for job '{snapshot.WorkOrder}' part '{snapshot.PartNumber}' could not be derived, so the returning pickups stay hidden and no item type is reported.");
+                $"The classification for job '{snapshot.WorkOrder}' part '{snapshot.PartNumber}' could not be derived, so the returning pickups stay hidden and no item type is reported.");
             return availability;
         }
 
-        return availability.WithDisposition(disposition);
+        return availability
+            .WithDisposition(classification.Disposition)
+            .WithPartType(classification.PartType);
     }
 
     /// <summary>Pure mapping, so the translation from a job snapshot to the snapshot flags is unit-testable.</summary>

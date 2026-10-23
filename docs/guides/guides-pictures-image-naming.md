@@ -110,10 +110,12 @@ Application\Images` (reached as `X:\MH_RESOURCE\...\Images` on a machine that ma
 
 Rules specific to this folder:
 
-- **Exactly three files, exactly these names.** `Small`, `Medium`, `Large`, each capitalised as written, with the
-  `.png` extension. These three words are the size answers the New Request wizard records, and the same words are
-  what the card resolves, so a file named `MEDIUM.png`, `Medium Hopper.png` or `Med.png` is never found.
-- **The extension is `.png`.** The part-picture rule above accepts three extensions; this folder expects `.png`.
+- **Exactly three files, exactly these names.** `Small`, `Medium`, `Large`, each capitalised as written, with one of
+  the accepted extensions. These three words are the size answers the New Request wizard records, and the same words
+  are what the card resolves, so a file named `MEDIUM.png`, `Medium Hopper.png` or `Med.png` is never found.
+- **The extension is `.png`, `.jpg` or `.jpeg`.** The part-picture rule above accepts three extensions and so does
+  this folder. When more than one exists for the same size, `.png` is read first, then `.jpg`, then `.jpeg`, so a
+  machine holding two of them draws the same file every time.
 - The folder is **configurable** on Settings → Pictures → *Where the picture files are kept*, under *Hopper picture
   folder*, and the box has a **Browse** button that opens a folder dialog at whatever the box currently holds. Its
   shipped default is the share's own `...\Images\Waitlist\hopper` path, written in full rather than relative to the
@@ -176,7 +178,8 @@ folders, because a walk of the share treats the part collections as belonging to
 2. Is it in the right folder, spelled exactly as the tables above spell it?
 3. Is the file name the part number, the Item/Category code, the size word, or the dunnage name — with **no**
    suffix added?
-4. Is the extension one of the accepted ones (and `.png` for hopper sizes)?
+4. Is the extension one of the accepted ones (`.png`, `.jpg`, `.jpeg` — the same three everywhere, hopper sizes
+   included)?
 5. Is it square, between 48 and 2048 pixels a side, and between 1 KB and 10 MB?
 6. Did you keep the case? `Large.png` and `large.png` are the same size to the code, but two different files to
    the share — pick the documented spelling and stay with it.

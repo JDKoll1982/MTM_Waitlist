@@ -152,6 +152,9 @@ MODIFY COLUMN has_outside_vendor_operation TINYINT(1) NOT NULL DEFAULT 0 COMMENT
 MODIFY COLUMN next_operation_resource_id VARCHAR(16) NULL COMMENT 'RESOURCE_ID of the first open operation after the job own; OUTSIDE_SERVICE means Outside Service.',
 MODIFY COLUMN has_remaining_operation TINYINT(1) NULL COMMENT '1 when an open operation remains after the job own, 0 when nothing follows it, NULL when the routing was not read.',
 MODIFY COLUMN has_customer_demand TINYINT(1) NULL COMMENT '1 when the part has customer-order lines in Visual, so it is a part the plant sells; NULL when not read. Decides Finished Goods against WIP when nothing follows.',
+MODIFY COLUMN product_code VARCHAR(64) NULL COMMENT 'Infor Visual PART.PRODUCT_CODE: the plant part category (FG_PRESS, RM_PRESS, MFG_TOOLING, EXP_*).',
+MODIFY COLUMN commodity_code VARCHAR(64) NULL COMMENT 'Infor Visual PART.COMMODITY_CODE: the material or part kind (E Stamped Item, M Matl Coil, M Fast Fastener...).',
+MODIFY COLUMN part_description VARCHAR(256) NULL COMMENT 'Infor Visual PART.DESCRIPTION, whose words break a customer-supplied tie.',
 MODIFY COLUMN refreshed_utc DATETIME NOT NULL COMMENT 'UTC time of the refresh that produced this row.',
 MODIFY COLUMN is_seed_content TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 for baseline seed rows; 0 for refreshed content.';
 
@@ -169,6 +172,9 @@ MODIFY COLUMN has_outside_vendor_operation TINYINT(1) NOT NULL DEFAULT 0 COMMENT
 MODIFY COLUMN next_operation_resource_id VARCHAR(16) NULL COMMENT 'RESOURCE_ID of the first open operation after the job own; OUTSIDE_SERVICE means Outside Service.',
 MODIFY COLUMN has_remaining_operation TINYINT(1) NULL COMMENT '1 when an open operation remains after the job own, 0 when nothing follows it, NULL when the routing was not read.',
 MODIFY COLUMN has_customer_demand TINYINT(1) NULL COMMENT '1 when the part has customer-order lines in Visual, so it is a part the plant sells; NULL when not read. Decides Finished Goods against WIP when nothing follows.',
+MODIFY COLUMN product_code VARCHAR(64) NULL COMMENT 'Infor Visual PART.PRODUCT_CODE: the plant part category (FG_PRESS, RM_PRESS, MFG_TOOLING, EXP_*).',
+MODIFY COLUMN commodity_code VARCHAR(64) NULL COMMENT 'Infor Visual PART.COMMODITY_CODE: the material or part kind (E Stamped Item, M Matl Coil, M Fast Fastener...).',
+MODIFY COLUMN part_description VARCHAR(256) NULL COMMENT 'Infor Visual PART.DESCRIPTION, whose words break a customer-supplied tie.',
 MODIFY COLUMN refreshed_utc DATETIME NOT NULL COMMENT 'UTC time of the refresh that produced this row.',
 MODIFY COLUMN is_seed_content TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 for baseline seed rows; 0 for refreshed content.';
 

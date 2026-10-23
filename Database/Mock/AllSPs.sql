@@ -53,7 +53,10 @@ SELECT
     has_outside_vendor_operation  AS HasOutsideVendorOperation,
     next_operation_resource_id    AS NextOperationResourceId,
     has_remaining_operation       AS HasRemainingOperation,
-    has_customer_demand           AS HasCustomerDemand
+    has_customer_demand           AS HasCustomerDemand,
+    product_code                  AS ProductCode,
+    commodity_code                AS CommodityCode,
+    part_description              AS PartDescription
 FROM visual_disposition_input_result
 WHERE work_order = p_work_order
   AND part_number = p_part_number
@@ -119,6 +122,9 @@ BEGIN
         next_operation_resource_id,
         has_remaining_operation,
         has_customer_demand,
+        product_code,
+        commodity_code,
+        part_description,
         refreshed_utc,
         is_seed_content
     )
@@ -133,6 +139,9 @@ BEGIN
         NULLIF(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].NextOperationResourceId'))), 'null'),
         CAST(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].HasRemainingOperation'))), 'null') AS SIGNED),
         CAST(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].HasCustomerDemand'))), 'null') AS SIGNED),
+        NULLIF(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].ProductCode'))), 'null'),
+        NULLIF(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].CommodityCode'))), 'null'),
+        NULLIF(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].PartDescription'))), 'null'),
         UTC_TIMESTAMP(),
         0
     FROM (

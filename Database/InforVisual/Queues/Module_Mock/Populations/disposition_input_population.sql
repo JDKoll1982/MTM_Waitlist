@@ -12,7 +12,12 @@
 -- Projection contract (must match VisualReadShapeCatalog + sp_visual_disposition_input_refresh):
 --   WorkOrder, PartNumber, WorkCenter (input keys),
 --   WorkOrderStatus, OpenWorkOrderQuantity, FinishedGoodsQuantity, HasOutsideVendorOperation,
---   NextOperationResourceId, HasRemainingOperation, HasCustomerDemand (outputs).
+--   NextOperationResourceId, HasRemainingOperation, HasCustomerDemand,
+--   ProductCode, CommodityCode, PartDescription (outputs).
+--
+-- `ProductCode` / `CommodityCode` / `PartDescription` are the plant's own part classification from PART, projected
+-- exactly as the live read projects them, so a cached answer and a live answer cannot differ in meaning. They are
+-- what RequestPartTypeClassifier reads.
 --
 -- `WorkCenter` is part of the key because the routing answer is anchored on it: the operation at that work
 -- centre is the job's own, so "what follows" differs per work centre. The read therefore enumerates every
@@ -188,8 +193,13 @@ SELECT
         SELECT 1
         FROM CUST_ORDER_LINE AS col
         WHERE col.PART_ID = a.PART_ID
-    ) THEN 1 ELSE 0 END AS HasCustomerDemand
+    ) THEN 1 ELSE 0 END AS HasCustomerDemand,
+    LTRIM(RTRIM(part.PRODUCT_CODE)) AS ProductCode,
+    LTRIM(RTRIM(part.COMMODITY_CODE)) AS CommodityCode,
+    LTRIM(RTRIM(part.DESCRIPTION)) AS PartDescription
 FROM anchored AS a
+LEFT JOIN PART AS part
+    ON part.ID = a.PART_ID
 ORDER BY
     a.WorkOrder,
     a.PART_ID,

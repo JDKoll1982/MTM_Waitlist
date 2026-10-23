@@ -35,7 +35,8 @@ public sealed class RefreshShapeCatalogProviderTests
         "disposition_input" =>
             "id,work_order,part_number,work_center,work_order_status,open_work_order_quantity," +
             "finished_goods_quantity,has_outside_vendor_operation,next_operation_resource_id," +
-            "has_remaining_operation,has_customer_demand,refreshed_utc,is_seed_content",
+            "has_remaining_operation,has_customer_demand,product_code,commodity_code,part_description," +
+            "refreshed_utc,is_seed_content",
         "employee_by_number" =>
             "id,employee_number,first_name,last_name,refreshed_utc,is_seed_content",
         "part_warehouse_quantities" =>

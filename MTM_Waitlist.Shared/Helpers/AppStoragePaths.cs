@@ -45,7 +45,7 @@ public static class AppStoragePaths
 
     /// <summary>
     /// The folder holding the three hopper reference pictures, one file per size word
-    /// (<c>Small.png</c>, <c>Medium.png</c>, <c>Large.png</c>).
+    /// (<c>Small</c>, <c>Medium</c>, <c>Large</c>, with a <c>.png</c>, <c>.jpg</c> or <c>.jpeg</c> extension).
     /// </summary>
     /// <remarks>
     /// Written as the share's own name and in full rather than as a path relative to

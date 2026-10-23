@@ -2465,7 +2465,7 @@
     <value>Hopper picture folder</value>
   </data>
   <data name="Settings_StoragePaths_HopperFolder.Hint" xml:space="preserve">
-    <value>The three hopper size pictures live here, one file per size named after it: Small.png, Medium.png and Large.png. A relative path is read under the picture folder.</value>
+    <value>The three hopper size pictures live here, one file per size named after it: Small, Medium and Large, with a .png, .jpg or .jpeg extension. A relative path is read under the picture folder.</value>
   </data>
   <data name="Settings_StoragePaths_HopperFolderBrowse.Text" xml:space="preserve">
     <value>Browse…</value>

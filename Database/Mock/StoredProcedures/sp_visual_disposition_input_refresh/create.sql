@@ -52,6 +52,9 @@ BEGIN
         next_operation_resource_id,
         has_remaining_operation,
         has_customer_demand,
+        product_code,
+        commodity_code,
+        part_description,
         refreshed_utc,
         is_seed_content
     )
@@ -66,6 +69,9 @@ BEGIN
         NULLIF(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].NextOperationResourceId'))), 'null'),
         CAST(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].HasRemainingOperation'))), 'null') AS SIGNED),
         CAST(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].HasCustomerDemand'))), 'null') AS SIGNED),
+        NULLIF(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].ProductCode'))), 'null'),
+        NULLIF(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].CommodityCode'))), 'null'),
+        NULLIF(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].PartDescription'))), 'null'),
         UTC_TIMESTAMP(),
         0
     FROM (

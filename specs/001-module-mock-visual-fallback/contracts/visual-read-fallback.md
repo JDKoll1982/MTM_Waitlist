@@ -86,7 +86,7 @@ Column names below are the **result** column names (PascalCase in C#, per repo n
 | 2 | `operation_sequences` | `SetupLookupService.GetSequencesFromBackendAsync` | `NormalizedWorkOrder`, `PartNumber` | `SequenceNumber`, `Description` |
 | 3 | `subordinate_parts` | `SetupLookupService.GetSubordinatePartsFromBackendAsync` | `NormalizedWorkOrder`, `PartNumber`, `SequenceNumber` | `Category`, `PartNumber`, `Description`, `Location`, `User8`, `OnHandQuantity` |
 | 4 | `inventory_locations` | `WaitlistInventoryService.GetInventoryLocationsFromBackendAsync` (`MTM_Waitlist.Waitlist.View`) | `PartNumber` | `PartNumber`, `Location`, `OnHandQuantity` |
-| 5 | `disposition_input` | `RequestDispositionResolver.GetDispositionInputAsync` (`MTM_Waitlist.Settings`) | `WorkOrder`, `PartNumber`, `WorkCenter` | `WorkOrderStatus`, `OpenWorkOrderQuantity`, `FinishedGoodsQuantity`, `HasOutsideVendorOperation`, `NextOperationResourceId`, `HasRemainingOperation`, `HasCustomerDemand` |
+| 5 | `disposition_input` | `RequestDispositionResolver.GetDispositionInputAsync` / `GetClassificationAsync` (`MTM_Waitlist.Settings`) | `WorkOrder`, `PartNumber`, `WorkCenter` | `WorkOrderStatus`, `OpenWorkOrderQuantity`, `FinishedGoodsQuantity`, `HasOutsideVendorOperation`, `NextOperationResourceId`, `HasRemainingOperation`, `HasCustomerDemand`, `ProductCode`, `CommodityCode`, `PartDescription` |
 
 **Preserved behaviours:** shape 4 keeps the caller-side on-hand ≥ 1 and ignored-location filtering unchanged; shape 5
 keeps `RequestDispositionStatusCodes` (Open = {R,U,F}, Closed = {C}, X never FG) as the only status-code authority;

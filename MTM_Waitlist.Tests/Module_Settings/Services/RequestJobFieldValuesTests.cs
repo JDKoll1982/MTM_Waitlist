@@ -43,21 +43,29 @@ public sealed class RequestJobFieldValuesTests
     }
 
     [TestMethod]
-    public void Service_RequestJobFieldValuesTests_Resolve_PartTypeAndItemTypeReadTheSnapshotsDerivation()
+    public void Service_RequestJobFieldValuesTests_Resolve_PartTypeReadsThePartsKindAndItemTypeReadsTheDisposition()
     {
-        // The four returning pickups declare `Part Type` and the component Items declare `Item Type`, and both
-        // read the one derivation the snapshot was handed (FR-091, FR-092, research R1). Neither label runs a
-        // derivation of its own.
-        var finishedGoods = RequestJobPartAvailability.None with { Disposition = RequestDisposition.FinishedGoods };
-        var outsideService = RequestJobPartAvailability.None with { Disposition = RequestDisposition.OutsideService };
-        var wip = RequestJobPartAvailability.None with { Disposition = RequestDisposition.WorkInProcess };
-        var ncm = RequestJobPartAvailability.None with { Disposition = RequestDisposition.Ncm };
+        // Two different questions on one snapshot (redefined 2026-10-23): `Part Type` draws what kind of part the
+        // job makes, read from the plant's own product and commodity codes, while the component Items' `Item Type`
+        // still draws the job's product disposition. Neither label runs a derivation of its own.
+        var finishedGoods = RequestJobPartAvailability.None
+            .WithDisposition(RequestDisposition.FinishedGoods)
+            .WithPartType(RequestPartType.StampedPart);
+        var outsideService = RequestJobPartAvailability.None
+            .WithDisposition(RequestDisposition.OutsideService)
+            .WithPartType(RequestPartType.Coil);
+        var wip = RequestJobPartAvailability.None
+            .WithDisposition(RequestDisposition.WorkInProcess)
+            .WithPartType(RequestPartType.Hardware);
+        var ncm = RequestJobPartAvailability.None
+            .WithDisposition(RequestDisposition.Ncm)
+            .WithPartType(RequestPartType.Tooling);
 
-        Assert.AreEqual("Finished Goods", RequestJobFieldValues.Resolve("Part Type", finishedGoods));
+        Assert.AreEqual("Stamped Part", RequestJobFieldValues.Resolve("Part Type", finishedGoods));
         Assert.AreEqual("Finished Goods", RequestJobFieldValues.Resolve("Item Type", finishedGoods));
-        Assert.AreEqual("Outside Service", RequestJobFieldValues.Resolve("Part Type", outsideService));
-        Assert.AreEqual("WIP", RequestJobFieldValues.Resolve("Part Type", wip));
-        Assert.AreEqual("NCM", RequestJobFieldValues.Resolve("Part Type", ncm));
+        Assert.AreEqual("Coil", RequestJobFieldValues.Resolve("Part Type", outsideService));
+        Assert.AreEqual("Hardware", RequestJobFieldValues.Resolve("Part Type", wip));
+        Assert.AreEqual("Tooling", RequestJobFieldValues.Resolve("Part Type", ncm));
         Assert.AreEqual("NCM", RequestJobFieldValues.Resolve("Item Type", ncm));
     }
 

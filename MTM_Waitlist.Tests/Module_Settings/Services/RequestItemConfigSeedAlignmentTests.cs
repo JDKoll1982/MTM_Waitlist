@@ -482,16 +482,18 @@ public sealed class RequestItemConfigSeedAlignmentTests
     public void Audit_RequestItemConfigSeedAlignmentTests_Seed_DeclaresTheDerivedCellsAsFieldsTheResolverAnswers()
     {
         var declarations = SeedDeclarations();
-        var job = Job().WithDisposition(RequestDisposition.FinishedGoods);
+        var job = Job()
+            .WithDisposition(RequestDisposition.FinishedGoods)
+            .WithPartType(RequestPartType.StampedPart);
 
         foreach (var item in new[] { "pickup-component", "deliver-component" })
         {
-            AssertDerivedCell(declarations, item, "Item Type", job);
+            AssertDerivedCell(declarations, item, "Item Type", job, RequestDispositionLabels.Of(job.Disposition));
         }
 
         foreach (var item in new[] { "pickup-fg", "pickup-ncm", "pickup-wip", "pickup-outside-service" })
         {
-            AssertDerivedCell(declarations, item, "Part Type", job);
+            AssertDerivedCell(declarations, item, "Part Type", job, RequestPartTypeLabels.Of(job.PartType));
         }
 
         foreach (var item in new[] { "pickup-component", "deliver-component" })
@@ -542,7 +544,8 @@ public sealed class RequestItemConfigSeedAlignmentTests
         IReadOnlyDictionary<string, RequestItemConfiguration> declarations,
         string itemCode,
         string label,
-        RequestJobPartAvailability job)
+        RequestJobPartAvailability job,
+        string? expected)
     {
         var field = DeclaredField(declarations, itemCode, label);
 
@@ -554,7 +557,7 @@ public sealed class RequestItemConfigSeedAlignmentTests
         var resolved = RequestJobFieldValues.Resolve(label, job);
 
         Assert.AreEqual(
-            RequestDispositionLabels.Of(job.Disposition),
+            expected,
             resolved,
             $"`{itemCode}`'s `{label}` label resolves to nothing from a job whose type has been derived, so the cell is hidden on every card (FR-091, FR-092).");
     }
@@ -661,7 +664,9 @@ public sealed class RequestItemConfigSeedAlignmentTests
     };
 
     /// <summary>The requesting job's material, so a declared job label has something to resolve to.</summary>
-    private static RequestJobPartAvailability Job() => RequestJobPartAvailability.All.WithDisposition(RequestDisposition.FinishedGoods) with
+    private static RequestJobPartAvailability Job() => RequestJobPartAvailability.All
+        .WithDisposition(RequestDisposition.FinishedGoods)
+        .WithPartType(RequestPartType.StampedPart) with
     {
         CoilPartNumber = "MMC0001000",
         CoilDescription = "38 in x 4200 lb",

@@ -86,6 +86,19 @@ public sealed record RequestJobPartAvailability(
     public RequestDisposition Disposition { get; init; } = RequestDisposition.Unknown;
 
     /// <summary>
+    /// What kind of part the requesting job's part is — coil, flatstock, hardware, stamped part, tooling and so on —
+    /// read from the plant's own Infor Visual <c>PRODUCT_CODE</c> and <c>COMMODITY_CODE</c>.
+    /// <para>
+    /// This is a different question from <see cref="Disposition"/>: that one says what <b>state</b> the job's product
+    /// is in, this one says what the part <b>is</b>. The card's <c>Part Type</c> cell draws this; the disposition
+    /// still decides which product pickup the picker offers. It is
+    /// <see cref="RequestPartType.Unknown"/> when neither code named a kind, and the cell is then left out rather
+    /// than filled with a guess (FR-089).
+    /// </para>
+    /// </summary>
+    public RequestPartType PartType { get; init; } = RequestPartType.Unknown;
+
+    /// <summary>
     /// The requesting job's component part numbers, in the job's own order (FR-035).
     /// <para>
     /// This is the list an Item whose configuration declares an enumerated answer <b>with no list of its own</b>
@@ -238,6 +251,16 @@ public sealed record RequestJobPartAvailability(
         HasNonconformingStockToReturn = disposition == RequestDisposition.Ncm,
         HasWorkInProgressToReturn = disposition == RequestDisposition.WorkInProcess,
         HasOutsideServiceWorkToReturn = disposition == RequestDisposition.OutsideService,
+    };
+
+    /// <summary>
+    /// A copy of this snapshot carrying the part's own derived <b>kind</b>, which is what the card's
+    /// <c>Part Type</c> cell draws. It moves nothing else: the disposition and the four returning gates are the
+    /// disposition's business, and the picker's choice of product Item is unchanged by what the part is made of.
+    /// </summary>
+    public RequestJobPartAvailability WithPartType(RequestPartType partType) => this with
+    {
+        PartType = partType,
     };
 
     /// <summary>

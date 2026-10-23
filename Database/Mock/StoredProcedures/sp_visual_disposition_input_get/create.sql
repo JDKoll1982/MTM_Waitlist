@@ -39,7 +39,10 @@ SELECT
     has_outside_vendor_operation  AS HasOutsideVendorOperation,
     next_operation_resource_id    AS NextOperationResourceId,
     has_remaining_operation       AS HasRemainingOperation,
-    has_customer_demand           AS HasCustomerDemand
+    has_customer_demand           AS HasCustomerDemand,
+    product_code                  AS ProductCode,
+    commodity_code                AS CommodityCode,
+    part_description              AS PartDescription
 FROM visual_disposition_input_result
 WHERE work_order = p_work_order
   AND part_number = p_part_number

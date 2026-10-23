@@ -38,4 +38,13 @@ public sealed record InforDispositionRow
     /// the read did not carry it. This is what decides Finished Goods once nothing remains in the routing.
     /// </summary>
     public bool? HasCustomerDemand { get; init; }
+
+    /// <summary>The plant's own product classification of the part (<c>PART.PRODUCT_CODE</c>).</summary>
+    public string? ProductCode { get; init; }
+
+    /// <summary>The plant's own commodity classification of the part (<c>PART.COMMODITY_CODE</c>).</summary>
+    public string? CommodityCode { get; init; }
+
+    /// <summary>The part's description, whose words break a customer-supplied tie.</summary>
+    public string? PartDescription { get; init; }
 }

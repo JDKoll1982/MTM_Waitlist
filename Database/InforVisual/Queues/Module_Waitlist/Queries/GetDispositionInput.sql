@@ -42,6 +42,9 @@
 --   Both routing columns are NULL when the work centre is not on the order's routing at all, which leaves the
 --   classifier's stock/quantity/status arms to answer exactly as before. HasCustomerDemand is NULL only when the
 --   read did not carry it (a cached row written before the column existed).
+--   ProductCode / CommodityCode / PartDescription are the plant's own part classification, read from PART. They
+--   answer what kind of part this is — coil, flatstock, hardware, tooling, … — which is a different question from
+--   the job's disposition, and they are what RequestPartTypeClassifier reads (2026-10-23).
 --   Finished-goods classification mirrors the taxonomy already documented for the WIP side in
 --   Database/MTMWipApp/Queues/Module_Waitlist/Queues/GetWipFloorQuantities.sql and already used by
 --   GetPartWarehouseQuantities.sql: a location is finished goods when its own DESCRIPTION says so, when its
@@ -164,8 +167,13 @@ SELECT TOP (1)
         SELECT 1
         FROM CUST_ORDER_LINE AS col
         WHERE col.PART_ID = wo.PART_ID
-    ) THEN 1 ELSE 0 END AS HasCustomerDemand
+    ) THEN 1 ELSE 0 END AS HasCustomerDemand,
+    LTRIM(RTRIM(part.PRODUCT_CODE)) AS ProductCode,
+    LTRIM(RTRIM(part.COMMODITY_CODE)) AS CommodityCode,
+    LTRIM(RTRIM(part.DESCRIPTION)) AS PartDescription
 FROM WORK_ORDER AS wo
+LEFT JOIN PART AS part
+    ON part.ID = wo.PART_ID
 WHERE
     wo.BASE_ID = @WorkOrderTrimmed
     AND wo.PART_ID = @PartNumberNormalized

@@ -279,3 +279,42 @@ Consequences:
   reach a product type any more.
 
 The five mapper tests that pinned the old floor fallback were rewritten to pin this instead.
+
+## Part Type redefined 2026-10-23 — the card now names what the part *is*
+
+The card's `Part Type` cell used to draw the job's **disposition** (Finished Goods / WIP / Outside Service / NCM).
+It now draws the part's own **kind**, read from the plant's Infor Visual classification. The disposition still
+decides which product pickup the picker offers; the component Items' `Item Type` cell still draws the disposition.
+
+**The two columns are the classifier** (`PART`, 8,895 rows, live 2026-10-23):
+
+| `PRODUCT_CODE` | Parts | | `COMMODITY_CODE` | Parts |
+|---|---|---|---|---|
+| `FG_PRESS` | 5,254 | | `E Stamped Item` | 5,088 |
+| `RM_PRESS` | 2,115 | | `T MFG Use Tools` | 1,279 |
+| `MFG_TOOLING` | 1,288 | | `M Matl Coil` | 1,095 |
+| `EXP_PKG` / `EXP_TOOLING` / `EXP_SUPPLIES` / `EXP_COOLANT` | 85 / 22 / 21 / 21 | | `M Fast Fastener` | 350 |
+| `FG_DIE` / `RM_DIE` | 39 / 12 | | `M Matl Flat` | 311 |
+| blank | 38 | | `M Matl Cust Sup` | 200 |
+| | | | `M Matl Net-Shap` 84, `E Mach Item` 52, `M Matl Misc` 52, | |
+| | | | `S Matl Net-Shap` 30, `M Matl Round` 29, `E Assy Item` 19, | |
+| | | | `M Die Punch` 13, `E Tooling` 6, `S Matl Coil` 4, blank 283 | |
+
+`MATERIAL_CODE` and `PROCESS_TYPE` are empty on every row, so these two are the only maintained classification.
+
+**Codes classify; the description only breaks the customer-supplied tie.** Word matching the description would
+misfile 50 stamped parts whose names mention a bolt ("Bolt Retainer Assembly") and 73 `M Fast Fastener` parts that
+never name one ("Boss", "Plug, Pipe", "Insulator"). Only `M Matl Cust Sup` needs the description, because that code
+says who supplied the material and not what it is: 144 of its 200 parts say COIL and 34 more sit on the plant's
+`MMF` prefix.
+
+**The prefix vocabulary the plant uses:** `MMC` coil, `MMF` flatstock, `MMR` round, with `CS` (customer supplied) and
+`SR` (special request) suffixes — `MMCCS` 107 parts, `MMCSR` 9, `MMFCS` 31, `MMFSR` 5, `MMR` 14. Never the primary
+rule: `MMC` also holds 5 flatstock parts, `MMF` 8 coil parts, `MMS` is 4 net-shape parts (not round), and 45 tooling
+parts carry no `FGT` prefix.
+
+**Code:** `RequestPartType` + `RequestPartTypeLabels` (Settings/Models), `RequestPartTypeClassifier` (pure, 27 tests),
+`RequestJobClassification` returned by `RequestDispositionResolver.GetClassificationAsync` (one Visual read for both
+answers), carried on `RequestJobPartAvailability.PartType` via `WithPartType`. The three columns travel on read shape
+5 (`ProductCode`, `CommodityCode`, `PartDescription`), so the mirror table, both procedures, the catalog and the
+population script moved with them. Read shape 5 now has thirteen columns against 8,895 parts of experience.

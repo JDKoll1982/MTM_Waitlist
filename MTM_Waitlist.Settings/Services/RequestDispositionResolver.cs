@@ -1,4 +1,5 @@
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Mock.Contracts;
@@ -45,6 +46,60 @@ public sealed class RequestDispositionResolver
         string? workCenter = null,
         CancellationToken cancellationToken = default)
     {
+        var (inforRow, floorSnapshot) = await ReadAsync(workOrder, partNumber, workCenter, cancellationToken).ConfigureAwait(false);
+
+        return RequestDispositionMapper.BuildDispositionInput(inforRow, floorSnapshot);
+    }
+
+    /// <summary>Resolves and classifies a part into a <see cref="RequestDisposition"/>.</summary>
+    public async Task<RequestDisposition> GetDispositionAsync(
+        string? workOrder,
+        string? partNumber,
+        string? workCenter = null,
+        CancellationToken cancellationToken = default)
+    {
+        var input = await GetDispositionInputAsync(workOrder, partNumber, workCenter, cancellationToken).ConfigureAwait(false);
+        return RequestDispositionClassifier.Classify(input);
+    }
+
+    /// <summary>
+    /// Resolves both answers the card needs from one read: the job's product <b>disposition</b> (FG / WIP /
+    /// Outside Service / NCM) and the part's own <b>type</b> (coil, flatstock, hardware, stamped part, …).
+    /// </summary>
+    /// <remarks>
+    /// One read, because the two answers come from the same Visual row and a second read would be a second chance
+    /// to disagree with the first. The part type is read from the plant's own <c>PRODUCT_CODE</c> and
+    /// <c>COMMODITY_CODE</c>; the disposition stays Visual's answer about the job rather than the part.
+    /// </remarks>
+    public async Task<RequestJobClassification> GetClassificationAsync(
+        string? workOrder,
+        string? partNumber,
+        string? workCenter = null,
+        CancellationToken cancellationToken = default)
+    {
+        var (inforRow, floorSnapshot) = await ReadAsync(workOrder, partNumber, workCenter, cancellationToken).ConfigureAwait(false);
+
+        var input = RequestDispositionMapper.BuildDispositionInput(inforRow, floorSnapshot);
+
+        var partType = RequestPartTypeClassifier.Classify(new RequestPartTypeClassifier.PartTypeInput(
+            inforRow?.ProductCode,
+            inforRow?.CommodityCode,
+            partNumber,
+            inforRow?.PartDescription));
+
+        return new RequestJobClassification(RequestDispositionClassifier.Classify(input), partType);
+    }
+
+    /// <summary>
+    /// Reads the Visual row and the floor buckets once. A failed Visual read is logged and answers nothing rather
+    /// than taking the caller down: the cache is never substituted for a genuine read failure (FR-024).
+    /// </summary>
+    private async Task<(InforDispositionRow? InforRow, WipFloorQuantitySnapshot? FloorSnapshot)> ReadAsync(
+        string? workOrder,
+        string? partNumber,
+        string? workCenter,
+        CancellationToken cancellationToken)
+    {
         var normalizedPart = (partNumber ?? string.Empty).Trim();
 
         InforDispositionRow? inforRow = null;
@@ -70,18 +125,7 @@ public sealed class RequestDispositionResolver
 
         var floorSnapshot = await _wipFloorInventoryService.GetFloorSnapshotAsync(normalizedPart, cancellationToken).ConfigureAwait(false);
 
-        return RequestDispositionMapper.BuildDispositionInput(inforRow, floorSnapshot);
-    }
-
-    /// <summary>Resolves and classifies a part into a <see cref="RequestDisposition"/>.</summary>
-    public async Task<RequestDisposition> GetDispositionAsync(
-        string? workOrder,
-        string? partNumber,
-        string? workCenter = null,
-        CancellationToken cancellationToken = default)
-    {
-        var input = await GetDispositionInputAsync(workOrder, partNumber, workCenter, cancellationToken).ConfigureAwait(false);
-        return RequestDispositionClassifier.Classify(input);
+        return (inforRow, floorSnapshot);
     }
 
     /// <summary>
@@ -107,6 +151,9 @@ public sealed class RequestDispositionResolver
                 : row.NextOperationResourceId,
             HasRemainingOperation = row.HasRemainingOperation,
             HasCustomerDemand = row.HasCustomerDemand,
+            ProductCode = string.IsNullOrWhiteSpace(row.ProductCode) ? null : row.ProductCode,
+            CommodityCode = string.IsNullOrWhiteSpace(row.CommodityCode) ? null : row.CommodityCode,
+            PartDescription = string.IsNullOrWhiteSpace(row.PartDescription) ? null : row.PartDescription,
         };
     }
 }

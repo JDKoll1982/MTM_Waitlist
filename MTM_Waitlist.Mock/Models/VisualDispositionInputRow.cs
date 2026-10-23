@@ -38,4 +38,13 @@ public sealed record VisualDispositionInputRow
     /// routing: a part nothing buys exists only to feed another work order.
     /// </summary>
     public bool? HasCustomerDemand { get; init; }
+
+    /// <summary>The plant's own product classification of the part (<c>PART.PRODUCT_CODE</c>).</summary>
+    public string ProductCode { get; init; } = string.Empty;
+
+    /// <summary>The plant's own commodity classification of the part (<c>PART.COMMODITY_CODE</c>).</summary>
+    public string CommodityCode { get; init; } = string.Empty;
+
+    /// <summary>The part's description, whose words break a customer-supplied tie.</summary>
+    public string PartDescription { get; init; } = string.Empty;
 }
