@@ -21,13 +21,12 @@ namespace MTM_Waitlist.Module_Settings.Services;
 ///      from nothing else, because NCM is a location state and not a production type (FR-093). It is checked
 ///      before the two production arms so quarantined stock is never reported as Finished Goods or WIP, and
 ///      after Outside Service so the documented priority is unchanged.
-///   3. WorkInProcess — work is still owed on the part: its own operation has not closed yet, or a further
-///      operation remains.
-///   4. FinishedGoods — the job's own operation has closed and nothing follows it, so what the job produces is the
-///      finished product. This is what the plant's tag print reads (research 2026-10-23), and it is the only test
-///      that can name Finished Goods for a job that is still running — in-process stock is never sitting at a
-///      shipping location yet, so the stock quantity is a confirmation, never the discriminator. A press that has
-///      produced 130 of 131 pieces and has nothing after it is still WIP, not a finished good.
+///   3. WorkInProcess — an open operation remains after the job's own, so the part is still being made.
+///   4. FinishedGoods — nothing follows the job's own operation and the part is one the plant sells (it has
+///      customer-order lines). A part nothing buys exists only to feed another work order, so it stays work in
+///      process even when the routing ends here. This is what the plant's tag print reads (research 2026-10-23),
+///      and it is the only test that can name either type for a job that is still running — in-process stock is
+///      never sitting at a shipping location yet, so the stock quantity is a confirmation, never the discriminator.
 ///   5. Unknown — no rule matched.
 /// <para>
 /// The routing arms answer only when the read supplied them; a snapshot without them (the floor-stock half, or a
@@ -53,7 +52,8 @@ public static class RequestDispositionClassifier
         bool HasOutsideVendorOperation,
         decimal NonConformingQuantity,
         string? NextOperationResourceId = null,
-        bool? HasRemainingOperation = null)
+        bool? HasRemainingOperation = null,
+        bool? HasCustomerDemand = null)
     {
         /// <summary>Whether a finished-goods (shipping) location holds stock for this part.</summary>
         public bool HasFinishedGoodsOnHand => FinishedGoodsQuantity > 0m;
@@ -75,16 +75,27 @@ public static class RequestDispositionClassifier
         public bool HasRouting => HasRemainingOperation.HasValue;
 
         /// <summary>
-        /// Whether work is still owed on the part — its own operation has not closed yet, or an operation follows
-        /// it. The read decides this from the routing; it is not the caller's judgement.
+        /// Whether an open operation remains <b>after</b> the job's own, so the part is still being made. The read
+        /// decides this from the routing; it is not the caller's judgement.
         /// </summary>
         public bool HasRemainingWork => HasRemainingOperation == true;
 
         /// <summary>
-        /// Whether the job's own operation has closed and nothing follows it, so what the job produces is the
-        /// finished product.
+        /// Whether nothing follows the job's own operation, so what it produces leaves the line. Whether that makes
+        /// it a finished good or still work in process is <see cref="HasCustomerDemand"/>'s answer, not this one.
         /// </summary>
         public bool HasNoRemainingWork => HasRemainingOperation == false;
+
+        /// <summary>
+        /// Whether the part is one the plant sells — it has customer-order lines in Infor Visual.
+        /// <para>
+        /// This is what separates a finished good from work in process once nothing remains in the routing. A part
+        /// the plant sells is the end product; a part nothing buys exists only to feed another work order, which is
+        /// what work in process means. Confirmed live 2026-10-23: the press still running on `A0006376159` with 180
+        /// customer-order lines is Finished Goods, while `T527094` with none is drawn by open `WO-073735` and is WIP.
+        /// </para>
+        /// </summary>
+        public bool IsSoldPart => HasCustomerDemand == true;
 
         /// <summary>
         /// Whether the operation that follows the job's own is the plant's subcontracted one. Its
@@ -116,17 +127,20 @@ public static class RequestDispositionClassifier
             return RequestDisposition.Ncm;
         }
 
-        // 3./4. The routing decides between the two production types: work still owed on the part — its own
-        //    operation open, or an operation after it — makes it WIP; an operation that has closed with nothing
-        //    after it makes what the job produces its finished product.
+        // 3. An operation remains after the job's own, so the part is still being made.
         if (input.HasRemainingWork)
         {
             return RequestDisposition.WorkInProcess;
         }
 
+        // 4. Nothing follows the job's own operation. Whether the product is a finished good or still work in
+        //    process is decided by the part itself: a part the plant sells is the end product, and a part nothing
+        //    buys exists only to feed another work order. Neither the operation's own completion nor the stock on
+        //    hand settles this — a press still running on a sold part has already produced a finished good, and an
+        //    in-process part never sits at a shipping location at all.
         if (input.HasNoRemainingWork)
         {
-            return RequestDisposition.FinishedGoods;
+            return input.IsSoldPart ? RequestDisposition.FinishedGoods : RequestDisposition.WorkInProcess;
         }
 
         // 5. No routing was read: the stock, open quantity and status are all there is to go on.

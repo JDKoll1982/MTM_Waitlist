@@ -32,4 +32,10 @@ public sealed record InforDispositionRow
     /// is the finished product.
     /// </summary>
     public bool? HasRemainingOperation { get; init; }
+
+    /// <summary>
+    /// Whether the part has customer-order lines — it is a part the plant sells — or <see langword="null"/> when
+    /// the read did not carry it. This is what decides Finished Goods once nothing remains in the routing.
+    /// </summary>
+    public bool? HasCustomerDemand { get; init; }
 }

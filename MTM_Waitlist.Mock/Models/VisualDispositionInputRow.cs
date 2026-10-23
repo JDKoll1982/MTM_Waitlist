@@ -31,4 +31,11 @@ public sealed record VisualDispositionInputRow
     /// read). <see langword="false"/> means that operation has closed and nothing follows.
     /// </summary>
     public bool? HasRemainingOperation { get; init; }
+
+    /// <summary>
+    /// Whether the part has customer-order lines — i.e. it is a part the plant sells — or <see langword="null"/>
+    /// when the read did not carry it. It is what separates Finished Goods from WIP once nothing remains in the
+    /// routing: a part nothing buys exists only to feed another work order.
+    /// </summary>
+    public bool? HasCustomerDemand { get; init; }
 }

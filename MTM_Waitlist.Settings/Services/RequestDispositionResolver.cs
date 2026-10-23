@@ -106,6 +106,7 @@ public sealed class RequestDispositionResolver
                 ? null
                 : row.NextOperationResourceId,
             HasRemainingOperation = row.HasRemainingOperation,
+            HasCustomerDemand = row.HasCustomerDemand,
         };
     }
 }

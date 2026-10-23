@@ -14,7 +14,7 @@
 --              "WorkOrder", "PartNumber", "WorkCenter"   (the read's inputs)
 --              "WorkOrderStatus", "OpenWorkOrderQuantity", "FinishedGoodsQuantity",
 --              "HasOutsideVendorOperation", "NextOperationResourceId",
---              "HasRemainingOperation"                    (the read's outputs)
+--              "HasRemainingOperation", "HasCustomerDemand"   (the read's outputs)
 --
 -- `WorkOrderStatus` is stored as the raw Visual status code. The status MEANING remains owned
 -- solely by RequestDispositionStatusCodes; this cache never interprets it (FR-018).
@@ -51,6 +51,7 @@ BEGIN
         has_outside_vendor_operation,
         next_operation_resource_id,
         has_remaining_operation,
+        has_customer_demand,
         refreshed_utc,
         is_seed_content
     )
@@ -64,6 +65,7 @@ BEGIN
         CAST(IFNULL(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].HasOutsideVendorOperation'))), '0') AS SIGNED),
         NULLIF(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].NextOperationResourceId'))), 'null'),
         CAST(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].HasRemainingOperation'))), 'null') AS SIGNED),
+        CAST(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].HasCustomerDemand'))), 'null') AS SIGNED),
         UTC_TIMESTAMP(),
         0
     FROM (

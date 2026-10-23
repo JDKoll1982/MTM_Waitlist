@@ -167,44 +167,41 @@ public sealed class RequestDispositionMapperTests
         Assert.IsFalse(input.HasRouting);
     }
 
-    // --- BuildDispositionInput: floor snapshot fallback / confirmation ---
+    // --- BuildDispositionInput: the WIP application never names the production type ---
     [TestMethod]
-    public void Service_RequestDispositionMapperTests_BuildDispositionInput_NoInforRowFloorWipOnlyClassifiesWip()
+    public void Service_RequestDispositionMapperTests_BuildDispositionInput_TheFloorStoresWipQuantityNeverNamesWorkInProcess()
     {
+        // A Visual read that returned nothing may not be answered from the WIP application's floor buckets: the
+        // production type is Visual's to state, and the floor store is not the system of record for it
+        // (operator instruction, 2026-10-23).
         var floor = new WipFloorQuantitySnapshot
         {
-            FinishedGoodsFloorQuantity = 0m,
-            OutsideServiceFloorQuantity = 0m,
+            FinishedGoodsFloorQuantity = 25m,
+            OutsideServiceFloorQuantity = 74m,
             NonConformingFloorQuantity = 0m,
             WipFloorQuantity = 40m,
         };
 
         var input = RequestDispositionMapper.BuildDispositionInput(inforRow: null, floor);
 
-        Assert.AreEqual(RequestDisposition.WorkInProcess, RequestDispositionClassifier.Classify(input));
+        Assert.AreEqual(0m, input.FinishedGoodsQuantity);
+        Assert.AreEqual(0m, input.OpenWorkOrderQuantity);
+        Assert.IsFalse(input.HasOutsideVendorOperation);
+        Assert.AreEqual(RequestDisposition.Unknown, RequestDispositionClassifier.Classify(input));
     }
 
     [TestMethod]
-    public void Service_RequestDispositionMapperTests_BuildDispositionInput_NoInforRowFloorOutsideServiceClassifiesOutsideService()
+    public void Service_RequestDispositionMapperTests_BuildDispositionInput_TheVisualRowAloneDecidesAndTheFloorDoesNotOverrideIt()
     {
+        // Visual says closed with stock on hand and no outside operation, so the product is a finished good even
+        // though the floor store happens to hold outside-service quantity for the same part.
         var floor = new WipFloorQuantitySnapshot
         {
-            FinishedGoodsFloorQuantity = 0m,
-            OutsideServiceFloorQuantity = 74m,
-            NonConformingFloorQuantity = 0m,
-            WipFloorQuantity = 0m,
+            FinishedGoodsFloorQuantity = 25m,
+            OutsideServiceFloorQuantity = 10m,
+            WipFloorQuantity = 40m,
         };
 
-        var input = RequestDispositionMapper.BuildDispositionInput(inforRow: null, floor);
-
-        Assert.AreEqual(RequestDisposition.OutsideService, RequestDispositionClassifier.Classify(input));
-    }
-
-    [TestMethod]
-    public void Service_RequestDispositionMapperTests_BuildDispositionInput_FloorOutsideServiceOverridesClosedStatus()
-    {
-        // Infor says closed + on hand (would be FG), but the part is physically staged at O/S on the floor.
-        var floor = new WipFloorQuantitySnapshot { OutsideServiceFloorQuantity = 10m };
         var input = RequestDispositionMapper.BuildDispositionInput(
             new InforDispositionRow
             {
@@ -215,13 +212,14 @@ public sealed class RequestDispositionMapperTests
             },
             floor);
 
-        Assert.AreEqual(RequestDisposition.OutsideService, RequestDispositionClassifier.Classify(input));
+        Assert.AreEqual(RequestDisposition.FinishedGoods, RequestDispositionClassifier.Classify(input));
     }
 
     [TestMethod]
-    public void Service_RequestDispositionMapperTests_BuildDispositionInput_InforClosedZeroOnHandFloorFinishedGoodsFillsGap()
+    public void Service_RequestDispositionMapperTests_BuildDispositionInput_AnEmptyVisualRowIsNotFilledInFromTheFloor()
     {
-        // Infor has no on-hand recorded but closed, and the floor shows finished-goods stock.
+        // Visual reports a closed order with no stock. The floor's finished-goods bucket may not fill that gap: the
+        // figure the classifier sees is Visual's.
         var floor = new WipFloorQuantitySnapshot { FinishedGoodsFloorQuantity = 25m };
         var input = RequestDispositionMapper.BuildDispositionInput(
             new InforDispositionRow
@@ -233,17 +231,7 @@ public sealed class RequestDispositionMapperTests
             },
             floor);
 
-        Assert.AreEqual(RequestDisposition.FinishedGoods, RequestDispositionClassifier.Classify(input));
-    }
-
-    [TestMethod]
-    public void Service_RequestDispositionMapperTests_BuildDispositionInput_NoInforRowFloorFinishedGoodsOnlyClassifiesUnknown()
-    {
-        // Floor FG stock alone cannot prove the order is closed -> Unknown (documented boundary).
-        var floor = new WipFloorQuantitySnapshot { FinishedGoodsFloorQuantity = 25m };
-
-        var input = RequestDispositionMapper.BuildDispositionInput(inforRow: null, floor);
-
+        Assert.AreEqual(0m, input.FinishedGoodsQuantity);
         Assert.AreEqual(RequestDisposition.Unknown, RequestDispositionClassifier.Classify(input));
     }
 
@@ -295,7 +283,10 @@ public sealed class RequestDispositionMapperTests
         var input = RequestDispositionMapper.BuildDispositionInput(inforRow: null, floor);
 
         Assert.IsFalse(input.HasNonConformingStock);
-        Assert.AreEqual(RequestDisposition.WorkInProcess, RequestDispositionClassifier.Classify(input));
+        Assert.AreEqual(
+            RequestDisposition.Unknown,
+            RequestDispositionClassifier.Classify(input),
+            "A part with no Visual row and no NCM stock has nothing that may name its product type.");
     }
 
     [TestMethod]
@@ -308,6 +299,7 @@ public sealed class RequestDispositionMapperTests
                 OpenWorkOrderQuantity = 0m,
                 FinishedGoodsQuantity = 0m,
                 HasOutsideVendorOperation = false,
+                HasRemainingOperation = true,
             },
             floorSnapshot: null);
 

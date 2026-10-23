@@ -38,7 +38,8 @@ SELECT
     finished_goods_quantity       AS FinishedGoodsQuantity,
     has_outside_vendor_operation  AS HasOutsideVendorOperation,
     next_operation_resource_id    AS NextOperationResourceId,
-    has_remaining_operation       AS HasRemainingOperation
+    has_remaining_operation       AS HasRemainingOperation,
+    has_customer_demand           AS HasCustomerDemand
 FROM visual_disposition_input_result
 WHERE work_order = p_work_order
   AND part_number = p_part_number

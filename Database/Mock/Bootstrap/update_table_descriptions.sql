@@ -150,7 +150,8 @@ MODIFY COLUMN open_work_order_quantity DECIMAL(18,4) NOT NULL DEFAULT 0 COMMENT 
 MODIFY COLUMN finished_goods_quantity DECIMAL(18,4) NOT NULL DEFAULT 0 COMMENT 'Finished-goods on-hand quantity for the part.',
 MODIFY COLUMN has_outside_vendor_operation TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 when an operation carries vendor/service fields; the routing decides when it was read.',
 MODIFY COLUMN next_operation_resource_id VARCHAR(16) NULL COMMENT 'RESOURCE_ID of the first open operation after the job own; OUTSIDE_SERVICE means Outside Service.',
-MODIFY COLUMN has_remaining_operation TINYINT(1) NULL COMMENT '1 when a further operation remains, 0 when the routing ends at the job own, NULL when it was not read.',
+MODIFY COLUMN has_remaining_operation TINYINT(1) NULL COMMENT '1 when an open operation remains after the job own, 0 when nothing follows it, NULL when the routing was not read.',
+MODIFY COLUMN has_customer_demand TINYINT(1) NULL COMMENT '1 when the part has customer-order lines in Visual, so it is a part the plant sells; NULL when not read. Decides Finished Goods against WIP when nothing follows.',
 MODIFY COLUMN refreshed_utc DATETIME NOT NULL COMMENT 'UTC time of the refresh that produced this row.',
 MODIFY COLUMN is_seed_content TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 for baseline seed rows; 0 for refreshed content.';
 
@@ -166,7 +167,8 @@ MODIFY COLUMN open_work_order_quantity DECIMAL(18,4) NOT NULL DEFAULT 0 COMMENT 
 MODIFY COLUMN finished_goods_quantity DECIMAL(18,4) NOT NULL DEFAULT 0 COMMENT 'Finished-goods on-hand quantity for the part.',
 MODIFY COLUMN has_outside_vendor_operation TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 when an operation carries vendor/service fields; the routing decides when it was read.',
 MODIFY COLUMN next_operation_resource_id VARCHAR(16) NULL COMMENT 'RESOURCE_ID of the first open operation after the job own; OUTSIDE_SERVICE means Outside Service.',
-MODIFY COLUMN has_remaining_operation TINYINT(1) NULL COMMENT '1 when a further operation remains, 0 when the routing ends at the job own, NULL when it was not read.',
+MODIFY COLUMN has_remaining_operation TINYINT(1) NULL COMMENT '1 when an open operation remains after the job own, 0 when nothing follows it, NULL when the routing was not read.',
+MODIFY COLUMN has_customer_demand TINYINT(1) NULL COMMENT '1 when the part has customer-order lines in Visual, so it is a part the plant sells; NULL when not read. Decides Finished Goods against WIP when nothing follows.',
 MODIFY COLUMN refreshed_utc DATETIME NOT NULL COMMENT 'UTC time of the refresh that produced this row.',
 MODIFY COLUMN is_seed_content TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 for baseline seed rows; 0 for refreshed content.';
 

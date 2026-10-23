@@ -56,5 +56,6 @@ public sealed class VisualDispositionInputFallback
         HasOutsideVendorOperation = VisualRowReader.GetBoolean(row, "HasOutsideVendorOperation"),
         NextOperationResourceId = VisualRowReader.GetNullableString(row, "NextOperationResourceId"),
         HasRemainingOperation = VisualRowReader.GetNullableBoolean(row, "HasRemainingOperation"),
+        HasCustomerDemand = VisualRowReader.GetNullableBoolean(row, "HasCustomerDemand"),
     };
 }

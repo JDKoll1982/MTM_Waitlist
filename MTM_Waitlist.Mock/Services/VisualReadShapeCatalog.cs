@@ -120,7 +120,8 @@ public static class VisualReadShapeCatalog
                 new VisualShapeColumn("FinishedGoodsQuantity", "decimal(18,4)"),
                 new VisualShapeColumn("HasOutsideVendorOperation", "bit"),
                 new VisualShapeColumn("NextOperationResourceId", "nvarchar(16)"),
-                new VisualShapeColumn("HasRemainingOperation", "bit")
+                new VisualShapeColumn("HasRemainingOperation", "bit"),
+                new VisualShapeColumn("HasCustomerDemand", "bit")
             ]
         },
         new VisualReadShape

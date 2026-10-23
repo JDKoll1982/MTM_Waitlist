@@ -70,7 +70,8 @@ public sealed class VisualShapePayloadSourceTests
             ("FinishedGoodsQuantity", 0m),
             ("HasOutsideVendorOperation", true),
             ("NextOperationResourceId", "OUTSIDE_SERVICE"),
-            ("HasRemainingOperation", 1)));
+            ("HasRemainingOperation", 1),
+            ("HasCustomerDemand", 1)));
 
         var source = new VisualShapePayloadSource(executor, NullLogger<VisualShapePayloadSource>.Instance);
         var payload = await source.BuildRefreshPayloadAsync(RequireShape("disposition_input"));
@@ -96,7 +97,8 @@ public sealed class VisualShapePayloadSourceTests
             ("FinishedGoodsQuantity", 0m),
             ("HasOutsideVendorOperation", false),
             ("NextOperationResourceId", null),
-            ("HasRemainingOperation", 0)));
+            ("HasRemainingOperation", 0),
+            ("HasCustomerDemand", 0)));
 
         var source = new VisualShapePayloadSource(executor, NullLogger<VisualShapePayloadSource>.Instance);
         var payload = await source.BuildRefreshPayloadAsync(RequireShape("disposition_input"));
@@ -225,3 +227,5 @@ public sealed class VisualShapePayloadSourceTests
         }
     }
 }
+
+

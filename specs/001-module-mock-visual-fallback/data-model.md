@@ -188,16 +188,18 @@ Source: `Module_Waitlist/Queries/GetDispositionInput.sql` · Caller: `RequestDis
 | `finished_goods_quantity` | `DECIMAL(18,4) NOT NULL DEFAULT 0` | out |
 | `has_outside_vendor_operation` | `TINYINT(1) NOT NULL DEFAULT 0` | out (`has_` prefix per DB rules); legacy Outside Service signal, used only when the routing was not read |
 | `next_operation_resource_id` | `VARCHAR(16) NULL` | out — `RESOURCE_ID` of the first open operation after the job's own; `OUTSIDE_SERVICE` means Outside Service (research 2026-10-23) |
-| `has_remaining_operation` | `TINYINT(1) NULL` | out — 1 = work still owed on the part (its own operation is not closed, or an operation follows it) → WIP; 0 = that operation has closed and nothing follows → Finished Goods; NULL = the routing was not read |
+| `has_remaining_operation` | `TINYINT(1) NULL` | out — 1 = an open operation remains **after** the job's own → WIP; 0 = nothing follows; NULL = the routing was not read |
+| `has_customer_demand` | `TINYINT(1) NULL` | out — 1 = the part has customer-order lines in Visual (it is a part the plant sells); NULL = not read. Decides Finished Goods against WIP once nothing follows the job's own operation |
 | `refreshed_utc` | DATETIME NOT NULL | metadata |
 | `is_seed_content` | TINYINT(1) NOT NULL DEFAULT 0 | metadata |
 
 Indexes: `PRIMARY (id)`; unique `uq_visual_disposition_input_result_lookup_key (work_order, part_number, work_center)`.
 
 `has_remaining_operation` is deliberately tri-state: NULL is "not read", which is a different answer from "no work
-remains". Conflating them would report Finished Goods for every part whose routing was never read. It counts the
-job's **own** operation as well as the ones after it: a part is not finished goods until the operation that makes it
-has closed, so a press holding 130 of 131 pieces with nothing after it is WIP, not a finished good.
+remains". Conflating them would report a product type for a part whose routing was never read. When nothing follows
+the job's own operation, `has_customer_demand` decides: a part the plant sells is the finished product, and a part
+nothing buys exists only to feed another work order, which is work in process. The operation's own completion does
+**not** decide it — a press still running on a sold part has already produced a finished good.
 
 ### 3.6 Stage twins
 

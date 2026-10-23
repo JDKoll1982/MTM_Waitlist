@@ -29,13 +29,19 @@
 --   NextOperationResourceId / HasRemainingOperation are the routing: the first open operation after the job's own.
 --     RESOURCE_ID = 'OUTSIDE_SERVICE'  -> Outside Service (the plant's own tag print reads this)
 --     any other resource               -> WIP
---     nothing open at or after the job's own operation, which has closed -> Finished Goods
---   `HasRemainingOperation` therefore counts the job's own operation too: a part is not finished goods until the
---   operation that makes it is closed. A press that has 130 of 131 pieces done and nothing after it is still WIP,
---   and reading it as Finished Goods would tell the shop a part is ready while it is still being made
---   (confirmed against WO-074654 / 100-17 on 2026-10-23).
---   Both are NULL when the work centre is not on the order's routing at all, which leaves the classifier's
---   stock/quantity/status arms to answer exactly as before.
+--     no operation after the job's own -> HasCustomerDemand decides (see below)
+--   HasCustomerDemand is the FG/WIP discriminator once nothing follows in the routing: a part the plant sells (it
+--   has customer-order lines) is the end product, and a part nothing buys exists only to feed another work order,
+--   which is what work in process means. Confirmed live 2026-10-23:
+--     A0006376159 at 100-08 — press still running (8,409 of 10,000), nothing after it, 180 customer-order lines
+--       -> Finished Goods
+--     T527094 at 100-17 — press at 130 of 131, nothing after it, no customer-order line, drawn by open WO-073735
+--       -> WIP
+--   Operation completion does NOT separate those two: both operations are open, and the first cut of this rule
+--   used completion and called both jobs WIP.
+--   Both routing columns are NULL when the work centre is not on the order's routing at all, which leaves the
+--   classifier's stock/quantity/status arms to answer exactly as before. HasCustomerDemand is NULL only when the
+--   read did not carry it (a cached row written before the column existed).
 --   Finished-goods classification mirrors the taxonomy already documented for the WIP side in
 --   Database/MTMWipApp/Queues/Module_Waitlist/Queues/GetWipFloorQuantities.sql and already used by
 --   GetPartWarehouseQuantities.sql: a location is finished goods when its own DESCRIPTION says so, when its
@@ -149,10 +155,16 @@ SELECT TOP (1)
                 AND o3.WORKORDER_LOT_ID = wo.LOT_ID
                 AND o3.WORKORDER_SPLIT_ID = wo.SPLIT_ID
                 AND o3.WORKORDER_SUB_ID = wo.SUB_ID
-                AND o3.SEQUENCE_NO >= @CurrentSequence
+                AND o3.SEQUENCE_NO > @CurrentSequence
                 AND o3.STATUS <> 'C'
         ) THEN 1 ELSE 0 END
-    ) END AS HasRemainingOperation
+    ) END AS HasRemainingOperation,
+    CASE WHEN EXISTS
+    (
+        SELECT 1
+        FROM CUST_ORDER_LINE AS col
+        WHERE col.PART_ID = wo.PART_ID
+    ) THEN 1 ELSE 0 END AS HasCustomerDemand
 FROM WORK_ORDER AS wo
 WHERE
     wo.BASE_ID = @WorkOrderTrimmed

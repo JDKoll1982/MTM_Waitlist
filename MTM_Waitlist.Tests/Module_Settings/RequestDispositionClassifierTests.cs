@@ -70,39 +70,76 @@ public sealed class RequestDispositionClassifierTests
 
         Assert.AreEqual(RequestDisposition.WorkInProcess, RequestDispositionClassifier.Classify(wipInput));
 
-        var finishedInput = wipInput with { NextOperationResourceId = null, HasRemainingOperation = false };
+        var finishedInput = wipInput with
+        {
+            NextOperationResourceId = null,
+            HasRemainingOperation = false,
+            HasCustomerDemand = true,
+        };
 
         Assert.AreEqual(RequestDisposition.FinishedGoods, RequestDispositionClassifier.Classify(finishedInput));
     }
 
     [TestMethod]
-    public void Service_RequestDispositionClassifierTests_Classify_AFinishedProductIsOnlyCalledFinishedOnceItsOwnOperationCloses()
+    public void Service_RequestDispositionClassifierTests_Classify_TheLastOperationOnAPartNothingBuysIsStillWorkInProcess()
     {
-        // WO-074654 / 100-17: the press is the last operation, 130 of 131 pieces done, nothing after it. The part
-        // is still being made, so the read reports work remaining and the card says WIP (2026-10-23).
-        var stillRunning = new RequestDispositionClassifier.DispositionInput(
+        // WO-074654 / 100-17: the press is the last operation and 130 of 131 pieces are done, but the part exists
+        // only to feed open WO-073735 — no customer-order line anywhere. That is work in process (2026-10-23).
+        var feedsAnotherJob = new RequestDispositionClassifier.DispositionInput(
             WorkOrderStatus: "R",
             FinishedGoodsQuantity: 0m,
             OpenWorkOrderQuantity: 3m,
             HasOutsideVendorOperation: false,
             NonConformingQuantity: 0m,
             NextOperationResourceId: null,
-            HasRemainingOperation: true);
+            HasRemainingOperation: false,
+            HasCustomerDemand: false);
 
-        Assert.AreEqual(RequestDisposition.WorkInProcess, RequestDispositionClassifier.Classify(stillRunning));
-
-        // WO-033406: the same last operation has closed and nothing follows, so what the job produced is the
-        // finished product.
-        var finished = stillRunning with { WorkOrderStatus = "C", OpenWorkOrderQuantity = 0m, HasRemainingOperation = false };
-
-        Assert.AreEqual(RequestDisposition.FinishedGoods, RequestDispositionClassifier.Classify(finished));
+        Assert.AreEqual(RequestDisposition.WorkInProcess, RequestDispositionClassifier.Classify(feedsAnotherJob));
     }
 
     [TestMethod]
-    public void Service_RequestDispositionClassifierTests_Classify_AClosedLastOperationReturnsFinishedGoodsEvenWhileTheOrderIsOpen()
+    public void Service_RequestDispositionClassifierTests_Classify_TheLastOperationOnAPartThePlantSellsIsFinishedGoods()
     {
-        // The operation that makes the part has closed and nothing follows it, so what the job produced is the
-        // finished product. The order itself may still be open — a lot can complete before its order does.
+        // WO-074962 / 100-08: the press is the last operation and still running at 8,409 of 10,000, but the part
+        // has 180 customer-order lines — it is the end product, so the job's output is Finished Goods even while
+        // the operation is open (2026-10-23).
+        var soldPart = new RequestDispositionClassifier.DispositionInput(
+            WorkOrderStatus: "R",
+            FinishedGoodsQuantity: 0m,
+            OpenWorkOrderQuantity: 1_763m,
+            HasOutsideVendorOperation: false,
+            NonConformingQuantity: 0m,
+            NextOperationResourceId: null,
+            HasRemainingOperation: false,
+            HasCustomerDemand: true);
+
+        Assert.AreEqual(RequestDisposition.FinishedGoods, RequestDispositionClassifier.Classify(soldPart));
+    }
+
+    [TestMethod]
+    public void Service_RequestDispositionClassifierTests_Classify_ARemainingOperationKeepsASoldPartInProcess()
+    {
+        // Customer demand does not promote a part that still has work ahead of it: a sold part at an operation
+        // with another one after it has not been made yet.
+        var soldButUnfinished = new RequestDispositionClassifier.DispositionInput(
+            WorkOrderStatus: "R",
+            FinishedGoodsQuantity: 0m,
+            OpenWorkOrderQuantity: 1_763m,
+            HasOutsideVendorOperation: false,
+            NonConformingQuantity: 0m,
+            NextOperationResourceId: "135-23",
+            HasRemainingOperation: true,
+            HasCustomerDemand: true);
+
+        Assert.AreEqual(RequestDisposition.WorkInProcess, RequestDispositionClassifier.Classify(soldButUnfinished));
+    }
+
+    [TestMethod]
+    public void Service_RequestDispositionClassifierTests_Classify_NoOperationAfterASoldPartReturnsFinishedGoodsEvenWhileTheOrderIsOpen()
+    {
+        // Nothing follows the job's own operation and the part is one the plant sells, so what the job produced is
+        // a finished good. The order itself may still be open — a lot can complete before its order does.
         var input = new RequestDispositionClassifier.DispositionInput(
             WorkOrderStatus: "R",
             FinishedGoodsQuantity: 0m,
@@ -110,7 +147,8 @@ public sealed class RequestDispositionClassifierTests
             HasOutsideVendorOperation: false,
             NonConformingQuantity: 0m,
             NextOperationResourceId: null,
-            HasRemainingOperation: false);
+            HasRemainingOperation: false,
+            HasCustomerDemand: true);
 
         Assert.AreEqual(RequestDisposition.FinishedGoods, RequestDispositionClassifier.Classify(input));
     }

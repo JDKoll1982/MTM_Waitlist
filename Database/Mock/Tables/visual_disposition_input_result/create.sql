@@ -27,6 +27,10 @@
 -- `next_operation_resource_id` / `has_remaining_operation` are the routing, and both are NULL when
 -- it was not read: NULL is "unknown", 0/other-resource is "no operation remains", and a resource id
 -- is the operation that follows the job's own (research 2026-10-23).
+--
+-- `has_customer_demand` decides Finished Goods against WIP once nothing remains in the routing: a part
+-- with customer-order lines is the end product, and a part nothing buys exists only to feed another
+-- work order. NULL when the read did not carry it.
 -- ============================================================
 
 USE mtm_mock;
@@ -44,6 +48,7 @@ CREATE TABLE IF NOT EXISTS visual_disposition_input_result (
     has_outside_vendor_operation TINYINT(1) NOT NULL DEFAULT 0,
     next_operation_resource_id VARCHAR(16) NULL,
     has_remaining_operation TINYINT(1) NULL,
+    has_customer_demand TINYINT(1) NULL,
     refreshed_utc DATETIME NOT NULL,
     is_seed_content TINYINT(1) NOT NULL DEFAULT 0,
     PRIMARY KEY (id),

@@ -226,29 +226,56 @@ work-centre key, so they answer for any work centre and carry NULL in both routi
 legacy arms. `AllTables.sql`, `AllSPs.sql` and `AllSeeds.sql` were regenerated with `build_mtm_mock_masters.ps1`.
 **The deployed `mtm_mock` on the plant host still carries the old shape** until the service is redeployed there.
 
-## Corrected 2026-10-23 — a part is not finished goods until its own operation closes
+## Corrected twice on 2026-10-23 — customer demand, not operation completion, separates FG from WIP
 
 The first cut of the routing rule read "no operation after the job's own" as Finished Goods, and the 100-17 card for
 `WO-074654` / `T527094` came up **Finished Goods** on a job the shop calls WIP. The data says why:
 
 | Seq | Resource | Status | End qty | Done |
 |---|---|---|---|---|
+
 | 5 | `500-GRP` | R | 1 | 0 |
-| 10 | `060-02` | C | 131 | 131 |
-| 30 | `100-17` | **R** | 131 | **130** |
+| 19 | `100-08` | **R** | 10,000 | **8,409** |
 
-Nothing follows the press, but the press is still running — 130 of 131 pieces. A part is not finished goods while the
-operation that makes it is still open; it is finished only when that operation has **closed** and nothing follows.
-`HasRemainingOperation` therefore counts the job's own operation, not just the ones after it:
+Nothing follows the press either, yet the shop calls this one Finished Goods and `T527094` WIP. **Operation
+completion is not the discriminator** — both presses are open, at 130/131 and 8,409/10,000. The Visual signal that
+does separate them is customer demand:
 
-- open at or after the job's own operation → 1 → WIP (or Outside Service when the next resource is `OUTSIDE_SERVICE`)
-- job's own operation closed and nothing after it → 0 → Finished Goods
+| Part | Work centre | Customer-order lines | Draws another order | Answer |
+|---|---|---|---|---|
+| `A0006376159` (`WO-074962`) | 100-08 | **180**, last shipped 2026-10-23 | no | **Finished Goods** |
+| `T527094` (`WO-074654`) | 100-17 | **none** | yes — open `WO-073735` at op 96 | **WIP** |
+| `29531267` (`WO-074866`) | 100-12 | 13 | no | Outside Service (next op) |
+| `16 096 02` (`WO-033406`) | 100-12 | 419 | no | Finished Goods |
 
-Verified live after the correction: `WO-074654`/100-17 → WIP, `WO-074866`/100-12 → Outside Service (unchanged),
-`WO-033406`/100-12 (press closed, nothing after, 3,600 at `002/FG`) → Finished Goods. The population read now reports
-**18** finished-goods rows out of 1,548, and 1,530 rows still owing work — the opposite balance from the first cut,
-which called 501 of them finished.
+So the final rule is:
 
-Two signals were checked and rejected as the FG/WIP discriminator: `mtm_wip_application_winforms.md_part_ids.ItemType`
-classifies 3,929 of 3,976 parts as `WIP` (a defaulted list, not a classification — it calls `29531267` WIP too), and a
-part being a `REQUIREMENT` of another open work order is true of both WIP and O/S parts.
+1. the next open operation's `RESOURCE_ID` is `OUTSIDE_SERVICE` → Outside Service (vendor fields only while the
+   routing is unread);
+2. an open operation remains **after** the job's own → WIP;
+3. nothing follows → `HasCustomerDemand` decides: a part the plant sells is the finished product, and a part nothing
+   buys exists only to feed another work order, which is what work in process means.
+
+`HasRemainingOperation` therefore compares `SEQUENCE_NO > ` the anchor (an earlier attempt used `>=` and made every
+running job WIP). Live population after the fix: **1,172** rows have a later in-house operation, **376** go to
+`OUTSIDE_SERVICE`, **299** end with nothing after and are sold (FG) and **198** end with nothing after and are not
+sold (WIP).
+
+Signals checked and **rejected**: `mtm_wip_application_winforms.md_part_ids.ItemType` classifies 3,929 of 3,976 parts
+as `WIP` (a defaulted list, not a classification — it calls `29531267` WIP too), the WIP app's colour history, and
+stock location (`002/FG` holds 5,464 parts, so its absence says nothing).
+
+### The WIP application may not name the production type (operator instruction, 2026-10-23)
+
+`RequestDispositionMapper` no longer lets the floor buckets answer FG / WIP / Outside Service: every one of those
+inputs now comes from the Visual row. The floor snapshot contributes **only** non-conforming stock, because NCM is a
+state of the location the material occupies and the floor store is the only place that is written down (FR-093).
+Consequences:
+
+- a Visual read that returned nothing yields `Unknown` (or `Ncm` when the floor shows an NCM location) instead of a
+  floor-derived WIP or Outside Service;
+- the floor's finished-goods figure may no longer fill a zero Visual figure;
+- `WipFloorQuantitySnapshot` keeps its other buckets for logging and `HasAnyQuantity`, but nothing reads them to
+  reach a product type any more.
+
+The five mapper tests that pinned the old floor fallback were rewritten to pin this instead.
