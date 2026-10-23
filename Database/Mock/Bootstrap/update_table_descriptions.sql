@@ -144,10 +144,13 @@ ALTER TABLE visual_disposition_input_result
 MODIFY COLUMN id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
 MODIFY COLUMN work_order VARCHAR(64) NOT NULL COMMENT 'Normalized work order used as the lookup predicate.',
 MODIFY COLUMN part_number VARCHAR(64) NOT NULL COMMENT 'Finished-product part on the work order.',
+MODIFY COLUMN work_center VARCHAR(64) NOT NULL DEFAULT '*' COMMENT 'Work centre the routing answer is anchored on; * marks a row seeded before the routing was read.',
 MODIFY COLUMN work_order_status VARCHAR(8) NULL COMMENT 'Raw Visual WORK_ORDER.STATUS code; meaning owned by RequestDispositionStatusCodes.',
 MODIFY COLUMN open_work_order_quantity DECIMAL(18,4) NOT NULL DEFAULT 0 COMMENT 'Open quantity still on the order.',
 MODIFY COLUMN finished_goods_quantity DECIMAL(18,4) NOT NULL DEFAULT 0 COMMENT 'Finished-goods on-hand quantity for the part.',
-MODIFY COLUMN has_outside_vendor_operation TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 when an operation carries vendor/service fields.',
+MODIFY COLUMN has_outside_vendor_operation TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 when an operation carries vendor/service fields; the routing decides when it was read.',
+MODIFY COLUMN next_operation_resource_id VARCHAR(16) NULL COMMENT 'RESOURCE_ID of the first open operation after the job own; OUTSIDE_SERVICE means Outside Service.',
+MODIFY COLUMN has_remaining_operation TINYINT(1) NULL COMMENT '1 when a further operation remains, 0 when the routing ends at the job own, NULL when it was not read.',
 MODIFY COLUMN refreshed_utc DATETIME NOT NULL COMMENT 'UTC time of the refresh that produced this row.',
 MODIFY COLUMN is_seed_content TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 for baseline seed rows; 0 for refreshed content.';
 
@@ -157,10 +160,13 @@ ALTER TABLE visual_disposition_input_result_stage
 MODIFY COLUMN id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
 MODIFY COLUMN work_order VARCHAR(64) NOT NULL COMMENT 'Normalized work order used as the lookup predicate.',
 MODIFY COLUMN part_number VARCHAR(64) NOT NULL COMMENT 'Finished-product part on the work order.',
+MODIFY COLUMN work_center VARCHAR(64) NOT NULL DEFAULT '*' COMMENT 'Work centre the routing answer is anchored on; * marks a row seeded before the routing was read.',
 MODIFY COLUMN work_order_status VARCHAR(8) NULL COMMENT 'Raw Visual WORK_ORDER.STATUS code; meaning owned by RequestDispositionStatusCodes.',
 MODIFY COLUMN open_work_order_quantity DECIMAL(18,4) NOT NULL DEFAULT 0 COMMENT 'Open quantity still on the order.',
 MODIFY COLUMN finished_goods_quantity DECIMAL(18,4) NOT NULL DEFAULT 0 COMMENT 'Finished-goods on-hand quantity for the part.',
-MODIFY COLUMN has_outside_vendor_operation TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 when an operation carries vendor/service fields.',
+MODIFY COLUMN has_outside_vendor_operation TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 when an operation carries vendor/service fields; the routing decides when it was read.',
+MODIFY COLUMN next_operation_resource_id VARCHAR(16) NULL COMMENT 'RESOURCE_ID of the first open operation after the job own; OUTSIDE_SERVICE means Outside Service.',
+MODIFY COLUMN has_remaining_operation TINYINT(1) NULL COMMENT '1 when a further operation remains, 0 when the routing ends at the job own, NULL when it was not read.',
 MODIFY COLUMN refreshed_utc DATETIME NOT NULL COMMENT 'UTC time of the refresh that produced this row.',
 MODIFY COLUMN is_seed_content TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 for baseline seed rows; 0 for refreshed content.';
 

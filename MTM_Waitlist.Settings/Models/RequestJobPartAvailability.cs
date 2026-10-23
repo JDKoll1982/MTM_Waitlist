@@ -33,9 +33,10 @@ public sealed record RequestJobPartAvailability(
     /// Whether the derivation read the requesting job's part as <b>finished goods</b> — stock completed at a
     /// finished-goods location.
     /// <para>
-    /// The <c>pickup-fg</c> Item is offered on any active job rather than on this flag (see
-    /// <c>RequestItemPickerRules.IsVisible</c>), because the finished-goods location names it is read from are not
-    /// confirmed for this installation. What this flag still feeds is the card's <c>Part Type</c> cell.
+    /// The <c>pickup-fg</c> Item is the generic product pickup: it is offered when the derivation named work in
+    /// progress or subcontracted work for neither of them, so it is what a job offers when its product type could
+    /// not be named (see <c>RequestItemPickerRules.ProductPickupItemId</c>). The flag also feeds the card's
+    /// <c>Part Type</c> cell.
     /// </para>
     /// </summary>
     public bool HasFinishedGoodsToReturn { get; init; }
@@ -49,8 +50,8 @@ public sealed record RequestJobPartAvailability(
 
     /// <summary>
     /// Whether the derivation read the requesting job's part as <b>work in progress</b> — quantity still open on
-    /// the work order. The <c>pickup-wip</c> Item is offered on any active job rather than on this flag, for the
-    /// same reason as <see cref="HasFinishedGoodsToReturn"/>; the flag still feeds the card's <c>Part Type</c>.
+    /// the work order. The <c>pickup-wip</c> Item is offered exactly when this flag is the derived product type,
+    /// beside the card's <c>Part Type</c> cell.
     /// </summary>
     public bool HasWorkInProgressToReturn { get; init; }
 

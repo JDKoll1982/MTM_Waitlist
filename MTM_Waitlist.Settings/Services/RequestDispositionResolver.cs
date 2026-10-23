@@ -42,6 +42,7 @@ public sealed class RequestDispositionResolver
     public async Task<RequestDispositionClassifier.DispositionInput> GetDispositionInputAsync(
         string? workOrder,
         string? partNumber,
+        string? workCenter = null,
         CancellationToken cancellationToken = default)
     {
         var normalizedPart = (partNumber ?? string.Empty).Trim();
@@ -52,7 +53,9 @@ public sealed class RequestDispositionResolver
             try
             {
                 var rows = await _dispositionInputFallback
-                    .ReadAsync(new VisualDispositionInputRequest(workOrder ?? string.Empty, normalizedPart), cancellationToken)
+                    .ReadAsync(
+                        new VisualDispositionInputRequest(workOrder ?? string.Empty, normalizedPart, (workCenter ?? string.Empty).Trim()),
+                        cancellationToken)
                     .ConfigureAwait(false);
 
                 inforRow = ToInforRow(rows.FirstOrDefault());
@@ -74,9 +77,10 @@ public sealed class RequestDispositionResolver
     public async Task<RequestDisposition> GetDispositionAsync(
         string? workOrder,
         string? partNumber,
+        string? workCenter = null,
         CancellationToken cancellationToken = default)
     {
-        var input = await GetDispositionInputAsync(workOrder, partNumber, cancellationToken).ConfigureAwait(false);
+        var input = await GetDispositionInputAsync(workOrder, partNumber, workCenter, cancellationToken).ConfigureAwait(false);
         return RequestDispositionClassifier.Classify(input);
     }
 
@@ -98,6 +102,10 @@ public sealed class RequestDispositionResolver
             OpenWorkOrderQuantity = row.OpenWorkOrderQuantity,
             FinishedGoodsQuantity = row.FinishedGoodsQuantity,
             HasOutsideVendorOperation = row.HasOutsideVendorOperation,
+            NextOperationResourceId = string.IsNullOrWhiteSpace(row.NextOperationResourceId)
+                ? null
+                : row.NextOperationResourceId,
+            HasRemainingOperation = row.HasRemainingOperation,
         };
     }
 }

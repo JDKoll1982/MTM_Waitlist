@@ -24,6 +24,43 @@ internal static class VisualRowReader
         return string.Empty;
     }
 
+    /// <summary>Reads a trimmed string, or <see langword="null"/> when the column is absent, null, or blank.</summary>
+    public static string? GetNullableString(IReadOnlyDictionary<string, object?> row, string key)
+    {
+        if (!row.TryGetValue(key, out var value) || value is null || value is DBNull)
+        {
+            return null;
+        }
+
+        var text = Convert.ToString(value, CultureInfo.InvariantCulture)?.Trim();
+        return string.IsNullOrWhiteSpace(text) ? null : text;
+    }
+
+    /// <summary>
+    /// Reads a flag that can also be absent, or <see langword="null"/> when the column is missing, null, or
+    /// unparseable. A tri-state flag is how the read says "the routing was not read" as distinct from "no
+    /// operation remains".
+    /// </summary>
+    public static bool? GetNullableBoolean(IReadOnlyDictionary<string, object?> row, string key)
+    {
+        if (!row.TryGetValue(key, out var value) || value is null || value is DBNull)
+        {
+            return null;
+        }
+
+        return value switch
+        {
+            bool boolValue => boolValue,
+            byte byteValue => byteValue != 0,
+            sbyte signedByteValue => signedByteValue != 0,
+            short shortValue => shortValue != 0,
+            int intValue => intValue != 0,
+            long longValue => longValue != 0,
+            decimal decimalValue => decimalValue != 0m,
+            _ => bool.TryParse(Convert.ToString(value, CultureInfo.InvariantCulture), out var parsed) ? parsed : null,
+        };
+    }
+
     /// <summary>Reads a decimal quantity, or zero when the column is absent, null, or unparseable.</summary>
     public static decimal GetDecimal(IReadOnlyDictionary<string, object?> row, string key)
     {

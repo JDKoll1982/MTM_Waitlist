@@ -887,6 +887,9 @@
   <data name="RequestItem_pickup_outside_service.DisplayName" xml:space="preserve">
     <value>Outside Service</value>
   </data>
+  <data name="RequestItem_finished_product.DisplayName" xml:space="preserve">
+    <value>Finished Product</value>
+  </data>
   <data name="RequestItem_pickup_riser_table.DisplayName" xml:space="preserve">
     <value>Riser Table</value>
   </data>

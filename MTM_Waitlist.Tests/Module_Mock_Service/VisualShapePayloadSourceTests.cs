@@ -64,10 +64,13 @@ public sealed class VisualShapePayloadSourceTests
         var executor = new StubExecutor(Row(
             ("WorkOrder", "WO-1"),
             ("PartNumber", "P-1"),
+            ("WorkCenter", "100-12"),
             ("WorkOrderStatus", "R"),
             ("OpenWorkOrderQuantity", 12.5m),
             ("FinishedGoodsQuantity", 0m),
-            ("HasOutsideVendorOperation", true)));
+            ("HasOutsideVendorOperation", true),
+            ("NextOperationResourceId", "OUTSIDE_SERVICE"),
+            ("HasRemainingOperation", 1)));
 
         var source = new VisualShapePayloadSource(executor, NullLogger<VisualShapePayloadSource>.Instance);
         var payload = await source.BuildRefreshPayloadAsync(RequireShape("disposition_input"));
@@ -87,10 +90,13 @@ public sealed class VisualShapePayloadSourceTests
         var executor = new StubExecutor(Row(
             ("WorkOrder", "WO-1"),
             ("PartNumber", "P-1"),
+            ("WorkCenter", "100-12"),
             ("WorkOrderStatus", "C"),
             ("OpenWorkOrderQuantity", 0m),
             ("FinishedGoodsQuantity", 0m),
-            ("HasOutsideVendorOperation", false)));
+            ("HasOutsideVendorOperation", false),
+            ("NextOperationResourceId", null),
+            ("HasRemainingOperation", 0)));
 
         var source = new VisualShapePayloadSource(executor, NullLogger<VisualShapePayloadSource>.Instance);
         var payload = await source.BuildRefreshPayloadAsync(RequireShape("disposition_input"));

@@ -182,14 +182,20 @@ Source: `Module_Waitlist/Queries/GetDispositionInput.sql` · Caller: `RequestDis
 | `id` | BIGINT UNSIGNED AI | PK |
 | `work_order` | `VARCHAR(64) NOT NULL` | **in** |
 | `part_number` | `VARCHAR(64) NOT NULL` | **in** |
+| `work_center` | `VARCHAR(64) NOT NULL DEFAULT '*'` | **in** — the work centre the job is set up on; the routing answer is anchored on it, so one row per (work order, part) could only be right for one of them. `'*'` marks a row seeded before the routing was read; `sp_visual_disposition_input_get` prefers an exact match |
 | `work_order_status` | `VARCHAR(8) NULL` | out (status codes remain owned by `RequestDispositionStatusCodes`; Open = {R,U,F}, Closed = {C}, X never FG) |
 | `open_work_order_quantity` | `DECIMAL(18,4) NOT NULL DEFAULT 0` | out |
 | `finished_goods_quantity` | `DECIMAL(18,4) NOT NULL DEFAULT 0` | out |
-| `has_outside_vendor_operation` | `TINYINT(1) NOT NULL DEFAULT 0` | out (`has_` prefix per DB rules) |
+| `has_outside_vendor_operation` | `TINYINT(1) NOT NULL DEFAULT 0` | out (`has_` prefix per DB rules); legacy Outside Service signal, used only when the routing was not read |
+| `next_operation_resource_id` | `VARCHAR(16) NULL` | out — `RESOURCE_ID` of the first open operation after the job's own; `OUTSIDE_SERVICE` means Outside Service (research 2026-10-23) |
+| `has_remaining_operation` | `TINYINT(1) NULL` | out — 1 = a further operation remains (WIP), 0 = the routing ends at the job's own operation (Finished Goods), NULL = the routing was not read |
 | `refreshed_utc` | DATETIME NOT NULL | metadata |
 | `is_seed_content` | TINYINT(1) NOT NULL DEFAULT 0 | metadata |
 
-Indexes: `PRIMARY (id)`; unique `uq_visual_disposition_input_result_lookup_key (work_order, part_number)`.
+Indexes: `PRIMARY (id)`; unique `uq_visual_disposition_input_result_lookup_key (work_order, part_number, work_center)`.
+
+`has_remaining_operation` is deliberately tri-state: NULL is "not read", which is a different answer from "no
+operation remains". Conflating them would report Finished Goods for every part whose routing was never read.
 
 ### 3.6 Stage twins
 

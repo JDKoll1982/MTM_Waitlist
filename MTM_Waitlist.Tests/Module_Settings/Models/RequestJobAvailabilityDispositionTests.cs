@@ -43,16 +43,16 @@ public sealed class RequestJobAvailabilityDispositionTests
     }
 
     [TestMethod]
-    public void Service_RequestJobAvailabilityDispositionTests_WithDisposition_AnActiveJobStillOffersTheJobsOwnProduct()
+    public void Service_RequestJobAvailabilityDispositionTests_WithDisposition_AnActiveJobStillOffersTheGenericProductPickup()
     {
-        // A request may name finished parts or WIP whatever the derivation made of the part: the two pickups name
-        // the job's own product, so the job is what offers them, and a derivation that cannot say where the stock
-        // sits does not take the choice away (FR-094).
+        // A request may name the job's finished product whatever the derivation made of the part: the one product
+        // pickup stays on offer, because the pickup itself is real work even when the type could not be named
+        // (FR-089, FR-094). What stays hidden is the card's Part Type cell, not the choice.
         var job = RequestJobPartAvailability.All.WithDisposition(RequestDisposition.Unknown);
 
         Assert.IsTrue(job.HasActiveJob);
         Assert.IsTrue(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-fg")!, job));
-        Assert.IsTrue(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-wip")!, job));
+        Assert.IsFalse(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-wip")!, job));
         Assert.IsFalse(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-ncm")!, job));
         Assert.IsFalse(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-outside-service")!, job));
     }
@@ -93,7 +93,7 @@ public sealed class RequestJobAvailabilityDispositionTests
         Assert.IsTrue(availability.HasComponent);
         Assert.IsFalse(availability.HasFlatstock);
         Assert.IsFalse(availability.HasDunnage);
-        Assert.IsTrue(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-fg")!, availability));
+        Assert.IsFalse(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-fg")!, availability));
         Assert.IsTrue(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-wip")!, availability));
         Assert.IsTrue(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-coil")!, availability));
     }

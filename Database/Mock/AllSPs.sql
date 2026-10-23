@@ -23,11 +23,18 @@ USE mtm_mock;
 -- ============================================================
 --
 -- Live projection: WorkOrderStatus, OpenWorkOrderQuantity, FinishedGoodsQuantity,
---                  HasOutsideVendorOperation   (the live read returns TOP (1)).
+--                  HasOutsideVendorOperation, NextOperationResourceId, HasRemainingOperation
+--                  (the live read returns TOP (1)).
 --
 -- `WorkOrderStatus` is the raw Visual status code. Its MEANING is owned solely by
 -- RequestDispositionStatusCodes (Open = {R,U,F}, Closed = {C}, X never FG); this read never
 -- interprets it (FR-018).
+--
+-- The lookup key includes the work centre, because the routing answer is anchored on it: the work
+-- order's "next operation" differs per work centre. A row seeded before the column existed carries
+-- the `'*'` wildcard; an exact match always wins, so the first refresh shadows the wildcard. A
+-- wildcard row answers NULL in both routing columns, which the caller reads as "routing not read"
+-- rather than "no operation remains".
 -- ============================================================
 
 USE mtm_mock;
@@ -36,16 +43,21 @@ DROP PROCEDURE IF EXISTS sp_visual_disposition_input_get;
 
 CREATE PROCEDURE sp_visual_disposition_input_get(
     IN p_work_order VARCHAR(64),
-    IN p_part_number VARCHAR(64)
+    IN p_part_number VARCHAR(64),
+    IN p_work_center VARCHAR(64)
 )
 SELECT
     work_order_status             AS WorkOrderStatus,
     open_work_order_quantity      AS OpenWorkOrderQuantity,
     finished_goods_quantity       AS FinishedGoodsQuantity,
-    has_outside_vendor_operation  AS HasOutsideVendorOperation
+    has_outside_vendor_operation  AS HasOutsideVendorOperation,
+    next_operation_resource_id    AS NextOperationResourceId,
+    has_remaining_operation       AS HasRemainingOperation
 FROM visual_disposition_input_result
 WHERE work_order = p_work_order
   AND part_number = p_part_number
+  AND (work_center = p_work_center OR work_center = '*')
+ORDER BY (work_center = p_work_center) DESC
 LIMIT 1;
 
 -- ============================================================
@@ -65,12 +77,17 @@ LIMIT 1;
 -- Follows the T015 reference pattern exactly. See that file for the full rationale.
 --
 --   p_rows : JSON array of result objects. Keys:
---              "WorkOrder", "PartNumber"      (the read's inputs)
+--              "WorkOrder", "PartNumber", "WorkCenter"   (the read's inputs)
 --              "WorkOrderStatus", "OpenWorkOrderQuantity", "FinishedGoodsQuantity",
---              "HasOutsideVendorOperation"     (the read's outputs)
+--              "HasOutsideVendorOperation", "NextOperationResourceId",
+--              "HasRemainingOperation"                    (the read's outputs)
 --
 -- `WorkOrderStatus` is stored as the raw Visual status code. The status MEANING remains owned
 -- solely by RequestDispositionStatusCodes; this cache never interprets it (FR-018).
+--
+-- `NextOperationResourceId` and `HasRemainingOperation` are stored as NULL when the payload omits
+-- them or sends JSON null: NULL means the routing was not read, which is a different answer from
+-- "no operation remains" (research 2026-10-23).
 -- ============================================================
 
 USE mtm_mock;
@@ -93,20 +110,26 @@ BEGIN
     INSERT INTO visual_disposition_input_result_stage (
         work_order,
         part_number,
+        work_center,
         work_order_status,
         open_work_order_quantity,
         finished_goods_quantity,
         has_outside_vendor_operation,
+        next_operation_resource_id,
+        has_remaining_operation,
         refreshed_utc,
         is_seed_content
     )
     SELECT
         JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].WorkOrder'))),
         JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].PartNumber'))),
+        IFNULL(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].WorkCenter'))), '*'),
         JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].WorkOrderStatus'))),
         CAST(IFNULL(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].OpenWorkOrderQuantity'))), '0') AS DECIMAL(18,4)),
         CAST(IFNULL(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].FinishedGoodsQuantity'))), '0') AS DECIMAL(18,4)),
         CAST(IFNULL(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].HasOutsideVendorOperation'))), '0') AS SIGNED),
+        NULLIF(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].NextOperationResourceId'))), 'null'),
+        CAST(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].HasRemainingOperation'))), 'null') AS SIGNED),
         UTC_TIMESTAMP(),
         0
     FROM (

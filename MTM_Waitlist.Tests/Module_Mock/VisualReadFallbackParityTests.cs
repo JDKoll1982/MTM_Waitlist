@@ -153,7 +153,7 @@ public sealed class VisualReadFallbackParityTests
         ]);
         var fallback = new VisualDispositionInputFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Unreachable("down")), cache);
 
-        var rows = await fallback.ReadAsync(new VisualDispositionInputRequest("WO-1", "P-1"));
+        var rows = await fallback.ReadAsync(new VisualDispositionInputRequest("WO-1", "P-1", "100-12"));
 
         Assert.AreEqual(1, rows.Count);
         Assert.AreEqual("R", rows[0].WorkOrderStatus);
@@ -169,7 +169,7 @@ public sealed class VisualReadFallbackParityTests
         var cache = new RecordingMirrorCache([Row(("WorkOrderStatus", "R"))]);
         var fallback = new VisualDispositionInputFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Ok([])), cache);
 
-        var result = await fallback.ReadWithProvenanceAsync(new VisualDispositionInputRequest("WO-1", "P-1"));
+        var result = await fallback.ReadWithProvenanceAsync(new VisualDispositionInputRequest("WO-1", "P-1", "100-12"));
 
         Assert.AreEqual(0, result.Value.Count);
         Assert.AreEqual(VisualReadSource.ServedFromLive, result.Source);
@@ -362,7 +362,7 @@ public sealed class VisualReadFallbackParityTests
             ("operation_sequences", executor => new VisualOperationSequencesFallback(executor).ReadAsync(new VisualOperationSequenceRequest("WO-1", "P-1"))),
             ("subordinate_parts", executor => new VisualSubordinatePartsFallback(executor).ReadAsync(new VisualSubordinatePartRequest("WO-1", "P-1", "020"))),
             ("inventory_locations", executor => new VisualInventoryLocationsFallback(executor).ReadAsync(new VisualInventoryLocationRequest("P-1"))),
-            ("disposition_input", executor => new VisualDispositionInputFallback(executor).ReadAsync(new VisualDispositionInputRequest("WO-1", "P-1"))),
+            ("disposition_input", executor => new VisualDispositionInputFallback(executor).ReadAsync(new VisualDispositionInputRequest("WO-1", "P-1", "100-12"))),
             ("employee_by_number", executor => new VisualEmployeeByNumberFallback(executor).ReadAsync(new VisualEmployeeByNumberRequest("6229"))),
         };
 
@@ -629,3 +629,4 @@ public sealed class VisualReadFallbackParityTests
         return row;
     }
 }
+

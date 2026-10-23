@@ -18,4 +18,16 @@ public sealed record VisualDispositionInputRow
 
     /// <summary>Whether the work order has an outside-vendor operation.</summary>
     public bool HasOutsideVendorOperation { get; init; }
+
+    /// <summary>
+    /// The <c>RESOURCE_ID</c> of the operation that follows the job's own at the asked work centre, or
+    /// <see langword="null"/> when there is none.
+    /// </summary>
+    public string? NextOperationResourceId { get; init; }
+
+    /// <summary>
+    /// Whether a further operation remains after the job's own, or <see langword="null"/> when the read did not
+    /// carry the routing (a cached row written before it was read).
+    /// </summary>
+    public bool? HasRemainingOperation { get; init; }
 }

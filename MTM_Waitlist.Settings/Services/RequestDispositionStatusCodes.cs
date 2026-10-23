@@ -17,9 +17,10 @@ namespace MTM_Waitlist.Module_Settings.Services;
 ///     C = Closed, F = Firmed, R = Released, U = Unreleased, X = Cancelled.
 ///
 /// Confirmed derivation rules (from the live schema / data — file 14 Phase 6):
-///   - Outside Service is driven by OPERATION vendor/service fields, NOT by a status code, so it needs
-///     no code entry here. Confirmed live: ~26.9k OPERATION rows carry a non-empty VENDOR_ID /
-///     SERVICE_ID / SERVICE_PART_ID (RESOURCE_ID = 'OUTSIDE_SERVICE').
+///   - Outside Service is driven by the routing, NOT by a status code: the operation that follows the job's own
+///     is routed to the OUTSIDE_SERVICE shop resource (confirmed live 2026-10-23; ~27.2k OPERATION rows, all of
+///     them also carrying a non-empty VENDOR_ID / SERVICE_ID / SERVICE_PART_ID). Those vendor fields remain the
+///     signal when the routing has not been read, so it needs no code entry here.
 ///   - FG vs WIP is driven by whether the order/operation is open (in process) or closed/completed:
 ///       OPEN (→ WIP)   = R (Released), U (Unreleased); F (Firmed) is also an open/planned state
 ///                        (defined but currently unused in this install).
@@ -35,6 +36,14 @@ namespace MTM_Waitlist.Module_Settings.Services;
 /// </summary>
 public static class RequestDispositionStatusCodes
 {
+    /// <summary>
+    /// The Infor Visual shop resource that subcontracted work is routed to. It is the value the plant's own tag
+    /// print reads to decide Outside Service (research 2026-10-23): <c>SHOP_RESOURCE</c> carries
+    /// <c>ID = 'OUTSIDE_SERVICE'</c>, <c>DESCRIPTION = 'Outside Service'</c>, and 27,216 <c>OPERATION</c> rows are
+    /// routed to it — every one of them also carrying the vendor/service fields this repository already read.
+    /// </summary>
+    public const string OutsideServiceResourceId = "OUTSIDE_SERVICE";
+
     /// <summary>
     /// WORK_ORDER.STATUS / OPERATION.STATUS codes that mean the work is still OPEN / in process (→ WIP).
     /// CONFIRMED 2026-09-08 against live data (ENUM_CODES): R = Released, U = Unreleased, F = Firmed.

@@ -18,4 +18,17 @@ public sealed record InforDispositionRow
     public decimal FinishedGoodsQuantity { get; init; }
 
     public bool HasOutsideVendorOperation { get; init; }
+
+    /// <summary>
+    /// The <c>RESOURCE_ID</c> of the operation that follows the one the job is set up on, or <see langword="null"/>
+    /// when the routing was not read or the job's operation has none after it.
+    /// </summary>
+    public string? NextOperationResourceId { get; init; }
+
+    /// <summary>
+    /// Whether a further operation remains after the job's own, or <see langword="null"/> when the routing was not
+    /// read. <see langword="false"/> means the job's operation is the last one, so what it produces is finished
+    /// goods.
+    /// </summary>
+    public bool? HasRemainingOperation { get; init; }
 }

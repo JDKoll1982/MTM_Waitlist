@@ -119,7 +119,7 @@ public sealed class RequestItemPickerRulesTests
         {
             ("pickup-fg", NoReturningWork),
             ("pickup-ncm", NoReturningWork with { HasNonconformingStockToReturn = true }),
-            ("pickup-wip", NoReturningWork),
+            ("pickup-wip", NoReturningWork with { HasWorkInProgressToReturn = true }),
             ("pickup-outside-service", NoReturningWork with { HasOutsideServiceWorkToReturn = true }),
         };
 
@@ -139,20 +139,51 @@ public sealed class RequestItemPickerRulesTests
     }
 
     /// <summary>
-    /// An active job whose part the derivation reads as neither finished goods nor WIP still offers both, because
-    /// the finished-goods location names that derivation leans on are not confirmed for this installation: the
-    /// option to return the job's own parts must not depend on a guess about where they sit.
+    /// The three product pickups are one question — what the job's product is — so exactly one is offered, chosen
+    /// by what the derivation named, and a job it could not name still gets the generic pickup rather than none.
     /// </summary>
     [TestMethod]
-    public void Service_RequestItemPickerRulesTests_AnActiveJob_OffersTheFinishedPartsAndWipPickupsWhateverWasDerived()
+    public void Service_RequestItemPickerRulesTests_AnActiveJob_OffersExactlyOneProductPickup()
     {
-        var unknown = WithScrap(null) with { HasActiveJob = true };
+        Assert.AreEqual(
+            "pickup-fg",
+            RequestItemPickerRules.ProductPickupItemId(WithScrap(null) with { HasActiveJob = true }),
+            "Nothing derived still offers the generic product pickup: the pickup is real work.");
 
+        Assert.AreEqual(
+            "pickup-fg",
+            RequestItemPickerRules.ProductPickupItemId(NoReturningWork with { HasFinishedGoodsToReturn = true }));
+
+        Assert.AreEqual(
+            "pickup-wip",
+            RequestItemPickerRules.ProductPickupItemId(NoReturningWork with { HasWorkInProgressToReturn = true }));
+
+        Assert.AreEqual(
+            "pickup-outside-service",
+            RequestItemPickerRules.ProductPickupItemId(NoReturningWork with { HasOutsideServiceWorkToReturn = true }));
+
+        foreach (var availability in new[]
+                 {
+                     WithScrap(null) with { HasActiveJob = true },
+                     NoReturningWork with { HasFinishedGoodsToReturn = true },
+                     NoReturningWork with { HasNonconformingStockToReturn = true },
+                     NoReturningWork with { HasWorkInProgressToReturn = true },
+                     NoReturningWork with { HasOutsideServiceWorkToReturn = true },
+                 })
+        {
+            var offered = new[] { "pickup-fg", "pickup-wip", "pickup-outside-service" }
+                .Where(id => RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById(id)!, availability))
+                .ToList();
+
+            Assert.AreEqual(
+                1,
+                offered.Count,
+                $"A job is offered exactly one product pickup, and this one offered {offered.Count}.");
+        }
+
+        var unknown = WithScrap(null) with { HasActiveJob = true };
         Assert.AreEqual(RequestDisposition.Unknown, unknown.Disposition);
-        Assert.IsTrue(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-fg")!, unknown));
-        Assert.IsTrue(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-wip")!, unknown));
         Assert.IsFalse(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-ncm")!, unknown));
-        Assert.IsFalse(RequestItemPickerRules.IsVisible(RequestItemCatalog.FindById("pickup-outside-service")!, unknown));
     }
 
     /// <summary>
@@ -222,9 +253,9 @@ public sealed class RequestItemPickerRulesTests
             "pickup-riser-table", "deliver-riser-table", "pickup-hopper", "deliver-hopper", "other"
         };
 
-        // The finished-parts and WIP pickups name the job's own product, so every configuration with an active job
-        // offers them (FR-094).
-        var jobProduct = new[] { "pickup-fg", "pickup-wip" };
+        // The product pickups answer one question — what the job's own product is — so a configuration that
+        // derived nothing offers the generic one and nothing else (FR-094).
+        var jobProduct = new[] { "pickup-fg" };
 
         AssertVisible(
             "coil only, a real scrap type",
@@ -288,7 +319,9 @@ public sealed class RequestItemPickerRulesTests
             [
                 .. jobIndependent,
                 "pickup-coil", "pickup-die", "pickup-component", "pickup-dunnage", "pickup-scrap",
-                "pickup-fg", "pickup-ncm", "pickup-wip", "pickup-outside-service",
+                // Outside service outranks WIP, which outranks the generic pickup, so the four gates resolve to
+                // exactly one product choice even when more than one of them is set.
+                "pickup-ncm", "pickup-outside-service",
                 "deliver-coil", "deliver-flatstock", "deliver-component", "deliver-die", "deliver-dunnage",
                 "deliver-wrong-coil", "deliver-wrong-flatstock",
                 "assist-coil-turn", "assist-table-place", "assist-table-remove"

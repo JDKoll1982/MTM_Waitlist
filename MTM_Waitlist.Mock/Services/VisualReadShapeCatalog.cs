@@ -110,14 +110,17 @@ public static class VisualReadShapeCatalog
             InputParameters =
             [
                 new VisualShapeParameter("WorkOrder", "nvarchar(30)", IsRequired: true),
-                new VisualShapeParameter("PartNumber", "nvarchar(60)", IsRequired: true)
+                new VisualShapeParameter("PartNumber", "nvarchar(60)", IsRequired: true),
+                new VisualShapeParameter("WorkCenter", "nvarchar(30)", IsRequired: true)
             ],
             OutputColumns =
             [
                 new VisualShapeColumn("WorkOrderStatus", "nvarchar(8)"),
                 new VisualShapeColumn("OpenWorkOrderQuantity", "decimal(18,4)"),
                 new VisualShapeColumn("FinishedGoodsQuantity", "decimal(18,4)"),
-                new VisualShapeColumn("HasOutsideVendorOperation", "bit")
+                new VisualShapeColumn("HasOutsideVendorOperation", "bit"),
+                new VisualShapeColumn("NextOperationResourceId", "nvarchar(16)"),
+                new VisualShapeColumn("HasRemainingOperation", "bit")
             ]
         },
         new VisualReadShape

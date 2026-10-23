@@ -103,8 +103,71 @@ public sealed class RequestDispositionMapperTests
         Assert.AreEqual(RequestDisposition.OutsideService, RequestDispositionClassifier.Classify(input));
     }
 
-    // --- BuildDispositionInput: floor snapshot fallback / confirmation ---
+    [TestMethod]
+    public void Service_RequestDispositionMapperTests_MapInforRow_CarriesTheRoutingColumns()
+    {
+        var mapped = RequestDispositionMapper.MapInforRow(new Dictionary<string, object?>
+        {
+            ["WorkOrderStatus"] = "R",
+            ["OpenWorkOrderQuantity"] = 30_203m,
+            ["FinishedGoodsQuantity"] = 0m,
+            ["HasOutsideVendorOperation"] = 1L,
+            ["NextOperationResourceId"] = "OUTSIDE_SERVICE",
+            ["HasRemainingOperation"] = 1L,
+        });
 
+        Assert.IsNotNull(mapped);
+        Assert.AreEqual("OUTSIDE_SERVICE", mapped!.NextOperationResourceId);
+        Assert.AreEqual(true, mapped.HasRemainingOperation);
+    }
+
+    [TestMethod]
+    public void Service_RequestDispositionMapperTests_MapInforRow_AnAbsentRoutingStaysUnread()
+    {
+        // NULL is "not read", which is a different answer from "no operation remains" — conflating them would
+        // report Finished Goods for every part whose routing was never read.
+        var mapped = RequestDispositionMapper.MapInforRow(new Dictionary<string, object?>
+        {
+            ["WorkOrderStatus"] = "R",
+            ["OpenWorkOrderQuantity"] = 10m,
+            ["FinishedGoodsQuantity"] = 0m,
+            ["HasOutsideVendorOperation"] = 0,
+        });
+
+        Assert.IsNotNull(mapped);
+        Assert.IsNull(mapped!.NextOperationResourceId);
+        Assert.IsNull(mapped.HasRemainingOperation);
+    }
+
+    [TestMethod]
+    public void Service_RequestDispositionMapperTests_BuildDispositionInput_CarriesTheRoutingThroughToTheClassifier()
+    {
+        var input = RequestDispositionMapper.BuildDispositionInput(
+            new InforDispositionRow
+            {
+                WorkOrderStatus = "R",
+                OpenWorkOrderQuantity = 30_203m,
+                FinishedGoodsQuantity = 0m,
+                HasOutsideVendorOperation = true,
+                NextOperationResourceId = "OUTSIDE_SERVICE",
+                HasRemainingOperation = true,
+            },
+            floorSnapshot: null);
+
+        Assert.AreEqual("OUTSIDE_SERVICE", input.NextOperationResourceId);
+        Assert.AreEqual(true, input.HasRemainingOperation);
+        Assert.AreEqual(RequestDisposition.OutsideService, RequestDispositionClassifier.Classify(input));
+    }
+
+    [TestMethod]
+    public void Service_RequestDispositionMapperTests_BuildDispositionInput_NoInforRowLeavesTheRoutingUnread()
+    {
+        var input = RequestDispositionMapper.BuildDispositionInput(inforRow: null, floorSnapshot: null);
+
+        Assert.IsFalse(input.HasRouting);
+    }
+
+    // --- BuildDispositionInput: floor snapshot fallback / confirmation ---
     [TestMethod]
     public void Service_RequestDispositionMapperTests_BuildDispositionInput_NoInforRowFloorWipOnlyClassifiesWip()
     {

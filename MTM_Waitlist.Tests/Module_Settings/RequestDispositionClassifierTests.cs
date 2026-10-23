@@ -35,8 +35,121 @@ public sealed class RequestDispositionClassifierTests
         Assert.AreEqual(RequestDisposition.OutsideService, RequestDispositionClassifier.Classify(input));
     }
 
-    // --- Finished Goods: closed status + on-hand, no open qty ---
+    // --- The routing decides: the operation that follows the job's own (research 2026-10-23) ---
 
+    [TestMethod]
+    public void Service_RequestDispositionClassifierTests_Classify_NextOperationIsTheOutsideServiceResourceReturnsOutsideService()
+    {
+        // Outside Service is the plant's OUTSIDE_SERVICE shop resource being the next operation, whether or not
+        // the vendor fields were read: the routing is the signal the tag print itself uses.
+        var input = new RequestDispositionClassifier.DispositionInput(
+            WorkOrderStatus: "R",
+            FinishedGoodsQuantity: 0m,
+            OpenWorkOrderQuantity: 100m,
+            HasOutsideVendorOperation: false,
+            NonConformingQuantity: 0m,
+            NextOperationResourceId: " outside_service ",
+            HasRemainingOperation: true);
+
+        Assert.AreEqual(RequestDisposition.OutsideService, RequestDispositionClassifier.Classify(input));
+    }
+
+    [TestMethod]
+    public void Service_RequestDispositionClassifierTests_Classify_ACompletedSubcontractedOperationNoLongerReadsAsOutsideService()
+    {
+        // The vendor fields stay on the order for ever, so a part that has already been out and come back would
+        // read as Outside Service on the legacy signal alone. With the routing read, what follows decides.
+        var wipInput = new RequestDispositionClassifier.DispositionInput(
+            WorkOrderStatus: "R",
+            FinishedGoodsQuantity: 0m,
+            OpenWorkOrderQuantity: 100m,
+            HasOutsideVendorOperation: true,
+            NonConformingQuantity: 0m,
+            NextOperationResourceId: "135-23",
+            HasRemainingOperation: true);
+
+        Assert.AreEqual(RequestDisposition.WorkInProcess, RequestDispositionClassifier.Classify(wipInput));
+
+        var finishedInput = wipInput with { NextOperationResourceId = null, HasRemainingOperation = false };
+
+        Assert.AreEqual(RequestDisposition.FinishedGoods, RequestDispositionClassifier.Classify(finishedInput));
+    }
+
+    [TestMethod]
+    public void Service_RequestDispositionClassifierTests_Classify_ARoutingThatEndsHereReturnsFinishedGoodsEvenWhileTheOrderIsOpen()
+    {
+        // A job whose operation is the last in the routing produces the finished product. In-process stock is
+        // never at a shipping location yet, so the stock quantity can only ever confirm this, never decide it.
+        var input = new RequestDispositionClassifier.DispositionInput(
+            WorkOrderStatus: "R",
+            FinishedGoodsQuantity: 0m,
+            OpenWorkOrderQuantity: 12_000m,
+            HasOutsideVendorOperation: false,
+            NonConformingQuantity: 0m,
+            NextOperationResourceId: null,
+            HasRemainingOperation: false);
+
+        Assert.AreEqual(RequestDisposition.FinishedGoods, RequestDispositionClassifier.Classify(input));
+    }
+
+    [TestMethod]
+    public void Service_RequestDispositionClassifierTests_Classify_ARemainingInHouseOperationReturnsWorkInProcess()
+    {
+        var input = new RequestDispositionClassifier.DispositionInput(
+            WorkOrderStatus: "R",
+            FinishedGoodsQuantity: 0m,
+            OpenWorkOrderQuantity: 12_000m,
+            HasOutsideVendorOperation: false,
+            NonConformingQuantity: 0m,
+            NextOperationResourceId: "V880-GRP",
+            HasRemainingOperation: true);
+
+        Assert.AreEqual(RequestDisposition.WorkInProcess, RequestDispositionClassifier.Classify(input));
+    }
+
+    [TestMethod]
+    public void Service_RequestDispositionClassifierTests_Classify_NonConformingStockOutranksTheRoutingProductionTypes()
+    {
+        // FR-093: quarantined stock is never reported as a production type, so the location still wins over a
+        // routing that would otherwise say WIP.
+        var input = new RequestDispositionClassifier.DispositionInput(
+            WorkOrderStatus: "R",
+            FinishedGoodsQuantity: 0m,
+            OpenWorkOrderQuantity: 100m,
+            HasOutsideVendorOperation: false,
+            NonConformingQuantity: 25m,
+            NextOperationResourceId: "135-23",
+            HasRemainingOperation: true);
+
+        Assert.AreEqual(RequestDisposition.Ncm, RequestDispositionClassifier.Classify(input));
+    }
+
+    [TestMethod]
+    public void Service_RequestDispositionClassifierTests_Classify_AnUnreadRoutingFallsBackToTheStockAndQuantityArms()
+    {
+        // The floor-stock half and a cached row written before the routing was read carry no routing at all, and
+        // must answer exactly as they did before it existed.
+        var open = new RequestDispositionClassifier.DispositionInput(
+            WorkOrderStatus: "R",
+            FinishedGoodsQuantity: 0m,
+            OpenWorkOrderQuantity: 100m,
+            HasOutsideVendorOperation: false,
+            NonConformingQuantity: 0m);
+
+        Assert.IsFalse(open.HasRouting);
+        Assert.AreEqual(RequestDisposition.WorkInProcess, RequestDispositionClassifier.Classify(open));
+
+        var closedWithStock = open with
+        {
+            WorkOrderStatus = "C",
+            OpenWorkOrderQuantity = 0m,
+            FinishedGoodsQuantity = 40m,
+        };
+
+        Assert.AreEqual(RequestDisposition.FinishedGoods, RequestDispositionClassifier.Classify(closedWithStock));
+    }
+
+    // --- Finished Goods: closed status + on-hand, no open qty ---
     [TestMethod]
     public void Service_RequestDispositionClassifierTests_Classify_ClosedWithOnHandReturnsFinishedGoods()
     {

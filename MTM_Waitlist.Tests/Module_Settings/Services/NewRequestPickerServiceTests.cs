@@ -179,7 +179,8 @@ public sealed class NewRequestPickerServiceTests
             HasDunnage = false,
             HasScrapDecision = false,
             // The NCM and outside-service pickups are offered on the signal each one names (FR-094), and this job
-            // has neither. The finished-parts and WIP pickups name the job's own product, so they stay on offer.
+            // has neither. The three product pickups answer one question, so the generic one is the sole product
+            // choice while nothing was derived.
             HasFinishedGoodsToReturn = false,
             HasNonconformingStockToReturn = false,
             HasWorkInProgressToReturn = false,
@@ -197,7 +198,7 @@ public sealed class NewRequestPickerServiceTests
         Assert.IsTrue(built.Contains("pickup-coil"));
         CollectionAssert.IsSubsetOf(built, RequestItemCatalog.GetByCategory(RequestCategory.Pickup).Select(i => i.Id).ToList());
         CollectionAssert.AreEquivalent(
-            new[] { "pickup-riser-table", "pickup-hopper", "pickup-coil", "pickup-fg", "pickup-wip" },
+            new[] { "pickup-riser-table", "pickup-hopper", "pickup-coil", "pickup-fg" },
             built);
     }
 }

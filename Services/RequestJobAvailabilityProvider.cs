@@ -65,7 +65,7 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
             return availability;
         }
 
-        availability = await ApplyDispositionAsync(availability, snapshot, cancellationToken).ConfigureAwait(false);
+        availability = await ApplyDispositionAsync(availability, snapshot, workCenter, cancellationToken).ConfigureAwait(false);
         availability = await ApplyComponentQuantitiesAsync(availability, cancellationToken).ConfigureAwait(false);
         availability = await ApplyCoilAverageWeightAsync(availability, cancellationToken).ConfigureAwait(false);
         return await ApplyLuggerLocationAsync(availability, workCenter, cancellationToken).ConfigureAwait(false);
@@ -225,13 +225,14 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
     private async Task<RequestJobPartAvailability> ApplyDispositionAsync(
         RequestJobPartAvailability availability,
         SetupActiveJobSnapshot snapshot,
+        string? workCenter,
         CancellationToken cancellationToken)
     {
         RequestDisposition disposition;
         try
         {
             disposition = await _dispositionResolver
-                .GetDispositionAsync(snapshot.WorkOrder, snapshot.PartNumber, cancellationToken)
+                .GetDispositionAsync(snapshot.WorkOrder, snapshot.PartNumber, workCenter, cancellationToken)
                 .ConfigureAwait(false);
         }
         catch (Exception ex)

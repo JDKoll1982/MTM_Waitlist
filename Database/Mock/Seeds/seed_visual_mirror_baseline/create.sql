@@ -4535,6 +4535,10 @@ VALUES
 -- Shape 5: disposition_input
 -- 496 rows captured from the live mirror on 2026-10-19.
 -- Live mirror last refreshed 2026-10-19 17:00:03 UTC.
+-- These rows predate the work-centre key and the routing columns, so they carry the `'*'` wildcard for
+-- `work_center` (the column's default) and NULL in both routing columns. The caller reads NULL there as
+-- "routing not read" and falls back to the stock/quantity/status arms exactly as it did before the routing
+-- existed; the first live refresh replaces them wholesale with per-work-centre rows.
 INSERT IGNORE INTO `visual_disposition_input_result`
     (`id`, `work_order`, `part_number`, `work_order_status`, `open_work_order_quantity`, `finished_goods_quantity`, `has_outside_vendor_operation`, `refreshed_utc`, `is_seed_content`)
 VALUES

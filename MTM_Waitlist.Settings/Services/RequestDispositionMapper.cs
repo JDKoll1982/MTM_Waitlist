@@ -27,7 +27,7 @@ public static class RequestDispositionMapper
 
         if (inforRow is null)
         {
-            // No Infor work order/part snapshot: classify from floor stock alone.
+            // No Infor work order/part snapshot: classify from floor stock alone, with no routing to read.
             return new RequestDispositionClassifier.DispositionInput(
                 WorkOrderStatus: null,
                 FinishedGoodsQuantity: floorSnapshot?.FinishedGoodsFloorQuantity ?? 0m,
@@ -51,7 +51,9 @@ public static class RequestDispositionMapper
             FinishedGoodsQuantity: finishedGoods,
             OpenWorkOrderQuantity: openQuantity,
             HasOutsideVendorOperation: inforRow.HasOutsideVendorOperation || floorOutside,
-            NonConformingQuantity: nonConforming);
+            NonConformingQuantity: nonConforming,
+            NextOperationResourceId: inforRow.NextOperationResourceId,
+            HasRemainingOperation: inforRow.HasRemainingOperation);
     }
 
     /// <summary>Maps one GetDispositionInput.sql result row to an <see cref="InforDispositionRow"/> (columns case-insensitive).</summary>
@@ -68,6 +70,28 @@ public static class RequestDispositionMapper
             OpenWorkOrderQuantity = GetDecimal(row, "OpenWorkOrderQuantity"),
             FinishedGoodsQuantity = GetDecimal(row, "FinishedGoodsQuantity"),
             HasOutsideVendorOperation = GetBool(row, "HasOutsideVendorOperation"),
+            NextOperationResourceId = GetString(row, "NextOperationResourceId"),
+            HasRemainingOperation = GetNullableBool(row, "HasRemainingOperation"),
+        };
+    }
+
+    private static bool? GetNullableBool(IReadOnlyDictionary<string, object?> row, string key)
+    {
+        if (!row.TryGetValue(key, out var value) || value is null)
+        {
+            return null;
+        }
+
+        return value switch
+        {
+            DBNull => null,
+            bool booleanValue => booleanValue,
+            byte byteValue => byteValue != 0,
+            short shortValue => shortValue != 0,
+            int intValue => intValue != 0,
+            long longValue => longValue != 0,
+            decimal decimalValue => decimalValue != 0m,
+            _ => bool.TryParse(Convert.ToString(value), out var parsed) ? parsed : null,
         };
     }
 
