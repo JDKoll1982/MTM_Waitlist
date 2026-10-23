@@ -60,10 +60,10 @@ public sealed class WaitlistLineCardDetailTemplateTests
         ["pickup-coil"] = ["Coil number", "Quantity in house", "Coil description", "Average coil weight"],
         ["pickup-die"] = ["Die", "Die Location", "Pickup location"],
         ["pickup-component"] = ["Component", "Total Qty In House", "Item Type"],
-        ["pickup-fg"] = ["Part", "Part Type", "# of Skids"],
-        ["pickup-ncm"] = ["Part", "Part Type", "# of Skids"],
-        ["pickup-wip"] = ["Part", "Part Type", "# of Skids"],
-        ["pickup-outside-service"] = ["Part", "Part Type", "# of Skids"],
+        ["pickup-fg"] = ["Part Type", "# of Skids"],
+        ["pickup-ncm"] = ["Part Type", "# of Skids"],
+        ["pickup-wip"] = ["Part Type", "# of Skids"],
+        ["pickup-outside-service"] = ["Part Type", "# of Skids"],
         ["pickup-riser-table"] = [],
         ["pickup-dunnage"] = ["Dunnage part", "Home Location", "Home location"],
         ["pickup-scrap"] = ["Scrap Type", "Scrap type", "Lugger Location"],
@@ -1530,3 +1530,4 @@ public sealed class WaitlistLineCardDetailTemplateTests
         public void Warn(string module, string message, string? errorType = null) => Warnings.Add(message);
     }
 }
+

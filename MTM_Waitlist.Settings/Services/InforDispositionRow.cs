@@ -26,9 +26,10 @@ public sealed record InforDispositionRow
     public string? NextOperationResourceId { get; init; }
 
     /// <summary>
-    /// Whether a further operation remains after the job's own, or <see langword="null"/> when the routing was not
-    /// read. <see langword="false"/> means the job's operation is the last one, so what it produces is finished
-    /// goods.
+    /// Whether work is still owed on the part, or <see langword="null"/> when the routing was not read.
+    /// <see langword="true"/> covers both "the job's own operation has not closed yet" and "an operation follows
+    /// it"; <see langword="false"/> means that operation has closed and nothing follows, so what the job produces
+    /// is the finished product.
     /// </summary>
     public bool? HasRemainingOperation { get; init; }
 }

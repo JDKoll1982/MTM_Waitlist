@@ -79,9 +79,10 @@ public static class WaitlistCardCellRules
     ];
 
     /// <summary>
-    /// The four previously-hidden pickups, whose panel draws the part the work centre is making, the derived
-    /// type and the skid count and nothing else — so every other field they declare is excluded
-    /// (FR-036 to FR-039, FR-056).
+    /// The four previously-hidden pickups, whose panel draws the derived type and the skid count and nothing else
+    /// — so every other field they declare is excluded (FR-036 to FR-039, FR-056). The part is not one of them:
+    /// it is already the card's own header ("Pickup 29531267"), and drawing it again in a cell would say the same
+    /// thing twice on the card the plant reads every shift.
     /// </summary>
     private static readonly string[] s_returningPickupItems =
     [
@@ -91,8 +92,8 @@ public static class WaitlistCardCellRules
         "pickup-outside-service",
     ];
 
-    /// <summary>The three cells a returning pickup draws, as the labels the declarations carry.</summary>
-    private static readonly string[] s_returningPickupCells = ["part", "part type", "# of skids"];
+    /// <summary>The two cells a returning pickup draws, as the labels the declarations carry.</summary>
+    private static readonly string[] s_returningPickupCells = ["part type", "# of skids"];
 
     /// <summary>
     /// The declared fields the card does not draw, per Item, as each declaration spells them today. Every one

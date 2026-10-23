@@ -20,9 +20,11 @@
 -- identical to the live one for the same question.
 --
 -- `NextOperationResourceId` / `HasRemainingOperation` are the routing, computed exactly as the live read
--- (GetDispositionInput.sql) computes them: the first open operation after the job's own. NULL in both means the
--- routing could not be anchored (the work centre is not on the order), which the classifier reads as "routing
--- not read" rather than "no operation remains" (research 2026-10-23).
+-- (GetDispositionInput.sql) computes them. `HasRemainingOperation` is 1 while work is still owed on the part: the
+-- job's own operation is not closed yet, or an operation follows it. It is 0 only when that operation has closed
+-- and nothing follows — the part the job produces is then the finished product. NULL in both means the routing
+-- could not be anchored (the work centre is not on the order), which the classifier reads as "routing not read"
+-- rather than "no work remains" (research 2026-10-23).
 --
 -- `FinishedGoodsQuantity` is the part's stock AT A FINISHED-GOODS LOCATION, projected exactly as the live read
 -- (GetDispositionInput.sql) projects it, so a cached answer and a live answer cannot differ in shape or meaning
@@ -178,7 +180,7 @@ SELECT
                 AND o5.WORKORDER_LOT_ID = a.LOT_ID
                 AND o5.WORKORDER_SPLIT_ID = a.SPLIT_ID
                 AND o5.WORKORDER_SUB_ID = a.SUB_ID
-                AND o5.SEQUENCE_NO > a.CurrentSequence
+                AND o5.SEQUENCE_NO >= a.CurrentSequence
                 AND o5.STATUS <> 'C'
         ) THEN 1 ELSE 0 END
     ) END AS HasRemainingOperation

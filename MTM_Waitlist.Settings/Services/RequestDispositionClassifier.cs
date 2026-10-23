@@ -21,11 +21,13 @@ namespace MTM_Waitlist.Module_Settings.Services;
 ///      from nothing else, because NCM is a location state and not a production type (FR-093). It is checked
 ///      before the two production arms so quarantined stock is never reported as Finished Goods or WIP, and
 ///      after Outside Service so the documented priority is unchanged.
-///   3. WorkInProcess — a further operation remains in the routing, so the part is still being made.
-///   4. FinishedGoods — no further operation remains: what the job's own operation produces is the finished
-///      product. This is what the plant's tag print reads (research 2026-10-23), and it is the only test that can
-///      name Finished Goods for a job that is still running — in-process stock is never sitting at a shipping
-///      location yet, so the stock quantity is a confirmation, never the discriminator.
+///   3. WorkInProcess — work is still owed on the part: its own operation has not closed yet, or a further
+///      operation remains.
+///   4. FinishedGoods — the job's own operation has closed and nothing follows it, so what the job produces is the
+///      finished product. This is what the plant's tag print reads (research 2026-10-23), and it is the only test
+///      that can name Finished Goods for a job that is still running — in-process stock is never sitting at a
+///      shipping location yet, so the stock quantity is a confirmation, never the discriminator. A press that has
+///      produced 130 of 131 pieces and has nothing after it is still WIP, not a finished good.
 ///   5. Unknown — no rule matched.
 /// <para>
 /// The routing arms answer only when the read supplied them; a snapshot without them (the floor-stock half, or a
@@ -72,10 +74,16 @@ public static class RequestDispositionClassifier
         /// </summary>
         public bool HasRouting => HasRemainingOperation.HasValue;
 
-        /// <summary>Whether a further operation remains after the job's own — the part is still being made.</summary>
+        /// <summary>
+        /// Whether work is still owed on the part — its own operation has not closed yet, or an operation follows
+        /// it. The read decides this from the routing; it is not the caller's judgement.
+        /// </summary>
         public bool HasRemainingWork => HasRemainingOperation == true;
 
-        /// <summary>Whether the routing is exhausted — what the job's own operation produces is the finished product.</summary>
+        /// <summary>
+        /// Whether the job's own operation has closed and nothing follows it, so what the job produces is the
+        /// finished product.
+        /// </summary>
         public bool HasNoRemainingWork => HasRemainingOperation == false;
 
         /// <summary>
@@ -108,8 +116,9 @@ public static class RequestDispositionClassifier
             return RequestDisposition.Ncm;
         }
 
-        // 3./4. The routing decides between the two production types: work still ahead of the part makes it WIP,
-        //    and a routing that ends at this operation makes what the job produces its finished product.
+        // 3./4. The routing decides between the two production types: work still owed on the part — its own
+        //    operation open, or an operation after it — makes it WIP; an operation that has closed with nothing
+        //    after it makes what the job produces its finished product.
         if (input.HasRemainingWork)
         {
             return RequestDisposition.WorkInProcess;

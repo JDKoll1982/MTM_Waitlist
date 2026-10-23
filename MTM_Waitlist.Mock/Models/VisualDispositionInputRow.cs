@@ -26,8 +26,9 @@ public sealed record VisualDispositionInputRow
     public string? NextOperationResourceId { get; init; }
 
     /// <summary>
-    /// Whether a further operation remains after the job's own, or <see langword="null"/> when the read did not
-    /// carry the routing (a cached row written before it was read).
+    /// Whether work is still owed on the part — the job's own operation has not closed, or an operation follows
+    /// it — or <see langword="null"/> when the read did not carry the routing (a cached row written before it was
+    /// read). <see langword="false"/> means that operation has closed and nothing follows.
     /// </summary>
     public bool? HasRemainingOperation { get; init; }
 }

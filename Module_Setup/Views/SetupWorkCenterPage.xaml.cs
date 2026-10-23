@@ -2,6 +2,8 @@ using System.Collections.Specialized;
 
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 
 using MTM_Waitlist.Module_Setup.Models;
 using MTM_Waitlist.Module_Setup.ViewModels;
@@ -43,6 +45,67 @@ public sealed partial class SetupWorkCenterPage : Page
         {
             ViewModel.SelectedWorkCenter = workCenter;
         }
+    }
+
+    /// <summary>
+    /// A double-click on a card is the Continue button's own gesture: the person has chosen that work centre and
+    /// wants to move on, so the second click selects and continues rather than only re-selecting (FR-002).
+    /// </summary>
+    private void WorkCenterCard_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+    {
+        // A double-click on the card's history button belongs to that button, not to the card.
+        if (FindAncestor<Button>(e.OriginalSource as DependencyObject) is not null)
+        {
+            return;
+        }
+
+        if (FindCard(e.OriginalSource as DependencyObject) is not { } workCenter)
+        {
+            return;
+        }
+
+        ViewModel.SelectedWorkCenter = workCenter;
+
+        if (ViewModel.ContinueCommand.CanExecute(null))
+        {
+            ViewModel.ContinueCommand.Execute(null);
+        }
+    }
+
+    /// <summary>
+    /// Finds the work-centre card a double-click landed on. A double-click inside a card lands on the text or the
+    /// picture, not on the grid item, so the visual tree is walked up to the container that holds the card's data.
+    /// </summary>
+    private static SetupWorkCenter? FindCard(DependencyObject? source)
+    {
+        while (source is not null)
+        {
+            if (source is GridViewItem { Content: SetupWorkCenter workCenter })
+            {
+                return workCenter;
+            }
+
+            source = VisualTreeHelper.GetParent(source);
+        }
+
+        return null;
+    }
+
+    /// <summary>Finds the nearest ancestor of a type, so a control inside the card can claim its own gesture.</summary>
+    private static T? FindAncestor<T>(DependencyObject? source)
+        where T : DependencyObject
+    {
+        while (source is not null)
+        {
+            if (source is T match)
+            {
+                return match;
+            }
+
+            source = VisualTreeHelper.GetParent(source);
+        }
+
+        return null;
     }
 
     private void OnViewHistoryClick(object sender, RoutedEventArgs e)

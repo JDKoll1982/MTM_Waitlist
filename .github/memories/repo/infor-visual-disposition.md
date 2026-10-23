@@ -214,7 +214,7 @@ sit at `SEQUENCE_NO` 5 with `STATUS = 'R'`, and `REQUIREMENT` does not help eith
 | Mirror | `work_center VARCHAR(64) NOT NULL DEFAULT '*'` joins the unique key; `next_operation_resource_id` and `has_remaining_operation` are added, both NULL-able |
 | Procedures | `sp_visual_disposition_input_get` takes `p_work_center` and prefers an exact match over the `'*'` wildcard; `sp_visual_disposition_input_refresh` parses the two new keys |
 | Client | `VisualDispositionInputRequest` carries `WorkCenter`; `RequestDispositionResolver` takes it; `RequestJobAvailabilityProvider` passes the work centre it already resolves |
-| Classifier | Outside Service when the next operation is `OUTSIDE_SERVICE` (vendor fields only while the routing is unread), then NCM, then WIP when work remains, then Finished Goods when the routing ends here, then the old stock/quantity/status arms |
+| Classifier | Outside Service when the next operation is `OUTSIDE_SERVICE` (vendor fields only while the routing is unread), then NCM, then WIP when work is still owed, then Finished Goods when the job's own operation has closed with nothing after it, then the old stock/quantity/status arms |
 
 **The `'*'` wildcard is what keeps a half-deployed cache honest.** The 496 baseline seed rows predate the
 work-centre key, so they answer for any work centre and carry NULL in both routing columns; the caller reads NULL as
@@ -225,3 +225,30 @@ work-centre key, so they answer for any work centre and carry NULL in both routi
 `R | 1205 | 0 | 0 | NULL | 0` -> Finished Goods; a work centre absent from the order's routing reads NULL/NULL -> the
 legacy arms. `AllTables.sql`, `AllSPs.sql` and `AllSeeds.sql` were regenerated with `build_mtm_mock_masters.ps1`.
 **The deployed `mtm_mock` on the plant host still carries the old shape** until the service is redeployed there.
+
+## Corrected 2026-10-23 — a part is not finished goods until its own operation closes
+
+The first cut of the routing rule read "no operation after the job's own" as Finished Goods, and the 100-17 card for
+`WO-074654` / `T527094` came up **Finished Goods** on a job the shop calls WIP. The data says why:
+
+| Seq | Resource | Status | End qty | Done |
+|---|---|---|---|---|
+| 5 | `500-GRP` | R | 1 | 0 |
+| 10 | `060-02` | C | 131 | 131 |
+| 30 | `100-17` | **R** | 131 | **130** |
+
+Nothing follows the press, but the press is still running — 130 of 131 pieces. A part is not finished goods while the
+operation that makes it is still open; it is finished only when that operation has **closed** and nothing follows.
+`HasRemainingOperation` therefore counts the job's own operation, not just the ones after it:
+
+- open at or after the job's own operation → 1 → WIP (or Outside Service when the next resource is `OUTSIDE_SERVICE`)
+- job's own operation closed and nothing after it → 0 → Finished Goods
+
+Verified live after the correction: `WO-074654`/100-17 → WIP, `WO-074866`/100-12 → Outside Service (unchanged),
+`WO-033406`/100-12 (press closed, nothing after, 3,600 at `002/FG`) → Finished Goods. The population read now reports
+**18** finished-goods rows out of 1,548, and 1,530 rows still owing work — the opposite balance from the first cut,
+which called 501 of them finished.
+
+Two signals were checked and rejected as the FG/WIP discriminator: `mtm_wip_application_winforms.md_part_ids.ItemType`
+classifies 3,929 of 3,976 parts as `WIP` (a defaulted list, not a classification — it calls `29531267` WIP too), and a
+part being a `REQUIREMENT` of another open work order is true of both WIP and O/S parts.

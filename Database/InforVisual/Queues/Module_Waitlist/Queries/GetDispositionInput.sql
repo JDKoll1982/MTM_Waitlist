@@ -29,7 +29,11 @@
 --   NextOperationResourceId / HasRemainingOperation are the routing: the first open operation after the job's own.
 --     RESOURCE_ID = 'OUTSIDE_SERVICE'  -> Outside Service (the plant's own tag print reads this)
 --     any other resource               -> WIP
---     no operation remains             -> Finished Goods
+--     nothing open at or after the job's own operation, which has closed -> Finished Goods
+--   `HasRemainingOperation` therefore counts the job's own operation too: a part is not finished goods until the
+--   operation that makes it is closed. A press that has 130 of 131 pieces done and nothing after it is still WIP,
+--   and reading it as Finished Goods would tell the shop a part is ready while it is still being made
+--   (confirmed against WO-074654 / 100-17 on 2026-10-23).
 --   Both are NULL when the work centre is not on the order's routing at all, which leaves the classifier's
 --   stock/quantity/status arms to answer exactly as before.
 --   Finished-goods classification mirrors the taxonomy already documented for the WIP side in
@@ -145,7 +149,7 @@ SELECT TOP (1)
                 AND o3.WORKORDER_LOT_ID = wo.LOT_ID
                 AND o3.WORKORDER_SPLIT_ID = wo.SPLIT_ID
                 AND o3.WORKORDER_SUB_ID = wo.SUB_ID
-                AND o3.SEQUENCE_NO > @CurrentSequence
+                AND o3.SEQUENCE_NO >= @CurrentSequence
                 AND o3.STATUS <> 'C'
         ) THEN 1 ELSE 0 END
     ) END AS HasRemainingOperation

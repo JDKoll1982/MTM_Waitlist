@@ -51,10 +51,10 @@ public sealed class RequestItemConfigSeedAlignmentTests
         ["pickup-coil"] = ["Coil number", "Quantity in house", "Coil description", "Average coil weight"],
         ["pickup-die"] = ["Die", "Die Location", WaitlistCardCellRules.DieShopAnswerLabel],
         ["pickup-component"] = ["Component", "Total Qty In House", "Item Type"],
-        ["pickup-fg"] = ["Part", "Part Type", "# of Skids"],
-        ["pickup-ncm"] = ["Part", "Part Type", "# of Skids"],
-        ["pickup-wip"] = ["Part", "Part Type", "# of Skids"],
-        ["pickup-outside-service"] = ["Part", "Part Type", "# of Skids"],
+        ["pickup-fg"] = ["Part Type", "# of Skids"],
+        ["pickup-ncm"] = ["Part Type", "# of Skids"],
+        ["pickup-wip"] = ["Part Type", "# of Skids"],
+        ["pickup-outside-service"] = ["Part Type", "# of Skids"],
         ["pickup-riser-table"] = [],
         ["pickup-dunnage"] = ["Dunnage part", "Home Location"],
         ["pickup-scrap"] = ["Scrap Type", "Lugger Location"],
@@ -289,6 +289,33 @@ public sealed class RequestItemConfigSeedAlignmentTests
             + "than a card rule (FR-056, FR-095):"
             + Environment.NewLine
             + string.Join(Environment.NewLine, dropped));
+    }
+
+    /// <summary>
+    /// The four returning pickups keep `Part` declared but never draw it as a cell: the part is already the card's
+    /// own header ("Pickup 29531267"), so a cell repeating it would say the same thing twice on the card the plant
+    /// reads every shift (FR-036 to FR-039, FR-056).
+    /// </summary>
+    [TestMethod]
+    public void Audit_RequestItemConfigSeedAlignmentTests_Card_NeverRepeatsThePartTheHeaderAlreadyNames()
+    {
+        var declarations = SeedDeclarations();
+
+        foreach (var itemCode in new[] { "pickup-fg", "pickup-ncm", "pickup-wip", "pickup-outside-service" })
+        {
+            Assert.IsTrue(
+                DeclaredLabels(declarations, itemCode).Contains("Part", StringComparer.Ordinal),
+                $"`{itemCode}` no longer declares `Part`. It stays declared: the header resolves the same value from the declaration rather than from a second copy (FR-056).");
+
+            Assert.IsFalse(
+                WaitlistCardCellRules.IsCell(itemCode, "Part"),
+                $"`{itemCode}` draws `Part` as a cell again, which repeats the part the card's own header already names.");
+
+            CollectionAssert.DoesNotContain(
+                DrawnLabels(declarations, itemCode).ToArray(),
+                "Part",
+                $"`{itemCode}` draws its `Part` declaration, repeating the header.");
+        }
     }
 
     /// <summary>
@@ -725,3 +752,4 @@ public sealed class RequestItemConfigSeedAlignmentTests
         return end < 0 ? normalized[start..] : normalized[start..end];
     }
 }
+

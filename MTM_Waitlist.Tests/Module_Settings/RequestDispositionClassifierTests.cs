@@ -76,10 +76,33 @@ public sealed class RequestDispositionClassifierTests
     }
 
     [TestMethod]
-    public void Service_RequestDispositionClassifierTests_Classify_ARoutingThatEndsHereReturnsFinishedGoodsEvenWhileTheOrderIsOpen()
+    public void Service_RequestDispositionClassifierTests_Classify_AFinishedProductIsOnlyCalledFinishedOnceItsOwnOperationCloses()
     {
-        // A job whose operation is the last in the routing produces the finished product. In-process stock is
-        // never at a shipping location yet, so the stock quantity can only ever confirm this, never decide it.
+        // WO-074654 / 100-17: the press is the last operation, 130 of 131 pieces done, nothing after it. The part
+        // is still being made, so the read reports work remaining and the card says WIP (2026-10-23).
+        var stillRunning = new RequestDispositionClassifier.DispositionInput(
+            WorkOrderStatus: "R",
+            FinishedGoodsQuantity: 0m,
+            OpenWorkOrderQuantity: 3m,
+            HasOutsideVendorOperation: false,
+            NonConformingQuantity: 0m,
+            NextOperationResourceId: null,
+            HasRemainingOperation: true);
+
+        Assert.AreEqual(RequestDisposition.WorkInProcess, RequestDispositionClassifier.Classify(stillRunning));
+
+        // WO-033406: the same last operation has closed and nothing follows, so what the job produced is the
+        // finished product.
+        var finished = stillRunning with { WorkOrderStatus = "C", OpenWorkOrderQuantity = 0m, HasRemainingOperation = false };
+
+        Assert.AreEqual(RequestDisposition.FinishedGoods, RequestDispositionClassifier.Classify(finished));
+    }
+
+    [TestMethod]
+    public void Service_RequestDispositionClassifierTests_Classify_AClosedLastOperationReturnsFinishedGoodsEvenWhileTheOrderIsOpen()
+    {
+        // The operation that makes the part has closed and nothing follows it, so what the job produced is the
+        // finished product. The order itself may still be open — a lot can complete before its order does.
         var input = new RequestDispositionClassifier.DispositionInput(
             WorkOrderStatus: "R",
             FinishedGoodsQuantity: 0m,
