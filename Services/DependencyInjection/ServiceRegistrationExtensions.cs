@@ -78,6 +78,12 @@ public static partial class ServiceRegistrationExtensions
             pageService.Configure<NewRequestSummaryViewModel, NewRequestSummaryPage>();
             pageService.Configure<NewRequestResultViewModel, NewRequestResultPage>();
             pageService.Configure<SettingsViewModel, SettingsPage>();
+        pageService.Configure<GeneralSettingsRoute, GeneralSettingsPage>();
+        pageService.Configure<OperationsSettingsRoute, OperationsSettingsPage>();
+        pageService.Configure<PicturesSettingsRoute, PicturesSettingsPage>();
+        pageService.Configure<DevicesSettingsRoute, DevicesSettingsPage>();
+        pageService.Configure<DiagnosticsSettingsRoute, DiagnosticsSettingsPage>();
+        pageService.Configure<AdministrationSettingsRoute, AdministrationSettingsPage>();
             pageService.Configure<SetupWorkCenterViewModel, SetupWorkCenterPage>();
             pageService.Configure<SetupWorkCenterHistoryViewModel, SetupWorkCenterHistoryPage>();
             pageService.Configure<SetupWorkOrderViewModel, SetupWorkOrderPage>();

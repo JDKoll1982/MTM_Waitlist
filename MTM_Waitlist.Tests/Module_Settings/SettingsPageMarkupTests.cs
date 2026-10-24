@@ -65,7 +65,7 @@ public sealed class SettingsPageMarkupTests
     [TestMethod]
     public void UI_SettingsPageMarkupTests_SettingsPage_ShowsTheConfiguredAndObservedValuesSeparatelyAndKeepsTheMinutesGate()
     {
-        var markup = PageMarkup();
+        var markup = PageMarkup("OperationsSettingsPage.xaml");
 
         StringAssert.Contains(markup, "{Binding DisplayName}", "The minutes row names the Item.");
         StringAssert.Contains(markup, "{Binding Minutes, Mode=TwoWay", "The editable column is the configured figure.");
@@ -84,7 +84,7 @@ public sealed class SettingsPageMarkupTests
     [TestMethod]
     public void UI_SettingsPageMarkupTests_SettingsPage_OpensTheItemKeyedPictureScreen()
     {
-        var markup = PageMarkup();
+        var markup = PageMarkup("PicturesSettingsPage.xaml");
 
         StringAssert.Contains(markup, "Click=\"RequestItemImages_Click\"");
         Assert.IsFalse(
@@ -95,7 +95,7 @@ public sealed class SettingsPageMarkupTests
             RepositoryPatternScan.FindRepositoryRoot(),
             "Module_Settings",
             "Views",
-            "SettingsPage.xaml.cs");
+            "PicturesSettingsPage.xaml.cs");
         Assert.IsTrue(File.Exists(codeBehindPath), $"The settings code-behind was not found at '{codeBehindPath}'.");
 
         var codeBehind = File.ReadAllText(codeBehindPath);
@@ -111,7 +111,7 @@ public sealed class SettingsPageMarkupTests
     [TestMethod]
     public void UI_SettingsPageMarkupTests_TheTwoDunnageLists_AreCardsThatStillShowAndHideTheirType()
     {
-        var markup = PageMarkup();
+        var markup = PageMarkup("OperationsSettingsPage.xaml");
 
         StringAssert.Contains(markup, "AutomationProperties.AutomationId=\"SettingsPage_VisibleDunnageTypesList\"");
         StringAssert.Contains(markup, "AutomationProperties.AutomationId=\"SettingsPage_HiddenDunnageTypesList\"");
@@ -143,7 +143,7 @@ public sealed class SettingsPageMarkupTests
     [TestMethod]
     public void UI_SettingsPageMarkupTests_TheDeveloperLogPanel_IsHostedWhereItsWrappingTextGetsABoundedWidth()
     {
-        var panel = XDocument.Parse(PageMarkup())
+        var panel = XDocument.Parse(PageMarkup("DiagnosticsSettingsPage.xaml"))
             .Descendants()
             .SingleOrDefault(element => element.Name.LocalName == "DeveloperLogPanelView");
 
@@ -342,13 +342,13 @@ public sealed class SettingsPageMarkupTests
                 + string.Join(Environment.NewLine, violations));
     }
 
-    private static string PageMarkup()
+    private static string PageMarkup(string fileName = "SettingsPage.xaml")
     {
         var path = Path.Combine(
             RepositoryPatternScan.FindRepositoryRoot(),
             "Module_Settings",
             "Views",
-            "SettingsPage.xaml");
+            fileName);
 
         Assert.IsTrue(File.Exists(path), $"The settings markup was not found at '{path}'.");
 
@@ -402,7 +402,7 @@ public sealed class SettingsPageMarkupTests
     [TestMethod]
     public void UI_SettingsPageMarkupTests_TheAdministrationEntries_NavigateAndCarryTheirOwnLabels()
     {
-        var markup = PageMarkup();
+        var markup = PageMarkup("AdministrationSettingsPage.xaml");
 
         foreach (var entry in new[] { "UserManagementEntryCard", "PermissionsEntryCard" })
         {
@@ -477,19 +477,30 @@ public sealed class SettingsPageMarkupTests
         return values;
     }
 
+    /// <summary>
+    /// Every x:Uid the settings pages declare. The settings surface is one hub plus one page per audience, so this
+    /// reads all of them: a duplicate is still a duplicate when the two elements sit on different pages.
+    /// </summary>
     private static IReadOnlyList<string> DeclaredUids()
     {
-        var path = Path.Combine(
-            RepositoryPatternScan.FindRepositoryRoot(),
-            "Module_Settings",
-            "Views",
-            "SettingsPage.xaml");
+        string[] pages =
+        [
+            "SettingsPage.xaml",
+            "GeneralSettingsPage.xaml",
+            "OperationsSettingsPage.xaml",
+            "PicturesSettingsPage.xaml",
+            "DevicesSettingsPage.xaml",
+            "DiagnosticsSettingsPage.xaml",
+            "AdministrationSettingsPage.xaml",
+        ];
 
-        Assert.IsTrue(File.Exists(path), $"The settings markup was not found at '{path}'.");
+        var uids = new List<string>();
+        foreach (var page in pages)
+        {
+            uids.AddRange(s_xUid.Matches(PageMarkup(page)).Select(match => match.Groups["uid"].Value));
+        }
 
-        var markup = File.ReadAllText(path);
-
-        return [.. s_xUid.Matches(markup).Select(match => match.Groups["uid"].Value)];
+        return uids;
     }
 
     /// <summary>Every resource key shipped anywhere, so an x:Uid may resolve in any resource file.</summary>

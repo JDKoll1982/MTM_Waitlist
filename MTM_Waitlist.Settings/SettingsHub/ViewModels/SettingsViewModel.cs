@@ -48,6 +48,24 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     /// </summary>
     internal const string LuggerArrangementViewModelName = "MTM_Waitlist.Module_Settings.ViewModels.LuggerArrangementViewModel";
 
+    /// <summary>The General page: the settings every person may change for themselves.</summary>
+    internal const string GeneralSettingsRouteViewModelName = "MTM_Waitlist.Module_Settings.ViewModels.GeneralSettingsRoute";
+
+    /// <summary>The Operations page: the settings a lead changes for the floor.</summary>
+    internal const string OperationsSettingsRouteViewModelName = "MTM_Waitlist.Module_Settings.ViewModels.OperationsSettingsRoute";
+
+    /// <summary>The Pictures page: picture assignments, picture folders and the local copies.</summary>
+    internal const string PicturesSettingsRouteViewModelName = "MTM_Waitlist.Module_Settings.ViewModels.PicturesSettingsRoute";
+
+    /// <summary>The Devices page: the computer registry.</summary>
+    internal const string DevicesSettingsRouteViewModelName = "MTM_Waitlist.Module_Settings.ViewModels.DevicesSettingsRoute";
+
+    /// <summary>The Diagnostics page: the developer log, its retention, and the cache refresh.</summary>
+    internal const string DiagnosticsSettingsRouteViewModelName = "MTM_Waitlist.Module_Settings.ViewModels.DiagnosticsSettingsRoute";
+
+    /// <summary>The Administration page: people, permissions and the lugger arrangement.</summary>
+    internal const string AdministrationSettingsRouteViewModelName = "MTM_Waitlist.Module_Settings.ViewModels.AdministrationSettingsRoute";
+
 
     /// <summary>
     /// Every permission this screen asks about, in one read: the four Settings subjects it gates itself, the three
@@ -550,6 +568,53 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     public bool IsAdministrationCategoryVisible => IsUserManagementEntryVisible ||
         IsPermissionsEntryVisible ||
         IsLuggerArrangementEntryVisible;
+
+    /// <summary>
+    /// Whether the General page is offered. It holds only personal choices, so it is always offered — this answer
+    /// exists so every card on the hub is drawn from a named answer rather than one card being a special case.
+    /// </summary>
+    public bool IsGeneralSettingsPageAvailable => true;
+
+    /// <summary>Whether the Operations page is offered: at least one of its panels may be used.</summary>
+    public bool IsOperationsSettingsPageAvailable =>
+        CanManageHotWorkCenters
+        || CanReadIgnoredLocations
+        || CanManageSessionLength
+        || UrgencyAllotments.CanManageUrgencySettings;
+
+    /// <summary>Whether the Pictures page is offered: either picture entitlement opens it.</summary>
+    public bool IsPicturesSettingsPageAvailable => CanManageImageLocationSettings || CanManageStoragePaths;
+
+    /// <summary>Whether the Diagnostics page is offered: the log entitlement or the refresh entitlement opens it.</summary>
+    public bool IsDiagnosticsSettingsPageAvailable => CanOpenDeveloperLogPanel || CanRequestCacheRefresh;
+
+    /// <summary>Whether the Administration page is offered: at least one of its entries may be opened.</summary>
+    public bool IsAdministrationSettingsPageAvailable =>
+        CanOpenUserManagement || CanOpenPermissions || CanOpenLuggerArrangement;
+
+    /// <summary>Opens the General page.</summary>
+    [RelayCommand]
+    private void OpenGeneralSettings() => _navigationService.NavigateTo(GeneralSettingsRouteViewModelName);
+
+    /// <summary>Opens the Operations page.</summary>
+    [RelayCommand]
+    private void OpenOperationsSettings() => _navigationService.NavigateTo(OperationsSettingsRouteViewModelName);
+
+    /// <summary>Opens the Pictures page.</summary>
+    [RelayCommand]
+    private void OpenPicturesSettings() => _navigationService.NavigateTo(PicturesSettingsRouteViewModelName);
+
+    /// <summary>Opens the Devices page.</summary>
+    [RelayCommand]
+    private void OpenDevicesSettings() => _navigationService.NavigateTo(DevicesSettingsRouteViewModelName);
+
+    /// <summary>Opens the Diagnostics page.</summary>
+    [RelayCommand]
+    private void OpenDiagnosticsSettings() => _navigationService.NavigateTo(DiagnosticsSettingsRouteViewModelName);
+
+    /// <summary>Opens the Administration page.</summary>
+    [RelayCommand]
+    private void OpenAdministrationSettings() => _navigationService.NavigateTo(AdministrationSettingsRouteViewModelName);
 
     /// <summary>
     /// The Users entry. It navigates rather than expanding, so it is a card rather than an expander, and it is
@@ -2344,6 +2409,13 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         OnPropertyChanged(nameof(IsOperationsCategoryVisible));
         OnPropertyChanged(nameof(IsAboutCategoryVisible));
         OnPropertyChanged(nameof(IsAdministrationCategoryVisible));
+
+        // The hub's cards are computed from the same answers, so they announce with them.
+        OnPropertyChanged(nameof(IsGeneralSettingsPageAvailable));
+        OnPropertyChanged(nameof(IsOperationsSettingsPageAvailable));
+        OnPropertyChanged(nameof(IsPicturesSettingsPageAvailable));
+        OnPropertyChanged(nameof(IsDiagnosticsSettingsPageAvailable));
+        OnPropertyChanged(nameof(IsAdministrationSettingsPageAvailable));
     }
 
     private static string GetVersionDescription()

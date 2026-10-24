@@ -113,7 +113,7 @@ public sealed class UserManagementPageMarkupTests
         {
             PagePath,
             CodeBehindPath,
-            "MTM_Waitlist.Settings/ViewModels/UserManagementViewModel.cs",
+            "MTM_Waitlist.Settings/Administration/ViewModels/UserManagementViewModel.cs",
             "MTM_Waitlist.Settings/Models/UserSummary.cs",
         };
 

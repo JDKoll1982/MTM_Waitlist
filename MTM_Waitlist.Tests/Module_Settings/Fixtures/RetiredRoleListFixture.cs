@@ -56,7 +56,7 @@ public static class RetiredRoleListFixture
         "Production Lead",
     ];
 
-    /// <summary>`MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs` — <c>AllowedIgnoredLocationManageRoles</c>.</summary>
+    /// <summary>`MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.cs` — <c>AllowedIgnoredLocationManageRoles</c>.</summary>
     public static IReadOnlyList<string> SettingsIgnoredLocationManageRoles { get; } =
     [
         "Admin",
@@ -68,7 +68,7 @@ public static class RetiredRoleListFixture
         "Setup Lead",
     ];
 
-    /// <summary>`MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs` — <c>AllowedHotWorkCenterManageRoles</c>.</summary>
+    /// <summary>`MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.cs` — <c>AllowedHotWorkCenterManageRoles</c>.</summary>
     public static IReadOnlyList<string> SettingsHotWorkCenterManageRoles { get; } =
     [
         "Admin",
@@ -78,14 +78,14 @@ public static class RetiredRoleListFixture
         "Production Lead",
     ];
 
-    /// <summary>`MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs` — <c>AllowedImageLocationManageRoles</c>.</summary>
+    /// <summary>`MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.cs` — <c>AllowedImageLocationManageRoles</c>.</summary>
     public static IReadOnlyList<string> SettingsImageLocationManageRoles { get; } =
     [
         "Admin",
         "Developer",
     ];
 
-    /// <summary>`MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs` — <c>AllowedCacheRefreshRoles</c>.</summary>
+    /// <summary>`MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.cs` — <c>AllowedCacheRefreshRoles</c>.</summary>
     public static IReadOnlyList<string> SettingsCacheRefreshRoles { get; } =
     [
         "Admin",
@@ -93,7 +93,7 @@ public static class RetiredRoleListFixture
         "Plant Manager",
     ];
 
-    /// <summary>`MTM_Waitlist.Settings/ViewModels/UrgencyAllotmentEditorViewModel.cs` — <c>AllowedUrgencyManageRoles</c>.</summary>
+    /// <summary>`MTM_Waitlist.Settings/Operations/ViewModels/UrgencyAllotmentEditorViewModel.cs` — <c>AllowedUrgencyManageRoles</c>.</summary>
     public static IReadOnlyList<string> UrgencyAllotmentManageRoles { get; } =
     [
         "Admin",
@@ -109,7 +109,7 @@ public static class RetiredRoleListFixture
         "developer",
     ];
 
-    /// <summary>`MTM_Waitlist.Settings/ViewModels/ComputerManagementViewModel.cs` — <c>AllowedComputerManageRoles</c>.</summary>
+    /// <summary>`MTM_Waitlist.Settings/Devices/ViewModels/ComputerManagementViewModel.cs` — <c>AllowedComputerManageRoles</c>.</summary>
     public static IReadOnlyList<string> ComputerManageRoles { get; } =
     [
         "Admin",

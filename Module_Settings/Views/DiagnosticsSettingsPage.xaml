@@ -1,0 +1,202 @@
+<Page
+    x:Class="MTM_Waitlist.Module_Settings.Views.DiagnosticsSettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helpers="using:MTM_Waitlist.Module_Core.Helpers"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:views="using:MTM_Waitlist.Module_Settings.Views"
+    xmlns:wct="using:CommunityToolkit.WinUI.Controls"
+    xmlns:xaml="using:Microsoft.UI.Xaml"
+    x:Name="RootPage"
+    mc:Ignorable="d">
+
+<Page.Resources>
+    <helpers:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+
+    <!--
+        Settings page typography and row chrome.
+
+        Every description and status line on the page uses SettingsDescriptionStyle, and every
+        value pill in a two-column pick list uses SettingsListPillStyle. Section headings use the
+        platform BodyStrong style directly. Keeping these three in one place is what stops the
+        page drifting back into a mix of margins, brushes and font sizes.
+    -->
+    <Style x:Key="SettingsDescriptionStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="SettingsListPillStyle" TargetType="Border">
+        <Setter Property="Padding" Value="10,6,10,6" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!--
+        Pictures panel row chrome.
+
+        The merged panel holds three cards, and between them a dozen rows of "label, description, control". The
+        measurements live here rather than on each row, so a folder box and the Browse button beside it sit in
+        one straight column instead of every row inventing its own width.
+    -->
+    <Style x:Key="SettingsFormRowStyle" TargetType="Grid">
+        <Setter Property="ColumnSpacing" Value="16" />
+    </Style>
+
+    <Style x:Key="SettingsRowTitleStyle" TargetType="TextBlock">
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="SettingsFolderBoxStyle" TargetType="TextBox">
+        <Setter Property="MinWidth" Value="300" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="SettingsFolderButtonStyle" TargetType="Button">
+        <Setter Property="MinWidth" Value="96" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+</Page.Resources>
+    <ScrollViewer
+        HorizontalScrollBarVisibility="Disabled"
+        HorizontalScrollMode="Disabled"
+        VerticalScrollBarVisibility="Auto">
+        <Grid
+            MaxWidth="1080"
+            Padding="0,0,0,48"
+            HorizontalAlignment="Stretch"
+            RowSpacing="28">
+            <StackPanel Spacing="10">
+                <TextBlock Style="{ThemeResource TitleTextBlockStyle}" Text="Diagnostics" />
+                <TextBlock Style="{StaticResource SettingsDescriptionStyle}" Text="The developer log, how much of it is kept, and the button that rebuilds the cached Infor Visual data." />
+<TextBox
+    AutomationProperties.AutomationId="DiagnosticsSettingsPage_SearchBox"
+    Header="Search"
+    PlaceholderText="Search settings"
+    Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+<wct:SettingsExpander
+    AutomationProperties.AutomationId="SettingsPage_DeveloperLogExpander"
+    x:Name="DeveloperLogExpander"
+    x:Load="{x:Bind ViewModel.IsDeveloperLogPanelVisible, Mode=OneWay}"
+    Header="{x:Bind ViewModel.DeveloperLogPanelTitle}"
+    HorizontalAlignment="Stretch"
+    IsExpanded="True">
+    <wct:SettingsExpander.HeaderIcon>
+        <FontIcon Glyph="&#xE9D9;" />
+    </wct:SettingsExpander.HeaderIcon>
+
+    <wct:SettingsExpander.Items>
+        <wct:SettingsCard
+            ContentAlignment="Vertical"
+            HorizontalContentAlignment="Stretch">
+            <views:DeveloperLogPanelView x:Name="DeveloperLogPanel" />
+        </wct:SettingsCard>
+    </wct:SettingsExpander.Items>
+</wct:SettingsExpander>
+
+<wct:SettingsExpander
+    AutomationProperties.AutomationId="SettingsPage_LogStoreLevelExpander"
+    x:Name="LogStoreLevelExpander"
+    x:Load="{x:Bind ViewModel.IsLogStoreLevelPanelVisible, Mode=OneWay}"
+    Description="{x:Bind ViewModel.LogStoreLevelPanelDescription}"
+    Header="{x:Bind ViewModel.LogStoreLevelPanelTitle}"
+    HorizontalAlignment="Stretch"
+    IsExpanded="False">
+    <wct:SettingsExpander.HeaderIcon>
+        <SymbolIcon Symbol="Filter" />
+    </wct:SettingsExpander.HeaderIcon>
+
+    <wct:SettingsExpander.Items>
+        <wct:SettingsCard Header="{x:Bind ViewModel.LogStoreLevelLabel}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <ComboBox
+                    AutomationProperties.AutomationId="SettingsPage_LogStoreLevelBox"
+                    AutomationProperties.Name="{x:Bind ViewModel.LogStoreLevelLabel}"
+                    MinWidth="180"
+                    ItemsSource="{x:Bind ViewModel.LogStoreLevelOptions}"
+                    SelectedItem="{x:Bind ViewModel.LogStoreMinimumLevelInput, Mode=TwoWay}" />
+                <Button
+                    AutomationProperties.AutomationId="SettingsPage_LogStoreLevelSaveButton"
+                    AutomationProperties.Name="{x:Bind ViewModel.LogStoreLevelSaveLabel}"
+                    MinWidth="110"
+                    Click="SaveLogStoreLevel_Click"
+                    Content="{x:Bind ViewModel.LogStoreLevelSaveLabel}" />
+                <ProgressRing
+                    Width="20"
+                    Height="20"
+                    IsActive="{x:Bind ViewModel.IsLogStoreBusy, Mode=OneWay}" />
+            </StackPanel>
+        </wct:SettingsCard>
+
+        <wct:SettingsCard
+            ContentAlignment="Vertical"
+            HorizontalContentAlignment="Stretch">
+            <StackPanel Spacing="8">
+                <TextBlock
+                    MaxWidth="680"
+                    Text="{x:Bind ViewModel.LogStoreLevelStoreIsTruthText}"
+                    TextWrapping="Wrap" />
+
+                <TextBlock
+                    MaxWidth="680"
+                    Text="{x:Bind ViewModel.LogStoreStatusMessage, Mode=OneWay}"
+                    TextWrapping="Wrap" />
+            </StackPanel>
+        </wct:SettingsCard>
+    </wct:SettingsExpander.Items>
+</wct:SettingsExpander>
+
+<wct:SettingsExpander
+    AutomationProperties.AutomationId="SettingsPage_CacheRefreshExpander"
+    AutomationProperties.Name="{x:Bind CacheRefreshHeaderText.Text, Mode=OneWay}"
+    x:Name="CacheRefreshExpander"
+    x:Load="{x:Bind ViewModel.IsCacheRefreshPanelVisible, Mode=OneWay}"
+    HorizontalAlignment="Stretch"
+    IsExpanded="False">
+    <wct:SettingsExpander.HeaderIcon>
+        <SymbolIcon Symbol="Refresh" />
+    </wct:SettingsExpander.HeaderIcon>
+
+    <wct:SettingsExpander.Header>
+        <TextBlock
+            x:Name="CacheRefreshHeaderText"
+            x:Uid="Settings_CacheRefresh_Title"
+            Text="Cached Infor Visual data" />
+    </wct:SettingsExpander.Header>
+
+    <wct:SettingsExpander.Description>
+        <TextBlock
+            x:Uid="Settings_CacheRefresh_Description"
+            Text="Ask the cache service to rebuild the cached Infor Visual reads now instead of waiting for its next scheduled cycle. Plant Manager and above only. A workstation that is not pointed at the service is told so rather than failing." />
+    </wct:SettingsExpander.Description>
+
+    <ProgressRing
+        Width="20"
+        Height="20"
+        VerticalAlignment="Center"
+        IsActive="{x:Bind ViewModel.IsCacheRefreshing, Mode=OneWay}" />
+
+    <wct:SettingsExpander.Items>
+        <wct:SettingsCard
+            ContentAlignment="Vertical"
+            HorizontalContentAlignment="Stretch">
+            <StackPanel Spacing="12">
+                <Button
+                    AutomationProperties.AutomationId="SettingsPage_CacheRefresh_RefreshButton"
+                    x:Uid="Settings_CacheRefresh_Refresh"
+                    HorizontalAlignment="Left"
+                    Command="{x:Bind ViewModel.RequestCacheRefreshCommand}"
+                    Content="Refresh cached data" />
+                <TextBlock
+                    Style="{StaticResource SettingsDescriptionStyle}"
+                    Text="{x:Bind ViewModel.CacheRefreshStatusMessage, Mode=OneWay}" />
+            </StackPanel>
+        </wct:SettingsCard>
+    </wct:SettingsExpander.Items>
+</wct:SettingsExpander>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</Page>

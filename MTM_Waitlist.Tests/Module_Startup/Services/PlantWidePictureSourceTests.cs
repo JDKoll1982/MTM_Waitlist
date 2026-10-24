@@ -166,7 +166,7 @@ public sealed class PlantWidePictureSourceTests
             keys.Contains("keys.folder_path", StringComparison.Ordinal),
             "The shared keys folder setting is back, though nothing reads a key file (FR-043).");
 
-        var panel = File.ReadAllText(Path.Combine(Root, "Module_Settings", "Views", "SettingsPage.xaml"));
+        var panel = File.ReadAllText(Path.Combine(Root, "Module_Settings", "Views", "PicturesSettingsPage.xaml"));
 
         StringAssert.Contains(
             panel,
