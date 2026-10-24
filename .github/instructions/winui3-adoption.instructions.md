@@ -1,5 +1,7 @@
 ---
 description: "Converts an existing WinUI 3 app (MTM_Waitlist, MTM_Receiving_Application) to the Lab design system: spacing scale, Windows type ramp, capped content column, adaptive breakpoints, theme brushes. Use when restyling or modernising an existing WinUI 3 codebase rather than writing a new page."
+
+applyTo: "**/*.xaml"
 ---
 
 # Adopting the design system in an existing WinUI 3 app
