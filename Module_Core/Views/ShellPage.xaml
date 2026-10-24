@@ -250,12 +250,29 @@
                 </AutoSuggestBox.ItemTemplate>
             </AutoSuggestBox>
         </Grid>
+        <!--
+        The pane expands only when expanding it costs the page nothing.
+
+        The window's width is not the page's width. The content sits inside the pane plus the shell's own inset
+        (NavigationViewPageContentMargin, 56 either side), and every page caps its content column at 1080. An
+        expanded pane leaves the page  window - 260 - 112 - 17  and a compact rail leaves it  window - 48 - 112 - 17
+        (the 17 is the window's own chrome, measured rather than assumed). At the 1280 this setting used to carry,
+        crossing the threshold made the window forty pixels wider and the page two hundred and twelve pixels
+        narrower: measured on 2026-10-24, the page's viewport went from 1104 px at 1281 to 971 px at 1360, and every
+        settings row and waitlist card re-wrapped into the narrower column. That is the whole of the "scaling issue"
+        seen while taking screenshots at laptop widths.
+
+        1500 is comfortably past the 1469 at which the expanded pane would only just leave the 1080-px content
+        column intact, so the page never re-wraps because the window grew. Below it the rail stays compact, which is
+        also where a 15-inch screen at 125-150% scaling lives, so the page keeps its full width and the item labels
+        stay one hover away in a tooltip.
+        -->
         <NavigationView
             AutomationProperties.AutomationId="ShellPage_Navigation"
             x:Name="NavigationViewControl"
             Canvas.ZIndex="0"
             DisplayModeChanged="NavigationViewControl_DisplayModeChanged"
-            ExpandedModeThresholdWidth="1280"
+            ExpandedModeThresholdWidth="1500"
             OpenPaneLength="260"
             CompactPaneLength="48"
             Header="{x:Bind ViewModel}"
