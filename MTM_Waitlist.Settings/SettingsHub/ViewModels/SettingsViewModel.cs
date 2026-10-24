@@ -368,6 +368,21 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     } = string.Empty;
 
     /// <summary>
+    /// What the lugger picture folder box holds: where the picture behind each lugger card lives.
+    /// </summary>
+    /// <remarks>
+    /// One file per lugger, named after its place in the arrangement rather than after its name: <c>Lugger01</c> …
+    /// <c>Lugger09</c>, then <c>Lugger10</c> … <c>Lugger99</c>. There is no Lugger100, because the arrangement holds at
+    /// most 99 luggers. The panel states the rule, because a folder whose contract is not written down is a folder
+    /// somebody fills with the wrong names.
+    /// </remarks>
+    [ObservableProperty]
+    public partial string LuggerFolderInput
+    {
+        get; set;
+    } = string.Empty;
+
+    /// <summary>
     /// How many days a replaced picture is kept before it is cleaned up (FR-037).
     /// </summary>
     /// <remarks>
@@ -615,6 +630,72 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     /// <summary>Opens the Administration page.</summary>
     [RelayCommand]
     private void OpenAdministrationSettings() => _navigationService.NavigateTo(AdministrationSettingsRouteViewModelName);
+
+    /// <summary>What the hub's search box currently holds.</summary>
+    /// <remarks>
+    /// Deliberately not the pages' own <see cref="SearchQuery"/>: that one filters the panels of the page you are
+    /// already on, while this one finds the page you are not on yet.
+    /// </remarks>
+    [ObservableProperty]
+    public partial string PageSearchQuery
+    {
+        get; set;
+    } = string.Empty;
+
+    /// <summary>The settings the hub's search box offers for the current term.</summary>
+    public ObservableCollection<SettingsSearchTarget> PageSearchSuggestions { get; } = [];
+
+    /// <summary>
+    /// Fills the suggestion list for <paramref name="query"/>, leaving out every page this reader may not open.
+    /// </summary>
+    public void UpdatePageSearch(string? query)
+    {
+        PageSearchSuggestions.Clear();
+
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return;
+        }
+
+        foreach (var target in SettingsSearchCatalog.All.Where(target => IsPageAvailable(target.PageRoute) && target.Matches(query)))
+        {
+            PageSearchSuggestions.Add(target);
+        }
+    }
+
+    /// <summary>The first setting that answers <paramref name="query"/>, or null when nothing does.</summary>
+    public SettingsSearchTarget? FindPageSearch(string? query) =>
+        SettingsSearchCatalog.All.FirstOrDefault(target => IsPageAvailable(target.PageRoute) && target.Matches(query));
+
+    /// <summary>
+    /// Opens the page that owns a setting and asks it to bring that setting's own section into view.
+    /// </summary>
+    /// <remarks>
+    /// The section travels as the navigation parameter, because each page has its own instance of this view model:
+    /// a field set here would belong to the hub's instance and never reach the page's.
+    /// </remarks>
+    [RelayCommand]
+    private void OpenSearchTarget(SettingsSearchTarget? target)
+    {
+        if (target is null || !IsPageAvailable(target.PageRoute))
+        {
+            return;
+        }
+
+        _navigationService.NavigateTo(target.PageRoute, target.SectionKey);
+    }
+
+    /// <summary>Whether the page behind <paramref name="pageRoute"/> is offered to this reader.</summary>
+    private bool IsPageAvailable(string pageRoute) => pageRoute switch
+    {
+        GeneralSettingsRouteViewModelName => IsGeneralSettingsPageAvailable,
+        OperationsSettingsRouteViewModelName => IsOperationsSettingsPageAvailable,
+        PicturesSettingsRouteViewModelName => IsPicturesSettingsPageAvailable,
+        DevicesSettingsRouteViewModelName => ComputerManagement.CanManageComputers,
+        DiagnosticsSettingsRouteViewModelName => IsDiagnosticsSettingsPageAvailable,
+        AdministrationSettingsRouteViewModelName => IsAdministrationSettingsPageAvailable,
+        _ => false,
+    };
 
     /// <summary>
     /// The Users entry. It navigates rather than expanding, so it is a card rather than an expander, and it is
@@ -950,6 +1031,24 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     /// </summary>
     public string StoragePathsHopperFolderBrowseName =>
         "Settings_StoragePaths_HopperFolderBrowse.Name".GetLocalized();
+
+    /// <summary>The label on the lugger-picture-folder box.</summary>
+    public string StoragePathsLuggerFolderLabel => "Settings_StoragePaths_LuggerFolder.Label".GetLocalized();
+
+    /// <summary>
+    /// The sentence under the lugger-picture-folder box, which states the file-naming rule. Written in the panel for
+    /// the same reason the hopper rule is: a folder whose naming rule nobody has read is a folder filled with the
+    /// wrong names.
+    /// </summary>
+    public string StoragePathsLuggerFolderHint => "Settings_StoragePaths_LuggerFolder.Hint".GetLocalized();
+
+    /// <summary>The label on the button that opens a folder dialog beside the lugger-picture-folder box.</summary>
+    public string StoragePathsLuggerFolderBrowseLabel =>
+        "Settings_StoragePaths_LuggerFolderBrowse.Text".GetLocalized();
+
+    /// <summary>What a screen reader announces for that button.</summary>
+    public string StoragePathsLuggerFolderBrowseName =>
+        "Settings_StoragePaths_LuggerFolderBrowse.Name".GetLocalized();
 
     /// <summary>The label on the retention-period box.</summary>
     public string StoragePathsArchiveKeepDaysLabel => "Settings_StoragePaths_ArchiveKeepDays.Label".GetLocalized();
@@ -2125,6 +2224,13 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         chosen => HopperFolderInput = chosen,
         ConfigSettingKeys.ImageStorageHopperFolderPathDefault);
 
+    /// <summary>Opens the folder dialog at the lugger picture folder and puts the chosen folder in the box.</summary>
+    [RelayCommand]
+    private Task BrowseLuggerFolderAsync() => BrowseIntoAsync(
+        LuggerFolderInput,
+        chosen => LuggerFolderInput = chosen,
+        ConfigSettingKeys.ImageStorageLuggerFolderPathDefault);
+
     /// <summary>Opens the folder dialog at the picture folder and puts the chosen folder in the box.</summary>
     [RelayCommand]
     private Task BrowsePictureFolderAsync() => BrowseIntoAsync(
@@ -2200,6 +2306,10 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 .GetHopperFolderPathAsync()
                 .ConfigureAwait(true);
 
+            LuggerFolderInput = await _imageStorageConfigurationResolver
+                .GetLuggerFolderPathAsync()
+                .ConfigureAwait(true);
+
             ArchiveKeepDaysInput = await _imageStorageConfigurationResolver
                 .GetArchiveKeepDaysAsync()
                 .ConfigureAwait(true);
@@ -2237,6 +2347,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         var pictureFolder = PictureFolderInput?.Trim() ?? string.Empty;
         var dunnageRoot = DunnageRootInput?.Trim() ?? string.Empty;
         var hopperFolder = HopperFolderInput?.Trim() ?? string.Empty;
+        var luggerFolder = LuggerFolderInput?.Trim() ?? string.Empty;
         var keepDays = (int)Math.Round(ArchiveKeepDaysInput, MidpointRounding.AwayFromZero);
 
         if (pictureFolder.Length == 0 || dunnageRoot.Length == 0)
@@ -2256,6 +2367,14 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         if (keepDays < 1)
         {
             StoragePathsStatusMessage = "Settings_StoragePaths_DaysNeeded.Text".GetLocalized();
+            return;
+        }
+
+        if (luggerFolder.Length == 0)
+        {
+            // Refused for the hopper folder's reason: an empty value is not a folder, and storing it would leave the
+            // lugger cards reading a path that resolves to nothing at all.
+            StoragePathsStatusMessage = "Settings_StoragePaths_LuggerFolderNeeded.Text".GetLocalized();
             return;
         }
 
@@ -2279,6 +2398,12 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 ConfigSettingKeys.ImageStorageHopperFolderPath,
                 "text",
                 hopperFolder,
+                boolean: null).ConfigureAwait(true);
+
+            await SaveAppWideSettingAsync(
+                ConfigSettingKeys.ImageStorageLuggerFolderPath,
+                "text",
+                luggerFolder,
                 boolean: null).ConfigureAwait(true);
 
             await SaveAppWideSettingAsync(

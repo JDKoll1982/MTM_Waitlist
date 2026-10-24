@@ -20,4 +20,10 @@ public sealed partial class OperationsSettingsPage : Page
         InitializeComponent();
         AppLog.Info("OperationsSettingsPage", "Constructor completed.");
     }
+
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        SettingsSectionNavigator.BringIntoView(this, e.Parameter);
+    }
 }

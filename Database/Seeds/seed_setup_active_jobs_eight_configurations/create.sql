@@ -67,7 +67,7 @@ VALUES
         'Location', 'A-01-01',
         'OnHandQuantity', 1200.50,
         'User8', '',
-        'SelectedScrapType', 'Steel Offal',
+        'SelectedScrapType', 'Steel',
         'IsLowStock', FALSE)),
      NULL, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP()),
 

@@ -10,6 +10,8 @@ using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Permissions;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Settings.Services;
+using MTM_Waitlist.Module_Shared.Helpers;
 
 namespace MTM_Waitlist.Module_Settings.ViewModels;
 
@@ -40,17 +42,20 @@ public partial class LuggerArrangementViewModel : ObservableRecipient, INavigati
     private readonly ILuggerArrangementService _arrangementService;
     private readonly IPermissionService _permissionService;
     private readonly IPersonIdentity _personIdentity;
+    private readonly ILuggerImageResolver? _luggerImages;
 
     private LuggerArrangementSnapshot _snapshot = LuggerArrangementSnapshot.Empty;
 
     public LuggerArrangementViewModel(
         ILuggerArrangementService arrangementService,
         IPermissionService permissionService,
-        IPersonIdentity personIdentity)
+        IPersonIdentity personIdentity,
+        ILuggerImageResolver? luggerImages = null)
     {
         _arrangementService = arrangementService ?? throw new ArgumentNullException(nameof(arrangementService));
         _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
         _personIdentity = personIdentity ?? throw new ArgumentNullException(nameof(personIdentity));
+        _luggerImages = luggerImages;
     }
 
     /// <summary>The work the page's arrival started, so a page or a test can wait for the first read.</summary>
@@ -596,10 +601,37 @@ public partial class LuggerArrangementViewModel : ObservableRecipient, INavigati
         }
     }
 
+    /// <summary>
+    /// The picture for one lugger, or <see langword="null"/> when it has none or no resolver is wired.
+    /// </summary>
+    /// <remarks>
+    /// A failure resolves to no picture rather than to a failed load: the arrangement is a working screen, and a
+    /// share that cannot be read must not stop a lead from moving a lugger.
+    /// </remarks>
+    private async Task<string?> ResolveImageAsync(int displayPosition, CancellationToken cancellationToken)
+    {
+        if (_luggerImages is null)
+        {
+            return null;
+        }
+
+        try
+        {
+            return await _luggerImages.ResolveAsync(displayPosition, cancellationToken).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error(
+                "LuggerArrangement",
+                ex,
+                $"The picture for lugger {displayPosition} could not be resolved; its card draws the no-picture image.");
+            return null;
+        }
+    }
+
     /// <summary>The two reads that make the summary, applied without keeping anything beyond this load.</summary>
     private async Task LoadArrangementAsync(CancellationToken cancellationToken)
-    {
-        var luggers = await _arrangementService.GetLuggersAsync(cancellationToken).ConfigureAwait(true);
+    {        var luggers = await _arrangementService.GetLuggersAsync(cancellationToken).ConfigureAwait(true);
         var snapshot = await _arrangementService.GetSnapshotAsync(cancellationToken).ConfigureAwait(true);
 
         _snapshot = snapshot;
@@ -610,6 +642,14 @@ public partial class LuggerArrangementViewModel : ObservableRecipient, INavigati
         Luggers.Clear();
         foreach (var lugger in luggers.OrderBy(candidate => candidate.DisplayPosition))
         {
+            // The card draws the picture at half size, so it is read at half size too. The width is taken from the
+            // file's header; when the lugger has no picture the same question is asked of the placeholder, which is
+            // what the card falls back to.
+            var imagePath = await ResolveImageAsync(lugger.DisplayPosition, cancellationToken).ConfigureAwait(true);
+            var pixelWidth = await LuggerImageResolver.ReadPixelWidthAsync(
+                string.IsNullOrWhiteSpace(imagePath) ? ImagePicturePolicy.NoImagePath : imagePath)
+                .ConfigureAwait(true);
+
             Luggers.Add(new LuggerArrangementRow
             {
                 PublicId = lugger.PublicId,
@@ -618,6 +658,8 @@ public partial class LuggerArrangementViewModel : ObservableRecipient, INavigati
                 StatusReason = lugger.StatusReason,
                 DisplayPosition = lugger.DisplayPosition,
                 ScrapTypes = ScrapTypesFor(snapshot, lugger.PublicId),
+                ImagePath = imagePath,
+                ImagePixelWidth = pixelWidth,
             });
         }
 

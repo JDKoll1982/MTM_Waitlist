@@ -82,6 +82,10 @@ internal sealed class FakeImageStorageConfigurationResolver : IImageStorageConfi
     public string HopperFolderPath { get; set; } =
         MTM_Waitlist.Module_Settings.Models.ConfigSettingKeys.ImageStorageHopperFolderPathDefault;
 
+    /// <summary>The folder the lugger pictures sit in, one file per lugger.</summary>
+    public string LuggerFolderPath { get; set; } =
+        MTM_Waitlist.Module_Settings.Models.ConfigSettingKeys.ImageStorageLuggerFolderPathDefault;
+
     public string CacheFolderPath { get; set; } = Path.Combine(Path.GetTempPath(), "mtm-image-tests", "cache");
 
     public bool CacheEnabled { get; set; } = true;
@@ -99,6 +103,8 @@ internal sealed class FakeImageStorageConfigurationResolver : IImageStorageConfi
     public Task<string> GetDunnageRootPathAsync() => Task.FromResult(DunnageRootPath);
 
     public Task<string> GetHopperFolderPathAsync() => Task.FromResult(HopperFolderPath);
+
+    public Task<string> GetLuggerFolderPathAsync() => Task.FromResult(LuggerFolderPath);
 
     public Task<string> GetImageCacheFolderPathAsync() => Task.FromResult(CacheFolderPath);
 

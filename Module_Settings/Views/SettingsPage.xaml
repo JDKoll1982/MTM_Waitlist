@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:MTM_Waitlist.Module_Settings.Models"
     xmlns:wct="using:CommunityToolkit.WinUI.Controls"
     x:Name="RootPage"
     mc:Ignorable="d">
@@ -31,6 +32,36 @@
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Text="Settings are grouped by who may change them. Pick the group you need."
                     TextWrapping="Wrap" />
+
+                <!--
+                    The hub's search. It finds a setting by the words a person would use and opens the page that owns
+                    it, landing on the setting's own section rather than at the top of the page.
+                -->
+                <AutoSuggestBox
+                    AutomationProperties.AutomationId="SettingsPage_SearchBox"
+                    AutomationProperties.Name="Search settings"
+                    Header="Search settings"
+                    PlaceholderText="Search settings by name"
+                    QueryIcon="Find"
+                    TextChanged="OnSearchTextChanged"
+                    SuggestionChosen="OnSearchSuggestionChosen"
+                    QuerySubmitted="OnSearchQuerySubmitted">
+                    <AutoSuggestBox.ItemTemplate>
+                        <DataTemplate x:DataType="models:SettingsSearchTarget">
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{x:Bind Title}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Text="{x:Bind Area}" />
+                            </Grid>
+                        </DataTemplate>
+                    </AutoSuggestBox.ItemTemplate>
+                </AutoSuggestBox>
 
                 <wct:SettingsCard
                     AutomationProperties.AutomationId="SettingsPage_GeneralEntry"

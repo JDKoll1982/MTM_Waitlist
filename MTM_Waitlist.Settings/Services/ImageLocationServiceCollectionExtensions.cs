@@ -67,6 +67,7 @@ public static class ImageLocationServiceCollectionExtensions
 
         // Register configuration resolver (singleton - coordinates with IOptions<T>)
         services.AddSingleton<IImageStorageConfigurationResolver, ImageStorageConfigurationResolver>();
+        services.AddSingleton<ILuggerImageResolver, LuggerImageResolver>();
 
         // Register override services (singletons - stateless queries, can be reused)
         services.AddSingleton<IImageOverrideReadService, ImageOverrideReadService>();
@@ -106,6 +107,7 @@ public static class ImageLocationServiceCollectionExtensions
             configuration.GetSection(ImageStorageOptions.SectionName));
 
         services.AddSingleton<IImageStorageConfigurationResolver, ImageStorageConfigurationResolver>();
+        services.AddSingleton<ILuggerImageResolver, LuggerImageResolver>();
 
         return services;
     }

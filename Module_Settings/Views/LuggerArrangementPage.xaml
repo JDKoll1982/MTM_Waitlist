@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:MTM_Waitlist.Module_Shared.Controls"
     xmlns:models="using:MTM_Waitlist.Module_Settings.Models"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d">
@@ -21,6 +22,7 @@
         interpreted two ways.
     -->
     <Page.Resources>
+
         <!-- The chrome the arrangement panel wears. -->
         <Style x:Key="ArrangementCardChrome" TargetType="Border">
             <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
@@ -162,11 +164,26 @@
                                     <Border
                                         AutomationProperties.Name="{x:Bind Name}"
                                         Style="{StaticResource ArrangementTile}">
-                                        <Grid ColumnSpacing="0">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="6" />
-                                                <ColumnDefinition Width="*" />
-                                            </Grid.ColumnDefinitions>
+                                        <Grid>
+                                            <!--
+                                                The lugger's own picture, drawn behind the card's words at a quarter
+                                                opacity so the status, the name and the actions stay legible over it.
+                                                A lugger with no picture gets the application's no-picture image
+                                                from the converter, not an empty card.
+                                            -->
+                                            <controls:ClickToEnlargeImageView
+                                                HorizontalAlignment="Stretch"
+                                                VerticalAlignment="Stretch"
+                                                AutomationProperties.Name="{x:Bind Name}"
+                                                Source="{x:Bind BackgroundImage}"
+                                                Stretch="None"
+                                                ThumbnailOpacity="0.25" />
+
+                                            <Grid ColumnSpacing="0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="6" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
 
                                             <Border
                                                 Grid.Column="0"
@@ -230,6 +247,7 @@
                                                         Content="{x:Bind RenameActionText}" />
                                                 </StackPanel>
                                             </Grid>
+                                        </Grid>
                                         </Grid>
                                     </Border>
                                 </DataTemplate>

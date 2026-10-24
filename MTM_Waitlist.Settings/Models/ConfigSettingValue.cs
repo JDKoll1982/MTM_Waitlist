@@ -144,6 +144,34 @@ public static class ConfigSettingKeys
     public const string ImageStorageHopperFolderPathDefault = AppStoragePaths.HopperFolderDefault;
 
     /// <summary>
+    /// The folder the lugger pictures sit in, one file per lugger.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Setting Key: "image_storage.lugger_folder_path"
+    /// </para>
+    /// <para>
+    /// Description: IT-configured location of the lugger pictures the arrangement's cards draw behind themselves.
+    /// The file for a lugger is its place in the arrangement, two digits wide, with a picture extension:
+    /// <c>Lugger01.png</c> … <c>Lugger09.png</c>, <c>Lugger10.png</c> … <c>Lugger99.png</c>. There is no Lugger100:
+    /// the arrangement holds at most 99 luggers, and a placement past that draws no picture rather than a wrong one.
+    /// </para>
+    /// <para>
+    /// Default: <see cref="ImageStorageLuggerFolderPathDefault"/>
+    /// (<c>\\mtmanu-fs01\Expo Drive\MH_RESOURCE\…\Images\Waitlist\lugger</c>).
+    /// </para>
+    /// </remarks>
+    public const string ImageStorageLuggerFolderPath = "image_storage.lugger_folder_path";
+
+    /// <summary>
+    /// The lugger picture folder this application ships with, given as the share's own path.
+    /// </summary>
+    /// <remarks>
+    /// Default: <see cref="AppStoragePaths.LuggerFolderDefault"/>.
+    /// </remarks>
+    public const string ImageStorageLuggerFolderPathDefault = AppStoragePaths.LuggerFolderDefault;
+
+    /// <summary>
     /// The root the dunnage pictures sit under, one folder per dunnage type and part beneath it.
     /// Setting Key: "dunnage.root_path"
     /// Value Type: "text" (string path)

@@ -20,4 +20,10 @@ public sealed partial class GeneralSettingsPage : Page
         InitializeComponent();
         AppLog.Info("GeneralSettingsPage", "Constructor completed.");
     }
+
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        SettingsSectionNavigator.BringIntoView(this, e.Parameter);
+    }
 }

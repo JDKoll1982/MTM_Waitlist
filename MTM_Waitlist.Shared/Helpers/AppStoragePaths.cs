@@ -57,6 +57,16 @@ public static class AppStoragePaths
     /// </remarks>
     public const string HopperFolderDefault = ImagesRootDefault + @"\Waitlist\hopper";
 
+    /// <summary>
+    /// The folder the lugger pictures sit in, one file per lugger named <c>Lugger01</c> … <c>Lugger99</c>.
+    /// </summary>
+    /// <remarks>
+    /// Given in full rather than beneath <see cref="ImagesRootDefault"/> because that is where the artwork lives, and
+    /// kept beside <see cref="HopperFolderDefault"/> because it is the same kind of decision: a plant folder the owner
+    /// changes without a new release.
+    /// </remarks>
+    public const string LuggerFolderDefault = ImagesRootDefault + @"\Waitlist\lugger";
+
     /// <summary>The sub-folder beside the pictures that a replaced picture is archived into.</summary>
     public const string ArchiveFolderName = "Archive";
 

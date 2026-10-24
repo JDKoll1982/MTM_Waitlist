@@ -76,7 +76,8 @@ public static class MockServiceRegistrationExtensions
         // service. There is no credential to supply (T147).
         services.AddSingleton<IMockServiceRefreshClient>(provider => new MockServiceRefreshClient(
             httpClient: null,
-            provider.GetService<IConfiguration>()));
+            provider.GetService<IConfiguration>(),
+            provider.GetService<IPersonIdentity>()));
 
         return services;
     }

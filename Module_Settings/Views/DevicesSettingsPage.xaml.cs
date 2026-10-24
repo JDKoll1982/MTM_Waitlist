@@ -29,6 +29,7 @@ public sealed partial class DevicesSettingsPage : Page
     {
         base.OnNavigatedTo(e);
         _ = ViewModel.ComputerManagement.LoadAsync();
+        SettingsSectionNavigator.BringIntoView(this, e.Parameter);
     }
 
     private async void AddComputer_Click(object sender, RoutedEventArgs e)

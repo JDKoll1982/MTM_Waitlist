@@ -157,6 +157,45 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
     }
 
     /// <inheritdoc />
+    public async Task<string> GetLuggerFolderPathAsync()
+    {
+        try
+        {
+            var cacheKey = ConfigSettingKeys.ImageStorageLuggerFolderPath;
+
+            if (_cache.TryGetValue(cacheKey, out var cached) && cached.IsValid())
+            {
+                _logger.LogDebug("Using cached lugger picture folder: {Source}", cached.Source);
+                return (string)cached.Value;
+            }
+
+            // The same plant-wide override the hopper folder has: where the lugger artwork lives is the owner's to
+            // change without a new release, and it applies to every computer rather than to the one that set it.
+            var dbValue = await _configService.GetSettingValueAsync(
+                ConfigSettingKeys.ImageStorageLuggerFolderPath, "all_users");
+
+            if (dbValue != null && !string.IsNullOrWhiteSpace(dbValue.SettingValue))
+            {
+                _logger.LogInformation("Using database override for the lugger picture folder: {Path}",
+                                     dbValue.SettingValue);
+                CacheValue(cacheKey, dbValue.SettingValue, "database");
+                return dbValue.SettingValue;
+            }
+
+            var appsettingsValue = _appsettingsOptions.Value.LuggerFolderPath;
+            _logger.LogInformation("Using the shipped default for the lugger picture folder: {Path}", appsettingsValue);
+            CacheValue(cacheKey, appsettingsValue, "default");
+            return appsettingsValue;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to resolve the lugger picture folder configuration");
+            throw new InvalidOperationException(
+                "Failed to resolve the lugger picture folder configuration", ex);
+        }
+    }
+
+    /// <inheritdoc />
     public async Task<string> GetImageCacheFolderPathAsync()
     {
         try

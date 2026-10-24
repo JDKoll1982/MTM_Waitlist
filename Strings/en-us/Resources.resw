@@ -2476,6 +2476,21 @@
   <data name="Settings_StoragePaths_HopperFolderNeeded.Text" xml:space="preserve">
     <value>A hopper picture folder is needed before this can be saved.</value>
   </data>
+  <data name="Settings_StoragePaths_LuggerFolder.Label" xml:space="preserve">
+    <value>Lugger picture folder</value>
+  </data>
+  <data name="Settings_StoragePaths_LuggerFolder.Hint" xml:space="preserve">
+    <value>One picture per lugger, named after its place in the arrangement: Lugger01 to Lugger09, then Lugger10 to Lugger99, with a .png, .jpg, .jpeg, .bmp or .gif extension. There is no Lugger100. A relative path is read under the picture folder.</value>
+  </data>
+  <data name="Settings_StoragePaths_LuggerFolderBrowse.Text" xml:space="preserve">
+    <value>Browse…</value>
+  </data>
+  <data name="Settings_StoragePaths_LuggerFolderBrowse.Name" xml:space="preserve">
+    <value>Browse for the lugger picture folder</value>
+  </data>
+  <data name="Settings_StoragePaths_LuggerFolderNeeded.Text" xml:space="preserve">
+    <value>A lugger picture folder is needed before this can be saved.</value>
+  </data>
   <data name="Settings_StoragePaths_ArchiveKeepDays.Label" xml:space="preserve">
     <value>Keep a replaced picture for (days)</value>
   </data>

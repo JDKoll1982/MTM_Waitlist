@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Settings.ViewModels;
@@ -22,6 +23,12 @@ public sealed partial class DiagnosticsSettingsPage : Page
         ViewModel = App.GetService<SettingsViewModel>();
         InitializeComponent();
         AppLog.Info("DiagnosticsSettingsPage", "Constructor completed.");
+    }
+
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        SettingsSectionNavigator.BringIntoView(this, e.Parameter);
     }
 
     /// <summary>Stores how much the log store keeps, for every computer.</summary>

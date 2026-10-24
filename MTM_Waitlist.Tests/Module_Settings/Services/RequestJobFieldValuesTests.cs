@@ -85,7 +85,7 @@ public sealed class RequestJobFieldValuesTests
         // derivation answers nothing whatever else it holds.
         var jobWithEverythingButADerivation = RequestJobPartAvailability.All with
         {
-            ScrapType = "Steel Offal",
+            ScrapType = "Steel",
             CoilPartNumber = "COIL-1",
         };
 

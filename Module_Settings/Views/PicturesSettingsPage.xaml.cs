@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Settings.ViewModels;
@@ -23,6 +24,12 @@ public sealed partial class PicturesSettingsPage : Page
         ViewModel = App.GetService<SettingsViewModel>();
         InitializeComponent();
         AppLog.Info("PicturesSettingsPage", "Constructor completed.");
+    }
+
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        SettingsSectionNavigator.BringIntoView(this, e.Parameter);
     }
 
     private async void RequestItemImages_Click(object sender, RoutedEventArgs e)

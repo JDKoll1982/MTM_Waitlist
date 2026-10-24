@@ -1,5 +1,8 @@
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Module_Shared.Helpers;
+
+using Microsoft.UI.Xaml.Media;
 
 namespace MTM_Waitlist.Module_Settings.Models;
 
@@ -29,6 +32,40 @@ public sealed class LuggerArrangementRow
 
     /// <summary>Where the lugger sits in the arrangement's own order (FR-001).</summary>
     public int DisplayPosition { get; init; }
+
+    /// <summary>
+    /// The picture drawn behind this card, or <see langword="null"/> when the lugger has none.
+    /// </summary>
+    /// <remarks>
+    /// The file is named after <see cref="DisplayPosition"/> rather than after <see cref="Name"/>, so renaming a
+    /// lugger does not lose its picture. A null draws the application's no-picture image, which is a different thing
+    /// from drawing nothing: the card says there is no picture rather than looking unfinished.
+    /// </remarks>
+    public string? ImagePath { get; init; }
+
+    /// <summary>
+    /// The width of the picture behind the card, in pixels, or <see langword="null"/> when it could not be read.
+    /// </summary>
+    /// <remarks>
+    /// Carried so the card can <b>read</b> the picture at half its own size rather than decode it whole and draw it
+    /// smaller: a 1024-pixel artwork becomes a 512-pixel bitmap, which is a quarter of the memory.
+    /// </remarks>
+    public int? ImagePixelWidth { get; init; }
+
+    /// <summary>
+    /// The picture the card draws behind its words, resolved once: the lugger's own file when it has one, and the
+    /// application's no-picture image when it does not.
+    /// </summary>
+    /// <remarks>
+    /// Resolved here rather than in the markup so the card goes through <see cref="PictureSource"/> like every other
+    /// picture in the application, which is what makes the absent case draw the shared no-picture image instead of a
+    /// blank tile.
+    /// </remarks>
+    public ImageSource BackgroundImage => PictureSource.FromPath(ImagePath, BackgroundDecodePixelWidth);
+
+    /// <summary>The width the card's picture is read at: half the picture's own width, as the card shows it at half size.</summary>
+    private int BackgroundDecodePixelWidth =>
+        ImagePixelWidth is > 1 ? Math.Max(1, ImagePixelWidth.Value / 2) : 0;
 
     /// <summary>The scrap types this lugger takes, as they are spelled, in that type's try order.</summary>
     public IReadOnlyList<string> ScrapTypes { get; init; } = Array.Empty<string>();

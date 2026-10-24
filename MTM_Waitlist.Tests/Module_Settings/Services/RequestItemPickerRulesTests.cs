@@ -91,7 +91,7 @@ public sealed class RequestItemPickerRulesTests
         var scrap = RequestItemCatalog.FindById("pickup-scrap")!;
 
         Assert.IsTrue(
-            RequestItemPickerRules.IsVisible(scrap, WithScrap("Steel Offal")),
+            RequestItemPickerRules.IsVisible(scrap, WithScrap("Steel")),
             "A real scrap type means a decision was made and something has to be collected.");
         Assert.IsFalse(
             RequestItemPickerRules.IsVisible(scrap, WithScrap(ScrapDecisionRules.NoScrap)),
@@ -259,7 +259,7 @@ public sealed class RequestItemPickerRulesTests
 
         AssertVisible(
             "coil only, a real scrap type",
-            WithScrap("Steel Offal") with { HasCoil = true, HasFlatstock = false, HasDie = false, HasComponent = false, HasDunnage = false },
+            WithScrap("Steel") with { HasCoil = true, HasFlatstock = false, HasDie = false, HasComponent = false, HasDunnage = false },
             [
                 .. jobIndependent,
                 .. jobProduct,
@@ -309,7 +309,7 @@ public sealed class RequestItemPickerRulesTests
 
         AssertVisible(
             "everything at once, a real scrap type and all four kinds of returning work",
-            WithScrap("Steel Offal") with
+            WithScrap("Steel") with
             {
                 HasFinishedGoodsToReturn = true,
                 HasNonconformingStockToReturn = true,
@@ -410,12 +410,12 @@ public sealed class RequestItemPickerRulesTests
 
     private static IEnumerable<RequestJobPartAvailability> EightConfigurations()
     {
-        yield return WithScrap("Steel Offal") with { HasCoil = true, HasFlatstock = false, HasDie = false, HasComponent = false, HasDunnage = false };
+        yield return WithScrap("Steel") with { HasCoil = true, HasFlatstock = false, HasDie = false, HasComponent = false, HasDunnage = false };
         yield return WithScrap(null) with { HasCoil = false, HasFlatstock = true, HasDie = false, HasComponent = false, HasDunnage = false };
         yield return WithScrap(null) with { HasCoil = false, HasFlatstock = false, HasDie = true, HasComponent = false, HasDunnage = false };
         yield return WithScrap(null) with { HasCoil = false, HasFlatstock = false, HasDie = false, HasComponent = true, HasDunnage = false };
         yield return WithScrap(null) with { HasCoil = false, HasFlatstock = false, HasDie = false, HasComponent = false, HasDunnage = true };
-        yield return WithScrap("Steel Offal");
+        yield return WithScrap("Steel");
         yield return WithScrap(null) with { HasActiveJob = true, HasCoil = false, HasFlatstock = false, HasDie = false, HasComponent = false, HasDunnage = false };
         yield return RequestJobPartAvailability.None;
     }

@@ -200,7 +200,7 @@ public sealed class WaitlistRequestTitlesTests
         JobPartNumber = "PART-9004",
         CoilPartNumber = "MMC0001000",
         FlatstockPartNumber = "MMF0001154",
-        ScrapType = "Steel Offal",
+        ScrapType = "Steel",
     };
 
     /// <summary>A job holding a component, which is all the component Items need.</summary>
@@ -371,7 +371,7 @@ public sealed class WaitlistRequestTitlesTests
             WaitlistRequestTitles.ResolveContext(request, MaterialJob()));
 
         Assert.IsTrue(result.IsResolved);
-        Assert.AreEqual("Steel Offal", result.Text);
+        Assert.AreEqual("Steel", result.Text);
     }
 
     [TestMethod]

@@ -54,7 +54,7 @@ public sealed class ActiveJobSeedRoundTripTests
     /// <summary>Coil only: an <c>MMC</c> subordinate with a real scrap type.</summary>
     private const string CoilOnlySubordinateJson =
         """
-        [{"Category":"Coil","PartNumber":"MMC0001000","Description":"Coil 0.062 x 48 wide","Location":"A-01-01","OnHandQuantity":1200.50,"User8":"","SelectedScrapType":"Steel Offal","IsLowStock":false}]
+        [{"Category":"Coil","PartNumber":"MMC0001000","Description":"Coil 0.062 x 48 wide","Location":"A-01-01","OnHandQuantity":1200.50,"User8":"","SelectedScrapType":"Steel","IsLowStock":false}]
         """;
 
     /// <summary>Flatstock only: an <c>MMF</c> subordinate stored with the Category 'Component', deliberately.</summary>

@@ -48,6 +48,14 @@ public sealed class ImageStorageOptions
     public string HopperFolderPath { get; init; } = ConfigSettingKeys.ImageStorageHopperFolderPathDefault;
 
     /// <summary>
+    /// The folder the lugger pictures sit in, one file per lugger named after its place in the arrangement.
+    /// Default: the share's own <c>Images\Waitlist\lugger</c> folder
+    /// (<see cref="AppStoragePaths.LuggerFolderDefault"/>). A plant-wide setting like the picture folder, and this is
+    /// the fallback a plant that names no folder is left with.
+    /// </summary>
+    public string LuggerFolderPath { get; init; } = ConfigSettingKeys.ImageStorageLuggerFolderPathDefault;
+
+    /// <summary>
     /// The folder on this computer that every picture is mirrored into at startup.
     /// Default: %LOCALAPPDATA%\MTM_Waitlist\ImageCache
     /// Can be overridden by IT Department or Developer through the database (config_settings_values).

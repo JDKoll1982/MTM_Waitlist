@@ -47,6 +47,17 @@ public interface IImageStorageConfigurationResolver
     Task<string> GetHopperFolderPathAsync();
 
     /// <summary>
+    /// Gets the effective folder holding the lugger pictures, with database override support.
+    /// Resolution order:
+    /// 1. Database override from config_settings_values (<c>image_storage.lugger_folder_path</c>)
+    /// 2. appsettings.json ImageStorage.LuggerFolderPath
+    /// 3. Hard-coded default from <c>ConfigSettingKeys.ImageStorageLuggerFolderPathDefault</c>
+    /// </summary>
+    /// <returns>The effective lugger picture folder, absolute or relative to the picture folder.</returns>
+    /// <exception cref="InvalidOperationException">If configuration cannot be resolved</exception>
+    Task<string> GetLuggerFolderPathAsync();
+
+    /// <summary>
     /// Gets the effective local picture cache folder with database override support.
     /// Resolution order:
     /// 1. Database override from config_settings_values (if set and not null)

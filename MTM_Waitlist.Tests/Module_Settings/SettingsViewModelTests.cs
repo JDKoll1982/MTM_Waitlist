@@ -758,7 +758,7 @@ public sealed class SettingsViewModelTests
     /// one action.
     /// </summary>
     [TestMethod]
-    public void ViewModel_SettingsViewModelTests_SavingTheStorageFoldersStoresAllFourValuesForEveryUser()
+    public void ViewModel_SettingsViewModelTests_SavingTheStorageFoldersStoresAllFiveValuesForEveryUser()
     {
         var configuration = new FakeConfigSettingsValueService();
         var viewModel = BuildViewModel(
@@ -770,6 +770,7 @@ public sealed class SettingsViewModelTests
         viewModel.PictureFolderInput = @"\\share\pictures";
         viewModel.DunnageRootInput = @"\\share\dunnage";
         viewModel.HopperFolderInput = ConfigSettingKeys.ImageStorageHopperFolderPathDefault;
+        viewModel.LuggerFolderInput = ConfigSettingKeys.ImageStorageLuggerFolderPathDefault;
         viewModel.ArchiveKeepDaysInput = 90;
         viewModel.SaveStoragePathsCommand.Execute(null);
 
@@ -784,13 +785,17 @@ public sealed class SettingsViewModelTests
             saved[ConfigSettingKeys.ImageStorageHopperFolderPath].SettingValue,
             "the hopper picture folder is held once for the plant, so the card and the wizard read the same artwork (FR-078)");
         Assert.AreEqual(90L, saved[ConfigSettingKeys.ImageStorageArchiveKeepDays].SettingValueInt);
+        Assert.AreEqual(
+            ConfigSettingKeys.ImageStorageLuggerFolderPathDefault,
+            saved[ConfigSettingKeys.ImageStorageLuggerFolderPath].SettingValue,
+            "the lugger picture folder is held once for the plant, so every computer draws the same lugger artwork");
         Assert.IsTrue(
             saved.Values.All(value => value.ScopeType == "all_users" && value.ScopeKey == "all_users"),
             "A person-scoped row would leave every other machine unchanged.");
         Assert.AreEqual(
-            4,
+            5,
             saved.Count,
-            "Four values and no more: the key-files folder was withdrawn with remember-me, so nothing writes it.");
+            "Five values and no more: the key-files folder was withdrawn with remember-me, so nothing writes it.");
     }
 
     /// <summary>

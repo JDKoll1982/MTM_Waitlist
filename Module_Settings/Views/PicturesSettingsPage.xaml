@@ -347,7 +347,43 @@
                     </StackPanel>
                 </Grid>
 
+                <!-- The lugger pictures. One file per lugger, named after the lugger's place in the
+                     arrangement rather than after its name, so renaming a lugger keeps its picture.
+                     The row sits beside the hopper folder because it is the same kind of decision:
+                     a plant folder the owner sets once and every computer reads. -->
                 <Grid Grid.Row="3" Style="{StaticResource SettingsFormRowStyle}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Spacing="2">
+                        <TextBlock
+                            Style="{StaticResource SettingsRowTitleStyle}"
+                            Text="{x:Bind ViewModel.StoragePathsLuggerFolderLabel}" />
+                        <TextBlock
+                            Style="{StaticResource SettingsDescriptionStyle}"
+                            Text="{x:Bind ViewModel.StoragePathsLuggerFolderHint}" />
+                    </StackPanel>
+                    <StackPanel
+                        Grid.Column="1"
+                        Orientation="Horizontal"
+                        Spacing="8">
+                        <TextBox
+                            AutomationProperties.AutomationId="SettingsPage_StoragePaths_LuggerFolderBox"
+                            AutomationProperties.Name="{x:Bind ViewModel.StoragePathsLuggerFolderLabel}"
+                            Style="{StaticResource SettingsFolderBoxStyle}"
+                            Text="{x:Bind ViewModel.LuggerFolderInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button
+                            AutomationProperties.AutomationId="SettingsPage_StoragePaths_LuggerFolderBrowseButton"
+                            AutomationProperties.Name="{x:Bind ViewModel.StoragePathsLuggerFolderBrowseName}"
+                            Style="{StaticResource SettingsFolderButtonStyle}"
+                            Command="{x:Bind ViewModel.BrowseLuggerFolderCommand}"
+                            Content="{x:Bind ViewModel.StoragePathsLuggerFolderBrowseLabel}"
+                            Visibility="{x:Bind ViewModel.CanBrowseFolders, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    </StackPanel>
+                </Grid>
+
+                <Grid Grid.Row="4" Style="{StaticResource SettingsFormRowStyle}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />

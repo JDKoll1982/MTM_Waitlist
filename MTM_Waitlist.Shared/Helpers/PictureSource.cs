@@ -51,6 +51,45 @@ public static class PictureSource
     }
 
     /// <summary>
+    /// Builds the source for <paramref name="path"/>, <b>read</b> at most <paramref name="decodePixelWidth"/> pixels
+    /// wide.
+    /// </summary>
+    /// <param name="path">The picture's path, as <see cref="FromPath(string?)"/> takes it.</param>
+    /// <param name="decodePixelWidth">
+    /// The width the bitmap is decoded at. A picture drawn small is read small, so a 1024-pixel artwork shown at
+    /// half size is decoded at 512 pixels rather than decoded whole and scaled to fit — which costs a quarter of the
+    /// memory and is what "half the size" means for the image being read rather than for the control drawing it.
+    /// Zero or less leaves the picture at its own size.
+    /// </param>
+    /// <returns>An <see cref="ImageSource"/> that is always safe to assign to a control.</returns>
+    public static ImageSource FromPath(string? path, int decodePixelWidth)
+    {
+        var file = ImagePicturePolicy.ResolveUsableFile(path);
+        if (file is not null)
+        {
+            try
+            {
+                var bitmap = new BitmapImage();
+                if (decodePixelWidth > 0)
+                {
+                    // Set before the URI: DecodePixelWidth must be in place before the bitmap starts loading, or
+                    // it is ignored and the picture is decoded whole.
+                    bitmap.DecodePixelWidth = decodePixelWidth;
+                }
+
+                bitmap.UriSource = new Uri(file);
+                return bitmap;
+            }
+            catch (UriFormatException)
+            {
+                // Fall through to the placeholder, as the path-only overload does.
+            }
+        }
+
+        return FromPlaceholder(decodePixelWidth);
+    }
+
+    /// <summary>
     /// The placeholder source on its own, for a surface that has no path to try — for example a card row that was
     /// never given a picture at all.
     /// </summary>
@@ -64,5 +103,28 @@ public static class PictureSource
         return file is not null
             ? new BitmapImage(new Uri(file))
             : new BitmapImage(new Uri(ImagePicturePolicy.NoImagePackUri));
+    }
+
+    /// <summary>
+    /// The placeholder source, read at most <paramref name="decodePixelWidth"/> pixels wide.
+    /// </summary>
+    /// <param name="decodePixelWidth">The width to decode at; zero or less leaves it at its own size.</param>
+    public static ImageSource FromPlaceholder(int decodePixelWidth)
+    {
+        var file = ImagePicturePolicy.ResolveExistingFile(ImagePicturePolicy.NoImagePath);
+
+        if (file is not null)
+        {
+            var bitmap = new BitmapImage();
+            if (decodePixelWidth > 0)
+            {
+                bitmap.DecodePixelWidth = decodePixelWidth;
+            }
+
+            bitmap.UriSource = new Uri(file);
+            return bitmap;
+        }
+
+        return new BitmapImage(new Uri(ImagePicturePolicy.NoImagePackUri));
     }
 }

@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
+using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.ViewModels;
@@ -56,13 +57,11 @@ public sealed partial class LuggerArrangementPage : Page
 
         ViewModel.SelectLugger(lugger);
 
-        var editor = new LuggerEditorDialog(ViewModel)
-        {
-            Title = lugger.Name,
-            XamlRoot = XamlRoot,
-        };
+        var editor = new LuggerEditorDialog(ViewModel);
 
-        await editor.ShowAsync();
+        // Its own window, owned by the application's, so it is centred on the window and stays centred when that
+        // window is resized.
+        await editor.ShowWindowedAsync(lugger.Name, App.GetService<IAppWindowProvider>().MainWindow);
     }
 
     /// <summary>Asks for the lugger's new name and renames it when the answer is accepted.</summary>
