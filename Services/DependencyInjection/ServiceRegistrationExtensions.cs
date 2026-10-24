@@ -316,6 +316,12 @@ public static partial class ServiceRegistrationExtensions
                 MTM_Waitlist.Module_Shared.Helpers.ImageCachePaths.SetCacheRoot(
                     await storageConfiguration.GetImageCacheFolderPathAsync().ConfigureAwait(false));
 
+                // Adopted here, beside the other plant-wide picture settings, so the artwork a surface draws for
+                // "no picture" is the plant's own from the first card of the run rather than from the first visit
+                // to the settings screen (FR-040).
+                MTM_Waitlist.Module_Shared.Helpers.ImagePicturePolicy.SetNoImageOverride(
+                    await storageConfiguration.GetNoImagePathAsync().ConfigureAwait(false));
+
                 if (await storageConfiguration.GetImageCacheEnabledAsync().ConfigureAwait(false) is false)
                 {
                     // No sources means nothing is copied and nothing is removed: a machine with caching switched

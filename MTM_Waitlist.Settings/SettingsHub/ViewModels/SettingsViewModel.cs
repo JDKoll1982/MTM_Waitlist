@@ -383,6 +383,22 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     } = string.Empty;
 
     /// <summary>
+    /// What the no-picture image box holds: the picture every surface draws where it has no picture of its own.
+    /// </summary>
+    /// <remarks>
+    /// One picture rather than a folder, unlike the rows above it, because there is only ever one answer: an item,
+    /// a work center and a lugger with no picture all draw the same thing, and that sameness is what teaches a
+    /// person to read it as "no picture". A path that names no file is stored as it is typed and reported, rather
+    /// than refused, because the artwork usually lives on the same share as the folders above: a share that is down
+    /// for a minute must not refuse a save the person cannot complete later either.
+    /// </remarks>
+    [ObservableProperty]
+    public partial string NoImagePathInput
+    {
+        get; set;
+    } = ConfigSettingKeys.ImageStorageNoImagePathDefault;
+
+    /// <summary>
     /// How many days a replaced picture is kept before it is cleaned up (FR-037).
     /// </summary>
     /// <remarks>
@@ -1050,6 +1066,20 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     public string StoragePathsLuggerFolderBrowseName =>
         "Settings_StoragePaths_LuggerFolderBrowse.Name".GetLocalized();
 
+    /// <summary>The label on the no-picture-image box.</summary>
+    public string StoragePathsNoImagePathLabel => "Settings_StoragePaths_NoImagePath.Label".GetLocalized();
+
+    /// <summary>The sentence under the no-picture-image box, which says where it is drawn.</summary>
+    public string StoragePathsNoImagePathHint => "Settings_StoragePaths_NoImagePath.Hint".GetLocalized();
+
+    /// <summary>The label on the button that picks the no-picture image.</summary>
+    public string StoragePathsNoImagePathBrowseLabel =>
+        "Settings_StoragePaths_NoImagePathBrowse.Text".GetLocalized();
+
+    /// <summary>What a screen reader announces for that button.</summary>
+    public string StoragePathsNoImagePathBrowseName =>
+        "Settings_StoragePaths_NoImagePathBrowse.Name".GetLocalized();
+
     /// <summary>The label on the retention-period box.</summary>
     public string StoragePathsArchiveKeepDaysLabel => "Settings_StoragePaths_ArchiveKeepDays.Label".GetLocalized();
 
@@ -1078,7 +1108,11 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
             "retention",
             "archive",
             "keep days",
-            "replaced picture");
+            "replaced picture",
+            "no picture",
+            "no image",
+            "placeholder",
+            "default picture");
 
     /// <summary>
     /// The picture cache's settings.
@@ -2310,6 +2344,15 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 .GetLuggerFolderPathAsync()
                 .ConfigureAwait(true);
 
+            NoImagePathInput = await _imageStorageConfigurationResolver
+                .GetNoImagePathAsync()
+                .ConfigureAwait(true);
+
+            // Adopted here as well as at startup: a host whose launch steps did not run the picture cache still gets
+            // the plant's artwork as soon as anyone opens this screen, rather than the shipped one for the rest of
+            // the run.
+            ImagePicturePolicy.SetNoImageOverride(NoImagePathInput);
+
             ArchiveKeepDaysInput = await _imageStorageConfigurationResolver
                 .GetArchiveKeepDaysAsync()
                 .ConfigureAwait(true);
@@ -2348,6 +2391,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         var dunnageRoot = DunnageRootInput?.Trim() ?? string.Empty;
         var hopperFolder = HopperFolderInput?.Trim() ?? string.Empty;
         var luggerFolder = LuggerFolderInput?.Trim() ?? string.Empty;
+        var noImagePath = NoImagePathInput?.Trim() ?? string.Empty;
         var keepDays = (int)Math.Round(ArchiveKeepDaysInput, MidpointRounding.AwayFromZero);
 
         if (pictureFolder.Length == 0 || dunnageRoot.Length == 0)
@@ -2406,6 +2450,14 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 luggerFolder,
                 boolean: null).ConfigureAwait(true);
 
+            // Empty is a legitimate answer — it means the artwork that ships with the application — so it is stored
+            // as the shipped path rather than as a blank the resolver would have to interpret.
+            await SaveAppWideSettingAsync(
+                ConfigSettingKeys.ImageStorageNoImagePath,
+                "text",
+                noImagePath.Length == 0 ? ConfigSettingKeys.ImageStorageNoImagePathDefault : noImagePath,
+                boolean: null).ConfigureAwait(true);
+
             await SaveAppWideSettingAsync(
                 ConfigSettingKeys.ImageStorageArchiveKeepDays,
                 "int",
@@ -2414,7 +2466,18 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 integer: keepDays).ConfigureAwait(true);
 
             PictureFolderPath = pictureFolder;
-            StoragePathsStatusMessage = "Settings_StoragePaths_Saved.Text".GetLocalized();
+            NoImagePathInput = noImagePath.Length == 0
+                ? ConfigSettingKeys.ImageStorageNoImagePathDefault
+                : noImagePath;
+
+            // Adopted at once rather than at the next start, so the change the person just made is the change they
+            // see when they walk to the next screen.
+            ImagePicturePolicy.SetNoImageOverride(NoImagePathInput);
+
+            StoragePathsStatusMessage = noImagePath.Length == 0
+                || ImagePicturePolicy.ResolveExistingFile(noImagePath) is not null
+                ? "Settings_StoragePaths_Saved.Text".GetLocalized()
+                : "Settings_StoragePaths_NoImageMissing.Text".GetLocalized();
         }
         catch (Exception ex)
         {

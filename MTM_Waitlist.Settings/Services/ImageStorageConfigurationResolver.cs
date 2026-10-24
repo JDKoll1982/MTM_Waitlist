@@ -196,6 +196,45 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
     }
 
     /// <inheritdoc />
+    public async Task<string> GetNoImagePathAsync()
+    {
+        try
+        {
+            var cacheKey = ConfigSettingKeys.ImageStorageNoImagePath;
+
+            if (_cache.TryGetValue(cacheKey, out var cached) && cached.IsValid())
+            {
+                _logger.LogDebug("Using cached no-picture artwork: {Source}", cached.Source);
+                return (string)cached.Value;
+            }
+
+            // A plant-wide override for the same reason the folders have one: what stands in for a missing picture
+            // is a house style, and a house style set on one computer would be a different face on every monitor.
+            var dbValue = await _configService.GetSettingValueAsync(
+                ConfigSettingKeys.ImageStorageNoImagePath, "all_users");
+
+            if (dbValue != null && !string.IsNullOrWhiteSpace(dbValue.SettingValue))
+            {
+                _logger.LogInformation("Using database override for the no-picture artwork: {Path}",
+                                     dbValue.SettingValue);
+                CacheValue(cacheKey, dbValue.SettingValue, "database");
+                return dbValue.SettingValue;
+            }
+
+            var appsettingsValue = _appsettingsOptions.Value.NoImagePath;
+            _logger.LogInformation("Using the shipped default for the no-picture artwork: {Path}", appsettingsValue);
+            CacheValue(cacheKey, appsettingsValue, "default");
+            return appsettingsValue;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to resolve the no-picture artwork configuration");
+            throw new InvalidOperationException(
+                "Failed to resolve the no-picture artwork configuration", ex);
+        }
+    }
+
+    /// <inheritdoc />
     public async Task<string> GetImageCacheFolderPathAsync()
     {
         try
@@ -405,6 +444,7 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
             var maxFileSize = await GetMaxFileSizeBytesAsync();
             var enableArchiveVersioning = await GetEnableArchiveVersioningAsync();
             var archiveKeepDays = await GetArchiveKeepDaysAsync();
+            var noImagePath = await GetNoImagePathAsync();
 
             var effectiveOptions = new ImageStorageOptions
             {
@@ -415,7 +455,8 @@ public sealed class ImageStorageConfigurationResolver : IImageStorageConfigurati
                 AllowedExtensions = _appsettingsOptions.Value.AllowedExtensions,
                 RequireSquareAspectRatio = _appsettingsOptions.Value.RequireSquareAspectRatio,
                 EnableArchiveVersioning = enableArchiveVersioning,
-                ArchiveKeepDays = archiveKeepDays
+                ArchiveKeepDays = archiveKeepDays,
+                NoImagePath = noImagePath
             };
 
             effectiveOptions.Validate();

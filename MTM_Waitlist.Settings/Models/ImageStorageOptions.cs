@@ -56,6 +56,14 @@ public sealed class ImageStorageOptions
     public string LuggerFolderPath { get; init; } = ConfigSettingKeys.ImageStorageLuggerFolderPathDefault;
 
     /// <summary>
+    /// The picture every surface draws where it has no picture of its own.
+    /// Default: the shipped artwork (<see cref="ConfigSettingKeys.ImageStorageNoImagePathDefault"/>). A plant-wide
+    /// setting, so the same "no picture" artwork is read on every computer rather than only on the one that chose
+    /// it.
+    /// </summary>
+    public string NoImagePath { get; init; } = ConfigSettingKeys.ImageStorageNoImagePathDefault;
+
+    /// <summary>
     /// The folder on this computer that every picture is mirrored into at startup.
     /// Default: %LOCALAPPDATA%\MTM_Waitlist\ImageCache
     /// Can be overridden by IT Department or Developer through the database (config_settings_values).

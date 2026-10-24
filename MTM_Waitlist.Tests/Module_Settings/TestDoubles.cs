@@ -86,6 +86,10 @@ internal sealed class FakeImageStorageConfigurationResolver : IImageStorageConfi
     public string LuggerFolderPath { get; set; } =
         MTM_Waitlist.Module_Settings.Models.ConfigSettingKeys.ImageStorageLuggerFolderPathDefault;
 
+    /// <summary>The picture every surface draws where it has none of its own.</summary>
+    public string NoImagePath { get; set; } =
+        MTM_Waitlist.Module_Settings.Models.ConfigSettingKeys.ImageStorageNoImagePathDefault;
+
     public string CacheFolderPath { get; set; } = Path.Combine(Path.GetTempPath(), "mtm-image-tests", "cache");
 
     public bool CacheEnabled { get; set; } = true;
@@ -105,6 +109,8 @@ internal sealed class FakeImageStorageConfigurationResolver : IImageStorageConfi
     public Task<string> GetHopperFolderPathAsync() => Task.FromResult(HopperFolderPath);
 
     public Task<string> GetLuggerFolderPathAsync() => Task.FromResult(LuggerFolderPath);
+
+    public Task<string> GetNoImagePathAsync() => Task.FromResult(NoImagePath);
 
     public Task<string> GetImageCacheFolderPathAsync() => Task.FromResult(CacheFolderPath);
 

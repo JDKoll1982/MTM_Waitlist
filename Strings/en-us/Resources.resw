@@ -2378,7 +2378,7 @@
     <value>Pictures</value>
   </data>
   <data name="Settings_Images_Description.Text" xml:space="preserve">
-    <value>The pictures the application shows, where the picture files are kept, and the copies made on this computer.</value>
+    <value>Which pictures the app shows, where they are kept, and the copies on this computer.</value>
   </data>
   <data name="Settings_Images_Browse.Text" xml:space="preserve">
     <value>Browse…</value>
@@ -2387,13 +2387,13 @@
     <value>Pictures the app shows</value>
   </data>
   <data name="Settings_Images_AssignmentsDescription.Text" xml:space="preserve">
-    <value>Which picture an item or a work center resolves. An item with no picture of its own shows its category's picture.</value>
+    <value>Which picture an item or work center shows, and what it shows when it has none.</value>
   </data>
   <data name="Settings_Images_ItemPicturesTitle.Text" xml:space="preserve">
     <value>Item pictures</value>
   </data>
   <data name="Settings_Images_ItemPicturesDescription.Text" xml:space="preserve">
-    <value>Manage the picture each item uses across the request screens and the waitlist.</value>
+    <value>The picture each item uses across the app.</value>
   </data>
   <data name="Settings_Images_ItemPicturesAction.Content" xml:space="preserve">
     <value>Manage items</value>
@@ -2402,7 +2402,7 @@
     <value>Work center pictures</value>
   </data>
   <data name="Settings_Images_WorkCenterPicturesDescription.Text" xml:space="preserve">
-    <value>Review and override the pictures used for active work-center selections and detail pages.</value>
+    <value>Pictures for work center selections and detail pages.</value>
   </data>
   <data name="Settings_Images_WorkCenterPicturesAction.Content" xml:space="preserve">
     <value>Manage work centers</value>
@@ -2414,34 +2414,34 @@
     <value>Where the picture files are kept</value>
   </data>
   <data name="Settings_Images_FoldersDescription.Text" xml:space="preserve">
-    <value>The folders every picture is read from, and how long a replaced picture is kept. A hopper folder given as a relative path is read under the picture folder.</value>
+    <value>Where every picture is read from, and how long a replaced one is kept.</value>
   </data>
   <data name="Settings_Images_PictureFolderDescription.Text" xml:space="preserve">
-    <value>The single folder every picture sits under on the share.</value>
+    <value>The folder every picture sits under.</value>
   </data>
   <data name="Settings_Images_DunnageRootDescription.Text" xml:space="preserve">
-    <value>The root the dunnage pictures are read from, one folder per dunnage type and part beneath it.</value>
+    <value>Where the dunnage pictures live, one folder per type and part.</value>
   </data>
   <data name="Settings_Images_KeepDaysDescription.Text" xml:space="preserve">
-    <value>How long a replaced picture is set aside before the cleanup removes it.</value>
+    <value>How long a replaced picture is kept before cleanup.</value>
   </data>
   <data name="Settings_Images_CacheTitle.Text" xml:space="preserve">
     <value>Copies on this computer</value>
   </data>
   <data name="Settings_Images_CacheDescription.Text" xml:space="preserve">
-    <value>Pictures are copied onto this computer when the application starts, so the waitlist draws them from local disk instead of reaching across the network for each one. A picture that has changed on the share is copied again, and a copy whose picture has gone is removed. Nothing else is touched.</value>
+    <value>Pictures are copied here when the app starts, so the waitlist reads them from local disk. Changed pictures are copied again; deleted ones are removed.</value>
   </data>
   <data name="Settings_Images_CacheToggleTitle.Text" xml:space="preserve">
     <value>Cache pictures on this computer</value>
   </data>
   <data name="Settings_Images_CacheToggleDescription.Text" xml:space="preserve">
-    <value>Applies to every computer, not just this one. Turned off, pictures are read from the network share.</value>
+    <value>Applies to every computer. Off, pictures are read from the share.</value>
   </data>
   <data name="Settings_Images_CacheFolderTitle.Text" xml:space="preserve">
     <value>Cache folder</value>
   </data>
   <data name="Settings_Images_CacheFolderDescription.Text" xml:space="preserve">
-    <value>Where the copies are kept. Each picture keeps the folder it has on the share, so the two trees read the same way.</value>
+    <value>Where the copies are kept, mirroring the share's folders.</value>
   </data>
   <data name="Settings_Images_CacheFolderSave.Content" xml:space="preserve">
     <value>Save</value>
@@ -2450,7 +2450,7 @@
     <value>Copy pictures now</value>
   </data>
   <data name="Settings_Images_CacheCopyDescription.Text" xml:space="preserve">
-    <value>Runs the same copy the application runs when it starts, without waiting for a restart.</value>
+    <value>Runs the same copy the app runs at startup, without a restart.</value>
   </data>
   <data name="Settings_Images_CacheCopyAction.Content" xml:space="preserve">
     <value>Copy now</value>
@@ -2465,7 +2465,7 @@
     <value>Hopper picture folder</value>
   </data>
   <data name="Settings_StoragePaths_HopperFolder.Hint" xml:space="preserve">
-    <value>The three hopper size pictures live here, one file per size named after it: Small, Medium and Large, with a .png, .jpg or .jpeg extension. A relative path is read under the picture folder.</value>
+    <value>One file per size — Small, Medium, Large — as .png, .jpg or .jpeg. A relative path is read under the picture folder.</value>
   </data>
   <data name="Settings_StoragePaths_HopperFolderBrowse.Text" xml:space="preserve">
     <value>Browse…</value>
@@ -2480,7 +2480,7 @@
     <value>Lugger picture folder</value>
   </data>
   <data name="Settings_StoragePaths_LuggerFolder.Hint" xml:space="preserve">
-    <value>One picture per lugger, named after its place in the arrangement: Lugger01 to Lugger09, then Lugger10 to Lugger99, with a .png, .jpg, .jpeg, .bmp or .gif extension. There is no Lugger100. A relative path is read under the picture folder.</value>
+    <value>One file per lugger, named Lugger01 to Lugger99, as .png, .jpg, .jpeg, .bmp or .gif. A relative path is read under the picture folder.</value>
   </data>
   <data name="Settings_StoragePaths_LuggerFolderBrowse.Text" xml:space="preserve">
     <value>Browse…</value>
@@ -2490,6 +2490,21 @@
   </data>
   <data name="Settings_StoragePaths_LuggerFolderNeeded.Text" xml:space="preserve">
     <value>A lugger picture folder is needed before this can be saved.</value>
+  </data>
+  <data name="Settings_StoragePaths_NoImagePath.Label" xml:space="preserve">
+    <value>No picture image</value>
+  </data>
+  <data name="Settings_StoragePaths_NoImagePath.Hint" xml:space="preserve">
+    <value>Drawn wherever an item, work center or lugger has no picture of its own.</value>
+  </data>
+  <data name="Settings_StoragePaths_NoImagePathBrowse.Text" xml:space="preserve">
+    <value>Browse…</value>
+  </data>
+  <data name="Settings_StoragePaths_NoImagePathBrowse.Name" xml:space="preserve">
+    <value>Browse for the no picture image</value>
+  </data>
+  <data name="Settings_StoragePaths_NoImageMissing.Text" xml:space="preserve">
+    <value>Storage settings saved. That image was not found, so the built-in no-picture image is drawn.</value>
   </data>
   <data name="Settings_StoragePaths_ArchiveKeepDays.Label" xml:space="preserve">
     <value>Keep a replaced picture for (days)</value>

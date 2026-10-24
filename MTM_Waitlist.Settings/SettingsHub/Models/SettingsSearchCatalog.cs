@@ -34,7 +34,7 @@ internal static class SettingsSearchCatalog
             "allotted minutes urgency deadline per item time limit allowed"),
 
         new("Picture folders", "Pictures", SettingsViewModel.PicturesSettingsRouteViewModelName, "SettingsPage_Images_FoldersCard",
-            "picture folder folders storage path share dunnage root hopper archive keep days"),
+            "picture folder folders storage path share dunnage root hopper lugger archive keep days no picture no image placeholder default artwork"),
         new("Item and work center pictures", "Pictures", SettingsViewModel.PicturesSettingsRouteViewModelName, "SettingsPage_Images_AssignmentsCard",
             "item picture pictures work centre center image manage assignments open part"),
         new("Copies on this computer", "Pictures", SettingsViewModel.PicturesSettingsRouteViewModelName, "SettingsPage_Images_CacheCard",

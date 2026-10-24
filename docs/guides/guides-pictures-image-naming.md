@@ -126,6 +126,24 @@ Rules specific to this folder:
   blank. Nothing is substituted, and nothing is logged as a fault.
 - These pictures are held to the picture rules in §5, like every other picture.
 
+### 3.2 The no-picture artwork — one file, not a folder
+
+Every surface that has no picture of its own draws the same picture, and the plant may choose which picture that is.
+It is one **file**, not a folder, because there is only ever one answer: an item, a work centre and a lugger with no
+picture all draw the same thing, and that sameness is what teaches a person to read it as "no picture".
+
+- The setting is **No picture image** on Settings → Pictures → *Where the picture files are kept*, stored as
+  `image_storage.no_image_path` for every computer. Empty means the artwork that ships with the application
+  (`Assets/Placeholders/default-no-image.png`), and an empty box is stored as that path rather than as a blank.
+- The **Browse** button beside the box opens a file dialog (`.png`, `.jpg`, `.jpeg`, `.bmp`, `.gif`), and the small
+  preview beside the box shows exactly what will be drawn — including the shipped artwork while the box names a file
+  that is not there.
+- **This file is exempt from §5.** It is drawn by existence alone, so a wide banner or a photograph is allowed; the
+  frames that draw it scale it to fit. A file that has gone missing is not an error: the shipped artwork is drawn
+  instead, so a share that is briefly unreachable does not leave every card blank.
+- The change takes effect as soon as it is saved, and from the first card of every later run; it does not require a
+  restart.
+
 ---
 
 ## 4. Dunnage pictures — the dunnage root
@@ -145,9 +163,9 @@ none). The root can be overridden for a machine by the `MTM_DUNNAGE_IMAGE_ROOT` 
 
 ## 5. The rules every picture must pass
 
-A file that fails any of these is treated as **no picture at all** — the application draws
-`Assets/Placeholders/default-no-image.png` and reports nothing. This is deliberate: a bad picture must not become
-a broken frame or a substituted value.
+A file that fails any of these is treated as **no picture at all** — the application draws the plant's no-picture
+artwork (§3.2), which is `Assets/Placeholders/default-no-image.png` unless the plant has chosen its own, and reports
+nothing. This is deliberate: a bad picture must not become a broken frame or a substituted value.
 
 | Rule | Value |
 | --- | --- |

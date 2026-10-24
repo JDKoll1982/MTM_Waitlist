@@ -754,11 +754,11 @@ public sealed class SettingsViewModelTests
     }
 
     /// <summary>
-    /// Both storage folders, the hopper picture folder and the retention period are stored for every computer in
-    /// one action.
+    /// Both storage folders, the hopper and lugger picture folders, the no-picture image and the retention period
+    /// are stored for every computer in one action.
     /// </summary>
     [TestMethod]
-    public void ViewModel_SettingsViewModelTests_SavingTheStorageFoldersStoresAllFiveValuesForEveryUser()
+    public void ViewModel_SettingsViewModelTests_SavingTheStorageFoldersStoresAllSixValuesForEveryUser()
     {
         var configuration = new FakeConfigSettingsValueService();
         var viewModel = BuildViewModel(
@@ -771,6 +771,7 @@ public sealed class SettingsViewModelTests
         viewModel.DunnageRootInput = @"\\share\dunnage";
         viewModel.HopperFolderInput = ConfigSettingKeys.ImageStorageHopperFolderPathDefault;
         viewModel.LuggerFolderInput = ConfigSettingKeys.ImageStorageLuggerFolderPathDefault;
+        viewModel.NoImagePathInput = @"\\share\pictures\no-picture.png";
         viewModel.ArchiveKeepDaysInput = 90;
         viewModel.SaveStoragePathsCommand.Execute(null);
 
@@ -789,13 +790,50 @@ public sealed class SettingsViewModelTests
             ConfigSettingKeys.ImageStorageLuggerFolderPathDefault,
             saved[ConfigSettingKeys.ImageStorageLuggerFolderPath].SettingValue,
             "the lugger picture folder is held once for the plant, so every computer draws the same lugger artwork");
+        Assert.AreEqual(
+            @"\\share\pictures\no-picture.png",
+            saved[ConfigSettingKeys.ImageStorageNoImagePath].SettingValue,
+            "the no-picture image is held once for the plant, so every computer draws the same thing for a missing picture");
         Assert.IsTrue(
             saved.Values.All(value => value.ScopeType == "all_users" && value.ScopeKey == "all_users"),
             "A person-scoped row would leave every other machine unchanged.");
         Assert.AreEqual(
-            5,
+            6,
             saved.Count,
-            "Five values and no more: the key-files folder was withdrawn with remember-me, so nothing writes it.");
+            "Six values and no more: the key-files folder was withdrawn with remember-me, so nothing writes it.");
+    }
+
+    /// <summary>
+    /// An empty no-picture box stores the shipped artwork rather than a blank, so a resolver never has to decide what
+    /// an empty picture path means.
+    /// </summary>
+    [TestMethod]
+    public void ViewModel_SettingsViewModelTests_AnEmptyNoPictureBoxStoresTheShippedArtwork()
+    {
+        var configuration = new FakeConfigSettingsValueService();
+        var viewModel = BuildViewModel(
+            new InMemoryScopedPreferenceStore(),
+            [PermissionKeys.SettingsStoragePaths],
+            configSettingsValueService: configuration,
+            imageStorageConfigurationResolver: new FakeImageStorageConfigurationResolver());
+
+        viewModel.PictureFolderInput = @"\\share\pictures";
+        viewModel.DunnageRootInput = @"\\share\dunnage";
+        viewModel.HopperFolderInput = ConfigSettingKeys.ImageStorageHopperFolderPathDefault;
+        viewModel.LuggerFolderInput = ConfigSettingKeys.ImageStorageLuggerFolderPathDefault;
+        viewModel.NoImagePathInput = "   ";
+        viewModel.ArchiveKeepDaysInput = 90;
+        viewModel.SaveStoragePathsCommand.Execute(null);
+
+        var saved = configuration.SavedValues.ToDictionary(value => value.SettingKey, StringComparer.Ordinal);
+        Assert.AreEqual(
+            ConfigSettingKeys.ImageStorageNoImagePathDefault,
+            saved[ConfigSettingKeys.ImageStorageNoImagePath].SettingValue,
+            "an empty box means the shipped artwork, and it is stored as that rather than as a blank");
+        Assert.AreEqual(
+            "Settings_StoragePaths_Saved.Text",
+            viewModel.StoragePathsStatusMessage,
+            "the shipped artwork is not a missing file, so the save is reported plainly");
     }
 
     /// <summary>

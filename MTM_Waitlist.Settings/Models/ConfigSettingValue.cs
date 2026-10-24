@@ -172,6 +172,35 @@ public static class ConfigSettingKeys
     public const string ImageStorageLuggerFolderPathDefault = AppStoragePaths.LuggerFolderDefault;
 
     /// <summary>
+    /// The picture drawn wherever a surface has no picture of its own.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Setting Key: "image_storage.no_image_path"
+    /// </para>
+    /// <para>
+    /// Description: the plant's own "no picture" artwork, held once for every computer like the folders above. It
+    /// is one file rather than a folder because there is only ever one answer: an item, a work center and a lugger
+    /// with no picture all draw the same thing, which is what teaches a person to read it as "no picture". Empty
+    /// means the artwork that ships with the application.
+    /// </para>
+    /// <para>
+    /// Default: <see cref="ImageStorageNoImagePathDefault"/>
+    /// (<c>Assets/Placeholders/default-no-image.png</c>, the shipped artwork).
+    /// </para>
+    /// </remarks>
+    public const string ImageStorageNoImagePath = "image_storage.no_image_path";
+
+    /// <summary>
+    /// The no-picture artwork this application ships with, relative to the deployment folder.
+    /// </summary>
+    /// <remarks>
+    /// Default: <see cref="ImagePicturePolicy.NoImagePath"/>, which is also what every surface drew before this
+    /// setting existed, so a plant that never changes it sees no difference.
+    /// </remarks>
+    public const string ImageStorageNoImagePathDefault = ImagePicturePolicy.NoImagePath;
+
+    /// <summary>
     /// The root the dunnage pictures sit under, one folder per dunnage type and part beneath it.
     /// Setting Key: "dunnage.root_path"
     /// Value Type: "text" (string path)

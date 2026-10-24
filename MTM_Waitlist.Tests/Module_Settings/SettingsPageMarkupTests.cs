@@ -430,6 +430,83 @@ public sealed class SettingsPageMarkupTests
             "No two labels may share a key or a value, so the two entries do not read as the same thing (SC-020).");
     }
 
+    /// <summary>
+    /// The storage card puts every control in a row of its own.
+    /// </summary>
+    /// <remarks>
+    /// The save panel used to share the retention row's <c>Grid.Row</c>, so the button drew on top of the box above
+    /// it and the row read as two controls fighting for the same space. A row attribute is not a compile error, so
+    /// nothing else in the build catches it.
+    /// </remarks>
+    [TestMethod]
+    public void UI_SettingsPageMarkupTests_TheStorageRows_EachOccupyTheirOwnRowOfTheCard()
+    {
+        XNamespace presentation = "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
+
+        var document = XDocument.Parse(PageMarkup("PicturesSettingsPage.xaml"));
+
+        var saveButton = document
+            .Descendants()
+            .Single(element => (string?)element.Attribute("AutomationProperties.AutomationId")
+                == "SettingsPage_StoragePaths_SaveButton");
+
+        // The button sits inside its panel; the row grid is the nearest Grid above it.
+        var card = saveButton.Ancestors().First(ancestor => ancestor.Name.LocalName == "Grid");
+        Assert.IsTrue(
+            card.Element(presentation + "Grid.RowDefinitions") is not null,
+            "The save panel must sit in the row grid of the card, so its row can be counted.");
+
+        var declared = card
+            .Element(presentation + "Grid.RowDefinitions")!
+            .Elements(presentation + "RowDefinition")
+            .Count();
+
+        var rows = card
+            .Elements()
+            .Where(child => child.Name.LocalName != "Grid.RowDefinitions")
+            .Select(child => (int?)child.Attribute("Grid.Row") ?? 0)
+            .ToList();
+
+        Assert.AreEqual(
+            rows.Count,
+            rows.Distinct().Count(),
+            $"Two controls share a row of the storage card, so one draws over the other: {string.Join(", ", rows)}");
+        Assert.IsTrue(
+            rows.All(row => row < declared),
+            $"A control names a row the card does not declare ({declared} rows declared): {string.Join(", ", rows)}");
+    }
+
+    /// <summary>
+    /// The no-picture image is chosen with a file dialog rather than typed, and the box beside it is what the Save
+    /// button stores.
+    /// </summary>
+    [TestMethod]
+    public void UI_SettingsPageMarkupTests_TheNoPictureImage_IsChosenFromAFileDialog()
+    {
+        var markup = PageMarkup("PicturesSettingsPage.xaml");
+
+        StringAssert.Contains(
+            markup,
+            "AutomationProperties.AutomationId=\"SettingsPage_StoragePaths_NoImagePathBox\"",
+            "The no-picture image has its own box, so a typed path is still possible.");
+        StringAssert.Contains(
+            markup,
+            "Click=\"PickNoImage_Click\"",
+            "The button beside that box opens the file dialog.");
+
+        var codeBehindPath = Path.Combine(
+            RepositoryPatternScan.FindRepositoryRoot(),
+            "Module_Settings",
+            "Views",
+            "PicturesSettingsPage.xaml.cs");
+        var codeBehind = File.ReadAllText(codeBehindPath);
+
+        StringAssert.Contains(
+            codeBehind,
+            "ViewModel.NoImagePathInput = file.Path;",
+            "The chosen file goes into the box that Save reads, rather than being stored on the spot.");
+    }
+
     /// <summary>The one element carrying <paramref name="xName"/>, from its opening tag to its matching close.</summary>
     private static string ElementWithName(string markup, string xName)
     {
