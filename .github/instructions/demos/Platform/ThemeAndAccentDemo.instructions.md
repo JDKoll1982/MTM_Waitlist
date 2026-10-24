@@ -1,0 +1,68 @@
+---
+description: "Theme & accent colour (Microsoft.UI.Xaml.Application) in Platform services; how ElementTheme, theme resources and the user's accent colour flow… MTM: MTM_Waitlist › Settings persistence and start-up."
+applyTo: "src/WinUI3LearningLab.App/Demos/Platform/ThemeAndAccentDemo.xaml,src/WinUI3LearningLab.App/Demos/Platform/ThemeAndAccentDemo.xaml.cs"
+---
+
+# Theme & accent colour
+
+| | |
+| --- | --- |
+| Ecosystem | Windows App SDK |
+| Category | Platform services |
+| Level | Intermediate |
+| API | `Microsoft.UI.Xaml.Application` |
+| Page | `Platform/ThemeAndAccentDemo` (`WinUI3LearningLab.Demos.Platform.ThemeAndAccentDemo`) |
+| Kind | Live, interactive demo |
+| Run it | `WinUI3LearningLab.App.exe --demo theme-and-accent` |
+
+## What it teaches
+
+How ElementTheme, theme resources and the user's accent colour flow through a WinUI 3 app.
+
+## How the demo is built
+
+The page is a `UserControl` at `Platform/ThemeAndAccentDemo.xaml`, paired with `ThemeAndAccentDemo.xaml.cs`. The shell hosts it inside `Shell/DemoPage.xaml`, which also shows both files verbatim — the snippet viewer reads the same source the app compiles, so what is displayed is always what runs.
+
+**Layout.** Root `UserControl` with 14 element(s).
+
+Named elements the code-behind touches: `ThemeText`, `AccentPanel`, `LastActionText`.
+
+Wired in XAML: `OnDefaultClicked()`, `OnLightClicked()`, `OnDarkClicked()`.
+
+**Code-behind.** Handlers `OnDefaultClicked()`, `OnLightClicked()`, `OnDarkClicked()`, `OnColorValuesChanged()`. 189 line(s), including the comments that record what the control does that the docs do not say.
+
+Anything the demo cannot show is explained on the page rather than faked: the same rules the rest of the repo follows are in `.github/instructions/winui3-api-rules.instructions.md`.
+
+## MTM use case
+
+**MTM_Waitlist › Settings persistence and start-up**
+
+Effective settings are resolved from several scopes and cached at start-up, and every change is versioned in a history table. Persistence, the UI thread and theme resolution are the plumbing that has to keep working when nothing is being demoed.
+
+Schema this mirrors: `config_settings_values, config_settings_history, usr_settings`. Sample data for the page comes from `src/WinUI3LearningLab.Core/LabData.cs` — part numbers, bins, dunnage types and work orders, never `Item 1` or `John Doe`.
+
+## Gotchas
+
+- RequestedTheme on a FrameworkElement is inherited by its subtree — set it on your page root, not on the Application, to scope a theme.
+- Use {ThemeResource} for anything that must change with the theme, and {StaticResource} only for theme-independent values.
+- Accent brushes are per-theme swatches: AccentFillColorDefaultBrush resolves differently in light and dark.
+- UISettings.ColorValuesChanged tells you when the system accent changed, but it arrives on a background thread.
+
+## Traps recorded in the source
+
+- Leaving the page restores the default theme when it can; nothing to report.
+
+## Try this
+
+- Run `WinUI3LearningLab.App.exe --demo theme-and-accent`. The page shows `ThemeAndAccentDemo.xaml` and `ThemeAndAccentDemo.xaml.cs` beside the live demo, so the next edit can be made against something already running.
+- Change one value in the XAML and rebuild; the snippet viewer re-reads the file, so what is shown stays the code that compiled.
+
+## Documentation
+
+- [Microsoft.UI.Xaml.Application](https://learn.microsoft.com/windows/apps/design/style/color)
+- [WinUI 3 API rules for this repo](../../winui3-api-rules.instructions.md)
+- [Design system](../../winui3-design-system.instructions.md)
+
+---
+
+Generated from `DemoCatalog` by `--export-instructions`. Do not edit by hand: change the descriptor in `src/WinUI3LearningLab.Core/Catalog/Platform.cs` or the demo source, then regenerate.
