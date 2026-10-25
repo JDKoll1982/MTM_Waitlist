@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Settings.Models"
+    xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
     xmlns:wct="using:CommunityToolkit.WinUI.Controls"
     x:Name="RootPage"
     mc:Ignorable="d">
@@ -53,7 +54,7 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="{x:Bind Title}" TextTrimming="CharacterEllipsis" />
+                                <sharedControls:AutoScrollTextView Text="{x:Bind Title}" />
                                 <TextBlock
                                     Grid.Column="1"
                                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"

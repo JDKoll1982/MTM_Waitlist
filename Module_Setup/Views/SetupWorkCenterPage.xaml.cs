@@ -12,31 +12,12 @@ namespace MTM_Waitlist.Module_Setup.Views;
 
 public sealed partial class SetupWorkCenterPage : Page
 {
-    // Unified grid: always three card columns, each a third of the container's width so the grid
-    // fills the collapsible container edge to edge and stays centred.
-    private const int ColumnCount = 3;
-    private const double ItemHeight = 190;
-
     public SetupWorkCenterViewModel ViewModel { get; }
 
     public SetupWorkCenterPage()
     {
         ViewModel = App.GetService<SetupWorkCenterViewModel>();
         InitializeComponent();
-
-        ViewModel.DisplayedHotWorkCenters.CollectionChanged += OnWorkCentersCollectionChanged;
-        ViewModel.DisplayedOtherWorkCenters.CollectionChanged += OnWorkCentersCollectionChanged;
-        Loaded += (_, _) => UpdateItemSize();
-        Unloaded += (_, _) =>
-        {
-            ViewModel.DisplayedHotWorkCenters.CollectionChanged -= OnWorkCentersCollectionChanged;
-            ViewModel.DisplayedOtherWorkCenters.CollectionChanged -= OnWorkCentersCollectionChanged;
-        };
-    }
-
-    private void WorkCenterGridView_SizeChanged(object sender, SizeChangedEventArgs e)
-    {
-        UpdateItemSize();
     }
 
     private void WorkCenterCard_ItemClick(object sender, ItemClickEventArgs e)
@@ -113,51 +94,6 @@ public sealed partial class SetupWorkCenterPage : Page
         if (sender is FrameworkElement { Tag: SetupWorkCenter workCenter })
         {
             ViewModel.ViewHistoryCommand.Execute(workCenter);
-        }
-    }
-
-    private void OnWorkCentersCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        UpdateItemSize();
-    }
-
-    private void UpdateItemSize()
-    {
-        if (HotWorkCentersGridView is null || OtherWorkCentersGridView is null)
-        {
-            return;
-        }
-
-        var availableWidth = Math.Max(HotWorkCentersGridView.ActualWidth, OtherWorkCentersGridView.ActualWidth);
-        if (availableWidth <= 0)
-        {
-            return;
-        }
-
-        var itemWidth = Math.Floor(availableWidth / ColumnCount) - 1;
-
-        var hotPanel = HotWorkCentersGridView.ItemsPanelRoot;
-        var otherPanel = OtherWorkCentersGridView.ItemsPanelRoot;
-        ApplyItemSize(hotPanel, itemWidth);
-        ApplyItemSize(otherPanel, itemWidth);
-
-        // The items panels are realized lazily; retry after the next layout pass so the
-        // responsive sizing still applies. Only retry for grids that are actually laid out
-        // (width > 0); a collapsed/unrealized section must not spin this loop - its
-        // SizeChanged fires again once it is expanded.
-        if ((hotPanel is null && HotWorkCentersGridView.Items.Count > 0 && HotWorkCentersGridView.ActualWidth > 0)
-            || (otherPanel is null && OtherWorkCentersGridView.Items.Count > 0 && OtherWorkCentersGridView.ActualWidth > 0))
-        {
-            DispatcherQueue.TryEnqueue(UpdateItemSize);
-        }
-    }
-
-    private static void ApplyItemSize(UIElement? panel, double itemWidth)
-    {
-        if (panel is ItemsWrapGrid wrapGrid)
-        {
-            wrapGrid.ItemWidth = itemWidth;
-            wrapGrid.ItemHeight = ItemHeight;
         }
     }
 

@@ -50,6 +50,11 @@
                         </MenuFlyout>
                     </Border.ContextFlyout>
                     <Grid>
+                        <!--
+                        The photo pane takes a share of the card rather than a fixed width, so a wider card gives the
+                        picture and the details beside it more room instead of leaving one of them clipped. The floor
+                        keeps the picture readable when the card is at its narrowest.
+                        -->
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="140" />
                             <ColumnDefinition Width="1" />
@@ -201,10 +206,10 @@
                             SelectionMode="None"
                             ScrollViewer.VerticalScrollBarVisibility="Disabled"
                             ScrollViewer.VerticalScrollMode="Disabled"
-                            SizeChanged="WorkCenterGridView_SizeChanged">
+                            shared:CardGridSizing.MinimumCardWidth="300">
                             <GridView.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <ItemsWrapGrid HorizontalAlignment="Center" MaximumRowsOrColumns="3" Orientation="Horizontal" />
+                                    <ItemsWrapGrid HorizontalAlignment="Stretch" ItemHeight="190" Orientation="Horizontal" />
                                 </ItemsPanelTemplate>
                             </GridView.ItemsPanel>
                         </GridView>
@@ -235,10 +240,10 @@
                             SelectionMode="None"
                             ScrollViewer.VerticalScrollBarVisibility="Disabled"
                             ScrollViewer.VerticalScrollMode="Disabled"
-                            SizeChanged="WorkCenterGridView_SizeChanged">
+                            shared:CardGridSizing.MinimumCardWidth="300">
                             <GridView.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <ItemsWrapGrid HorizontalAlignment="Center" MaximumRowsOrColumns="3" Orientation="Horizontal" />
+                                    <ItemsWrapGrid HorizontalAlignment="Stretch" ItemHeight="190" Orientation="Horizontal" />
                                 </ItemsPanelTemplate>
                             </GridView.ItemsPanel>
                         </GridView>

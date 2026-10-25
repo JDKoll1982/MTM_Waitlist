@@ -53,18 +53,28 @@ public sealed class LuggerArrangementPageMarkupTests
 
         Assert.IsNotNull(panel, "The cards do not wrap, so they run off the panel instead of forming a grid.");
         Assert.AreEqual("Horizontal", (string?)panel.Attribute("Orientation"), "The cards are laid out down the panel rather than across it.");
-        Assert.AreEqual(
-            "3",
-            (string?)panel.Attribute("MaximumRowsOrColumns"),
-            "The arrangement is not drawn three cards across.");
-        Assert.AreEqual(
-            "OnLuggerGridSizeChanged",
-            (string?)grid.Attribute("SizeChanged"),
-            "The card width is not measured from the grid, so the columns stop short of the panel and leave a gap beside the third one.");
+
+        // The column count and the card width come from the container on every measure, so neither is pinned in
+        // markup and the page no longer carries a SizeChanged handler of its own to compute them.
+        Assert.IsNull(
+            panel.Attribute("MaximumRowsOrColumns"),
+            "A fixed column count cannot follow the container, so the grid stops short of its panel or runs past it.");
         Assert.IsNull(
             panel.Attribute("ItemWidth"),
-            "The card width is pinned in markup, so the three columns cannot span the panel they are drawn in.");
-        Assert.IsNotNull(panel.Attribute("ItemHeight"), "The tile height is left to the first card, so a long lugger name sets every card's size.");
+            "The card width is pinned in markup, so the columns cannot span the panel they are drawn in.");
+        Assert.AreEqual(
+            "208",
+            (string?)panel.Attribute("ItemHeight"),
+            "The tile height is declared on the panel: only the width follows the container, never the row height.");
+        Assert.AreEqual(
+            "240",
+            grid.Attributes()
+                .FirstOrDefault(attribute => attribute.Name.LocalName == "CardGridSizing.MinimumCardWidth")
+                ?.Value,
+            "The grid does not declare the narrowest card it may draw, so nothing sizes it from the container.");
+        Assert.IsNull(
+            grid.Attribute("SizeChanged"),
+            "The page computes card widths itself again instead of letting the shared sizing follow the container.");
         Assert.AreEqual("Disabled", (string?)grid.Attribute("ScrollViewer.VerticalScrollMode"), "The list scrolls inside the page's own scroll viewer.");
 
         var template = grid.Element(s_presentation + "GridView.ItemTemplate")!.Descendants(s_presentation + "DataTemplate").Single();

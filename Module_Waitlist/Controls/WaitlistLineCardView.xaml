@@ -291,21 +291,19 @@
                         Rows 3 and 4: the person, and - once the request has closed - the requester (FR-022). A row
                         with no value is removed rather than left blank (FR-018).
                     -->
-                    <TextBlock
+                    <sharedControls:AutoScrollTextView
                         x:Name="StatusPersonText"
                         HorizontalAlignment="Center"
                         Text="{Binding Order.PersonText, ElementName=Root}"
                         TextAlignment="Center"
-                        TextTrimming="CharacterEllipsis"
                         Visibility="{Binding Order.HasPerson, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}" />
 
-                    <TextBlock
+                    <sharedControls:AutoScrollTextView
                         x:Name="StatusRequesterText"
                         HorizontalAlignment="Center"
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                         Text="{Binding Order.RequesterText, ElementName=Root}"
                         TextAlignment="Center"
-                        TextTrimming="CharacterEllipsis"
                         Visibility="{Binding Order.HasRequester, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}" />
                 </StackPanel>
             </Border>

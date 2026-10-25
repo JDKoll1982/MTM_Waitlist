@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Waitlist.Models"
+    xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
     mc:Ignorable="d">
 
     <Grid Style="{StaticResource SetupPageGridStyle}" RowSpacing="16">
@@ -83,10 +84,9 @@
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
                                 CornerRadius="8">
-                                <TextBlock
+                                <sharedControls:AutoScrollTextView
                                     FontSize="14"
-                                    Text="{x:Bind Title}"
-                                    TextTrimming="CharacterEllipsis" />
+                                    Text="{x:Bind Title}" />
                             </Border>
 
                             <!-- Selection outline, drawn only on the part currently chosen. -->

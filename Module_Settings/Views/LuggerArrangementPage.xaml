@@ -8,6 +8,7 @@
     xmlns:controls="using:MTM_Waitlist.Module_Shared.Controls"
     xmlns:models="using:MTM_Waitlist.Module_Settings.Models"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:shared="using:MTM_Waitlist.Module_Shared.Services"
     mc:Ignorable="d">
 
     <!--
@@ -142,8 +143,7 @@
                             CanReorderItems="True"
                             DragItemsCompleted="OnLuggerDragItemsCompleted"
                             IsItemClickEnabled="False"
-                            Loaded="OnLuggerGridLoaded"
-                            SizeChanged="OnLuggerGridSizeChanged"
+                            shared:CardGridSizing.MinimumCardWidth="240"
                             ItemContainerStyle="{StaticResource ArrangementTileItemContainerStyle}"
                             ItemsSource="{x:Bind ViewModel.Luggers, Mode=OneWay}"
                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
@@ -153,10 +153,7 @@
                             SelectionMode="None">
                             <GridView.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <ItemsWrapGrid
-                                        ItemHeight="208"
-                                        MaximumRowsOrColumns="3"
-                                        Orientation="Horizontal" />
+                                    <ItemsWrapGrid ItemHeight="208" Orientation="Horizontal" />
                                 </ItemsPanelTemplate>
                             </GridView.ItemsPanel>
                             <GridView.ItemTemplate>

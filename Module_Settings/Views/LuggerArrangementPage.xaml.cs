@@ -25,12 +25,6 @@ namespace MTM_Waitlist.Module_Settings.Views;
 /// </remarks>
 public sealed partial class LuggerArrangementPage : Page
 {
-    /// <summary>How many cards the arrangement draws across, which is what the panel is divided between.</summary>
-    private const int CardColumns = 3;
-
-    /// <summary>The narrowest cell worth drawing a card in, below which the grid keeps the width it has.</summary>
-    private const double MinCardWidth = 140;
-
     /// <summary>True while a drag's new order is being written, so one drag is persisted once.</summary>
     private bool _isPublishingOrder;
 
@@ -83,30 +77,6 @@ public sealed partial class LuggerArrangementPage : Page
         ViewModel.BeginAdd();
 
         await ShowNameDialogAsync(ViewModel.AddActionText, () => ViewModel.AddLuggerAsync());
-    }
-
-    /// <summary>
-    /// Sizes the cards so three columns fill the panel whatever the window is doing. The panel hands every card one
-    /// cell and the card's own margin opens the gutter inside that cell, so a third of the grid's width is exactly
-    /// one column and three of them span it. A window too narrow for three readable cells wraps to two rather than
-    /// squeezing them past the point of legibility.
-    /// </summary>
-    private void OnLuggerGridSizeChanged(object sender, SizeChangedEventArgs e) => ApplyCardWidth(sender);
-
-    /// <summary>
-    /// Applies the width once the panel exists. A grid measured before its items panel was built reports no panel,
-    /// so the same sizing is asked for again as the grid loads.
-    /// </summary>
-    private void OnLuggerGridLoaded(object sender, RoutedEventArgs e) => ApplyCardWidth(sender);
-
-    private static void ApplyCardWidth(object sender)
-    {
-        if (sender is not GridView grid || grid.ItemsPanelRoot is not ItemsWrapGrid panel)
-        {
-            return;
-        }
-
-        panel.ItemWidth = Math.Max(grid.ActualWidth / CardColumns, MinCardWidth);
     }
 
     /// <summary>
