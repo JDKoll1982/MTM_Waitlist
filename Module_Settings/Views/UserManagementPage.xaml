@@ -20,7 +20,7 @@
         long for its column is trimmed and carries the whole of itself as a tooltip, so trimming can hide the end
         of a word and never the fact itself.
     -->
-    <Grid Padding="24" RowSpacing="16">
+    <Grid Padding="24" MaxWidth="{StaticResource PageContentMaxWidth}" RowSpacing="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />

@@ -42,7 +42,7 @@
         <x:Double x:Key="PermissionPersonColumnWidth">240</x:Double>
     </Page.Resources>
 
-    <Grid Padding="24">
+    <Grid Padding="24" MaxWidth="{StaticResource PageContentMaxWidth}">
         <ScrollViewer VerticalScrollBarVisibility="Auto" VerticalScrollMode="Enabled">
             <StackPanel Spacing="16">
 

@@ -2,6 +2,14 @@
     <Style x:Key="SetupPageGridStyle" TargetType="Grid">
         <Setter Property="Padding" Value="32,24,32,20" />
         <Setter Property="RowSpacing" Value="20" />
+
+        <!--
+            The content column is capped and centred rather than stretched to the window, so a wide monitor gives
+            the page margins instead of two thousand pixels of card. Every setup and new-request step wears this
+            style, so the ceiling is declared once. The alignment stays Stretch on purpose: a capped stretch
+            element is centred by the framework, while an explicit Center would shrink the page to its content.
+        -->
+        <Setter Property="MaxWidth" Value="{StaticResource PageContentMaxWidth}" />
     </Style>
 
     <Style x:Key="SetupPageHeaderStyle" TargetType="StackPanel">

@@ -1,4 +1,4 @@
-﻿<Page
+<Page
     x:Class="MTM_Waitlist.Module_Waitlist.Views.WaitlistViewPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -27,7 +27,11 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid x:Name="ContentArea">
+    <!-- The page body sits in a capped, centred column, so a wide monitor gives margins rather than a card that
+         spans the whole window with its label at one end and its buttons at the other. -->
+    <Grid
+        x:Name="ContentArea"
+        MaxWidth="{StaticResource PageContentMaxWidth}">
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup x:Name="FabLayoutStates">
                 <VisualState x:Name="CompactFabState">

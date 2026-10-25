@@ -22,7 +22,7 @@
         HorizontalScrollMode="Disabled"
         VerticalScrollBarVisibility="Auto">
         <Grid
-            MaxWidth="1080"
+            MaxWidth="{StaticResource PageContentMaxWidth}"
             Padding="0,0,0,48"
             HorizontalAlignment="Stretch"
             RowSpacing="28">

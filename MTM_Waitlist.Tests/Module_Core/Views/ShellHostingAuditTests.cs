@@ -160,7 +160,13 @@ public sealed class ShellHostingAuditTests
             .Select(part => int.Parse(part.Trim(), System.Globalization.CultureInfo.InvariantCulture))
             .ToArray();
 
-        var column = AttributeValue(Read("Module_Settings", "Views", "SettingsPage.xaml"), "MaxWidth");
+        var column = int.Parse(
+            System.Text.RegularExpressions.Regex
+                .Match(Read("Styles", "Thickness.xaml"), @"x:Key=""PageContentMaxWidth"">(\d+)<")
+                .Groups[1].Value,
+            System.Globalization.CultureInfo.InvariantCulture);
+
+        Assert.IsTrue(column > 0, "the page content column is not declared, so this audit cannot tell what to compare against.");
 
         var viewportWhenExpanded = threshold - pane - inset[0] - inset[2] - WindowChromePixels;
 
