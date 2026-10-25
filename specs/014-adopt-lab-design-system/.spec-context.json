@@ -2,8 +2,8 @@
   "workflow": "companion",
   "specName": "One set of rules for every screen, window and dialog",
   "branch": "master",
-  "currentStep": "specify",
-  "status": "specified",
+  "currentStep": "implement",
+  "status": "implementing",
   "history": [
     {
       "step": "specify",
@@ -18,6 +18,76 @@
       "kind": "complete",
       "by": "extension",
       "at": "2026-10-25T20:00:14.404Z"
+    },
+    {
+      "step": "clarify",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-10-25T20:20:05.635Z"
+    },
+    {
+      "step": "clarify",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T20:20:36.657Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-10-25T20:20:43.283Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T20:21:30.495Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T20:22:11.932Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T20:22:17.540Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-10-25T20:23:16.813Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T20:23:17.070Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T20:23:17.243Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-10-25T20:23:24.354Z"
     }
   ],
   "telemetryInstanceId": "c4fc0bc7-f330-4e0b-86a1-f4ca6b4ad3ce",
@@ -114,6 +184,15 @@
     },
     "FR-031": {
       "title": "A diagnostic surface raised over a dialog is a window, not a page"
+    },
+    "FR-032": {
+      "title": "The standard message set lives in the shared layer all consumers reference"
+    },
+    "FR-033": {
+      "title": "A fragment control stays a control, and still meets the rules"
+    },
+    "FR-034": {
+      "title": "The mapping from today's raise sites to the six kinds is recorded"
     }
   },
   "size": "oversized",
@@ -144,7 +223,47 @@
     "decision: the service console (separate executable) is in scope: its window and both pages",
     "decision: no exemptions - every XAML file is treated as a production page, including the control inspector, the developer log panel and the service console",
     "decision: a surface that cannot meet the rules without rearrangement has its layout redesigned, with behaviour preserved",
-    "constraint: api rules also require the shared tooltip behaviour, resource registration in the same change, direct await of the dialog show call, and a window for a diagnostic surface raised over a dialog"
+    "constraint: api rules also require the shared tooltip behaviour, resource registration in the same change, direct await of the dialog show call, and a window for a diagnostic surface raised over a dialog",
+    "clarify Q1: dialog sizing 480 min / 720 preferred / 880 max / 640 max body height / 120 body floor, chosen for a 15-inch screen at 150%",
+    "clarify Q2: raise-site to message-kind mapping established by reading the code",
+    "clarify Q3: standard set lives in MTM_Waitlist.Shared; DevWinUI added there; Mock.Service gains a project reference to it",
+    "clarify Q4: the developer log panel stays a control inside the Diagnostics page, not a surface",
+    "clarify Q5: the control inspector's fixed 172px column becomes proportional and its type moves onto the shared scale"
   ],
-  "intent": "Bring every XAML surface, with no exemptions, onto one set of layout, sizing, automation and platform rules; move every dialog, message and question into its own window centred on the main window with one standard message set; redesign any layout that cannot comply."
+  "intent": "Bring every XAML surface, with no exemptions, onto one set of layout, sizing, automation and platform rules; move every dialog, message and question into its own window centred on the main window with one standard message set; redesign any layout that cannot comply.",
+  "workingBranch": "014-adopt-lab-design-system",
+  "decisions": [
+    {
+      "decision": "Show ContentDialog content through DevWinUI.WindowedContentDialog",
+      "why": "Satisfies the request and the api rule that asks for ContentDialog; the repo already proves the pattern in LuggerEditorDialog",
+      "rejected": "A hand-built Window with its own button bar, which would lose framework Escape and default-button handling"
+    },
+    {
+      "decision": "Put the message set in MTM_Waitlist.Shared",
+      "why": "It is the only project every module and the service console can reference, so one implementation serves all",
+      "rejected": "MTM_Waitlist.Core, which holds no XAML, or a copy in the console"
+    },
+    {
+      "decision": "Dialog sizing 480/720/880/640/120 from shared resources",
+      "why": "Fits a 15-inch screen at 150% and never outgrows the 1080 page column",
+      "rejected": "Per-dialog literals, which is today's four different values, or deriving from the page column"
+    },
+    {
+      "decision": "Six message kinds classified from the code",
+      "why": "The code fixes the answer; Leave and Decide are separate because their defaults protect different things",
+      "rejected": "One generic confirm with caller-supplied labels, which is what caused the inconsistency"
+    },
+    {
+      "decision": "Inspector's fixed 172px column becomes proportional",
+      "why": "The one surface that cannot fit a capped column at a fixed width; FR-027 authorises the redesign",
+      "rejected": "Exempting it, or allowing horizontal scrolling"
+    }
+  ],
+  "step_summaries": {
+    "plan": {
+      "summary": "Plan, research, data model and the message-dialog contract written for an oversized change spanning 77 XAML files.",
+      "key_finding": "WindowedContentDialog is a host for ContentDialog content, so the request and the api rule agree; one shared set in Shared serves the app and the console."
+    }
+  },
+  "approach": "Build the shared pieces first: dialog sizing resources, a windowed dialog host, and one standard set of six message dialogs in MTM_Waitlist.Shared. Then convert every raise site to them, sweep the remaining surfaces for layout, tooltip and automation conformance, and add source audits that fail the build if any of it drifts."
 }

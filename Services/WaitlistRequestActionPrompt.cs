@@ -2,17 +2,17 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Shared.Dialogs;
 using MTM_Waitlist.Module_Waitlist.Services;
 
 namespace MTM_Waitlist.Services;
 
 /// <summary>
 /// App-side implementation of <see cref="IWaitlistRequestActionPrompt"/>. Lives in the composition root
-/// because it needs the live XAML root from the main window — the same arrangement the Setup dunnage
-/// workflow uses for its dialog service.
+/// because it needs the live main window to own the dialogs it opens.
 /// </summary>
 /// <remarks>
-/// With no XAML root (a headless host) every method answers "not confirmed" instead of throwing, so an
+/// With no owner window (a headless host) every method answers "not confirmed" instead of throwing, so an
 /// unanswered prompt can never be read as consent.
 /// </remarks>
 public sealed class WaitlistRequestActionPrompt : IWaitlistRequestActionPrompt
@@ -23,8 +23,7 @@ public sealed class WaitlistRequestActionPrompt : IWaitlistRequestActionPrompt
         return string.Equals(localized, key, StringComparison.Ordinal) ? fallback : localized;
     }
 
-    private static XamlRoot? TryGetXamlRoot()
-        => (App.MainWindow?.Content as FrameworkElement)?.XamlRoot;
+    private static Window? TryGetOwnerWindow() => App.MainWindow;
 
     /// <inheritdoc />
     public async Task ShowWarningAsync(
@@ -33,22 +32,18 @@ public sealed class WaitlistRequestActionPrompt : IWaitlistRequestActionPrompt
         string closeText,
         CancellationToken cancellationToken = default)
     {
-        var xamlRoot = TryGetXamlRoot();
-        if (xamlRoot is null)
+        if (TryGetOwnerWindow() is not { } owner)
         {
             return;
         }
 
-        var dialog = new ContentDialog
+        await MessageDialogHost.AskAsync(owner, new MessageDialogRequest
         {
+            Kind = MessageKind.Acknowledge,
             Title = title,
-            Content = message,
-            CloseButtonText = closeText,
-            DefaultButton = ContentDialogButton.Close,
-            XamlRoot = xamlRoot,
-        };
-
-        await dialog.ShowAsync();
+            Message = message,
+            CancelLabel = closeText,
+        });
     }
 
     /// <inheritdoc />
@@ -59,23 +54,21 @@ public sealed class WaitlistRequestActionPrompt : IWaitlistRequestActionPrompt
         string cancelText,
         CancellationToken cancellationToken = default)
     {
-        var xamlRoot = TryGetXamlRoot();
-        if (xamlRoot is null)
+        if (TryGetOwnerWindow() is not { } owner)
         {
             return false;
         }
 
-        var dialog = new ContentDialog
+        var outcome = await MessageDialogHost.AskAsync(owner, new MessageDialogRequest
         {
+            Kind = MessageKind.Confirm,
             Title = title,
-            Content = message,
-            PrimaryButtonText = acceptText,
-            CloseButtonText = cancelText,
-            DefaultButton = ContentDialogButton.Close,
-            XamlRoot = xamlRoot,
-        };
+            Message = message,
+            ActLabel = acceptText,
+            CancelLabel = cancelText,
+        });
 
-        return await dialog.ShowAsync() == ContentDialogResult.Primary;
+        return outcome.IsAct;
     }
 
     /// <inheritdoc />
@@ -86,8 +79,7 @@ public sealed class WaitlistRequestActionPrompt : IWaitlistRequestActionPrompt
         string cancelText,
         CancellationToken cancellationToken = default)
     {
-        var xamlRoot = TryGetXamlRoot();
-        if (xamlRoot is null)
+        if (TryGetOwnerWindow() is not { } owner)
         {
             return null;
         }
@@ -101,20 +93,21 @@ public sealed class WaitlistRequestActionPrompt : IWaitlistRequestActionPrompt
         var content = new StackPanel { Spacing = 10 };
         content.Children.Add(new TextBlock { Text = message, TextWrapping = TextWrapping.WrapWholeWords });
         content.Children.Add(reasonBox);
+        content.MinWidth = DialogSizing.MinWidth;
+        content.MaxWidth = DialogSizing.MaxWidth;
 
-        var dialog = new ContentDialog
-        {
-            Title = title,
-            Content = content,
-            PrimaryButtonText = confirmText,
-            CloseButtonText = cancelText,
-            DefaultButton = ContentDialogButton.Close,
-            XamlRoot = xamlRoot,
-        };
+        // This one keeps its own body because it collects a reason; only the window it opens in is shared.
+        var result = await WindowedDialogHost.ShowAsync(
+            owner,
+            title,
+            content,
+            confirmText,
+            cancelText,
+            MessageDialogButton.Cancel);
 
         // Dismissed is null: "no answer" must stay distinguishable from "answered with an empty reason",
         // because only the latter is a cancellation.
-        return await dialog.ShowAsync() == ContentDialogResult.Primary
+        return result == ContentDialogResult.Primary
             ? reasonBox.Text?.Trim() ?? string.Empty
             : null;
     }

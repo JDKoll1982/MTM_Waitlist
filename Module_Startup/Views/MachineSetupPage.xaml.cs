@@ -1,4 +1,4 @@
-using System.Threading;
+﻿using System.Threading;
 
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Input;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Startup.Services;
 using MTM_Waitlist.Module_Startup.ViewModels;
+using MTM_Waitlist.Module_Shared.Dialogs;
 
 namespace MTM_Waitlist.Module_Startup.Views;
 
@@ -131,16 +132,16 @@ internal sealed partial class MachineSetupPage : Page, ILaunchStageSurface
 
         try
         {
-            var dialog = new ContentDialog
+            if (App.MainWindow is { } owner)
             {
-                XamlRoot = RootGrid.XamlRoot,
-                Title = ViewModel.TitleText,
-                Content = statement,
-                CloseButtonText = ViewModel.DismissActionText,
-                DefaultButton = ContentDialogButton.Close,
-            };
-
-            await dialog.ShowAsync();
+                await MessageDialogHost.AskAsync(owner, new MessageDialogRequest
+                {
+                    Kind = MessageKind.Acknowledge,
+                    Title = ViewModel.TitleText,
+                    Message = statement,
+                    CancelLabel = ViewModel.DismissActionText,
+                });
+            }
         }
         catch (Exception exception)
         {

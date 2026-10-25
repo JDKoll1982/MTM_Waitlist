@@ -1,4 +1,4 @@
-using System.Threading;
+﻿using System.Threading;
 
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Controls;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Startup.Services;
 using MTM_Waitlist.Module_Startup.ViewModels;
+using MTM_Waitlist.Module_Shared.Dialogs;
 
 namespace MTM_Waitlist.Module_Startup.Views;
 
@@ -98,17 +99,19 @@ internal sealed partial class BlockedStatePage : Page, ILaunchStageSurface
 
         try
         {
-            var dialog = new ContentDialog
+            if (App.MainWindow is { } owner)
             {
-                XamlRoot = RootGrid.XamlRoot,
-                Title = ViewModel.ResetPreviewTitleText,
-                Content = ViewModel.RestoreDefaultsPreview,
-                PrimaryButtonText = ViewModel.ResetPreviewConfirmText,
-                CloseButtonText = ViewModel.ResetPreviewCancelText,
-                DefaultButton = ContentDialogButton.Close,
-            };
+                var outcome = await MessageDialogHost.AskAsync(owner, new MessageDialogRequest
+                {
+                    Kind = MessageKind.DestructiveConfirm,
+                    Title = ViewModel.ResetPreviewTitleText,
+                    Message = ViewModel.RestoreDefaultsPreview,
+                    ActLabel = ViewModel.ResetPreviewConfirmText,
+                    CancelLabel = ViewModel.ResetPreviewCancelText,
+                });
 
-            agreed = await dialog.ShowAsync() == ContentDialogResult.Primary;
+                agreed = outcome.IsAct;
+            }
         }
         catch (Exception exception)
         {

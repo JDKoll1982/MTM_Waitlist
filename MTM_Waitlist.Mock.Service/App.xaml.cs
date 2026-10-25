@@ -37,6 +37,16 @@ public partial class App : Application
 
     private static App? s_instance;
 
+    /// <summary>
+    /// The console window, when it exists, for anything that has to own a dialog.
+    /// </summary>
+    /// <remarks>
+    /// The service is tray-only until a launch or the tray menu asks for a window, so this is <c>null</c> until then.
+    /// A caller that needs an owner and finds none must not open a dialog at all: an unowned dialog has no window to be
+    /// centred on and cannot be dismissed with the window it was raised from.
+    /// </remarks>
+    internal static Microsoft.UI.Xaml.Window? CurrentWindow => s_instance?._shellWindow;
+
     private ServiceHostBuilder? _hostBuilder;
     private ServiceProvider? _services;
     private TrayIcon? _trayIcon;

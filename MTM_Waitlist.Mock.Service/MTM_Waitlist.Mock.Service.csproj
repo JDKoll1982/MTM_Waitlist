@@ -33,7 +33,7 @@
     <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.1" />
     <PackageReference Include="MySqlConnector" Version="2.6.1" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.3.1" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.4.0" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.0" />
     <PackageReference Include="WinUIEx" Version="2.9.2" />
   </ItemGroup>
@@ -41,6 +41,9 @@
   <ItemGroup>
     <ProjectReference Include="..\MTM_Waitlist.Mock\MTM_Waitlist.Mock.csproj" />
     <ProjectReference Include="..\MTM_Waitlist.Core\MTM_Waitlist.Core.csproj" />
+    <!-- The standard message dialogs: the service console asks the same questions the operator application does, so it
+         uses the one shared set rather than a second copy of it (014-adopt-lab-design-system, FR-032). -->
+    <ProjectReference Include="..\MTM_Waitlist.Shared\MTM_Waitlist.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

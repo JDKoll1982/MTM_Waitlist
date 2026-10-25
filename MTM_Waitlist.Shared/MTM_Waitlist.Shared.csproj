@@ -12,10 +12,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.3.1" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.4.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.10" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.10" />
+
+    <!-- The windowed dialog host lives here so one implementation serves the operator application and the
+         service console. DevWinUI is the package that supplies it. -->
+    <PackageReference Include="DevWinUI" Version="10.8.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,3 +31,4 @@
     <InternalsVisibleTo Include="MTM_Waitlist.Tests" />
   </ItemGroup>
 </Project>
+

@@ -1,4 +1,4 @@
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
@@ -7,6 +7,7 @@ using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Shared.ViewModels;
 
 using WinUIEx;
+using MTM_Waitlist.Module_Shared.Dialogs;
 
 namespace MTM_Waitlist.Module_Shared.Views;
 
@@ -139,15 +140,13 @@ public sealed partial class ControlInspectorDetailWindow : WindowEx
 
     private async Task ShowPrintMessageAsync(string title, string content)
     {
-        var dialog = new ContentDialog
+        // Owned by this window, because the message belongs to the window that raised it.
+        await MessageDialogHost.AskAsync(this, new MessageDialogRequest
         {
+            Kind = MessageKind.Acknowledge,
             Title = title,
-            Content = content,
-            PrimaryButtonText = "OK",
-
-            // This window's own root, because the dialog belongs to the window that raised it.
-            XamlRoot = Content.XamlRoot,
-        };
-        await dialog.ShowAsync();
+            Message = content,
+            CancelLabel = "OK",
+        });
     }
 }

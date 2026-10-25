@@ -1,9 +1,10 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.ViewModels;
 using Windows.Storage.Pickers;
+using MTM_Waitlist.Module_Shared.Dialogs;
 
 namespace MTM_Waitlist.Module_Settings.Views;
 
@@ -90,17 +91,21 @@ public sealed partial class ImageOverrideEditorControl : UserControl
             return;
         }
 
-        var confirm = new ContentDialog
+        if (App.MainWindow is not { } owner)
         {
-            XamlRoot = XamlRoot,
-            Title = "Reset all overrides?",
-            Content = "Every custom image in this list will be cleared. Nothing is written until you choose Save.",
-            PrimaryButtonText = "Reset all",
-            CloseButtonText = "Cancel",
-            DefaultButton = ContentDialogButton.Close
-        };
+            return;
+        }
 
-        if (await confirm.ShowAsync() == ContentDialogResult.Primary)
+        var outcome = await MessageDialogHost.AskAsync(owner, new MessageDialogRequest
+        {
+            Kind = MessageKind.DestructiveConfirm,
+            Title = "Reset all overrides?",
+            Message = "Every custom image in this list will be cleared. Nothing is written until you choose Save.",
+            ActLabel = "Reset all",
+            CancelLabel = "Cancel",
+        });
+
+        if (outcome.IsAct)
         {
             await _viewModel.ResetAllAsync();
         }

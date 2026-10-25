@@ -2,7 +2,44 @@
 
 **Feature**: `014-adopt-lab-design-system`
 **Created**: 2026-10-25
-**Status**: Draft
+**Status**: Clarified
+
+## Clarifications
+
+### Session 2026-10-25
+
+Five gaps were genuinely open after the specification. Each answer is bounded by the three instruction files and by
+what the codebase already does; none invents a rule.
+
+**Q1: The shared dialog sizing values FR-004 refers to do not exist yet. What are they?**
+A1: Declared once as resources beside the existing shared measurements: a minimum width of 480, a preferred width of
+720, a working maximum of 880, and a maximum body height of 640, with a body floor of 120. These are chosen to fit a
+15-inch screen at 150% scaling, which is the smallest supported window, and they leave the 1080 page column intact
+behind them. `winui3-adoption.instructions` governs gaps and caps, not dialog dimensions, so the figures come from the
+smallest supported screen rather than from the spacing scale. FR-004 now names them.
+
+**Q2: Which of today's dialog raise sites is which message kind?**
+A2: Established by reading the code, not by guessing. Acknowledge: the three failure reports. Confirm: the
+deactivate, reset-password, clear-all and scrap-type prompts. Decide: the two leave-with-changes questions. Destructive
+confirm: remove workstation, remove lugger. Leave without saving: the setup navigation guard. Retry: the store
+unreachable prompt and the cache refresh failure. The remainder are not messages at all and stay as their own
+dialogs. A requirement records that mapping so the plan does not have to re-derive it.
+
+**Q3: Where does the standard message set live?**
+A3: In `MTM_Waitlist.Shared`, which every module and the application already reference. It gains a package reference
+to DevWinUI so the one windowed host lives there too, and `MTM_Waitlist.Mock.Service` gains a project reference to it
+so the console uses the same set instead of its own. This keeps FR-026's no-exemption rule affordable: one
+implementation, three consumers.
+
+**Q4: Does the developer log panel become its own surface?**
+A4: No. It stays a reusable control hosted inside the Diagnostics settings page, because it is a fragment of a screen
+rather than a screen. It still meets every layout, automation and platform rule, which is what FR-026 asks, and it
+does not gain a window.
+
+**Q5: The control inspector's dense fixed 172-pixel column cannot satisfy the capped-column rule. What replaces it?**
+A5: Its columns become proportional, so the same information fits a capped page column and widens with it, and its
+dense type sizes move onto the shared scale. It keeps its window and its read-only role. This is the redesign
+FR-027 authorises, and it is the only surface in the application whose layout is re-arranged rather than adjusted.
 
 ## User Scenarios & Testing
 
@@ -131,7 +168,7 @@ The screens keep working across a Windows App SDK update, because no screen uses
 - **FR-001**: Every dialog MUST open as its own window owned by the main window, so that it is centred on that window and stays in front of it.
 - **FR-002**: A dialog MUST stay centred on its owner while the owner is moved or resized.
 - **FR-003**: A dialog MUST NOT open larger than its owner window. When its content does not fit, its body MUST scroll rather than the window growing.
-- **FR-004**: A dialog MUST declare a minimum width and a preferred width, taken from the shared sizing values rather than chosen per dialog.
+- **FR-004**: A dialog MUST declare its minimum width, preferred width, maximum width and maximum body height from the shared dialog sizing values rather than choosing its own: 480, 720, 880 and 640 respectively, with a body floor of 120.
 - **FR-005**: A dialog's title MUST name the subject it acts on, not only the action.
 - **FR-006**: A dialog that only reports a message or asks a question MUST also open as its own window owned by the main window, and MUST be raised from the standard set in FR-008 rather than built where it is needed.
 - **FR-007**: A converted dialog MUST keep the visual styling it had: its cards, its headings and its typography.
@@ -177,6 +214,9 @@ The screens keep working across a Windows App SDK update, because no screen uses
 - **FR-029**: Any converter or resource dictionary introduced during this work MUST be registered in the application's resource merge in the same change, because a missing registration is a build failure.
 - **FR-030**: A dialog MUST await its own show call directly, without deferring its continuation, as the api rules require.
 - **FR-031**: A diagnostic surface raised over a dialog MUST be a window rather than a page, so the dialog cannot block it.
+- **FR-032**: The standard set in FR-008 MUST live in the shared layer that every module and the service console already reference, so one implementation serves all of them and no consumer needs a variant of its own.
+- **FR-033**: A reusable control that is a fragment of a screen MUST NOT become a surface of its own, and MUST still meet the layout, automation and platform rules.
+- **FR-034**: The mapping from today's message raise sites to the six kinds MUST be recorded, so a screen adopting the set does not re-decide which kind it needs.
 
 ### Key Entities
 

@@ -1,4 +1,4 @@
-using System.Collections.Specialized;
+﻿using System.Collections.Specialized;
 
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml;
@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Media;
 
 using MTM_Waitlist.Module_Setup.Models;
 using MTM_Waitlist.Module_Setup.ViewModels;
+using MTM_Waitlist.Module_Shared.Dialogs;
 
 namespace MTM_Waitlist.Module_Setup.Views;
 
@@ -116,7 +117,12 @@ public sealed partial class SetupWorkCenterPage : Page
         };
         var buildingInput = CreateBuildingComboBox(ViewModel.BuildingInput);
 
-        var dialog = CreateWorkCenterDialog("New Workstation", nameInput, buildingInput);
+        if (App.MainWindow is not { } owner)
+        {
+            return;
+        }
+
+        var dialog = CreateWorkCenterDialog(owner, "New Workstation", nameInput, buildingInput);
         var result = await dialog.ShowAsync();
         if (result == ContentDialogResult.Primary)
         {
@@ -146,7 +152,12 @@ public sealed partial class SetupWorkCenterPage : Page
         };
         var buildingInput = CreateBuildingComboBox(workstation.Building);
 
-        var dialog = CreateWorkCenterDialog("Edit Workstation", nameInput, buildingInput);
+        if (App.MainWindow is not { } owner)
+        {
+            return;
+        }
+
+        var dialog = CreateWorkCenterDialog(owner, "Edit Workstation", nameInput, buildingInput);
         var result = await dialog.ShowAsync();
         if (result == ContentDialogResult.Primary)
         {
@@ -184,22 +195,12 @@ public sealed partial class SetupWorkCenterPage : Page
         };
     }
 
-    private ContentDialog CreateWorkCenterDialog(string title, TextBox nameInput, ComboBox buildingInput)
+    private DevWinUI.WindowedContentDialog CreateWorkCenterDialog(Window owner, string title, TextBox nameInput, ComboBox buildingInput)
     {
-        var content = new StackPanel { Spacing = 12 };
+        var content = new StackPanel { Spacing = 12, MinWidth = DialogSizing.MinWidth };
         content.Children.Add(nameInput);
         content.Children.Add(buildingInput);
 
-        var dialog = new ContentDialog
-        {
-            Title = title,
-            Content = content,
-            PrimaryButtonText = "Save",
-            CloseButtonText = "Cancel",
-            DefaultButton = ContentDialogButton.Primary,
-            XamlRoot = XamlRoot,
-        };
-
-        return dialog;
+        return WindowedDialogHost.Create(owner, title, content, "Save", "Cancel", MessageDialogButton.Act);
     }
 }

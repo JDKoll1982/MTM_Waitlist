@@ -1,18 +1,18 @@
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Setup.Models;
 using MTM_Waitlist.Module_Setup.Views;
+using MTM_Waitlist.Module_Shared.Dialogs;
 
 namespace MTM_Waitlist.Services;
 
 /// <summary>
 /// App-side implementation of <see cref="ISetupDialogService"/> for the Setup
 /// dunnage workflow. Lives in the composition root because it needs the app-owned
-/// <see cref="SetupDunnageImageSearchDialog"/> view and the live XAML root from the
-/// main window.
+/// <see cref="SetupDunnageImageSearchDialog"/> view and the live main window that owns
+/// the dialogs it opens.
 /// </summary>
 public sealed class SetupDialogService : ISetupDialogService
 {
@@ -22,63 +22,52 @@ public sealed class SetupDialogService : ISetupDialogService
         return string.Equals(localized, key, StringComparison.Ordinal) ? fallback : localized;
     }
 
+    private static Window? TryGetOwnerWindow() => App.MainWindow;
+
     /// <inheritdoc />
-    public async Task<SetupDunnagePart?> ShowDunnageImageSearchDialogAsync()
+    public Task<SetupDunnagePart?> ShowDunnageImageSearchDialogAsync()
     {
-        var xamlRoot = (App.MainWindow?.Content as FrameworkElement)?.XamlRoot;
-        if (xamlRoot is null)
+        if (TryGetOwnerWindow() is not { } owner)
         {
-            // No active XAML root (for example a headless test host); no dialog can be shown.
-            return null;
+            // No window to own the dialog (for example a headless test host); no dialog can be shown.
+            return Task.FromResult<SetupDunnagePart?>(null);
         }
 
         var dialog = App.GetService<SetupDunnageImageSearchDialog>();
-        dialog.XamlRoot = xamlRoot;
-
-        await dialog.ShowAsync();
-
-        return dialog.SelectedPart;
+        return dialog.ShowWindowedAsync(owner);
     }
 
     /// <inheritdoc />
-    public async Task<SetupWorkOrderSearchResult?> ShowWorkOrderSearchDialogAsync()
+    public Task<SetupWorkOrderSearchResult?> ShowWorkOrderSearchDialogAsync()
     {
-        var xamlRoot = (App.MainWindow?.Content as FrameworkElement)?.XamlRoot;
-        if (xamlRoot is null)
+        if (TryGetOwnerWindow() is not { } owner)
         {
-            // No active XAML root (for example a headless test host); no dialog can be shown.
-            return null;
+            // No window to own the dialog (for example a headless test host); no dialog can be shown.
+            return Task.FromResult<SetupWorkOrderSearchResult?>(null);
         }
 
         var dialog = App.GetService<SetupWorkOrderSearchDialog>();
-        dialog.XamlRoot = xamlRoot;
-
-        await dialog.ShowAsync();
-
-        return dialog.SelectedWorkOrder;
+        return dialog.ShowWindowedAsync(owner);
     }
 
     /// <inheritdoc />
     public async Task<bool> ConfirmNoDunnageAsync()
     {
-        var xamlRoot = (App.MainWindow?.Content as FrameworkElement)?.XamlRoot;
-        if (xamlRoot is null)
+        if (TryGetOwnerWindow() is not { } owner)
         {
-            // No active XAML root (for example a headless test host); proceed.
+            // No window to own the dialog (for example a headless test host); proceed.
             return true;
         }
 
-        var dialog = new ContentDialog
+        var outcome = await MessageDialogHost.AskAsync(owner, new MessageDialogRequest
         {
+            Kind = MessageKind.Decide,
             Title = LocalizeOrDefault("Setup_NoDunnage.DialogTitle", "Continue without dunnage?"),
-            Content = LocalizeOrDefault("Setup_NoDunnage.DialogMessage", "No dunnage was selected for this job. Do you want to continue without dunnage?"),
-            PrimaryButtonText = LocalizeOrDefault("Setup_NoDunnage.Confirm", "Yes"),
-            CloseButtonText = LocalizeOrDefault("Setup_NoDunnage.Cancel", "No"),
-            DefaultButton = ContentDialogButton.Close,
-            XamlRoot = xamlRoot,
-        };
+            Message = LocalizeOrDefault("Setup_NoDunnage.DialogMessage", "No dunnage was selected for this job. Do you want to continue without dunnage?"),
+            ActLabel = LocalizeOrDefault("Setup_NoDunnage.Confirm", "Yes"),
+            CancelLabel = LocalizeOrDefault("Setup_NoDunnage.Cancel", "No"),
+        });
 
-        var result = await dialog.ShowAsync();
-        return result == ContentDialogResult.Primary;
+        return outcome.IsAct;
     }
 }

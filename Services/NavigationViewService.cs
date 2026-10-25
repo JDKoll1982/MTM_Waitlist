@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 
 using Microsoft.UI.Xaml.Controls;
 
@@ -7,6 +7,7 @@ using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Settings.ViewModels;
 using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
+using MTM_Waitlist.Module_Shared.Dialogs;
 
 namespace MTM_Waitlist.Services;
 
@@ -125,18 +126,22 @@ public class NavigationViewService : INavigationViewService
             return true;
         }
 
-        var dialog = new ContentDialog
+        if (App.MainWindow is not { } owner)
         {
-            Title = LocalizeOrDefault("Setup_Navigation_LeaveSetup.Title", "Leave Work Center Setup?"),
-            Content = LocalizeOrDefault("Setup_Navigation_LeaveSetup.Message", "All unsaved setup data will be lost. Continue?"),
-            PrimaryButtonText = LocalizeOrDefault("Setup_Navigation_LeaveSetup.Confirm", "Yes"),
-            CloseButtonText = LocalizeOrDefault("Setup_Navigation_LeaveSetup.Cancel", "No"),
-            DefaultButton = ContentDialogButton.Close,
-            XamlRoot = sender.XamlRoot,
-        };
+            // No window to own the dialog; leaving is refused rather than assumed.
+            return false;
+        }
 
-        var result = await dialog.ShowAsync();
-        if (result != ContentDialogResult.Primary)
+        var outcome = await MessageDialogHost.AskAsync(owner, new MessageDialogRequest
+        {
+            Kind = MessageKind.LeaveWithoutSaving,
+            Title = LocalizeOrDefault("Setup_Navigation_LeaveSetup.Title", "Leave Work Center Setup?"),
+            Message = LocalizeOrDefault("Setup_Navigation_LeaveSetup.Message", "All unsaved setup data will be lost. Continue?"),
+            ActLabel = LocalizeOrDefault("Setup_Navigation_LeaveSetup.Confirm", "Yes"),
+            CancelLabel = LocalizeOrDefault("Setup_Navigation_LeaveSetup.Cancel", "No"),
+        });
+
+        if (!outcome.IsAct)
         {
             return false;
         }

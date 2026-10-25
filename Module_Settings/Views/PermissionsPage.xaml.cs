@@ -1,9 +1,10 @@
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.ViewModels;
+using MTM_Waitlist.Module_Shared.Dialogs;
 
 namespace MTM_Waitlist.Module_Settings.Views;
 
@@ -62,17 +63,21 @@ public sealed partial class PermissionsPage : Page
 
         try
         {
-            var confirm = new ContentDialog
+            if (App.MainWindow is not { } owner)
             {
-                XamlRoot = XamlRoot,
-                Title = ViewModel.ConfirmTitleText,
-                Content = string.Join(Environment.NewLine, person.ConfirmationSentences),
-                PrimaryButtonText = ViewModel.SaveLabelText,
-                CloseButtonText = ViewModel.CancelLabelText,
-                DefaultButton = ContentDialogButton.Close,
-            };
+                return;
+            }
 
-            if (await confirm.ShowAsync() != ContentDialogResult.Primary)
+            var outcome = await MessageDialogHost.AskAsync(owner, new MessageDialogRequest
+            {
+                Kind = MessageKind.Confirm,
+                Title = ViewModel.ConfirmTitleText,
+                Message = string.Join(Environment.NewLine, person.ConfirmationSentences),
+                ActLabel = ViewModel.SaveLabelText,
+                CancelLabel = ViewModel.CancelLabelText,
+            });
+
+            if (!outcome.IsAct)
             {
                 return;
             }

@@ -14,6 +14,7 @@
                 <ResourceDictionary Source="/Styles/TooltipDeveloper.xaml" />
                 <ResourceDictionary Source="/Styles/ControlInspector.xaml" />
                 <ResourceDictionary Source="/Styles/RequestDialogs.xaml" />
+                <ResourceDictionary Source="/Styles/Dialogs.xaml" />
                 <ResourceDictionary Source="/Styles/PartPictureCardTemplate.xaml" />
                 <!--
                     The waitlist card's per-Item detail templates: the card's detail column is resolved through

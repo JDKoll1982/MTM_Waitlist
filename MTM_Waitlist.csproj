@@ -70,7 +70,7 @@
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.10" />
     <PackageReference Include="MySqlConnector" Version="2.6.1" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.3.1" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.4.0" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="3.0.1" />
     <PackageReference Include="WinUIEx" Version="2.9.2" />
   </ItemGroup>
@@ -157,6 +157,27 @@
     <PRIResource Remove="MTM_Waitlist.Mock.Service\**\*" />
     <Content Remove="MTM_Waitlist.Mock.Service\**\*" />
     <None Remove="MTM_Waitlist.Mock.Service\**\*" />
+
+    <!--
+      The same exposure, one level down, plus a second way it bites. A class library that carries XAML is globbed
+      twice by this root project: its source is picked up by the default **/*.xaml, **/*.pri and content patterns,
+      and its build output is copied into every sibling's bin\. Both produce a duplicate PRI entry for the library's
+      own .xbf (PRI175 / PRI277) and a second, conflicting XAML type (CS0436). DefaultItemExcludes only covers this
+      project's own bin\ and obj\, never a sibling's. The library ships its own .pri, so its XAML is excluded here.
+    -->
+    <Page Remove="MTM_Waitlist.Shared\**\*.xaml" />
+    <ApplicationDefinition Remove="MTM_Waitlist.Shared\**\*.xaml" />
+    <PRIResource Remove="MTM_Waitlist.Shared\**\*" />
+    <Content Remove="MTM_Waitlist.Shared\**\*.xaml" />
+    <None Remove="MTM_Waitlist.Shared\**\*.xaml" />
+
+    <Page Remove="**\bin\**\*.xaml" />
+    <Page Remove="**\obj\**\*.xaml" />
+    <ApplicationDefinition Remove="**\bin\**\*.xaml" />
+    <ApplicationDefinition Remove="**\obj\**\*.xaml" />
+    <PRIResource Remove="**\bin\**\*" />
+    <PRIResource Remove="**\obj\**\*" />
+
 
     <None Include="MTM_Waitlist.Tests\**\*" />
   </ItemGroup>

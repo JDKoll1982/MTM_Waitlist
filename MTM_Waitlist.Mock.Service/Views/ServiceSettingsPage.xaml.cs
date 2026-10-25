@@ -1,7 +1,8 @@
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using MTM_Waitlist.Mock.Service.Contracts;
 using MTM_Waitlist.Mock.Service.ViewModels;
+using MTM_Waitlist.Module_Shared.Dialogs;
 
 namespace MTM_Waitlist.Mock.Service.Views;
 
@@ -52,18 +53,22 @@ public sealed partial class ServiceSettingsPage : Page, IServiceSearchHost
             return;
         }
 
-        var dialog = new ContentDialog
+        if (App.CurrentWindow is not { } owner)
         {
-            XamlRoot = XamlRoot,
+            ViewModel.RestoreSelectedCommand.Execute(false);
+            return;
+        }
+
+        // A restore replaces the mirror, so the dismissing answer is the default.
+        var outcome = await MessageDialogHost.AskAsync(owner, new MessageDialogRequest
+        {
+            Kind = MessageKind.DestructiveConfirm,
             Title = ViewModel.RestoreConfirmTitleText,
-            Content = ViewModel.RestoreConfirmBodyText,
-            PrimaryButtonText = ViewModel.RestoreConfirmPrimaryText,
-            CloseButtonText = ViewModel.RestoreConfirmCloseText,
-            DefaultButton = ContentDialogButton.Close
-        };
+            Message = ViewModel.RestoreConfirmBodyText,
+            ActLabel = ViewModel.RestoreConfirmPrimaryText,
+            CancelLabel = ViewModel.RestoreConfirmCloseText,
+        });
 
-        var result = await dialog.ShowAsync();
-
-        ViewModel.RestoreSelectedCommand.Execute(result == ContentDialogResult.Primary);
+        ViewModel.RestoreSelectedCommand.Execute(outcome.IsAct);
     }
 }

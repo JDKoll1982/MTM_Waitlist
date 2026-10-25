@@ -1,8 +1,9 @@
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Settings.ViewModels;
+using MTM_Waitlist.Module_Shared.Dialogs;
 
 namespace MTM_Waitlist.Module_Settings.Views;
 
@@ -38,17 +39,21 @@ public sealed partial class EditUserPage : Page
     /// </summary>
     private async void OnDeactivateClick(object sender, RoutedEventArgs e)
     {
-        var confirm = new ContentDialog
+        if (App.MainWindow is not { } owner)
         {
-            XamlRoot = XamlRoot,
-            Title = ViewModel.DeactivateLabelText,
-            Content = ViewModel.DeactivateExplanationText,
-            PrimaryButtonText = ViewModel.DeactivateLabelText,
-            CloseButtonText = ViewModel.BackLabelText,
-            DefaultButton = ContentDialogButton.Close,
-        };
+            return;
+        }
 
-        if (await confirm.ShowAsync() != ContentDialogResult.Primary)
+        var outcome = await MessageDialogHost.AskAsync(owner, new MessageDialogRequest
+        {
+            Kind = MessageKind.DestructiveConfirm,
+            Title = ViewModel.DeactivateLabelText,
+            Message = ViewModel.DeactivateExplanationText,
+            ActLabel = ViewModel.DeactivateLabelText,
+            CancelLabel = ViewModel.BackLabelText,
+        });
+
+        if (!outcome.IsAct)
         {
             return;
         }
@@ -62,17 +67,21 @@ public sealed partial class EditUserPage : Page
     /// </summary>
     private async void OnResetClick(object sender, RoutedEventArgs e)
     {
-        var confirm = new ContentDialog
+        if (App.MainWindow is not { } owner)
         {
-            XamlRoot = XamlRoot,
-            Title = ViewModel.ResetPasswordLabelText,
-            Content = ViewModel.ResetConfirmationText,
-            PrimaryButtonText = ViewModel.ResetPasswordLabelText,
-            CloseButtonText = ViewModel.BackLabelText,
-            DefaultButton = ContentDialogButton.Close,
-        };
+            return;
+        }
 
-        if (await confirm.ShowAsync() != ContentDialogResult.Primary)
+        var outcome = await MessageDialogHost.AskAsync(owner, new MessageDialogRequest
+        {
+            Kind = MessageKind.DestructiveConfirm,
+            Title = ViewModel.ResetPasswordLabelText,
+            Message = ViewModel.ResetConfirmationText,
+            ActLabel = ViewModel.ResetPasswordLabelText,
+            CancelLabel = ViewModel.BackLabelText,
+        });
+
+        if (!outcome.IsAct)
         {
             return;
         }

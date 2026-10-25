@@ -1,4 +1,4 @@
-﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
@@ -9,6 +9,7 @@ using MTM_Waitlist.Module_Startup.Services;
 using MTM_Waitlist.ViewModels;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
+using MTM_Waitlist.Module_Shared.Dialogs;
 
 using Windows.System;
 
@@ -221,16 +222,19 @@ public sealed partial class ShellPage : Page
             return;
         }
 
-        // ShowAsync returns IAsyncOperation and must not be awaited through ConfigureAwait on this thread.
-        var dialog = new ContentDialog
+        if (App.MainWindow is not { } owner)
         {
-            XamlRoot = XamlRoot,
-            Title = "Shell_SignOut_Failed.Title".GetLocalized(),
-            Content = result.Message,
-            CloseButtonText = "Shell_SignOut.Close".GetLocalized(),
-        };
+            // No window to own the dialog; the failure is only in the log, which the caller already wrote.
+            return;
+        }
 
-        await dialog.ShowAsync();
+        await MessageDialogHost.AskAsync(owner, new MessageDialogRequest
+        {
+            Kind = MessageKind.Acknowledge,
+            Title = "Shell_SignOut_Failed.Title".GetLocalized(),
+            Message = result.Message,
+            CancelLabel = "Shell_SignOut.Close".GetLocalized(),
+        });
     }
 
     private void TitleBarSearchBox_TextChanged(

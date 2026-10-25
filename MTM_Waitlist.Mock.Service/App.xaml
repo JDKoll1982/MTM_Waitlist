@@ -6,7 +6,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />`r`n                <!-- The shared dialog sizing scale, so the console asks its questions at the same size the operator`r`n                     application does (014-adopt-lab-design-system, FR-004, FR-029). -->`r`n                <ResourceDictionary Source="/Styles/Dialogs.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
