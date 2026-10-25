@@ -1,4 +1,4 @@
-﻿using System.Threading;
+using System.Threading;
 
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -105,7 +105,9 @@ internal sealed partial class BlockedStatePage : Page, ILaunchStageSurface
                 {
                     Kind = MessageKind.DestructiveConfirm,
                     Title = ViewModel.ResetPreviewTitleText,
-                    Message = ViewModel.RestoreDefaultsPreview,
+                    Message = string.IsNullOrWhiteSpace(ViewModel.RestoreDefaultsPreview)
+                        ? "Resetting returns every setting on this machine to its shipped value."
+                        : ViewModel.RestoreDefaultsPreview,
                     ActLabel = ViewModel.ResetPreviewConfirmText,
                     CancelLabel = ViewModel.ResetPreviewCancelText,
                 });

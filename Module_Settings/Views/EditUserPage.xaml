@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="MTM_Waitlist.Module_Settings.Views.EditUserPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -13,7 +13,7 @@
         in a clearly separated area below, each with its own heading, and no control carries a fixed width.
     -->
     <ScrollViewer Padding="24">
-        <StackPanel Spacing="16" MaxWidth="720" HorizontalAlignment="Left">
+        <StackPanel Spacing="16" MaxWidth="{StaticResource PageContentMaxWidth}" HorizontalAlignment="Left">
 
             <Grid ColumnSpacing="12">
                 <Grid.ColumnDefinitions>

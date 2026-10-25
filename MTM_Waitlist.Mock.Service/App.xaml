@@ -5,8 +5,16 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Application.Resources>
         <ResourceDictionary>
+            <!--
+                The console deliberately does not merge /Styles/Dialogs.xaml: that file lives in the operator
+                application's project, and this is a separate application with its own PRI, so a Source pointing at it
+                would resolve to nothing. MTM_Waitlist.Module_Shared.Dialogs.DialogSizing reads the five keys when the
+                dictionary is present and falls back to the same five numbers when it is not, which is what keeps the
+                console's dialogs the same size as the operator's without a second copy of the file
+                (014-adopt-lab-design-system, FR-004, FR-032).
+            -->
             <ResourceDictionary.MergedDictionaries>
-                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />`r`n                <!-- The shared dialog sizing scale, so the console asks its questions at the same size the operator`r`n                     application does (014-adopt-lab-design-system, FR-004, FR-029). -->`r`n                <ResourceDictionary Source="/Styles/Dialogs.xaml" />
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

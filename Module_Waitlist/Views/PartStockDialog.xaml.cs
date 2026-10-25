@@ -1,7 +1,8 @@
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Shared.Dialogs;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
 
 namespace MTM_Waitlist.Module_Waitlist.Views;
@@ -10,7 +11,11 @@ namespace MTM_Waitlist.Module_Waitlist.Views;
 /// The window opened from the part number on a Deliver Component card. It lists where the part is held, the
 /// total on hand, and whether the WIP Application or Infor Visual supplied the answer.
 /// </summary>
-public sealed partial class PartStockDialog : ContentDialog
+/// <remarks>
+/// The body of a windowed dialog rather than a dialog of its own: it opens in its own window owned by the main one
+/// (014-adopt-lab-design-system, FR-001, FR-002).
+/// </remarks>
+public sealed partial class PartStockDialog : UserControl
 {
     /// <summary>The window's view model.</summary>
     public PartStockDialogViewModel ViewModel
@@ -24,24 +29,33 @@ public sealed partial class PartStockDialog : ContentDialog
     {
         InitializeComponent();
         ViewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
-        Title = ViewModel.TitleText;
-        CloseButtonText = ViewModel.CloseText;
+
+        MinWidth = DialogSizing.MinWidth;
+        Width = DialogSizing.PreferredWidth;
+        MaxHeight = DialogSizing.MaxBodyHeight;
     }
 
     /// <summary>
-    /// Shows the window for a part. The root a dialog is shown from must be set explicitly in WinUI 3, so it is
-    /// set here rather than left to the caller.
+    /// Shows the window for a part, owned by <paramref name="owner"/>.
     /// </summary>
     /// <param name="partNumber">The part to look up.</param>
-    /// <param name="xamlRoot">The root the window is shown from.</param>
-    public async Task ShowForAsync(string partNumber, XamlRoot xamlRoot)
+    /// <param name="owner">The application window the dialog is centred on and belongs to.</param>
+    public async Task ShowWindowedAsync(string partNumber, Window owner)
     {
-        ArgumentNullException.ThrowIfNull(xamlRoot);
-        XamlRoot = xamlRoot;
+        ArgumentNullException.ThrowIfNull(owner);
+
+        var host = WindowedDialogHost.Create(
+            owner,
+            ViewModel.TitleText,
+            this,
+            actLabel: null,
+            cancelLabel: ViewModel.CloseText,
+            MessageDialogButton.Cancel);
 
         // The lookup runs while the window is open, so it appears at once with a progress ring.
         _ = LoadAsync(partNumber);
-        await ShowAsync();
+
+        await host.ShowAsync();
     }
 
     private async Task LoadAsync(string partNumber)

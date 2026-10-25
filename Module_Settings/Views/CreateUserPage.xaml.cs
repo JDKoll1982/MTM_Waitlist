@@ -1,4 +1,4 @@
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
 using MTM_Waitlist.Module_Core.Helpers;
@@ -38,10 +38,13 @@ public sealed partial class CreateUserPage : Page
             return;
         }
 
-        var dialog = new PinRevealDialog(App.GetService<PinRevealDialogViewModel>());
-        dialog.ShowFor(credential, XamlRoot);
+        if (App.MainWindow is not { } owner)
+        {
+            return;
+        }
 
-        await dialog.ShowAsync();
+        var dialog = new PinRevealDialog(App.GetService<PinRevealDialogViewModel>());
+        await dialog.ShowWindowedAsync(owner, credential);
 
         ViewModel.DismissIssuedCredential();
     }

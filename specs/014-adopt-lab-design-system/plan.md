@@ -129,3 +129,63 @@ gaining only the windowed host and the shared sizing.
 | VII. Readable, End-User-Facing Delivery | PASS. Remaining replies state what changed and what is still open, with outstanding actions last. |
 
 No unresolved gate failures, so no Complexity Tracking table is needed.
+
+## Implementation notes — what the build taught us
+
+Recorded during `/speckit.companion.implement`, because each of these changed a decision the plan had made. Every one is
+verified: the build is clean with zero warnings and the suite is green (2412 passed, 56 skipped, 0 failed).
+
+### N1 — DevWinUI cannot be referenced from a class library at WindowsAppSDK 2.3.1
+
+`applying <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>` to a class library is refused outright, and
+without it the component check rejects DevWinUI 10.8.0, whose own dependency set is `Microsoft.WindowsAppSDK.Foundation
+2.3.9` and `Microsoft.WindowsAppSDK.WinUI 2.3.6` against a 2.3.1 runtime that expects 2.3.5 and 2.3.0.
+
+Resolved by moving the umbrella package to **2.4.0 across all twelve projects**, because `Microsoft.WindowsAppSDK.Runtime
+2.4.0` expects exactly Foundation 2.3.9 and WinUI 2.3.6 — the set DevWinUI already forces. A partial bump is not
+possible: NuGet unifies the version upwards, so any single project left at 2.3.1 fails with NU1605. The runtime the
+application ships was already those assemblies; 2.4.0 aligns the manifests with them.
+
+### N2 — XAML in a referenced class library is compiled twice by a root project
+
+`MTM_Waitlist.csproj` sits at the repository root, so its default `**/*.xaml`, `**/*.pri` and content globs reach into
+every sibling project — including their `bin\` folders, which `DefaultItemExcludes` covers only for this project's own
+output. The shared message body produced WMC0610, then PRI175/PRI277, then CS0436. Fixed by removing
+`MTM_Waitlist.Shared\**\*` and every nested `bin\`/`obj\` from the `Page`, `ApplicationDefinition`, `PRIResource`,
+`Content` and `None` globs. The library ships its own `.pri`, which is how its XAML reaches the application.
+
+### N3 — `WindowedContentDialog` is not a `ContentDialog`, and that changes three dialogs
+
+Its public surface was read from the package, not assumed: `Header`, `Content`, three `*ButtonContent` slots, three
+`*ButtonCommand` slots, `IsPrimaryButtonEnabled`, `DefaultButton`, `Owner`, `Result`, `HasTitleBar`, `CanResize`,
+`MinWidth`, `MinHeight`, `ShowAsync() → Task<ContentDialogResult>`, and `PrimaryButtonClick`/`SecondaryButtonClick`/
+`CloseButtonClick` as plain `EventHandler`. There is **no** `Opened`, `Closed`, `Closing`, or `Hide()`, and the button
+event fires **after** the window has already closed, so a press cannot be refused.
+
+Three behaviours therefore had to change, and each is reported rather than hidden:
+
+- **A failed save can no longer hold its window open.** The two picture editors and the lugger name question now run
+  their write after the window closes and, if it is refused, say so through the `Retry` message and reopen the editor
+  over the edits the view model still holds. Nothing typed is lost; the person sees the same sentence they used to see
+  inside the window, one window later.
+- **The dunnage image search gained an accept button** (`Use this part`, disabled until a card is chosen), because a
+  card click used to close the window and the window can no longer be closed from its content.
+- **A double-click in the work-order search selects rather than closes**, for the same reason.
+
+### N4 — the service console does not merge `Styles/Dialogs.xaml`
+
+It is a separate application with its own PRI, so a `Source` pointing into the operator application's project resolves
+to nothing. `DialogSizing` reads the five keys when the dictionary is present and falls back to the same five numbers
+when it is not, which keeps the console's dialogs the same size without a second copy of the file.
+
+### N5 — the shell is the frame, not a content screen
+
+`Module_Core/Views/ShellPage.xaml` holds the navigation pane and the page frame; capping it would cap the pane with it.
+Every page it navigates to carries the ceiling, and the extended page-content audit requires that of every page the
+inventory lists.
+
+### N6 — the kind decides the slot, the screen decides the word
+
+FR-009 fixes the order, the position and the default per kind; FR-027 preserves each screen's wording. Both hold because
+a screen may name its own affirmative and dismissive labels — "Remove", "Clear all", "Yes" — while the kind still
+decides which slot they sit in and which one Enter takes.

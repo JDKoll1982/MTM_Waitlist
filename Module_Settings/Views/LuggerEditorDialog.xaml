@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <UserControl
     x:Class="MTM_Waitlist.Module_Settings.Views.LuggerEditorDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -7,7 +7,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:wct="using:CommunityToolkit.WinUI.Controls"
     AutomationProperties.AutomationId="LuggerEditorDialog_Dialog"
-    MinWidth="480"
     mc:Ignorable="d">
 
     <!--
@@ -23,11 +22,10 @@
         dialog host places it rather than the window; the alignment here states that rather than working around it.
     -->
     <ScrollViewer
-        MaxHeight="560"
         HorizontalScrollBarVisibility="Disabled"
         HorizontalScrollMode="Disabled"
         VerticalScrollBarVisibility="Auto">
-        <StackPanel MinWidth="440" Spacing="12">
+        <StackPanel Spacing="12">
 
             <!-- What the last action answered, or what the editor is waiting for. -->
             <TextBlock

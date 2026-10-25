@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="MTM_Waitlist.Mock.Service.Views.ServiceStatusPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -14,7 +14,7 @@
         where the title bar and the navigation pane end instead of leaving a band of empty space down the
         left of the surface.
     -->
-    <ScrollViewer Padding="24">
+    <ScrollViewer MaxWidth="{StaticResource PageContentMaxWidth}" Padding="24">
         <StackPanel Spacing="16">
 
             <Grid ColumnSpacing="16">

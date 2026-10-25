@@ -1,4 +1,4 @@
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
@@ -117,12 +117,14 @@ public sealed partial class LuggerArrangementPage : Page
 
     private async Task ShowNameDialogAsync(string actionText, Func<Task> accept)
     {
-        var dialog = new LuggerNameDialog(ViewModel, actionText, actionText, accept)
+        if (App.MainWindow is not { } owner)
         {
-            XamlRoot = XamlRoot,
-        };
+            return;
+        }
 
-        await dialog.ShowAsync();
+        var dialog = new LuggerNameDialog(ViewModel, actionText, actionText, accept);
+
+        await dialog.ShowWindowedAsync(owner);
     }
 
     /// <summary>The place a card holds in the grid as it stands, or <c>-1</c> when it is not there.</summary>

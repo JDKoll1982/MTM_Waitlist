@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="MTM_Waitlist.Module_Settings.Views.LuggerArrangementPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -75,7 +75,7 @@
 
     <Grid x:Name="RootPage" Padding="24">
         <ScrollViewer VerticalScrollBarVisibility="Auto" VerticalScrollMode="Enabled">
-            <StackPanel MaxWidth="960" Spacing="16">
+            <StackPanel MaxWidth="{StaticResource PageContentMaxWidth}" Spacing="16">
 
                 <TextBlock Style="{ThemeResource TitleTextBlockStyle}" Text="{x:Bind ViewModel.TitleText}" />
 

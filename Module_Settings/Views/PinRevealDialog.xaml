@@ -1,14 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ContentDialog
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UserControl
     x:Class="MTM_Waitlist.Module_Settings.Views.PinRevealDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
-    mc:Ignorable="d"
-    DefaultButton="None">
-
+    mc:Ignorable="d">
     <!--
         There is deliberately no CloseButton and no PrimaryButton: the two buttons the reader may use sit inside
         this dialog's own content, so the only close that is accepted is the one that comes from them. Escape, the
@@ -65,16 +63,13 @@
             TextWrapping="Wrap"
             Visibility="{x:Bind ViewModel.HasMessage, Mode=OneWay}" />
 
-        <StackPanel Orientation="Horizontal" Spacing="12">
-            <Button
-                AutomationProperties.AutomationId="PinRevealDialog_Print"
-                Click="OnPrintClick"
-                Content="{x:Bind ViewModel.PrintLabelText}" />
-            <Button
-                AutomationProperties.AutomationId="PinRevealDialog_Close"
-                Click="OnCloseClick"
-                Content="{x:Bind ViewModel.CloseLabelText}"
-                Style="{ThemeResource AccentButtonStyle}" />
-        </StackPanel>
+        <!--
+            Printing only. Close is the window's own button, because the window cannot be told to close from inside
+            its content and the deliberate close has to be the one the window offers.
+        -->
+        <Button
+            AutomationProperties.AutomationId="PinRevealDialog_Print"
+            Click="OnPrintClick"
+            Content="{x:Bind ViewModel.PrintLabelText}" />
     </StackPanel>
-</ContentDialog>
+</UserControl>

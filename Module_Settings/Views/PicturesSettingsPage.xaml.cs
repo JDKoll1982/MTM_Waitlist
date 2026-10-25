@@ -38,22 +38,24 @@ public sealed partial class PicturesSettingsPage : Page
 
     private async void RequestItemImages_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new RequestItemImagesDialog(App.GetService<RequestItemImagesDialogViewModel>())
+        if (App.MainWindow is not { } owner)
         {
-            XamlRoot = XamlRoot
-        };
+            return;
+        }
 
-        await dialog.ShowAsync();
+        await new RequestItemImagesDialog(App.GetService<RequestItemImagesDialogViewModel>())
+            .ShowWindowedAsync(owner);
     }
 
     private async void WorkCenterImages_Click(object sender, RoutedEventArgs e)
     {
-        var dialog = new WorkCenterImagesDialog(App.GetService<WorkCenterImagesDialogViewModel>())
+        if (App.MainWindow is not { } owner)
         {
-            XamlRoot = XamlRoot
-        };
+            return;
+        }
 
-        await dialog.ShowAsync();
+        await new WorkCenterImagesDialog(App.GetService<WorkCenterImagesDialogViewModel>())
+            .ShowWindowedAsync(owner);
     }
 
     /// <summary>Stores the two storage folders and the retention period that are in the boxes.</summary>

@@ -1,4 +1,4 @@
-<Page
+﻿<Page
     x:Class="MTM_Waitlist.Module_Startup.Views.SplashPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -26,7 +26,11 @@
         The error strip is its own row rather than something laid over the rows above it, so a stated cause never
         covers what a person is reading (FR-005).
     -->
-    <Grid Padding="32,28" RowSpacing="16" VerticalAlignment="Center">
+    <Grid
+        MaxWidth="{StaticResource PageContentMaxWidth}"
+        Padding="32,28"
+        RowSpacing="16"
+        VerticalAlignment="Center">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />

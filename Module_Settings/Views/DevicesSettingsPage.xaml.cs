@@ -1,4 +1,4 @@
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 
@@ -42,12 +42,14 @@ public sealed partial class DevicesSettingsPage : Page
         var editViewModel = App.GetService<ComputerEditDialogViewModel>();
         editViewModel.ConfigureForAdd();
 
-        var dialog = new ComputerEditDialog(editViewModel)
+        if (App.MainWindow is not { } owner)
         {
-            XamlRoot = XamlRoot
-        };
+            return;
+        }
 
-        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        var dialog = new ComputerEditDialog(editViewModel);
+
+        if (await dialog.ShowWindowedAsync(owner))
         {
             await ViewModel.ComputerManagement.LoadAsync();
         }
@@ -64,12 +66,14 @@ public sealed partial class DevicesSettingsPage : Page
         var editViewModel = App.GetService<ComputerEditDialogViewModel>();
         editViewModel.ConfigureForEdit(selected);
 
-        var dialog = new ComputerEditDialog(editViewModel)
+        if (App.MainWindow is not { } owner)
         {
-            XamlRoot = XamlRoot
-        };
+            return;
+        }
 
-        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        var dialog = new ComputerEditDialog(editViewModel);
+
+        if (await dialog.ShowWindowedAsync(owner))
         {
             await ViewModel.ComputerManagement.LoadAsync();
         }

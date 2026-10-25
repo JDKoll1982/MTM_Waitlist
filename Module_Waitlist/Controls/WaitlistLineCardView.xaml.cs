@@ -1,4 +1,4 @@
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 
@@ -217,7 +217,7 @@ public partial class WaitlistLineCardView : UserControl
 
     private async void OnPartLinkClick(object sender, RoutedEventArgs e)
     {
-        if (Order?.StockLookupPartNumber is not { Length: > 0 } part || XamlRoot is null)
+        if (Order?.StockLookupPartNumber is not { Length: > 0 } part || App.MainWindow is not { } owner)
         {
             return;
         }
@@ -225,7 +225,7 @@ public partial class WaitlistLineCardView : UserControl
         try
         {
             var dialog = new MTM_Waitlist.Module_Waitlist.Views.PartStockDialog(App.GetService<PartStockDialogViewModel>());
-            await dialog.ShowForAsync(part, XamlRoot);
+            await dialog.ShowWindowedAsync(part, owner);
         }
         catch (Exception ex)
         {

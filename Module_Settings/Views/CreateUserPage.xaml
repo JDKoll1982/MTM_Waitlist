@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="MTM_Waitlist.Module_Settings.Views.CreateUserPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -13,7 +13,7 @@
         localised through the view model rather than through x:Uid, so the resource map keeps one owner.
     -->
     <ScrollViewer Padding="24">
-        <StackPanel Spacing="16" MaxWidth="720" HorizontalAlignment="Left">
+        <StackPanel Spacing="16" MaxWidth="{StaticResource PageContentMaxWidth}" HorizontalAlignment="Left">
 
             <TextBlock Style="{ThemeResource TitleTextBlockStyle}" Text="{x:Bind ViewModel.TitleText}" />
             <TextBlock

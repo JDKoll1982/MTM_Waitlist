@@ -1,9 +1,8 @@
-using DevWinUI;
-
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
 using MTM_Waitlist.Module_Settings.ViewModels;
+using MTM_Waitlist.Module_Shared.Dialogs;
 
 namespace MTM_Waitlist.Module_Settings.Views;
 
@@ -29,6 +28,10 @@ public sealed partial class LuggerEditorDialog : UserControl
     {
         ViewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
         InitializeComponent();
+
+        MinWidth = DialogSizing.MinWidth;
+        Width = DialogSizing.PreferredWidth;
+        MaxHeight = DialogSizing.MaxBodyHeight;
     }
 
     public LuggerArrangementViewModel ViewModel
@@ -44,14 +47,13 @@ public sealed partial class LuggerEditorDialog : UserControl
     /// <returns>The button the window was closed with.</returns>
     public async Task<ContentDialogResult> ShowWindowedAsync(string header, Window owner)
     {
-        var dialog = new WindowedContentDialog
-        {
-            Header = header,
-            Content = this,
-            CloseButtonContent = ViewModel.CloseEditorActionText,
-            DefaultButton = ContentDialogButton.Close,
-            Owner = owner,
-        };
+        var dialog = WindowedDialogHost.Create(
+            owner,
+            header,
+            this,
+            actLabel: null,
+            cancelLabel: ViewModel.CloseEditorActionText,
+            MessageDialogButton.Cancel);
 
         return await dialog.ShowAsync();
     }

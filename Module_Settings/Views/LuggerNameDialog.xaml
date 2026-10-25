@@ -1,20 +1,16 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ContentDialog
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UserControl
     x:Class="MTM_Waitlist.Module_Settings.Views.LuggerNameDialog"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     AutomationProperties.AutomationId="LuggerNameDialog_Dialog"
-    CloseButtonText="{x:Bind ViewModel.CancelActionText}"
-    DefaultButton="Primary"
     HorizontalAlignment="Center"
-    PrimaryButtonClick="OnAccepted"
     VerticalAlignment="Center">
-
     <!--
         Adding a lugger and renaming one ask the same question — what is it called — so they are one window, opened
         with a different title and a different action behind its primary button (FR-003).
     -->
-    <StackPanel MinWidth="380" Spacing="14">
+    <StackPanel Spacing="14">
         <TextBlock
             Style="{ThemeResource BodyTextBlockStyle}"
             Text="{x:Bind ViewModel.MessageText, Mode=OneWay}"
@@ -25,4 +21,4 @@
             Header="{x:Bind ViewModel.NameLabelText}"
             Text="{x:Bind ViewModel.LuggerNameInput, Mode=TwoWay}" />
     </StackPanel>
-</ContentDialog>
+</UserControl>

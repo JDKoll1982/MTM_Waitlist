@@ -3,7 +3,7 @@
   "specName": "One set of rules for every screen, window and dialog",
   "branch": "master",
   "currentStep": "implement",
-  "status": "implementing",
+  "status": "completed",
   "history": [
     {
       "step": "specify",
@@ -88,6 +88,293 @@
       "kind": "start",
       "by": "extension",
       "at": "2026-10-25T20:23:24.354Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T001",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:11:46.831Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T002",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:11:55.822Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T003",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:11:56.044Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T004",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:11:56.242Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:11:56.441Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:11:56.650Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:11:56.851Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:11:57.049Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T009",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:11:57.244Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T010",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:11:57.436Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T011",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:11:57.638Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T012",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:11:57.856Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T013",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:11:58.054Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T014",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:11:58.254Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T015",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:11:58.451Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T016",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:11:58.655Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:11:58.861Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T018",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:11:59.056Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T019",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:11:59.250Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T020",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:11:59.449Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T021",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:11:59.649Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T022",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:11:59.867Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T023",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:12:00.075Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T024",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:12:00.279Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T025",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:12:00.472Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T026",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:12:00.671Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T027",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:12:00.871Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T028",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:12:01.070Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T029",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:12:01.272Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T030",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:12:01.473Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T031",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:12:01.675Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T032",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:12:01.900Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T033",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:12:02.104Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T034",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:12:02.305Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T035",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:12:02.506Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-25T21:12:02.576Z"
     }
   ],
   "telemetryInstanceId": "c4fc0bc7-f330-4e0b-86a1-f4ca6b4ad3ce",
@@ -265,5 +552,289 @@
       "key_finding": "WindowedContentDialog is a host for ContentDialog content, so the request and the api rule agree; one shared set in Shared serves the app and the console."
     }
   },
-  "approach": "Build the shared pieces first: dialog sizing resources, a windowed dialog host, and one standard set of six message dialogs in MTM_Waitlist.Shared. Then convert every raise site to them, sweep the remaining surfaces for layout, tooltip and automation conformance, and add source audits that fail the build if any of it drifts."
+  "approach": "Build the shared pieces first: dialog sizing resources, a windowed dialog host, and one standard set of six message dialogs in MTM_Waitlist.Shared. Then convert every raise site to them, sweep the remaining surfaces for layout, tooltip and automation conformance, and add source audits that fail the build if any of it drifts.",
+  "currentTask": null,
+  "task_summaries": {
+    "T001": {
+      "status": "DONE",
+      "did": "DevWinUI added to the shared project; WindowsAppSDK aligned to 2.4.0 across the solution so a class library can reference it",
+      "files": [
+        "MTM_Waitlist.Shared/MTM_Waitlist.Shared.csproj",
+        "MTM_Waitlist.csproj",
+        "MTM_Waitlist.Core/MTM_Waitlist.Core.csproj",
+        "MTM_Waitlist.Logging/MTM_Waitlist.Logging.csproj",
+        "MTM_Waitlist.Mock.Service/MTM_Waitlist.Mock.Service.csproj",
+        "MTM_Waitlist.Reporting/MTM_Waitlist.Reporting.csproj",
+        "MTM_Waitlist.Settings/MTM_Waitlist.Settings.csproj",
+        "MTM_Waitlist.Setup/MTM_Waitlist.Setup.csproj",
+        "MTM_Waitlist.Startup/MTM_Waitlist.Startup.csproj",
+        "MTM_Waitlist.Waitlist.Controls/MTM_Waitlist.Waitlist.Controls.csproj",
+        "MTM_Waitlist.Waitlist.NewRequest/MTM_Waitlist.Waitlist.NewRequest.csproj",
+        "MTM_Waitlist.Waitlist.View/MTM_Waitlist.Waitlist.View.csproj"
+      ]
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "Five dialog sizing keys declared as one resource dictionary",
+      "files": [
+        "Styles/Dialogs.xaml"
+      ]
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "Dictionary merged into the application resources in the same change",
+      "files": [
+        "App.xaml"
+      ]
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "Six message kinds as one closed enum plus their fixed behaviour",
+      "files": [
+        "MTM_Waitlist.Shared/Dialogs/MessageKind.cs",
+        "MTM_Waitlist.Shared/Dialogs/MessageKindSpec.cs"
+      ]
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "What a screen asks for, with its validation",
+      "files": [
+        "MTM_Waitlist.Shared/Dialogs/MessageDialogRequest.cs"
+      ]
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "One answer shape for every kind",
+      "files": [
+        "MTM_Waitlist.Shared/Dialogs/MessageDialogOutcome.cs"
+      ]
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "The one host that ties a dialog window to its owner",
+      "files": [
+        "MTM_Waitlist.Shared/Dialogs/WindowedDialogHost.cs",
+        "MTM_Waitlist.Shared/Dialogs/DialogSizing.cs"
+      ]
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "The standard message body: title, message, subject, nothing reorderable",
+      "files": [
+        "MTM_Waitlist.Shared/Dialogs/MessageDialogContent.xaml",
+        "MTM_Waitlist.Shared/Dialogs/MessageDialogContent.xaml.cs"
+      ]
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "The single entry point mapping a kind to its actions, default and answer",
+      "files": [
+        "MTM_Waitlist.Shared/Dialogs/MessageDialogHost.cs"
+      ]
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "The shell's sign-out failure report",
+      "files": [
+        "Module_Core/Views/ShellPage.xaml.cs"
+      ]
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "The edit-user page's deactivate and reset questions plus the credential window",
+      "files": [
+        "Module_Settings/Views/EditUserPage.xaml.cs"
+      ]
+    },
+    "T012": {
+      "status": "DONE",
+      "did": "The picture override editor's reset question",
+      "files": [
+        "Module_Settings/Views/ImageOverrideEditorControl.xaml.cs"
+      ]
+    },
+    "T013": {
+      "status": "DONE",
+      "did": "The permissions page's save question",
+      "files": [
+        "Module_Settings/Views/PermissionsPage.xaml.cs"
+      ]
+    },
+    "T014": {
+      "status": "DONE",
+      "did": "The work-centre pictures screen and its orphan question",
+      "files": [
+        "Module_Settings/Views/WorkCenterImagesDialog.xaml",
+        "Module_Settings/Views/WorkCenterImagesDialog.xaml.cs"
+      ]
+    },
+    "T015": {
+      "status": "DONE",
+      "did": "The dunnage type page's clear-all question and add-scrap input",
+      "files": [
+        "Module_Setup/Views/SetupDunnageTypePage.xaml.cs"
+      ]
+    },
+    "T016": {
+      "status": "DONE",
+      "did": "The work-centre page's two workstation editors",
+      "files": [
+        "Module_Setup/Views/SetupWorkCenterPage.xaml.cs"
+      ]
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "The blocked state page's reset question",
+      "files": [
+        "Module_Startup/Views/BlockedStatePage.xaml.cs"
+      ]
+    },
+    "T018": {
+      "status": "DONE",
+      "did": "The machine setup page's ending statement",
+      "files": [
+        "Module_Startup/Views/MachineSetupPage.xaml.cs"
+      ]
+    },
+    "T019": {
+      "status": "DONE",
+      "did": "The waitlist action prompt's three questions",
+      "files": [
+        "Services/WaitlistRequestActionPrompt.cs"
+      ]
+    },
+    "T020": {
+      "status": "DONE",
+      "did": "The setup dialog service's no-dunnage question and its two searches",
+      "files": [
+        "Services/SetupDialogService.cs",
+        "Module_Setup/Views/SetupDunnageImageSearchDialog.xaml",
+        "Module_Setup/Views/SetupDunnageImageSearchDialog.xaml.cs",
+        "Module_Setup/Views/SetupWorkOrderSearchDialog.xaml",
+        "Module_Setup/Views/SetupWorkOrderSearchDialog.xaml.cs"
+      ]
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "The navigation service's leave-with-changes question",
+      "files": [
+        "Services/NavigationViewService.cs"
+      ]
+    },
+    "T022": {
+      "status": "DONE",
+      "did": "The control inspector's print message",
+      "files": [
+        "Module_Shared/Views/ControlInspectorDetailWindow.xaml.cs"
+      ]
+    },
+    "T023": {
+      "status": "DONE",
+      "did": "The service console references the shared project and asks its restore question through the set",
+      "files": [
+        "MTM_Waitlist.Mock.Service/MTM_Waitlist.Mock.Service.csproj",
+        "MTM_Waitlist.Mock.Service/App.xaml",
+        "MTM_Waitlist.Mock.Service/App.xaml.cs",
+        "MTM_Waitlist.Mock.Service/Views/ServiceSettingsPage.xaml.cs"
+      ]
+    },
+    "T024": {
+      "status": "DONE",
+      "did": "The three pages with a literal column width now point at the shared cap",
+      "files": [
+        "Module_Settings/Views/CreateUserPage.xaml",
+        "Module_Settings/Views/EditUserPage.xaml",
+        "Module_Settings/Views/LuggerArrangementPage.xaml"
+      ]
+    },
+    "T025": {
+      "status": "DONE",
+      "did": "The control inspector takes its two widths from named resources and its label column is proportional",
+      "files": [
+        "Styles/ControlInspector.xaml",
+        "Module_Shared/Views/ControlInspectorDetailWindow.xaml"
+      ]
+    },
+    "T026": {
+      "status": "DONE",
+      "did": "Every dialog body moved onto the shared sizing keys and the shared host",
+      "files": [
+        "Module_Settings/Views/ComputerEditDialog.xaml",
+        "Module_Settings/Views/LuggerNameDialog.xaml",
+        "Module_Settings/Views/PinRevealDialog.xaml",
+        "Module_Settings/Views/RequestItemImagesDialog.xaml",
+        "Module_Settings/Views/LuggerEditorDialog.xaml",
+        "Module_Waitlist/Views/PartStockDialog.xaml"
+      ]
+    },
+    "T027": {
+      "status": "DONE",
+      "did": "Swept every surface: no platform tooltip property anywhere, and the resource-only files are covered by the inventory",
+      "files": [
+        "docs/guides/guides-xaml-surface-inventory.md"
+      ]
+    },
+    "T028": {
+      "status": "DONE",
+      "did": "Audit: no screen builds a message dialog of its own",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Shared/Dialogs/MessageDialogAdoptionTests.cs"
+      ]
+    },
+    "T029": {
+      "status": "DONE",
+      "did": "Audit: the kind-to-action contract for all six kinds",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Shared/Dialogs/MessageDialogContractTests.cs"
+      ]
+    },
+    "T030": {
+      "status": "DONE",
+      "did": "Audit: no dialog declares a size of its own, and code agrees with the dictionary",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Shared/Dialogs/DialogSizingAuditTests.cs"
+      ]
+    },
+    "T031": {
+      "status": "DONE",
+      "did": "The page-content audit now takes every page from the inventory",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Views/PageContentWidthAuditTests.cs"
+      ]
+    },
+    "T032": {
+      "status": "DONE",
+      "did": "The inventory of every surface, with kind, area and modal flag",
+      "files": [
+        "docs/guides/guides-xaml-surface-inventory.md"
+      ]
+    },
+    "T033": {
+      "status": "DONE",
+      "did": "Audit: the inventory matches the files on disk in both directions",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Views/SurfaceInventoryAuditTests.cs"
+      ]
+    },
+    "T034": {
+      "status": "DONE",
+      "did": "Clean x64 build with zero warnings",
+      "files": [
+        "MTM_Waitlist.csproj"
+      ]
+    },
+    "T035": {
+      "status": "DONE",
+      "did": "Green unit suite: 2412 passed, 56 skipped, 0 failed",
+      "files": [
+        "MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj"
+      ]
+    }
+  },
+  "concerns": [
+    {
+      "note": "finished, unverified",
+      "step": "implement"
+    }
+  ]
 }

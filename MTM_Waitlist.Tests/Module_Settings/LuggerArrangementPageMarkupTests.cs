@@ -1,4 +1,4 @@
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -218,8 +218,10 @@ public sealed class LuggerArrangementPageMarkupTests
 
         var dialog = LoadDialog("LuggerNameDialog.xaml");
 
-        Assert.AreEqual(s_presentation + "ContentDialog", dialog.Name, "The name question is no longer a window.");
-        Assert.AreEqual("OnAccepted", (string?)dialog.Attribute("PrimaryButtonClick"), "Accepting the name window runs no action.");
+        // The question is the body of a windowed dialog now: its own window, owned by the main one, with the accept
+        // button supplied by the host (014-adopt-lab-design-system, FR-001). The accept action therefore sits on the
+        // show call rather than on the markup.
+        Assert.AreEqual(s_presentation + "UserControl", dialog.Name, "The name question is no longer one hostable body.");
         Assert.AreEqual(
             1,
             dialog.Descendants(s_presentation + "TextBox")
