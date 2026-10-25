@@ -87,21 +87,6 @@ public static class WaitlistCardCellLayout
     public static bool CarriesBottomRow(int cellCount) => FilledSlots(cellCount) > PanelColumnCount;
 
     /// <summary>
-    /// Whether the title pair is the whole of the panel's content, and is therefore centred in the zone
-    /// instead of sitting at its top (FR-024, FR-026, FR-027).
-    /// </summary>
-    /// <remarks>
-    /// A row that filled nothing resolved nothing, and <see cref="WaitlistLineCardCell.CellsToDraw"/> drops a
-    /// cell that resolved nothing — so no cells is the same statement as no data, and it is what a request
-    /// looks like while the values it needs are still missing. The panel then has one thing to draw, and a
-    /// title pair left at the top of a full-height zone reads as a card whose contents failed to load. It is
-    /// centred, and the two rows beneath it collapse to nothing rather than holding an empty cell (FR-006).
-    /// The count decides both, so a row with data of its own cannot be centred by accident.
-    /// </remarks>
-    /// <param name="cellCount">The cells the Item filled.</param>
-    public static bool TitleIsCentred(int cellCount) => FilledSlots(cellCount) == 0;
-
-    /// <summary>
     /// The slot a template's binding names in its converter parameter, so one rule answers for all four slots
     /// rather than the dictionary holding four near-identical converters.
     /// </summary>

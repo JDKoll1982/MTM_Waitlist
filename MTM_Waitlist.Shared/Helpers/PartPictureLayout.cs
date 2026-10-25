@@ -42,15 +42,18 @@ public static class PartPictureLayout
 
     /// <summary>
     /// The folder holding the hopper reference pictures, inside the application's own collection
-    /// (<c>Waitlist/Hoppers</c>).
+    /// (<c>Waitlist/hopper</c>).
     /// </summary>
     /// <remarks>
     /// The hopper pictures are keyed by the <b>size word</b> rather than by a part number, because what they
     /// picture is the size a person chose and not a part: <c>Small</c>, <c>Medium</c> and <c>Large</c>, one file
-    /// each (D22, FR-077, FR-078). That is why they sit in a folder of their own instead of under one of the
-    /// part-number family folders, and why the scope below is deliberately not one of the part scopes.
+    /// each, under any extension the application accepts (D22, FR-077, FR-078). That is why they sit in a folder of
+    /// their own instead of under one of the part-number family folders, and why the scope below is deliberately not
+    /// one of the part scopes.
+    /// The spelling matches <see cref="AppStoragePaths.HopperFolderDefault"/>, which is the folder the artwork
+    /// already lives in on the share.
     /// </remarks>
-    public const string HoppersFolder = "Hoppers";
+    public const string HoppersFolder = "hopper";
 
     /// <summary>
     /// The file-name stem of each hopper picture, in the order the size choices are offered. The stem is the
@@ -59,8 +62,24 @@ public static class PartPictureLayout
     /// </summary>
     public static readonly IReadOnlyList<string> HopperSizeCodes = ["Small", "Medium", "Large"];
 
-    /// <summary>The extension every hopper reference picture is expected to carry.</summary>
+    /// <summary>
+    /// The extension a hopper reference picture is <b>stored</b> under when this application writes one. The three
+    /// hopper pictures the plant placed on the share are JPEGs, so the lookup accepts every extension the rest of
+    /// the application already accepts (see <see cref="HopperPictureExtensions"/>) and this one is only the
+    /// preferred name.
+    /// </summary>
     public const string HopperPictureExtension = ".png";
+
+    /// <summary>
+    /// The extensions a hopper reference picture may carry, in the order the lookup tries them.
+    /// </summary>
+    /// <remarks>
+    /// The same three the application accepts for every other picture (<c>ImageStorageOptions.AllowedExtensions</c>
+    /// and the part-picture lookup): the shop's artwork is a JPEG, and pinning the hopper to <c>.png</c> alone made
+    /// the size step and the card's Size cell draw the placeholder for three files that were sitting in the folder
+    /// (2026-10-23). The picture rule reads the file's own header, so the extension is a name rather than a format.
+    /// </remarks>
+    public static readonly IReadOnlyList<string> HopperPictureExtensions = [".png", ".jpg", ".jpeg"];
 
     /// <summary>The store/read scope for a hopper size's reference picture.</summary>
     /// <remarks>
@@ -149,7 +168,7 @@ public static class PartPictureLayout
             return WipCollection;
         }
 
-        // A hopper size's picture lives in the application's own collection, in the `Hoppers` folder. It is not a
+        // A hopper size's picture lives in the application's own collection, in the `hopper` folder. It is not a
         // part, so it is answered before the part-family rules below rather than by them.
         if (IsHopperSizeScope(normalized))
         {
@@ -265,7 +284,7 @@ public static class PartPictureLayout
             return null;
         }
 
-        // A hopper size is filed by its size word in the `Hoppers` folder, never by a part-number family: there is
+        // A hopper size is filed by its size word in the `hopper` folder, never by a part-number family: there is
         // no part here to derive a family from, and "Large" must not be filed under the catch-all as if it were an
         // unrecognised part (D22, FR-078).
         if (IsHopperSizeScope(scope))
@@ -320,11 +339,22 @@ public static class PartPictureLayout
             : string.Empty;
 
     /// <summary>
+    /// Every file name a hopper size's reference picture may be found under, in the order the lookup tries them:
+    /// the size word with each extension the application accepts, preferred one first.
+    /// </summary>
+    /// <param name="size">The size word.</param>
+    /// <returns>The candidate file names, or none when the value is not one of the three sizes.</returns>
+    public static IReadOnlyList<string> HopperPictureFileNames(string? size) =>
+        CanonicalHopperSize(size) is { Length: > 0 } canonical
+            ? HopperPictureExtensions.Select(extension => canonical + extension).ToArray()
+            : Array.Empty<string>();
+
+    /// <summary>
     /// The path a hopper size's reference picture is stored at, relative to the configured picture root.
     /// </summary>
     /// <param name="size">The size word.</param>
     /// <returns>
-    /// The relative path, for example <c>Waitlist/Hoppers/Large.png</c>, or <see langword="null"/> when the value
+    /// The relative path, for example <c>Waitlist/hopper/Large.png</c>, or <see langword="null"/> when the value
     /// is not one of the three sizes.
     /// </returns>
     public static string? HopperPictureRelativePath(string? size)

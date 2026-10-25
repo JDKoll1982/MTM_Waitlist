@@ -102,7 +102,7 @@ is not. `UrgencyCalculator.OrderMostUrgentFirst` is the existing home for the or
 that method returns domain records that carry no urgency state, and the seeded requirement puts the
 ordering in the list view model. Adding a new sort helper — rejected: the helper exists.
 
-**Note**: the "My Requests" filter narrows the same ordered list rather than re-sorting it, so the
+**Note**: the Local Work Centers filter narrows the same ordered list rather than re-sorting it, so the
 filtered view keeps the urgency order.
 
 ---

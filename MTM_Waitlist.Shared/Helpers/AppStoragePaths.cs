@@ -43,6 +43,30 @@ public static class AppStoragePaths
     public const string DunnageRootDefault =
         @"\\mtmanu-fs01\Expo Drive\Software Development\Live Applications\Shared\Images\Dunnage";
 
+    /// <summary>
+    /// The folder holding the three hopper reference pictures, one file per size word
+    /// (<c>Small</c>, <c>Medium</c>, <c>Large</c>, with a <c>.png</c>, <c>.jpg</c> or <c>.jpeg</c> extension).
+    /// </summary>
+    /// <remarks>
+    /// Written as the share's own name and in full rather than as a path relative to
+    /// <see cref="ImagesRootDefault"/>, because it is the one picture folder the plant names without asking: the
+    /// artwork was already on the share under <c>Images\Waitlist\hopper</c> before this application had a box for
+    /// it, so the shipped default points straight at it and a machine that has never opened the storage panel still
+    /// draws the size pictures. A drive letter would not do that — <c>X:</c> is only meaningful on a machine that
+    /// has the mapping.
+    /// </remarks>
+    public const string HopperFolderDefault = ImagesRootDefault + @"\Waitlist\hopper";
+
+    /// <summary>
+    /// The folder the lugger pictures sit in, one file per lugger named <c>Lugger01</c> … <c>Lugger99</c>.
+    /// </summary>
+    /// <remarks>
+    /// Given in full rather than beneath <see cref="ImagesRootDefault"/> because that is where the artwork lives, and
+    /// kept beside <see cref="HopperFolderDefault"/> because it is the same kind of decision: a plant folder the owner
+    /// changes without a new release.
+    /// </remarks>
+    public const string LuggerFolderDefault = ImagesRootDefault + @"\Waitlist\lugger";
+
     /// <summary>The sub-folder beside the pictures that a replaced picture is archived into.</summary>
     public const string ArchiveFolderName = "Archive";
 

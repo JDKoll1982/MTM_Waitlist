@@ -25,7 +25,10 @@ public sealed class WaitlistRequestSubmitResult
         new(WaitlistRequestSubmitStatus.Success, "Request submitted.", request);
 
     public static WaitlistRequestSubmitResult DuplicateWarning(WaitlistRequest request) =>
-        new(WaitlistRequestSubmitStatus.DuplicateWarningRequired, "An active matching request already exists.", request);
+        new(
+            WaitlistRequestSubmitStatus.DuplicateWarningRequired,
+            "An active matching request already exists. Only one active request is allowed for the same work center, item and detail, so this request was not raised.",
+            request);
 
     public static WaitlistRequestSubmitResult ValidationFailure(string message) =>
         new(WaitlistRequestSubmitStatus.ValidationFailure, message);

@@ -33,12 +33,17 @@ public sealed class RefreshShapeCatalogProviderTests
         "inventory_locations" =>
             "id,part_number,location,on_hand_quantity,refreshed_utc,is_seed_content",
         "disposition_input" =>
-            "id,work_order,part_number,work_order_status,open_work_order_quantity,finished_goods_quantity," +
-            "has_outside_vendor_operation,refreshed_utc,is_seed_content",
+            "id,work_order,part_number,work_center,work_order_status,open_work_order_quantity," +
+            "finished_goods_quantity,has_outside_vendor_operation,next_operation_resource_id," +
+            "has_remaining_operation,has_customer_demand,product_code,commodity_code,part_description," +
+            "refreshed_utc,is_seed_content",
         "employee_by_number" =>
             "id,employee_number,first_name,last_name,refreshed_utc,is_seed_content",
         "part_warehouse_quantities" =>
             "id,part_number,warehouse_quantity,finished_goods_quantity,refreshed_utc,is_seed_content",
+        "work_order_search" =>
+            "id,work_order_text,part_filter,customer_filter,work_order,part_number,part_description," +
+            "customer_name,work_center,status,want_date,refreshed_utc,is_seed_content",
         _ => WorkOrderLookupColumns
     };
 
@@ -49,9 +54,9 @@ public sealed class RefreshShapeCatalogProviderTests
 
         var entries = await provider.ValidateAsync();
 
-        Assert.AreEqual(7, entries.Count, "The shipped catalog describes seven shapes.");
+        Assert.AreEqual(8, entries.Count, "The shipped catalog describes eight shapes.");
         Assert.IsTrue(entries.All(entry => entry.IsValid), "Every shape should validate against matching metadata.");
-        Assert.AreEqual(7, provider.RefreshableShapes.Count);
+        Assert.AreEqual(8, provider.RefreshableShapes.Count);
         Assert.AreEqual(0, provider.InvalidShapes.Count);
     }
 
@@ -78,9 +83,10 @@ public sealed class RefreshShapeCatalogProviderTests
                 "disposition_input",
                 "employee_by_number",
                 "part_warehouse_quantities",
+                "work_order_search",
             },
             provider.RefreshableShapes.Select(shape => shape.Key).ToArray(),
-            "all seven shapes, including the employee lookup, are on the refreshable work list");
+            "all eight shapes, including the employee lookup and the work-order search, are on the refreshable work list");
 
         Assert.AreEqual(0, provider.InvalidShapes.Count);
         Assert.AreEqual(0, provider.DisabledShapes.Count);
@@ -102,7 +108,7 @@ public sealed class RefreshShapeCatalogProviderTests
         Assert.AreEqual("employee_by_number", provider.InvalidShapes[0].Shape.Key);
         StringAssert.Contains(provider.InvalidShapes[0].InvalidReason, "Mirror column mismatch");
         StringAssert.Contains(provider.InvalidShapes[0].InvalidReason, "last_name");
-        Assert.AreEqual(6, provider.RefreshableShapes.Count, "the six remaining shapes still refresh");
+        Assert.AreEqual(7, provider.RefreshableShapes.Count, "the seven remaining shapes still refresh");
     }
 
     [TestMethod]
@@ -114,7 +120,7 @@ public sealed class RefreshShapeCatalogProviderTests
 
         var entries = await provider.ValidateAsync();
 
-        Assert.AreEqual(6, provider.RefreshableShapes.Count, "Only the broken shape should be excluded.");
+        Assert.AreEqual(7, provider.RefreshableShapes.Count, "Only the broken shape should be excluded.");
         Assert.AreEqual(1, provider.InvalidShapes.Count);
 
         var invalid = provider.InvalidShapes[0];
@@ -147,7 +153,7 @@ public sealed class RefreshShapeCatalogProviderTests
 
         var entries = await provider.ValidateAsync();
 
-        Assert.AreEqual(7, entries.Count, "Validation must still report every catalog shape.");
+        Assert.AreEqual(8, entries.Count, "Validation must still report every catalog shape.");
         Assert.AreEqual(1, provider.InvalidShapes.Count);
         Assert.AreEqual("disposition_input", provider.InvalidShapes[0].Shape.Key);
         StringAssert.Contains(provider.InvalidShapes[0].InvalidReason, "cache unreachable");
@@ -187,7 +193,7 @@ public sealed class RefreshShapeCatalogProviderTests
         await provider.ValidateAsync();
 
         Assert.AreEqual(0, provider.InvalidShapes.Count, "A parked shape is valid, not broken.");
-        Assert.AreEqual(6, provider.RefreshableShapes.Count, "A parked shape must not be refreshed.");
+        Assert.AreEqual(7, provider.RefreshableShapes.Count, "A parked shape must not be refreshed.");
         Assert.AreEqual(1, provider.DisabledShapes.Count);
         Assert.AreEqual("inventory_locations", provider.DisabledShapes[0].Key);
     }
@@ -202,7 +208,7 @@ public sealed class RefreshShapeCatalogProviderTests
 
         await provider.ValidateAsync();
 
-        Assert.AreEqual(7, provider.Entries.Count);
+        Assert.AreEqual(8, provider.Entries.Count);
     }
 
     [TestMethod]
@@ -220,7 +226,7 @@ public sealed class RefreshShapeCatalogProviderTests
             new[] { "newly_added_shape" },
             provider.UnregisteredShapeKeys.ToArray());
 
-        Assert.AreEqual(7, provider.RefreshableShapes.Count, "The seven registered shapes still refresh.");
+        Assert.AreEqual(8, provider.RefreshableShapes.Count, "The eight registered shapes still refresh.");
         Assert.AreEqual(0, provider.InvalidShapes.Count, "An unregistered shape is a gap, not an invalid catalog entry.");
     }
 
@@ -233,7 +239,7 @@ public sealed class RefreshShapeCatalogProviderTests
 
         var entries = await provider.ValidateAsync();
 
-        Assert.AreEqual(7, entries.Count, "The catalog shapes are still validated individually.");
+        Assert.AreEqual(8, entries.Count, "The catalog shapes are still validated individually.");
         Assert.AreEqual(0, provider.UnregisteredShapeKeys.Count, "An unreadable cache must not produce phantom gaps.");
     }
 

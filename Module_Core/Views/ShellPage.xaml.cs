@@ -34,7 +34,7 @@ public sealed partial class ShellPage : Page
     private void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         ViewModel.RefreshUserInfo();
-        SyncMyRequestsVisibility();
+        SyncWaitlistHeaderControls();
         ApplyNavigationItemSizing();
         OpenTheFirstPage();
 
@@ -113,17 +113,17 @@ public sealed partial class ShellPage : Page
 
     private void NavigationFrame_Navigated(object sender, Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
     {
-        SyncMyRequestsVisibility();
+        SyncWaitlistHeaderControls();
     }
 
-    private void SyncMyRequestsVisibility()
+    private void SyncWaitlistHeaderControls()
     {
         if (NavigationFrame.GetPageViewModel() is WaitlistViewViewModel waitlistViewModel)
         {
-            // The My Requests header filter applies only while the Waitlist (list) view is
+            // The Local Work Centers filter applies only while the Waitlist (list) view is
             // active; keep its toggle in sync with the active view model's filter state.
-            ViewModel.IsMyRequestsVisible = true;
-            ViewModel.ShowMyRequestsOnly = waitlistViewModel.ShowMyRequestsOnly;
+            ViewModel.IsWaitlistHeaderControlsVisible = true;
+            ViewModel.ShowLocalWorkCentersOnly = waitlistViewModel.ShowLocalWorkCentersOnly;
 
             // The sort control belongs to the list too, and the list has just resolved the order the viewer
             // remembers. Showing it here (rather than writing it) is what makes the control open on the order
@@ -132,18 +132,18 @@ public sealed partial class ShellPage : Page
         }
         else
         {
-            ViewModel.IsMyRequestsVisible = false;
+            ViewModel.IsWaitlistHeaderControlsVisible = false;
             TitleBarSearchBox.Text = string.Empty;
             TitleBarSearchBox.ItemsSource = null;
         }
     }
 
-    private void MyRequestsToggle_Toggled(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    private void LocalWorkCentersToggle_Toggled(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         if (NavigationFrame.GetPageViewModel() is WaitlistViewViewModel waitlistViewModel
             && sender is ToggleSwitch toggle)
         {
-            waitlistViewModel.ShowMyRequestsOnly = toggle.IsOn;
+            waitlistViewModel.ShowLocalWorkCentersOnly = toggle.IsOn;
         }
     }
 

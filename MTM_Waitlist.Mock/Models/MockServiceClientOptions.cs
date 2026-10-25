@@ -42,18 +42,24 @@ public sealed class MockServiceClientOptions
     /// Resolves the effective settings from the environment and configuration.
     /// </summary>
     /// <param name="configuration">Optional configuration supplying the fallback values.</param>
+    /// <param name="signedInUserName">
+    /// The name to present when neither the environment nor configuration names one: the person using the
+    /// application. The service authorizes that name against the application's own store, so presenting anyone
+    /// else would be refused — and presenting the signed-in person is exactly what "no separate installation
+    /// step" means.
+    /// </param>
     /// <returns>
-    /// The resolved settings. Individual values may be null when neither source provides them; the client
-    /// reports each missing value as an unconfigured-client outcome rather than guessing (FR-025, SC-011).
+    /// The resolved settings. The endpoint may still be null when neither source provides it, and the client
+    /// reports that as an unconfigured-client outcome rather than guessing (FR-025, SC-011).
     /// </returns>
-    public static MockServiceClientOptions Resolve(IConfiguration? configuration) => new()
+    public static MockServiceClientOptions Resolve(IConfiguration? configuration, string? signedInUserName = null) => new()
     {
         Endpoint = FirstNonEmpty(
             Environment.GetEnvironmentVariable(EndpointEnvironmentVariable),
             configuration?[$"{SectionName}:Endpoint"]),
         UserName = FirstNonEmpty(
             Environment.GetEnvironmentVariable(UserNameEnvironmentVariable),
-            configuration?[$"{SectionName}:UserName"]),
+            FirstNonEmpty(configuration?[$"{SectionName}:UserName"], signedInUserName)),
     };
 
     private static string? FirstNonEmpty(string? preferred, string? fallback)

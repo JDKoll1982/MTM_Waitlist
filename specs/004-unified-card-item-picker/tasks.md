@@ -616,7 +616,7 @@ choice came back (SC-009).
 
 **Wave 4 — the shell control, independent (different files):**
 
-- [x] **T079** [P] [US3] Add the sort control to the shell beside the existing My Requests and building controls
+- [x] **T079** [P] [US3] Add the sort control to the shell beside the existing Local Work Centers and building controls
   (FR-011) as a `MenuFlyout` of `RadioMenuFlyoutItem` elements sharing a `GroupName` with `IsChecked` on the selected
   one — the documented WinUI 3 mechanism for mutually exclusive menu options. Every item's `Text` binds to a
   localized resource. · `Module_Core/Views/ShellPage.xaml`

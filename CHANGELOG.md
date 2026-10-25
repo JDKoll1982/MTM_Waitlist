@@ -10,6 +10,171 @@
 
 ---
 
+## 2026-10-22 — a dunnage request now shows the picture of the dunnage part you asked for
+
+**What changed:** the waitlist card for a **Pickup Dunnage** or **Deliver Dunnage** request used to draw the
+no-image picture every time, even when the dunnage part had a picture. It now draws that part's picture, the same
+one the dunnage step of a new request shows.
+
+**Why it matters:** the picture is how a handler recognises the thing to go and fetch. A dunnage request whose card
+said "no picture" while the part's picture existed made the card look like a part nobody had pictured, and the
+handler had nothing to recognise until they read the part number.
+
+**What to expect:**
+
+- **The picture is the part the second line names.** A request that reads `Dunnage part: 40 x 48` draws the
+  picture of that dunnage part, on the card and on the request page.
+- **A part with no picture still shows the no-image picture,** exactly as before — including a dunnage part the
+  requesting job does not carry and nobody pictured.
+- **Nothing else about the card changed:** the two lines, the status word, the ring and the detail cells read what
+  they read before.
+
+---
+
+
+**What changed:** the Work Order box on **Start Setup** now has a magnifier beside it. It opens **Find a Work
+Order**, where you type any part of the work order number, the part number, or the customer's name, and the open
+orders that match are listed with their part, customer, work centre, status and want date. Pick a line — or
+double-click it, or press **Use Work Order** — and the order's number goes into the box and the normal search runs.
+
+**Why it matters:** the number was the one thing you had to know before you could start. Now you can find it from
+what you do know: the part you are running, or who the order is for. Nothing about the box itself changed — it still
+formats what you type and still runs the same lookup — this is an extra way to find the number.
+
+**What to expect:**
+
+- **The work-order box matches loosely.** `0752`, `WO-0752` and `752` all find the `WO-0752xx` orders, and an exact
+  number sorts to the top.
+- **The customer is the customer's real name** — `Volvo - Mack Trucks (45)`, not an account number. Searching a
+  customer finds the orders allocated to that customer.
+- **Only orders you can actually start** are listed: open work orders (released, unreleased or firmed) in the
+  `WO-######` form the box accepts. Closed and cancelled orders are not offered.
+- **A stock order shows no customer**, so it does not appear when a customer is typed.
+- **The list is capped at 200 lines**, newest want date first, so a very broad search stays quick.
+- **Press Enter in any of the three boxes to search.** The window opens on the open orders, so it is useful before
+  you type anything.
+- **It still works when Infor Visual is down** once the cache has been refreshed on the plant server; until that
+  first refresh the window has nothing cached to show and says the work orders could not be read.
+
+---
+
+## 2026-10-21 — the header switch shows the requests this computer's work centers are waiting on
+
+**What changed:** the switch in the waitlist header used to narrow the list to the requests you raised yourself. It
+now narrows it to the requests waiting at **your Local Work Centers** — the work centers assigned to the computer you
+are standing at. Its label says which way it is set: **All Requests** when it is off, **Local Work Centers** when it
+is on.
+
+**Why it matters:** the question at the machine is not "what did I send" but "what is waiting for the work centers
+this computer runs". Someone covering several presses can now see just that list, and someone at a single press sees
+only their own queue instead of the whole building.
+
+**What to expect:**
+
+- **It starts off, showing everything.** Turn it on to see the requests whose work center is one of this computer's
+  Local Work Centers, as assigned in Settings.
+- **The assignment is read when the list loads,** so a change to which work centers this computer serves is picked up
+  on the next load rather than needing a restart.
+- **The label beside the switch always says what you are looking at** — `All Requests` or `Local Work Centers` — and
+  the switch's accessible name is "Show only this computer's Local Work Centers".
+- **A filtered list that finds nothing says so.** Instead of the usual prompt to add a request, the empty screen
+  explains that nothing is waiting at this computer's Local Work Centers and that turning the filter off shows every
+  work center.
+- **The filter is matched on the work center's name,** so a name typed with stray spaces or in different case still
+  matches the request.
+- Sorting, search, and the card actions are unchanged, and the filter applies to whatever the list is showing.
+
+---
+
+## 2026-10-18 — the lugger arrangement is a wall of cards you can drag into order
+
+**What changed:** the **Lugger arrangement** page in Settings was rebuilt around its cards. Each lugger is now its
+own card carrying the lugger's name, its status in the status's own colour, the scrap types it takes, and its own
+**Edit** and **Rename** buttons. The editor opens as a window over the page instead of being drawn underneath it,
+and a new **Add lugger** button at the bottom of the cards does the same for a lugger that does not exist yet.
+
+**Why it matters:** the arrangement is about individual doors. Editing one meant picking it out of a list first,
+and the page drew a second list of scrap types that repeated what the cards already said.
+
+**What to expect:**
+
+- **Each card is one lugger**, and the status colour tells you at a glance whether it can take material. The cards
+  are drawn three across and stretch to fill the panel, so a wide window shows the whole arrangement without a
+  strip of empty space beside it.
+- **Edit opens that lugger's window.** It offers the status with its reason, the scrap types to assign or unassign,
+  and removing the lugger. It never asks which lugger you meant, and the scrap type is a drop-down rather than a
+  typed field.
+- **Make dump point only appears when it can do something** — when the chosen scrap type has a backup lugger
+  assigned and this lugger is not already the dump point.
+- **Rename sits beside Edit on the card**, and **Add lugger** is at the bottom.
+- **Drag a card to move it.** Press and hold the card's background, then drag it to another card's place; the new
+  order is saved, so it survives a reload. The buttons on a card keep their own clicks, so nothing opens by accident.
+- **Move up and Move down are gone**, replaced by the drag.
+- The separate scrap-type list is gone: each card already names the scrap types it takes.
+- **A change that cannot be saved no longer empties the page.** The cards stay as the store holds them and the page
+  says the change was not saved, instead of clearing the arrangement and reporting it as unreadable. When the cause
+  is that the database is missing part of the arrangement, the page says that too, because no amount of retrying a
+  change will fix it.
+- **Changes now save on a computer that is not on the plant network.** Reading the arrangement already knew to use
+  the local database when the plant server could not be reached; saving did not, so every edit timed out against a
+  server the machine could not see. Saving now follows the same rule as reading.
+
+---
+
+## 2026-10-18 — the scrap card puts the lugger beside the scrap type
+
+**What changed:** on a scrap request's card, `Lugger Location` is now drawn in the second column, directly beside
+`Scrap Type`, instead of following whatever order the Item's configuration happened to list its fields in.
+
+**Why it matters:** the two cells read as one sentence — the material, then where it is dumped — so a handler reads
+them left to right without hunting for the lugger. The placement is now a card rule, which means it holds on every
+store, including one whose scrap Item lists the lugger before the scrap type.
+
+**What to expect:** a scrap card whose job has a real scrap decision shows `Scrap Type` on the left and the lugger's
+name on the right, on the same line. If the job has no scrap decision, or the scrap type has no lugger configured,
+the lugger cell is still absent rather than blank, and the scrap type keeps the left column.
+
+---
+
+## 2026-10-17 — a scrap card now says which lugger to walk to, and a lead can keep that list straight
+
+**What changed:** the `Lugger Location` cell on a scrap request's card used to read "In development". It now names the
+lugger that job's scrap goes into, for example `Door 6 Lugger`, so a handler knows where to walk without asking.
+Settings also gained a **Lugger arrangement** page, opened by a Material Handler Lead and above, where the luggers,
+their status and the scrap types each one takes are kept up to date.
+
+**Why it matters:** the luggers move, get emptied, get repainted and get swapped between doors. Until now the
+application had nothing to say about which one a given scrap type used, so the cell could only admit it was unbuilt.
+
+**What to expect:**
+
+- **The scrap card names the lugger.** Each scrap type dumps through the lugger the arrangement assigns to it, and
+  the card shows that lugger's name. If the job recorded no scrap decision, or the type has no lugger configured, the
+  cell is simply not drawn rather than showing an empty value.
+- **A lugger's own status decides who is next, and nobody reconciles it by hand.** A lugger is `Available`,
+  `Backup`, `Full` or `Do Not Use`. Marking one `Full` or `Do Not Use` moves the dump point to the next usable lugger
+  for every scrap type that lugger takes, and a lugger that is emptied does not take the role back from whoever now
+  holds it. `Do Not Use` asks for a reason, and the reason stays with the change record.
+- **When no lugger can take the material, the card says so.** It names the first lugger for that type with its status
+  beside it, for example `Door 9 Lugger (Full)`, instead of going blank.
+- **A lead maintains the arrangement in Settings.** They can add a lugger, rename one, remove one, set a status, and
+  assign, order, unassign or promote the luggers for a scrap type. Every change records who made it and when, and
+  shows on the next card load with no restart.
+- **Handlers are told when the arrangement changes.** A person working the waitlist sees a small closable note above
+  the list naming what changed, once per change, within a minute. Closing it dismisses it for that person for the
+  session. Nothing is sent as an operating-system notification, and a change made before the list was opened is not
+  replayed.
+- **Nobody below Material Handler Lead can open the arrangement.** The entry is not shown to them, and the route is
+  refused even if reached another way.
+
+**Who is affected:** material handlers (the card and the notice strip), and Material Handler Leads and above (the new
+Settings page).
+
+**If the store is unreachable:** the arrangement page shows its own unavailable message with a retry, and the card
+simply draws no lugger cell. Nothing invents a lugger or shows a sample list.
+
+---
+
 ## 2026-10-10 — the waitlist card is rebuilt around what you need to see, and a handler can say what is wrong
 
 **What changed:** the waitlist card is now four panels instead of a picture, a stack of labels and a row of buttons.

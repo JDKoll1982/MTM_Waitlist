@@ -48,15 +48,14 @@
 --     edit. `Description` on the two dunnage Items is the live example — it is provably unfillable, and whether
 --     to remove it is an open question rather than a silent deletion (FR-095).
 --
---     TODO (feature 012 follow-up, FR-034 / FR-095): two declared fields have no source yet, and both are
---     deliberate rather than oversights.
---       1. `Lugger Location` on `pickup-scrap` (source `job`, order 5, below) — its source is designed but not
---          built, so the card draws an "in development" placeholder in that cell. The fix is a resolver arm,
---          NOT a seed change: delete the `pickup-scrap` entry from `WaitlistCardCellRules.s_pendingSourceLabels`
---          and add the `lugger location` arm to `RequestJobFieldValues.JobValue`.
---       2. `Description` on both dunnage Items — provably unfillable, because no dunnage table in
---          `mtm_receiving_application` holds a description. It stays declared until the clarify step decides
---          whether to remove it; nothing draws it either way.
+--     One declared field still has no source, and it is deliberate rather than an oversight: `Description` on
+--     both dunnage Items is provably unfillable, because no dunnage table in `mtm_receiving_application` holds a
+--     description. It stays declared until the clarify step decides whether to remove it; nothing draws it
+--     either way.
+--
+--     `Lugger Location` on `pickup-scrap` (source `job`, order 5, below) used to be the other one. It is not any
+--     more: 013-lugger-location-config resolves it from the lugger arrangement, so the declaration below is
+--     unchanged and needs no further edit.
 --   * Only the two wrong-part Items change a field's source: their incorrect part (`Coil number`,
 --     `Part`) moves from `job` to `answer`, because the operator types it through the fuzzy search (FR-082).
 --     Their correct part stays the job's own (FR-088).
@@ -112,7 +111,7 @@ VALUES
 ('c1000000-0000-4000-8000-000000000004', 'pickup-fg', 'Pickup', 'direct-to-confirmation', 0, NULL, NULL,
  0, 200, NULL,
  JSON_ARRAY(
-   JSON_OBJECT('label','Part number','value_type','string','source','job','order',1,'is_required',FALSE),
+   JSON_OBJECT('label','Part','value_type','string','source','job','order',1,'is_required',FALSE),
    JSON_OBJECT('label','Quantity remaining','value_type','string','source','job','order',2,'is_required',FALSE),
    JSON_OBJECT('label','Part description','value_type','string','source','job','order',3,'is_required',FALSE),
    JSON_OBJECT('label','Customer','value_type','string','source','job','order',4,'is_required',FALSE),
@@ -136,7 +135,7 @@ VALUES
 ('c1000000-0000-4000-8000-000000000006', 'pickup-wip', 'Pickup', 'direct-to-confirmation', 0, NULL, NULL,
  0, 200, NULL,
  JSON_ARRAY(
-   JSON_OBJECT('label','Part and quantity','value_type','string','source','job','order',1,'is_required',FALSE),
+   JSON_OBJECT('label','Part','value_type','string','source','job','order',1,'is_required',FALSE),
    JSON_OBJECT('label','Pickup work center','value_type','string','source','fixed','order',2,'is_required',FALSE),
    JSON_OBJECT('label','WIP destination','value_type','string','source','job','order',3,'is_required',FALSE),
    JSON_OBJECT('label','Operation sequence','value_type','string','source','job','order',4,'is_required',FALSE),

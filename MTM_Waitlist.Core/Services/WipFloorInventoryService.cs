@@ -5,9 +5,14 @@ using System.Text;
 
 namespace MTM_Waitlist.Module_Core.Services;
 
+/// <summary>One location the WIP floor holds stock of a part in, and how much.</summary>
+/// <param name="Location">The location name.</param>
+/// <param name="Quantity">The quantity held there.</param>
+public sealed record WipLocationQuantity(string Location, decimal Quantity);
+
 /// <summary>
-/// Executes the checked-in MTM WIP Application queue scripts <c>GetWipFloorQuantities.sql</c> and
-/// <c>GetWipInventoryPartNumbers.sql</c> against the <c>mtm_wip_application_winforms</c> database (via
+/// Executes the checked-in MTM WIP Application queue scripts <c>GetWipFloorQuantities.sql</c>,
+/// <c>GetWipInventoryPartNumbers.sql</c> and <c>GetWipInventoryLocations.sql</c> against the <c>mtm_wip_application_winforms</c> database (via
 /// <see cref="IMySqlHelperServer"/> with <see cref="MySqlDatabaseTarget.MtmWipApplication"/>), and maps
 /// <c>GetWipFloorQuantities</c>' single result row to a <see cref="WipFloorQuantitySnapshot"/>. Never throws: a
 /// missing script/connection or SQL error yields <c>null</c> (or no part numbers) so a caller can fall back.
@@ -16,6 +21,7 @@ public sealed class WipFloorInventoryService
 {
     private const string FloorSnapshotScriptName = "GetWipFloorQuantities";
     private const string InventoryPartNumbersScriptName = "GetWipInventoryPartNumbers";
+    private const string InventoryLocationsScriptName = "GetWipInventoryLocations";
 
     private readonly IMySqlHelperServer _mysqlHelperServer;
 
@@ -113,6 +119,50 @@ public sealed class WipFloorInventoryService
         {
             AppLog.Error("WipFloorInventory", ex, $"GetFloorSnapshotAsync failed for part '{normalized}'.");
             return null;
+        }
+    }
+
+    /// <summary>
+    /// The locations the WIP floor holds stock of a part in, with the quantity at each, or an empty list when the
+    /// part has none or the floor cannot be read.
+    /// </summary>
+    /// <param name="partNumber">The part to look up.</param>
+    /// <param name="cancellationToken">A token to cancel the read.</param>
+    /// <returns>One <see cref="WipLocationQuantity"/> per location that holds stock.</returns>
+    public async Task<IReadOnlyList<WipLocationQuantity>> GetInventoryLocationsAsync(
+        string partNumber,
+        CancellationToken cancellationToken = default)
+    {
+        var normalized = (partNumber ?? string.Empty).Trim();
+        if (normalized.Length == 0)
+        {
+            return Array.Empty<WipLocationQuantity>();
+        }
+
+        var script = await WaitlistWipMySqlScriptStore.LoadAsync(InventoryLocationsScriptName, cancellationToken).ConfigureAwait(false);
+        if (string.IsNullOrWhiteSpace(script))
+        {
+            AppLog.Info("WipFloorInventory", $"Script '{InventoryLocationsScriptName}' loaded empty; returning no locations.");
+            return Array.Empty<WipLocationQuantity>();
+        }
+
+        try
+        {
+            var rows = await _mysqlHelperServer.ExecuteSqlQueryAsync(
+                script,
+                new Dictionary<string, object?> { ["PartNumber"] = normalized },
+                MySqlDatabaseTarget.MtmWipApplication,
+                cancellationToken).ConfigureAwait(false);
+
+            return rows
+                .Select(row => new WipLocationQuantity(GetString(row, "Location"), GetDecimal(row, "Quantity")))
+                .Where(item => item.Location.Length > 0 && item.Quantity > 0m)
+                .ToArray();
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("WipFloorInventory", ex, $"GetInventoryLocationsAsync failed for part '{normalized}'.");
+            return Array.Empty<WipLocationQuantity>();
         }
     }
 

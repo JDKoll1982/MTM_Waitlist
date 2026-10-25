@@ -15,16 +15,17 @@ public sealed class SetupWorkflowService : ISetupWorkflowService
     /// </summary>
     private const string NoScrapValue = ScrapDecisionRules.NoScrap;
 
+    /// <summary>
+    /// The picker's list: the workflow's two decision words first, then the shipped scrap types from the one
+    /// catalogue the arrangement editor also reads. The two words are not scrap types and never reach an
+    /// assignment, which is why they are composed here rather than held in <see cref="ScrapTypeCatalog"/>
+    /// (FR-010, FR-011).
+    /// </summary>
     private static readonly string[] s_defaultScrapTypes =
     [
         ScrapDecisionRules.RequiredPlaceholder,
         NoScrapValue,
-        "3003 Aluminum",
-        "5052 aluminum",
-        "Galvanized Steel",
-        "Steel",
-        "Skeleton",
-        "Gaylord"
+        .. ScrapTypeCatalog.All,
     ];
 
     private readonly IWorkOrderValidationService _workOrderValidationService;

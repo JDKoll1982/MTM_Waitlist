@@ -11,12 +11,17 @@
 -- Follows the T015 reference pattern exactly. See that file for the full rationale.
 --
 --   p_rows : JSON array of result objects. Keys:
---              "WorkOrder", "PartNumber"      (the read's inputs)
+--              "WorkOrder", "PartNumber", "WorkCenter"   (the read's inputs)
 --              "WorkOrderStatus", "OpenWorkOrderQuantity", "FinishedGoodsQuantity",
---              "HasOutsideVendorOperation"     (the read's outputs)
+--              "HasOutsideVendorOperation", "NextOperationResourceId",
+--              "HasRemainingOperation", "HasCustomerDemand"   (the read's outputs)
 --
 -- `WorkOrderStatus` is stored as the raw Visual status code. The status MEANING remains owned
 -- solely by RequestDispositionStatusCodes; this cache never interprets it (FR-018).
+--
+-- `NextOperationResourceId` and `HasRemainingOperation` are stored as NULL when the payload omits
+-- them or sends JSON null: NULL means the routing was not read, which is a different answer from
+-- "no operation remains" (research 2026-10-23).
 -- ============================================================
 
 USE mtm_mock;
@@ -39,20 +44,34 @@ BEGIN
     INSERT INTO visual_disposition_input_result_stage (
         work_order,
         part_number,
+        work_center,
         work_order_status,
         open_work_order_quantity,
         finished_goods_quantity,
         has_outside_vendor_operation,
+        next_operation_resource_id,
+        has_remaining_operation,
+        has_customer_demand,
+        product_code,
+        commodity_code,
+        part_description,
         refreshed_utc,
         is_seed_content
     )
     SELECT
         JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].WorkOrder'))),
         JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].PartNumber'))),
+        IFNULL(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].WorkCenter'))), '*'),
         JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].WorkOrderStatus'))),
         CAST(IFNULL(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].OpenWorkOrderQuantity'))), '0') AS DECIMAL(18,4)),
         CAST(IFNULL(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].FinishedGoodsQuantity'))), '0') AS DECIMAL(18,4)),
         CAST(IFNULL(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].HasOutsideVendorOperation'))), '0') AS SIGNED),
+        NULLIF(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].NextOperationResourceId'))), 'null'),
+        CAST(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].HasRemainingOperation'))), 'null') AS SIGNED),
+        CAST(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].HasCustomerDemand'))), 'null') AS SIGNED),
+        NULLIF(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].ProductCode'))), 'null'),
+        NULLIF(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].CommodityCode'))), 'null'),
+        NULLIF(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].PartDescription'))), 'null'),
         UTC_TIMESTAMP(),
         0
     FROM (

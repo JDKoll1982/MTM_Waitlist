@@ -382,6 +382,44 @@ ON DUPLICATE KEY UPDATE
     value_type = VALUES(value_type),
     updated_utc = VALUES(updated_utc);
 
+-- ---------------------------------------------------------------------------
+-- 013-lugger-location-config (task T006) — permission.settings.lugger_arrangement
+--
+--   The arrangement is the one settings surface a lead edits from the floor, so the six rungs from Material
+--   Handler Lead upward answer 1 and the three worker roles below that rung answer 0 (FR-028). Reading a
+--   lugger on a card is not a permission: the cell follows the request, not the reader. A role with no row
+--   here is refused, which is what a missing row means everywhere else in this file.
+--
+--   Written as its own statement rather than woven into the nine role blocks above, for the same reason
+--   `permission.settings.storage_paths` is: what each role inherited from the retired lists stays unedited and
+--   this addition is reviewable on its own.
+-- ---------------------------------------------------------------------------
+INSERT INTO
+    config_settings_values (
+        public_id,
+        setting_key,
+        scope_type,
+        scope_key,
+        setting_value_bool,
+        value_type,
+        updated_by_user_id,
+        updated_utc
+    )
+VALUES
+    (UUID(), 'permission.settings.lugger_arrangement', 'role', 'role:developer', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.lugger_arrangement', 'role', 'role:it_department', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.lugger_arrangement', 'role', 'role:plant_manager', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.lugger_arrangement', 'role', 'role:production_lead', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.lugger_arrangement', 'role', 'role:setup_lead', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.lugger_arrangement', 'role', 'role:material_handler_lead', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.lugger_arrangement', 'role', 'role:material_handler', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.lugger_arrangement', 'role', 'role:production', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.lugger_arrangement', 'role', 'role:setup', 0, 'bool', NULL, UTC_TIMESTAMP())
+ON DUPLICATE KEY UPDATE
+    setting_value_bool = VALUES(setting_value_bool),
+    value_type = VALUES(value_type),
+    updated_utc = VALUES(updated_utc);
+
 -- The plant's list of locations to hide (FR-024). The value is the normalized, uppercase, comma-separated form
 -- `IgnoredLocationsService` returns, so the store holds the same shape the code compares against rather than a
 -- second shape that has to be parsed back. `value_type` is `text`, which is the vocabulary this table already

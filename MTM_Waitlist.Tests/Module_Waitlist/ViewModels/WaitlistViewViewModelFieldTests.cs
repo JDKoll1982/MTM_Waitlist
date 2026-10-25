@@ -4,6 +4,7 @@ using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
+using MTM_Waitlist.Module_Shared.Helpers;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
@@ -325,6 +326,68 @@ public sealed class WaitlistViewViewModelFieldTests
             "The row's close instant is what freezes the ring, so a completed request measures the time it took.");
     }
 
+    /// <summary>
+    /// A dunnage request's row carries the picture of the dunnage part its identifier names. The dunnage part is
+    /// the one thing such a request is about, and it is not a material part, so the picture is read from the
+    /// requesting job here — the only place it exists — rather than resolved by the material-part resolver, which
+    /// cannot see the dunnage catalogue. Without it the card drew the placeholder even when the part had a picture.
+    /// </summary>
+    [TestMethod]
+    public void ViewModel_WaitlistViewViewModelFieldTests_CreateSessionOrder_CarriesTheChosenDunnagePartsPicture()
+    {
+        var job = (RequestJobPartAvailability.None with
+        {
+            HasActiveJob = true,
+            HasDunnage = true,
+        }).WithDunnageParts(
+        [
+            new RequestDunnagePart { PartNumber = "DN-STL-4", ImagePath = @"X:\Dunnage\Parts\Steel Rack.png" },
+        ]);
+
+        var row = WaitlistViewViewModel.CreateSessionOrder(
+            Shape("deliver-dunnage", inputValue: "DN-STL-4"),
+            job);
+
+        Assert.AreEqual(
+            @"X:\Dunnage\Parts\Steel Rack.png",
+            row.ResolvedPartImagePath,
+            "The dunnage card draws the picture of the part its own identifier names.");
+        Assert.AreEqual(
+            @"X:\Dunnage\Parts\Steel Rack.png",
+            row.EffectiveImagePath,
+            "And that picture is what the card actually draws, rather than the shared placeholder.");
+    }
+
+    /// <summary>
+    /// A request that is not about a dunnage part keeps the shared placeholder, whatever its answer happens to
+    /// spell: the picture rule is asked for every row, so it must not hand a coil card a dunnage part's picture.
+    /// </summary>
+    [TestMethod]
+    public void ViewModel_WaitlistViewViewModelFieldTests_CreateSessionOrder_LeavesANonDunnageRowOnTheSharedPlaceholder()
+    {
+        var job = (RequestJobPartAvailability.None with
+        {
+            HasActiveJob = true,
+            HasDunnage = true,
+        }).WithDunnageParts(
+        [
+            new RequestDunnagePart { PartNumber = "DN-STL-4", ImagePath = @"X:\Dunnage\Parts\Steel Rack.png" },
+        ]);
+
+        var row = WaitlistViewViewModel.CreateSessionOrder(
+            Shape("pickup-riser-table", inputValue: "DN-STL-4"),
+            job);
+
+        Assert.AreEqual(
+            string.Empty,
+            row.ResolvedPartImagePath,
+            "A request that is not about a dunnage part resolves no dunnage picture.");
+        Assert.AreEqual(
+            ImagePicturePolicy.NoImagePath,
+            row.EffectiveImagePath,
+            "It draws the one shared placeholder instead.");
+    }
+
     // ── The flyout's command: one condition, set on the row, by the row's own handler ─────────────────
 
     /// <summary>
@@ -571,7 +634,6 @@ public sealed class WaitlistViewViewModelFieldTests
 
         public Task<WaitlistRequestSubmitResult> SubmitAsync(
             WaitlistRequestDraft draft,
-            bool allowDuplicate,
             CancellationToken cancellationToken = default) => throw new NotSupportedException("This test drives one condition write.");
 
         public Task<bool> TransitionStatusAsync(

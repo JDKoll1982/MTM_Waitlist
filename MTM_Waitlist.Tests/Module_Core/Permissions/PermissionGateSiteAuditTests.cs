@@ -48,13 +48,13 @@ public sealed class PermissionGateSiteAuditTests
     [
         new("Request actions", "MTM_Waitlist.Core/Services/RequestActionPolicy.cs", "RequestActionPolicy", PermissionKeys.RequestsHandle),
         new("The service host's operator gate", "MTM_Waitlist.Mock.Service/Api/ServiceOperatorRoles.cs", "ServiceOperatorRoles", PermissionKeys.CacheRefreshApi),
-        new("Ignored locations", "MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs", "SettingsViewModel", PermissionKeys.SettingsIgnoredLocations),
-        new("Hot work centres", "MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs", "SettingsViewModel", PermissionKeys.SettingsHotWorkCenters),
-        new("Part pictures", "MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs", "SettingsViewModel", PermissionKeys.SettingsPartPictures),
-        new("The Settings cache refresh", "MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs", "SettingsViewModel", PermissionKeys.SettingsCacheRefresh),
-        new("The minutes per item", "MTM_Waitlist.Settings/ViewModels/UrgencyAllotmentEditorViewModel.cs", "UrgencyAllotmentEditorViewModel", PermissionKeys.SettingsUrgencyMinutes),
+        new("Ignored locations", "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.cs", "SettingsViewModel", PermissionKeys.SettingsIgnoredLocations),
+        new("Hot work centres", "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.cs", "SettingsViewModel", PermissionKeys.SettingsHotWorkCenters),
+        new("Part pictures", "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.cs", "SettingsViewModel", PermissionKeys.SettingsPartPictures),
+        new("The Settings cache refresh", "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.cs", "SettingsViewModel", PermissionKeys.SettingsCacheRefresh),
+        new("The minutes per item", "MTM_Waitlist.Settings/Operations/ViewModels/UrgencyAllotmentEditorViewModel.cs", "UrgencyAllotmentEditorViewModel", PermissionKeys.SettingsUrgencyMinutes),
         new("The defect-type catalogue", "MTM_Waitlist.Settings/Services/DefectTypeCatalogService.cs", "DefectTypeCatalogService", PermissionKeys.SettingsDefectTypes),
-        new("The computer registry", "MTM_Waitlist.Settings/ViewModels/ComputerManagementViewModel.cs", "ComputerManagementViewModel", PermissionKeys.SettingsComputers),
+        new("The computer registry", "MTM_Waitlist.Settings/Devices/ViewModels/ComputerManagementViewModel.cs", "ComputerManagementViewModel", PermissionKeys.SettingsComputers),
         new("Dunnage Quick Add", "MTM_Waitlist.Setup/Services/DunnageWorkflowService.cs", "DunnageWorkflowService", PermissionKeys.SetupDunnageQuickAdd),
         new("Work-centre setup", "MTM_Waitlist.Setup/ViewModels/SetupWorkCenterViewModel.cs", "SetupWorkCenterViewModel", PermissionKeys.SetupWorkCenters),
         new("The badge map", "MTM_Waitlist.Core/Permissions/RoleBadgeCatalog.cs", "RoleBadgeCatalog", PermissionKey: null),
@@ -360,7 +360,7 @@ public sealed class PermissionGateSiteAuditTests
     [TestMethod]
     public void Audit_PermissionGateSiteAuditTests_ThePictureCacheGate_ReadsTheStorageEntitlementAndNotThePictureOne()
     {
-        var settings = ReadProductionFile("MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs");
+        var settings = ReadProductionFile("MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.cs");
 
         var gate = Regex.Match(settings, @"IsPictureCachePanelVisible\s*=>[^;]+;").Value;
 

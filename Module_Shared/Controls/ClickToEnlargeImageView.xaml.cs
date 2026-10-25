@@ -68,6 +68,21 @@ public sealed partial class ClickToEnlargeImageView : UserControl
         typeof(ClickToEnlargeImageView),
         new PropertyMetadata(Stretch.Uniform));
 
+    /// <summary>
+    /// How opaque the picture is where it sits. Defaults to fully opaque, so every existing surface is unchanged.
+    /// </summary>
+    /// <remarks>
+    /// A surface that draws a picture <b>behind</b> its own words needs it dimmed to stay readable, but the enlarged
+    /// view is reached from the same control and must stay at full strength. The opacity therefore belongs to the
+    /// thumbnail alone, which is why it is a property here rather than an <c>Opacity</c> on the control itself —
+    /// dimming the control would dim the view it opens.
+    /// </remarks>
+    public static readonly DependencyProperty ThumbnailOpacityProperty = DependencyProperty.Register(
+        nameof(ThumbnailOpacity),
+        typeof(double),
+        typeof(ClickToEnlargeImageView),
+        new PropertyMetadata(1.0));
+
     private IPictureEnlargePreference? _enlargePreference;
     private XamlRoot? _sizedRoot;
 
@@ -82,7 +97,17 @@ public sealed partial class ClickToEnlargeImageView : UserControl
         InitializeComponent();
         Loaded += OnLoaded;
         Unloaded += OnUnloaded;
+
+        // The picture is clipped to the frame it was given, so a surface that draws it at its own size (Stretch=None)
+        // gets the artwork clipped by the card rather than spilling over the surface behind it.
+        ThumbnailFrame.SizeChanged += OnThumbnailFrameSizeChanged;
     }
+
+    private void OnThumbnailFrameSizeChanged(object sender, SizeChangedEventArgs e) =>
+        ThumbnailFrame.Clip = new RectangleGeometry
+        {
+            Rect = new Windows.Foundation.Rect(0, 0, e.NewSize.Width, e.NewSize.Height),
+        };
 
     public ImageSource? Source
     {
@@ -94,6 +119,13 @@ public sealed partial class ClickToEnlargeImageView : UserControl
     {
         get => (Stretch)GetValue(StretchProperty);
         set => SetValue(StretchProperty, value);
+    }
+
+    /// <summary>How opaque the picture is where it sits; the enlarged view is always drawn at full strength.</summary>
+    public double ThumbnailOpacity
+    {
+        get => (double)GetValue(ThumbnailOpacityProperty);
+        set => SetValue(ThumbnailOpacityProperty, value);
     }
 
     /// <summary>

@@ -28,7 +28,7 @@ derive, captured answer, or absent by design.
 | `# of Skids` (the four returning pickups) | nothing | Captured answer, defaulting to 1, added to each of the four declarations |
 | `Weight of Coil` (`assist-coil-turn`) | nothing | Required captured numeric answer, added to the declaration. Deliberately not the job's average coil weight (FR-054) |
 | The die-shop cell (both die Items) | nothing | Captured answer: the checkbox's flag, added to the declaration, with the phrase chosen by the Item's category from a resource key |
-| `Lugger Location` (`pickup-scrap`) | no source anywhere | Absent by design. The declaration stays; the resolver has no arm, so the cell is hidden. The reveal path is that a future source adds a resolver arm and the cell appears with no card change |
+| `Lugger Location` (`pickup-scrap`) | no source in this feature | Superseded by 013-lugger-location-config. The source is configuration: the lugger arrangement assigns each scrap type an ordered set of luggers, and the card draws the one holding that type's dump point. The reveal path is a snapshot read per list load plus one resolver arm reading the availability's `LuggerLocation`, so the cell appears on the next load with no card change |
 | `Description` (dunnage Items) | declared, provably unfillable | Absent by design, same path as above (see R8) |
 
 **Rationale**: the pre-spec's own rule is that anything the job cannot carry is read from the source that holds it,
@@ -197,6 +197,27 @@ is unavailable; the value that travels on is the one the application would have 
 *Rationale*: "as entered" distinguishes the operator's own typed value from a value the search would have supplied,
 which is the point of the requirement. It does not mean bypassing the normalization every other answer gets, or the
 request would carry a term no other surface would recognise (FR-082, FR-085).
+
+## R12. Which returning pickups an active job is offered (recorded 2026-10-20)
+
+A **finished-parts** (`pickup-fg`) and a **WIP** (`pickup-wip`) pickup are offered on **any active job**; the
+**NCM** and **outside-service** pickups stay gated on the signal each one names. Before this, all four were offered
+only on the derived disposition, one state lighting exactly one Item.
+
+*Rationale*: the two production pickups name **the job's own product** — the parts the work centre has just made —
+so the job is the work they name. The derivation that separates them leans on finished-goods **location names that
+are not confirmed for this installation** (`GetDispositionInput.sql`, T067) and needs the plant system to answer at
+all, so a job whose parts were sitting somewhere the query does not recognise, or whose Visual read did not answer,
+had no finished-parts pickup at all. The owner hit exactly that and reported the option missing.
+
+*Not changed*: the part's derived type. `Part Type` on those cards still shows what the derivation found and stays
+hidden when it found nothing (FR-089, FR-091), so the looser availability does not claim a disposition the reads did
+not support. NCM and outside service keep their gates because their signals are confirmed — the location the stock
+occupies (`md_locations.Location LIKE 'NCM%'`) and the operation's vendor fields.
+
+*Rejected*: offering all four on any job (NCM pickup with no NCM stock on the floor wastes a handler trip); leaving
+the finished-parts pickup gated on the derivation and repairing only the location codes (the codes are unconfirmed,
+so nothing could be repaired from the repository).
 
 ## R11. Carried into `clarify`: NCM's priority for a part that has both
 

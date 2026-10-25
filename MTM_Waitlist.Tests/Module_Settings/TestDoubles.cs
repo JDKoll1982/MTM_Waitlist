@@ -82,6 +82,14 @@ internal sealed class FakeImageStorageConfigurationResolver : IImageStorageConfi
     public string HopperFolderPath { get; set; } =
         MTM_Waitlist.Module_Settings.Models.ConfigSettingKeys.ImageStorageHopperFolderPathDefault;
 
+    /// <summary>The folder the lugger pictures sit in, one file per lugger.</summary>
+    public string LuggerFolderPath { get; set; } =
+        MTM_Waitlist.Module_Settings.Models.ConfigSettingKeys.ImageStorageLuggerFolderPathDefault;
+
+    /// <summary>The picture every surface draws where it has none of its own.</summary>
+    public string NoImagePath { get; set; } =
+        MTM_Waitlist.Module_Settings.Models.ConfigSettingKeys.ImageStorageNoImagePathDefault;
+
     public string CacheFolderPath { get; set; } = Path.Combine(Path.GetTempPath(), "mtm-image-tests", "cache");
 
     public bool CacheEnabled { get; set; } = true;
@@ -99,6 +107,10 @@ internal sealed class FakeImageStorageConfigurationResolver : IImageStorageConfi
     public Task<string> GetDunnageRootPathAsync() => Task.FromResult(DunnageRootPath);
 
     public Task<string> GetHopperFolderPathAsync() => Task.FromResult(HopperFolderPath);
+
+    public Task<string> GetLuggerFolderPathAsync() => Task.FromResult(LuggerFolderPath);
+
+    public Task<string> GetNoImagePathAsync() => Task.FromResult(NoImagePath);
 
     public Task<string> GetImageCacheFolderPathAsync() => Task.FromResult(CacheFolderPath);
 
@@ -122,6 +134,25 @@ internal sealed class FakeImageStorageConfigurationResolver : IImageStorageConfi
 
     public void InvalidateCache()
     {
+    }
+}
+
+internal sealed class FakeFolderBrowserService : IFolderBrowserService
+{
+    /// <summary>What the dialog answers; <c>null</c> is a dialog closed without a choice.</summary>
+    public string? ChosenFolder { get; set; }
+
+    /// <summary>The folder the dialog was asked to open at, which is what the box already held.</summary>
+    public string? LastStartingFolder { get; private set; }
+
+    public int PickCallCount { get; private set; }
+
+    public Task<string?> PickFolderAsync(string? startingFolder, CancellationToken cancellationToken)
+    {
+        PickCallCount++;
+        LastStartingFolder = startingFolder;
+
+        return Task.FromResult(ChosenFolder);
     }
 }
 
@@ -182,6 +213,9 @@ internal sealed class FakeWorkCenterCatalogService : IWorkCenterCatalogService
 
     public Task<WorkCenterCatalogResult> GetCatalogAsync(string workstationName, CancellationToken cancellationToken = default) =>
         Task.FromResult(Catalog);
+
+    public Task<IReadOnlyList<string>> GetHotWorkCenterNamesAsync(string workstationName, CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<string>>(Catalog.HotWorkCenters);
 
     public Task<string?> SaveHotWorkCentersAsync(string workstationName, IReadOnlyCollection<string> hotWorkCenters, CancellationToken cancellationToken = default) =>
         Task.FromResult<string?>(null);

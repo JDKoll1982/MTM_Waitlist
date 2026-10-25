@@ -21,21 +21,51 @@ public sealed class RequestJobFieldValuesTests
     };
 
     [TestMethod]
-    public void Service_RequestJobFieldValuesTests_Resolve_PartTypeAndItemTypeReadTheSnapshotsDerivation()
+    public void Service_RequestJobFieldValuesTests_Resolve_ComponentDescriptionAndQuantityComeFromTheComponentTheRequestNames()
     {
-        // The four returning pickups declare `Part Type` and the component Items declare `Item Type`, and both
-        // read the one derivation the snapshot was handed (FR-091, FR-092, research R1). Neither label runs a
-        // derivation of its own.
-        var finishedGoods = RequestJobPartAvailability.None with { Disposition = RequestDisposition.FinishedGoods };
-        var outsideService = RequestJobPartAvailability.None with { Disposition = RequestDisposition.OutsideService };
-        var wip = RequestJobPartAvailability.None with { Disposition = RequestDisposition.WorkInProcess };
-        var ncm = RequestJobPartAvailability.None with { Disposition = RequestDisposition.Ncm };
+        var job = RequestJobPartAvailability.None.WithComponentFacts(
+            [new("FGT0002000", new RequestComponentFacts("Rear bracket", "1,200"))]);
+        var answers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { ["Component"] = "fgt0002000" };
 
-        Assert.AreEqual("Finished Goods", RequestJobFieldValues.Resolve("Part Type", finishedGoods));
+        Assert.AreEqual("Rear bracket", RequestJobFieldValues.Resolve("Part description", job, answers));
+        Assert.AreEqual("1,200", RequestJobFieldValues.Resolve("Total Qty In House", job, answers));
+    }
+
+    [TestMethod]
+    public void Service_RequestJobFieldValuesTests_Resolve_ComponentFactsAreAbsentWhenTheComponentHasNone()
+    {
+        var job = RequestJobPartAvailability.None.WithComponentFacts(
+            [new("FGT0002000", new RequestComponentFacts("Rear bracket", "1,200"))]);
+        var answers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { ["Component"] = "FGT0009999" };
+
+        Assert.IsNull(RequestJobFieldValues.Resolve("Part description", job, answers));
+        Assert.IsNull(RequestJobFieldValues.Resolve("Total Qty In House", job, null));
+    }
+
+    [TestMethod]
+    public void Service_RequestJobFieldValuesTests_Resolve_PartTypeReadsThePartsKindAndItemTypeReadsTheDisposition()
+    {
+        // Two different questions on one snapshot (redefined 2026-10-23): `Part Type` draws what kind of part the
+        // job makes, read from the plant's own product and commodity codes, while the component Items' `Item Type`
+        // still draws the job's product disposition. Neither label runs a derivation of its own.
+        var finishedGoods = RequestJobPartAvailability.None
+            .WithDisposition(RequestDisposition.FinishedGoods)
+            .WithPartType(RequestPartType.StampedPart);
+        var outsideService = RequestJobPartAvailability.None
+            .WithDisposition(RequestDisposition.OutsideService)
+            .WithPartType(RequestPartType.Coil);
+        var wip = RequestJobPartAvailability.None
+            .WithDisposition(RequestDisposition.WorkInProcess)
+            .WithPartType(RequestPartType.Hardware);
+        var ncm = RequestJobPartAvailability.None
+            .WithDisposition(RequestDisposition.Ncm)
+            .WithPartType(RequestPartType.Tooling);
+
+        Assert.AreEqual("Stamped Part", RequestJobFieldValues.Resolve("Part Type", finishedGoods));
         Assert.AreEqual("Finished Goods", RequestJobFieldValues.Resolve("Item Type", finishedGoods));
-        Assert.AreEqual("Outside Service", RequestJobFieldValues.Resolve("Part Type", outsideService));
-        Assert.AreEqual("WIP", RequestJobFieldValues.Resolve("Part Type", wip));
-        Assert.AreEqual("NCM", RequestJobFieldValues.Resolve("Part Type", ncm));
+        Assert.AreEqual("Coil", RequestJobFieldValues.Resolve("Part Type", outsideService));
+        Assert.AreEqual("Hardware", RequestJobFieldValues.Resolve("Part Type", wip));
+        Assert.AreEqual("Tooling", RequestJobFieldValues.Resolve("Part Type", ncm));
         Assert.AreEqual("NCM", RequestJobFieldValues.Resolve("Item Type", ncm));
     }
 
@@ -55,7 +85,7 @@ public sealed class RequestJobFieldValuesTests
         // derivation answers nothing whatever else it holds.
         var jobWithEverythingButADerivation = RequestJobPartAvailability.All with
         {
-            ScrapType = "Steel Offal",
+            ScrapType = "Steel",
             CoilPartNumber = "COIL-1",
         };
 
@@ -329,10 +359,41 @@ public sealed class RequestJobFieldValuesTests
     public void Service_RequestJobFieldValuesTests_Resolve_UnknownOrEmptyLabelYieldsNothing()
     {
         // A label this snapshot cannot supply is omitted rather than drawn as a blank standing in for a value.
-        // `Lugger Location` is declared but has no source anywhere, so it is absent by design (research R1).
-        Assert.IsNull(RequestJobFieldValues.Resolve("Lugger Location", DieJob()));
         Assert.IsNull(RequestJobFieldValues.Resolve("Quantity", DieJob()));
         Assert.IsNull(RequestJobFieldValues.Resolve(string.Empty, DieJob()));
         Assert.IsNull(RequestJobFieldValues.Resolve(null, DieJob()));
+    }
+
+    [TestMethod]
+    public void Service_RequestJobFieldValuesTests_Resolve_LuggerLocationIsTheLuggerTheSnapshotWasHanded()
+    {
+        // `pickup-scrap` declares `Lugger Location` with source `job`, so the row reads the lugger the availability
+        // was handed for the job's own scrap type rather than the Item's own display name (FR-022, FR-026).
+        var scrap = RequestJobPartAvailability.None with
+        {
+            HasActiveJob = true,
+            ScrapType = "3003 Aluminum",
+            LuggerLocation = "Door 6 Lugger",
+        };
+
+        foreach (var label in new[] { "Lugger Location", "lugger location", "  LUGGER LOCATION  " })
+        {
+            Assert.AreEqual(
+                "Door 6 Lugger",
+                RequestJobFieldValues.Resolve(label, scrap),
+                "The declared label `Lugger Location` does not read the lugger the snapshot carries (FR-022).");
+        }
+    }
+
+    [TestMethod]
+    public void Service_RequestJobFieldValuesTests_Resolve_NoLuggerAnswerYieldsNothingSoNoCellIsDrawn()
+    {
+        // A scrap type with no arrangement, and a job with no real scrap decision, both leave the value null, and
+        // the cell is then omitted rather than filled with a dash, a blank or a guess (FR-025, FR-026).
+        var gap = RequestJobPartAvailability.None with { HasActiveJob = true, ScrapType = "Galvanized Steel" };
+
+        Assert.IsNull(RequestJobFieldValues.Resolve("Lugger Location", gap));
+        Assert.IsNull(RequestJobFieldValues.Resolve("Lugger Location", RequestJobPartAvailability.None));
+        Assert.IsNull(RequestJobFieldValues.Resolve("Lugger Location", job: null));
     }
 }

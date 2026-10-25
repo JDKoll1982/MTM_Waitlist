@@ -65,7 +65,7 @@ public sealed class SettingsPageMarkupTests
     [TestMethod]
     public void UI_SettingsPageMarkupTests_SettingsPage_ShowsTheConfiguredAndObservedValuesSeparatelyAndKeepsTheMinutesGate()
     {
-        var markup = PageMarkup();
+        var markup = PageMarkup("OperationsSettingsPage.xaml");
 
         StringAssert.Contains(markup, "{Binding DisplayName}", "The minutes row names the Item.");
         StringAssert.Contains(markup, "{Binding Minutes, Mode=TwoWay", "The editable column is the configured figure.");
@@ -84,7 +84,7 @@ public sealed class SettingsPageMarkupTests
     [TestMethod]
     public void UI_SettingsPageMarkupTests_SettingsPage_OpensTheItemKeyedPictureScreen()
     {
-        var markup = PageMarkup();
+        var markup = PageMarkup("PicturesSettingsPage.xaml");
 
         StringAssert.Contains(markup, "Click=\"RequestItemImages_Click\"");
         Assert.IsFalse(
@@ -95,7 +95,7 @@ public sealed class SettingsPageMarkupTests
             RepositoryPatternScan.FindRepositoryRoot(),
             "Module_Settings",
             "Views",
-            "SettingsPage.xaml.cs");
+            "PicturesSettingsPage.xaml.cs");
         Assert.IsTrue(File.Exists(codeBehindPath), $"The settings code-behind was not found at '{codeBehindPath}'.");
 
         var codeBehind = File.ReadAllText(codeBehindPath);
@@ -111,7 +111,7 @@ public sealed class SettingsPageMarkupTests
     [TestMethod]
     public void UI_SettingsPageMarkupTests_TheTwoDunnageLists_AreCardsThatStillShowAndHideTheirType()
     {
-        var markup = PageMarkup();
+        var markup = PageMarkup("OperationsSettingsPage.xaml");
 
         StringAssert.Contains(markup, "AutomationProperties.AutomationId=\"SettingsPage_VisibleDunnageTypesList\"");
         StringAssert.Contains(markup, "AutomationProperties.AutomationId=\"SettingsPage_HiddenDunnageTypesList\"");
@@ -143,7 +143,7 @@ public sealed class SettingsPageMarkupTests
     [TestMethod]
     public void UI_SettingsPageMarkupTests_TheDeveloperLogPanel_IsHostedWhereItsWrappingTextGetsABoundedWidth()
     {
-        var panel = XDocument.Parse(PageMarkup())
+        var panel = XDocument.Parse(PageMarkup("DiagnosticsSettingsPage.xaml"))
             .Descendants()
             .SingleOrDefault(element => element.Name.LocalName == "DeveloperLogPanelView");
 
@@ -342,13 +342,13 @@ public sealed class SettingsPageMarkupTests
                 + string.Join(Environment.NewLine, violations));
     }
 
-    private static string PageMarkup()
+    private static string PageMarkup(string fileName = "SettingsPage.xaml")
     {
         var path = Path.Combine(
             RepositoryPatternScan.FindRepositoryRoot(),
             "Module_Settings",
             "Views",
-            "SettingsPage.xaml");
+            fileName);
 
         Assert.IsTrue(File.Exists(path), $"The settings markup was not found at '{path}'.");
 
@@ -402,7 +402,7 @@ public sealed class SettingsPageMarkupTests
     [TestMethod]
     public void UI_SettingsPageMarkupTests_TheAdministrationEntries_NavigateAndCarryTheirOwnLabels()
     {
-        var markup = PageMarkup();
+        var markup = PageMarkup("AdministrationSettingsPage.xaml");
 
         foreach (var entry in new[] { "UserManagementEntryCard", "PermissionsEntryCard" })
         {
@@ -428,6 +428,83 @@ public sealed class SettingsPageMarkupTests
             titles[0],
             titles[1],
             "No two labels may share a key or a value, so the two entries do not read as the same thing (SC-020).");
+    }
+
+    /// <summary>
+    /// The storage card puts every control in a row of its own.
+    /// </summary>
+    /// <remarks>
+    /// The save panel used to share the retention row's <c>Grid.Row</c>, so the button drew on top of the box above
+    /// it and the row read as two controls fighting for the same space. A row attribute is not a compile error, so
+    /// nothing else in the build catches it.
+    /// </remarks>
+    [TestMethod]
+    public void UI_SettingsPageMarkupTests_TheStorageRows_EachOccupyTheirOwnRowOfTheCard()
+    {
+        XNamespace presentation = "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
+
+        var document = XDocument.Parse(PageMarkup("PicturesSettingsPage.xaml"));
+
+        var saveButton = document
+            .Descendants()
+            .Single(element => (string?)element.Attribute("AutomationProperties.AutomationId")
+                == "SettingsPage_StoragePaths_SaveButton");
+
+        // The button sits inside its panel; the row grid is the nearest Grid above it.
+        var card = saveButton.Ancestors().First(ancestor => ancestor.Name.LocalName == "Grid");
+        Assert.IsTrue(
+            card.Element(presentation + "Grid.RowDefinitions") is not null,
+            "The save panel must sit in the row grid of the card, so its row can be counted.");
+
+        var declared = card
+            .Element(presentation + "Grid.RowDefinitions")!
+            .Elements(presentation + "RowDefinition")
+            .Count();
+
+        var rows = card
+            .Elements()
+            .Where(child => child.Name.LocalName != "Grid.RowDefinitions")
+            .Select(child => (int?)child.Attribute("Grid.Row") ?? 0)
+            .ToList();
+
+        Assert.AreEqual(
+            rows.Count,
+            rows.Distinct().Count(),
+            $"Two controls share a row of the storage card, so one draws over the other: {string.Join(", ", rows)}");
+        Assert.IsTrue(
+            rows.All(row => row < declared),
+            $"A control names a row the card does not declare ({declared} rows declared): {string.Join(", ", rows)}");
+    }
+
+    /// <summary>
+    /// The no-picture image is chosen with a file dialog rather than typed, and the box beside it is what the Save
+    /// button stores.
+    /// </summary>
+    [TestMethod]
+    public void UI_SettingsPageMarkupTests_TheNoPictureImage_IsChosenFromAFileDialog()
+    {
+        var markup = PageMarkup("PicturesSettingsPage.xaml");
+
+        StringAssert.Contains(
+            markup,
+            "AutomationProperties.AutomationId=\"SettingsPage_StoragePaths_NoImagePathBox\"",
+            "The no-picture image has its own box, so a typed path is still possible.");
+        StringAssert.Contains(
+            markup,
+            "Click=\"PickNoImage_Click\"",
+            "The button beside that box opens the file dialog.");
+
+        var codeBehindPath = Path.Combine(
+            RepositoryPatternScan.FindRepositoryRoot(),
+            "Module_Settings",
+            "Views",
+            "PicturesSettingsPage.xaml.cs");
+        var codeBehind = File.ReadAllText(codeBehindPath);
+
+        StringAssert.Contains(
+            codeBehind,
+            "ViewModel.NoImagePathInput = file.Path;",
+            "The chosen file goes into the box that Save reads, rather than being stored on the spot.");
     }
 
     /// <summary>The one element carrying <paramref name="xName"/>, from its opening tag to its matching close.</summary>
@@ -477,19 +554,30 @@ public sealed class SettingsPageMarkupTests
         return values;
     }
 
+    /// <summary>
+    /// Every x:Uid the settings pages declare. The settings surface is one hub plus one page per audience, so this
+    /// reads all of them: a duplicate is still a duplicate when the two elements sit on different pages.
+    /// </summary>
     private static IReadOnlyList<string> DeclaredUids()
     {
-        var path = Path.Combine(
-            RepositoryPatternScan.FindRepositoryRoot(),
-            "Module_Settings",
-            "Views",
-            "SettingsPage.xaml");
+        string[] pages =
+        [
+            "SettingsPage.xaml",
+            "GeneralSettingsPage.xaml",
+            "OperationsSettingsPage.xaml",
+            "PicturesSettingsPage.xaml",
+            "DevicesSettingsPage.xaml",
+            "DiagnosticsSettingsPage.xaml",
+            "AdministrationSettingsPage.xaml",
+        ];
 
-        Assert.IsTrue(File.Exists(path), $"The settings markup was not found at '{path}'.");
+        var uids = new List<string>();
+        foreach (var page in pages)
+        {
+            uids.AddRange(s_xUid.Matches(PageMarkup(page)).Select(match => match.Groups["uid"].Value));
+        }
 
-        var markup = File.ReadAllText(path);
-
-        return [.. s_xUid.Matches(markup).Select(match => match.Groups["uid"].Value)];
+        return uids;
     }
 
     /// <summary>Every resource key shipped anywhere, so an x:Uid may resolve in any resource file.</summary>

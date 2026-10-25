@@ -1,5 +1,7 @@
 namespace MTM_Waitlist.Module_Settings.Models;
 
+using MTM_Waitlist.Module_Shared.Helpers;
+
 /// <summary>
 /// Represents a configuration setting stored in config_settings_values table.
 /// Used for retrieving and managing overridable configuration values from the database.
@@ -124,16 +126,79 @@ public static class ConfigSettingKeys
     /// the value from appsettings.json. The naming contract for the files inside it is
     /// <c>docs/guides/guides-pictures-image-naming.md</c>.
     /// </para>
-    /// Default: <see cref="ImageStorageHopperFolderPathDefault"/> (<c>Waitlist\Hoppers</c> beneath the picture
-    /// folder).
+    /// Default: <see cref="ImageStorageHopperFolderPathDefault"/>
+    /// (<c>\\mtmanu-fs01\Expo Drive\MH_RESOURCE\…\Images\Waitlist\hopper</c>).
     /// </summary>
     public const string ImageStorageHopperFolderPath = "image_storage.hopper_folder_path";
 
     /// <summary>
-    /// The hopper picture folder this application ships with, relative to the picture folder, and the one place the
-    /// figure is written: the storage screen's box and the compiled fallback both read it from here.
+    /// The hopper picture folder this application ships with, given as the share's own path, and the one place the
+    /// figure is written: the storage screen's box, the folder dialog and the compiled fallback all read it from
+    /// here.
     /// </summary>
-    public const string ImageStorageHopperFolderPathDefault = @"Waitlist\Hoppers";
+    /// <remarks>
+    /// Absolute rather than relative to the picture folder: this is the folder the hopper artwork already lives in,
+    /// so a machine that has never been told otherwise still finds the three size pictures. The spelling of the
+    /// path itself belongs to <see cref="AppStoragePaths.HopperFolderDefault"/>.
+    /// </remarks>
+    public const string ImageStorageHopperFolderPathDefault = AppStoragePaths.HopperFolderDefault;
+
+    /// <summary>
+    /// The folder the lugger pictures sit in, one file per lugger.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Setting Key: "image_storage.lugger_folder_path"
+    /// </para>
+    /// <para>
+    /// Description: IT-configured location of the lugger pictures the arrangement's cards draw behind themselves.
+    /// The file for a lugger is its place in the arrangement, two digits wide, with a picture extension:
+    /// <c>Lugger01.png</c> … <c>Lugger09.png</c>, <c>Lugger10.png</c> … <c>Lugger99.png</c>. There is no Lugger100:
+    /// the arrangement holds at most 99 luggers, and a placement past that draws no picture rather than a wrong one.
+    /// </para>
+    /// <para>
+    /// Default: <see cref="ImageStorageLuggerFolderPathDefault"/>
+    /// (<c>\\mtmanu-fs01\Expo Drive\MH_RESOURCE\…\Images\Waitlist\lugger</c>).
+    /// </para>
+    /// </remarks>
+    public const string ImageStorageLuggerFolderPath = "image_storage.lugger_folder_path";
+
+    /// <summary>
+    /// The lugger picture folder this application ships with, given as the share's own path.
+    /// </summary>
+    /// <remarks>
+    /// Default: <see cref="AppStoragePaths.LuggerFolderDefault"/>.
+    /// </remarks>
+    public const string ImageStorageLuggerFolderPathDefault = AppStoragePaths.LuggerFolderDefault;
+
+    /// <summary>
+    /// The picture drawn wherever a surface has no picture of its own.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Setting Key: "image_storage.no_image_path"
+    /// </para>
+    /// <para>
+    /// Description: the plant's own "no picture" artwork, held once for every computer like the folders above. It
+    /// is one file rather than a folder because there is only ever one answer: an item, a work center and a lugger
+    /// with no picture all draw the same thing, which is what teaches a person to read it as "no picture". Empty
+    /// means the artwork that ships with the application.
+    /// </para>
+    /// <para>
+    /// Default: <see cref="ImageStorageNoImagePathDefault"/>
+    /// (<c>Assets/Placeholders/default-no-image.png</c>, the shipped artwork).
+    /// </para>
+    /// </remarks>
+    public const string ImageStorageNoImagePath = "image_storage.no_image_path";
+
+    /// <summary>
+    /// The no-picture artwork this application ships with, relative to the deployment folder.
+    /// </summary>
+    /// <remarks>
+    /// Default: <see cref="ImagePicturePolicy.NoImagePath"/>, which is also what every surface drew before this
+    /// setting existed, so a plant that never changes it sees no difference.
+    /// </remarks>
+    public const string ImageStorageNoImagePathDefault = ImagePicturePolicy.NoImagePath;
 
     /// <summary>
     /// The root the dunnage pictures sit under, one folder per dunnage type and part beneath it.

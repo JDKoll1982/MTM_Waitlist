@@ -15,6 +15,7 @@ using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Shared.Helpers;
+using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Waitlist.Helpers;
 using MTM_Waitlist.Module_Waitlist.Models;
 
@@ -33,6 +34,19 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     private readonly IUrgencyDeadlineService? _urgencyDeadlineService;
     private readonly MTM_Waitlist.Module_Waitlist.Services.IWaitlistMessageSeenStore? _messageSeenStore;
     private readonly IWaitlistSortPreferenceService? _sortPreferenceService;
+    private readonly MTM_Waitlist.Module_Waitlist.Services.ILuggerChangeNoticeService? _luggerChangeNoticeService;
+
+    /// <summary>
+    /// The reader of this computer's Local Work Centers. The list's own filter narrows to them, so a null seam
+    /// leaves the filter matching nothing rather than guessing which work centers this machine serves.
+    /// </summary>
+    private readonly IWorkCenterCatalogService? _workCenterCatalogService;
+
+    /// <summary>
+    /// The Local Work Centers (hot work centers) assigned to this computer, read on each cold load. Empty until the
+    /// first read completes, and empty on a host whose machine configuration assigns none.
+    /// </summary>
+    private HashSet<string> _localWorkCenterNames = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// The order this viewer's list is shown in, resolved from their remembered choice the first time the list
@@ -113,21 +127,41 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     public ObservableCollection<SampleOrder> Source { get; } = new ObservableCollection<SampleOrder>();
     public ObservableCollection<SampleOrder> SearchSuggestions { get; } = new();
 
+    /// <summary>
+    /// The arrangement changes this session has been told about and has not dismissed, oldest first. The strip
+    /// draws one bar per entry, so two changes draw two bars (FR-033, FR-036).
+    /// </summary>
+    public ObservableCollection<LuggerChangeNotice> LuggerChangeNotices { get; } = new();
+
     [ObservableProperty]
     public partial bool IsWaitlistEmpty { get; private set; } = true;
 
     /// <summary>
-    /// When true, the list is narrowed to the signed-in user's own submitted requests
-    /// (the "My Requests" quick view). Toggling reloads the current building's list.
+    /// When true, the list is narrowed to the requests whose work center is one of this computer's Local Work
+    /// Centers (its hot work centers). Toggling reloads the current building's list.
     /// </summary>
+    /// <remarks>
+    /// This replaced a "My Requests" filter that narrowed to the signed-in person's own submissions. The floor's
+    /// question was never "what did I raise" but "what is waiting for the work centers this machine runs", which
+    /// is the one thing the computer's own configuration can answer.
+    /// </remarks>
     [ObservableProperty]
-    public partial bool ShowMyRequestsOnly { get; set; }
+    public partial bool ShowLocalWorkCentersOnly { get; set; }
 
-    partial void OnShowMyRequestsOnlyChanged(bool value)
+    partial void OnShowLocalWorkCentersOnlyChanged(bool value)
     {
-        AppLog.Info("Waitlist", $"My-Requests filter {(value ? "enabled" : "disabled")} for requester '{_currentRequesterEmployeeNumber}'.");
+        AppLog.Info("Waitlist", $"Local-Work-Centers filter {(value ? "enabled" : "disabled")} for {_localWorkCenterNames.Count} configured Local Work Center(s).");
+        OnPropertyChanged(nameof(EmptyStateMessage));
         _ = LoadOrdersAsync(_buildingSelectionService.SelectedBuilding);
     }
+
+    /// <summary>
+    /// The sentence under the empty state's title. A filtered list says what the filter left out, so an empty
+    /// screen is never read as "nothing is waiting anywhere".
+    /// </summary>
+    public string EmptyStateMessage => ShowLocalWorkCentersOnly
+        ? "Waitlist_EmptyState_Filtered.Message".GetLocalized()
+        : "Waitlist_EmptyState.Message".GetLocalized();
 
     public string SelectedBuilding => _buildingSelectionService.SelectedBuilding;
 
@@ -152,7 +186,9 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         IRequestJobPartAvailabilityProvider? jobAvailabilityProvider = null,
         IPermissionService? permissionService = null,
         IPartPictureResolver? partPictureResolver = null,
-        IRequestItemConfigurationService? itemConfigurationService = null)
+        IRequestItemConfigurationService? itemConfigurationService = null,
+        MTM_Waitlist.Module_Waitlist.Services.ILuggerChangeNoticeService? luggerChangeNoticeService = null,
+        IWorkCenterCatalogService? workCenterCatalogService = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(buildingSelectionService);
@@ -173,6 +209,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         _jobAvailabilityProvider = jobAvailabilityProvider;
         _partPictureResolver = partPictureResolver;
         _itemConfigurationService = itemConfigurationService;
+        _luggerChangeNoticeService = luggerChangeNoticeService;
+        _workCenterCatalogService = workCenterCatalogService;
 
         // This screen's own internal-store unavailable state (FR-021): the waitlist list reads
         // mtm_waitlist live, so a failure is reported here, with a retry that re-runs this screen's load.
@@ -607,6 +645,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         }
 
         await LoadOrdersAsync(_buildingSelectionService.SelectedBuilding);
+        await OpenLuggerChangeNoticesAsync();
         StartMinuteTicker();
     }
 
@@ -686,6 +725,144 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         }
 
         RefreshTimeDerivedText();
+        _ = PollLuggerChangeNoticesAsync();
+    }
+
+    /// <summary>
+    /// Takes this session's notice watermark as the list opens, so a change recorded before the person was using
+    /// the list is never shown to them as though it had just happened (FR-037). A person who may not handle
+    /// requests is not asked for anything and is shown no bar (FR-038).
+    /// </summary>
+    public async Task OpenLuggerChangeNoticesAsync()
+    {
+        if (_luggerChangeNoticeService is null)
+        {
+            return;
+        }
+
+        try
+        {
+            if (!await CanHandleRequestsAsync().ConfigureAwait(false))
+            {
+                await ApplyLuggerChangeNoticesAsync(Array.Empty<LuggerChangeNotice>()).ConfigureAwait(false);
+                return;
+            }
+
+            var notices = await _luggerChangeNoticeService.OpenSessionAsync().ConfigureAwait(false);
+            await ApplyLuggerChangeNoticesAsync(notices).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            // A strip that cannot be opened costs the notice, not the list.
+            AppLog.Error("Waitlist", ex, "Opening the lugger change notices failed; the strip stays empty.");
+        }
+    }
+
+    /// <summary>
+    /// Asks the notice seam for the changes made since the list opened, once per minute tick, and shows every
+    /// notice the session still holds (FR-033). Only a person who holds <c>permission.requests.handle</c> is
+    /// asked; an unreachable store answers no notice rather than an invented one.
+    /// </summary>
+    public async Task PollLuggerChangeNoticesAsync()
+    {
+        if (_luggerChangeNoticeService is null)
+        {
+            return;
+        }
+
+        try
+        {
+            if (!await CanHandleRequestsAsync().ConfigureAwait(false))
+            {
+                await ApplyLuggerChangeNoticesAsync(Array.Empty<LuggerChangeNotice>()).ConfigureAwait(false);
+                return;
+            }
+
+            var notices = await _luggerChangeNoticeService.PollAsync().ConfigureAwait(false);
+            await ApplyLuggerChangeNoticesAsync(notices).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("Waitlist", ex, "Polling the lugger change notices failed; this tick shows nothing new.");
+        }
+    }
+
+    /// <summary>
+    /// Records that the person closed one notice's bar, so it is not offered again for the rest of the session
+    /// (FR-036). The page calls this only when the bar's own close button raised the close.
+    /// </summary>
+    [RelayCommand]
+    private async Task DismissLuggerChangeNoticeAsync(LuggerChangeNotice? notice)
+    {
+        if (notice is null)
+        {
+            return;
+        }
+
+        if (_luggerChangeNoticeService is not null)
+        {
+            try
+            {
+                var remaining = await _luggerChangeNoticeService
+                    .DismissAsync(notice.Id, raisedByCloseButton: true)
+                    .ConfigureAwait(false);
+                await ApplyLuggerChangeNoticesAsync(remaining).ConfigureAwait(false);
+                return;
+            }
+            catch (Exception ex)
+            {
+                AppLog.Error("Waitlist", ex, "Recording the dismissed lugger change notice failed; the bar is closed for this list.");
+            }
+        }
+
+        LuggerChangeNotices.Remove(notice);
+    }
+
+    /// <summary>
+    /// Makes the strip match the notices the session still holds. Bars that are already up are left alone, so a
+    /// poll adds the new ones and removes only the dismissed ones rather than rebuilding the strip every minute.
+    /// </summary>
+    private async Task ApplyLuggerChangeNoticesAsync(IReadOnlyList<LuggerChangeNotice> notices)
+    {
+        void Apply()
+        {
+            for (var index = LuggerChangeNotices.Count - 1; index >= 0; index--)
+            {
+                if (!notices.Any(notice => notice.Id == LuggerChangeNotices[index].Id))
+                {
+                    LuggerChangeNotices.RemoveAt(index);
+                }
+            }
+
+            foreach (var notice in notices.OrderBy(notice => notice.Id))
+            {
+                if (!LuggerChangeNotices.Any(held => held.Id == notice.Id))
+                {
+                    LuggerChangeNotices.Add(notice);
+                }
+            }
+        }
+
+        if (_dispatcherQueue is DispatcherQueue dispatcher)
+        {
+            var tcs = new TaskCompletionSource();
+            dispatcher.TryEnqueue(() =>
+            {
+                try
+                {
+                    Apply();
+                }
+                finally
+                {
+                    tcs.SetResult();
+                }
+            });
+            await tcs.Task;
+        }
+        else
+        {
+            Apply();
+        }
     }
 
     /// <summary>
@@ -800,6 +977,13 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             _maxAllottedCache.Clear();
             _jobAvailabilityCache.Clear();
             _resolvedPictureCache.Clear();
+
+            // Its own read, and only while the filter is on: a list that is not narrowing to this computer's work
+            // centers has no use for the assignment, and every live read this screen pays for is felt on a card.
+            if (ShowLocalWorkCentersOnly)
+            {
+                await LoadLocalWorkCenterNamesAsync().ConfigureAwait(false);
+            }
         }
 
         var now = DateTimeOffset.UtcNow;
@@ -818,10 +1002,10 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             return;
         }
 
-        // "My Requests": keep only the signed-in user's own submitted request rows.
-        if (ShowMyRequestsOnly)
+        // "Local Work Centers": keep only the rows whose work center is one this computer serves.
+        if (ShowLocalWorkCentersOnly)
         {
-            newItems = newItems.Where(order => IsRequesterOrder(order, _currentRequesterEmployeeNumber)).ToList();
+            newItems = newItems.Where(order => IsLocalWorkCenterOrder(order, _localWorkCenterNames)).ToList();
         }
 
         // The order the viewer left the list in, applied to every build of it: the same rows in the same order
@@ -834,7 +1018,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         await ApplyHandlerActionStateAsync(newItems, DateTimeOffset.UtcNow).ConfigureAwait(false);
 
         await ApplySourceUpdateAsync(newItems, refreshVersion);
-        AppLog.Info("Waitlist", $"Loaded building '{building}'. SessionRequests={activeRequestCount}, TotalRows={Source.Count}, MyRequestsOnly={ShowMyRequestsOnly}, SearchQuery='{SearchQuery}'.");
+        AppLog.Info("Waitlist", $"Loaded building '{building}'. SessionRequests={activeRequestCount}, TotalRows={Source.Count}, LocalWorkCentersOnly={ShowLocalWorkCentersOnly}, LocalWorkCenterCount={_localWorkCenterNames.Count}, SearchQuery='{SearchQuery}'.");
         UpdateSearchSuggestions(SearchQuery);
     }
 
@@ -990,13 +1174,24 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         // A request that names no material carries none, and its card draws the one shared placeholder (FR-020).
         var materialPartNumber = WaitlistRequestTitles.ResolveMaterialPartNumber(request, jobAvailability);
 
+        // A dunnage request carries no material part, but it is just as much about one thing the operator picked:
+        // the dunnage part, which is the part its second line names. Its picture is carried here for the same
+        // reason the material part's is resolved where the job is in hand — neither surface's picture resolver can
+        // see the dunnage catalogue, so a dunnage card would otherwise always draw the placeholder.
+        var dunnagePartPicturePath = WaitlistRequestTitles.ResolveDunnagePartPicturePath(context, jobAvailability);
+
         var item = new SampleOrder
         {
             Id = request.Id.GetHashCode(),
             RequestId = request.Id,
             ItemCode = request.Item,
             MaterialPartNumber = materialPartNumber ?? string.Empty,
+            StockLookupPartNumber = string.Equals(request.Item, "deliver-component", StringComparison.OrdinalIgnoreCase)
+                ? context.Component?.Trim() ?? string.Empty
+                : string.Empty,
             MaterialPartScope = materialPartNumber is null ? string.Empty : PartPictureLayout.VisualPartScope,
+            // Empty for every request that is not about a dunnage part, which draws the one shared placeholder.
+            ResolvedPartImagePath = dunnagePartPicturePath ?? string.Empty,
             RequesterEmployeeNumber = request.RequesterEmployeeNumber,
             AssignedMaterialHandler = request.AssignedMaterialHandler,
             AssignedMaterialHandlerName = request.AssignedMaterialHandlerName,
@@ -1154,7 +1349,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             candidates.Add(ResolveDeclaredCell(field, request, jobAvailability));
         }
 
-        return WaitlistLineCardCell.CellsToDraw(candidates);
+        return WaitlistCardCellRules.OrderForPanel(request.Item, WaitlistLineCardCell.CellsToDraw(candidates));
     }
 
     /// <summary>
@@ -1192,20 +1387,6 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             };
         }
 
-        // A cell whose source is designed but not yet built draws a plainly-worded placeholder rather than being
-        // hidden, so the person can see the cell is coming (FR-034). It is a message about the cell, never a value
-        // read from anywhere, and it is not recorded as a failure: nothing has failed, the source is simply not
-        // built yet. Delete the field from `WaitlistCardCellRules.s_pendingSourceLabels` once its source lands.
-        if (WaitlistCardCellRules.IsPendingSourceField(request.Item, label))
-        {
-            return new WaitlistLineCardCell
-            {
-                Label = label,
-                Value = WaitlistCardCellRules.PendingSourcePhrase(request.Item, label) ?? string.Empty,
-                Order = field.Order,
-            };
-        }
-
         if (string.Equals(source, RequestItemFieldDefinition.Sources.Answer, StringComparison.OrdinalIgnoreCase))
         {
             var answer = CapturedAnswer(label, request, field.IsRequired);
@@ -1237,7 +1418,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             // A label the requesting job does not carry is the designed absence, not a fault: a job with no die
             // draws no Die cell and nothing is logged for it (FR-057, RequestJobFieldValues). The label that
             // resolves is the declared one, and an answer captured under it outranks the job's own (FR-082).
-            var jobValue = RequestJobFieldValues.Resolve(label, jobAvailability, request.Answers);
+            var jobValue = RequestJobFieldValues.Resolve(label, jobAvailability, AnswersWithComponent(request));
             return new WaitlistLineCardCell { Label = label, Value = jobValue ?? string.Empty, Order = field.Order };
         }
 
@@ -1258,6 +1439,34 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             $"its declared source '{source}' is not one this build can read");
 
         return new WaitlistLineCardCell { Label = label, Order = field.Order };
+    }
+
+    /// <summary>
+    /// The request's captured answers with the one answer the flow asked for added under <c>Component</c>, for an
+    /// Item that names a component. The request stores that answer on itself rather than among the labelled ones,
+    /// and the component's description and quantity are looked up by it.
+    /// </summary>
+    private static IReadOnlyDictionary<string, string>? AnswersWithComponent(WaitlistRequest request)
+    {
+        var item = request.Item ?? string.Empty;
+        if (!item.EndsWith("-component", StringComparison.OrdinalIgnoreCase)
+            || string.IsNullOrWhiteSpace(request.InputValue)
+            || (request.Answers is not null && request.Answers.Keys.Any(key => string.Equals(key?.Trim(), "Component", StringComparison.OrdinalIgnoreCase))))
+        {
+            return request.Answers;
+        }
+
+        var merged = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        if (request.Answers is not null)
+        {
+            foreach (var answer in request.Answers)
+            {
+                merged[answer.Key] = answer.Value;
+            }
+        }
+
+        merged["Component"] = request.InputValue.Trim();
+        return merged;
     }
 
     /// <summary>
@@ -1462,8 +1671,10 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     /// <summary>
     /// Resolves the row's <b>material part's</b> picture and carries it on the row, so the card draws a value it
     /// was handed. A request that names no material, and a material whose picture cannot be resolved, both leave
-    /// the row empty — and the card then draws the one shared placeholder rather than a picture of the kind of
-    /// request or the part's family (FR-014, FR-019, FR-020).
+    /// the row as it was — and the card then draws the one shared placeholder rather than a picture of the kind of
+    /// request or the part's family (FR-014, FR-019, FR-020). A dunnage request is left alone here for the same
+    /// reason: it names no material part, and the dunnage part's picture is already carried by
+    /// <see cref="CreateSessionOrder"/>, which is where the requesting job is in hand.
     /// </summary>
     /// <remarks>
     /// A resolver that cannot answer is not worth failing the whole list for: the row keeps its placeholder, the
@@ -1641,17 +1852,72 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     }
 
     /// <summary>
-    /// Narrows a set of rows to those submitted by the given requester (used by the "My
-    /// Requests" quick view). A row with no requester identity is excluded.
+    /// Reads the Local Work Centers (hot work centers) assigned to this computer. Called on each cold load, which is
+    /// this screen's refresh point, so a machine whose assignment was changed in Settings is picked up on the next
+    /// load rather than needing a restart.
     /// </summary>
-    public static IReadOnlyList<SampleOrder> FilterToMyRequests(IEnumerable<SampleOrder> source, string requesterEmployeeNumber)
+    /// <remarks>
+    /// A failed read keeps the set the last successful read produced rather than emptying it: an empty set would
+    /// turn the filter into a screen that always says nothing is waiting, which is the one answer a failed read
+    /// cannot support. On a host with no reader at all (a unit test) the set stays empty, and the filter is only
+    /// reachable through the toggle, which a test sets deliberately.
+    /// </remarks>
+    private async Task LoadLocalWorkCenterNamesAsync()
+    {
+        if (_workCenterCatalogService is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var workstationName = _workCenterCatalogService.GetCurrentComputerName();
+            var hotWorkCenters = await _workCenterCatalogService
+                .GetHotWorkCenterNamesAsync(workstationName)
+                .ConfigureAwait(false);
+
+            _localWorkCenterNames = new HashSet<string>(
+                hotWorkCenters
+                    .Where(name => !string.IsNullOrWhiteSpace(name))
+                    .Select(name => name.Trim()),
+                StringComparer.OrdinalIgnoreCase);
+
+            AppLog.Info("Waitlist", $"Local Work Centers loaded. Workstation='{workstationName}', Count={_localWorkCenterNames.Count}.");
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("Waitlist", ex, "Reading this computer's Local Work Centers failed; the list is keeping the assignment it last read.");
+        }
+    }
+
+    /// <summary>
+    /// Whether a row is for one of the given Local Work Centers. A row that names no work center is not one of
+    /// them: the filter may only include a work center it can actually match.
+    /// </summary>
+    public static bool IsLocalWorkCenterOrder(SampleOrder order, IEnumerable<string> localWorkCenterNames)
+    {
+        if (order is null || localWorkCenterNames is null)
+        {
+            return false;
+        }
+
+        var workCenter = order.RequestedPressName?.Trim() ?? string.Empty;
+        return !string.IsNullOrWhiteSpace(workCenter)
+            && localWorkCenterNames.Any(name => string.Equals(name?.Trim(), workCenter, StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// Narrows a set of rows to those whose work center is one of the given Local Work Centers (used by the
+    /// screen's own filter).
+    /// </summary>
+    public static IReadOnlyList<SampleOrder> FilterToLocalWorkCenters(IEnumerable<SampleOrder> source, IEnumerable<string> localWorkCenterNames)
     {
         if (source is null)
         {
             return Array.Empty<SampleOrder>();
         }
 
-        return source.Where(order => IsRequesterOrder(order, requesterEmployeeNumber)).ToArray();
+        return source.Where(order => IsLocalWorkCenterOrder(order, localWorkCenterNames)).ToArray();
     }
 
     public Task RefreshAsync() => LoadOrdersAsync(_buildingSelectionService.SelectedBuilding);

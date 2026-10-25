@@ -263,3 +263,51 @@ handler, and the gate is never relaxed — an absent or empty expected handler m
 extended in place rather than replaced: `sp_waitlist_request_list` returns both new columns on every row, and
 `sp_waitlist_request_insert` takes `p_answers_json`. `AllSPs.sql`, `AllSeeds.sql` and
 `update_table_descriptions.sql` moved in the same change.
+
+### What the lugger arrangement added (013-lugger-location-config, recorded 2026-10-17)
+
+The `Lugger Location` cell on a `pickup-scrap` card became a live read, and the arrangement behind it is **three new
+tables and eleven new procedures**. Each artifact ships `create.sql` with `rollback.sql` beside it, and
+`Database/Tables/AllTables.sql`, `Database/StoredProcedures/AllSPs.sql`, `Database/Seeds/AllSeeds.sql` and
+`Database/Bootstrap/update_table_descriptions.sql` moved in the same change. The feature's own read-only check is
+`Database/Validation/lugger_arrangement_schema/validate.sql`.
+
+**Tables.**
+
+- **`waitlist_lugger_locations`** (`Database/Tables/36_waitlist_lugger_locations/`) — one row per named lugger: its
+  name (unique on the case-insensitive collation), its own `status` (`Available`, `Backup`, `Full`, `Do Not Use`,
+  defaulting to `Backup`), the `status_reason` a blocked lugger carries, and its `display_position`. A name is never
+  reserved: every row can be renamed, removed and re-created.
+- **`waitlist_lugger_scrap_assignments`** (`Database/Tables/37_waitlist_lugger_scrap_assignments/`) — one row per
+  scrap type and lugger pairing: the entered spelling, its normalised key (`LOWER(TRIM(...))`, the value every
+  lookup matches on), `is_dump_point`, and `sort_position`. The unique key is `(scrap_type_key, lugger_id)` and the
+  foreign key to the luggers carries `ON DELETE CASCADE`, so removing a lugger leaves no assignment pointing at it.
+  The dump-point role lives here rather than on the lugger because a lugger that takes two scrap types can hold the
+  role for one and be a backup for the other.
+- **`waitlist_lugger_arrangement_changes`** (`Database/Tables/38_waitlist_lugger_arrangement_changes/`) — the
+  append-only record of every edit: one of the eight `change_kind` values, the lugger's name as text, the affected
+  scrap type where there is one, the value before and after, the reason, and who made the change and when. It has
+  **no foreign key** to the luggers on purpose: a cascade would delete the audit with the lugger.
+
+**Procedures.** `sp_waitlist_lugger_locations_list|insert|rename|delete|status_set|promote`,
+`sp_waitlist_lugger_scrap_assignments_list|set|delete`, and
+`sp_waitlist_lugger_arrangement_list` and `sp_waitlist_lugger_arrangement_changes_list`. The writes share three
+conventions this repository already uses and one that is specific to them:
+
+- A refusal is `SIGNAL SQLSTATE '45000'` with a plain sentence, and the application shows that sentence.
+- Every write runs in one transaction, appends its own change rows inside it, and holds each affected scrap type's
+  assignment rows with `SELECT ... FOR UPDATE` for the whole transaction, so two leads changing at once produce one
+  outcome rather than a half-moved arrangement.
+- Every write **ends with `SELECT v_affected AS affected_rows`** rather than relying on the provider's affected-row
+  count. A `COMMIT` is the last statement a transaction-wrapped procedure runs, and the C API reports *that*
+  statement's count (0), so the count is answered as a result set and `LuggerArrangementService` reads it.
+- The dump-point rule is in one shape inside each procedure that needs it: usable luggers (`Available`, `Backup`)
+  sort before blocked ones (`Full`, `Do Not Use`), exactly one usable row holds `is_dump_point = 1`, a holder that
+  can no longer receive hands the role to the first usable lugger in order, and an emptied lugger does not take the
+  role back from a lugger that holds it.
+
+**Seeds.** `seed_waitlist_lugger_arrangement_defaults` writes the seven pinned luggers and seven pinned assignments
+only when `waitlist_lugger_locations` is empty, so it lands on an installed store without a reinstall and a second
+run writes nothing. `seed_permission_role_baselines` gained nine rows for
+`permission.settings.lugger_arrangement`; because `AllSeeds.sql` is the hand-maintained aggregate the installer
+runs, that block was synced into it in the same change — the artifact alone would not have reached a fresh store.

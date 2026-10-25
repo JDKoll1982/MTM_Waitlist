@@ -106,24 +106,29 @@ public partial class ShellViewModel : ObservableRecipient
         get; set;
     }
 
-    /// <summary>True while the Waitlist (list) page is the active view, so the header's My Requests filter is shown.</summary>
+    /// <summary>True while the Waitlist (list) page is the active view, so the header's list controls are shown.</summary>
     [ObservableProperty]
-    public partial bool IsMyRequestsVisible
+    public partial bool IsWaitlistHeaderControlsVisible
     {
         get; set;
     }
 
-    /// <summary>Header My Requests filter state (kept in sync with the active Waitlist view model).</summary>
+    /// <summary>Header Local Work Centers filter state (kept in sync with the active Waitlist view model).</summary>
     [ObservableProperty]
-    public partial bool ShowMyRequestsOnly
+    public partial bool ShowLocalWorkCentersOnly
     {
         get; set;
     }
 
-    /// <summary>Label text reflecting the current filter: "My Requests" when filtering, else "All Requests".</summary>
-    public string MyRequestsFilterLabel => ShowMyRequestsOnly ? "My Requests" : "All Requests";
+    /// <summary>Label text reflecting the current filter: "Local Work Centers" when filtering, else "All Requests".</summary>
+    public string LocalWorkCentersFilterLabel => (ShowLocalWorkCentersOnly
+        ? "Shell_LocalWorkCentersFilter_On.Label"
+        : "Shell_LocalWorkCentersFilter_Off.Label").GetLocalized();
 
-    partial void OnShowMyRequestsOnlyChanged(bool value) => OnPropertyChanged(nameof(MyRequestsFilterLabel));
+    /// <summary>The switch's accessible name, so it says what it narrows rather than what it is.</summary>
+    public string LocalWorkCentersFilterAutomationName => "Shell_LocalWorkCentersFilter_AutomationProperties.Name".GetLocalized();
+
+    partial void OnShowLocalWorkCentersOnlyChanged(bool value) => OnPropertyChanged(nameof(LocalWorkCentersFilterLabel));
 
     /// <summary>
     /// The order the list is currently shown in, as one of the five <see cref="WaitlistSortOrder"/> keys
@@ -394,7 +399,7 @@ public partial class ShellViewModel : ObservableRecipient
     {
         _currentPageType = e.SourcePageType;
         IsBackEnabled = NavigationService.CanGoBack;
-        IsMyRequestsVisible = e.SourcePageType == typeof(WaitlistViewPage);
+        IsWaitlistHeaderControlsVisible = e.SourcePageType == typeof(WaitlistViewPage);
 
         if (e.SourcePageType == typeof(WaitlistViewDetailPage))
         {

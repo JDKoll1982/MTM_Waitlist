@@ -227,6 +227,7 @@
             <Button
                 AutomationProperties.AutomationId="NewRequestSummaryPage_BackButton"
                 Content="Back"
+                ContentTemplate="{StaticResource ActionBarBackTemplate}"
                 Command="{x:Bind ViewModel.BackCommand}"
                 IsEnabled="{x:Bind ViewModel.CanSubmit, Mode=OneWay}" />
             <Button
@@ -241,7 +242,8 @@
                             Width="16"
                             Height="16"
                             IsActive="{x:Bind ViewModel.IsSubmitting, Mode=OneWay}" />
-                        <TextBlock Text="Submit" />
+                        <FontIcon FontSize="16" Glyph="&#xE724;" />
+                        <TextBlock Text="Submit" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button.Content>
             </Button>

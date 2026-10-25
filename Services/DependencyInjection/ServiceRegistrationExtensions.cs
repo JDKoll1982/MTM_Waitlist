@@ -78,7 +78,14 @@ public static partial class ServiceRegistrationExtensions
             pageService.Configure<NewRequestSummaryViewModel, NewRequestSummaryPage>();
             pageService.Configure<NewRequestResultViewModel, NewRequestResultPage>();
             pageService.Configure<SettingsViewModel, SettingsPage>();
+        pageService.Configure<GeneralSettingsRoute, GeneralSettingsPage>();
+        pageService.Configure<OperationsSettingsRoute, OperationsSettingsPage>();
+        pageService.Configure<PicturesSettingsRoute, PicturesSettingsPage>();
+        pageService.Configure<DevicesSettingsRoute, DevicesSettingsPage>();
+        pageService.Configure<DiagnosticsSettingsRoute, DiagnosticsSettingsPage>();
+        pageService.Configure<AdministrationSettingsRoute, AdministrationSettingsPage>();
             pageService.Configure<SetupWorkCenterViewModel, SetupWorkCenterPage>();
+            pageService.Configure<SetupWorkCenterHistoryViewModel, SetupWorkCenterHistoryPage>();
             pageService.Configure<SetupWorkOrderViewModel, SetupWorkOrderPage>();
             pageService.Configure<SetupPartSelectionViewModel, SetupPartSelectionPage>();
             pageService.Configure<SetupSequenceSelectionViewModel, SetupSequenceSelectionPage>();
@@ -158,6 +165,7 @@ public static partial class ServiceRegistrationExtensions
         services.AddTransient<SettingsPage>();
         services.AddTransient<SetupWorkOrderViewModel>();
         services.AddTransient<SetupWorkCenterViewModel>();
+        services.AddTransient<SetupWorkCenterHistoryViewModel>();
         services.AddTransient<SetupPartSelectionViewModel>();
         services.AddTransient<SetupSequenceSelectionViewModel>();
         services.AddTransient<SetupDunnageTypeViewModel>();
@@ -165,8 +173,11 @@ public static partial class ServiceRegistrationExtensions
         services.AddTransient<SetupCompletionViewModel>();
         services.AddTransient<SetupDunnageImageSearchDialogViewModel>();
         services.AddTransient<SetupDunnageImageSearchDialog>();
+        services.AddTransient<SetupWorkOrderSearchDialogViewModel>();
+        services.AddTransient<SetupWorkOrderSearchDialog>();
         services.AddTransient<SetupWorkOrderPage>();
         services.AddTransient<SetupWorkCenterPage>();
+        services.AddTransient<SetupWorkCenterHistoryPage>();
         services.AddTransient<SetupPartSelectionPage>();
         services.AddTransient<SetupSequenceSelectionPage>();
         services.AddTransient<SetupDunnageTypePage>();
@@ -185,6 +196,7 @@ public static partial class ServiceRegistrationExtensions
             jobAvailabilityProvider: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestJobPartAvailabilityProvider>(),
             partPictureResolver: provider.GetRequiredService<MTM_Waitlist.Module_Core.Contracts.Services.IPartPictureResolver>()));
         services.AddTransient<WaitlistViewDetailPage>();
+        services.AddTransient<MTM_Waitlist.Module_Waitlist.ViewModels.PartStockDialogViewModel>();
         services.AddTransient<NewRequestWorkCenterViewModel>();
         services.AddTransient<NewRequestWorkCenterPage>();
         services.AddTransient<NewRequestJobTypeViewModel>();
@@ -237,7 +249,13 @@ public static partial class ServiceRegistrationExtensions
             partPictureResolver: provider.GetRequiredService<MTM_Waitlist.Module_Core.Contracts.Services.IPartPictureResolver>(),
             // The Item's declaration is where the card's cells come from, so a null seam here would leave every
             // card drawing no detail cell at all while the screen still looked wired (FR-025).
-            itemConfigurationService: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestItemConfigurationService>()));
+            itemConfigurationService: provider.GetRequiredService<MTM_Waitlist.Module_Settings.Services.IRequestItemConfigurationService>(),
+            // A null notice seam would leave the strip permanently empty, so the change notice the handler is
+            // owed would never be drawn while the screen still looked wired (FR-033).
+            luggerChangeNoticeService: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.ILuggerChangeNoticeService>(),
+            // A null seam here leaves the Local Work Centers filter matching nothing at all, so the header
+            // switch would look wired and always empty the list.
+            workCenterCatalogService: provider.GetRequiredService<MTM_Waitlist.Module_Shared.Services.IWorkCenterCatalogService>()));
         services.AddTransient<WaitlistViewPage>();
         services.AddTransient<ShellPage>();
         services.AddTransient<ShellViewModel>();
@@ -259,6 +277,11 @@ public static partial class ServiceRegistrationExtensions
         RegisterPartPictureServices(services);
         RegisterPartPictureScreen(services);
         RegisterPartPictureCache(services);
+
+        // The scrap-lugger arrangement (feature 013): the service now, and the Settings page when its story phase
+        // lands. The two declarations are separate so the page's file can be added without a second edit here.
+        RegisterLuggerArrangementServices(services);
+        RegisterLuggerArrangementPage(services);
 
         // Configuration
         services.Configure<WaitlistDatabaseOptions>(context.Configuration.GetSection(nameof(WaitlistDatabaseOptions)));
@@ -292,6 +315,12 @@ public static partial class ServiceRegistrationExtensions
                 // folder the screens look in are the same one.
                 MTM_Waitlist.Module_Shared.Helpers.ImageCachePaths.SetCacheRoot(
                     await storageConfiguration.GetImageCacheFolderPathAsync().ConfigureAwait(false));
+
+                // Adopted here, beside the other plant-wide picture settings, so the artwork a surface draws for
+                // "no picture" is the plant's own from the first card of the run rather than from the first visit
+                // to the settings screen (FR-040).
+                MTM_Waitlist.Module_Shared.Helpers.ImagePicturePolicy.SetNoImageOverride(
+                    await storageConfiguration.GetNoImagePathAsync().ConfigureAwait(false));
 
                 if (await storageConfiguration.GetImageCacheEnabledAsync().ConfigureAwait(false) is false)
                 {
@@ -385,4 +414,15 @@ public static partial class ServiceRegistrationExtensions
     /// drawn rather than in one pass at startup.
     /// </summary>
     static partial void RegisterPartPictureCache(IServiceCollection services);
+
+    /// <summary>
+    /// The scrap-lugger arrangement's service, in its own file beside this one so no later phase edits the
+    /// service list.
+    /// </summary>
+    static partial void RegisterLuggerArrangementServices(IServiceCollection services);
+
+    /// <summary>
+    /// The lugger arrangement's Settings page and its route, contributed by the story phase that builds them.
+    /// </summary>
+    static partial void RegisterLuggerArrangementPage(IServiceCollection services);
 }

@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -229,11 +230,34 @@ public sealed class SetupWorkCenter : ObservableObject
         ? "None"
         : CurrentPartNumber;
 
+    public string TitleDisplay => string.IsNullOrWhiteSpace(Building) ? Name : $"{Name} - {Building}";
+
     /// <summary>Local date-and-time label for the "Last Updated" row.</summary>
     public string LastUpdatedDisplay => LastUpdatedUtc is null
         ? "Never"
         : LastUpdatedUtc.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt");
 }
+
+/// <summary>One recorded setup event for a work center, shown on the Work Center history page.</summary>
+public sealed class SetupWorkCenterHistoryEntry
+{
+    public string EventAction { get; init; } = string.Empty;
+
+    public string WorkOrder { get; init; } = string.Empty;
+
+    public string PartNumber { get; init; } = string.Empty;
+
+    public string SequenceNumber { get; init; } = string.Empty;
+
+    public DateTime? ChangedUtc { get; init; }
+
+    public string ChangedDisplay => ChangedUtc is null
+        ? "Unknown"
+        : ChangedUtc.Value.ToLocalTime().ToString("MMM d, yyyy h:mm tt");
+}
+
+/// <summary>Navigation parameter that tells the history page which work center to show.</summary>
+public sealed record SetupWorkCenterHistoryNavigationData(string WorkCenterName, string Building);
 
 public sealed class SetupPartResult
 {
@@ -271,6 +295,48 @@ public sealed class SetupSequenceResult
     public string Description { get; set; } = string.Empty;
 
     public bool IsSelected { get; set; }
+}
+
+/// <summary>
+/// One line of the work-order search results: an open order the setup workflow can start from, with the
+/// part, customer and work centre that let an operator recognise it.
+/// </summary>
+public sealed class SetupWorkOrderSearchResult
+{
+    /// <summary>The prefix every automation name on this list is built from.</summary>
+    public const string AutomationIdPrefix = "SetupWorkOrderSearchDialog_Row";
+
+    /// <summary>The canonical <c>WO-######</c> base id — the value the entry page accepts.</summary>
+    public string WorkOrder { get; set; } = string.Empty;
+
+    public string PartNumber { get; set; } = string.Empty;
+
+    public string PartDescription { get; set; } = string.Empty;
+
+    /// <summary>The customer's real name; empty for a stock order, which has none.</summary>
+    public string CustomerName { get; set; } = string.Empty;
+
+    public string WorkCenter { get; set; } = string.Empty;
+
+    /// <summary>The Visual status code as returned: <c>R</c>, <c>U</c> or <c>F</c>.</summary>
+    public string Status { get; set; } = string.Empty;
+
+    public DateTimeOffset? WantDate { get; init; }
+
+    /// <summary>The status code spelled out for the screen, or the code itself when it is not one of the three.</summary>
+    public string StatusText => Status?.Trim().ToUpperInvariant() switch
+    {
+        "R" => "Released",
+        "U" => "Unreleased",
+        "F" => "Firmed",
+        var other => other ?? string.Empty,
+    };
+
+    /// <summary>The want date as the operator reads dates, or an empty cell when Visual carries none.</summary>
+    public string WantDateText => WantDate?.ToLocalTime().ToString("MMM d, yyyy", CultureInfo.CurrentCulture) ?? string.Empty;
+
+    /// <summary>This row's automation name, unique to the order it offers.</summary>
+    public string AutomationId => $"{AutomationIdPrefix}_{WorkOrder}";
 }
 
 public sealed class SetupSubordinatePart

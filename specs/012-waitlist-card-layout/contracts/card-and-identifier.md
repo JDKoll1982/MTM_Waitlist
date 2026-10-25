@@ -61,8 +61,11 @@ The status word, its precedence and the three column themes are pinned in
 An inner grid of three rows and two columns (FR-024). Row 1 always spans both columns and holds **the category word
 and the request's own identifier** (FR-007). The detail cells occupy rows 2 and 3.
 
-The cells a card shows are determined by the request's Item and are never chosen per row (FR-025). Every cell is a
-label on top with its value beneath, apart from the label-less die-shop cell (FR-028).
+The cells a card shows are determined by the request's Item and are never chosen per row (FR-025). Every cell reads
+`Label: value` on one line — the label small, secondary and semibold, the value a step larger, semibold and in the
+primary text colour, with a real gap between them and the pair starting at the cell's left edge — apart from the
+label-less die-shop cell (FR-028). The grid those cells sit in is centred in its area, so a panel whose lower row is
+empty stays in the middle of the section (FR-027).
 
 **Geometry by the number of cells the Item declares** (FR-026, FR-027):
 
@@ -180,6 +183,11 @@ the four labels in that state today are listed below the table.
 
 `Destination` is shown only on `deliver-flatstock` and never on `pickup-ncm` or `pickup-outside-service` (FR-057).
 
+`pickup-scrap` is the one Item whose two cells are **placed by the card rather than by the declaration**: `Scrap Type`
+draws in the panel's first column and `Lugger Location` in the second, side by side on the top row. The pair reads as
+one statement — the material, then where it is dumped — so the order holds even on a store whose declaration lists
+the lugger first (`WaitlistCardCellRules.OrderForPanel`).
+
 **Declared fields that must not be shown** (FR-056): the requesting, pickup and work-centre fields; `Description` on
 the dunnage Items; `Quantity` on the die Items; `Reason` on both wrong-part Items; and the declared fields of the
 four returning Items other than `Part Type` and `# of Skids`.
@@ -197,7 +205,7 @@ card change the day a source lands:
 | `Quantity in house` | `pickup-coil`, `deliver-coil` | no resolver arm reads a quantity; the `part_warehouse_quantities` read shape is registered and mirrorable but no card cell consumes it |
 | `Quantity` | `deliver-flatstock` | the same absent quantity source |
 | `Total Qty In House` | `pickup-component`, `deliver-component` | the same absent quantity source (FR-090 records the finished-goods rule as unsettled) |
-| `Lugger Location` | `pickup-scrap` | no resolver arm exists for it, and none is added by this work |
+| `Lugger Location` | `pickup-scrap` | no longer hidden: 013-lugger-location-config added the resolver arm, and the value comes from the job's scrap type matched against the lugger arrangement, read once per list load |
 
 A reader must not take any of the four as "declared and therefore drawn": the delivered behaviour is that a cell
 with no source is absent, and the exception above is the complete set of the declarations in that state.

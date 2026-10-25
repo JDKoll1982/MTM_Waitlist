@@ -66,8 +66,8 @@
         </ListView>
 
         <StackPanel Grid.Row="2" Style="{StaticResource SetupActionBarStyle}">
-            <Button AutomationProperties.AutomationId="SetupPartSelectionPage_BackButton" x:Uid="Setup_Action_Back" Content="Back" Command="{x:Bind ViewModel.BackCommand}" />
-            <Button AutomationProperties.AutomationId="SetupPartSelectionPage_ContinueButton" x:Uid="Setup_Action_Continue" Content="Continue" Command="{x:Bind ViewModel.ContinueCommand}" />
+            <Button AutomationProperties.AutomationId="SetupPartSelectionPage_BackButton" x:Uid="Setup_Action_Back" Content="Back" ContentTemplate="{StaticResource ActionBarBackTemplate}" Command="{x:Bind ViewModel.BackCommand}" />
+            <Button AutomationProperties.AutomationId="SetupPartSelectionPage_ContinueButton" x:Uid="Setup_Action_Continue" Content="Continue" ContentTemplate="{StaticResource ActionBarContinueTemplate}" Command="{x:Bind ViewModel.ContinueCommand}" />
         </StackPanel>
     </Grid>
 </Page>

@@ -85,16 +85,20 @@ public sealed class AutomationSurfaceTests
     /// <remarks>
     /// An expander whose header is a plain string lends that header to its toggle as a name; one whose header is an
     /// element lends nothing, so the toggle - the thing a person clicks - announced itself as an unnamed button.
+    /// The controls live on the page that owns them, so each one is looked for where it is drawn.
     /// </remarks>
     [TestMethod]
     public void UI_AutomationSurfaceTests_TheSettingsExpandersAndComputerButtonsAreNamed()
     {
-        var settings = LoadXaml("Module_Settings", "Views", "SettingsPage.xaml");
+        var operations = LoadXaml("Module_Settings", "Views", "OperationsSettingsPage.xaml");
+        AssertNamed(operations, "SettingsPage_IgnoredLocationsExpander", "The ignored-locations expander");
 
-        AssertNamed(settings, "SettingsPage_IgnoredLocationsExpander", "The ignored-locations expander");
-        AssertNamed(settings, "SettingsPage_CacheRefreshExpander", "The cache-refresh expander");
-        AssertNamed(settings, "SettingsPage_Computers_AddButton", "The add-computer button");
-        AssertNamed(settings, "SettingsPage_Computers_EditButton", "The edit-computer button");
+        var diagnostics = LoadXaml("Module_Settings", "Views", "DiagnosticsSettingsPage.xaml");
+        AssertNamed(diagnostics, "SettingsPage_CacheRefreshExpander", "The cache-refresh expander");
+
+        var devices = LoadXaml("Module_Settings", "Views", "DevicesSettingsPage.xaml");
+        AssertNamed(devices, "SettingsPage_Computers_AddButton", "The add-computer button");
+        AssertNamed(devices, "SettingsPage_Computers_EditButton", "The edit-computer button");
     }
 
     /// <summary>The remembered person offered on the sign-in stage.</summary>

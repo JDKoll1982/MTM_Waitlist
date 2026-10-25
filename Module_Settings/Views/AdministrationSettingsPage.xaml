@@ -1,0 +1,138 @@
+<Page
+    x:Class="MTM_Waitlist.Module_Settings.Views.AdministrationSettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helpers="using:MTM_Waitlist.Module_Core.Helpers"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:views="using:MTM_Waitlist.Module_Settings.Views"
+    xmlns:wct="using:CommunityToolkit.WinUI.Controls"
+    xmlns:xaml="using:Microsoft.UI.Xaml"
+    x:Name="RootPage"
+    mc:Ignorable="d">
+
+<Page.Resources>
+    <helpers:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+
+    <!--
+        Settings page typography and row chrome.
+
+        Every description and status line on the page uses SettingsDescriptionStyle, and every
+        value pill in a two-column pick list uses SettingsListPillStyle. Section headings use the
+        platform BodyStrong style directly. Keeping these three in one place is what stops the
+        page drifting back into a mix of margins, brushes and font sizes.
+    -->
+    <Style x:Key="SettingsDescriptionStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="SettingsListPillStyle" TargetType="Border">
+        <Setter Property="Padding" Value="10,6,10,6" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!--
+        Pictures panel row chrome.
+
+        The merged panel holds three cards, and between them a dozen rows of "label, description, control". The
+        measurements live here rather than on each row, so a folder box and the Browse button beside it sit in
+        one straight column instead of every row inventing its own width.
+    -->
+    <Style x:Key="SettingsFormRowStyle" TargetType="Grid">
+        <Setter Property="ColumnSpacing" Value="16" />
+    </Style>
+
+    <Style x:Key="SettingsRowTitleStyle" TargetType="TextBlock">
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="SettingsFolderBoxStyle" TargetType="TextBox">
+        <Setter Property="MinWidth" Value="300" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="SettingsFolderButtonStyle" TargetType="Button">
+        <Setter Property="MinWidth" Value="96" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+</Page.Resources>
+    <ScrollViewer
+        HorizontalScrollBarVisibility="Disabled"
+        HorizontalScrollMode="Disabled"
+        VerticalScrollBarVisibility="Auto">
+        <Grid
+            MaxWidth="{StaticResource PageContentMaxWidth}"
+            Padding="0,0,0,48"
+            HorizontalAlignment="Stretch"
+            RowSpacing="28">
+            <StackPanel x:Name="AdministrationCategoryPanel" Spacing="10">
+                <TextBlock Style="{ThemeResource TitleTextBlockStyle}" Text="Administration" />
+                <TextBlock Style="{StaticResource SettingsDescriptionStyle}" Text="The people who may sign in, what each of them is allowed to do, and the lugger arrangement." />
+<TextBox
+    AutomationProperties.AutomationId="AdministrationSettingsPage_SearchBox"
+    Header="Search"
+    PlaceholderText="Search settings"
+    Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+<wct:SettingsCard
+    x:Name="UserManagementEntryCard"
+    x:Load="{x:Bind ViewModel.IsUserManagementEntryVisible, Mode=OneWay}"
+    AutomationProperties.AutomationId="SettingsPage_UserManagementEntry"
+    AutomationProperties.Name="{x:Bind ViewModel.UserManagementEntryTitle}"
+    HorizontalAlignment="Stretch"
+    IsClickEnabled="True"
+    Command="{x:Bind ViewModel.OpenUserManagementCommand}">
+    <wct:SettingsCard.Header>
+        <TextBlock Text="{x:Bind ViewModel.UserManagementEntryTitle}" />
+    </wct:SettingsCard.Header>
+    <wct:SettingsCard.Description>
+        <TextBlock Text="{x:Bind ViewModel.UserManagementEntryDescription}" />
+    </wct:SettingsCard.Description>
+    <wct:SettingsCard.HeaderIcon>
+        <SymbolIcon Symbol="People" />
+    </wct:SettingsCard.HeaderIcon>
+</wct:SettingsCard>
+
+<wct:SettingsCard
+    x:Name="PermissionsEntryCard"
+    x:Load="{x:Bind ViewModel.IsPermissionsEntryVisible, Mode=OneWay}"
+    AutomationProperties.AutomationId="SettingsPage_PermissionsEntry"
+    AutomationProperties.Name="{x:Bind ViewModel.PermissionsEntryTitle}"
+    HorizontalAlignment="Stretch"
+    IsClickEnabled="True"
+    Command="{x:Bind ViewModel.OpenPermissionsCommand}">
+    <wct:SettingsCard.Header>
+        <TextBlock Text="{x:Bind ViewModel.PermissionsEntryTitle}" />
+    </wct:SettingsCard.Header>
+    <wct:SettingsCard.Description>
+        <TextBlock Text="{x:Bind ViewModel.PermissionsEntryDescription}" />
+    </wct:SettingsCard.Description>
+    <wct:SettingsCard.HeaderIcon>
+        <SymbolIcon Symbol="Permissions" />
+    </wct:SettingsCard.HeaderIcon>
+</wct:SettingsCard>
+
+<wct:SettingsCard
+    x:Name="LuggerArrangementEntryCard"
+    x:Load="{x:Bind ViewModel.IsLuggerArrangementEntryVisible, Mode=OneWay}"
+    AutomationProperties.AutomationId="SettingsPage_LuggerArrangementEntry"
+    AutomationProperties.Name="{x:Bind ViewModel.LuggerArrangementEntryTitle}"
+    HorizontalAlignment="Stretch"
+    IsClickEnabled="True"
+    Command="{x:Bind ViewModel.OpenLuggerArrangementCommand}">
+    <wct:SettingsCard.Header>
+        <TextBlock Text="{x:Bind ViewModel.LuggerArrangementEntryTitle}" />
+    </wct:SettingsCard.Header>
+    <wct:SettingsCard.Description>
+        <TextBlock Text="{x:Bind ViewModel.LuggerArrangementEntryDescription}" />
+    </wct:SettingsCard.Description>
+    <wct:SettingsCard.HeaderIcon>
+        <SymbolIcon Symbol="Bullets" />
+    </wct:SettingsCard.HeaderIcon>
+</wct:SettingsCard>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</Page>

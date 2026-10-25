@@ -16,7 +16,7 @@
         the list of parts that still have none. The picture the screen shows for a part comes from the same reader
         every card draws with, so what is shown here is what a surface shows.
     -->
-    <Grid Padding="24" RowSpacing="16">
+    <Grid Padding="24" MaxWidth="{StaticResource PageContentMaxWidth}" RowSpacing="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />

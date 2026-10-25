@@ -23,7 +23,7 @@ so the list no longer has to infer "somebody spoke" from a timestamp that moves 
 | `RequestType` / `Subtype` | `string` / `string?` | Selects the card template and the urgency max-allotted lookup. |
 | `InputValue` | `string?` | The type-specific "request details" the handler reads. |
 | `ActiveSetupJobId` | `string` | Work-order context. |
-| `RequesterEmployeeNumber` | `string` | **Ownership key**: decides who may cancel, and which rows "My Requests" keeps. |
+| `RequesterEmployeeNumber` | `string` | **Ownership key**: decides who may cancel a request. |
 | `RequesterEmployeeName` | `string` | Shown as "Requested by". |
 | `Status` | `string` | One of `Pending`, `Accepted`, `Completed`, `Canceled` — see §6 invariant 3. |
 | `RequestedUtc` | `DateTimeOffset` | Waiting age, and the left end of the urgency window. |

@@ -1,0 +1,171 @@
+<Page
+    x:Class="MTM_Waitlist.Module_Settings.Views.DevicesSettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helpers="using:MTM_Waitlist.Module_Core.Helpers"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:views="using:MTM_Waitlist.Module_Settings.Views"
+    xmlns:wct="using:CommunityToolkit.WinUI.Controls"
+    xmlns:xaml="using:Microsoft.UI.Xaml"
+    x:Name="RootPage"
+    mc:Ignorable="d">
+
+<Page.Resources>
+    <helpers:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+
+    <!--
+        Settings page typography and row chrome.
+
+        Every description and status line on the page uses SettingsDescriptionStyle, and every
+        value pill in a two-column pick list uses SettingsListPillStyle. Section headings use the
+        platform BodyStrong style directly. Keeping these three in one place is what stops the
+        page drifting back into a mix of margins, brushes and font sizes.
+    -->
+    <Style x:Key="SettingsDescriptionStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="SettingsListPillStyle" TargetType="Border">
+        <Setter Property="Padding" Value="10,6,10,6" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!--
+        Pictures panel row chrome.
+
+        The merged panel holds three cards, and between them a dozen rows of "label, description, control". The
+        measurements live here rather than on each row, so a folder box and the Browse button beside it sit in
+        one straight column instead of every row inventing its own width.
+    -->
+    <Style x:Key="SettingsFormRowStyle" TargetType="Grid">
+        <Setter Property="ColumnSpacing" Value="16" />
+    </Style>
+
+    <Style x:Key="SettingsRowTitleStyle" TargetType="TextBlock">
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="SettingsFolderBoxStyle" TargetType="TextBox">
+        <Setter Property="MinWidth" Value="300" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="SettingsFolderButtonStyle" TargetType="Button">
+        <Setter Property="MinWidth" Value="96" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+</Page.Resources>
+    <ScrollViewer
+        HorizontalScrollBarVisibility="Disabled"
+        HorizontalScrollMode="Disabled"
+        VerticalScrollBarVisibility="Auto">
+        <Grid
+            MaxWidth="{StaticResource PageContentMaxWidth}"
+            Padding="0,0,0,48"
+            HorizontalAlignment="Stretch"
+            RowSpacing="28">
+            <StackPanel Spacing="10">
+                <TextBlock Style="{ThemeResource TitleTextBlockStyle}" Text="Devices" />
+                <TextBlock Style="{StaticResource SettingsDescriptionStyle}" Text="The registry of the computers that may run MTM Waitlist, and what each one is called on the floor." />
+<TextBox
+    AutomationProperties.AutomationId="DevicesSettingsPage_SearchBox"
+    Header="Search"
+    PlaceholderText="Search settings"
+    Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+<wct:SettingsExpander
+    AutomationProperties.AutomationId="SettingsPage_ComputersExpander"
+    x:Name="ComputersExpander"
+    x:Load="{x:Bind ViewModel.IsComputersPanelVisible, Mode=OneWay}"
+    Description="Manage the computers registered on the shop floor. Restricted to Admin and Developer roles."
+    Header="Computers"
+    HorizontalAlignment="Stretch"
+    IsExpanded="False">
+    <wct:SettingsExpander.HeaderIcon>
+        <SymbolIcon Symbol="Setting" />
+    </wct:SettingsExpander.HeaderIcon>
+
+    <StackPanel
+        Orientation="Horizontal"
+        Spacing="8"
+        VerticalAlignment="Center">
+        <ProgressRing
+            Width="20"
+            Height="20"
+            VerticalAlignment="Center"
+            IsActive="{x:Bind ViewModel.ComputerManagement.IsBusy, Mode=OneWay}" />
+        <Button
+            AutomationProperties.AutomationId="SettingsPage_Computers_AddButton"
+            AutomationProperties.Name="Add computer"
+            Content="Add"
+            Click="AddComputer_Click"
+            IsEnabled="{x:Bind ViewModel.ComputerManagement.CanManageComputers, Mode=OneWay}" />
+        <Button
+            AutomationProperties.AutomationId="SettingsPage_Computers_EditButton"
+            AutomationProperties.Name="Edit the selected computer"
+            Content="Edit"
+            Click="EditComputer_Click"
+            IsEnabled="{x:Bind ViewModel.ComputerManagement.CanEditSelected, Mode=OneWay}" />
+    </StackPanel>
+
+    <wct:SettingsExpander.Items>
+        <wct:SettingsCard
+            Header="Registered Computers"
+            ContentAlignment="Vertical"
+            HorizontalContentAlignment="Stretch">
+            <Grid RowSpacing="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <ListView
+                    AutomationProperties.AutomationId="SettingsPage_ComputersList"
+                    Grid.Row="0"
+                    MaxHeight="320"
+                    ItemsSource="{x:Bind ViewModel.ComputerManagement.Computers, Mode=OneWay}"
+                    SelectedItem="{x:Bind ViewModel.ComputerManagement.SelectedComputer, Mode=TwoWay}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Padding="4" ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock FontWeight="SemiBold" Text="{Binding DisplayName}" />
+                                    <TextBlock
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="{Binding ComputerName}" />
+                                    <TextBlock
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="{Binding MacAddressNormalized}" />
+                                </StackPanel>
+                                <Button
+                                    AutomationProperties.Name="{Binding DisplayName}"
+                                    Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding ViewModel.ComputerManagement.DeleteCommand, ElementName=RootPage}"
+                                    CommandParameter="{Binding}"
+                                    Content="Delete"
+                                    Visibility="{Binding IsCurrentComputer, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Invert}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <TextBlock
+                    Grid.Row="1"
+                    Style="{StaticResource SettingsDescriptionStyle}"
+                    Text="{x:Bind ViewModel.ComputerManagement.StatusMessage, Mode=OneWay}" />
+            </Grid>
+        </wct:SettingsCard>
+    </wct:SettingsExpander.Items>
+</wct:SettingsExpander>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</Page>

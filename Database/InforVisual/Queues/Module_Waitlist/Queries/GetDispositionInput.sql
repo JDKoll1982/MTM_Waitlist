@@ -13,23 +13,43 @@
 -- Parameters:
 --   @WorkOrder    - the `WO-######` key (e.g. WO-074011), matched verbatim against WORK_ORDER.BASE_ID
 --   @PartNumber   - finished-product part on the order (e.g. 24733431)
+--   @WorkCenter   - the work centre the job is set up on (e.g. 100-12). It anchors the routing read: the
+--                   operation at this work centre is the job's own, so the read can name the operation that
+--                   follows it — which is how Infor Visual itself decides Outside Service versus WIP, and how a
+--                   routing that ends here is known to produce finished goods (research 2026-10-23).
 --
--- Derivation (file 14 Phase 6, confirmed 2026-09-08 against live data):
+-- Derivation (file 14 Phase 6, confirmed 2026-09-08 against live data; routing confirmed 2026-10-23):
 --   Infor MT_WIP_INVENTORY is empty in this install, so open order quantity = DESIRED_QTY - RECEIVED_QTY.
---   Outside Service is driven by the vendor/service fields, NOT by a status code.
 --   WORK_ORDER.PROD_ORDER_TYPE is all NULL -> not used.
 --   FinishedGoodsQuantity is the part's stock AT A FINISHED-GOODS LOCATION, not PART.QTY_ON_HAND. FR-090 records
 --   the defect that PART.QTY_ON_HAND stood here: it is the part's total on-hand across every location and carries
 --   no location filter at all, so any stock anywhere plus a closed order with nothing open read as Finished
---   Goods. The classifier's documented rule ("on-hand > 0 at a finished-goods / shipping location") is unchanged;
---   only the value handed to it is corrected (research R8).
+--   Goods. That figure is now a confirmation, never the discriminator: a job that is still running has no stock
+--   at a shipping location yet, so Finished Goods is read from the routing instead.
+--   NextOperationResourceId / HasRemainingOperation are the routing: the first open operation after the job's own.
+--     RESOURCE_ID = 'OUTSIDE_SERVICE'  -> Outside Service (the plant's own tag print reads this)
+--     any other resource               -> WIP
+--     no operation after the job's own -> HasCustomerDemand decides (see below)
+--   HasCustomerDemand is the FG/WIP discriminator once nothing follows in the routing: a part the plant sells (it
+--   has customer-order lines) is the end product, and a part nothing buys exists only to feed another work order,
+--   which is what work in process means. Confirmed live 2026-10-23:
+--     A0006376159 at 100-08 — press still running (8,409 of 10,000), nothing after it, 180 customer-order lines
+--       -> Finished Goods
+--     T527094 at 100-17 — press at 130 of 131, nothing after it, no customer-order line, drawn by open WO-073735
+--       -> WIP
+--   Operation completion does NOT separate those two: both operations are open, and the first cut of this rule
+--   used completion and called both jobs WIP.
+--   Both routing columns are NULL when the work centre is not on the order's routing at all, which leaves the
+--   classifier's stock/quantity/status arms to answer exactly as before. HasCustomerDemand is NULL only when the
+--   read did not carry it (a cached row written before the column existed).
+--   ProductCode / CommodityCode / PartDescription are the plant's own part classification, read from PART. They
+--   answer what kind of part this is — coil, flatstock, hardware, tooling, … — which is a different question from
+--   the job's disposition, and they are what RequestPartTypeClassifier reads (2026-10-23).
 --   Finished-goods classification mirrors the taxonomy already documented for the WIP side in
 --   Database/MTMWipApp/Queues/Module_Waitlist/Queues/GetWipFloorQuantities.sql and already used by
 --   GetPartWarehouseQuantities.sql: a location is finished goods when its own DESCRIPTION says so, when its
 --   WAREHOUSE.DESCRIPTION says so, or when its code is 'FG' / 'DC-FG'. LOCATION is keyed by (WAREHOUSE_ID, ID),
---   so the join carries both. These codes are NOT YET CONFIRMED for this installation: task T067's live
---   validation (Database/Validation/disposition_input_finished_goods/validate.sql) is what confirms them, and no
---   code is invented before it does.
+--   so the join carries both. These codes were CONFIRMED for this installation on 2026-10-16 (T067).
 -- Returns zero rows when the work order/part is not found (caller falls back to Unknown).
 -- ========================================
 
@@ -43,6 +63,43 @@ SET NOCOUNT ON;
 DECLARE @WorkOrderTrimmed nvarchar(30) = LTRIM(RTRIM(@WorkOrder));
 
 DECLARE @PartNumberNormalized nvarchar(60) = LTRIM(RTRIM(@PartNumber));
+
+DECLARE @WorkCenterTrimmed nvarchar(30) = LTRIM(RTRIM(ISNULL(@WorkCenter, '')));
+
+-- The job's own operation: the one at the asked work centre. The lowest open sequence wins when a work centre
+-- appears more than once in a routing, because that is the operation the part is standing at.
+DECLARE @CurrentSequence smallint;
+
+SELECT @CurrentSequence = MIN(o.SEQUENCE_NO)
+FROM WORK_ORDER AS wo
+INNER JOIN OPERATION AS o
+    ON o.WORKORDER_TYPE = wo.TYPE
+    AND o.WORKORDER_BASE_ID = wo.BASE_ID
+    AND o.WORKORDER_LOT_ID = wo.LOT_ID
+    AND o.WORKORDER_SPLIT_ID = wo.SPLIT_ID
+    AND o.WORKORDER_SUB_ID = wo.SUB_ID
+WHERE
+    wo.BASE_ID = @WorkOrderTrimmed
+    AND wo.PART_ID = @PartNumberNormalized
+    AND LTRIM(RTRIM(o.RESOURCE_ID)) = @WorkCenterTrimmed
+    AND o.STATUS <> 'C';
+
+-- An operation that has already closed still anchors the routing: what follows it is what the part became.
+IF @CurrentSequence IS NULL
+BEGIN
+    SELECT @CurrentSequence = MIN(o.SEQUENCE_NO)
+    FROM WORK_ORDER AS wo
+    INNER JOIN OPERATION AS o
+        ON o.WORKORDER_TYPE = wo.TYPE
+        AND o.WORKORDER_BASE_ID = wo.BASE_ID
+        AND o.WORKORDER_LOT_ID = wo.LOT_ID
+        AND o.WORKORDER_SPLIT_ID = wo.SPLIT_ID
+        AND o.WORKORDER_SUB_ID = wo.SUB_ID
+    WHERE
+        wo.BASE_ID = @WorkOrderTrimmed
+        AND wo.PART_ID = @PartNumberNormalized
+        AND LTRIM(RTRIM(o.RESOURCE_ID)) = @WorkCenterTrimmed;
+END
 
 SELECT TOP (1)
     LTRIM(RTRIM(wo.STATUS)) AS WorkOrderStatus,
@@ -76,8 +133,47 @@ SELECT TOP (1)
             AND (LTRIM(RTRIM(ISNULL(o.VENDOR_ID, ''))) <> ''
                  OR LTRIM(RTRIM(ISNULL(o.SERVICE_ID, ''))) <> ''
                  OR LTRIM(RTRIM(ISNULL(o.SERVICE_PART_ID, ''))) <> '')
-    ) THEN 1 ELSE 0 END AS HasOutsideVendorOperation
+    ) THEN 1 ELSE 0 END AS HasOutsideVendorOperation,
+    CASE WHEN @CurrentSequence IS NULL THEN NULL ELSE
+    (
+        SELECT TOP (1) LTRIM(RTRIM(o2.RESOURCE_ID))
+        FROM OPERATION AS o2
+        WHERE o2.WORKORDER_TYPE = wo.TYPE
+            AND o2.WORKORDER_BASE_ID = wo.BASE_ID
+            AND o2.WORKORDER_LOT_ID = wo.LOT_ID
+            AND o2.WORKORDER_SPLIT_ID = wo.SPLIT_ID
+            AND o2.WORKORDER_SUB_ID = wo.SUB_ID
+            AND o2.SEQUENCE_NO > @CurrentSequence
+            AND o2.STATUS <> 'C'
+        ORDER BY o2.SEQUENCE_NO
+    ) END AS NextOperationResourceId,
+    CASE WHEN @CurrentSequence IS NULL THEN NULL ELSE
+    (
+        CASE WHEN EXISTS
+        (
+            SELECT 1
+            FROM OPERATION AS o3
+            WHERE o3.WORKORDER_TYPE = wo.TYPE
+                AND o3.WORKORDER_BASE_ID = wo.BASE_ID
+                AND o3.WORKORDER_LOT_ID = wo.LOT_ID
+                AND o3.WORKORDER_SPLIT_ID = wo.SPLIT_ID
+                AND o3.WORKORDER_SUB_ID = wo.SUB_ID
+                AND o3.SEQUENCE_NO > @CurrentSequence
+                AND o3.STATUS <> 'C'
+        ) THEN 1 ELSE 0 END
+    ) END AS HasRemainingOperation,
+    CASE WHEN EXISTS
+    (
+        SELECT 1
+        FROM CUST_ORDER_LINE AS col
+        WHERE col.PART_ID = wo.PART_ID
+    ) THEN 1 ELSE 0 END AS HasCustomerDemand,
+    LTRIM(RTRIM(part.PRODUCT_CODE)) AS ProductCode,
+    LTRIM(RTRIM(part.COMMODITY_CODE)) AS CommodityCode,
+    LTRIM(RTRIM(part.DESCRIPTION)) AS PartDescription
 FROM WORK_ORDER AS wo
+LEFT JOIN PART AS part
+    ON part.ID = wo.PART_ID
 WHERE
     wo.BASE_ID = @WorkOrderTrimmed
     AND wo.PART_ID = @PartNumberNormalized

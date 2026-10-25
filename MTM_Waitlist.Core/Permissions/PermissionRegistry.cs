@@ -68,7 +68,7 @@ public static class PermissionRegistry
         IReadOnlyList<string> GateSites);
 
     /// <summary>
-    /// The nineteen permissions, one per gated action, each spelled as the specification pins it.
+    /// The twenty permissions, one per gated action, each spelled as the specification pins it.
     /// </summary>
     /// <remarks>
     /// The fallback column is a deliberate choice rather than a copy of any role's baseline: an unreachable store
@@ -178,6 +178,13 @@ public static class PermissionRegistry
             Area.Settings,
             Fallback: false,
             new[] { "SettingsViewModel" }),
+        new Entry(
+            PermissionKeys.SettingsLuggerArrangement,
+            LabelResourceKey(PermissionKeys.SettingsLuggerArrangement),
+            GatesResourceKey(PermissionKeys.SettingsLuggerArrangement),
+            Area.Settings,
+            Fallback: false,
+            new[] { "SettingsViewModel", "LuggerArrangementViewModel" }),
         new Entry(
             PermissionKeys.SetupDunnageQuickAdd,
             LabelResourceKey(PermissionKeys.SetupDunnageQuickAdd),

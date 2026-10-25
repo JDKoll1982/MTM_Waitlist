@@ -105,9 +105,31 @@ public sealed class RequestItemCatalogTests
     }
 
     [TestMethod]
+    public void Service_RequestItemCatalogTests_Catalog_TheThreeProductPickupsShareOneItemStepLabel()
+    {        // Superseded 2026-09-14 (FR-053). The identifier used to be the language's one conditional — the die's
+        // The job, not the person, decides whether its product is FG, WIP or outside service, so the Item step
+        // asks the question once and the card states the answer (FR-091).
+        foreach (var itemId in new[] { "pickup-fg", "pickup-wip", "pickup-outside-service" })
+        {
+            var item = RequestItemCatalog.FindById(itemId)!;
+
+            Assert.IsTrue(RequestItemCatalog.SharesProductPickupLabel(itemId), $"{itemId} shares the product label.");
+            Assert.AreEqual("Finished Product", RequestItemCatalog.ResolveItemStepLabel(item), $"{itemId}'s Item-step label.");
+        }
+
+        // Every other Item keeps its own name on that step.
+        foreach (var item in RequestItemCatalog.Items.Where(item => !RequestItemCatalog.SharesProductPickupLabel(item.Id)))
+        {
+            Assert.AreEqual(
+                RequestItemCatalog.ResolveDisplayName(item),
+                RequestItemCatalog.ResolveItemStepLabel(item),
+                $"Item '{item.Id}' must keep its own name on the Item step.");
+        }
+    }
+
+    [TestMethod]
     public void Service_RequestItemCatalogTests_Catalog_DieItemsDeclareTheirOwnTwoLines()
-    {
-        // Superseded 2026-09-14 (FR-053). The identifier used to be the language's one conditional — the die's
+    {        // Superseded 2026-09-14 (FR-053). The identifier used to be the language's one conditional — the die's
         // location at Home Location, otherwise its number. Both lines now carry what the handler needs in one
         // read: which job part the die is for, then the die's own number and where the die is. Nothing in the
         // shipped catalog uses the conditional syntax any more; the resolver still supports it.

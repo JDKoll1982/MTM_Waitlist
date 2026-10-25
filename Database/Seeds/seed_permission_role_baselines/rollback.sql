@@ -50,3 +50,23 @@ WHERE scope_type = 'role'
   AND value_type = 'bool'
   AND setting_key = 'permission.settings.part_pictures'
   AND scope_key IN ('role:setup_lead', 'role:plant_manager');
+
+-- Feature 013-lugger-location-config (task T006) added `permission.settings.lugger_arrangement` for nine roles:
+-- six that hold it and three that are refused. Reversing that addition is this DELETE, which names exactly that
+-- one key and the nine rows it wrote, and touches no other row. The DELETE above is the seed's own full
+-- reversal, so on a whole-seed rollback these nine rows are already gone and this statement changes nothing; it
+-- is here for a store where only the new key is being reversed.
+DELETE FROM config_settings_values
+WHERE scope_type = 'role'
+  AND value_type = 'bool'
+  AND setting_key = 'permission.settings.lugger_arrangement'
+  AND scope_key IN (
+      'role:developer',
+      'role:it_department',
+      'role:plant_manager',
+      'role:production_lead',
+      'role:setup_lead',
+      'role:material_handler_lead',
+      'role:material_handler',
+      'role:production',
+      'role:setup');

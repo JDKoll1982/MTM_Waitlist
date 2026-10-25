@@ -182,14 +182,27 @@ Source: `Module_Waitlist/Queries/GetDispositionInput.sql` · Caller: `RequestDis
 | `id` | BIGINT UNSIGNED AI | PK |
 | `work_order` | `VARCHAR(64) NOT NULL` | **in** |
 | `part_number` | `VARCHAR(64) NOT NULL` | **in** |
+| `work_center` | `VARCHAR(64) NOT NULL DEFAULT '*'` | **in** — the work centre the job is set up on; the routing answer is anchored on it, so one row per (work order, part) could only be right for one of them. `'*'` marks a row seeded before the routing was read; `sp_visual_disposition_input_get` prefers an exact match |
 | `work_order_status` | `VARCHAR(8) NULL` | out (status codes remain owned by `RequestDispositionStatusCodes`; Open = {R,U,F}, Closed = {C}, X never FG) |
 | `open_work_order_quantity` | `DECIMAL(18,4) NOT NULL DEFAULT 0` | out |
 | `finished_goods_quantity` | `DECIMAL(18,4) NOT NULL DEFAULT 0` | out |
-| `has_outside_vendor_operation` | `TINYINT(1) NOT NULL DEFAULT 0` | out (`has_` prefix per DB rules) |
+| `has_outside_vendor_operation` | `TINYINT(1) NOT NULL DEFAULT 0` | out (`has_` prefix per DB rules); legacy Outside Service signal, used only when the routing was not read |
+| `next_operation_resource_id` | `VARCHAR(16) NULL` | out — `RESOURCE_ID` of the first open operation after the job's own; `OUTSIDE_SERVICE` means Outside Service (research 2026-10-23) |
+| `has_remaining_operation` | `TINYINT(1) NULL` | out — 1 = an open operation remains **after** the job's own → WIP; 0 = nothing follows; NULL = the routing was not read |
+| `has_customer_demand` | `TINYINT(1) NULL` | out — 1 = the part has customer-order lines in Visual (it is a part the plant sells); NULL = not read. Decides Finished Goods against WIP once nothing follows the job's own operation |
+| `product_code` | `VARCHAR(64) NULL` | out — `PART.PRODUCT_CODE`, the plant's part category (`FG_PRESS`, `RM_PRESS`, `MFG_TOOLING`, `FG_DIE`, `RM_DIE`, `EXP_*`) |
+| `commodity_code` | `VARCHAR(64) NULL` | out — `PART.COMMODITY_CODE`, the material or part kind (`E Stamped Item`, `M Matl Coil`, `M Fast Fastener`, …) |
+| `part_description` | `VARCHAR(256) NULL` | out — `PART.DESCRIPTION`, whose words break a customer-supplied tie |
 | `refreshed_utc` | DATETIME NOT NULL | metadata |
 | `is_seed_content` | TINYINT(1) NOT NULL DEFAULT 0 | metadata |
 
-Indexes: `PRIMARY (id)`; unique `uq_visual_disposition_input_result_lookup_key (work_order, part_number)`.
+Indexes: `PRIMARY (id)`; unique `uq_visual_disposition_input_result_lookup_key (work_order, part_number, work_center)`.
+
+`has_remaining_operation` is deliberately tri-state: NULL is "not read", which is a different answer from "no work
+remains". Conflating them would report a product type for a part whose routing was never read. When nothing follows
+the job's own operation, `has_customer_demand` decides: a part the plant sells is the finished product, and a part
+nothing buys exists only to feed another work order, which is work in process. The operation's own completion does
+**not** decide it — a press still running on a sold part has already produced a finished good.
 
 ### 3.6 Stage twins
 

@@ -870,3 +870,126 @@ CREATE TABLE IF NOT EXISTS user_active_sessions (
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'The one active session for a person on a machine: a salted token digest, its lifetime and its machine key.';
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- Create table: waitlist_lugger_locations
+-- Engine: MySQL 5.7
+-- Purpose: One row per named scrap lugger. Holds the name the lead maintains and the handler reads on the
+--          `pickup-scrap` card, that lugger's own operating status, the reason it is blocked where it is
+--          `Do Not Use`, and its place in the display order. Where the material goes is a per scrap type role
+--          held by waitlist_lugger_scrap_assignments, so this table carries no dump-point column (FR-001,
+--          FR-004, FR-012, research D2).
+-- Source: specs/013-lugger-location-config/data-model.md section 1 and
+--         specs/013-lugger-location-config/contracts/persistence-and-permission.md section 1.
+-- Twin: uq_waitlist_lugger_locations_lugger_name is FR-004's uniqueness rule. The table collation is
+--       utf8mb4_unicode_ci, so the unique key refuses `door 6 lugger` beside `Door 6 Lugger`.
+-- Audit: every edit to this table appends a row to waitlist_lugger_arrangement_changes in the same
+--        transaction; the application never writes either table (FR-032, research D6).
+-- Rows are seeded by Database/Seeds/seed_waitlist_lugger_arrangement_defaults (7 rows).
+
+USE mtm_waitlist;
+
+SET NAMES utf8mb4;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+CREATE TABLE IF NOT EXISTS waitlist_lugger_locations (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    public_id CHAR(36) NOT NULL COMMENT 'Public UUID for the lugger row.',
+    lugger_name VARCHAR(64) NOT NULL COMMENT 'The name the lead maintains and the card shows, e.g. Door 6 Lugger.',
+    status VARCHAR(16) NOT NULL DEFAULT 'Backup' COMMENT 'One of Available, Backup, Full, Do Not Use. Defaults to Backup: a new lugger holds no dump point until a scrap type order makes it one.',
+    status_reason VARCHAR(500) NULL COMMENT 'Why the lugger is Do Not Use. Required for that status, NULL for the other three.',
+    display_position INT NOT NULL COMMENT 'The lugger place in the display order.',
+    created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the lugger was added.',
+    updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the lugger last changed.',
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_waitlist_lugger_locations_public_id (public_id),
+    UNIQUE KEY uq_waitlist_lugger_locations_lugger_name (lugger_name),
+    KEY idx_waitlist_lugger_locations_display_position (display_position),
+    KEY idx_waitlist_lugger_locations_status (status)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'One row per named scrap lugger: name, own status and reason, display order.';
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- Create table: waitlist_lugger_scrap_assignments
+-- Engine: MySQL 5.7
+-- Purpose: One row is one statement that a scrap type dumps through a given lugger: the spelling the lead
+--          entered, its normalised key, whether that pairing holds the dump point for the type, and where it
+--          sits in the type's try order. The role lives here rather than on the lugger, because a lugger that
+--          takes two scrap types can hold the role for one and be a backup for the other (FR-005, FR-006,
+--          FR-007, FR-013, research D2).
+-- Source: specs/013-lugger-location-config/data-model.md section 2 and
+--         specs/013-lugger-location-config/contracts/persistence-and-permission.md section 1.
+-- Twin: uq_waitlist_lugger_scrap_assignments_type_lugger refuses the same lugger twice for one scrap type,
+--       keyed on the normalised value so ` 5052 ALUMINUM ` cannot slip past it.
+-- Cascade: fk_waitlist_lugger_assignments_lugger_locations_lugger_id takes every pairing with the lugger when
+--          it is removed, so no assignment ever points at a lugger that no longer exists (FR-005).
+-- At most one is_dump_point = 1 row per scrap_type_key is enforced by the procedures, in one transaction, not
+-- by a key: MySQL 5.7 has no partial unique index.
+-- Rows are seeded by Database/Seeds/seed_waitlist_lugger_arrangement_defaults (7 rows).
+
+USE mtm_waitlist;
+
+SET NAMES utf8mb4;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+CREATE TABLE IF NOT EXISTS waitlist_lugger_scrap_assignments (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    public_id CHAR(36) NOT NULL COMMENT 'Public UUID for the assignment row.',
+    lugger_id BIGINT NOT NULL COMMENT 'The lugger this scrap type dumps through.',
+    scrap_type VARCHAR(128) NOT NULL COMMENT 'The scrap type as the lead spelled it, or as the seed wrote it.',
+    scrap_type_key VARCHAR(128) NOT NULL COMMENT 'LOWER(TRIM(scrap_type)); the value every lookup matches on.',
+    is_dump_point TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 when this lugger is the one a handler is sent to for this scrap type.',
+    sort_position INT NOT NULL COMMENT 'The order the system tries the luggers for this scrap type.',
+    created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the assignment was made.',
+    updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the assignment or its position last changed.',
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_waitlist_lugger_scrap_assignments_public_id (public_id),
+    UNIQUE KEY uq_waitlist_lugger_scrap_assignments_type_lugger (scrap_type_key, lugger_id),
+    KEY idx_waitlist_lugger_scrap_assignments_scrap_type_key (scrap_type_key),
+    KEY idx_waitlist_lugger_scrap_assignments_lugger_id (lugger_id),
+    CONSTRAINT fk_waitlist_lugger_assignments_lugger_locations_lugger_id FOREIGN KEY (lugger_id) REFERENCES waitlist_lugger_locations (id) ON DELETE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'One row per scrap type and lugger pairing: entered spelling, normalised key, dump-point role and try order.';
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- Create table: waitlist_lugger_arrangement_changes
+-- Engine: MySQL 5.7
+-- Purpose: One row per recorded change to the lugger arrangement. It is both the audit trail FR-032 asks for
+--          and the source of the in-application notice FR-033 delivers, read above a session watermark on
+--          `id` (FR-037, research D6).
+-- Source: specs/013-lugger-location-config/data-model.md section 3 and
+--         specs/013-lugger-location-config/contracts/persistence-and-permission.md section 1.
+-- No foreign key on lugger_id: a cascade would delete the audit with the lugger, and SET NULL would rewrite
+-- history. `lugger_name` is the durable identifier and `lugger_id` a convenience (FR-005, research D3).
+-- Append only: a row is written by the procedure that makes the change and is never updated or deleted.
+-- change_kind is one of lugger_added, lugger_renamed, lugger_removed, status_changed,
+-- dump_point_promoted, assignment_added, assignment_removed, assignment_reordered, lugger_reordered.
+
+USE mtm_waitlist;
+
+SET NAMES utf8mb4;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+CREATE TABLE IF NOT EXISTS waitlist_lugger_arrangement_changes (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    public_id CHAR(36) NOT NULL COMMENT 'Public UUID for the change row.',
+    change_kind VARCHAR(32) NOT NULL COMMENT 'What kind of edit was made. One of the nine pinned kinds.',
+    lugger_id BIGINT NULL COMMENT 'Cross reference to the lugger as it stands; NULL once the lugger was removed.',
+    lugger_name VARCHAR(64) NOT NULL COMMENT 'The name the lugger holds after the change, or held when removed. Text on purpose, so the record outlives the row.',
+    scrap_type VARCHAR(128) NULL COMMENT 'The affected scrap type as spelled at the time; NULL when the change touched none.',
+    scrap_type_key VARCHAR(128) NULL COMMENT 'The normalised key, so a row is found by the same match the card uses.',
+    previous_value VARCHAR(255) NULL COMMENT 'The value before the change, read according to change_kind.',
+    new_value VARCHAR(255) NULL COMMENT 'The value after the change, read according to change_kind.',
+    change_reason VARCHAR(500) NULL COMMENT 'The Do Not Use reason, kept after the lugger row clears it.',
+    changed_by_employee_number VARCHAR(32) NOT NULL COMMENT 'Who made the change.',
+    changed_by_employee_name VARCHAR(128) NOT NULL COMMENT 'The same person name, so the notice and the audit read without a join.',
+    changed_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the change was made.',
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_waitlist_lugger_arrangement_changes_public_id (public_id),
+    KEY idx_waitlist_lugger_arrangement_changes_changed_utc (changed_utc),
+    KEY idx_waitlist_lugger_arrangement_changes_lugger_id (lugger_id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'Append-only record of every edit to the lugger arrangement: what changed, from what to what, by whom and when.';
+
+SET FOREIGN_KEY_CHECKS = 1;

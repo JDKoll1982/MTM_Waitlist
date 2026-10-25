@@ -1,5 +1,7 @@
 ---
 description: "Converts an existing WinUI 3 app (MTM_Waitlist, MTM_Receiving_Application) to the Lab design system: spacing scale, Windows type ramp, capped content column, adaptive breakpoints, theme brushes. Use when restyling or modernising an existing WinUI 3 codebase rather than writing a new page."
+
+applyTo: "**/*.xaml"
 ---
 
 # Adopting the design system in an existing WinUI 3 app
@@ -142,6 +144,14 @@ Set them explicitly rather than relying on defaults, so every page behaves the s
 - **≥ 1008** — pane expanded.
 - **641–1007** — pane compact (48 epx icon rail).
 - **< 640** — pane overlay.
+
+**One repo deviates on purpose.** MTM_Waitlist sets `ExpandedModeThresholdWidth="1500"` with
+`OpenPaneLength="260"`. Its pages cap their content column at 1080 epx and sit inside a 56-epx inset either side,
+so an expanded pane costs the page 212 epx. At 1008 (or at the 1280 it carried until 2026-10-24) crossing the
+threshold made the window wider and the page *narrower* — measured at 1360, the page's viewport was 971 epx where
+1281 gave it 1104. 1500 is the first width where expanding leaves the 1080 column intact. Set a threshold only
+after checking that `threshold - pane - inset - window chrome >= your content column`, and keep a source audit
+next to it so it cannot drift back.
 
 Two-pane detail layouts need an `AdaptiveTrigger` at 1008 that collapses the detail column and reveals
 a back affordance — see `Demos/Layout/SplitViewDemo` and the master/detail pattern in the lab.

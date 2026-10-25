@@ -193,6 +193,19 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
     }
 
     [RelayCommand]
+    private void ViewHistory(SetupWorkCenter? workCenter)
+    {
+        if (workCenter is null)
+        {
+            return;
+        }
+
+        _navigationService.NavigateTo(
+            typeof(SetupWorkCenterHistoryViewModel).FullName!,
+            new SetupWorkCenterHistoryNavigationData(workCenter.Name, workCenter.Building));
+    }
+
+    [RelayCommand]
     private async Task RefreshAsync()
     {
         await LoadWorkCentersAsync().ConfigureAwait(true);

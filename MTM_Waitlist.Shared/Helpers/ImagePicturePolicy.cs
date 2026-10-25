@@ -31,6 +31,12 @@ namespace MTM_Waitlist.Module_Shared.Helpers;
 public static class ImagePicturePolicy
 {
     /// <summary>
+    /// The picture the plant chose to stand in for "no picture", or empty when it has chosen none. Written through
+    /// <see cref="SetNoImageOverride"/> and read on the interface thread, so the field behind it is volatile.
+    /// </summary>
+    private static string s_noImageOverridePath = string.Empty;
+
+    /// <summary>
     /// The single picture every image surface draws when it has nothing usable of its own: no image configured,
     /// the configured file not found, or the configured file holding no picture.
     /// </summary>
@@ -41,6 +47,86 @@ public static class ImagePicturePolicy
     /// read (a packaged host, or a probe that runs before the app directory is known).
     /// </summary>
     public const string NoImagePackUri = "ms-appx:///Assets/Placeholders/default-no-image.png";
+
+    /// <summary>
+    /// The picture the plant chose to stand in for "no picture", or empty when it has chosen none.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A plant's own "no picture" artwork is a configuration decision, not a build one: the settings screen stores
+    /// it for every computer and the value is adopted here once at startup, so every surface that already draws
+    /// <see cref="NoImagePath"/> keeps drawing the same picture it always did, with the plant's file instead of the
+    /// shipped one.
+    /// </para>
+    /// <para>
+    /// Adopted rather than injected because the drawing helpers are static: a converter and a control template
+    /// cannot be handed a service, and threading a resolver through all of them would put the same four lines in
+    /// every surface. The value is read on the interface thread many times a second, so it is a plain field read.
+    /// </para>
+    /// </remarks>
+    public static string NoImageOverridePath => Volatile.Read(ref s_noImageOverridePath);
+
+    /// <summary>
+    /// Adopts the picture this plant draws where a surface has no picture, or drops back to the shipped one.
+    /// </summary>
+    /// <param name="path">
+    /// The picture's path, or null or blank to go back to <see cref="NoImagePath"/>. Nothing is validated here:
+    /// a file that has gone missing falls back on its own, which is what keeps a share that is briefly
+    /// unreachable from leaving every surface blank.
+    /// </param>
+    public static void SetNoImageOverride(string? path)
+    {
+        var adopted = string.IsNullOrWhiteSpace(path) ? string.Empty : path.Trim();
+
+        Volatile.Write(ref s_noImageOverridePath, adopted);
+    }
+
+    /// <summary>
+    /// Whether <paramref name="path"/> is the placeholder itself rather than a picture.
+    /// </summary>
+    /// <param name="path">The path to compare, or null.</param>
+    /// <returns>
+    /// <see langword="true"/> when the path names <see cref="NoImagePath"/> or <see cref="NoImagePackUri"/>.
+    /// </returns>
+    /// <remarks>
+    /// Several view models hand the placeholder's path back as if it were a picture's, and the converters beside them
+    /// resolve it like one. Answering this question is what lets those surfaces draw the plant's own "no picture"
+    /// artwork instead of the shipped file the constant names — without editing every one of them.
+    /// </remarks>
+    public static bool IsNoImagePath(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return false;
+        }
+
+        static string Normalize(string value) => value.Trim().Replace('\\', '/');
+
+        var candidate = Normalize(path);
+
+        return string.Equals(candidate, Normalize(NoImagePath), StringComparison.OrdinalIgnoreCase)
+            || string.Equals(candidate, Normalize(NoImagePackUri), StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// The file the placeholder is drawn from: the plant's own picture when it named one that is there, and the
+    /// shipped asset otherwise.
+    /// </summary>
+    /// <returns>The absolute path of an existing file, or <see langword="null"/> when neither one is there.</returns>
+    /// <remarks>
+    /// Existence only, for the reason <see cref="ResolveExistingFile"/> gives: a placeholder that is itself not a
+    /// picture the rule would accept must still be drawable, or the surface it stands in for has nothing left.
+    /// </remarks>
+    public static string? ResolveNoImageFile() => ResolveNoImageFile(NoImageOverridePath);
+
+    /// <summary>
+    /// The file the placeholder would be drawn from if <paramref name="candidate"/> were the adopted picture, which
+    /// is what the settings screen previews while the box is being typed into.
+    /// </summary>
+    /// <param name="candidate">The picture to prefer, or null or blank for the shipped one.</param>
+    /// <returns>The absolute path of an existing file, or <see langword="null"/> when neither one is there.</returns>
+    public static string? ResolveNoImageFile(string? candidate) =>
+        ResolveExistingFile(candidate) ?? ResolveExistingFile(NoImagePath);
 
     /// <summary>The smallest width and height the application accepts as a picture (48 pixels — the app's own preview floor).</summary>
     public const int MinimumPixels = 48;

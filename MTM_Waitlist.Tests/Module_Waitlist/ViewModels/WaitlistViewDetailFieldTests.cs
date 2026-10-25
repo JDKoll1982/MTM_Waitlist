@@ -142,8 +142,7 @@ public sealed class WaitlistViewDetailFieldTests
                     WorkCenterName = "Expo Line 7",
                     RequesterEmployeeNumber = "6331",
                     RequesterEmployeeName = "Dana Whitfield",
-                },
-                allowDuplicate: true)
+                })
             .GetAwaiter()
             .GetResult();
 

@@ -3,8 +3,8 @@
   "specName": "013-lugger-location-config",
   "branch": "013-lugger-location-config",
   "selectedAt": "2026-10-18T01:56:19.252Z",
-  "currentStep": "specify",
-  "status": "specified",
+  "currentStep": "implement",
+  "status": "completed",
   "history": [
     {
       "step": "specify",
@@ -12,7 +12,1761 @@
       "kind": "complete",
       "by": "extension",
       "at": "2026-10-18T01:57:05.312Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-10-18T02:07:30.271Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:11:11.405Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:15:19.545Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:15:34.243Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-10-18T02:15:52.535Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:22:30.585Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:22:46.113Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-10-18T02:23:26.056Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T001",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:26:37.997Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T003",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:28:09.775Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T002",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:28:09.880Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T004",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:28:09.996Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:30:40.992Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:31:39.650Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T009",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:31:42.864Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:32:03.532Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T010",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:32:06.098Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:32:47.717Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T011",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:32:50.763Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T014",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:37:08.415Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T018",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:37:11.846Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T022",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:37:11.957Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T013",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:38:24.251Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:38:26.845Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T021",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:38:29.660Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T015",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:46:02.790Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T019",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:46:05.859Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T012",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:47:28.005Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T016",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:47:30.834Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T020",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:47:33.639Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T025",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:50:08.347Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T026",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:50:54.337Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T024",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:51:35.516Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T023",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:52:19.275Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T027",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:52:22.211Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T030",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:55:51.401Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T028",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:55:51.510Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T029",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:55:51.703Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T031",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:56:44.263Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T032",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:56:44.460Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T033",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:59:12.239Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T035",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:59:12.350Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T034",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:59:12.458Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T036",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T02:59:15.546Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T039",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:02:25.032Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T037",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:06:57.212Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T038",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:07:00.016Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T040",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:07:03.021Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T041",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:07:06.128Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T042",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:07:09.625Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T043",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:07:11.958Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T044",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:07:14.363Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T047",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:09:33.922Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T045",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:09:34.028Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T046",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:09:34.230Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T048",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:17:39.827Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T049",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:17:42.328Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T051",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:17:45.759Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T050",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:17:49.915Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T052",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:22:34.159Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T053",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:22:37.049Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T054",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:22:40.172Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T055",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:23:13.992Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T056",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:34:26.983Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T057",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:34:29.598Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T058",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:34:32.579Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T059",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:34:35.399Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T060",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:34:38.751Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T061",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:34:41.205Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T062",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:34:44.369Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T063",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:34:47.446Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T064",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:34:50.385Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T065",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:35:16.409Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T066",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:35:16.738Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T067",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:35:16.926Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T068",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:35:17.115Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T069",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:35:36.384Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T070",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:35:57.900Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T071",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:38:28.030Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:38:28.093Z"
+    },
+    {
+      "step": "implement",
+      "substep": "living-review",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:40:40.747Z"
+    },
+    {
+      "step": "implement",
+      "substep": "living-fold",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-18T03:40:44.119Z"
     }
   ],
-  "telemetryInstanceId": "35ccd855-8e51-49e5-b35b-dd0f0d8b649b"
+  "telemetryInstanceId": "35ccd855-8e51-49e5-b35b-dd0f0d8b649b",
+  "unattended": true,
+  "decisions": [
+    {
+      "decision": "Read the whole arrangement once per list load and hand the resolved lugger to the card through the availability record",
+      "why": "Cell resolution is static and synchronous, and the card already reads values it was handed; one read per load beats one per card",
+      "rejected": "Making cell resolution asynchronous and injecting the service into the card path"
+    },
+    {
+      "decision": "Store the dump-point role on the scrap-type assignment row and keep status on the lugger",
+      "why": "A lugger can take two scrap types, so one status cannot encode a per-type role, and FR-016 forbids deriving the role from order alone",
+      "rejected": "Deriving the dump point as the first usable lugger in order"
+    },
+    {
+      "decision": "Delete a removed lugger and keep its name as text in the change row",
+      "why": "FR-003 requires a removed name to be re-creatable, and MySQL 5.7 has no partial unique index to let a retired row keep the name",
+      "rejected": "A soft is_active flag, which collides with the unique name on re-creation"
+    },
+    {
+      "decision": "One idempotent seed that inserts the defaults only when the lugger table is empty",
+      "why": "The defaults are a starting arrangement, so a re-run must not duplicate them or undo a lead rename, and the same artifact lands on an installed store",
+      "rejected": "A truncating base seed plus a separate migration seed"
+    },
+    {
+      "decision": "Match scrap types on case and surrounding spaces only",
+      "why": "FR-009 says exactly that, and the setup list spells 5052 aluminum while the spec pins 5052 Aluminum",
+      "rejected": "Collapsing inner whitespace, which would let a genuinely different spelling match"
+    },
+    {
+      "decision": "Every mutating procedure writes its own arrangement-change rows in its own transaction",
+      "why": "The audit and the notice cannot drift apart, and a write that records nothing cannot be authored",
+      "rejected": "A shared audit procedure called by the application, which one call site can forget"
+    },
+    {
+      "decision": "Poll the change table on the existing minute tick with a per-session watermark set when the list opens",
+      "why": "FR-037 is a statement about where the client starts, which a watermark gives exactly, and no dismissal table is then needed",
+      "rejected": "A per-user read cursor in the store, which replays changes made while the person was away"
+    },
+    {
+      "decision": "Reordering or assigning re-derives the dump point to the first usable lugger in the new order",
+      "why": "FR-006 says the order is the order the system tries, so an order where the second lugger held the role would make the two disagree",
+      "rejected": "Leaving the role where it was after a reorder"
+    },
+    {
+      "decision": "The arrangement writes open the provider connection in LuggerArrangementService and read affected_rows from the procedure's result set, instead of going through the retrying IMySqlHelperServer.",
+      "why": "A transaction-wrapped CALL answers the COMMIT's count (0), and the helper retries and folds a SIGNAL into its neutral result, so a refusal would read as a change that landed and a retry could duplicate a write. PermissionAdministrationService and UserManagementRepository already use this shape for the same reason.",
+      "rejected": "A second affected-row column on the non-query seam, or client-side-only validation with the store's refusal message lost."
+    },
+    {
+      "decision": "The Setup scrap picker composes its list as ScrapDecisionRules' two decision words plus ScrapTypeCatalog.All, rather than the catalogue holding those two words.",
+      "why": "The catalogue is the shipped scrap types and nothing else (FR-010); the two words decide whether there is scrap and may never be assigned to a lugger, while the picker must still offer them, so the composition belongs where the picker is built.",
+      "rejected": "Putting 'Scrap Type Required' and 'No Scrap' in the catalogue and filtering them out in the editor."
+    },
+    {
+      "decision": "RoleRestrictionInventoryTests (T007) and PermissionBaselineParityTests (T006) were amended alongside the tasks that invalidated them.",
+      "why": "Both pin the declaration's Settings keys and the Material Handler Lead baseline, so the new key broke them and no task in tasks.md owned either file.",
+      "rejected": "Leaving them red until an unlisted later task, or weakening their coverage assertions."
+    },
+    {
+      "decision": "Adding a lugger at an occupied display position shifts every row at or after it up by one, inside the same transaction.",
+      "why": "The procedure convention is a distinct and contiguous display order, and refusing an occupied position would make the editor depend on numbering the lead cannot see.",
+      "rejected": "A unique key on display_position, which would reject the intermediate state mid-shift."
+    },
+    {
+      "decision": "AllSeeds.sql was resynced with seed_permission_role_baselines/create.sql in this change.",
+      "why": "Installing the aggregates into a scratch store showed the nine new permission rows were in the artifact only; AllSeeds.sql is what the installer runs, so a fresh store would never have received them. DatabaseAggregateRegistrationTests cannot see this because it matches the first line only.",
+      "rejected": "Leaving the aggregate stale because its artifact-registration gate passes."
+    },
+    {
+      "decision": "Reorder by dragging a card, written through sp_waitlist_lugger_locations_position_set, and recorded without a handler notice",
+      "why": "The lead is arranging their own screen, so the change is an edit worth recording (FR-032) but sends no handler anywhere differently, and FR-033 does not list it.",
+      "rejected": "Stepping a lugger one place with Move up and Move down, which needed two buttons, a position readout and a write per step."
+    },
+    {
+      "decision": "Report a failed write and a failed read as two different things",
+      "why": "The store still answers the read, so the cards on screen are still the stores own; clearing them reports a write fault as a read fault and takes away the list the reader would use to see nothing changed.",
+      "rejected": "Reusing the unavailable state for both, which is what emptied the page after the first failed edit."
+    }
+  ],
+  "step_summaries": {
+    "plan": {
+      "summary": "Planned a live lugger-arrangement read for the scrap card, a permissioned settings editor with a stored transition engine, and an in-app change notice.",
+      "key_finding": "The card slot and its declaration already exist; the whole feature is a configuration read plus one resolver arm, not a card or seed change."
+    },
+    "tasks": {
+      "summary": "71 tasks in 7 phases: 1 setup, 35 foundational (3 tables, 11 procedures, 3 aggregates, seed, permission, service), 8 card, 3 transition proofs, 8 editor, 9 notice, 7 polish."
+    },
+    "specify": {
+      "summary": "Scrap Lugger Location shipped: three tables and eleven procedures behind one arrangement seam, the pickup-scrap card resolving its lugger from configuration with the In development placeholder retired, a permissioned Settings arrangement page, and an in-application change notice."
+    },
+    "implement": {
+      "summary": "Implemented 013 end to end, then revised the Settings surface the owner asked for: lugger cards with their own Edit and Rename, modal editor and name dialogs, a scrap-type ComboBox, a filtered Make dump point, and drag-to-reorder replacing the move buttons.",
+      "key_finding": "Reading the arrangement fell back to the local store and writing did not, so every edit timed out on a workstation off the plant network and the page reported it as unreadable.",
+      "risks": "The cards, dialogs and drag are proven by markup and view-model tests only; no run against a store happened on this machine, and the twelve database objects are deployed locally but not on the plant host."
+    }
+  },
+  "approach": "A new configuration capability in mtm_waitlist holds seven seeded luggers, each scrap type ordered list of luggers, and a dump-point role stored on the assignment row, with every transition performed inside the stored procedure that makes the edit. The scrap card reads the whole arrangement once per list load, resolves the requesting jobs scrap type without regard to case or surrounding spaces, and draws the dump point name, or the first lugger plus its status when none can receive. A permissioned Settings page maintains the arrangement, and the waitlist polls the recorded changes on its existing minute tick so each handler sees each change once inside the application.",
+  "coverage": {
+    "FR-001": {
+      "title": "Maintain a managed set of named luggers, each with a name, a status and a position in the display order",
+      "tasks": [
+        "T002",
+        "T012",
+        "T030",
+        "T050"
+      ]
+    },
+    "FR-002": {
+      "title": "A fresh installation ships the seven named luggers",
+      "tasks": [
+        "T005",
+        "T027"
+      ]
+    },
+    "FR-003": {
+      "title": "Every lugger is renameable, removable and re-creatable; none is fixed",
+      "tasks": [
+        "T013",
+        "T014",
+        "T015",
+        "T050"
+      ]
+    },
+    "FR-004": {
+      "title": "A lugger name is unique across the set, compared without regard to case",
+      "tasks": [
+        "T002",
+        "T013",
+        "T014"
+      ]
+    },
+    "FR-005": {
+      "title": "Removing a lugger removes its assignments and leaves none pointing at it",
+      "tasks": [
+        "T003",
+        "T015",
+        "T020",
+        "T023"
+      ]
+    },
+    "FR-006": {
+      "title": "A scrap type names an ordered set of luggers, and the order is the order tried",
+      "tasks": [
+        "T003",
+        "T018",
+        "T019",
+        "T021"
+      ]
+    },
+    "FR-007": {
+      "title": "A lugger may take several scrap types and a scrap type may name several luggers",
+      "tasks": [
+        "T003"
+      ]
+    },
+    "FR-008": {
+      "title": "A fresh installation ships the seven pinned assignments",
+      "tasks": [
+        "T005",
+        "T027"
+      ]
+    },
+    "FR-009": {
+      "title": "A job's scrap type matches its assignment ignoring letter case and surrounding spaces only",
+      "tasks": [
+        "T028",
+        "T030",
+        "T033"
+      ],
+      "tests": [
+        "LuggerArrangementServiceTests.cs::Snapshot_MatchesTheScrapTypeIgnoringCaseAndSurroundingSpaces"
+      ]
+    },
+    "FR-010": {
+      "title": "Scrap Type Required and No Scrap are never assignable and never produce a lugger",
+      "tasks": [
+        "T009",
+        "T019",
+        "T034"
+      ]
+    },
+    "FR-011": {
+      "title": "The editor offers the recognised scrap types and accepts one that is not among them",
+      "tasks": [
+        "T009",
+        "T031",
+        "T034",
+        "T050"
+      ]
+    },
+    "FR-012": {
+      "title": "A lugger carries exactly one status: Available, Backup, Full, or Do Not Use with a reason",
+      "tasks": [
+        "T002",
+        "T010",
+        "T016",
+        "T045"
+      ]
+    },
+    "FR-013": {
+      "title": "Exactly one lugger holds the dump point per scrap type whenever one can receive material",
+      "tasks": [
+        "T005",
+        "T016",
+        "T019",
+        "T020",
+        "T027",
+        "T028",
+        "T046"
+      ]
+    },
+    "FR-014": {
+      "title": "The system performs the status transitions; a lead does not reconcile by hand",
+      "tasks": [
+        "T016",
+        "T017",
+        "T029",
+        "T030",
+        "T032"
+      ]
+    },
+    "FR-015": {
+      "title": "Blocking the dump point promotes the next lugger in that scrap type's order",
+      "tasks": [
+        "T016",
+        "T045",
+        "T046"
+      ]
+    },
+    "FR-016": {
+      "title": "An emptied lugger returns to Backup and does not reclaim the dump point",
+      "tasks": [
+        "T016",
+        "T045",
+        "T046"
+      ],
+      "tests": [
+        "LuggerTransitionStoreRuleTests.cs::Engine_LeavesTheRoleWithTheHolderWhenTheEmptiedLuggerCouldTakeItBack",
+        "LuggerDumpPointResolutionTests.cs::WalkThrough_EmptyingDoor6LeavesExtraHoldingTheRole"
+      ]
+    },
+    "FR-017": {
+      "title": "A blocked lugger is never ordered above the dump point",
+      "tasks": [
+        "T016",
+        "T045"
+      ]
+    },
+    "FR-018": {
+      "title": "A lead may promote a chosen lugger, and the previous dump point returns to Backup",
+      "tasks": [
+        "T017",
+        "T046"
+      ]
+    },
+    "FR-019": {
+      "title": "Do Not Use requires a reason that a handler can read",
+      "tasks": [
+        "T008",
+        "T010",
+        "T016",
+        "T045",
+        "T050",
+        "T053"
+      ]
+    },
+    "FR-020": {
+      "title": "A status change leaves every affected scrap type complete",
+      "tasks": [
+        "T016",
+        "T045"
+      ],
+      "tests": [
+        "LuggerTransitionStoreRuleTests.cs::Engine_SortsEveryBlockedLuggerAfterEveryUsableOne",
+        "LuggerDumpPointResolutionTests.cs"
+      ]
+    },
+    "FR-021": {
+      "title": "A lugger's status applies to every scrap type assigned to it",
+      "tasks": [
+        "T016",
+        "T046"
+      ]
+    },
+    "FR-022": {
+      "title": "The Lugger Location cell shows the name of the lugger holding the dump point",
+      "tasks": [
+        "T028",
+        "T037",
+        "T038",
+        "T041"
+      ],
+      "tests": [
+        "RequestJobFieldValuesTests.cs::Resolve_LuggerLocationReadsTheSnapshotsValue",
+        "WaitlistLineCardDetailTemplateTests.cs"
+      ]
+    },
+    "FR-023": {
+      "title": "The value is read when the card is drawn, not stored on the request",
+      "tasks": [
+        "T040"
+      ]
+    },
+    "FR-024": {
+      "title": "When no lugger can receive, the cell names the first lugger with its status",
+      "tasks": [
+        "T028",
+        "T033",
+        "T046"
+      ],
+      "tests": [
+        "LuggerArrangementServiceTests.cs::Snapshot_ATypeWhoseLuggersAreAllBlockedNamesTheFirstWithItsStatus"
+      ]
+    },
+    "FR-025": {
+      "title": "No real scrap decision draws no lugger cell and is not recorded as a failure",
+      "tasks": [
+        "T028",
+        "T037",
+        "T038"
+      ]
+    },
+    "FR-026": {
+      "title": "An unassigned scrap type draws no cell and records the gap",
+      "tasks": [
+        "T028",
+        "T033",
+        "T037",
+        "T040"
+      ],
+      "tests": [
+        "LuggerArrangementServiceTests.cs::Snapshot_AnUnassignedScrapTypeResolvesNothingAndReportsTheGap"
+      ]
+    },
+    "FR-027": {
+      "title": "The cell's label stays Lugger Location and the card layout does not change",
+      "tasks": [
+        "T038",
+        "T043",
+        "T052"
+      ]
+    },
+    "FR-028": {
+      "title": "A permission of its own governs the arrangement, held by Material Handler Lead and above",
+      "tasks": [
+        "T006",
+        "T007",
+        "T035",
+        "T049",
+        "T051"
+      ],
+      "tests": [
+        "PermissionRegistryTests.cs::Declaration_PinsTheLuggerArrangementKey",
+        "RoleRestrictionInventoryTests.cs"
+      ]
+    },
+    "FR-029": {
+      "title": "A person without the permission cannot open the arrangement by any route",
+      "tasks": [
+        "T007",
+        "T050",
+        "T051",
+        "T052"
+      ],
+      "tests": [
+        "SettingsViewModelTests.cs",
+        "LuggerArrangementViewModelTests.cs"
+      ]
+    },
+    "FR-030": {
+      "title": "The arrangement is reachable from settings as a summary with an editor behind an explicit action",
+      "tasks": [
+        "T021",
+        "T050",
+        "T051",
+        "T052",
+        "T053",
+        "T054"
+      ]
+    },
+    "FR-031": {
+      "title": "The editor shows, for each scrap type, which lugger holds the dump point",
+      "tasks": [
+        "T018",
+        "T021",
+        "T050",
+        "T053"
+      ]
+    },
+    "FR-032": {
+      "title": "Every change to the arrangement records who made it and when",
+      "tasks": [
+        "T004",
+        "T011",
+        "T013",
+        "T014",
+        "T015",
+        "T016",
+        "T017",
+        "T019",
+        "T020",
+        "T023",
+        "T026",
+        "T029",
+        "T050"
+      ]
+    },
+    "FR-033": {
+      "title": "Handlers using the application are told inside the application what changed",
+      "tasks": [
+        "T029",
+        "T056",
+        "T060",
+        "T061",
+        "T062",
+        "T063"
+      ],
+      "tests": [
+        "LuggerChangeNoticeServiceTests.cs",
+        "WaitlistViewViewModelNoticeTests.cs"
+      ]
+    },
+    "FR-034": {
+      "title": "The notice is in-application; no operating-system notification is used",
+      "tasks": [
+        "T063"
+      ]
+    },
+    "FR-035": {
+      "title": "A notice names what changed, naming the lugger, the scrap type and both values",
+      "tasks": [
+        "T008",
+        "T014",
+        "T056",
+        "T058",
+        "T060",
+        "T063"
+      ]
+    },
+    "FR-036": {
+      "title": "Each person sees a notice once, and dismissing it does not let it return",
+      "tasks": [
+        "T056",
+        "T057",
+        "T059",
+        "T060",
+        "T062",
+        "T063"
+      ],
+      "tests": [
+        "LuggerChangeNoticeServiceTests.cs::Dismiss_AnyReasonOtherThanTheCloseButtonLeavesTheNoticeInPlace"
+      ]
+    },
+    "FR-037": {
+      "title": "A change made while the person was not using the application is not replayed",
+      "tasks": [
+        "T022",
+        "T056",
+        "T059",
+        "T060"
+      ],
+      "tests": [
+        "LuggerChangeNoticeServiceTests.cs::Poll_ReturnsOnlyTheChangesAboveTheWatermarkInIdOrder"
+      ]
+    },
+    "FR-038": {
+      "title": "A person without the handle permission is not interrupted by the notice",
+      "tasks": [
+        "T057",
+        "T060",
+        "T062"
+      ]
+    },
+    "FR-039": {
+      "title": "The In development placeholder is retired completely",
+      "tasks": [
+        "T008",
+        "T038",
+        "T042",
+        "T043",
+        "T065",
+        "T069"
+      ],
+      "tests": [
+        "WaitlistLineCardDetailTemplateTests.cs",
+        "RetiredSymbolAuditTests.cs"
+      ]
+    }
+  },
+  "currentTask": null,
+  "task_summaries": {
+    "T001": {
+      "status": "DONE",
+      "did": "Pre-change baseline on 013-lugger-location-config: dotnet build 0 warnings/0 errors; full suite 2227 total, 2179 passed, 48 skipped, 0 failed, exit 0",
+      "files": [
+        "MTM_Waitlist.sln",
+        "scripts/build/run-tests.ps1"
+      ]
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "waitlist_lugger_scrap_assignments + rollback applied and reversed on the local mtm_waitlist; the same lugger twice for one scrap_type_key refused 1062, is_dump_point defaults to 0, and the cascade took the assignment with its lugger",
+      "files": [
+        "Database/Tables/37_waitlist_lugger_scrap_assignments/create.sql",
+        "Database/Tables/37_waitlist_lugger_scrap_assignments/rollback.sql"
+      ]
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "waitlist_lugger_locations + rollback authored and exercised on the local mtm_waitlist (127.0.0.1): create applied, 'door 6 lugger' refused 1062 beside 'Door 6 Lugger', status defaults to Backup with a null reason, rollback dropped and re-create reapplied",
+      "files": [
+        "Database/Tables/36_waitlist_lugger_locations/create.sql",
+        "Database/Tables/36_waitlist_lugger_locations/rollback.sql"
+      ]
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "waitlist_lugger_arrangement_changes + rollback applied and reversed on the local mtm_waitlist; a lugger_removed row survived deletion of its lugger with the name intact, and the table carries no foreign key",
+      "files": [
+        "Database/Tables/38_waitlist_lugger_arrangement_changes/create.sql",
+        "Database/Tables/38_waitlist_lugger_arrangement_changes/rollback.sql"
+      ]
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "Added 43 lugger arrangement, permission and notice resource keys and removed the retired in-development placeholder",
+      "files": [
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "Idempotent default arrangement seed: 7 luggers at positions 1-7 and 7 assignments keyed LOWER(TRIM(...)), written only when the table is empty inside one transaction; rollback deletes only the seven names. Local MySQL: 7/7 first run, nothing on second run, rename survived a re-run, rollback left 0/0.",
+      "files": [
+        "Database/Seeds/seed_waitlist_lugger_arrangement_defaults/create.sql",
+        "Database/Seeds/seed_waitlist_lugger_arrangement_defaults/rollback.sql"
+      ]
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "ScrapTypeCatalog in MTM_Waitlist.Module_Core.Services exposes the six shipped scrap-type spellings read-only in pinned order with a Trim + OrdinalIgnoreCase membership test; verified by inspection that they match SetupWorkflowService.s_defaultScrapTypes apart from Scrap Type Required and No Scrap, and that 5052 keeps the setup list's lower-case spelling.",
+      "files": [
+        "MTM_Waitlist.Core/Services/ScrapTypeCatalog.cs"
+      ]
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "Added nine role-scoped bool baselines for permission.settings.lugger_arrangement to the seed and a named nine-row delete to its rollback.",
+      "files": [
+        "Database/Seeds/seed_permission_role_baselines/create.sql",
+        "Database/Seeds/seed_permission_role_baselines/rollback.sql"
+      ]
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "Added the Lugger model over the eight locations-list columns and LuggerStatus with the four pinned spellings, can-receive, requires-reason and an exact parse.",
+      "files": [
+        "MTM_Waitlist.Core/Models/Lugger/Lugger.cs",
+        "MTM_Waitlist.Core/Models/Lugger/LuggerStatus.cs"
+      ]
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "Declared permission.settings.lugger_arrangement: constant plus twentieth All entry, one Area.Settings registry entry falling back to false with SettingsViewModel and LuggerArrangementViewModel as gate sites, and the settings inventory row that T007 invalidates.",
+      "files": [
+        "MTM_Waitlist.Core/Permissions/PermissionKeys.cs",
+        "MTM_Waitlist.Core/Permissions/PermissionRegistry.cs",
+        "MTM_Waitlist.Tests/Module_Core/Permissions/RoleRestrictionInventoryTests.cs"
+      ]
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "Added the ScrapAssignment row model covering both assignment reads and the ArrangementChange row model with the eight pinned change-kind constants, every contract column mapped.",
+      "files": [
+        "MTM_Waitlist.Core/Models/Lugger/ScrapAssignment.cs",
+        "MTM_Waitlist.Core/Models/Lugger/ArrangementChange.cs"
+      ]
+    },
+    "T014": {
+      "status": "DONE",
+      "did": "Wrote sp_waitlist_lugger_locations_rename and rollback: trims and refuses a blank name, refuses a case-insensitive duplicate as a plain refusal, writes one lugger_renamed row per affected scrap type naming both names, and returns affected_rows 0 or 1.",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_lugger_locations_rename/create.sql",
+        "Database/StoredProcedures/sp_waitlist_lugger_locations_rename/rollback.sql"
+      ]
+    },
+    "T018": {
+      "status": "DONE",
+      "did": "Wrote sp_waitlist_lugger_scrap_assignments_list and rollback: the ten contract columns for one scrap type key in sort_position then lugger_name order, status read live from the lugger, and no row for an unassigned type.",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_lugger_scrap_assignments_list/create.sql",
+        "Database/StoredProcedures/sp_waitlist_lugger_scrap_assignments_list/rollback.sql"
+      ]
+    },
+    "T022": {
+      "status": "DONE",
+      "did": "Wrote sp_waitlist_lugger_arrangement_changes_list and rollback: rows above p_after_id in id order, and a null p_after_id returning one watermark row whose id is the highest change id (0 when empty) with every other column null.",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_lugger_arrangement_changes_list/create.sql",
+        "Database/StoredProcedures/sp_waitlist_lugger_arrangement_changes_list/rollback.sql"
+      ]
+    },
+    "T013": {
+      "status": "DONE",
+      "did": "Wrote sp_waitlist_lugger_locations_insert: trims and refuses blank or duplicate names, inserts as Backup with a shifted contiguous display_position, and appends one lugger_added change row in the same transaction; verified on mtm_lugger_w3_2.",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_lugger_locations_insert/create.sql",
+        "Database/StoredProcedures/sp_waitlist_lugger_locations_insert/rollback.sql"
+      ]
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "Wrote sp_waitlist_lugger_locations_promote: holds the scrap type's pairings with SELECT FOR UPDATE, refuses unassigned and blocked luggers, makes the chosen lugger the dump point as Available, returns the previous holder to Backup, re-orders usable before blocked, and appends one dump_point_promoted row; verified on mtm_lugger_w3_2.",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_lugger_locations_promote/create.sql",
+        "Database/StoredProcedures/sp_waitlist_lugger_locations_promote/rollback.sql"
+      ]
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "Wrote sp_waitlist_lugger_arrangement_list: the ten contract columns in pinned order via a LEFT JOIN so an unassigned lugger returns one row with null assignment columns, ordered by display position, assignment sort position then lugger name; verified on mtm_lugger_w3_2.",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_lugger_arrangement_list/create.sql",
+        "Database/StoredProcedures/sp_waitlist_lugger_arrangement_list/rollback.sql"
+      ]
+    },
+    "T015": {
+      "status": "DONE",
+      "did": "Wrote sp_waitlist_lugger_locations_delete with its rollback: captures the lugger name and its scrap types before the cascade delete, re-derives each affected scrap type's contiguity and dump point inside the transaction, and appends lugger_removed and dump_point_promoted rows",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_lugger_locations_delete/create.sql",
+        "Database/StoredProcedures/sp_waitlist_lugger_locations_delete/rollback.sql"
+      ]
+    },
+    "T019": {
+      "status": "DONE",
+      "did": "Wrote sp_waitlist_lugger_scrap_assignments_set with its rollback: normalises the type into scrap_type_key, refuses the two non-types and blank input, upserts the pairing on (scrap_type_key, lugger_id), renumbers the scrap type contiguously usable-first and re-derives its dump point in one transaction",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_lugger_scrap_assignments_set/create.sql",
+        "Database/StoredProcedures/sp_waitlist_lugger_scrap_assignments_set/rollback.sql"
+      ]
+    },
+    "T012": {
+      "status": "DONE",
+      "did": "Wrote sp_waitlist_lugger_locations_list and its rollback: the eight contract columns in display_position then lugger_name order; verified 7 rows in order, 8 columns, and no row on an empty table.",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_lugger_locations_list/create.sql",
+        "Database/StoredProcedures/sp_waitlist_lugger_locations_list/rollback.sql"
+      ]
+    },
+    "T016": {
+      "status": "DONE",
+      "did": "Wrote sp_waitlist_lugger_locations_status_set and its rollback: refuses any status outside the four and a blank Do Not Use reason, applies the status, then locks and re-derives every affected scrap type so blocked luggers sort after usable ones and exactly one dump point remains; verified the full transition walk, refusals and the change rows.",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_lugger_locations_status_set/create.sql",
+        "Database/StoredProcedures/sp_waitlist_lugger_locations_status_set/rollback.sql"
+      ]
+    },
+    "T020": {
+      "status": "DONE",
+      "did": "Wrote sp_waitlist_lugger_scrap_assignments_delete and its rollback: reads the pairing before deleting it, re-derives the scrap type only when luggers remain, and appends assignment_removed plus dump_point_promoted when the role moved; verified promotion to the remaining lugger, an empty scrap type after the last pairing, and actor-named change rows.",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_lugger_scrap_assignments_delete/create.sql",
+        "Database/StoredProcedures/sp_waitlist_lugger_scrap_assignments_delete/rollback.sql"
+      ]
+    },
+    "T025": {
+      "status": "DONE",
+      "did": "Appended the lugger arrangement seed verbatim to AllSeeds.sql after the last seed, with a boxed banner recording why it sits last",
+      "files": [
+        "Database/Seeds/AllSeeds.sql"
+      ]
+    },
+    "T026": {
+      "status": "DONE",
+      "did": "Added the three feature-013 lugger table descriptions to the bootstrap maintenance file as one unconditional ALTER TABLE ... COMMENT statement each, word for word with their create.sql artifacts.",
+      "files": [
+        "Database/Bootstrap/update_table_descriptions.sql"
+      ]
+    },
+    "T024": {
+      "status": "DONE",
+      "did": "Appended the eleven lugger create scripts verbatim to AllSPs.sql; gate rule, declaration count, byte identity and a full MySQL 5.7 scratch apply all pass.",
+      "files": [
+        "Database/StoredProcedures/AllSPs.sql"
+      ]
+    },
+    "T023": {
+      "status": "DONE",
+      "did": "Appended the three lugger table create scripts verbatim to Database/Tables/AllTables.sql behind their own creation banners; all 24 table folders now match the aggregate.",
+      "files": [
+        "Database/Tables/AllTables.sql"
+      ]
+    },
+    "T027": {
+      "status": "DONE",
+      "did": "Wrote the lugger arrangement schema validation as one SELECT of problem rows covering the three tables, their key columns and keys, the cascade, the absent audit foreign key, the eleven procedures, the seeded counts and dump points, and the permission's nine baselines; clean on a fresh scratch store and it catches a dropped procedure and a deleted lugger.",
+      "files": [
+        "Database/Validation/lugger_arrangement_schema/validate.sql"
+      ]
+    },
+    "T030": {
+      "status": "DONE",
+      "did": "LuggerArrangementService reads through IMySqlHelperServer and writes with the procedure name only, answering affected_rows and surfacing a 45000 refusal as its plain message; InlineSqlAuditTests and RetiredSymbolAuditTests green (15/15), solution builds 0/0",
+      "files": [
+        "MTM_Waitlist.Core/Services/LuggerArrangementService.cs"
+      ]
+    },
+    "T028": {
+      "status": "DONE",
+      "did": "LuggerArrangementSnapshot holds the arrangement read and the one rule: LOWER(TRIM()) match, dump point named, first lugger with its status when all are blocked, and a gap only for a real unassigned type; 6/6 LuggerArrangementServiceTests green",
+      "files": [
+        "MTM_Waitlist.Core/Models/Lugger/LuggerArrangementSnapshot.cs"
+      ]
+    },
+    "T029": {
+      "status": "DONE",
+      "did": "ILuggerArrangementService declares the snapshot, the four reads and the seven writes, each carrying the actor; no method takes statement text",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/ILuggerArrangementService.cs"
+      ]
+    },
+    "T031": {
+      "status": "DONE",
+      "did": "SetupWorkflowService composes its picker list from ScrapDecisionRules plus ScrapTypeCatalog.All; the eight entries and their order are unchanged from the local array it replaced (3003 Aluminum, 5052 aluminum, Galvanized Steel, Steel, Skeleton, Gaylord); solution builds 0/0",
+      "files": [
+        "MTM_Waitlist.Setup/Services/SetupWorkflowService.cs"
+      ]
+    },
+    "T032": {
+      "status": "DONE",
+      "did": "ILuggerArrangementService registered in its own contribution file; the composition root declares and calls both RegsterLuggerArrangement partials so the page file lands without a second edit; solution builds with the page partial unimplemented (0 warnings, 0 errors)",
+      "files": [
+        "Services/DependencyInjection/ServiceRegistrationExtensions.LuggerArrangement.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T033": {
+      "status": "DONE",
+      "did": "LuggerArrangementServiceTests green 6/6: the seven seeded assignments resolve, 5052 aluminum and '  5052 ALUMINUM ' reach Door 8 Lugger, an unassigned type resolves nothing as a gap, a placeholder or No Scrap resolves nothing without a gap, all-blocked names Door 9 Lugger (Full), and the snapshot read is one call",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Services/LuggerArrangementServiceTests.cs"
+      ]
+    },
+    "T035": {
+      "status": "DONE",
+      "did": "PermissionRegistryTests extended to twenty keys with the lugger key pinned: Area.Settings, fallback false, both resource keys derived from the suffix rule and present in Resources.resw, both gate sites named; 26/26 across the registry, inventory, catalogue and service suites",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Permissions/PermissionRegistryTests.cs"
+      ]
+    },
+    "T034": {
+      "status": "DONE",
+      "did": "ScrapTypeCatalogTests green: the six shipped spellings in picker order, 5052 aluminum kept as the setup list spells it, every one present in the default seed case-insensitively, and neither decision word offered",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Services/ScrapTypeCatalogTests.cs"
+      ]
+    },
+    "T036": {
+      "status": "DONE",
+      "did": "Foundational gate: build 0 warnings/0 errors; DatabaseAggregateRegistration, InlineSqlAudit, RetiredSymbolAudit green 16/16; PermissionRegistry, ScrapTypeCatalog, LuggerArrangementService green 26/26; aggregates installed in order into a scratch mtm_waitlist and validate-database-schema.ps1 passed read-only (exit 0) for both the feature validation and the startup schema. Installing the aggregates exposed a stale seed copy in AllSeeds.sql, now resynced",
+      "files": [
+        "MTM_Waitlist.sln"
+      ]
+    },
+    "T039": {
+      "status": "DONE",
+      "did": "Added LuggerLocation as a nullable string beside ScrapType on RequestJobPartAvailability",
+      "files": [
+        "MTM_Waitlist.Settings/Models/RequestJobPartAvailability.cs"
+      ]
+    },
+    "T037": {
+      "status": "DONE",
+      "did": "Tested the lugger location resolver arm: the label returns the snapshot value and nothing when no lugger was resolved",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/RequestJobFieldValuesTests.cs"
+      ]
+    },
+    "T038": {
+      "status": "DONE",
+      "did": "Amended the card test: the scrap card draws the resolved lugger, draws no cell when none resolved, and no cell reads the retired placeholder",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Controls/WaitlistLineCardDetailTemplateTests.cs"
+      ]
+    },
+    "T040": {
+      "status": "DONE",
+      "did": "Provider now reads the arrangement snapshot per availability resolution, resolves the job's scrap type, sets LuggerLocation, warns once on a configuration gap, and stays silent on an outage",
+      "files": [
+        "Services/RequestJobAvailabilityProvider.cs"
+      ]
+    },
+    "T041": {
+      "status": "DONE",
+      "did": "Added the lugger location arm to RequestJobFieldValues and deleted the feature 012 one-arm TODO",
+      "files": [
+        "MTM_Waitlist.Settings/Services/RequestJobFieldValues.cs"
+      ]
+    },
+    "T042": {
+      "status": "DONE",
+      "did": "Retired the placeholder mechanism from WaitlistCardCellRules; no PendingSource symbol remains outside specs",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Helpers/WaitlistCardCellRules.cs"
+      ]
+    },
+    "T043": {
+      "status": "DONE",
+      "did": "Deleted the placeholder branch from the card's cell resolution; the declared-field path now draws the resolver value or omits the cell",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs"
+      ]
+    },
+    "T044": {
+      "status": "DONE",
+      "did": "Build gate and focused verification: solution builds with zero warnings and errors; RequestJobFieldValues, WaitlistLineCardDetailTemplate, InlineSqlAudit and RetiredSymbolAudit all green (66 passed)",
+      "files": [
+        "MTM_Waitlist.sln",
+        "MTM_Waitlist.Tests/Module_Settings/Services/RequestItemConfigSeedAlignmentTests.cs"
+      ]
+    },
+    "T047": {
+      "status": "DONE",
+      "did": "US2 gate: solution builds 0 warnings/0 errors and LuggerTransition|LuggerDumpPoint run 14/14 green with the engine unchanged",
+      "files": [
+        "MTM_Waitlist.sln"
+      ]
+    },
+    "T045": {
+      "status": "DONE",
+      "did": "LuggerTransitionStoreRuleTests 7/7: each assertion names the statement it guards in sp_waitlist_lugger_locations_status_set/create.sql (the four-status guard, the trimmed Do Not Use reason and its clearing, two FOR UPDATE holds, first-usable promotion, holder kept when usable, blocked sorted last, and the two change kinds in one transaction)",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Services/LuggerTransitionStoreRuleTests.cs"
+      ]
+    },
+    "T046": {
+      "status": "DONE",
+      "did": "LuggerDumpPointResolutionTests 7/7: the four walk-through steps read Door 6, Extra, Extra, Door 6 with one dump point at each, explicit promotion reads the promoted lugger, all-blocked reads 'Door 6 Lugger (Do Not Use)', and two scrap types each promote their own next lugger",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Services/LuggerDumpPointResolutionTests.cs"
+      ]
+    },
+    "T048": {
+      "status": "DONE",
+      "did": "Tested the arrangement editor: summary, actor on every write, blank-reason refusal, catalogue-plus-assigned picker, dump point, store refusal, unavailable with retry, and the permission refusal.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/ViewModels/LuggerArrangementViewModelTests.cs"
+      ]
+    },
+    "T049": {
+      "status": "DONE",
+      "did": "Extended the settings tests: the lugger entry is drawn only for a holder, is absent rather than disabled, routes by its view-model name, and the route is refused without the key.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/SettingsViewModelTests.cs"
+      ]
+    },
+    "T051": {
+      "status": "DONE",
+      "did": "Added the route constant, the lugger permission to the screened keys, the search-registered entry visibility, the Administration category rule and the guarded OpenLuggerArrangement command.",
+      "files": [
+        "MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs"
+      ]
+    },
+    "T050": {
+      "status": "DONE",
+      "did": "Wrote the arrangement view model: summary from one luggers read plus one snapshot, editor commands for add, rename, remove, status with a required reason, assign, move up/down, unassign and promote, the catalogue-plus-assigned picker, dump point per type, store refusal in its own words, and an unavailable state with a manual retry and no sample luggers.",
+      "files": [
+        "MTM_Waitlist.Settings/ViewModels/LuggerArrangementViewModel.cs",
+        "MTM_Waitlist.Settings/Models/LuggerArrangementRow.cs",
+        "MTM_Waitlist.Settings/Models/ScrapTypeDumpPointRow.cs"
+      ]
+    },
+    "T052": {
+      "status": "DONE",
+      "did": "Added the lugger arrangement entry card in the Administration category, copying the Permissions card's markup shape and bound only to the view model's own visibility answer and command; the solution build resolves every x:Bind path and the settings markup suite stays green.",
+      "files": [
+        "Module_Settings/Views/SettingsPage.xaml"
+      ]
+    },
+    "T053": {
+      "status": "DONE",
+      "did": "Built the arrangement page: summary of each lugger with its status and scrap types, the scrap types with their dump points, the editor behind the Edit action with the status picker and a reason field enabled only for Do Not Use, and the unavailable state with its retry. Bindings are compile-verified; rendering needs a running app.",
+      "files": [
+        "Module_Settings/Views/LuggerArrangementPage.xaml",
+        "Module_Settings/Views/LuggerArrangementPage.xaml.cs"
+      ]
+    },
+    "T054": {
+      "status": "DONE",
+      "did": "Implemented RegisterLuggerArrangementPage: the view model and page registered and the route contributed as pageService.Configure<LuggerArrangementViewModel, LuggerArrangementPage>() under the view model's full name.",
+      "files": [
+        "Services/DependencyInjection/ServiceRegistrationExtensions.LuggerArrangementPage.cs"
+      ]
+    },
+    "T055": {
+      "status": "DONE",
+      "did": "Gate: the x64 Debug solution builds with 0 warnings and 0 errors, the lugger and settings view-model suites pass 59/59, the full suite passes 2233 with 48 environment-gated skips, and the C#/XAML naming guard passes with 0 new findings. The live rename/remove/add/reassign round trip and the rendered page still need a running app against the store.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/ViewModels/LuggerArrangementViewModelTests.cs",
+        "MTM_Waitlist.Tests/Module_Settings/SettingsViewModelTests.cs",
+        "MTM_Waitlist.Settings/ViewModels/LuggerArrangementViewModel.cs",
+        "MTM_Waitlist.Settings/ViewModels/SettingsViewModel.cs",
+        "Module_Settings/Views/SettingsPage.xaml",
+        "Module_Settings/Views/LuggerArrangementPage.xaml",
+        "Module_Settings/Views/LuggerArrangementPage.xaml.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.LuggerArrangementPage.cs"
+      ]
+    },
+    "T056": {
+      "status": "DONE",
+      "did": "Added LuggerChangeNoticeServiceTests: watermark taken once at open, poll above it only, per-kind wording, dismissal held, non-close-button close ignored, unreachable store answers nothing",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/LuggerChangeNoticeServiceTests.cs"
+      ]
+    },
+    "T057": {
+      "status": "DONE",
+      "did": "Added WaitlistViewViewModelNoticeTests: non-handler never polled and sees no bar, one bar per undismissed notice, dismissal removes only that bar and does not return, change before the list opened never shown",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelNoticeTests.cs"
+      ]
+    },
+    "T058": {
+      "status": "DONE",
+      "did": "Added the LuggerChangeNotice record: id, kind, lugger, scrap type, both values, reason, actor and time, plus the wording template and its arguments",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Models/LuggerChangeNotice.cs"
+      ]
+    },
+    "T059": {
+      "status": "DONE",
+      "did": "Declared ILuggerChangeNoticeService: open the session watermark, poll above it, dismiss one notice for the session; no method can ask below the watermark",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Services/ILuggerChangeNoticeService.cs"
+      ]
+    },
+    "T060": {
+      "status": "DONE",
+      "did": "Implemented LuggerChangeNoticeService: one null-cursor watermark read at open, poll above it, session-held dismissals, each kind turned into its resource template and arguments in id order, unreachable store answers nothing",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Services/LuggerChangeNoticeService.cs"
+      ]
+    },
+    "T061": {
+      "status": "DONE",
+      "did": "Registered ILuggerChangeNoticeService as a module singleton, and named the new parameter in the app's WaitlistViewViewModel factory so the list resolves it on navigation",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs;Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T062": {
+      "status": "DONE",
+      "did": "Wired the list view model: watermark taken as the list opens, one poll per minute tick gated on permission.requests.handle, observable notice collection and dismissal command, nothing older than the open ever shown",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs"
+      ]
+    },
+    "T063": {
+      "status": "DONE",
+      "did": "Drew the notice strip above the list: one informational closable InfoBar per notice, dismissal recorded only when InfoBarCloseReason.CloseButton raised the close, no OS notification",
+      "files": [
+        "Module_Waitlist/Views/WaitlistViewPage.xaml;Module_Waitlist/Views/WaitlistViewPage.xaml.cs"
+      ]
+    },
+    "T064": {
+      "status": "DONE",
+      "did": "Gate passed: solution builds with 0 warnings and 0 errors, 23 notice tests green, naming validator exit 0, full suite 2256 passed 48 skipped 0 failed",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/LuggerChangeNoticeServiceTests.cs;MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelNoticeTests.cs;MTM_Waitlist.Waitlist.View/Models/LuggerChangeNotice.cs;MTM_Waitlist.Waitlist.View/Services/ILuggerChangeNoticeService.cs;MTM_Waitlist.Waitlist.View/Services/LuggerChangeNoticeService.cs;MTM_Waitlist.Waitlist.View/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs;MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs;Module_Waitlist/Views/WaitlistViewPage.xaml;Module_Waitlist/Views/WaitlistViewPage.xaml.cs;Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T065": {
+      "status": "DONE",
+      "did": "012's assumption now names configuration as the Lugger Location source and the drawn cell, and keeps only Destination as a cell with no source",
+      "files": [
+        "specs/012-waitlist-card-layout/spec.md"
+      ]
+    },
+    "T066": {
+      "status": "DONE",
+      "did": "012 research R1's Lugger Location row now records the configuration source and the snapshot read plus one resolver arm",
+      "files": [
+        "specs/012-waitlist-card-layout/research.md"
+      ]
+    },
+    "T067": {
+      "status": "DONE",
+      "did": "012's contract no longer records Lugger Location as hidden; it names the resolver arm and where the value comes from",
+      "files": [
+        "specs/012-waitlist-card-layout/contracts/card-and-identifier.md"
+      ]
+    },
+    "T068": {
+      "status": "DONE",
+      "did": "012's data-model pickup-scrap note now states the resolver arm exists and where the value comes from",
+      "files": [
+        "specs/012-waitlist-card-layout/data-model.md"
+      ]
+    },
+    "T069": {
+      "status": "DONE",
+      "did": "seed_waitlist_request_item_configs no longer carries a TODO: the one-arm-plan paragraph is gone and the dunnage Description fact stands as prose; the Lugger Location declaration still reads job/string/order 5/not required",
+      "files": [
+        "Database/Seeds/seed_waitlist_request_item_configs/create.sql"
+      ]
+    },
+    "T070": {
+      "status": "DONE",
+      "did": "Database-Ruleset names the three tables, the eleven procedures, the affected_rows result-set convention and the seed sync; CHANGELOG carries the 2026-10-17 entry for the cell, the Settings page and the notices",
+      "files": [
+        "Database/Database-Ruleset.md",
+        "CHANGELOG.md"
+      ]
+    },
+    "T071": {
+      "status": "DONE",
+      "did": "Success criteria recorded: run-tests.ps1 -All 2304 total / 2256 passed / 48 skipped / exit 0; naming validator exit 0 (1028 files, 0 new); schema validation exit 0 for both the feature validation and the startup schema against a scratch store installed from the aggregates; SC-001/002/003/006/007 met, SC-004/005 met at the view-model and service level with the running-app round trip not exercised; validate-sql-naming exits 1 on 13 pre-existing findings with zero from this feature",
+      "files": [
+        "specs/013-lugger-location-config/tasks.md"
+      ]
+    }
+  },
+  "verified": [
+    {
+      "what": "solution build",
+      "command": "dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 14.7,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:14.56"
+    },
+    {
+      "what": "full suite",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build/run-tests.ps1 -All",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 51.0,
+      "result": "     Passed: 2256 ·     Skipped: 48 ·  Total time: 35.9602 Seconds"
+    },
+    {
+      "what": "csharp and xaml naming",
+      "command": "pwsh -NoProfile -File .github/scripts/validate-csharp-xaml-naming.ps1",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 4.5,
+      "result": "C#/XAML naming compliance passed for 1028 file(s). Grandfathered: 249. New: 0."
+    },
+    {
+      "what": "feature schema validation against a scratch store",
+      "command": "pwsh -NoProfile -File .github/scripts/validate-database-schema.ps1 -DatabaseName mtm_install_check -ValidationSqlPath Database/Validation/lugger_arrangement_schema/validate.sql",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 1.7,
+      "result": "[db-validate] MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING schema is valid. · [db-validate] Seed phase skipped: this run read the store and wrote nothing. Pass -ApplySeeds to apply seed data, which rewrites the seeded tables. · [db-validate] Database schema validation passed using MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING."
+    }
+  ],
+  "concerns": [
+    {
+      "note": "The Settings entry, the arrangement page and the notice strip are WinUI surfaces; no running application or XamlMcp agent was available, so what is proven is that every x:Bind path compiles and the view-model and service layers behave under test. The visible round trip (entry appears for a lead, two bars, closing one leaves the other) was not exercised.",
+      "step": "implement"
+    },
+    {
+      "note": "SC-004 and SC-005 are met at the view-model and service level only; the live two-session notice scenario and the in-app rename/remove/add/reassign round trip need a running app against the store.",
+      "step": "implement"
+    },
+    {
+      "note": "The arrangement is read once per availability resolution, which the list caches per work centre, so a load costs one arrangement read per distinct work centre rather than literally one. A strictly single read per load needs a load-scoped signal on IRequestJobPartAvailabilityProvider, which no task owned.",
+      "step": "implement"
+    },
+    {
+      "note": "validate-sql-naming.ps1 exits 1 on 13 pre-existing findings (the mock population file names, two restore scripts, and the legacy require_password_change / requires_answer columns). This feature contributes zero findings after the temp column was renamed is_previous_dump_point.",
+      "step": "implement"
+    },
+    {
+      "note": "validate-database-schema.ps1 run against the local mtm_waitlist reports the 14 objects this feature adds as missing, because installing them is outside this run's read-only mandate. Validation ran with exit 0 against a scratch store installed from the aggregates in order (AllTables, AllFunct, AllViews, AllSPs, AllSeeds).",
+      "step": "implement"
+    },
+    {
+      "note": "Two task descriptions count differently from the shipped data: T009 says the catalogue holds 'seven shipped types' where the setup list carries six distinct real spellings, and T021 says the seeded arrangement returns eleven rows where seven luggers with seven pairings return seven. The code follows the contract tables.",
+      "step": "implement"
+    },
+    {
+      "note": "This change resolved no living-spec capability, so nothing was loaded before it and nothing was folded after it. Either the areas it touched belong to no capability yet, or a capability claims them and no requirement describes them — `living-validate` names which."
+    },
+    {
+      "note": "Root cause of the arrangement reporting itself unreadable after any edit on this workstation: LuggerArrangementService opened the raw configured connection string for writes, so with the plant host unreachable every write waited out Connect Timeout, while the read path fell back through MySqlHostFallback. Writes now resolve through LuggerWriteConnection with the same fallback, pinned to mtm_waitlist."
+    },
+    {
+      "note": "A write that fails is no longer reported as the unavailable state: the page keeps the cards the store answered and says the change was not saved (WriteFailedText); a missing procedure or table reports StoreOutOfDateText rather than inviting a retry that cannot work."
+    },
+    {
+      "note": "The local mtm_waitlist was missing sp_waitlist_lugger_locations_position_set, so the first drag hit a procedure that did not exist. The artifact was applied to the store and exercised there on a no-op move; any other store, including the plant host, still needs all twelve objects deployed."
+    },
+    {
+      "note": "The WinUI surfaces have still not been seen running against a store from this machine: the cards, both dialogs and the drag are proven by markup and view-model tests, not by a run."
+    }
+  ],
+  "last_action": "Post-implement UI revision captured: card grid, modal editor, drag reorder, write-path host fallback.",
+  "context": [
+    "Post-implement UI revision (owner-requested, 2026-10-18/19), none of which changed spec.md, plan.md or tasks.md: the Settings arrangement is a grid of lugger cards, each with its own Edit and Rename, replacing the single-column summary and the inline editor panel.",
+    "The scrap-type summary list was deleted with its tile members, so which lugger holds a scrap types dump point is read from that luggers card and from the editors Make dump point action; the settings contract was amended to match.",
+    "The editor became two ContentDialogs: LuggerEditorDialog, one lugger named by the card that opened it and carrying no lugger picker, and LuggerNameDialog, shared by Add and Rename. The scrap type is a ComboBox rather than the AutoSuggestBox.",
+    "Display order is changed by dragging cards (GridView CanReorderItems with DragItemsCompleted); Move up and Move down were deleted with their commands, view-model members and resource strings.",
+    "New procedure sp_waitlist_lugger_locations_position_set and change kind lugger_reordered: the order is renumbered contiguously in one transaction and the reorder is recorded but deliberately not announced.",
+    "Make dump point is drawn only when the chosen scrap type is assigned to that lugger, another lugger is assigned as its backup, and this one is not already the dump point (CanPromote).",
+    "Card action words are bound from the row (LuggerArrangementRow.EditActionText and RenameActionText), not from the page: a GridView item template has its own name scope, so the ElementName binding to the page resolved to nothing and both buttons drew empty.",
+    "The cards are three across and the cell width is measured from the grid on load and on resize, so the columns span the panel; the cards margin opens the gutter inside its cell, so the width is a third of the grid rather than a third less the gutter.",
+    "Scrap card (spec 012 surface, no 013 artifact changed): Lugger Location is pinned to the second panel slot beside Scrap Type by WaitlistCardCellRules.OrderForPanel, so the pair reads the same whatever order a declaration carries."
+  ]
 }

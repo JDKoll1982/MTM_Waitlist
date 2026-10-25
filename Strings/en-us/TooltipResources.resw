@@ -240,4 +240,10 @@
   <data name="Setup_DunnageShowAll.Tooltip" xml:space="preserve">
     <value>Include parts that do not have an image.</value>
   </data>
+  <data name="Setup_WorkCenterViewHistory.Tooltip" xml:space="preserve">
+    <value>View this work center's setup history.</value>
+  </data>
+  <data name="Waitlist_Card_PartStockLink.Tooltip" xml:space="preserve">
+    <value>See where this part is stored and how much is on hand.</value>
+  </data>
 </root>

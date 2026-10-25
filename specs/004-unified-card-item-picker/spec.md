@@ -241,7 +241,7 @@ the umbrella phrase rather than reporting a fault; the identifier is where a fau
   Item has none; a placeholder MUST NOT replace a picture the request already resolves.
 - **FR-010**: The list MUST default to most-urgent-first.
 - **FR-011**: A viewer MUST be able to change the list's sort from a control on the shell beside the existing
-  My Requests and building controls, and their choice MUST be remembered for them.
+  Local Work Centers and building controls, and their choice MUST be remembered for them.
 - **FR-012**: Overdue requests MUST remain visibly marked as overdue whatever the sort.
 - **FR-013**: An Item's behaviour — how far the flow goes before confirmation, whether an answer is required,
   the prompt, the length limits, the options offered, and the fields its page shows — MUST come from stored

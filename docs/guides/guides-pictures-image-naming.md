@@ -11,7 +11,7 @@ renamed folder or a re-cased file name stops working without any error being rai
 - Storage paths and defaults: `MTM_Waitlist.Shared/Helpers/AppStoragePaths.cs`
 - Picture acceptance rule: `MTM_Waitlist.Shared/Helpers/ImagePicturePolicy.cs`,
   `MTM_Waitlist.Settings/Models/ImageValidation.cs`
-- Folder settings live on **Settings → Storage Paths** in the application.
+- Folder settings live on **Settings → Pictures → Where the picture files are kept** in the application.
 
 ---
 
@@ -93,29 +93,56 @@ draws the same one every time. `.webp`, `.bmp` and `.gif` are **not** accepted a
 These three names are lower-case here and are compared case-insensitively, but keep the spelling above: the same
 folder name in two cases is two folders on the share.
 
-### 3.1 Hopper reference pictures — `Waitlist\Hoppers`
+### 3.1 Hopper reference pictures — `Waitlist\hopper`
 
 The hopper size pictures are the one group keyed by **something other than a part number**: they picture the size
 a person chose, so they are named after the size word.
 
 ```
-<picture folder>\Waitlist\Hoppers\Small.png
-<picture folder>\Waitlist\Hoppers\Medium.png
-<picture folder>\Waitlist\Hoppers\Large.png
+<picture root>\Waitlist\hopper\Small.png
+<picture root>\Waitlist\hopper\Medium.png
+<picture root>\Waitlist\hopper\Large.png
 ```
+
+On this site the picture root is `\\mtmanu-fs01\Expo Drive\MH_RESOURCE\Material_Handler\MTM Applications\MTM Waitlist
+Application\Images` (reached as `X:\MH_RESOURCE\...\Images` on a machine that maps `X:`), so the three files sit at
+`X:\MH_RESOURCE\Material_Handler\MTM Applications\MTM Waitlist Application\Images\Waitlist\hopper`.
 
 Rules specific to this folder:
 
-- **Exactly three files, exactly these names.** `Small`, `Medium`, `Large`, each capitalised as written, with the
-  `.png` extension. These three words are the size answers the New Request wizard records, and the same words are
-  what the card resolves, so a file named `MEDIUM.png`, `Medium Hopper.png` or `Med.png` is never found.
-- **The extension is `.png`.** The part-picture rule above accepts three extensions; this folder expects `.png`.
-- The folder is **configurable** on Settings → Storage Paths, under *Hopper picture folder*. Its default is the
-  relative path `Waitlist\Hoppers`, read beneath the picture folder. An absolute path is used as given, and the
-  picture folder is then not consulted. Do not leave it blank — the panel refuses an empty value.
+- **Exactly three files, exactly these names.** `Small`, `Medium`, `Large`, each capitalised as written, with one of
+  the accepted extensions. These three words are the size answers the New Request wizard records, and the same words
+  are what the card resolves, so a file named `MEDIUM.png`, `Medium Hopper.png` or `Med.png` is never found.
+- **The extension is `.png`, `.jpg` or `.jpeg`.** The part-picture rule above accepts three extensions and so does
+  this folder. When more than one exists for the same size, `.png` is read first, then `.jpg`, then `.jpeg`, so a
+  machine holding two of them draws the same file every time.
+- The folder is **configurable** on Settings → Pictures → *Where the picture files are kept*, under *Hopper picture
+  folder*, and the box has a **Browse** button that opens a folder dialog at whatever the box currently holds. Its
+  shipped default is the share's own `...\Images\Waitlist\hopper` path, written in full rather than relative to the
+  picture folder, so a machine that has never opened the panel still draws the size pictures. A relative path is
+  still read beneath the picture folder, and an absolute path is used as given. Do not leave it blank — the panel
+  refuses an empty value.
 - If a size's picture is missing or unusable, the card and the wizard draw the shared placeholder rather than a
   blank. Nothing is substituted, and nothing is logged as a fault.
 - These pictures are held to the picture rules in §5, like every other picture.
+
+### 3.2 The no-picture artwork — one file, not a folder
+
+Every surface that has no picture of its own draws the same picture, and the plant may choose which picture that is.
+It is one **file**, not a folder, because there is only ever one answer: an item, a work centre and a lugger with no
+picture all draw the same thing, and that sameness is what teaches a person to read it as "no picture".
+
+- The setting is **No picture image** on Settings → Pictures → *Where the picture files are kept*, stored as
+  `image_storage.no_image_path` for every computer. Empty means the artwork that ships with the application
+  (`Assets/Placeholders/default-no-image.png`), and an empty box is stored as that path rather than as a blank.
+- The **Browse** button beside the box opens a file dialog (`.png`, `.jpg`, `.jpeg`, `.bmp`, `.gif`), and the small
+  preview beside the box shows exactly what will be drawn — including the shipped artwork while the box names a file
+  that is not there.
+- **This file is exempt from §5.** It is drawn by existence alone, so a wide banner or a photograph is allowed; the
+  frames that draw it scale it to fit. A file that has gone missing is not an error: the shipped artwork is drawn
+  instead, so a share that is briefly unreachable does not leave every card blank.
+- The change takes effect as soon as it is saved, and from the first card of every later run; it does not require a
+  restart.
 
 ---
 
@@ -136,9 +163,9 @@ none). The root can be overridden for a machine by the `MTM_DUNNAGE_IMAGE_ROOT` 
 
 ## 5. The rules every picture must pass
 
-A file that fails any of these is treated as **no picture at all** — the application draws
-`Assets/Placeholders/default-no-image.png` and reports nothing. This is deliberate: a bad picture must not become
-a broken frame or a substituted value.
+A file that fails any of these is treated as **no picture at all** — the application draws the plant's no-picture
+artwork (§3.2), which is `Assets/Placeholders/default-no-image.png` unless the plant has chosen its own, and reports
+nothing. This is deliberate: a bad picture must not become a broken frame or a substituted value.
 
 | Rule | Value |
 | --- | --- |
@@ -169,7 +196,8 @@ folders, because a walk of the share treats the part collections as belonging to
 2. Is it in the right folder, spelled exactly as the tables above spell it?
 3. Is the file name the part number, the Item/Category code, the size word, or the dunnage name — with **no**
    suffix added?
-4. Is the extension one of the accepted ones (and `.png` for hopper sizes)?
+4. Is the extension one of the accepted ones (`.png`, `.jpg`, `.jpeg` — the same three everywhere, hopper sizes
+   included)?
 5. Is it square, between 48 and 2048 pixels a side, and between 1 KB and 10 MB?
 6. Did you keep the case? `Large.png` and `large.png` are the same size to the code, but two different files to
    the share — pick the documented spelling and stay with it.

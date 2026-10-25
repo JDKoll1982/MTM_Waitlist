@@ -269,18 +269,10 @@ public partial class NewRequestItemViewModel : ObservableRecipient, INavigationA
 
     /// <summary>
     /// The name a person reads for an Item, resolved from the Item's own resource key (FR-022), falling back to
-    /// the catalog's normalized name rather than to a bare key.
+    /// the catalog's normalized name rather than to a bare key. The three product pickups answer with the one
+    /// label they share on this step, because the job — not the person — decides which of them it is.
     /// </summary>
-    public static string ResolveItemName(RequestItemDefinition item)
-    {
-        var key = string.IsNullOrWhiteSpace(item.DisplayNameResourceKey)
-            ? RequestItemCatalog.DisplayNameResourceKeyFor(item.Id)
-            : item.DisplayNameResourceKey;
-        var localized = key.GetLocalized();
-        return string.IsNullOrWhiteSpace(localized) || string.Equals(localized, key, StringComparison.Ordinal)
-            ? item.NormalizedName
-            : localized;
-    }
+    public static string ResolveItemName(RequestItemDefinition item) => RequestItemCatalog.ResolveItemStepLabel(item);
 
     /// <summary>The Category step's prompt, resolved through the resource mechanism (FR-022).</summary>
     public static string ResolveCategoryPrompt() => ResolveMessage("NewRequest_Category_Prompt.Text", "Choose a request category to continue.");

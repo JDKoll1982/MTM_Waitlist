@@ -178,9 +178,9 @@ public sealed class NewRequestPickerServiceTests
             HasComponent = false,
             HasDunnage = false,
             HasScrapDecision = false,
-            // The four returning pickups are offered on the work the job has (FR-094), so this job — which has
-            // none of it — must not be handed them. Their own gating is pinned by
-            // RequestItemPickerRulesTests_EachReturningPickup_IsOfferedExactlyWhenTheJobHasThatWork.
+            // The NCM and outside-service pickups are offered on the signal each one names (FR-094), and this job
+            // has neither. The three product pickups answer one question, so the generic one is the sole product
+            // choice while nothing was derived.
             HasFinishedGoodsToReturn = false,
             HasNonconformingStockToReturn = false,
             HasWorkInProgressToReturn = false,
@@ -193,10 +193,12 @@ public sealed class NewRequestPickerServiceTests
         // offered, so it cannot be "offered and then refused" (FR-002).
         Assert.IsFalse(built.Contains("pickup-die"));
         Assert.IsFalse(built.Contains("pickup-scrap"));
+        Assert.IsFalse(built.Contains("pickup-ncm"));
+        Assert.IsFalse(built.Contains("pickup-outside-service"));
         Assert.IsTrue(built.Contains("pickup-coil"));
         CollectionAssert.IsSubsetOf(built, RequestItemCatalog.GetByCategory(RequestCategory.Pickup).Select(i => i.Id).ToList());
         CollectionAssert.AreEquivalent(
-            new[] { "pickup-riser-table", "pickup-hopper", "pickup-coil" },
+            new[] { "pickup-riser-table", "pickup-hopper", "pickup-coil", "pickup-fg" },
             built);
     }
 }

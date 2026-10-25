@@ -7,6 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Mock.Models;
 using MTM_Waitlist.Mock.Services;
+using MTM_Waitlist.Tests.Fixtures;
 
 namespace MTM_Waitlist.Tests.Module_Mock;
 
@@ -72,6 +73,33 @@ public sealed class MockServiceRefreshClientTests
         Assert.IsFalse(result.Succeeded);
         StringAssert.Contains(result.Message, MockServiceClientOptions.UserNameEnvironmentVariable);
         Assert.AreEqual(0, handler.CallCount);
+    }
+
+    /// <summary>
+    /// A workstation with only the endpoint installed still works: the client presents the person using the
+    /// application, which is the only name the service could authorize on their behalf.
+    /// </summary>
+    [TestMethod]
+    public async Task Service_MockServiceRefreshClientTests_RequestRefreshAsync_WithoutAnInstalledUserNamePresentsTheSignedInPerson()
+    {
+        var handler = new RecordingHandler(HttpStatusCode.OK, """{"runId":"r1","results":[]}""");
+
+        var values = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+        {
+            [$"{MockServiceClientOptions.SectionName}:Endpoint"] = Endpoint,
+        };
+
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(values).Build();
+        var identity = new FakePersonIdentity { UserId = 1, SignInName = "JOHNK" };
+        var client = new MockServiceRefreshClient(new HttpClient(handler), configuration, identity);
+
+        var result = await client.RequestRefreshAsync(null);
+
+        Assert.IsTrue(result.Succeeded, result.Message);
+        Assert.AreEqual(
+            "JOHNK",
+            handler.LastRequest!.Headers.GetValues(MockServiceRefreshClient.UserNameHeaderName).Single(),
+            "An endpoint-only installation must present the signed-in person rather than refusing to call.");
     }
 
     [TestMethod]

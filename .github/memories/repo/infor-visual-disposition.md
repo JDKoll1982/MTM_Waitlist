@@ -170,3 +170,151 @@ Phase 24 (the 2026-09-12 fix).
 - **Still unread, and out of scope for `clarify`:** the Infor-side NCM signal (`PART_LOCATION.STATUS` against the
   occupied `LOCATION`). Its code values are now confirmed (`A`/`H`/`U`), but no Visual read in the repository carries
   that column, so the NCM arm continues to run on the floor location signal alone.
+
+## How Infor Visual itself decides FG / WIP / Outside Service (live research, 2026-10-23)
+
+Question asked by the owner: the tag a Visual user prints already knows which of the three a part is, and its colour
+follows from that (green vs yellow). Where does Visual get it?
+
+**Answer: from the routing, not from stock, and not from a status code.**
+
+- **Outside Service is a *resource*, not an operation type.** `SHOP_RESOURCE` carries `ID = 'OUTSIDE_SERVICE'`,
+  `DESCRIPTION = 'Outside Service'` (15 characters, exactly `OPERATION.RESOURCE_ID`'s width). 27,216 `OPERATION` rows
+  are routed to it, and **all 27,216** also carry `VENDOR_ID` / `SERVICE_ID` / `SERVICE_PART_ID` — the vendor fields
+  the classifier already reads. The two signals agree on every row in this installation.
+- **The deciding field is the *next* operation's resource.** Take the work order's operation at the work centre the
+  job is set up on; the next open operation after it (`SEQUENCE_NO >` current, `STATUS <> 'C'`) is what the part
+  becomes when it leaves. That operation's `RESOURCE_ID` is `'OUTSIDE_SERVICE'` → Outside Service; any other resource
+  → WIP. Worked example, the live 100-12 job `WO-074866` lot `1` (part `29531267`): seq 5 `500-GRP` (die maintenance),
+  seq 10 `100-12` (the press, open), seq 900 **`OUTSIDE_SERVICE`** (`VENDOR_ID = VID-000477-01`, `SERVICE_ID =
+  DEBURR`), seq 929 `V880-GRP` (Manual Finish). Next open after the press = seq 900 → **Outside Service**, which is
+  exactly what the owner reported for that work centre.
+- **Finished Goods is the routing running out.** A job whose operation is the last open one in the routing has
+  nothing further done to the part, so the part it produces *is* the finished product. This is the only discriminator
+  that survives the data: of 171 jobs open at `100-12`, 92 have no operation after the press, 49 go next to
+  `OUTSIDE_SERVICE` and 41 to another in-house resource — and **no active job's part holds any stock at a
+  finished-goods location** (2 of 92, 1 of 49, 0 of 41), because in-process stock is not at `002/FG` yet. The
+  classifier's current `FinishedGoodsQuantity` arm therefore cannot name FG for a *live* job, which is why it returns
+  `Unknown` for most of them; the stock test is a confirmation after the fact, never the discriminator.
+- **The two tables that look promising are dead ends.** `LABEL_TYPE` / `LABEL_FORMAT` / `LABEL_GROUP*` are the barcode
+  label engine (16 built-in label types: `WORKORDER`, `PART`, `PHYSICAL`, …), not the shop tag. No view, procedure or
+  function in `MTMFG` mentions `'OUTSIDE_SERVICE'` (checked across `sys.sql_modules`), and there is no
+  `NEXT_RESOURCE`/`TAG` column anywhere in the schema — so the rule lives in the Visual client, and these live queries
+  are the closest thing to its source.
+
+**Implemented 2026-10-23 — read shape 5 is now work-centre aware.** The rule needs the work centre, and the read did
+not carry it: "first open operation" is no substitute because the die-maintenance pseudo-operations (`500-GRP`, ...)
+sit at `SEQUENCE_NO` 5 with `STATUS = 'R'`, and `REQUIREMENT` does not help either (it is absent for both the
+`500-GRP` row and the `OUTSIDE_SERVICE` row on `WO-074866`). Every governed artifact moved together:
+
+| Layer | What changed |
+|---|---|
+| Live read | `GetDispositionInput.sql` takes `@WorkCenter`; the job's own operation is the one at that resource (lowest open sequence, else lowest sequence), and the read returns `NextOperationResourceId` + `HasRemainingOperation` for the first open operation after it |
+| Population | `disposition_input_population.sql` enumerates every (work order, part, work centre) the order's routing names — 496 orders became **1,552** rows live, of which 501 end at the interrogated work centre (FG) and 376 point at `OUTSIDE_SERVICE` |
+| Mirror | `work_center VARCHAR(64) NOT NULL DEFAULT '*'` joins the unique key; `next_operation_resource_id` and `has_remaining_operation` are added, both NULL-able |
+| Procedures | `sp_visual_disposition_input_get` takes `p_work_center` and prefers an exact match over the `'*'` wildcard; `sp_visual_disposition_input_refresh` parses the two new keys |
+| Client | `VisualDispositionInputRequest` carries `WorkCenter`; `RequestDispositionResolver` takes it; `RequestJobAvailabilityProvider` passes the work centre it already resolves |
+| Classifier | Outside Service when the next operation is `OUTSIDE_SERVICE` (vendor fields only while the routing is unread), then NCM, then WIP when work is still owed, then Finished Goods when the job's own operation has closed with nothing after it, then the old stock/quantity/status arms |
+
+**The `'*'` wildcard is what keeps a half-deployed cache honest.** The 496 baseline seed rows predate the
+work-centre key, so they answer for any work centre and carry NULL in both routing columns; the caller reads NULL as
+"routing not read" and falls back to the stock/quantity/status arms. The first refresh replaces them wholesale.
+
+**Verified live (2026-10-23, `VISUAL`/`MTMFG` as `JKOLL`):** the 100-12 job `WO-074866` reads
+`R | 30203 | 0 | 1 | OUTSIDE_SERVICE | 1` -> Outside Service; `WO-071711` (the press is the last operation) reads
+`R | 1205 | 0 | 0 | NULL | 0` -> Finished Goods; a work centre absent from the order's routing reads NULL/NULL -> the
+legacy arms. `AllTables.sql`, `AllSPs.sql` and `AllSeeds.sql` were regenerated with `build_mtm_mock_masters.ps1`.
+**The deployed `mtm_mock` on the plant host still carries the old shape** until the service is redeployed there.
+
+## Corrected twice on 2026-10-23 — customer demand, not operation completion, separates FG from WIP
+
+The first cut of the routing rule read "no operation after the job's own" as Finished Goods, and the 100-17 card for
+`WO-074654` / `T527094` came up **Finished Goods** on a job the shop calls WIP. The data says why:
+
+| Seq | Resource | Status | End qty | Done |
+|---|---|---|---|---|
+
+| 5 | `500-GRP` | R | 1 | 0 |
+| 19 | `100-08` | **R** | 10,000 | **8,409** |
+
+Nothing follows the press either, yet the shop calls this one Finished Goods and `T527094` WIP. **Operation
+completion is not the discriminator** — both presses are open, at 130/131 and 8,409/10,000. The Visual signal that
+does separate them is customer demand:
+
+| Part | Work centre | Customer-order lines | Draws another order | Answer |
+|---|---|---|---|---|
+| `A0006376159` (`WO-074962`) | 100-08 | **180**, last shipped 2026-10-23 | no | **Finished Goods** |
+| `T527094` (`WO-074654`) | 100-17 | **none** | yes — open `WO-073735` at op 96 | **WIP** |
+| `29531267` (`WO-074866`) | 100-12 | 13 | no | Outside Service (next op) |
+| `16 096 02` (`WO-033406`) | 100-12 | 419 | no | Finished Goods |
+
+So the final rule is:
+
+1. the next open operation's `RESOURCE_ID` is `OUTSIDE_SERVICE` → Outside Service (vendor fields only while the
+   routing is unread);
+2. an open operation remains **after** the job's own → WIP;
+3. nothing follows → `HasCustomerDemand` decides: a part the plant sells is the finished product, and a part nothing
+   buys exists only to feed another work order, which is what work in process means.
+
+`HasRemainingOperation` therefore compares `SEQUENCE_NO > ` the anchor (an earlier attempt used `>=` and made every
+running job WIP). Live population after the fix: **1,172** rows have a later in-house operation, **376** go to
+`OUTSIDE_SERVICE`, **299** end with nothing after and are sold (FG) and **198** end with nothing after and are not
+sold (WIP).
+
+Signals checked and **rejected**: `mtm_wip_application_winforms.md_part_ids.ItemType` classifies 3,929 of 3,976 parts
+as `WIP` (a defaulted list, not a classification — it calls `29531267` WIP too), the WIP app's colour history, and
+stock location (`002/FG` holds 5,464 parts, so its absence says nothing).
+
+### The WIP application may not name the production type (operator instruction, 2026-10-23)
+
+`RequestDispositionMapper` no longer lets the floor buckets answer FG / WIP / Outside Service: every one of those
+inputs now comes from the Visual row. The floor snapshot contributes **only** non-conforming stock, because NCM is a
+state of the location the material occupies and the floor store is the only place that is written down (FR-093).
+Consequences:
+
+- a Visual read that returned nothing yields `Unknown` (or `Ncm` when the floor shows an NCM location) instead of a
+  floor-derived WIP or Outside Service;
+- the floor's finished-goods figure may no longer fill a zero Visual figure;
+- `WipFloorQuantitySnapshot` keeps its other buckets for logging and `HasAnyQuantity`, but nothing reads them to
+  reach a product type any more.
+
+The five mapper tests that pinned the old floor fallback were rewritten to pin this instead.
+
+## Part Type redefined 2026-10-23 — the card now names what the part *is*
+
+The card's `Part Type` cell used to draw the job's **disposition** (Finished Goods / WIP / Outside Service / NCM).
+It now draws the part's own **kind**, read from the plant's Infor Visual classification. The disposition still
+decides which product pickup the picker offers; the component Items' `Item Type` cell still draws the disposition.
+
+**The two columns are the classifier** (`PART`, 8,895 rows, live 2026-10-23):
+
+| `PRODUCT_CODE` | Parts | | `COMMODITY_CODE` | Parts |
+|---|---|---|---|---|
+| `FG_PRESS` | 5,254 | | `E Stamped Item` | 5,088 |
+| `RM_PRESS` | 2,115 | | `T MFG Use Tools` | 1,279 |
+| `MFG_TOOLING` | 1,288 | | `M Matl Coil` | 1,095 |
+| `EXP_PKG` / `EXP_TOOLING` / `EXP_SUPPLIES` / `EXP_COOLANT` | 85 / 22 / 21 / 21 | | `M Fast Fastener` | 350 |
+| `FG_DIE` / `RM_DIE` | 39 / 12 | | `M Matl Flat` | 311 |
+| blank | 38 | | `M Matl Cust Sup` | 200 |
+| | | | `M Matl Net-Shap` 84, `E Mach Item` 52, `M Matl Misc` 52, | |
+| | | | `S Matl Net-Shap` 30, `M Matl Round` 29, `E Assy Item` 19, | |
+| | | | `M Die Punch` 13, `E Tooling` 6, `S Matl Coil` 4, blank 283 | |
+
+`MATERIAL_CODE` and `PROCESS_TYPE` are empty on every row, so these two are the only maintained classification.
+
+**Codes classify; the description only breaks the customer-supplied tie.** Word matching the description would
+misfile 50 stamped parts whose names mention a bolt ("Bolt Retainer Assembly") and 73 `M Fast Fastener` parts that
+never name one ("Boss", "Plug, Pipe", "Insulator"). Only `M Matl Cust Sup` needs the description, because that code
+says who supplied the material and not what it is: 144 of its 200 parts say COIL and 34 more sit on the plant's
+`MMF` prefix.
+
+**The prefix vocabulary the plant uses:** `MMC` coil, `MMF` flatstock, `MMR` round, with `CS` (customer supplied) and
+`SR` (special request) suffixes — `MMCCS` 107 parts, `MMCSR` 9, `MMFCS` 31, `MMFSR` 5, `MMR` 14. Never the primary
+rule: `MMC` also holds 5 flatstock parts, `MMF` 8 coil parts, `MMS` is 4 net-shape parts (not round), and 45 tooling
+parts carry no `FGT` prefix.
+
+**Code:** `RequestPartType` + `RequestPartTypeLabels` (Settings/Models), `RequestPartTypeClassifier` (pure, 27 tests),
+`RequestJobClassification` returned by `RequestDispositionResolver.GetClassificationAsync` (one Visual read for both
+answers), carried on `RequestJobPartAvailability.PartType` via `WithPartType`. The three columns travel on read shape
+5 (`ProductCode`, `CommodityCode`, `PartDescription`), so the mirror table, both procedures, the catalog and the
+population script moved with them. Read shape 5 now has thirteen columns against 8,895 parts of experience.

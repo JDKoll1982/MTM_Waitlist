@@ -28,6 +28,7 @@ $UiaAny    = [System.Windows.Automation.Condition]::TrueCondition
 $UiaInvoke = [System.Windows.Automation.InvokePattern]::Pattern
 $UiaValue  = [System.Windows.Automation.ValuePattern]::Pattern
 $UiaSelect = [System.Windows.Automation.SelectionItemPattern]::Pattern
+$UiaToggle = [System.Windows.Automation.TogglePattern]::Pattern
 
 # How long between two looks at the tree. 120 ms is below the time a person notices and above the cost of a UIA
 # walk, so polling is cheaper than waiting.
@@ -235,15 +236,73 @@ function Invoke-MtmElement {
         return
     }
 
-    throw "The $What ('$($Element.Current.Name)', $($Element.Current.ControlType.ProgrammaticName)) accepts neither Invoke nor SelectionItem."
+    # A ToggleButton offers neither, and WinUI's own header toggles ("Show only this computer's Local Work Centers",
+    # the sort control) are ordinary toggle buttons. Without this arm, driving them failed with "accepts neither
+    # Invoke nor SelectionItem" even though the control is plainly operable - the pattern it advertises is Toggle.
+    $pattern = $null
+    $ok = $false
+    try { $ok = $Element.TryGetCurrentPattern($UiaToggle, [ref]$pattern) } catch { $ok = $false }
+    if ($ok) {
+        $pattern.Toggle()
+        return
+    }
+
+    throw "The $What ('$($Element.Current.Name)', $($Element.Current.ControlType.ProgrammaticName)) accepts none of Invoke, SelectionItem or Toggle."
 }
 
 function Set-MtmText {
-    param($Element, [string]$Text)
+    param($Element, [string]$Text, [switch]$Commit)
 
     if (-not $Element) { throw 'No element to type into.' }
     $pattern = $Element.GetCurrentPattern($UiaValue)
+    $before = $pattern.Current.Value
+
+    # Typed first, not written. ValuePattern sets a control's value model without producing a keystroke, and a
+    # commit-on-parse control never sees it: the NumberBox behind the skid count accepted '1' -> '3' through the
+    # value model, read '3' back when asked, and submitted 1, because the number it submits is the one it parsed
+    # from its own text. Typing is what a person does and what the control listens for, so it is the first attempt
+    # and the value model is the fallback.
+    Set-MtmTypedText -Element $Element -Text $Text -Commit:$Commit
+
+    $read = $pattern.Current.Value
+    if ($read -eq $Text) {
+        return
+    }
+
+    # A password field reports its value masked, so a correct PIN reads as '●●●●' and is not a failed entry. The
+    # mask is accepted only when its length matches what was typed, which no other field can claim.
+    if ($read.Length -eq $Text.Length -and $read -match '^[\u25CF\u2022\*]+$') {
+        return
+    }
+
     $pattern.SetValue($Text)
+    if ($pattern.Current.Value -ne $Text -and -not ($pattern.Current.Value -match '^[\u25CF\u2022\*]+$')) {
+        Write-Warning "Could not put '$Text' into '$($Element.Current.Name)': it still reads '$($pattern.Current.Value)' (was '$before')."
+    }
+}
+
+# Types into a control through the keyboard: focus, select what is there, then send the characters. This is the
+# path that makes a commit-on-parse control (a NumberBox, a formatted field) behave the way it does for a person.
+function Set-MtmTypedText {
+    param($Element, [string]$Text, [switch]$Commit)
+
+    Add-Type -AssemblyName System.Windows.Forms
+    $Element.SetFocus()
+    Start-Sleep -Milliseconds 120
+    [System.Windows.Forms.SendKeys]::SendWait('^a')
+    Start-Sleep -Milliseconds 80
+    [System.Windows.Forms.SendKeys]::SendWait('{DEL}')
+    Start-Sleep -Milliseconds 80
+    [System.Windows.Forms.SendKeys]::SendWait($Text)
+    Start-Sleep -Milliseconds 120
+
+    # A control that parses its text on commit keeps the old value until it is committed, and an Invoke on the
+    # next button does not move focus, so the typed number never reached the request. Tabbing out is the commit a
+    # person's own click would produce.
+    if ($Commit) {
+        [System.Windows.Forms.SendKeys]::SendWait('{TAB}')
+        Start-Sleep -Milliseconds 200
+    }
 }
 
 # Waits for the process to actually be gone, rather than sleeping a guess and hoping.

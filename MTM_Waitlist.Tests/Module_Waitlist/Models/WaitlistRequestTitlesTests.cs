@@ -200,7 +200,7 @@ public sealed class WaitlistRequestTitlesTests
         JobPartNumber = "PART-9004",
         CoilPartNumber = "MMC0001000",
         FlatstockPartNumber = "MMF0001154",
-        ScrapType = "Steel Offal",
+        ScrapType = "Steel",
     };
 
     /// <summary>A job holding a component, which is all the component Items need.</summary>
@@ -210,6 +210,82 @@ public sealed class WaitlistRequestTitlesTests
         HasComponent = true,
         JobPartNumber = "PART-9004",
     };
+
+    /// <summary>
+    /// A job whose dunnage parts carry pictures, one of which has none: the operator's answer is matched to the
+    /// job's own list, so the two cases can be told apart.
+    /// </summary>
+    private static RequestJobPartAvailability DunnageJob() => (RequestJobPartAvailability.None with
+    {
+        HasActiveJob = true,
+        HasDunnage = true,
+        JobPartNumber = "PART-9004",
+    }).WithDunnageParts(
+    [
+        new RequestDunnagePart { PartNumber = "DN-STL-4", ImagePath = @"X:\Dunnage\Parts\Steel Rack.png" },
+        new RequestDunnagePart { PartNumber = "DN-BOX-2" },
+    ]);
+
+    [TestMethod]
+    public void Model_WaitlistRequestTitlesTests_ResolveDunnagePartPicturePath_AnswersTheChosenPartsPictureForBothDunnageItems()
+    {
+        // The dunnage Items name `{dunnage_part}` and not `{part_number}`, so the material-part rule answers
+        // nothing for them and the card drew the placeholder even when the chosen part had a picture. The picture
+        // has to follow the part the second line names (FR-019).
+        foreach (var itemId in new[] { "pickup-dunnage", "deliver-dunnage" })
+        {
+            var request = new WaitlistRequest { Item = itemId, InputValue = "DN-STL-4" };
+
+            var picture = WaitlistRequestTitles.ResolveDunnagePartPicturePath(
+                WaitlistRequestTitles.ResolveContext(request, DunnageJob()),
+                DunnageJob());
+
+            Assert.AreEqual(
+                @"X:\Dunnage\Parts\Steel Rack.png",
+                picture,
+                $"'{itemId}' draws the picture of the part its identifier names.");
+        }
+    }
+
+    [TestMethod]
+    public void Model_WaitlistRequestTitlesTests_ResolveDunnagePartPicturePath_AChoosablePartWithNoPictureAnswersNothing()
+    {
+        // A part the job carries but nobody pictured is not a picture: the card draws the one shared placeholder
+        // rather than a blank or something chosen on the part's behalf (FR-014, FR-020).
+        var request = new WaitlistRequest { Item = "deliver-dunnage", InputValue = "DN-BOX-2" };
+
+        Assert.IsNull(
+            WaitlistRequestTitles.ResolveDunnagePartPicturePath(
+                WaitlistRequestTitles.ResolveContext(request, DunnageJob()),
+                DunnageJob()),
+            "A part with no picture leaves the card on the shared placeholder.");
+    }
+
+    [TestMethod]
+    public void Model_WaitlistRequestTitlesTests_ResolveDunnagePartPicturePath_AnAnswerTheJobDoesNotCarryAnswersNothing()
+    {
+        var request = new WaitlistRequest { Item = "deliver-dunnage", InputValue = "DN-UNKNOWN-9" };
+
+        Assert.IsNull(
+            WaitlistRequestTitles.ResolveDunnagePartPicturePath(
+                WaitlistRequestTitles.ResolveContext(request, DunnageJob()),
+                DunnageJob()),
+            "A part the job does not carry has no picture here, so nothing is guessed.");
+    }
+
+    [TestMethod]
+    public void Model_WaitlistRequestTitlesTests_ResolveDunnagePartPicturePath_AnItemThatAsksForNoDunnageAnswersNothing()
+    {
+        // The rule is asked for every request, so an Item whose templates name no dunnage part must not pick up
+        // the picture of a part some other Item chose.
+        var request = new WaitlistRequest { Item = "pickup-coil", InputValue = "DN-STL-4" };
+
+        Assert.IsNull(
+            WaitlistRequestTitles.ResolveDunnagePartPicturePath(
+                WaitlistRequestTitles.ResolveContext(request, DunnageJob()),
+                DunnageJob()),
+            "A coil request is not about a dunnage part, whatever its answer happens to spell.");
+    }
 
     [TestMethod]
     public void Model_WaitlistRequestTitlesTests_ResolveLine2_ComponentRequestsShowThePartTheOperatorChose()
@@ -295,7 +371,56 @@ public sealed class WaitlistRequestTitlesTests
             WaitlistRequestTitles.ResolveContext(request, MaterialJob()));
 
         Assert.IsTrue(result.IsResolved);
-        Assert.AreEqual("Steel Offal", result.Text);
+        Assert.AreEqual("Steel", result.Text);
+    }
+
+    [TestMethod]
+    public void Model_WaitlistRequestTitlesTests_ResolveMaterialPartNumber_ComponentRequestsAreAboutTheComponentTheOperatorChose()
+    {
+        // The component Items name the component on their second line, so the part the card pictures and the part
+        // it names have to be that same component. Reading the job's own part number here pictured one part and
+        // named another, which left the Deliver Component card drawing the no-image placeholder while its own
+        // identifier read a part that has a picture (FR-019).
+        foreach (var itemId in new[] { "pickup-component", "deliver-component" })
+        {
+            var request = new WaitlistRequest { Item = itemId, InputValue = "A0006376159-Blank" };
+
+            var part = WaitlistRequestTitles.ResolveMaterialPartNumber(request, ComponentJob());
+
+            Assert.AreEqual("A0006376159-Blank", part, $"'{itemId}' is about the component the operator chose.");
+        }
+    }
+
+    [TestMethod]
+    public void Model_WaitlistRequestTitlesTests_ResolveMaterialPartNumber_AComponentRequestThatChoseNothingNamesNoPart()
+    {
+        var request = new WaitlistRequest { Item = "deliver-component", InputValue = "   " };
+
+        var part = WaitlistRequestTitles.ResolveMaterialPartNumber(request, ComponentJob());
+
+        Assert.IsNull(part, "No answer is not a part: the card draws the shared placeholder rather than a guess.");
+    }
+
+    [TestMethod]
+    public void Model_WaitlistRequestTitlesTests_ResolveMaterialPartNumber_AnItemWithNoRequestInHandStillNamesTheJobPart()
+    {
+        // The confirmation step asks before a request exists, so the Item-and-job overload has to keep answering
+        // for the Items whose part comes from the job.
+        var item = Find("pickup-wip");
+
+        var part = WaitlistRequestTitles.ResolveMaterialPartNumber(item, ComponentJob());
+
+        Assert.AreEqual("PART-9004", part, "An Item whose identifier names no captured answer still names the job's part.");
+    }
+
+    [TestMethod]
+    public void Model_WaitlistRequestTitlesTests_ResolveMaterialPartNumber_JobPartRequestsKeepNamingTheJobPart()
+    {
+        var request = new WaitlistRequest { Item = "pickup-wip", InputValue = "IGNORED-ANSWER" };
+
+        var part = WaitlistRequestTitles.ResolveMaterialPartNumber(request, ComponentJob());
+
+        Assert.AreEqual("PART-9004", part, "An Item whose identifier names no component still names the job's own part.");
     }
 
     /// <summary>A job carrying a die, as the composition root maps it onto the wizard's snapshot.</summary>

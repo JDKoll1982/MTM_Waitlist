@@ -35,6 +35,7 @@ public sealed class VisualDispositionInputFallback
         {
             ["WorkOrder"] = request.WorkOrder,
             ["PartNumber"] = request.PartNumber,
+            ["WorkCenter"] = request.WorkCenter,
         };
 
     /// <inheritdoc />
@@ -43,6 +44,7 @@ public sealed class VisualDispositionInputFallback
         {
             ["p_work_order"] = request.WorkOrder,
             ["p_part_number"] = request.PartNumber,
+            ["p_work_center"] = request.WorkCenter,
         };
 
     /// <inheritdoc />
@@ -52,5 +54,11 @@ public sealed class VisualDispositionInputFallback
         OpenWorkOrderQuantity = VisualRowReader.GetDecimal(row, "OpenWorkOrderQuantity"),
         FinishedGoodsQuantity = VisualRowReader.GetDecimal(row, "FinishedGoodsQuantity"),
         HasOutsideVendorOperation = VisualRowReader.GetBoolean(row, "HasOutsideVendorOperation"),
+        NextOperationResourceId = VisualRowReader.GetNullableString(row, "NextOperationResourceId"),
+        HasRemainingOperation = VisualRowReader.GetNullableBoolean(row, "HasRemainingOperation"),
+        HasCustomerDemand = VisualRowReader.GetNullableBoolean(row, "HasCustomerDemand"),
+        ProductCode = VisualRowReader.GetString(row, "ProductCode"),
+        CommodityCode = VisualRowReader.GetString(row, "CommodityCode"),
+        PartDescription = VisualRowReader.GetString(row, "PartDescription"),
     };
 }

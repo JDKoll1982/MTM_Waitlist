@@ -1,4 +1,6 @@
+using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
@@ -28,19 +30,26 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
     private readonly IActiveJobItemResolverService _activeJobItemResolver;
     private readonly RequestDispositionResolver _dispositionResolver;
     private readonly IAverageCoilWeightService _averageCoilWeightService;
+    private readonly ILuggerArrangementService _luggerArrangement;
+    private readonly IPartStockService? _partStockService;
 
     public RequestJobAvailabilityProvider(
         IActiveJobItemResolverService activeJobItemResolver,
         RequestDispositionResolver dispositionResolver,
-        IAverageCoilWeightService averageCoilWeightService)
+        IAverageCoilWeightService averageCoilWeightService,
+        ILuggerArrangementService luggerArrangement,
+        IPartStockService? partStockService = null)
     {
         ArgumentNullException.ThrowIfNull(activeJobItemResolver);
         ArgumentNullException.ThrowIfNull(dispositionResolver);
         ArgumentNullException.ThrowIfNull(averageCoilWeightService);
+        ArgumentNullException.ThrowIfNull(luggerArrangement);
 
         _activeJobItemResolver = activeJobItemResolver;
         _dispositionResolver = dispositionResolver;
         _averageCoilWeightService = averageCoilWeightService;
+        _luggerArrangement = luggerArrangement;
+        _partStockService = partStockService;
     }
 
     /// <inheritdoc />
@@ -56,8 +65,51 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
             return availability;
         }
 
-        availability = await ApplyDispositionAsync(availability, snapshot, cancellationToken).ConfigureAwait(false);
-        return await ApplyCoilAverageWeightAsync(availability, cancellationToken).ConfigureAwait(false);
+        availability = await ApplyDispositionAsync(availability, snapshot, workCenter, cancellationToken).ConfigureAwait(false);
+        availability = await ApplyComponentQuantitiesAsync(availability, cancellationToken).ConfigureAwait(false);
+        availability = await ApplyCoilAverageWeightAsync(availability, cancellationToken).ConfigureAwait(false);
+        return await ApplyLuggerLocationAsync(availability, workCenter, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Fills each component's total quantity on hand from the system that owns the part (the WIP Application when
+    /// its floor holds the part, Infor Visual otherwise). A component whose stock cannot be read keeps an empty
+    /// quantity, so its cell is left out rather than showing a guess.
+    /// </summary>
+    private async Task<RequestJobPartAvailability> ApplyComponentQuantitiesAsync(
+        RequestJobPartAvailability availability,
+        CancellationToken cancellationToken)
+    {
+        if (_partStockService is null || availability.ComponentFacts.Count == 0)
+        {
+            return availability;
+        }
+
+        try
+        {
+            var reads = availability.ComponentFacts.Select(async pair =>
+            {
+                var stock = await _partStockService.GetStockAsync(pair.Key, cancellationToken).ConfigureAwait(false);
+                if (!stock.WasRead)
+                {
+                    return pair;
+                }
+
+                var quantity = stock.TotalQuantity.ToString("#,0.##", System.Globalization.CultureInfo.CurrentCulture);
+                return new KeyValuePair<string, RequestComponentFacts>(pair.Key, pair.Value with { TotalQuantityOnHand = quantity });
+            });
+
+            return availability.WithComponentFacts(await Task.WhenAll(reads).ConfigureAwait(false));
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("WaitlistNewRequest", ex, "The components' quantities on hand could not be read, so their quantity cells are left out.");
+            return availability;
+        }
     }
 
     /// <summary>
@@ -104,6 +156,62 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
     }
 
     /// <summary>
+    /// Names the lugger the job's scrap is dumped into, from the arrangement as it stands now.
+    /// <para>
+    /// The arrangement is read through its own seam, once for the availability this call builds, so a card shows
+    /// the lugger named when the list loaded rather than anything the request stored; a status change or a rename
+    /// therefore shows on the next load (FR-023). The job's real scrap type is the key: it is matched ignoring
+    /// letter case and surrounding spaces, and nothing else (FR-009, FR-022).
+    /// </para>
+    /// <para>
+    /// Two absences are not the same. A job with no real scrap decision is the designed absence and resolves
+    /// nothing, so the cell is simply left out (FR-025). A real scrap type with no lugger assigned is a
+    /// configuration gap: it is recorded once through <see cref="AppLog.Warn"/>, naming the scrap type and the work
+    /// centre so the arrangement can be corrected, and the value stays null so no substitute reaches the card
+    /// (FR-026). An arrangement that could not be read at all arrives as an empty snapshot, which is an outage
+    /// rather than a gap — the list keeps working with no value and no warning is raised about configuration that
+    /// was never seen.
+    /// </para>
+    /// </summary>
+    private async Task<RequestJobPartAvailability> ApplyLuggerLocationAsync(
+        RequestJobPartAvailability availability,
+        string? workCenter,
+        CancellationToken cancellationToken)
+    {
+        if (availability.ScrapType.Length == 0)
+        {
+            return availability;
+        }
+
+        LuggerArrangementSnapshot arrangement;
+        try
+        {
+            arrangement = await _luggerArrangement.GetSnapshotAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error(
+                "Waitlist",
+                ex,
+                $"The scrap lugger arrangement could not be read, so the `Lugger Location` cell for scrap type '{availability.ScrapType}' at work center '{workCenter}' is left out.");
+            return availability;
+        }
+
+        var resolution = arrangement.Resolve(availability.ScrapType);
+
+        if (resolution.IsConfigurationGap && arrangement.Rows.Count > 0)
+        {
+            AppLog.Warn(
+                "Waitlist",
+                $"The scrap type '{availability.ScrapType}' has no lugger assigned, so the `Lugger Location` cell at work center '{workCenter}' is left out. Assign the type to a lugger in the lugger arrangement so handlers know where to walk.");
+        }
+
+        return resolution.LuggerLocation is null
+            ? availability
+            : availability with { LuggerLocation = resolution.LuggerLocation };
+    }
+
+    /// <summary>
     /// Writes the job part's derivation onto the snapshot: the single item type the card's <c>Item Type</c> /
     /// <c>Part Type</c> cell reads, and the four returning pickups' gates.
     /// <para>
@@ -117,29 +225,32 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
     private async Task<RequestJobPartAvailability> ApplyDispositionAsync(
         RequestJobPartAvailability availability,
         SetupActiveJobSnapshot snapshot,
+        string? workCenter,
         CancellationToken cancellationToken)
     {
-        RequestDisposition disposition;
+        RequestJobClassification classification;
         try
         {
-            disposition = await _dispositionResolver
-                .GetDispositionAsync(snapshot.WorkOrder, snapshot.PartNumber, cancellationToken)
+            classification = await _dispositionResolver
+                .GetClassificationAsync(snapshot.WorkOrder, snapshot.PartNumber, workCenter, cancellationToken)
                 .ConfigureAwait(false);
         }
         catch (Exception ex)
         {
             // The derivation needs both the plant system and the floor store, and neither may take the snapshot
             // down with it: without it the part-kind gates are exactly what they were before, the four returning
-            // pickups stay hidden, and the failure is recorded rather than turned into a value nothing supports
-            // (FR-089). The caller's own catch is the last resort, not the first.
+            // pickups stay hidden, no item type is reported, and the failure is recorded rather than turned into a
+            // value nothing supports (FR-089). The caller's own catch is the last resort, not the first.
             AppLog.Error(
                 "WaitlistNewRequest",
                 ex,
-                $"The disposition for job '{snapshot.WorkOrder}' part '{snapshot.PartNumber}' could not be derived, so the returning pickups stay hidden and no item type is reported.");
+                $"The classification for job '{snapshot.WorkOrder}' part '{snapshot.PartNumber}' could not be derived, so the returning pickups stay hidden and no item type is reported.");
             return availability;
         }
 
-        return availability.WithDisposition(disposition);
+        return availability
+            .WithDisposition(classification.Disposition)
+            .WithPartType(classification.PartType);
     }
 
     /// <summary>Pure mapping, so the translation from a job snapshot to the snapshot flags is unit-testable.</summary>
@@ -170,6 +281,13 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
             // enumerated answer with no list of its own takes its choices from here (FR-035), which is how
             // `pickup-component`'s details step can be completed at all.
             .WithComponentPartNumbers(snapshot.Components.Select(component => component.PartNumber))
+            // Each component's description comes from the same subordinate read; its quantity on hand is filled in
+            // afterwards by the provider, because it is read from the system that owns the part.
+            .WithComponentFacts(snapshot.Components
+                .Where(component => !string.IsNullOrWhiteSpace(component.PartNumber))
+                .Select(component => new KeyValuePair<string, RequestComponentFacts>(
+                    component.PartNumber,
+                    new RequestComponentFacts(component.Description?.Trim() ?? string.Empty, string.Empty))))
             // The job's assigned dunnage parts travel the same way: they are the dunnage step's cards, and the
             // list an Item naming the `dunnage` list draws its choices from (FR-035, FR-048).
             .WithDunnageParts(snapshot.DunnageParts.Select(MapDunnagePart))

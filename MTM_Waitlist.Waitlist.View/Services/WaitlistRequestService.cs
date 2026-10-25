@@ -87,7 +87,16 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         return loaded.Count;
     }
 
-    private static WaitlistRequest? MapRowToRequest(IReadOnlyDictionary<string, object?> row)
+    /// <summary>
+    /// Turns one row of <c>sp_waitlist_request_list</c> into the request the card is built from.
+    /// </summary>
+    /// <remarks>
+    /// Internal rather than private because it is the one mapper between the store's row shape and the card, and a
+    /// check that drives the card from a live store has to map its rows exactly as the list does rather than
+    /// through a second copy that can drift from this one (the suite reaches internals through
+    /// <c>InternalsVisibleTo</c>).
+    /// </remarks>
+    internal static WaitlistRequest? MapRowToRequest(IReadOnlyDictionary<string, object?> row)
     {
         var publicId = ReadString(row, "public_id");
         if (!Guid.TryParse(publicId, out var requestId))
@@ -1030,7 +1039,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         };
     }
 
-    public async Task<WaitlistRequestSubmitResult> SubmitAsync(WaitlistRequestDraft draft, bool allowDuplicate, CancellationToken cancellationToken = default)
+    public async Task<WaitlistRequestSubmitResult> SubmitAsync(WaitlistRequestDraft draft, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -1066,9 +1075,11 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             && string.Equals(request.Item, resolvedItem, StringComparison.OrdinalIgnoreCase)
             && string.Equals(request.InputValue ?? string.Empty, normalizedDraftInput ?? string.Empty, StringComparison.OrdinalIgnoreCase));
 
-        if (duplicate is not null && !allowDuplicate)
+        // A duplicate is refused outright: there is no override path, because two active requests for the same
+        // work centre, item and answer are two jobs the floor would have to do twice for one need.
+        if (duplicate is not null)
         {
-            AppLog.Info("WaitlistRequest", $"Duplicate request detected. Building='{draft.Building}', WorkCenter='{draft.WorkCenter}', Category='{draft.Category}', Item='{resolvedItem}'.");
+            AppLog.Info("WaitlistRequest", $"Duplicate request refused. Building='{draft.Building}', WorkCenter='{draft.WorkCenter}', Category='{draft.Category}', Item='{resolvedItem}'.");
             return WaitlistRequestSubmitResult.DuplicateWarning(duplicate);
         }
 

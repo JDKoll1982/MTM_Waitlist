@@ -3552,6 +3552,29 @@ WHERE part_number = TRIM(p_part_number)
 ORDER BY updated_utc DESC
 LIMIT 1;
 
+-- Stored Procedure: sp_setup_job_history_by_work_center_get
+-- Engine: MySQL 5.7
+-- Purpose: Get the most recent setup history events recorded for one work center, newest first.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_setup_job_history_by_work_center_get;
+
+CREATE PROCEDURE sp_setup_job_history_by_work_center_get(
+    IN p_work_center VARCHAR(64)
+)
+SELECT
+    h.event_action,
+    h.work_order,
+    h.part_number,
+    h.sequence_number,
+    h.work_center,
+    h.changed_utc
+FROM setup_job_history h
+WHERE h.work_center = TRIM(p_work_center)
+ORDER BY h.changed_utc DESC, h.id DESC
+LIMIT 200;
+
 -- Stored Procedure: sp_setup_part_sequence_custom_data_upsert
 -- Engine: MySQL 5.7
 -- Purpose: Upsert custom setup data for an exact part/sequence pair.
@@ -5152,3 +5175,2474 @@ WHERE public_id = p_public_id
       NULLIF(TRIM(COALESCE(p_expected_status, '')), '') IS NULL
       OR UPPER(TRIM(status)) = UPPER(TRIM(p_expected_status) COLLATE utf8mb4_unicode_ci)
   );
+
+-- Stored Procedure: sp_waitlist_lugger_locations_list
+-- Engine: MySQL 5.7
+-- Feature: 013-lugger-location-config (task T012)
+--
+-- Purpose: read every named lugger the Material Handler Lead maintains, in the order the set is displayed, so the
+--          settings page, the summary and the notice all draw the same list from one call (FR-001).
+--
+-- Contract:
+--   IN  none
+--
+--   OUT id, public_id, lugger_name, status, status_reason, display_position, created_utc, updated_utc
+--       one row per lugger that exists, ordered by display_position ascending then lugger_name ascending.
+--
+-- Guarantee:
+--   A removed lugger has no row, because removal deletes it (research D3). status is always one of the four pinned
+--   strings, and status_reason is null except where the lugger is Do Not Use. display_position is what the caller
+--   orders by; the second key is only a tie-break, so two luggers written at one position still come back in a
+--   stable order.
+--
+--   This is a read. It opens no transaction, writes nothing and appends no change row.
+-- ============================================================
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_lugger_locations_list;
+
+CREATE PROCEDURE sp_waitlist_lugger_locations_list()
+SELECT
+    id,
+    public_id,
+    lugger_name,
+    status,
+    status_reason,
+    display_position,
+    created_utc,
+    updated_utc
+FROM waitlist_lugger_locations
+ORDER BY
+    display_position ASC,
+    lugger_name ASC;
+
+-- Stored Procedure: sp_waitlist_lugger_locations_insert
+-- Engine: MySQL 5.7
+-- Feature: 013-lugger-location-config (task T013)
+--
+-- Purpose: add one named lugger to the set, at the place in the display order the lead asked for, and record
+--          that it was added (FR-003, FR-004, FR-032).
+--
+-- Contract:
+--   IN  p_lugger_name            VARCHAR(64)   the name the lead typed
+--       p_display_position       INT           where it sits in the display order
+--       p_actor_employee_number  VARCHAR(32)   who added it
+--       p_actor_employee_name    VARCHAR(128)  the same person's name
+--
+--   OUT one row, one column: affected_rows, which is 1 on a successful add.
+--
+-- Guarantee: the name is trimmed and a blank one is refused. A name another lugger already holds is refused,
+--            compared without regard to case by the table's utf8mb4_unicode_ci collation, and the refusal is a
+--            plain sentence rather than the engine's duplicate-key error. The lugger is written as `Backup`
+--            with a null reason, because it holds no dump point until a scrap type's order makes it one
+--            (FR-013). Every existing row at or after the requested position is shifted up by one in the same
+--            transaction, so the display order stays distinct and contiguous (FR-001). One `lugger_added`
+--            change row is written with both scrap-type columns null and the actor on it (FR-032).
+--
+-- A refused add writes nothing at all: the refusal raises before the insert, the handler rolls the
+-- transaction back, and the caller sees the sentence rather than a half-written set.
+-- ============================================================
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_lugger_locations_insert;
+
+-- DELIMITER because this body is compound; see the note in
+-- sp_auth_temporary_credential_attempt_record/create.sql.
+DELIMITER $$
+
+CREATE PROCEDURE sp_waitlist_lugger_locations_insert(
+    IN p_lugger_name VARCHAR(64),
+    IN p_display_position INT,
+    IN p_actor_employee_number VARCHAR(32),
+    IN p_actor_employee_name VARCHAR(128)
+)
+BEGIN
+    DECLARE v_lugger_name VARCHAR(64) DEFAULT '';
+    DECLARE v_display_position INT DEFAULT 0;
+    DECLARE v_highest_position INT DEFAULT 0;
+    DECLARE v_name_taken INT DEFAULT 0;
+    DECLARE v_lugger_id BIGINT DEFAULT NULL;
+    DECLARE v_affected INT DEFAULT 0;
+    DECLARE v_refusal VARCHAR(255) DEFAULT '';
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    -- The unique key is caught as well as checked below, so a name that slips past the check between the two
+    -- statements is answered with the same plain sentence instead of a bare 1062 reaching the caller (FR-004).
+    DECLARE EXIT HANDLER FOR 1062
+    BEGIN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'A lugger with that name already exists. Choose a different name.';
+    END;
+
+    SET v_lugger_name = TRIM(COALESCE(p_lugger_name, ''));
+
+    START TRANSACTION;
+
+    IF v_lugger_name = '' THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'A lugger needs a name before it can be added.';
+    END IF;
+
+    -- Case-insensitive by the column collation, which is exactly the rule the unique key enforces (FR-004).
+    SELECT COUNT(*)
+    INTO v_name_taken
+    FROM waitlist_lugger_locations l
+    WHERE l.lugger_name = v_lugger_name;
+
+    IF v_name_taken > 0 THEN
+        SET v_refusal = CONCAT('A lugger called ', v_lugger_name, ' already exists. Choose a different name.');
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_refusal;
+    END IF;
+
+    SELECT COALESCE(MAX(l.display_position), 0)
+    INTO v_highest_position
+    FROM waitlist_lugger_locations l;
+
+    -- A position past the end is clamped to the end, otherwise "contiguous" would be broken by the call itself.
+    SET v_display_position = IFNULL(p_display_position, 0);
+    IF v_display_position < 1 THEN
+        SET v_display_position = 1;
+    END IF;
+    IF v_display_position > v_highest_position + 1 THEN
+        SET v_display_position = v_highest_position + 1;
+    END IF;
+
+    -- `updated_utc` is deliberately left alone: a shifted row's content did not change, only its place, and
+    -- nothing in the change log records a move.
+    UPDATE waitlist_lugger_locations l
+    SET l.display_position = l.display_position + 1
+    WHERE l.display_position >= v_display_position;
+
+    INSERT INTO waitlist_lugger_locations (
+        public_id,
+        lugger_name,
+        status,
+        status_reason,
+        display_position,
+        created_utc,
+        updated_utc
+    )
+    VALUES (
+        UUID(),
+        v_lugger_name,
+        'Backup',
+        NULL,
+        v_display_position,
+        UTC_TIMESTAMP(),
+        UTC_TIMESTAMP()
+    );
+
+    SET v_affected = ROW_COUNT();
+    SET v_lugger_id = LAST_INSERT_ID();
+
+    INSERT INTO waitlist_lugger_arrangement_changes (
+        public_id,
+        change_kind,
+        lugger_id,
+        lugger_name,
+        scrap_type,
+        scrap_type_key,
+        previous_value,
+        new_value,
+        change_reason,
+        changed_by_employee_number,
+        changed_by_employee_name,
+        changed_utc
+    )
+    VALUES (
+        UUID(),
+        'lugger_added',
+        v_lugger_id,
+        v_lugger_name,
+        NULL,
+        NULL,
+        NULL,
+        v_lugger_name,
+        NULL,
+        p_actor_employee_number,
+        p_actor_employee_name,
+        UTC_TIMESTAMP()
+    );
+
+    COMMIT;
+
+    SELECT v_affected AS affected_rows;
+END$$
+
+DELIMITER ;
+
+-- Stored Procedure: sp_waitlist_lugger_locations_rename
+-- Engine: MySQL 5.7
+-- Feature: 013-lugger-location-config (task T014)
+--
+-- Purpose: rename one lugger, refusing a blank name and a name another lugger already holds, and record the
+--          rename against every scrap type the lugger takes so the in-application notice can name both what it
+--          was called and what it is called now (FR-003, FR-004, FR-035).
+--
+-- Contract:
+--   IN  p_lugger_public_id        CHAR(36)     the lugger to rename
+--   IN  p_lugger_name             VARCHAR(64)  the new name
+--   IN  p_actor_employee_number   VARCHAR(32)  who renamed it
+--   IN  p_actor_employee_name     VARCHAR(128) the same person's name
+--
+--   OUT affected_rows             0 when the public id matches no lugger, 1 when it does.
+--
+-- Guarantee: the name is trimmed before it is judged, so a name of spaces is refused like an empty one. The
+--            duplicate test runs under the same case-insensitive collation as the unique key, so `door 7 lugger`
+--            is refused beside `Door 7 Lugger`, and a lugger renamed to the name it already holds is not a clash.
+--            A rename writes one `lugger_renamed` change row per affected scrap type, each naming the old name in
+--            previous_value and the new name in new_value, so the notice names both (FR-035). A lugger that takes
+--            no scrap type writes one row with both scrap-type columns null. The unique key is still the last
+--            word: a concurrent insert that beats the duplicate test is reported as a plain refusal rather than
+--            escaping as a bare 1062.
+--
+-- One clock for the whole call: v_now_utc is read once, so the updated row and its change rows share one
+-- timestamp.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_lugger_locations_rename;
+
+-- DELIMITER because this body is compound; see the note in
+-- sp_auth_temporary_credential_attempt_record/create.sql.
+DELIMITER $$
+
+CREATE PROCEDURE sp_waitlist_lugger_locations_rename(
+    IN p_lugger_public_id CHAR(36),
+    IN p_lugger_name VARCHAR(64),
+    IN p_actor_employee_number VARCHAR(32),
+    IN p_actor_employee_name VARCHAR(128)
+)
+BEGIN
+    DECLARE v_lugger_id BIGINT DEFAULT NULL;
+    DECLARE v_old_name VARCHAR(64) DEFAULT NULL;
+    DECLARE v_new_name VARCHAR(64) DEFAULT NULL;
+    DECLARE v_name_holder_id BIGINT DEFAULT NULL;
+    DECLARE v_affected INT DEFAULT 0;
+    DECLARE v_now_utc DATETIME DEFAULT NULL;
+
+    -- Declared ahead of the general handler so a concurrent insert that slips past the duplicate test is
+    -- reported as a sentence rather than escaping as a bare 1062.
+    DECLARE CONTINUE HANDLER FOR 1062
+    BEGIN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Another lugger already has that name.';
+    END;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    SET v_new_name = TRIM(p_lugger_name);
+
+    IF v_new_name IS NULL OR v_new_name = '' THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'A lugger needs a name.';
+    END IF;
+
+    START TRANSACTION;
+
+    SET v_now_utc = UTC_TIMESTAMP();
+
+    SELECT
+        l.id,
+        l.lugger_name
+    INTO v_lugger_id,
+    v_old_name
+    FROM
+        waitlist_lugger_locations AS l
+    WHERE
+        l.public_id = TRIM(p_lugger_public_id)
+    FOR UPDATE;
+
+    IF v_lugger_id IS NOT NULL AND BINARY v_new_name <> BINARY v_old_name THEN
+        SELECT
+            l.id
+        INTO v_name_holder_id
+        FROM
+            waitlist_lugger_locations AS l
+        WHERE
+            l.lugger_name = v_new_name
+            AND l.id <> v_lugger_id
+        LIMIT 1;
+
+        IF v_name_holder_id IS NOT NULL THEN
+            SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'Another lugger already has that name.';
+        END IF;
+
+        INSERT INTO waitlist_lugger_arrangement_changes (
+            public_id,
+            change_kind,
+            lugger_id,
+            lugger_name,
+            scrap_type,
+            scrap_type_key,
+            previous_value,
+            new_value,
+            change_reason,
+            changed_by_employee_number,
+            changed_by_employee_name,
+            changed_utc
+        )
+        SELECT
+            UUID(),
+            'lugger_renamed',
+            v_lugger_id,
+            v_new_name,
+            a.scrap_type,
+            a.scrap_type_key,
+            v_old_name,
+            v_new_name,
+            NULL,
+            TRIM(p_actor_employee_number),
+            TRIM(p_actor_employee_name),
+            v_now_utc
+        FROM
+            waitlist_lugger_scrap_assignments AS a
+        WHERE
+            a.lugger_id = v_lugger_id
+        ORDER BY
+            a.scrap_type_key ASC,
+            a.sort_position ASC;
+
+        IF ROW_COUNT() = 0 THEN
+            INSERT INTO waitlist_lugger_arrangement_changes (
+                public_id,
+                change_kind,
+                lugger_id,
+                lugger_name,
+                scrap_type,
+                scrap_type_key,
+                previous_value,
+                new_value,
+                change_reason,
+                changed_by_employee_number,
+                changed_by_employee_name,
+                changed_utc
+            )
+            VALUES (
+                UUID(),
+                'lugger_renamed',
+                v_lugger_id,
+                v_new_name,
+                NULL,
+                NULL,
+                v_old_name,
+                v_new_name,
+                NULL,
+                TRIM(p_actor_employee_number),
+                TRIM(p_actor_employee_name),
+                v_now_utc
+            );
+        END IF;
+
+        UPDATE waitlist_lugger_locations
+        SET
+            lugger_name = v_new_name,
+            updated_utc = v_now_utc
+        WHERE
+            id = v_lugger_id;
+
+        SET v_affected = ROW_COUNT();
+    ELSEIF v_lugger_id IS NOT NULL THEN
+        -- The lugger already holds this exact name. The call succeeds and changes nothing: a change row
+        -- reading `renamed from X to X` would tell the reader nothing (FR-035).
+        SET v_affected = 1;
+    END IF;
+
+    COMMIT;
+
+    SELECT v_affected AS affected_rows;
+END$$
+
+DELIMITER ;
+
+-- Stored Procedure: sp_waitlist_lugger_locations_delete
+-- Engine: MySQL 5.7
+-- Feature: 013-lugger-location-config (task T015)
+--
+-- Purpose: remove one named lugger from the plant's set and leave every scrap type it served in a state the cards
+--          and the editor can draw: no assignment pointing at a lugger that no longer exists, and each affected
+--          scrap type still holding exactly one dump point whenever a usable lugger remains (FR-003, FR-005,
+--          FR-026, FR-032).
+--
+-- Contract:
+--   IN  p_lugger_public_id      CHAR(36)      the lugger to remove
+--   IN  p_actor_employee_number VARCHAR(32)   who removed it
+--   IN  p_actor_employee_name   VARCHAR(128)  the same person's name, so the notice reads without a join
+--
+--   OUT affected_rows INT  1 when a lugger was removed, 0 when the id matches no lugger. The result set is the
+--       contract: ExecuteNonQueryAsync cannot report a count through a transaction, so the procedure answers with
+--       one column named affected_rows as its last statement.
+--
+-- Guarantee:
+--   * The lugger's name and the scrap types it takes are read BEFORE the delete, in the same transaction. A scrap
+--     type whose only lugger was this one keeps no assignment row afterwards, so its key would otherwise be
+--     unrecoverable and it could be neither re-derived nor recorded.
+--   * The delete is the removal (research D3). The foreign key's ON DELETE CASCADE takes every assignment with it,
+--     so no assignment survives the delete and none can point at a lugger that no longer exists (FR-005).
+--   * Each affected scrap type is re-derived inside the same transaction, and its assignment rows are held with
+--     SELECT ... FOR UPDATE for the whole of that derivation, so two leads changing the same scrap type at the
+--     same moment produce one outcome rather than a half-moved arrangement.
+--
+--   The dump point rule, applied to one scrap type key K inside this transaction:
+--     1. read K's assignment rows joined to their luggers, ordered by sort_position then lugger_name, FOR UPDATE;
+--     2. renumber them contiguously from 1 so every usable lugger (Available or Backup) comes before every
+--        blocked one (Full or Do Not Use), preserving each group's relative order, and update only the rows whose
+--        position actually moved;
+--     3. keep the existing holder when its lugger is usable, otherwise give the role to the first usable lugger in
+--        the new order, otherwise leave it with nobody;
+--     4. set is_dump_point on exactly that row and clear it on every other row of K;
+--     5. when the holder changed, including when it changed to nobody, write one dump_point_promoted row naming
+--        the lugger that held it and the one that holds it now, with a null new_value when none can receive.
+--
+--   * One `lugger_removed` change row is written per affected scrap type. It carries the removed name in
+--     previous_value, the scrap type as spelled at the time, and a null new_value, and its lugger_id is null
+--     because the lugger it names is gone. That is what keeps the notice able to say what was removed (FR-032).
+--   * A lugger that took no scrap type still records one `lugger_removed` row, with both scrap_type columns null,
+--     exactly as a rename of an unassigned lugger does. Without it, removing a lugger nothing was using would
+--     leave no trace at all.
+--   * A `dump_point_promoted` row is written wherever another lugger took the role. When the removed lugger held
+--     it, previous_value names the removed lugger even though its row is already deleted, because that is the
+--     lugger the handler was told about.
+--   * A scrap type that loses its last lugger keeps no assignment and no dump point; its cards draw no lugger
+--     cell until the lead assigns one (FR-026). The procedure never invents a replacement lugger.
+--   * The change table is append only here: nothing updates or deletes a change row, and the rows survive the
+--     lugger they describe.
+-- ============================================================
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_lugger_locations_delete;
+
+-- DELIMITER because this body is compound; see the note in
+-- sp_auth_temporary_credential_attempt_record/create.sql.
+DELIMITER $$
+
+CREATE PROCEDURE sp_waitlist_lugger_locations_delete(
+    IN p_lugger_public_id CHAR(36),
+    IN p_actor_employee_number VARCHAR(32),
+    IN p_actor_employee_name VARCHAR(128)
+)
+BEGIN
+    DECLARE v_lugger_id BIGINT DEFAULT NULL;
+    DECLARE v_lugger_name VARCHAR(64) DEFAULT NULL;
+    DECLARE v_affected INT DEFAULT 0;
+
+    DECLARE v_type_total INT DEFAULT 0;
+    DECLARE v_type_index INT DEFAULT 0;
+    DECLARE v_key VARCHAR(128) DEFAULT '';
+    DECLARE v_spelling VARCHAR(128) DEFAULT '';
+    DECLARE v_was_dump_point TINYINT(1) DEFAULT 0;
+
+    DECLARE v_row_total INT DEFAULT 0;
+    DECLARE v_usable_total INT DEFAULT 0;
+    DECLARE v_row_index INT DEFAULT 0;
+    DECLARE v_usable_seen INT DEFAULT 0;
+    DECLARE v_blocked_seen INT DEFAULT 0;
+    DECLARE v_arranged_position INT DEFAULT 0;
+    DECLARE v_assignment_id BIGINT DEFAULT NULL;
+    DECLARE v_assignment_name VARCHAR(64) DEFAULT '';
+    DECLARE v_assignment_status VARCHAR(16) DEFAULT '';
+    DECLARE v_assignment_position INT DEFAULT 0;
+    DECLARE v_assignment_is_dump_point TINYINT(1) DEFAULT 0;
+    DECLARE v_assignment_usable TINYINT(1) DEFAULT 0;
+
+    DECLARE v_holder_id BIGINT DEFAULT NULL;
+    DECLARE v_holder_name VARCHAR(64) DEFAULT NULL;
+    DECLARE v_holder_usable TINYINT(1) DEFAULT 0;
+    DECLARE v_first_usable_id BIGINT DEFAULT NULL;
+    DECLARE v_first_usable_name VARCHAR(64) DEFAULT NULL;
+    DECLARE v_target_id BIGINT DEFAULT NULL;
+    DECLARE v_target_name VARCHAR(64) DEFAULT NULL;
+    DECLARE v_previous_name VARCHAR(255) DEFAULT NULL;
+    DECLARE v_change_lugger_name VARCHAR(64) DEFAULT NULL;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    -- Two session-scoped staging tables, created before the transaction opens so their DDL never sits inside it.
+    -- The first holds the scrap types read before the delete; the second holds one scrap type's new order, because
+    -- the renumbering cannot be applied while the rows are still being read in sort_position order.
+    DROP TEMPORARY TABLE IF EXISTS tmp_sp_lugger_locations_delete_types;
+    CREATE TEMPORARY TABLE tmp_sp_lugger_locations_delete_types (
+        scrap_type_key VARCHAR(128) NOT NULL,
+        scrap_type VARCHAR(128) NOT NULL,
+        is_previous_dump_point TINYINT(1) NOT NULL,
+        PRIMARY KEY (scrap_type_key)
+    ) ENGINE = InnoDB;
+
+    DROP TEMPORARY TABLE IF EXISTS tmp_sp_lugger_locations_delete_order;
+    CREATE TEMPORARY TABLE tmp_sp_lugger_locations_delete_order (
+        seq INT NOT NULL,
+        assignment_id BIGINT NOT NULL,
+        arranged_position INT NOT NULL,
+        PRIMARY KEY (seq)
+    ) ENGINE = InnoDB;
+
+    START TRANSACTION;
+
+    SELECT id, lugger_name
+      INTO v_lugger_id, v_lugger_name
+      FROM waitlist_lugger_locations
+     WHERE public_id = p_lugger_public_id
+     FOR UPDATE;
+
+    IF v_lugger_id IS NOT NULL THEN
+        INSERT INTO tmp_sp_lugger_locations_delete_types (scrap_type_key, scrap_type, is_previous_dump_point)
+        SELECT a.scrap_type_key, MIN(a.scrap_type), MAX(a.is_dump_point)
+          FROM waitlist_lugger_scrap_assignments AS a
+         WHERE a.lugger_id = v_lugger_id
+         GROUP BY a.scrap_type_key;
+
+        DELETE FROM waitlist_lugger_locations
+         WHERE id = v_lugger_id;
+
+        SET v_affected = ROW_COUNT();
+    END IF;
+
+    IF v_affected > 0 THEN
+        SELECT COUNT(*)
+          INTO v_type_total
+          FROM tmp_sp_lugger_locations_delete_types;
+
+        SET v_type_index = 0;
+
+        WHILE v_type_index < v_type_total DO
+            SELECT scrap_type_key, scrap_type, is_previous_dump_point
+              INTO v_key, v_spelling, v_was_dump_point
+              FROM tmp_sp_lugger_locations_delete_types
+             ORDER BY scrap_type_key
+             LIMIT v_type_index, 1;
+
+            -- Step 1: hold every remaining assignment row of this scrap type for the whole derivation.
+            DELETE FROM tmp_sp_lugger_locations_delete_order;
+
+            SELECT COUNT(*)
+              INTO v_row_total
+              FROM waitlist_lugger_scrap_assignments AS a
+              JOIN waitlist_lugger_locations AS l ON l.id = a.lugger_id
+             WHERE a.scrap_type_key = v_key
+             FOR UPDATE;
+
+            SELECT COUNT(*)
+              INTO v_usable_total
+              FROM waitlist_lugger_scrap_assignments AS a
+              JOIN waitlist_lugger_locations AS l ON l.id = a.lugger_id
+             WHERE a.scrap_type_key = v_key
+               AND l.status IN ('Available', 'Backup');
+
+            SET v_row_index = 0;
+            SET v_usable_seen = 0;
+            SET v_blocked_seen = 0;
+            SET v_holder_id = NULL;
+            SET v_holder_name = NULL;
+            SET v_holder_usable = 0;
+            SET v_first_usable_id = NULL;
+            SET v_first_usable_name = NULL;
+
+            -- Step 2, first half: read the rows in their current order and compute the new one into the staging
+            -- table. Writing sort_position while still reading in sort_position order would make this loop revisit
+            -- or skip a row.
+            WHILE v_row_index < v_row_total DO
+                SELECT a.id, a.is_dump_point, a.sort_position, l.lugger_name, l.status
+                  INTO v_assignment_id, v_assignment_is_dump_point, v_assignment_position,
+                       v_assignment_name, v_assignment_status
+                  FROM waitlist_lugger_scrap_assignments AS a
+                  JOIN waitlist_lugger_locations AS l ON l.id = a.lugger_id
+                 WHERE a.scrap_type_key = v_key
+                 ORDER BY a.sort_position, l.lugger_name
+                 LIMIT v_row_index, 1
+                 FOR UPDATE;
+
+                SET v_assignment_usable = IF(v_assignment_status IN ('Available', 'Backup'), 1, 0);
+
+                IF v_assignment_usable = 1 THEN
+                    SET v_arranged_position = v_usable_seen + 1;
+                    SET v_usable_seen = v_usable_seen + 1;
+                ELSE
+                    SET v_arranged_position = v_usable_total + v_blocked_seen + 1;
+                    SET v_blocked_seen = v_blocked_seen + 1;
+                END IF;
+
+                INSERT INTO tmp_sp_lugger_locations_delete_order (seq, assignment_id, arranged_position)
+                VALUES (v_row_index + 1, v_assignment_id, v_arranged_position);
+
+                IF v_assignment_is_dump_point = 1 THEN
+                    SET v_holder_id = v_assignment_id;
+                    SET v_holder_name = v_assignment_name;
+                    SET v_holder_usable = v_assignment_usable;
+                END IF;
+
+                IF v_assignment_usable = 1 AND v_first_usable_id IS NULL THEN
+                    SET v_first_usable_id = v_assignment_id;
+                    SET v_first_usable_name = v_assignment_name;
+                END IF;
+
+                SET v_row_index = v_row_index + 1;
+            END WHILE;
+
+            -- Step 2, second half: only the rows whose order actually changed are written.
+            UPDATE waitlist_lugger_scrap_assignments AS a
+              JOIN tmp_sp_lugger_locations_delete_order AS t ON t.assignment_id = a.id
+               SET a.sort_position = t.arranged_position,
+                   a.updated_utc = UTC_TIMESTAMP()
+             WHERE a.scrap_type_key = v_key
+               AND a.sort_position <> t.arranged_position;
+
+            -- Step 3: the current holder keeps the role while its lugger is usable; otherwise the first usable
+            -- lugger in the new order takes it; otherwise nobody does.
+            IF v_holder_id IS NOT NULL AND v_holder_usable = 1 THEN
+                SET v_target_id = v_holder_id;
+                SET v_target_name = v_holder_name;
+            ELSE
+                SET v_target_id = v_first_usable_id;
+                SET v_target_name = v_first_usable_name;
+            END IF;
+
+            -- Steps 4 and 5.
+            IF NOT (v_target_id <=> v_holder_id) THEN
+                UPDATE waitlist_lugger_scrap_assignments
+                   SET is_dump_point = IF(id = v_target_id, 1, 0)
+                 WHERE scrap_type_key = v_key;
+
+                IF v_was_dump_point = 1 THEN
+                    SET v_previous_name = v_lugger_name;
+                ELSE
+                    SET v_previous_name = v_holder_name;
+                END IF;
+
+                SET v_change_lugger_name = IFNULL(v_target_name, IFNULL(v_previous_name, v_lugger_name));
+
+                INSERT INTO waitlist_lugger_arrangement_changes (
+                    public_id,
+                    change_kind,
+                    lugger_id,
+                    lugger_name,
+                    scrap_type,
+                    scrap_type_key,
+                    previous_value,
+                    new_value,
+                    change_reason,
+                    changed_by_employee_number,
+                    changed_by_employee_name,
+                    changed_utc
+                )
+                VALUES (
+                    UUID(),
+                    'dump_point_promoted',
+                    v_target_id,
+                    v_change_lugger_name,
+                    v_spelling,
+                    v_key,
+                    v_previous_name,
+                    v_target_name,
+                    NULL,
+                    p_actor_employee_number,
+                    p_actor_employee_name,
+                    UTC_TIMESTAMP()
+                );
+            END IF;
+
+            INSERT INTO waitlist_lugger_arrangement_changes (
+                public_id,
+                change_kind,
+                lugger_id,
+                lugger_name,
+                scrap_type,
+                scrap_type_key,
+                previous_value,
+                new_value,
+                change_reason,
+                changed_by_employee_number,
+                changed_by_employee_name,
+                changed_utc
+            )
+            VALUES (
+                UUID(),
+                'lugger_removed',
+                NULL,
+                v_lugger_name,
+                v_spelling,
+                v_key,
+                v_lugger_name,
+                NULL,
+                NULL,
+                p_actor_employee_number,
+                p_actor_employee_name,
+                UTC_TIMESTAMP()
+            );
+
+            SET v_type_index = v_type_index + 1;
+        END WHILE;
+
+        IF v_type_total = 0 THEN
+            INSERT INTO waitlist_lugger_arrangement_changes (
+                public_id,
+                change_kind,
+                lugger_id,
+                lugger_name,
+                scrap_type,
+                scrap_type_key,
+                previous_value,
+                new_value,
+                change_reason,
+                changed_by_employee_number,
+                changed_by_employee_name,
+                changed_utc
+            )
+            VALUES (
+                UUID(),
+                'lugger_removed',
+                NULL,
+                v_lugger_name,
+                NULL,
+                NULL,
+                v_lugger_name,
+                NULL,
+                NULL,
+                p_actor_employee_number,
+                p_actor_employee_name,
+                UTC_TIMESTAMP()
+            );
+        END IF;
+    END IF;
+
+    COMMIT;
+
+    DROP TEMPORARY TABLE IF EXISTS tmp_sp_lugger_locations_delete_types;
+    DROP TEMPORARY TABLE IF EXISTS tmp_sp_lugger_locations_delete_order;
+
+    SELECT v_affected AS affected_rows;
+END$$
+
+DELIMITER ;
+
+-- Stored Procedure: sp_waitlist_lugger_locations_status_set
+-- Engine: MySQL 5.7
+-- Feature: 013-lugger-location-config (task T016)
+--
+-- Purpose: apply one lugger's status and leave every scrap type that dumps through it complete, so a lead sets Full,
+--          Backup, Available or Do Not Use and never reconciles a dump point by hand (FR-014, FR-021).
+--
+-- Contract:
+--   IN  p_lugger_public_id         CHAR(36)     the lugger whose status is being set
+--   IN  p_status                   VARCHAR(16)  one of Available, Backup, Full, Do Not Use
+--   IN  p_reason                   VARCHAR(500) the reason, required for Do Not Use and cleared for the others
+--   IN  p_actor_employee_number    VARCHAR(32)  who set it
+--   IN  p_actor_employee_name      VARCHAR(128) the same person's name
+--
+--   OUT affected_rows              1 when the lugger was found and its status applied, 0 when the public id matches
+--                                  no lugger.
+--
+-- Guarantee:
+--   One transaction. A refusal raises SQLSTATE 45000 and changes nothing: a status outside the four pinned strings is
+--   refused, and Do Not Use with a blank or whitespace-only reason is refused. The reason is trimmed and stored only
+--   for Do Not Use; for the other three it is written as null (FR-019).
+--
+--   The scrap types the lugger is assigned to are read BEFORE the status changes, then the status is written, then
+--   each of those scrap types is re-derived in the same transaction:
+--
+--     1. its assignment rows are held with SELECT ... FOR UPDATE for the rest of the transaction, which is what makes
+--        two leads changing at the same moment produce one outcome rather than a half-moved arrangement;
+--     2. positions are renumbered contiguously 1..n so every usable lugger (Available or Backup) sorts before every
+--        blocked one (Full or Do Not Use), each group keeping its relative order, and only rows whose position
+--        changed are updated (FR-017);
+--     3. the holder is the current is_dump_point row when its lugger is usable, otherwise the first usable lugger in
+--        the new order, otherwise nobody — so a lugger that has been emptied does not reclaim the role by itself
+--        (FR-013, FR-016, FR-020);
+--     4. the flag is set on exactly that row and cleared on every other row of the scrap type, so there are never two
+--        dump points and never one that cannot receive while another could.
+--
+--   It writes one status_changed row per affected scrap type, and one dump_point_promoted row for each scrap type
+--   whose role moved, naming the lugger that held it and the lugger that holds it now (null when nobody can
+--   receive). A lugger assigned to no scrap type writes a single status_changed row with both scrap-type columns
+--   null. Every row carries the actor and one shared UTC timestamp (FR-032).
+--
+--   The last statement is the affected_rows result set. ExecuteNonQueryAsync cannot report a count through a
+--   transaction, so the result set is the contract, not a convenience.
+-- ============================================================
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_lugger_locations_status_set;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_waitlist_lugger_locations_status_set(
+    IN p_lugger_public_id CHAR(36),
+    IN p_status VARCHAR(16),
+    IN p_reason VARCHAR(500),
+    IN p_actor_employee_number VARCHAR(32),
+    IN p_actor_employee_name VARCHAR(128)
+)
+BEGIN
+    DECLARE v_status VARCHAR(16) DEFAULT NULL;
+    DECLARE v_reason VARCHAR(500) DEFAULT NULL;
+    DECLARE v_old_status VARCHAR(16) DEFAULT NULL;
+    DECLARE v_lugger_id BIGINT DEFAULT NULL;
+    DECLARE v_lugger_name VARCHAR(64) DEFAULT NULL;
+    DECLARE v_found INT DEFAULT 0;
+    DECLARE v_affected INT DEFAULT 0;
+    DECLARE v_now DATETIME DEFAULT NULL;
+
+    DECLARE v_key VARCHAR(128) DEFAULT NULL;
+    DECLARE v_scrap_type VARCHAR(128) DEFAULT NULL;
+    DECLARE v_affected_types INT DEFAULT 0;
+
+    DECLARE v_row_count INT DEFAULT 0;
+    DECLARE v_usable_count INT DEFAULT 0;
+    DECLARE v_usable_seen INT DEFAULT 0;
+    DECLARE v_blocked_seen INT DEFAULT 0;
+    DECLARE v_arranged_position INT DEFAULT 0;
+    DECLARE v_row_id BIGINT DEFAULT NULL;
+    DECLARE v_row_position INT DEFAULT 0;
+    DECLARE v_row_usable TINYINT DEFAULT 0;
+    DECLARE v_row_is_dump_point TINYINT DEFAULT 0;
+    DECLARE v_row_name VARCHAR(64) DEFAULT NULL;
+
+    DECLARE v_current_holder_id BIGINT DEFAULT NULL;
+    DECLARE v_current_holder_name VARCHAR(64) DEFAULT NULL;
+    DECLARE v_current_holder_usable TINYINT DEFAULT 0;
+    DECLARE v_first_usable_id BIGINT DEFAULT NULL;
+    DECLARE v_first_usable_name VARCHAR(64) DEFAULT NULL;
+    DECLARE v_prev_holder_id BIGINT DEFAULT NULL;
+    DECLARE v_prev_holder_name VARCHAR(64) DEFAULT NULL;
+    DECLARE v_next_holder_id BIGINT DEFAULT NULL;
+    DECLARE v_next_holder_name VARCHAR(64) DEFAULT NULL;
+
+    DECLARE v_done TINYINT DEFAULT 0;
+
+    DECLARE cur_affected_types CURSOR FOR
+        SELECT t.scrap_type, t.scrap_type_key
+        FROM tmp_affected_lugger_types AS t
+        ORDER BY t.scrap_type_key ASC;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_done = 1;
+
+    -- Refusals are decided before any write opens, so a rejected call leaves the arrangement untouched.
+    IF p_status IS NULL
+        OR BINARY p_status NOT IN (BINARY 'Available', BINARY 'Backup', BINARY 'Full', BINARY 'Do Not Use') THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'A lugger status must be Available, Backup, Full or Do Not Use.';
+    END IF;
+
+    SET v_status = p_status;
+
+    IF v_status = 'Do Not Use' THEN
+        SET v_reason = NULLIF(TRIM(IFNULL(p_reason, '')), '');
+        IF v_reason IS NULL THEN
+            SIGNAL SQLSTATE '45000'
+                SET MESSAGE_TEXT = 'A reason is required when a lugger is marked Do Not Use.';
+        END IF;
+    ELSE
+        SET v_reason = NULL;
+    END IF;
+
+    START TRANSACTION;
+
+    SET v_now = UTC_TIMESTAMP();
+
+    SELECT COUNT(*)
+    INTO v_found
+    FROM waitlist_lugger_locations
+    WHERE public_id = p_lugger_public_id
+    FOR UPDATE;
+
+    IF v_found = 0 THEN
+        ROLLBACK;
+
+        SELECT 0 AS affected_rows;
+    ELSE
+        SELECT id, lugger_name, status
+        INTO v_lugger_id, v_lugger_name, v_old_status
+        FROM waitlist_lugger_locations
+        WHERE public_id = p_lugger_public_id;
+
+        -- The affected scrap types are read before the status moves, so the set cannot shrink underneath the loop.
+        DROP TEMPORARY TABLE IF EXISTS tmp_affected_lugger_types;
+
+        CREATE TEMPORARY TABLE tmp_affected_lugger_types (
+            scrap_type VARCHAR(128) NOT NULL,
+            scrap_type_key VARCHAR(128) NOT NULL,
+            PRIMARY KEY (scrap_type_key)
+        );
+
+        INSERT INTO tmp_affected_lugger_types (scrap_type, scrap_type_key)
+        SELECT a.scrap_type, a.scrap_type_key
+        FROM waitlist_lugger_scrap_assignments AS a
+        WHERE a.lugger_id = v_lugger_id;
+
+        SELECT COUNT(*)
+        INTO v_affected_types
+        FROM tmp_affected_lugger_types;
+
+        UPDATE waitlist_lugger_locations
+        SET status = v_status,
+            status_reason = v_reason,
+            updated_utc = v_now
+        WHERE id = v_lugger_id;
+
+        -- The row matched, so the status was applied. A second write of the status it already holds reports the lugger
+        -- rather than a lost race, because ROW_COUNT() answers 0 for an update that changes nothing.
+        SET v_affected = ROW_COUNT();
+        IF v_affected = 0 THEN
+            SET v_affected = 1;
+        END IF;
+
+        SET v_done = 0;
+
+        OPEN cur_affected_types;
+
+        read_affected_types: LOOP
+            FETCH cur_affected_types INTO v_scrap_type, v_key;
+
+            IF v_done = 1 THEN
+                LEAVE read_affected_types;
+            END IF;
+
+            -- The re-derivation owns its cursor and its own end-of-cursor flag, so reaching the end of one scrap
+            -- type's lugger order cannot also end the outer loop over the affected scrap types.
+            BEGIN
+                DECLARE v_order_done TINYINT DEFAULT 0;
+                DECLARE cur_order CURSOR FOR
+                    SELECT t.assignment_id, t.sort_position, t.is_usable, t.is_dump_point, t.lugger_name
+                    FROM tmp_lugger_placement AS t
+                    ORDER BY t.sort_position ASC, t.lugger_name ASC;
+                DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_order_done = 1;
+
+                DROP TEMPORARY TABLE IF EXISTS tmp_lugger_placement;
+
+                CREATE TEMPORARY TABLE tmp_lugger_placement (
+                    assignment_id BIGINT NOT NULL,
+                    lugger_id BIGINT NOT NULL,
+                    lugger_name VARCHAR(64) NOT NULL,
+                    status VARCHAR(16) NOT NULL,
+                    sort_position INT NOT NULL,
+                    is_dump_point TINYINT(1) NOT NULL,
+                    is_usable TINYINT(1) NOT NULL DEFAULT 0,
+                    PRIMARY KEY (assignment_id)
+                );
+
+                -- The locks are taken before a single row is read for the decision, for the whole transaction.
+                SELECT COUNT(*)
+                INTO v_row_count
+                FROM waitlist_lugger_scrap_assignments AS a
+                INNER JOIN waitlist_lugger_locations AS l ON l.id = a.lugger_id
+                WHERE a.scrap_type_key = v_key
+                FOR UPDATE;
+
+                INSERT INTO tmp_lugger_placement (
+                    assignment_id,
+                    lugger_id,
+                    lugger_name,
+                    status,
+                    sort_position,
+                    is_dump_point
+                )
+                SELECT
+                    a.id,
+                    a.lugger_id,
+                    l.lugger_name,
+                    l.status,
+                    a.sort_position,
+                    a.is_dump_point
+                FROM waitlist_lugger_scrap_assignments AS a
+                INNER JOIN waitlist_lugger_locations AS l ON l.id = a.lugger_id
+                WHERE a.scrap_type_key = v_key;
+
+                UPDATE tmp_lugger_placement
+                SET is_usable = CASE WHEN status IN ('Available', 'Backup') THEN 1 ELSE 0 END;
+
+                SELECT COUNT(*)
+                INTO v_usable_count
+                FROM tmp_lugger_placement
+                WHERE is_usable = 1;
+
+                -- One ordered pass decides the current holder, the first usable lugger and every position, which also
+                -- keeps a temporary table from being opened twice in one statement (MySQL 5.7 refuses that).
+                SET v_current_holder_id = NULL;
+                SET v_current_holder_name = NULL;
+                SET v_current_holder_usable = 0;
+                SET v_first_usable_id = NULL;
+                SET v_first_usable_name = NULL;
+                SET v_usable_seen = 0;
+                SET v_blocked_seen = 0;
+                SET v_order_done = 0;
+
+                OPEN cur_order;
+
+                renumber_positions: LOOP
+                    FETCH cur_order INTO v_row_id, v_row_position, v_row_usable, v_row_is_dump_point, v_row_name;
+
+                    IF v_order_done = 1 THEN
+                        LEAVE renumber_positions;
+                    END IF;
+
+                    IF v_row_is_dump_point = 1 AND v_current_holder_id IS NULL THEN
+                        SET v_current_holder_id = v_row_id;
+                        SET v_current_holder_name = v_row_name;
+                        SET v_current_holder_usable = v_row_usable;
+                    END IF;
+
+                    IF v_row_usable = 1 AND v_first_usable_id IS NULL THEN
+                        SET v_first_usable_id = v_row_id;
+                        SET v_first_usable_name = v_row_name;
+                    END IF;
+
+                    IF v_row_usable = 1 THEN
+                        SET v_usable_seen = v_usable_seen + 1;
+                        SET v_arranged_position = v_usable_seen;
+                    ELSE
+                        SET v_blocked_seen = v_blocked_seen + 1;
+                        SET v_arranged_position = v_usable_count + v_blocked_seen;
+                    END IF;
+
+                    IF v_arranged_position <> v_row_position THEN
+                        UPDATE waitlist_lugger_scrap_assignments
+                        SET sort_position = v_arranged_position,
+                            updated_utc = v_now
+                        WHERE id = v_row_id;
+                    END IF;
+                END LOOP;
+
+                CLOSE cur_order;
+
+                -- The holder keeps the role while its lugger can receive material; only a blocked holder is replaced.
+                IF v_current_holder_id IS NOT NULL AND v_current_holder_usable = 1 THEN
+                    SET v_next_holder_id = v_current_holder_id;
+                    SET v_next_holder_name = v_current_holder_name;
+                ELSE
+                    SET v_next_holder_id = v_first_usable_id;
+                    SET v_next_holder_name = v_first_usable_name;
+                END IF;
+
+                SET v_prev_holder_id = v_current_holder_id;
+                SET v_prev_holder_name = v_current_holder_name;
+
+                -- Exactly one dump point: the chosen row set, every other row of the scrap type cleared.
+                UPDATE waitlist_lugger_scrap_assignments
+                SET is_dump_point = 0,
+                    updated_utc = v_now
+                WHERE scrap_type_key = v_key
+                  AND is_dump_point = 1
+                  AND (v_next_holder_id IS NULL OR id <> v_next_holder_id);
+
+                IF v_next_holder_id IS NOT NULL THEN
+                    UPDATE waitlist_lugger_scrap_assignments
+                    SET is_dump_point = 1,
+                        updated_utc = v_now
+                    WHERE id = v_next_holder_id
+                      AND is_dump_point = 0;
+                END IF;
+            END;
+
+            INSERT INTO waitlist_lugger_arrangement_changes (
+                public_id,
+                change_kind,
+                lugger_id,
+                lugger_name,
+                scrap_type,
+                scrap_type_key,
+                previous_value,
+                new_value,
+                change_reason,
+                changed_by_employee_number,
+                changed_by_employee_name,
+                changed_utc
+            ) VALUES (
+                UUID(),
+                'status_changed',
+                v_lugger_id,
+                v_lugger_name,
+                v_scrap_type,
+                v_key,
+                v_old_status,
+                v_status,
+                v_reason,
+                p_actor_employee_number,
+                p_actor_employee_name,
+                v_now
+            );
+
+            IF NOT (v_prev_holder_name <=> v_next_holder_name) THEN
+                INSERT INTO waitlist_lugger_arrangement_changes (
+                    public_id,
+                    change_kind,
+                    lugger_id,
+                    lugger_name,
+                    scrap_type,
+                    scrap_type_key,
+                    previous_value,
+                    new_value,
+                    change_reason,
+                    changed_by_employee_number,
+                    changed_by_employee_name,
+                    changed_utc
+                ) VALUES (
+                    UUID(),
+                    'dump_point_promoted',
+                    IFNULL(v_next_holder_id, v_prev_holder_id),
+                    IFNULL(v_next_holder_name, v_prev_holder_name),
+                    v_scrap_type,
+                    v_key,
+                    v_prev_holder_name,
+                    v_next_holder_name,
+                    NULL,
+                    p_actor_employee_number,
+                    p_actor_employee_name,
+                    v_now
+                );
+            END IF;
+        END LOOP;
+
+        CLOSE cur_affected_types;
+
+        -- A lugger no scrap type dumps through still records its status change, with both scrap-type columns null.
+        IF v_affected_types = 0 THEN
+            INSERT INTO waitlist_lugger_arrangement_changes (
+                public_id,
+                change_kind,
+                lugger_id,
+                lugger_name,
+                scrap_type,
+                scrap_type_key,
+                previous_value,
+                new_value,
+                change_reason,
+                changed_by_employee_number,
+                changed_by_employee_name,
+                changed_utc
+            ) VALUES (
+                UUID(),
+                'status_changed',
+                v_lugger_id,
+                v_lugger_name,
+                NULL,
+                NULL,
+                v_old_status,
+                v_status,
+                v_reason,
+                p_actor_employee_number,
+                p_actor_employee_name,
+                v_now
+            );
+        END IF;
+
+        DROP TEMPORARY TABLE IF EXISTS tmp_lugger_placement;
+        DROP TEMPORARY TABLE IF EXISTS tmp_affected_lugger_types;
+
+        COMMIT;
+
+        SELECT v_affected AS affected_rows;
+    END IF;
+END
+$$
+
+DELIMITER ;
+
+-- Stored Procedure: sp_waitlist_lugger_locations_promote
+-- Engine: MySQL 5.7
+-- Feature: 013-lugger-location-config (task T017)
+--
+-- Purpose: let a lead choose which assigned lugger a scrap type dumps through, and leave the scrap type in a
+--          complete state: one usable holder, the previous holder stepped back to `Backup`, every blocked
+--          lugger ordered after every usable one (FR-018, FR-020).
+--
+-- Contract:
+--   IN  p_lugger_public_id           CHAR(36)      the lugger the lead chose
+--       p_scrap_type_key             VARCHAR(128)  the normalised scrap type it is promoted for
+--       p_actor_employee_number      VARCHAR(32)   who promoted it
+--       p_actor_employee_name        VARCHAR(128)  the same person's name
+--
+--   OUT one row, one column: affected_rows, which is 1 when the lugger was promoted and 0 when the lugger does
+--       not exist, so a caller can tell a lost race from a success.
+--
+-- Guarantee: the chosen lugger becomes the dump point for that scrap type and is set `Available`; the previous
+--            holder returns to `Backup` unless it is the lugger being promoted (FR-018). A lugger that does not
+--            take that scrap type is refused, and so is one that is `Full` or `Do Not Use`, because a blocked
+--            lugger cannot receive material. The scrap type's pairing rows are held with `SELECT ... FOR UPDATE`
+--            for the whole transaction and re-ordered so every usable lugger comes before every blocked one,
+--            preserving each group's own order. One `dump_point_promoted` change row names both luggers, and is
+--            written only when the holder actually moved.
+--
+-- Both refusals raise before the first write, and the exit handler rolls the transaction back, so a refused
+-- promotion leaves the arrangement exactly as it was.
+--
+-- The write count is the promotion's own: the chosen pairing's `is_dump_point` is cleared with every other
+-- pairing of the scrap type and then set, so it always changes one row and never reports a stale zero.
+-- ============================================================
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_lugger_locations_promote;
+
+-- DELIMITER because this body is compound; see the note in
+-- sp_auth_temporary_credential_attempt_record/create.sql.
+DELIMITER $$
+
+CREATE PROCEDURE sp_waitlist_lugger_locations_promote(
+    IN p_lugger_public_id CHAR(36),
+    IN p_scrap_type_key VARCHAR(128),
+    IN p_actor_employee_number VARCHAR(32),
+    IN p_actor_employee_name VARCHAR(128)
+)
+BEGIN
+    DECLARE v_scrap_type_key VARCHAR(128) DEFAULT '';
+    DECLARE v_scrap_type VARCHAR(128) DEFAULT NULL;
+    DECLARE v_lugger_id BIGINT DEFAULT NULL;
+    DECLARE v_lugger_name VARCHAR(64) DEFAULT NULL;
+    DECLARE v_lugger_status VARCHAR(16) DEFAULT NULL;
+    DECLARE v_assignment_count INT DEFAULT 0;
+    DECLARE v_previous_holder_name VARCHAR(64) DEFAULT NULL;
+    DECLARE v_affected INT DEFAULT 0;
+    DECLARE v_refusal VARCHAR(255) DEFAULT '';
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    -- A temp table survives a rollback, so a stale one from an earlier refused call is cleared first.
+    DROP TEMPORARY TABLE IF EXISTS tmp_waitlist_lugger_ordering;
+
+    SET v_scrap_type_key = LOWER(TRIM(COALESCE(p_scrap_type_key, '')));
+
+    START TRANSACTION;
+
+    SELECT l.id, l.lugger_name, l.status
+    INTO v_lugger_id, v_lugger_name, v_lugger_status
+    FROM waitlist_lugger_locations l
+    WHERE l.public_id = p_lugger_public_id
+    FOR UPDATE;
+
+    -- A lugger that is not there is not an error: the row may simply have been removed by another lead.
+    IF v_lugger_id IS NOT NULL THEN
+        SELECT COUNT(*), MIN(a.scrap_type)
+        INTO v_assignment_count, v_scrap_type
+        FROM waitlist_lugger_scrap_assignments a
+        WHERE a.scrap_type_key = v_scrap_type_key
+          AND a.lugger_id = v_lugger_id;
+
+        IF v_assignment_count = 0 THEN
+            SET v_refusal = CONCAT(v_lugger_name, ' does not take ', v_scrap_type_key, ', so it cannot hold its dump point.');
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_refusal;
+        END IF;
+
+        IF v_lugger_status IN ('Full', 'Do Not Use') THEN
+            SET v_refusal = CONCAT(v_lugger_name, ' is ', v_lugger_status, ' and cannot receive material.');
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_refusal;
+        END IF;
+
+        -- Hold this scrap type's pairings for the rest of the transaction, and read the order they sit in with
+        -- the contiguous re-ordering already worked out: usable first, then blocked, each group in its own order.
+        CREATE TEMPORARY TABLE tmp_waitlist_lugger_ordering (
+            assignment_id BIGINT NOT NULL,
+            lugger_name VARCHAR(64) NOT NULL,
+            is_blocked TINYINT(1) NOT NULL,
+            old_position INT NOT NULL,
+            arranged_position INT NOT NULL,
+            PRIMARY KEY (assignment_id)
+        );
+
+        INSERT INTO tmp_waitlist_lugger_ordering (
+            assignment_id,
+            lugger_name,
+            is_blocked,
+            old_position,
+            arranged_position
+        )
+        SELECT a.id,
+               l.lugger_name,
+               IF(l.status IN ('Full', 'Do Not Use'), 1, 0),
+               a.sort_position,
+               (SELECT COUNT(*) + 1
+                FROM waitlist_lugger_scrap_assignments b
+                INNER JOIN waitlist_lugger_locations bl ON bl.id = b.lugger_id
+                WHERE b.scrap_type_key = a.scrap_type_key
+                  AND (
+                        IF(bl.status IN ('Full', 'Do Not Use'), 1, 0)
+                            < IF(l.status IN ('Full', 'Do Not Use'), 1, 0)
+                     OR (IF(bl.status IN ('Full', 'Do Not Use'), 1, 0)
+                            = IF(l.status IN ('Full', 'Do Not Use'), 1, 0)
+                         AND (b.sort_position < a.sort_position
+                              OR (b.sort_position = a.sort_position
+                                  AND (bl.lugger_name < l.lugger_name
+                                       OR (bl.lugger_name = l.lugger_name AND b.id < a.id)))))
+                  ))
+        FROM waitlist_lugger_scrap_assignments a
+        INNER JOIN waitlist_lugger_locations l ON l.id = a.lugger_id
+        WHERE a.scrap_type_key = v_scrap_type_key
+        ORDER BY a.sort_position, l.lugger_name
+        FOR UPDATE;
+
+        -- Read before anything moves: this is the holder the promotion replaces.
+        SELECT l.lugger_name
+        INTO v_previous_holder_name
+        FROM waitlist_lugger_scrap_assignments a
+        INNER JOIN waitlist_lugger_locations l ON l.id = a.lugger_id
+        WHERE a.scrap_type_key = v_scrap_type_key
+          AND a.is_dump_point = 1
+        ORDER BY a.sort_position, l.lugger_name
+        LIMIT 1;
+
+        UPDATE waitlist_lugger_locations l
+        SET l.status = 'Available',
+            l.status_reason = NULL,
+            l.updated_utc = UTC_TIMESTAMP()
+        WHERE l.id = v_lugger_id
+          AND (l.status <> 'Available' OR l.status_reason IS NOT NULL);
+
+        UPDATE waitlist_lugger_locations l
+        INNER JOIN waitlist_lugger_scrap_assignments a ON a.lugger_id = l.id
+        SET l.status = 'Backup',
+            l.status_reason = NULL,
+            l.updated_utc = UTC_TIMESTAMP()
+        WHERE a.scrap_type_key = v_scrap_type_key
+          AND a.is_dump_point = 1
+          AND l.id <> v_lugger_id
+          AND (l.status <> 'Backup' OR l.status_reason IS NOT NULL);
+
+        UPDATE waitlist_lugger_scrap_assignments a
+        INNER JOIN tmp_waitlist_lugger_ordering o ON o.assignment_id = a.id
+        SET a.sort_position = o.arranged_position,
+            a.updated_utc = UTC_TIMESTAMP()
+        WHERE a.sort_position <> o.arranged_position;
+
+        -- Exactly one holder: every pairing of the scrap type is cleared, then the chosen one is set.
+        UPDATE waitlist_lugger_scrap_assignments a
+        SET a.is_dump_point = 0,
+            a.updated_utc = UTC_TIMESTAMP()
+        WHERE a.scrap_type_key = v_scrap_type_key
+          AND a.is_dump_point = 1;
+
+        UPDATE waitlist_lugger_scrap_assignments a
+        SET a.is_dump_point = 1,
+            a.updated_utc = UTC_TIMESTAMP()
+        WHERE a.scrap_type_key = v_scrap_type_key
+          AND a.lugger_id = v_lugger_id;
+
+        SET v_affected = ROW_COUNT();
+
+        IF v_previous_holder_name IS NULL OR v_previous_holder_name <> v_lugger_name THEN
+            INSERT INTO waitlist_lugger_arrangement_changes (
+                public_id,
+                change_kind,
+                lugger_id,
+                lugger_name,
+                scrap_type,
+                scrap_type_key,
+                previous_value,
+                new_value,
+                change_reason,
+                changed_by_employee_number,
+                changed_by_employee_name,
+                changed_utc
+            )
+            VALUES (
+                UUID(),
+                'dump_point_promoted',
+                v_lugger_id,
+                v_lugger_name,
+                v_scrap_type,
+                v_scrap_type_key,
+                v_previous_holder_name,
+                v_lugger_name,
+                NULL,
+                p_actor_employee_number,
+                p_actor_employee_name,
+                UTC_TIMESTAMP()
+            );
+        END IF;
+
+        DROP TEMPORARY TABLE IF EXISTS tmp_waitlist_lugger_ordering;
+    END IF;
+
+    COMMIT;
+
+    SELECT v_affected AS affected_rows;
+END$$
+
+DELIMITER ;
+
+-- Stored Procedure: sp_waitlist_lugger_scrap_assignments_list
+-- Engine: MySQL 5.7
+-- Feature: 013-lugger-location-config (task T018)
+--
+-- Purpose: read one scrap type's luggers in the order the system tries them, each carrying the lugger's current
+--          status, so the editor can show the try order and the blocked reason without a second call.
+--
+-- Contract:
+--   IN  p_scrap_type_key VARCHAR(128) the normalised scrap type to read
+--
+--   OUT id, public_id, scrap_type, scrap_type_key, lugger_public_id, lugger_name, status, status_reason,
+--       is_dump_point, sort_position
+--
+-- Guarantee: one row per assignment of that scrap type, in `sort_position` then `lugger_name` order, with the
+--            status read live from the lugger rather than copied onto the pairing (research D2). A scrap type
+--            nobody is assigned to returns no row, which is how the caller tells "no lugger for this type" from
+--            "the read failed" (FR-006, FR-026, FR-031).
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_lugger_scrap_assignments_list;
+
+CREATE PROCEDURE sp_waitlist_lugger_scrap_assignments_list(
+    IN p_scrap_type_key VARCHAR(128)
+)
+SELECT
+    a.id,
+    a.public_id,
+    a.scrap_type,
+    a.scrap_type_key,
+    l.public_id AS lugger_public_id,
+    l.lugger_name,
+    l.status,
+    l.status_reason,
+    a.is_dump_point,
+    a.sort_position
+FROM
+    waitlist_lugger_scrap_assignments AS a
+    INNER JOIN waitlist_lugger_locations AS l ON l.id = a.lugger_id
+WHERE
+    a.scrap_type_key = LOWER(TRIM(p_scrap_type_key))
+ORDER BY
+    a.sort_position ASC,
+    l.lugger_name ASC;
+
+-- Stored Procedure: sp_waitlist_lugger_scrap_assignments_set
+-- Engine: MySQL 5.7
+-- Feature: 013-lugger-location-config (task T019)
+--
+-- Purpose: give one scrap type one lugger at one place in that scrap type's try order, or move an existing pairing,
+--          and leave the scrap type complete in the same act: contiguous positions with every usable lugger ahead
+--          of every blocked one, exactly one dump point while a usable lugger can receive, and the change recorded
+--          (FR-006, FR-010, FR-011, FR-013, FR-032).
+--
+-- Contract:
+--   IN  p_scrap_type            VARCHAR(128)  the scrap type as the lead entered it
+--   IN  p_lugger_public_id      CHAR(36)      the lugger to assign
+--   IN  p_sort_position         INT           the position in that scrap type's try order
+--   IN  p_actor_employee_number VARCHAR(32)   who assigned or reordered it
+--   IN  p_actor_employee_name   VARCHAR(128)  the same person's name, so the notice reads without a join
+--
+--   OUT affected_rows INT  1 when a pairing was written, 0 when the lugger id matches no lugger. The result set is
+--       the contract: ExecuteNonQueryAsync cannot report a count through a transaction, so the procedure answers
+--       with one column named affected_rows as its last statement.
+--
+-- Guarantee:
+--   * The key is LOWER(TRIM(p_scrap_type)) and the stored spelling is TRIM(p_scrap_type), and both are written by
+--     the same statement, so the two cannot disagree (FR-009, research D5). The inner spelling is never
+--     normalised: `5052 aluminum` and `5052  aluminum` stay two different scrap types.
+--   * `Scrap Type Required` and `No Scrap` are refused after normalising, under any letter case and any amount of
+--     surrounding space, because neither is a scrap type and neither may be assigned a lugger (FR-010). A blank
+--     entry is refused as required. Nothing is written by a refusal: the signal is raised before the transaction
+--     opens.
+--   * Any other spelling is accepted, including one the shipped list does not name, because the setup workflow
+--     accepts a scrap type it does not recognise and keeps it (FR-011).
+--   * An existing pairing is updated in place, keyed on (scrap_type_key, lugger_id), which is the unique key that
+--     makes one pairing exist once. Its spelling, its position and its updated_utc are rewritten; the rest of the
+--     row is untouched. Otherwise the pairing is inserted with a fresh public id, is_dump_point 0 until the
+--     derivation below decides, and both timestamps set to this call's clock.
+--   * A position below 1 is read as 1, so a caller that sends 0 or a negative number cannot sort a lugger ahead of
+--     the try order itself.
+--   * The scrap type's assignment rows are held with SELECT ... FOR UPDATE for the whole derivation, so two leads
+--     assigning into the same scrap type at the same moment produce one outcome rather than a half-moved order.
+--
+--   The dump point rule, applied to this scrap type's key K inside this transaction:
+--     1. read K's assignment rows joined to their luggers, ordered by sort_position then lugger_name, FOR UPDATE;
+--        the pairing this call wrote wins any tie on its own position, so the position the lead asked for is the
+--        position it ends up in;
+--     2. renumber them contiguously from 1 so every usable lugger (Available or Backup) comes before every
+--        blocked one (Full or Do Not Use), preserving each group's relative order, and update only the rows whose
+--        position actually moved. That is what makes the positions contiguous again after an assignment, and what
+--        keeps the order the order the system tries them in (FR-006, FR-013);
+--     3. keep the existing holder when its lugger is usable, otherwise give the role to the first usable lugger in
+--        the new order, otherwise leave it with nobody;
+--     4. set is_dump_point on exactly that row and clear it on every other row of K;
+--     5. when the holder changed, including when it changed to nobody, write one dump_point_promoted row naming
+--        the lugger that held it and the one that holds it now, with a null new_value when none can receive.
+--
+--   * One `assignment_added` change row is written for a new pairing, with a null previous_value and the lugger's
+--     name as new_value; one `assignment_reordered` row is written for an existing pairing, naming the position it
+--     held and the position it now holds. A `dump_point_promoted` row is added only when the role moved.
+--   * A blocked lugger may be assigned to a scrap type and is then ordered after every usable one; it simply
+--     cannot take the role. The status lives on the lugger, never on the pairing (research D2).
+--   * The change table is append only here: nothing updates or deletes a change row.
+-- ============================================================
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_lugger_scrap_assignments_set;
+
+-- DELIMITER because this body is compound; see the note in
+-- sp_auth_temporary_credential_attempt_record/create.sql.
+DELIMITER $$
+
+CREATE PROCEDURE sp_waitlist_lugger_scrap_assignments_set(
+    IN p_scrap_type VARCHAR(128),
+    IN p_lugger_public_id CHAR(36),
+    IN p_sort_position INT,
+    IN p_actor_employee_number VARCHAR(32),
+    IN p_actor_employee_name VARCHAR(128)
+)
+BEGIN
+    DECLARE v_spelling VARCHAR(128) DEFAULT '';
+    DECLARE v_key VARCHAR(128) DEFAULT '';
+    DECLARE v_position INT DEFAULT 1;
+
+    DECLARE v_lugger_id BIGINT DEFAULT NULL;
+    DECLARE v_lugger_name VARCHAR(64) DEFAULT NULL;
+    DECLARE v_assignment_id BIGINT DEFAULT NULL;
+    DECLARE v_assignment_is_new TINYINT(1) DEFAULT 0;
+    DECLARE v_existing_id BIGINT DEFAULT NULL;
+    DECLARE v_existing_position INT DEFAULT NULL;
+    DECLARE v_assignment_arranged_position INT DEFAULT NULL;
+    DECLARE v_affected INT DEFAULT 0;
+
+    DECLARE v_row_total INT DEFAULT 0;
+    DECLARE v_usable_total INT DEFAULT 0;
+    DECLARE v_row_index INT DEFAULT 0;
+    DECLARE v_usable_seen INT DEFAULT 0;
+    DECLARE v_blocked_seen INT DEFAULT 0;
+    DECLARE v_arranged_position INT DEFAULT 0;
+    DECLARE v_row_id BIGINT DEFAULT NULL;
+    DECLARE v_row_name VARCHAR(64) DEFAULT '';
+    DECLARE v_row_status VARCHAR(16) DEFAULT '';
+    DECLARE v_row_position INT DEFAULT 0;
+    DECLARE v_row_is_dump_point TINYINT(1) DEFAULT 0;
+    DECLARE v_row_usable TINYINT(1) DEFAULT 0;
+
+    DECLARE v_holder_id BIGINT DEFAULT NULL;
+    DECLARE v_holder_name VARCHAR(64) DEFAULT NULL;
+    DECLARE v_holder_usable TINYINT(1) DEFAULT 0;
+    DECLARE v_first_usable_id BIGINT DEFAULT NULL;
+    DECLARE v_first_usable_name VARCHAR(64) DEFAULT NULL;
+    DECLARE v_target_id BIGINT DEFAULT NULL;
+    DECLARE v_target_name VARCHAR(64) DEFAULT NULL;
+    DECLARE v_change_lugger_name VARCHAR(64) DEFAULT NULL;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    SET v_spelling = TRIM(IFNULL(p_scrap_type, ''));
+    SET v_key = LOWER(v_spelling);
+
+    IF v_key = '' OR v_key = 'scrap type required' THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Scrap Type Required is not a scrap type a lugger can be assigned to.';
+    END IF;
+
+    IF v_key = 'no scrap' THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'No Scrap is not a scrap type a lugger can be assigned to.';
+    END IF;
+
+    IF p_sort_position IS NULL OR p_sort_position < 1 THEN
+        SET v_position = 1;
+    ELSE
+        SET v_position = p_sort_position;
+    END IF;
+
+    -- One session-scoped staging table, created before the transaction opens so its DDL never sits inside it. It
+    -- holds this scrap type's new order, because the renumbering cannot be applied while the rows are still being
+    -- read in sort_position order.
+    DROP TEMPORARY TABLE IF EXISTS tmp_sp_lugger_scrap_assignments_set_order;
+    CREATE TEMPORARY TABLE tmp_sp_lugger_scrap_assignments_set_order (
+        seq INT NOT NULL,
+        assignment_id BIGINT NOT NULL,
+        arranged_position INT NOT NULL,
+        PRIMARY KEY (seq)
+    ) ENGINE = InnoDB;
+
+    START TRANSACTION;
+
+    SELECT id, lugger_name
+      INTO v_lugger_id, v_lugger_name
+      FROM waitlist_lugger_locations
+     WHERE public_id = p_lugger_public_id
+     FOR UPDATE;
+
+    IF v_lugger_id IS NOT NULL THEN
+        SELECT id, sort_position
+          INTO v_existing_id, v_existing_position
+          FROM waitlist_lugger_scrap_assignments
+         WHERE scrap_type_key = v_key
+           AND lugger_id = v_lugger_id
+         FOR UPDATE;
+
+        IF v_existing_id IS NOT NULL THEN
+            UPDATE waitlist_lugger_scrap_assignments
+               SET scrap_type = v_spelling,
+                   scrap_type_key = v_key,
+                   sort_position = v_position,
+                   updated_utc = UTC_TIMESTAMP()
+             WHERE id = v_existing_id;
+
+            SET v_affected = ROW_COUNT();
+            SET v_assignment_id = v_existing_id;
+            SET v_assignment_arranged_position = v_position;
+        ELSE
+            INSERT INTO waitlist_lugger_scrap_assignments (
+                public_id,
+                lugger_id,
+                scrap_type,
+                scrap_type_key,
+                is_dump_point,
+                sort_position,
+                created_utc,
+                updated_utc
+            )
+            VALUES (
+                UUID(),
+                v_lugger_id,
+                v_spelling,
+                v_key,
+                0,
+                v_position,
+                UTC_TIMESTAMP(),
+                UTC_TIMESTAMP()
+            );
+
+            SET v_affected = ROW_COUNT();
+            SET v_assignment_id = LAST_INSERT_ID();
+            SET v_assignment_is_new = 1;
+        END IF;
+
+        -- Step 1: hold every assignment row of this scrap type for the whole derivation.
+        SELECT COUNT(*)
+          INTO v_row_total
+          FROM waitlist_lugger_scrap_assignments AS a
+          JOIN waitlist_lugger_locations AS l ON l.id = a.lugger_id
+         WHERE a.scrap_type_key = v_key
+         FOR UPDATE;
+
+        SELECT COUNT(*)
+          INTO v_usable_total
+          FROM waitlist_lugger_scrap_assignments AS a
+          JOIN waitlist_lugger_locations AS l ON l.id = a.lugger_id
+         WHERE a.scrap_type_key = v_key
+           AND l.status IN ('Available', 'Backup');
+
+        DELETE FROM tmp_sp_lugger_scrap_assignments_set_order;
+
+        SET v_row_index = 0;
+        SET v_usable_seen = 0;
+        SET v_blocked_seen = 0;
+        SET v_holder_id = NULL;
+        SET v_holder_name = NULL;
+        SET v_holder_usable = 0;
+        SET v_first_usable_id = NULL;
+        SET v_first_usable_name = NULL;
+
+        -- Step 2, first half: read the rows in their current order and compute the new one into the staging table.
+        WHILE v_row_index < v_row_total DO
+            SELECT a.id, a.is_dump_point, a.sort_position, l.lugger_name, l.status
+              INTO v_row_id, v_row_is_dump_point, v_row_position, v_row_name, v_row_status
+              FROM waitlist_lugger_scrap_assignments AS a
+              JOIN waitlist_lugger_locations AS l ON l.id = a.lugger_id
+             WHERE a.scrap_type_key = v_key
+             ORDER BY a.sort_position, IF(a.id = v_assignment_id, 0, 1), l.lugger_name
+             LIMIT v_row_index, 1
+             FOR UPDATE;
+
+            SET v_row_usable = IF(v_row_status IN ('Available', 'Backup'), 1, 0);
+
+            IF v_row_usable = 1 THEN
+                SET v_arranged_position = v_usable_seen + 1;
+                SET v_usable_seen = v_usable_seen + 1;
+            ELSE
+                SET v_arranged_position = v_usable_total + v_blocked_seen + 1;
+                SET v_blocked_seen = v_blocked_seen + 1;
+            END IF;
+
+            INSERT INTO tmp_sp_lugger_scrap_assignments_set_order (seq, assignment_id, arranged_position)
+            VALUES (v_row_index + 1, v_row_id, v_arranged_position);
+
+            IF v_row_id = v_assignment_id THEN
+                SET v_assignment_arranged_position = v_arranged_position;
+            END IF;
+
+            IF v_row_is_dump_point = 1 THEN
+                SET v_holder_id = v_row_id;
+                SET v_holder_name = v_row_name;
+                SET v_holder_usable = v_row_usable;
+            END IF;
+
+            IF v_row_usable = 1 AND v_first_usable_id IS NULL THEN
+                SET v_first_usable_id = v_row_id;
+                SET v_first_usable_name = v_row_name;
+            END IF;
+
+            SET v_row_index = v_row_index + 1;
+        END WHILE;
+
+        -- Step 2, second half: only the rows whose order actually changed are written.
+        UPDATE waitlist_lugger_scrap_assignments AS a
+          JOIN tmp_sp_lugger_scrap_assignments_set_order AS t ON t.assignment_id = a.id
+           SET a.sort_position = t.arranged_position,
+               a.updated_utc = UTC_TIMESTAMP()
+         WHERE a.scrap_type_key = v_key
+           AND a.sort_position <> t.arranged_position;
+
+        -- Step 3: the current holder keeps the role while its lugger is usable; otherwise the first usable lugger
+        -- in the new order takes it; otherwise nobody does.
+        IF v_holder_id IS NOT NULL AND v_holder_usable = 1 THEN
+            SET v_target_id = v_holder_id;
+            SET v_target_name = v_holder_name;
+        ELSE
+            SET v_target_id = v_first_usable_id;
+            SET v_target_name = v_first_usable_name;
+        END IF;
+
+        -- Steps 4 and 5.
+        IF NOT (v_target_id <=> v_holder_id) THEN
+            UPDATE waitlist_lugger_scrap_assignments
+               SET is_dump_point = IF(id = v_target_id, 1, 0)
+             WHERE scrap_type_key = v_key;
+
+            SET v_change_lugger_name = IFNULL(v_target_name, IFNULL(v_holder_name, v_lugger_name));
+
+            INSERT INTO waitlist_lugger_arrangement_changes (
+                public_id,
+                change_kind,
+                lugger_id,
+                lugger_name,
+                scrap_type,
+                scrap_type_key,
+                previous_value,
+                new_value,
+                change_reason,
+                changed_by_employee_number,
+                changed_by_employee_name,
+                changed_utc
+            )
+            VALUES (
+                UUID(),
+                'dump_point_promoted',
+                v_target_id,
+                v_change_lugger_name,
+                v_spelling,
+                v_key,
+                v_holder_name,
+                v_target_name,
+                NULL,
+                p_actor_employee_number,
+                p_actor_employee_name,
+                UTC_TIMESTAMP()
+            );
+        END IF;
+
+        IF v_assignment_is_new = 1 THEN
+            INSERT INTO waitlist_lugger_arrangement_changes (
+                public_id,
+                change_kind,
+                lugger_id,
+                lugger_name,
+                scrap_type,
+                scrap_type_key,
+                previous_value,
+                new_value,
+                change_reason,
+                changed_by_employee_number,
+                changed_by_employee_name,
+                changed_utc
+            )
+            VALUES (
+                UUID(),
+                'assignment_added',
+                v_lugger_id,
+                v_lugger_name,
+                v_spelling,
+                v_key,
+                NULL,
+                v_lugger_name,
+                NULL,
+                p_actor_employee_number,
+                p_actor_employee_name,
+                UTC_TIMESTAMP()
+            );
+        ELSE
+            INSERT INTO waitlist_lugger_arrangement_changes (
+                public_id,
+                change_kind,
+                lugger_id,
+                lugger_name,
+                scrap_type,
+                scrap_type_key,
+                previous_value,
+                new_value,
+                change_reason,
+                changed_by_employee_number,
+                changed_by_employee_name,
+                changed_utc
+            )
+            VALUES (
+                UUID(),
+                'assignment_reordered',
+                v_lugger_id,
+                v_lugger_name,
+                v_spelling,
+                v_key,
+                CAST(v_existing_position AS CHAR),
+                CAST(IFNULL(v_assignment_arranged_position, v_position) AS CHAR),
+                NULL,
+                p_actor_employee_number,
+                p_actor_employee_name,
+                UTC_TIMESTAMP()
+            );
+        END IF;
+    END IF;
+
+    COMMIT;
+
+    DROP TEMPORARY TABLE IF EXISTS tmp_sp_lugger_scrap_assignments_set_order;
+
+    SELECT v_affected AS affected_rows;
+END$$
+
+DELIMITER ;
+
+-- Stored Procedure: sp_waitlist_lugger_scrap_assignments_delete
+-- Engine: MySQL 5.7
+-- Feature: 013-lugger-location-config (task T020)
+--
+-- Purpose: remove one lugger from one scrap type's try order and leave that scrap type complete, so a lead
+--          unassigns a lugger without reconciling the dump point by hand (FR-005, FR-013).
+--
+-- Contract:
+--   IN  p_scrap_type_key           VARCHAR(128) the normalised scrap type, LOWER(TRIM(scrap_type))
+--   IN  p_lugger_public_id         CHAR(36)     the lugger to unassign
+--   IN  p_actor_employee_number    VARCHAR(32)  who unassigned it
+--   IN  p_actor_employee_name      VARCHAR(128) the same person's name
+--
+--   OUT affected_rows              1 when the pairing existed and was removed, 0 when there was no such pairing.
+--
+-- Guarantee:
+--   One transaction. The pairing's scrap type and the lugger's name are read before the row is deleted, so the change
+--   rows can name both after the row is gone. The delete then runs, and the scrap type is re-derived only when it
+--   still has pairings:
+--
+--     1. its remaining assignment rows are held with SELECT ... FOR UPDATE for the rest of the transaction;
+--     2. positions are renumbered contiguously 1..n so every usable lugger (Available or Backup) sorts before every
+--        blocked one (Full or Do Not Use), each group keeping its relative order, and only rows whose position
+--        changed are updated (FR-017);
+--     3. the holder is the remaining is_dump_point row when its lugger is usable, otherwise the first usable lugger in
+--        the new order, otherwise nobody (FR-013, FR-020).
+--
+--   When the removed pairing held the role and luggers remain, the first usable lugger remaining in the order takes
+--   it and a dump_point_promoted row records the move, carrying the removed lugger's name as previous_value and null
+--   as new_value when nothing can receive. One assignment_removed row always records the removal (previous_value = the
+--   lugger's name, new_value null). When this was the last pairing for the scrap type, no re-derivation is possible:
+--   the scrap type simply holds no assignment, so no role is left to move and its cards draw no lugger cell
+--   (FR-026). Every row carries the actor and one shared UTC timestamp (FR-032).
+--
+--   The last statement is the affected_rows result set. ExecuteNonQueryAsync cannot report a count through a
+--   transaction, so the result set is the contract, not a convenience.
+-- ============================================================
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_lugger_scrap_assignments_delete;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_waitlist_lugger_scrap_assignments_delete(
+    IN p_scrap_type_key VARCHAR(128),
+    IN p_lugger_public_id CHAR(36),
+    IN p_actor_employee_number VARCHAR(32),
+    IN p_actor_employee_name VARCHAR(128)
+)
+BEGIN
+    DECLARE v_key VARCHAR(128) DEFAULT NULL;
+    DECLARE v_found INT DEFAULT 0;
+    DECLARE v_affected INT DEFAULT 0;
+    DECLARE v_now DATETIME DEFAULT NULL;
+    DECLARE v_assignment_id BIGINT DEFAULT NULL;
+    DECLARE v_lugger_id BIGINT DEFAULT NULL;
+    DECLARE v_lugger_name VARCHAR(64) DEFAULT NULL;
+    DECLARE v_scrap_type VARCHAR(128) DEFAULT NULL;
+    DECLARE v_was_dump_point TINYINT DEFAULT 0;
+
+    DECLARE v_row_count INT DEFAULT 0;
+    DECLARE v_usable_count INT DEFAULT 0;
+    DECLARE v_usable_seen INT DEFAULT 0;
+    DECLARE v_blocked_seen INT DEFAULT 0;
+    DECLARE v_arranged_position INT DEFAULT 0;
+    DECLARE v_row_id BIGINT DEFAULT NULL;
+    DECLARE v_row_position INT DEFAULT 0;
+    DECLARE v_row_usable TINYINT DEFAULT 0;
+    DECLARE v_row_is_dump_point TINYINT DEFAULT 0;
+    DECLARE v_row_name VARCHAR(64) DEFAULT NULL;
+
+    DECLARE v_current_holder_id BIGINT DEFAULT NULL;
+    DECLARE v_current_holder_name VARCHAR(64) DEFAULT NULL;
+    DECLARE v_current_holder_usable TINYINT DEFAULT 0;
+    DECLARE v_first_usable_id BIGINT DEFAULT NULL;
+    DECLARE v_first_usable_name VARCHAR(64) DEFAULT NULL;
+    DECLARE v_next_holder_id BIGINT DEFAULT NULL;
+    DECLARE v_next_holder_name VARCHAR(64) DEFAULT NULL;
+
+    DECLARE v_done TINYINT DEFAULT 0;
+
+    DECLARE cur_order CURSOR FOR
+        SELECT t.assignment_id, t.sort_position, t.is_usable, t.is_dump_point, t.lugger_name
+        FROM tmp_lugger_placement AS t
+        ORDER BY t.sort_position ASC, t.lugger_name ASC;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_done = 1;
+
+    SET v_key = LOWER(TRIM(IFNULL(p_scrap_type_key, '')));
+
+    START TRANSACTION;
+
+    SET v_now = UTC_TIMESTAMP();
+
+    SELECT COUNT(*)
+    INTO v_found
+    FROM waitlist_lugger_scrap_assignments AS a
+    INNER JOIN waitlist_lugger_locations AS l ON l.id = a.lugger_id
+    WHERE a.scrap_type_key = v_key
+      AND l.public_id = p_lugger_public_id
+    FOR UPDATE;
+
+    IF v_found = 0 THEN
+        ROLLBACK;
+
+        SELECT 0 AS affected_rows;
+    ELSE
+        SELECT a.id, a.lugger_id, a.scrap_type, a.is_dump_point, l.lugger_name
+        INTO v_assignment_id, v_lugger_id, v_scrap_type, v_was_dump_point, v_lugger_name
+        FROM waitlist_lugger_scrap_assignments AS a
+        INNER JOIN waitlist_lugger_locations AS l ON l.id = a.lugger_id
+        WHERE a.scrap_type_key = v_key
+          AND l.public_id = p_lugger_public_id;
+
+        DELETE FROM waitlist_lugger_scrap_assignments
+        WHERE id = v_assignment_id;
+
+        SET v_affected = ROW_COUNT();
+
+        SELECT COUNT(*)
+        INTO v_row_count
+        FROM waitlist_lugger_scrap_assignments
+        WHERE scrap_type_key = v_key;
+
+        -- The role can only move when this pairing held it and the scrap type still has a lugger to give it to.
+        IF v_row_count > 0 THEN
+            DROP TEMPORARY TABLE IF EXISTS tmp_lugger_placement;
+
+            CREATE TEMPORARY TABLE tmp_lugger_placement (
+                assignment_id BIGINT NOT NULL,
+                lugger_id BIGINT NOT NULL,
+                lugger_name VARCHAR(64) NOT NULL,
+                status VARCHAR(16) NOT NULL,
+                sort_position INT NOT NULL,
+                is_dump_point TINYINT(1) NOT NULL,
+                is_usable TINYINT(1) NOT NULL DEFAULT 0,
+                PRIMARY KEY (assignment_id)
+            );
+
+            -- The locks are taken before a single row is read for the decision, for the whole transaction.
+            SELECT COUNT(*)
+            INTO v_row_count
+            FROM waitlist_lugger_scrap_assignments AS a
+            INNER JOIN waitlist_lugger_locations AS l ON l.id = a.lugger_id
+            WHERE a.scrap_type_key = v_key
+            FOR UPDATE;
+
+            INSERT INTO tmp_lugger_placement (
+                assignment_id,
+                lugger_id,
+                lugger_name,
+                status,
+                sort_position,
+                is_dump_point
+            )
+            SELECT
+                a.id,
+                a.lugger_id,
+                l.lugger_name,
+                l.status,
+                a.sort_position,
+                a.is_dump_point
+            FROM waitlist_lugger_scrap_assignments AS a
+            INNER JOIN waitlist_lugger_locations AS l ON l.id = a.lugger_id
+            WHERE a.scrap_type_key = v_key;
+
+            UPDATE tmp_lugger_placement
+            SET is_usable = CASE WHEN status IN ('Available', 'Backup') THEN 1 ELSE 0 END;
+
+            SELECT COUNT(*)
+            INTO v_usable_count
+            FROM tmp_lugger_placement
+            WHERE is_usable = 1;
+
+            -- One ordered pass decides the remaining holder, the first usable lugger and every position, which also
+            -- keeps a temporary table from being opened twice in one statement (MySQL 5.7 refuses that).
+            SET v_current_holder_id = NULL;
+            SET v_current_holder_name = NULL;
+            SET v_current_holder_usable = 0;
+            SET v_first_usable_id = NULL;
+            SET v_first_usable_name = NULL;
+            SET v_usable_seen = 0;
+            SET v_blocked_seen = 0;
+            SET v_done = 0;
+
+            OPEN cur_order;
+
+            renumber_positions: LOOP
+                FETCH cur_order INTO v_row_id, v_row_position, v_row_usable, v_row_is_dump_point, v_row_name;
+
+                IF v_done = 1 THEN
+                    LEAVE renumber_positions;
+                END IF;
+
+                IF v_row_is_dump_point = 1 AND v_current_holder_id IS NULL THEN
+                    SET v_current_holder_id = v_row_id;
+                    SET v_current_holder_name = v_row_name;
+                    SET v_current_holder_usable = v_row_usable;
+                END IF;
+
+                IF v_row_usable = 1 AND v_first_usable_id IS NULL THEN
+                    SET v_first_usable_id = v_row_id;
+                    SET v_first_usable_name = v_row_name;
+                END IF;
+
+                IF v_row_usable = 1 THEN
+                    SET v_usable_seen = v_usable_seen + 1;
+                    SET v_arranged_position = v_usable_seen;
+                ELSE
+                    SET v_blocked_seen = v_blocked_seen + 1;
+                    SET v_arranged_position = v_usable_count + v_blocked_seen;
+                END IF;
+
+                IF v_arranged_position <> v_row_position THEN
+                    UPDATE waitlist_lugger_scrap_assignments
+                    SET sort_position = v_arranged_position,
+                        updated_utc = v_now
+                    WHERE id = v_row_id;
+                END IF;
+            END LOOP;
+
+            CLOSE cur_order;
+
+            IF v_current_holder_id IS NOT NULL AND v_current_holder_usable = 1 THEN
+                SET v_next_holder_id = v_current_holder_id;
+                SET v_next_holder_name = v_current_holder_name;
+            ELSE
+                SET v_next_holder_id = v_first_usable_id;
+                SET v_next_holder_name = v_first_usable_name;
+            END IF;
+
+            UPDATE waitlist_lugger_scrap_assignments
+            SET is_dump_point = 0,
+                updated_utc = v_now
+            WHERE scrap_type_key = v_key
+              AND is_dump_point = 1
+              AND (v_next_holder_id IS NULL OR id <> v_next_holder_id);
+
+            IF v_next_holder_id IS NOT NULL THEN
+                UPDATE waitlist_lugger_scrap_assignments
+                SET is_dump_point = 1,
+                    updated_utc = v_now
+                WHERE id = v_next_holder_id
+                  AND is_dump_point = 0;
+            END IF;
+
+            DROP TEMPORARY TABLE IF EXISTS tmp_lugger_placement;
+        END IF;
+
+        INSERT INTO waitlist_lugger_arrangement_changes (
+            public_id,
+            change_kind,
+            lugger_id,
+            lugger_name,
+            scrap_type,
+            scrap_type_key,
+            previous_value,
+            new_value,
+            change_reason,
+            changed_by_employee_number,
+            changed_by_employee_name,
+            changed_utc
+        ) VALUES (
+            UUID(),
+            'assignment_removed',
+            v_lugger_id,
+            v_lugger_name,
+            v_scrap_type,
+            v_key,
+            v_lugger_name,
+            NULL,
+            NULL,
+            p_actor_employee_number,
+            p_actor_employee_name,
+            v_now
+        );
+
+        IF v_was_dump_point = 1 AND v_row_count > 0 THEN
+            INSERT INTO waitlist_lugger_arrangement_changes (
+                public_id,
+                change_kind,
+                lugger_id,
+                lugger_name,
+                scrap_type,
+                scrap_type_key,
+                previous_value,
+                new_value,
+                change_reason,
+                changed_by_employee_number,
+                changed_by_employee_name,
+                changed_utc
+            ) VALUES (
+                UUID(),
+                'dump_point_promoted',
+                IFNULL(v_next_holder_id, v_lugger_id),
+                IFNULL(v_next_holder_name, v_lugger_name),
+                v_scrap_type,
+                v_key,
+                v_lugger_name,
+                v_next_holder_name,
+                NULL,
+                p_actor_employee_number,
+                p_actor_employee_name,
+                v_now
+            );
+        END IF;
+
+        COMMIT;
+
+        SELECT v_affected AS affected_rows;
+    END IF;
+END
+$$
+
+DELIMITER ;
+
+-- Stored Procedure: sp_waitlist_lugger_arrangement_list
+-- Engine: MySQL 5.7
+-- Feature: 013-lugger-location-config (task T021)
+--
+-- Purpose: the one read behind the arrangement summary, the arrangement editor and the card path, so a list
+--          load costs one call for the whole arrangement rather than one call per lugger (FR-030, FR-031,
+--          research D1).
+--
+-- Contract:
+--   IN  none
+--
+--   OUT zero or more rows, ordered by lugger_display_position ascending, then assignment_sort_position
+--       ascending, then lugger_name ascending, in exactly this column order:
+--         lugger_public_id, lugger_name, status, status_reason, lugger_display_position,
+--         scrap_type, scrap_type_key, assignment_public_id, is_dump_point, assignment_sort_position
+--
+-- Guarantee: one row per lugger and assignment pairing, and a lugger that takes no scrap type appears once with
+--            `scrap_type`, `scrap_type_key`, `assignment_public_id`, `is_dump_point` and
+--            `assignment_sort_position` all null, which is what the editor draws its empty lugger cell from
+--            (FR-026). The LEFT JOIN is what makes that single row possible: an inner join would silently drop
+--            every lugger with no assignment, so the summary would lose a lugger the lead had just added.
+--
+-- The read is not a transaction. It takes no locks and writes nothing, so it can never be the call that blocks
+-- a lead mid-edit.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_lugger_arrangement_list;
+
+CREATE PROCEDURE sp_waitlist_lugger_arrangement_list()
+SELECT l.public_id AS lugger_public_id,
+       l.lugger_name AS lugger_name,
+       l.status AS status,
+       l.status_reason AS status_reason,
+       l.display_position AS lugger_display_position,
+       a.scrap_type AS scrap_type,
+       a.scrap_type_key AS scrap_type_key,
+       a.public_id AS assignment_public_id,
+       a.is_dump_point AS is_dump_point,
+       a.sort_position AS assignment_sort_position
+FROM waitlist_lugger_locations l
+LEFT JOIN waitlist_lugger_scrap_assignments a ON a.lugger_id = l.id
+ORDER BY l.display_position ASC,
+         a.sort_position ASC,
+         l.lugger_name ASC;
+
+-- Stored Procedure: sp_waitlist_lugger_arrangement_changes_list
+-- Engine: MySQL 5.7
+-- Feature: 013-lugger-location-config (task T022)
+--
+-- Purpose: hand the caller the arrangement changes it has not seen yet, and hand it its starting watermark in
+--          the same shape, so a change made before the list opened is never replayed as though it had just
+--          happened (FR-033, FR-037).
+--
+-- Contract:
+--   IN  p_after_id BIGINT  the highest change id the caller has already seen, or NULL to take a watermark
+--
+--   OUT id, public_id, change_kind, lugger_name, scrap_type, previous_value, new_value, change_reason,
+--       changed_by_employee_name, changed_utc
+--
+-- Guarantee: with a value in p_after_id, only rows whose `id` is greater are returned, in `id` order, so the
+--            caller's cursor advances and nothing is skipped or replayed. With a NULL p_after_id, exactly one
+--            row is returned whose `id` is the current highest change id (0 when no change has been recorded)
+--            and whose every other column is NULL. That row is the watermark and nothing else: it is never a
+--            change, so a caller cannot mistake it for one.
+--
+-- The watermark is read from the same table the poll reads, under one statement, so the watermark a caller takes
+-- is a value that already exists on disk rather than a guess between two reads.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_lugger_arrangement_changes_list;
+
+-- DELIMITER because this body is compound; see the note in
+-- sp_auth_temporary_credential_attempt_record/create.sql.
+DELIMITER $$
+
+CREATE PROCEDURE sp_waitlist_lugger_arrangement_changes_list(
+    IN p_after_id BIGINT
+)
+BEGIN
+    IF p_after_id IS NULL THEN
+        SELECT
+            COALESCE(MAX(c.id), 0) AS id,
+            NULL AS public_id,
+            NULL AS change_kind,
+            NULL AS lugger_name,
+            NULL AS scrap_type,
+            NULL AS previous_value,
+            NULL AS new_value,
+            NULL AS change_reason,
+            NULL AS changed_by_employee_name,
+            NULL AS changed_utc
+        FROM
+            waitlist_lugger_arrangement_changes AS c;
+    ELSE
+        SELECT
+            c.id,
+            c.public_id,
+            c.change_kind,
+            c.lugger_name,
+            c.scrap_type,
+            c.previous_value,
+            c.new_value,
+            c.change_reason,
+            c.changed_by_employee_name,
+            c.changed_utc
+        FROM
+            waitlist_lugger_arrangement_changes AS c
+        WHERE
+            c.id > p_after_id
+        ORDER BY
+            c.id ASC;
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- Stored Procedure: sp_waitlist_lugger_locations_position_set
+-- Engine: MySQL 5.7
+-- Feature: 013-lugger-location-config (display-order maintenance)
+--
+-- Purpose: move one lugger to a position in the display order and renumber the rest behind it, so a lead can
+--          arrange the cards by dragging them instead of stepping a lugger up or down one place at a time
+--          (FR-001, FR-003).
+--
+-- Contract:
+--   IN  p_lugger_public_id        CHAR(36)     the lugger to move
+--   IN  p_display_position        INT          1-based position it should hold
+--   IN  p_actor_employee_number   VARCHAR(32)  who moved it
+--   IN  p_actor_employee_name     VARCHAR(128) the same person's name
+--
+--   OUT affected_rows             0 when the public id matches no lugger, 1 when it does.
+--
+-- Guarantee: the requested position is clamped to the range the arrangement actually holds, so a move past the
+--            last card lands on the last place rather than leaving a gap. The whole order is renumbered
+--            contiguously from 1 in one transaction, so two luggers can never share a position and no hole is
+--            left behind a move. A move that asks for the place the lugger already holds changes nothing and
+--            records nothing. Any real move writes one `lugger_reordered` change row naming the old and the new
+--            position, which is what keeps the audit whole (FR-032); the row carries no scrap type, because a
+--            display position belongs to the lugger rather than to a pairing.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_waitlist_lugger_locations_position_set;
+
+-- DELIMITER because this body is compound; see the note in
+-- sp_auth_temporary_credential_attempt_record/create.sql.
+DELIMITER $$
+
+CREATE PROCEDURE sp_waitlist_lugger_locations_position_set(
+    IN p_lugger_public_id CHAR(36),
+    IN p_display_position INT,
+    IN p_actor_employee_number VARCHAR(32),
+    IN p_actor_employee_name VARCHAR(128)
+)
+BEGIN
+    DECLARE v_lugger_id BIGINT DEFAULT NULL;
+    DECLARE v_lugger_name VARCHAR(64) DEFAULT NULL;
+    DECLARE v_old_position INT DEFAULT 0;
+    DECLARE v_arranged_position INT DEFAULT 0;
+    DECLARE v_lugger_count INT DEFAULT 0;
+    DECLARE v_now_utc DATETIME DEFAULT NULL;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        DROP TEMPORARY TABLE IF EXISTS tmp_lugger_placement;
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    START TRANSACTION;
+
+    SET v_now_utc = UTC_TIMESTAMP();
+
+    SELECT
+        l.id,
+        l.lugger_name,
+        l.display_position
+    INTO v_lugger_id,
+    v_lugger_name,
+    v_old_position
+    FROM
+        waitlist_lugger_locations AS l
+    WHERE
+        l.public_id = TRIM(p_lugger_public_id)
+    FOR UPDATE;
+
+    IF v_lugger_id IS NULL THEN
+        COMMIT;
+
+        SELECT 0 AS affected_rows;
+    ELSE
+        SELECT
+            COUNT(*)
+        INTO v_lugger_count
+        FROM
+            waitlist_lugger_locations;
+
+        -- The requested place, clamped to the arrangement that exists, so a drag past either end is still a move
+        -- to the end rather than a refused one.
+        SET v_arranged_position = GREATEST(1, LEAST(COALESCE(p_display_position, 1), v_lugger_count));
+
+        IF v_arranged_position = v_old_position THEN
+            COMMIT;
+
+            SELECT 1 AS affected_rows;
+        ELSE
+            DROP TEMPORARY TABLE IF EXISTS tmp_lugger_placement;
+
+            CREATE TEMPORARY TABLE tmp_lugger_placement (
+                lugger_id BIGINT NOT NULL,
+                arranged_position INT NOT NULL,
+                PRIMARY KEY (lugger_id)
+            );
+
+            -- Every other lugger in its current order, numbered from 1; then the place the moved lugger takes is
+            -- opened by shifting the rows at or after it down by one.
+            SET @v_sequence := 0;
+
+            INSERT INTO tmp_lugger_placement (
+                lugger_id,
+                arranged_position
+            )
+            SELECT
+                l.id,
+                (@v_sequence := @v_sequence + 1)
+            FROM
+                waitlist_lugger_locations AS l
+            WHERE
+                l.id <> v_lugger_id
+            ORDER BY
+                l.display_position ASC,
+                l.lugger_name ASC;
+
+            UPDATE tmp_lugger_placement
+            SET
+                arranged_position = arranged_position + 1
+            WHERE
+                arranged_position >= v_arranged_position;
+
+            INSERT INTO tmp_lugger_placement (
+                lugger_id,
+                arranged_position
+            )
+            VALUES (
+                v_lugger_id,
+                v_arranged_position
+            );
+
+            UPDATE waitlist_lugger_locations AS l
+            JOIN tmp_lugger_placement AS o ON o.lugger_id = l.id
+            SET
+                l.display_position = o.arranged_position,
+                l.updated_utc = v_now_utc
+            WHERE
+                l.display_position <> o.arranged_position;
+
+            INSERT INTO waitlist_lugger_arrangement_changes (
+                public_id,
+                change_kind,
+                lugger_id,
+                lugger_name,
+                scrap_type,
+                scrap_type_key,
+                previous_value,
+                new_value,
+                change_reason,
+                changed_by_employee_number,
+                changed_by_employee_name,
+                changed_utc
+            )
+            VALUES (
+                UUID(),
+                'lugger_reordered',
+                v_lugger_id,
+                v_lugger_name,
+                NULL,
+                NULL,
+                CAST(v_old_position AS CHAR),
+                CAST(v_arranged_position AS CHAR),
+                NULL,
+                TRIM(p_actor_employee_number),
+                TRIM(p_actor_employee_name),
+                v_now_utc
+            );
+
+            DROP TEMPORARY TABLE IF EXISTS tmp_lugger_placement;
+
+            COMMIT;
+
+            SELECT 1 AS affected_rows;
+        END IF;
+    END IF;
+END$$
+
+DELIMITER ;

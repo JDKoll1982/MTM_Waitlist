@@ -19,14 +19,33 @@
 
         <StackPanel Grid.Row="0" Style="{StaticResource SetupPageHeaderStyle}">
             <TextBlock x:Uid="Setup_WorkOrder_EnterTitle" Style="{StaticResource SetupPageTitleStyle}" Text="Start Setup" />
-            <TextBox
-                AutomationProperties.AutomationId="SetupWorkOrderPage_WorkOrderInput"
-                x:Name="WorkOrderTextBox"
-                x:Uid="Setup_WorkOrder_Input"
-                Header="Work Order"
-                Text="{x:Bind ViewModel.WorkOrderInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                LostFocus="OnWorkOrderTextBoxLostFocus"
-                PlaceholderText="Enter work order (for example 76951, 076951, or WO-076951)" shared:TooltipBehavior.ResourceKey="Setup_WorkOrderTextBox_Tooltip" shared:TooltipBehavior.AssociatedFiles="Module_Setup/Views/SetupWorkOrderPage.xaml|Module_Setup/Views/SetupWorkOrderPage.xaml.cs|Module_Setup/ViewModels/SetupWorkOrderViewModel.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs|Module_Core/Helpers/ResourceExtensions.cs" shared:TooltipBehavior.FallbackText="Enter work order (for example 76951, 076951, or WO-076951). It is formatted as WO-###### before the lookup runs."/>
+            <Grid ColumnSpacing="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox
+                    AutomationProperties.AutomationId="SetupWorkOrderPage_WorkOrderInput"
+                    x:Name="WorkOrderTextBox"
+                    x:Uid="Setup_WorkOrder_Input"
+                    Header="Work Order"
+                    Text="{x:Bind ViewModel.WorkOrderInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    LostFocus="OnWorkOrderTextBoxLostFocus"
+                    PlaceholderText="Enter work order (for example 76951, 076951, or WO-076951)" shared:TooltipBehavior.ResourceKey="Setup_WorkOrderTextBox_Tooltip" shared:TooltipBehavior.AssociatedFiles="Module_Setup/Views/SetupWorkOrderPage.xaml|Module_Setup/Views/SetupWorkOrderPage.xaml.cs|Module_Setup/ViewModels/SetupWorkOrderViewModel.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs|Module_Core/Helpers/ResourceExtensions.cs" shared:TooltipBehavior.FallbackText="Enter work order (for example 76951, 076951, or WO-076951). It is formatted as WO-###### before the lookup runs."/>
+
+                <!-- Find an order by number, part or customer. It only fills the box above: the page's own
+                     Search is what looks the order up, so the box behaves exactly as it always has. -->
+                <Button
+                    AutomationProperties.AutomationId="SetupWorkOrderPage_FindWorkOrderButton"
+                    AutomationProperties.Name="Find a work order"
+                    Grid.Column="1"
+                    VerticalAlignment="Bottom"
+                    Command="{x:Bind ViewModel.FindWorkOrderCommand}"
+                    shared:TooltipBehavior.AssociatedFiles="Module_Setup/Views/SetupWorkOrderPage.xaml|Module_Setup/Views/SetupWorkOrderSearchDialog.xaml|Module_Setup/Views/SetupWorkOrderSearchDialog.xaml.cs|Module_Setup/ViewModels/SetupWorkOrderSearchDialogViewModel.cs|MTM_Waitlist.Setup/ViewModels/SetupWorkOrderViewModel.cs"
+                    shared:TooltipBehavior.FallbackText="Find a work order by number, part number or customer.">
+                    <FontIcon FontSize="16" Glyph="&#xE721;" />
+                </Button>
+            </Grid>
 
             <Border Style="{StaticResource SetupSectionCardStyle}">
                 <Grid ColumnSpacing="14">
@@ -109,9 +128,9 @@
             IsActive="{x:Bind ViewModel.IsBusy, Mode=OneWay}" />
 
         <StackPanel Grid.Row="2" Style="{StaticResource SetupActionBarStyle}">
-            <Button AutomationProperties.AutomationId="SetupWorkOrderPage_BackButton" x:Uid="Setup_Action_BackToWorkstations" Content="Back" Command="{x:Bind ViewModel.BackToWorkCentersCommand}" />
-            <Button AutomationProperties.AutomationId="SetupWorkOrderPage_CancelButton" x:Uid="Setup_Action_Cancel" Content="Cancel" Command="{x:Bind ViewModel.CancelCommand}" />
-            <Button AutomationProperties.AutomationId="SetupWorkOrderPage_SearchButton" x:Uid="Setup_Action_Search" Content="Search" Command="{x:Bind ViewModel.SearchCommand}" IsEnabled="{x:Bind ViewModel.IsIdle, Mode=OneWay}" />
+            <Button AutomationProperties.AutomationId="SetupWorkOrderPage_BackButton" x:Uid="Setup_Action_BackToWorkstations" Content="Back" ContentTemplate="{StaticResource ActionBarBackTemplate}" Command="{x:Bind ViewModel.BackToWorkCentersCommand}" />
+            <Button AutomationProperties.AutomationId="SetupWorkOrderPage_CancelButton" x:Uid="Setup_Action_Cancel" Content="Cancel" ContentTemplate="{StaticResource ActionBarCancelTemplate}" Command="{x:Bind ViewModel.CancelCommand}" />
+            <Button AutomationProperties.AutomationId="SetupWorkOrderPage_SearchButton" x:Uid="Setup_Action_Search" Content="Search" ContentTemplate="{StaticResource ActionBarSearchTemplate}" Command="{x:Bind ViewModel.SearchCommand}" IsEnabled="{x:Bind ViewModel.IsIdle, Mode=OneWay}" />
         </StackPanel>
     </Grid>
 </Page>

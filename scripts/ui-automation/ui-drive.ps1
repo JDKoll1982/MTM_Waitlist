@@ -49,19 +49,32 @@ param(
 
     [int]$WaitSeconds = 90,
 
+    # How long a named control is waited for after the shell is up. A wizard step draws its cards a moment after
+    # the page it belongs to, so the find polls instead of looking once and reporting the step as absent.
+    [int]$FindSeconds = 10,
+
     # Skip the evidence dump: a driving-only step does not need the tree walked three times.
     [switch]$NoEvidence,
 
-    [string]$Exe = "$PSScriptRoot\..\..\bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.exe",
+    # Resolved after the param block: $PSScriptRoot is not populated when it is used as a parameter default, so a
+    # default written here would expand to 'C:\..\..\bin\...' and every launch would fail the path check.
+    [string]$Exe = '',
 
-    # Left empty by default and taken from the environment on launch: this machine already carries
-    # MTM_WAITLIST_DB_CONNECTION_STRING at user scope, so the credential never has to appear on a command
-    # line or in this file.
+    # Optional store override. Empty by default and taken from MTM_WAITLIST_DB_CONNECTION_STRING when left empty, so
+    # the credential never has to appear on a command line or in this file. When neither is set the app uses its own
+    # appsettings.json, which is the normal case on a machine that carries no such variable.
     [string]$ConnectionString = ''
 )
 
 $ErrorActionPreference = 'Stop'
 . "$PSScriptRoot\uia-common.ps1"
+
+# $PSScriptRoot is not populated when it is used as a parameter default in this host, so the executable is resolved
+# here rather than in the param block - the same reason ui-settings-drive.ps1 and uia-surface-walk.ps1 do it here.
+if ([string]::IsNullOrWhiteSpace($Exe)) {
+    $Exe = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'bin\x64\Debug\net10.0-windows10.0.19041.0\win-x64\MTM_Waitlist.exe'
+    $Exe = [System.IO.Path]::GetFullPath($Exe)
+}
 
 $CT     = $UiaCT
 $Scope  = $UiaScope
@@ -178,6 +191,25 @@ function Find-Element {
     return $null
 }
 
+# The find above looks once. A wizard step that has just been navigated to draws its controls a moment later, so a
+# single look found only the navigation pane and the step was reported as "no ListItem matched [Pickup]" on a page
+# whose Pickup card appeared a fifth of a second afterwards. A caller waits for the control instead, polling the
+# same find for a few seconds, which is what a person does when they look again.
+function Wait-Element {
+    param($ControlType, [string[]]$Patterns, [int]$TimeoutSeconds = 10)
+
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    while ((Get-Date) -lt $deadline) {
+        $root = Get-AppRoot
+        if ($root) {
+            $el = Find-Element -Root $root -ControlType $ControlType -Patterns $Patterns
+            if ($el) { return $el }
+        }
+        Start-Sleep -Milliseconds $MtmPollMilliseconds
+    }
+    return $null
+}
+
 function Get-AppWindows { Get-MtmAppWindows }
 
 function Find-ById { param($Root, [string]$Id) Find-MtmById -Root $Root -Id $Id }
@@ -215,16 +247,24 @@ switch ($Action) {
         else {
             if (-not (Test-Path $Exe)) { throw "Executable not found: $Exe" }
 
-            # The app needs both: the plain one for the stores, and the STARTUP_ variant to clear its startup
-            # session check. Taken from this process's environment when -ConnectionString was not passed, which is
-            # how the value reaches the app without ever being written down.
+            # Also point the app at whichever store the caller named: the plain variable for the stores, the STARTUP_
+            # variant for the startup session check. Taken from this process's environment when -ConnectionString was
+            # not passed, which is how the value reaches the app without ever being written down.
+            #
+            # A connection string is OPTIONAL. This used to throw when neither was present, which made the launcher
+            # unusable on any machine that carries none - the app resolves its own store from appsettings.json, and
+            # that path works. Overriding is a choice, so nothing is overridden when nothing was offered, and the
+            # app's own configuration is left alone.
             if (-not $ConnectionString) { $ConnectionString = $env:MTM_WAITLIST_DB_CONNECTION_STRING }
-            if (-not $ConnectionString) {
-                throw 'No connection string. Pass -ConnectionString or set MTM_WAITLIST_DB_CONNECTION_STRING.'
-            }
 
-            $env:MTM_WAITLIST_DB_CONNECTION_STRING = $ConnectionString
-            $env:MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING = $ConnectionString
+            if ($ConnectionString) {
+                $env:MTM_WAITLIST_DB_CONNECTION_STRING = $ConnectionString
+                $env:MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING = $ConnectionString
+                Write-Host 'store     : from -ConnectionString / MTM_WAITLIST_DB_CONNECTION_STRING' -ForegroundColor DarkGray
+            }
+            else {
+                Write-Host 'store     : from the app''s own appsettings.json' -ForegroundColor DarkGray
+            }
 
             Start-Process -FilePath $Exe
             Write-Host "launched  : $Exe" -ForegroundColor Green
@@ -241,11 +281,11 @@ switch ($Action) {
 
     'click-item' {
         if (-not $Name) { throw 'click-item needs -Name.' }
-        $root = Wait-ShellRoot
-        $el = Find-Element -Root $root -ControlType $CT::ListItem -Patterns $Name
+        [void](Wait-ShellRoot)
+        $el = Wait-Element -ControlType $CT::ListItem -Patterns $Name -TimeoutSeconds $FindSeconds
         if (-not $el) {
-            $available = @(Get-ByControlType -Root $root -ControlType $CT::ListItem)
-            throw "No ListItem matched [$($Name -join ', ')]. Available: $($available -join ' | ')"
+            $available = @(Get-ByControlType -Root (Get-AppRoot) -ControlType $CT::ListItem)
+            throw "No ListItem matched [$($Name -join ', ')] within $FindSeconds s. Available: $($available -join ' | ')"
         }
         # A navigation entry is selected rather than invoked, so this goes through the same fallback a button does.
         Invoke-MtmElement -Element $el -What "list item '$($el.Current.Name)'"
@@ -258,11 +298,11 @@ switch ($Action) {
 
     'click-button' {
         if (-not $Name) { throw 'click-button needs -Name.' }
-        $root = Wait-ShellRoot
-        $el = Find-Element -Root $root -ControlType $CT::Button -Patterns $Name
+        [void](Wait-ShellRoot)
+        $el = Wait-Element -ControlType $CT::Button -Patterns $Name -TimeoutSeconds $FindSeconds
         if (-not $el) {
-            $available = @(Get-ByControlType -Root $root -ControlType $CT::Button)
-            throw "No Button matched [$($Name -join ', ')]. Available: $($available -join ' | ')"
+            $available = @(Get-ByControlType -Root (Get-AppRoot) -ControlType $CT::Button)
+            throw "No Button matched [$($Name -join ', ')] within $FindSeconds s. Available: $($available -join ' | ')"
         }
         Invoke-MtmElement -Element $el -What "button '$($el.Current.Name)'"
         Write-Host "clicked   : '$($el.Current.Name)'" -ForegroundColor Green

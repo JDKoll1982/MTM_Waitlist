@@ -50,11 +50,13 @@
                 AutomationProperties.AutomationId="NewRequestCoilTurnPage_BackButton"
                 x:Uid="NewRequest_CoilTurn_BackButton"
                 Content="Back"
+                ContentTemplate="{StaticResource ActionBarBackTemplate}"
                 Command="{x:Bind ViewModel.BackCommand}" />
             <Button
                 AutomationProperties.AutomationId="NewRequestCoilTurnPage_ContinueButton"
                 x:Uid="NewRequest_CoilTurn_ContinueButton"
                 Content="Continue"
+                ContentTemplate="{StaticResource ActionBarContinueTemplate}"
                 Command="{x:Bind ViewModel.ContinueCommand}"
                 Style="{StaticResource AccentButtonStyle}" />
         </StackPanel>

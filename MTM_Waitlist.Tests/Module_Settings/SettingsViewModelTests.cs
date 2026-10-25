@@ -543,6 +543,118 @@ public sealed class SettingsViewModelTests
         Assert.IsFalse(viewModel.IsUrgencyAllotmentsPanelVisible);
     }
 
+    /// <summary>
+    /// T049 (FR-028, FR-029). The lugger arrangement's entry is drawn for a person holding
+    /// <c>permission.settings.lugger_arrangement</c> and is absent for everybody else.
+    /// </summary>
+    [TestMethod]
+    public void ViewModel_SettingsViewModelTests_TheLuggerArrangementEntry_IsDrawnOnlyWhenItsPermissionIsHeld()
+    {
+        var held = BuildViewModel(new InMemoryScopedPreferenceStore(), [PermissionKeys.SettingsLuggerArrangement]);
+        var withheld = BuildViewModel(new InMemoryScopedPreferenceStore(), [PermissionKeys.AdminPermissions]);
+
+        Assert.IsTrue(
+            held.CanOpenLuggerArrangement,
+            "The gate is the lugger permission itself, not a role name kept on this screen (FR-028).");
+        Assert.IsTrue(held.IsLuggerArrangementEntryVisible, "A holder is offered the entry.");
+
+        Assert.IsFalse(withheld.CanOpenLuggerArrangement);
+        Assert.IsFalse(
+            withheld.IsLuggerArrangementEntryVisible,
+            "A person below the gate is not offered the entry at all (FR-029).");
+    }
+
+    /// <summary>
+    /// T049 (FR-029). Absent, not shown-but-disabled: the entry's visibility is the only channel this screen has
+    /// for it, and there is no separate enable flag that would draw it in a dead state.
+    /// </summary>
+    [TestMethod]
+    public void ViewModel_SettingsViewModelTests_TheLuggerArrangementEntry_IsAbsentRatherThanDisabled()
+    {
+        var withheld = BuildViewModel(new InMemoryScopedPreferenceStore(), [PermissionKeys.AdminPermissions]);
+
+        Assert.IsFalse(
+            withheld.IsLuggerArrangementEntryVisible,
+            "The card is not drawn for a person who does not hold the key.");
+
+        var enableFlag = typeof(SettingsViewModel)
+            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .FirstOrDefault(property => property.Name.Contains("LuggerArrangement", StringComparison.Ordinal)
+                && property.Name.Contains("Enabled", StringComparison.Ordinal));
+
+        Assert.IsNull(
+            enableFlag,
+            "There is no separate enabled flag, because a disabled card is the state FR-029 forbids.");
+    }
+
+    /// <summary>T049 (FR-030). The entry's route is the view model's full name, as every page in this application is routed.</summary>
+    [TestMethod]
+    public void ViewModel_SettingsViewModelTests_TheLuggerArrangementRoute_IsItsViewModelsFullName()
+    {
+        Assert.AreEqual(
+            "MTM_Waitlist.Module_Settings.ViewModels.LuggerArrangementViewModel",
+            SettingsViewModel.LuggerArrangementViewModelName,
+            "The route constant names the view model the page service is configured with.");
+    }
+
+    /// <summary>T049 (FR-030). The entry navigates rather than expanding, on the route the constant names.</summary>
+    [TestMethod]
+    public async Task ViewModel_SettingsViewModelTests_OpeningTheLuggerArrangement_NavigatesToItsRoute()
+    {
+        var navigation = new RecordingNavigationService();
+        var viewModel = BuildViewModel(
+            new InMemoryScopedPreferenceStore(),
+            [PermissionKeys.SettingsLuggerArrangement],
+            navigationService: navigation);
+        viewModel.OnNavigatedTo(new object());
+        await viewModel.PermissionLoad;
+
+        viewModel.OpenLuggerArrangementCommand.Execute(null);
+
+        CollectionAssert.Contains(
+            navigation.RequestedPageKeys,
+            SettingsViewModel.LuggerArrangementViewModelName,
+            "The entry opens the arrangement rather than unfolding a panel.");
+    }
+
+    /// <summary>T049 (FR-029). Reaching the route another way is refused on the same permission answer.</summary>
+    [TestMethod]
+    public void ViewModel_SettingsViewModelTests_OpeningWithoutThePermission_DoesNotNavigate()
+    {
+        var navigation = new RecordingNavigationService();
+        var viewModel = BuildViewModel(
+            new InMemoryScopedPreferenceStore(),
+            [PermissionKeys.AdminPermissions],
+            navigationService: navigation);
+
+        viewModel.OpenLuggerArrangementCommand.Execute(null);
+
+        Assert.AreEqual(
+            0,
+            navigation.RequestedPageKeys.Count,
+            "A person who does not hold the key is not taken to the arrangement by any route.");
+    }
+
+    /// <summary>T049 (FR-028). The screen asks for the lugger key with the keys it already reads, in the one read.</summary>
+    [TestMethod]
+    public void ViewModel_SettingsViewModelTests_ThePermissionRead_CarriesTheLuggerArrangementKey()
+    {
+        var declared = DeclaredPermissionKeys();
+
+        CollectionAssert.Contains(
+            declared.ToList(),
+            PermissionKeys.SettingsLuggerArrangement,
+            "The gate is read in the screen's single permission call, not in a layout pass (FR-056).");
+    }
+
+    private static IReadOnlyList<string> DeclaredPermissionKeys()
+    {
+        var field = typeof(SettingsViewModel).GetField("s_permissionKeys", BindingFlags.NonPublic | BindingFlags.Static);
+        Assert.IsNotNull(field, "The declared permission list is missing; the gate would never be read.");
+
+        return (IReadOnlyList<string>)(field.GetValue(null) ?? Array.Empty<string>());
+    }
+
     private static IReadOnlyList<string> DeclaredSearchAwareProperties()
     {
         var field = typeof(SettingsViewModel).GetField("s_searchAwareProperties", BindingFlags.NonPublic | BindingFlags.Static);
@@ -642,11 +754,11 @@ public sealed class SettingsViewModelTests
     }
 
     /// <summary>
-    /// Both storage folders, the hopper picture folder and the retention period are stored for every computer in
-    /// one action.
+    /// Both storage folders, the hopper and lugger picture folders, the no-picture image and the retention period
+    /// are stored for every computer in one action.
     /// </summary>
     [TestMethod]
-    public void ViewModel_SettingsViewModelTests_SavingTheStorageFoldersStoresAllFourValuesForEveryUser()
+    public void ViewModel_SettingsViewModelTests_SavingTheStorageFoldersStoresAllSixValuesForEveryUser()
     {
         var configuration = new FakeConfigSettingsValueService();
         var viewModel = BuildViewModel(
@@ -657,7 +769,9 @@ public sealed class SettingsViewModelTests
 
         viewModel.PictureFolderInput = @"\\share\pictures";
         viewModel.DunnageRootInput = @"\\share\dunnage";
-        viewModel.HopperFolderInput = @"Waitlist\Hoppers";
+        viewModel.HopperFolderInput = ConfigSettingKeys.ImageStorageHopperFolderPathDefault;
+        viewModel.LuggerFolderInput = ConfigSettingKeys.ImageStorageLuggerFolderPathDefault;
+        viewModel.NoImagePathInput = @"\\share\pictures\no-picture.png";
         viewModel.ArchiveKeepDaysInput = 90;
         viewModel.SaveStoragePathsCommand.Execute(null);
 
@@ -668,17 +782,58 @@ public sealed class SettingsViewModelTests
             saved[ConfigSettingKeys.DunnageRootPath].SettingValue,
             "the dunnage root is held once for the plant, like the picture folder beside it (FR-040)");
         Assert.AreEqual(
-            @"Waitlist\Hoppers",
+            ConfigSettingKeys.ImageStorageHopperFolderPathDefault,
             saved[ConfigSettingKeys.ImageStorageHopperFolderPath].SettingValue,
             "the hopper picture folder is held once for the plant, so the card and the wizard read the same artwork (FR-078)");
         Assert.AreEqual(90L, saved[ConfigSettingKeys.ImageStorageArchiveKeepDays].SettingValueInt);
+        Assert.AreEqual(
+            ConfigSettingKeys.ImageStorageLuggerFolderPathDefault,
+            saved[ConfigSettingKeys.ImageStorageLuggerFolderPath].SettingValue,
+            "the lugger picture folder is held once for the plant, so every computer draws the same lugger artwork");
+        Assert.AreEqual(
+            @"\\share\pictures\no-picture.png",
+            saved[ConfigSettingKeys.ImageStorageNoImagePath].SettingValue,
+            "the no-picture image is held once for the plant, so every computer draws the same thing for a missing picture");
         Assert.IsTrue(
             saved.Values.All(value => value.ScopeType == "all_users" && value.ScopeKey == "all_users"),
             "A person-scoped row would leave every other machine unchanged.");
         Assert.AreEqual(
-            4,
+            6,
             saved.Count,
-            "Four values and no more: the key-files folder was withdrawn with remember-me, so nothing writes it.");
+            "Six values and no more: the key-files folder was withdrawn with remember-me, so nothing writes it.");
+    }
+
+    /// <summary>
+    /// An empty no-picture box stores the shipped artwork rather than a blank, so a resolver never has to decide what
+    /// an empty picture path means.
+    /// </summary>
+    [TestMethod]
+    public void ViewModel_SettingsViewModelTests_AnEmptyNoPictureBoxStoresTheShippedArtwork()
+    {
+        var configuration = new FakeConfigSettingsValueService();
+        var viewModel = BuildViewModel(
+            new InMemoryScopedPreferenceStore(),
+            [PermissionKeys.SettingsStoragePaths],
+            configSettingsValueService: configuration,
+            imageStorageConfigurationResolver: new FakeImageStorageConfigurationResolver());
+
+        viewModel.PictureFolderInput = @"\\share\pictures";
+        viewModel.DunnageRootInput = @"\\share\dunnage";
+        viewModel.HopperFolderInput = ConfigSettingKeys.ImageStorageHopperFolderPathDefault;
+        viewModel.LuggerFolderInput = ConfigSettingKeys.ImageStorageLuggerFolderPathDefault;
+        viewModel.NoImagePathInput = "   ";
+        viewModel.ArchiveKeepDaysInput = 90;
+        viewModel.SaveStoragePathsCommand.Execute(null);
+
+        var saved = configuration.SavedValues.ToDictionary(value => value.SettingKey, StringComparer.Ordinal);
+        Assert.AreEqual(
+            ConfigSettingKeys.ImageStorageNoImagePathDefault,
+            saved[ConfigSettingKeys.ImageStorageNoImagePath].SettingValue,
+            "an empty box means the shipped artwork, and it is stored as that rather than as a blank");
+        Assert.AreEqual(
+            "Settings_StoragePaths_Saved.Text",
+            viewModel.StoragePathsStatusMessage,
+            "the shipped artwork is not a missing file, so the save is reported plainly");
     }
 
     /// <summary>
@@ -706,6 +861,80 @@ public sealed class SettingsViewModelTests
             "Settings_StoragePaths_HopperFolderNeeded.Text",
             viewModel.StoragePathsStatusMessage,
             "The refusal does not name the hopper folder, so the person has to guess which box is at fault (FR-078).");
+    }
+
+    /// <summary>
+    /// The folder dialog beside the hopper box opens at the folder the box already names, so the person starts on
+    /// the artwork rather than wherever the last dialog was left.
+    /// </summary>
+    [TestMethod]
+    public void ViewModel_SettingsViewModelTests_TheHopperFolderDialogStartsAtTheFolderTheBoxNames()
+    {
+        var resolver = new FakeImageStorageConfigurationResolver
+        {
+            HopperFolderPath = @"\\mtmanu-fs01\Expo Drive\MH_RESOURCE\Images\Waitlist\hopper",
+        };
+        var browser = new FakeFolderBrowserService();
+
+        var viewModel = BuildViewModel(
+            new InMemoryScopedPreferenceStore(),
+            [PermissionKeys.SettingsStoragePaths],
+            imageStorageConfigurationResolver: resolver,
+            folderBrowserService: browser);
+
+        viewModel.HopperFolderInput = resolver.HopperFolderPath;
+        viewModel.BrowseHopperFolderCommand.ExecuteAsync(null).GetAwaiter().GetResult();
+
+        Assert.AreEqual(
+            resolver.HopperFolderPath,
+            browser.LastStartingFolder,
+            "The dialog must open where the box points, which is how a share is browsed at all.");
+    }
+
+    /// <summary>
+    /// The folder a person picks is put in the box and nothing is stored until Save is chosen.
+    /// </summary>
+    [TestMethod]
+    public void ViewModel_SettingsViewModelTests_TheChosenHopperFolderGoesInTheBoxAndIsNotStored()
+    {
+        var configuration = new FakeConfigSettingsValueService();
+        var browser = new FakeFolderBrowserService { ChosenFolder = @"\\share\hopper2" };
+
+        var viewModel = BuildViewModel(
+            new InMemoryScopedPreferenceStore(),
+            [PermissionKeys.SettingsStoragePaths],
+            configSettingsValueService: configuration,
+            imageStorageConfigurationResolver: new FakeImageStorageConfigurationResolver(),
+            folderBrowserService: browser);
+
+        viewModel.BrowseHopperFolderCommand.ExecuteAsync(null).GetAwaiter().GetResult();
+
+        Assert.AreEqual(@"\\share\hopper2", viewModel.HopperFolderInput);
+        Assert.AreEqual(0, configuration.SavedValues.Count, "Choosing a folder is not saving it.");
+    }
+
+    /// <summary>
+    /// A dialog closed without a choice leaves the box exactly as it was.
+    /// </summary>
+    /// <remarks>
+    /// Closing the dialog is an ordinary answer meaning "leave what I typed alone": clearing the box on it would
+    /// lose a path because a network drive was not mapped.
+    /// </remarks>
+    [TestMethod]
+    public void ViewModel_SettingsViewModelTests_AClosedHopperFolderDialogLeavesTheBoxAlone()
+    {
+        var browser = new FakeFolderBrowserService { ChosenFolder = null };
+
+        var viewModel = BuildViewModel(
+            new InMemoryScopedPreferenceStore(),
+            [PermissionKeys.SettingsStoragePaths],
+            imageStorageConfigurationResolver: new FakeImageStorageConfigurationResolver(),
+            folderBrowserService: browser);
+
+        viewModel.HopperFolderInput = @"\\share\typed";
+        viewModel.BrowseHopperFolderCommand.ExecuteAsync(null).GetAwaiter().GetResult();
+
+        Assert.AreEqual(@"\\share\typed", viewModel.HopperFolderInput);
     }
 
     /// <summary>
@@ -804,15 +1033,19 @@ public sealed class SettingsViewModelTests
         IMockServiceRefreshClient? refreshClient = null,
         IImageStorageConfigurationResolver? imageStorageConfigurationResolver = null,
         IConfigSettingsValueService? configSettingsValueService = null,
-        IImageCacheSyncService? imageCacheSyncService = null)
+        IImageCacheSyncService? imageCacheSyncService = null,
+        RecordingNavigationService? navigationService = null,
+        IFolderBrowserService? folderBrowserService = null)
     {
         var viewModel = BuildViewModelWithoutLoading(
-            settings,
-            heldPermissionKeys,
-            refreshClient,
-            imageStorageConfigurationResolver,
-            configSettingsValueService,
-            imageCacheSyncService);
+           settings,
+           heldPermissionKeys,
+           refreshClient,
+           imageStorageConfigurationResolver,
+           configSettingsValueService,
+           imageCacheSyncService,
+           navigationService,
+           folderBrowserService);
 
         // The stub answers from an already-completed task, so this settles synchronously and no test has to
         // sleep waiting for a gate to make up its mind.
@@ -830,7 +1063,9 @@ public sealed class SettingsViewModelTests
         IMockServiceRefreshClient? refreshClient = null,
         IImageStorageConfigurationResolver? imageStorageConfigurationResolver = null,
         IConfigSettingsValueService? configSettingsValueService = null,
-        IImageCacheSyncService? imageCacheSyncService = null)
+        IImageCacheSyncService? imageCacheSyncService = null,
+        RecordingNavigationService? navigationService = null,
+        IFolderBrowserService? folderBrowserService = null)
     {
         var person = new FakePersonIdentity();
         var computerManagement = new ComputerManagementViewModel(new FakeComputerRegistryService(), new FakeMachineFacts());
@@ -850,14 +1085,15 @@ public sealed class SettingsViewModelTests
             new FakeDunnageTypeVisibilityCatalogService(),
             new NewRequestAlertService(settings),
             permissions,
-            new RecordingNavigationService(),
+            navigationService ?? new RecordingNavigationService(),
             person,
             computerManagement,
             urgencyAllotments,
             refreshClient ?? new FakeMockServiceRefreshClient(),
             imageStorageConfigurationResolver,
             configSettingsValueService,
-            imageCacheSyncService);
+            imageCacheSyncService,
+            folderBrowserService: folderBrowserService);
     }
 
     /// <summary>

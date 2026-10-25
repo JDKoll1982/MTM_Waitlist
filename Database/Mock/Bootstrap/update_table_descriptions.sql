@@ -15,6 +15,7 @@
 --   T014  five mirror tables + five stage twins
 --   011   sixth mirror table (employee_by_number) + its stage twin
 --   012   seventh mirror table (part_warehouse_quantities) + its stage twin
+--   013   eighth mirror table (work_order_search) + its stage twin
 -- ============================================================
 
 USE mtm_mock;
@@ -143,10 +144,17 @@ ALTER TABLE visual_disposition_input_result
 MODIFY COLUMN id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
 MODIFY COLUMN work_order VARCHAR(64) NOT NULL COMMENT 'Normalized work order used as the lookup predicate.',
 MODIFY COLUMN part_number VARCHAR(64) NOT NULL COMMENT 'Finished-product part on the work order.',
+MODIFY COLUMN work_center VARCHAR(64) NOT NULL DEFAULT '*' COMMENT 'Work centre the routing answer is anchored on; * marks a row seeded before the routing was read.',
 MODIFY COLUMN work_order_status VARCHAR(8) NULL COMMENT 'Raw Visual WORK_ORDER.STATUS code; meaning owned by RequestDispositionStatusCodes.',
 MODIFY COLUMN open_work_order_quantity DECIMAL(18,4) NOT NULL DEFAULT 0 COMMENT 'Open quantity still on the order.',
 MODIFY COLUMN finished_goods_quantity DECIMAL(18,4) NOT NULL DEFAULT 0 COMMENT 'Finished-goods on-hand quantity for the part.',
-MODIFY COLUMN has_outside_vendor_operation TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 when an operation carries vendor/service fields.',
+MODIFY COLUMN has_outside_vendor_operation TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 when an operation carries vendor/service fields; the routing decides when it was read.',
+MODIFY COLUMN next_operation_resource_id VARCHAR(16) NULL COMMENT 'RESOURCE_ID of the first open operation after the job own; OUTSIDE_SERVICE means Outside Service.',
+MODIFY COLUMN has_remaining_operation TINYINT(1) NULL COMMENT '1 when an open operation remains after the job own, 0 when nothing follows it, NULL when the routing was not read.',
+MODIFY COLUMN has_customer_demand TINYINT(1) NULL COMMENT '1 when the part has customer-order lines in Visual, so it is a part the plant sells; NULL when not read. Decides Finished Goods against WIP when nothing follows.',
+MODIFY COLUMN product_code VARCHAR(64) NULL COMMENT 'Infor Visual PART.PRODUCT_CODE: the plant part category (FG_PRESS, RM_PRESS, MFG_TOOLING, EXP_*).',
+MODIFY COLUMN commodity_code VARCHAR(64) NULL COMMENT 'Infor Visual PART.COMMODITY_CODE: the material or part kind (E Stamped Item, M Matl Coil, M Fast Fastener...).',
+MODIFY COLUMN part_description VARCHAR(256) NULL COMMENT 'Infor Visual PART.DESCRIPTION, whose words break a customer-supplied tie.',
 MODIFY COLUMN refreshed_utc DATETIME NOT NULL COMMENT 'UTC time of the refresh that produced this row.',
 MODIFY COLUMN is_seed_content TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 for baseline seed rows; 0 for refreshed content.';
 
@@ -156,10 +164,17 @@ ALTER TABLE visual_disposition_input_result_stage
 MODIFY COLUMN id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
 MODIFY COLUMN work_order VARCHAR(64) NOT NULL COMMENT 'Normalized work order used as the lookup predicate.',
 MODIFY COLUMN part_number VARCHAR(64) NOT NULL COMMENT 'Finished-product part on the work order.',
+MODIFY COLUMN work_center VARCHAR(64) NOT NULL DEFAULT '*' COMMENT 'Work centre the routing answer is anchored on; * marks a row seeded before the routing was read.',
 MODIFY COLUMN work_order_status VARCHAR(8) NULL COMMENT 'Raw Visual WORK_ORDER.STATUS code; meaning owned by RequestDispositionStatusCodes.',
 MODIFY COLUMN open_work_order_quantity DECIMAL(18,4) NOT NULL DEFAULT 0 COMMENT 'Open quantity still on the order.',
 MODIFY COLUMN finished_goods_quantity DECIMAL(18,4) NOT NULL DEFAULT 0 COMMENT 'Finished-goods on-hand quantity for the part.',
-MODIFY COLUMN has_outside_vendor_operation TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 when an operation carries vendor/service fields.',
+MODIFY COLUMN has_outside_vendor_operation TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 when an operation carries vendor/service fields; the routing decides when it was read.',
+MODIFY COLUMN next_operation_resource_id VARCHAR(16) NULL COMMENT 'RESOURCE_ID of the first open operation after the job own; OUTSIDE_SERVICE means Outside Service.',
+MODIFY COLUMN has_remaining_operation TINYINT(1) NULL COMMENT '1 when an open operation remains after the job own, 0 when nothing follows it, NULL when the routing was not read.',
+MODIFY COLUMN has_customer_demand TINYINT(1) NULL COMMENT '1 when the part has customer-order lines in Visual, so it is a part the plant sells; NULL when not read. Decides Finished Goods against WIP when nothing follows.',
+MODIFY COLUMN product_code VARCHAR(64) NULL COMMENT 'Infor Visual PART.PRODUCT_CODE: the plant part category (FG_PRESS, RM_PRESS, MFG_TOOLING, EXP_*).',
+MODIFY COLUMN commodity_code VARCHAR(64) NULL COMMENT 'Infor Visual PART.COMMODITY_CODE: the material or part kind (E Stamped Item, M Matl Coil, M Fast Fastener...).',
+MODIFY COLUMN part_description VARCHAR(256) NULL COMMENT 'Infor Visual PART.DESCRIPTION, whose words break a customer-supplied tie.',
 MODIFY COLUMN refreshed_utc DATETIME NOT NULL COMMENT 'UTC time of the refresh that produced this row.',
 MODIFY COLUMN is_seed_content TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 for baseline seed rows; 0 for refreshed content.';
 
@@ -208,5 +223,43 @@ MODIFY COLUMN id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Surrogate prim
 MODIFY COLUMN part_number VARCHAR(64) NOT NULL COMMENT 'Part number; both the read input and the returned part.',
 MODIFY COLUMN warehouse_quantity DECIMAL(18,4) NOT NULL DEFAULT 0 COMMENT 'The part-wide on-hand sum over every location, filtered by location class. The card''s `Quantity in house` and `Quantity` cells read it (FR-090).',
 MODIFY COLUMN finished_goods_quantity DECIMAL(18,4) NOT NULL DEFAULT 0 COMMENT 'The same sum restricted to finished-goods locations; what `Item Type` and `Total Qty In House` need (FR-090, D38).',
+MODIFY COLUMN refreshed_utc DATETIME NOT NULL COMMENT 'UTC time of the refresh that produced this row.',
+MODIFY COLUMN is_seed_content TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 for baseline seed rows; 0 for refreshed content.';
+
+-- ------------------------------------------------------------
+-- Shape 8: work_order_search
+-- ------------------------------------------------------------
+
+ALTER TABLE visual_work_order_search_result COMMENT = 'Cached Infor Visual work-order search result (shape 8 mirror); complete snapshot, replaced atomically.';
+
+ALTER TABLE visual_work_order_search_result
+MODIFY COLUMN id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
+MODIFY COLUMN work_order_text VARCHAR(32) NOT NULL COMMENT 'Declared input, holding the row''s own work order; the search filters on work_order.',
+MODIFY COLUMN part_filter VARCHAR(64) NOT NULL COMMENT 'Declared input, holding the row''s own part number; the search filters on part_number.',
+MODIFY COLUMN customer_filter VARCHAR(120) NOT NULL COMMENT 'Declared input, holding the row''s own customer name; the search filters on customer_name.',
+MODIFY COLUMN work_order VARCHAR(32) NOT NULL COMMENT 'Canonical WO-###### base id of the open work order.',
+MODIFY COLUMN part_number VARCHAR(64) NOT NULL COMMENT 'The part the work order builds; a search input and a returned column.',
+MODIFY COLUMN part_description VARCHAR(255) NULL COMMENT 'Part description (empty string when Visual has none).',
+MODIFY COLUMN customer_name VARCHAR(120) NULL COMMENT 'The customer''s real name from CUST_ORDER_ALLOC.CUST_NAME, never the customer id; empty for a stock order.',
+MODIFY COLUMN work_center VARCHAR(32) NULL COMMENT 'Primary work center (first operation resource) for the order.',
+MODIFY COLUMN status VARCHAR(4) NULL COMMENT 'Visual work-order status code: R released, U unreleased, F firmed.',
+MODIFY COLUMN want_date DATE NULL COMMENT 'The order''s desired want date, used as the secondary sort.',
+MODIFY COLUMN refreshed_utc DATETIME NOT NULL COMMENT 'UTC time of the refresh that produced this row.',
+MODIFY COLUMN is_seed_content TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 for baseline seed rows; 0 for refreshed content.';
+
+ALTER TABLE visual_work_order_search_result_stage COMMENT = 'Staging twin used by sp_visual_work_order_search_refresh for the atomic live-table swap.';
+
+ALTER TABLE visual_work_order_search_result_stage
+MODIFY COLUMN id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
+MODIFY COLUMN work_order_text VARCHAR(32) NOT NULL COMMENT 'Declared input, holding the row''s own work order; the search filters on work_order.',
+MODIFY COLUMN part_filter VARCHAR(64) NOT NULL COMMENT 'Declared input, holding the row''s own part number; the search filters on part_number.',
+MODIFY COLUMN customer_filter VARCHAR(120) NOT NULL COMMENT 'Declared input, holding the row''s own customer name; the search filters on customer_name.',
+MODIFY COLUMN work_order VARCHAR(32) NOT NULL COMMENT 'Canonical WO-###### base id of the open work order.',
+MODIFY COLUMN part_number VARCHAR(64) NOT NULL COMMENT 'The part the work order builds; a search input and a returned column.',
+MODIFY COLUMN part_description VARCHAR(255) NULL COMMENT 'Part description (empty string when Visual has none).',
+MODIFY COLUMN customer_name VARCHAR(120) NULL COMMENT 'The customer''s real name from CUST_ORDER_ALLOC.CUST_NAME, never the customer id; empty for a stock order.',
+MODIFY COLUMN work_center VARCHAR(32) NULL COMMENT 'Primary work center (first operation resource) for the order.',
+MODIFY COLUMN status VARCHAR(4) NULL COMMENT 'Visual work-order status code: R released, U unreleased, F firmed.',
+MODIFY COLUMN want_date DATE NULL COMMENT 'The order''s desired want date, used as the secondary sort.',
 MODIFY COLUMN refreshed_utc DATETIME NOT NULL COMMENT 'UTC time of the refresh that produced this row.',
 MODIFY COLUMN is_seed_content TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 for baseline seed rows; 0 for refreshed content.';

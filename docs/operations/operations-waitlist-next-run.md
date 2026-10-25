@@ -16,11 +16,18 @@ the owner to restate any of it.
 > `sqlcmd` connects as `SHOP2`, and the live `mtm_waitlist` validates against the repository. **T067, T068 and T071
 > are done and ticked**, with the codes recorded in `.github/memories/repo/infor-visual-disposition.md`.
 >
-> **Five tasks remain, and one thing blocks all five: a credential.** T048, T058, T069, T079 and T088 are each driven
-> through the running application, which signs in with its own account and PIN. Nothing in this environment can
-> supply that, and it must never be passed through an agent. Everything else those five need is here — the live
-> store, live Visual, and the UI tooling. So this file's §2 and §3 are now history; §4 is what is left, and it needs
-> a person at the keyboard.
+> **2026-10-19, on the home workstation — the credential arrived and T058 is done.** The five tasks this note used to
+> say were blocked on a credential are now **three**: **T048 and T058 are driven and ticked**, and the sign-in was
+> supplied per run rather than stored. Getting there needed repairs to the automation itself — a broken `-Exe` default,
+> a thrown connection string, a hardcoded sign-in account, a missing `TogglePattern`, single-look finds, and a
+> `NumberBox` that ignored a `ValuePattern` write — all fixed and recorded in
+> `.github/memories/repo/ui-automation-drive.md` and §11 of `docs/scripts/scripts-automation-ui-automation.md`. Read
+> those two before a driven run: every one of those faults complains in the app's voice. **What remains (T069, T079,
+> T088) is no longer blocked by the tooling.** T069/T079 are blocked by *data* on this workstation — the cached Infor
+> Visual mirror (`mtm_mock.visual_disposition_input_result`) holds a disposition row for only one of the five jobs
+> that currently carry work, so the Finished Goods, WIP and NCM journeys cannot be offered here. T088 is blocked by
+> nothing but the remaining measuring: keyboard operability of the flyout is already proven, the action buttons, the
+> clipping check at the shipped default window size and the animations-off pass are not.
 
 **The one-line summary.** Eight tasks were left unticked because the machine they were written on could not reach the
 plant: one Infor Visual SQL Server and no live `mtm_waitlist`. On the next machine both exist, so those eight become
@@ -50,22 +57,24 @@ artifacts fails in a way that is invisible at run time (see §2, and the defect 
 
 | Task | What it needs | Why it is unticked |
 |---|---|---|
-| **T048** | drive the status column through every state against a live store | needs a store with real requests in each state |
-| **T058** | drive the handler-condition flyout and confirm it survives a restart | needs a live store to write the condition to |
+| **T048** | drive the status column through every state against a live store | **DONE 2026-10-19** — the column's states were read off the rendered cards while T058 was driven |
+| **T058** | drive the handler-condition flyout and confirm it survives a restart | **DONE 2026-10-19** — chosen on `100-08`, `handler_status` read back from the store, the column moving `#B02418` → `#C0392B`, a second choice replacing the first, and all four conditions restored after a restart across four rows (SC-016) |
 | **T067** | run `Database/Validation/disposition_input_finished_goods/validate.sql` against Infor Visual | **DONE 2026-10-16** on the plant host — the finished-goods class resolves to `002/FG` and `002/DC-FG`, `NCM%` is confirmed, and the assertion on part `24733431` reads 0 against a total of 90 |
 | **T068** | record the location codes T067 reports | **DONE 2026-10-16** — recorded in `.github/memories/repo/infor-visual-disposition.md` |
-| **T069** | drive the picker for each job kind and check the four returning Items' cards | needs live job data from Visual and a rendered picker |
+| **T069** | drive the picker for each job kind and check the four returning Items' cards | **Partly done 2026-10-19:** Outside Service proven end to end (offered only for the job whose mirrored disposition says outside operation; card drew `Part Type \| Outside Service` and `# of Skids \| 4`, no location cell). The other three need a current job whose disposition is FG, WIP or NCM, and this workstation's cached mirror holds one disposition row for the five jobs with work |
 | **T071** | run `GetPartMatches.sql` against Infor Visual for an exact and a partial term | **DONE 2026-10-16** — run live: `MMC0000010` returned that one part, `MMC000001` returned all ten containing it, a term matching nothing returned no rows |
-| **T079** | one request per new answer, each checked on its card against SC-015 | needs a live store and a rendered card |
-| **T088** | keyboard operability, no clipped values at the default window size, usable with animations off | needs the rendered application |
+| **T079** | one request per new answer, each checked on its card against SC-015 | **Partly done 2026-10-19:** the count, `# of Skids \| 4`, driven and drawn. The other five answers still need their own requests. The skid field was the reason this could not be driven at all — a `NumberBox` ignores a `ValuePattern` write, so every driven request carried the default `1` (see the automation memory) |
+| **T088** | keyboard operability, no clipped values at the default window size, usable with animations off | **Partly done 2026-10-19:** the condition flyout is operable by keyboard alone (Enter opens it, Tab walks the four conditions, Escape closes it). Left: the action buttons one at a time, the clipping check at the shipped default window size, and the animations-off pass |
 
 Everything else in the feature is built, and the non-live halves of T079/T088 are already pinned by tests —
 each task's own text says which half is done, so read it rather than re-deriving the gap. T067 is now done live as
 well, so the codes it was written to discover are settled.
 
-**The one blocker left is a credential.** All five tasks still open are driven through the running application, and
-its own account and PIN are not available to an agent. Run `scripts/ui-automation/ui-drive.ps1 -Action signin -Identifier <user>
--Pin <pin>` yourself, or type the PIN at the prompt, and the five become a single sitting's work.
+**What is left is not a credential any more.** T048 and T058 were driven through the running app on 2026-10-19 with
+the sign-in supplied per run (`scripts/ui-automation/ui-drive.ps1 -Action signin -Identifier <user> -Pin <pin>`). The
+remaining three want three different things: **data** for T069 (a current job whose disposition is Finished Goods, WIP
+or NCM), **one request per answer** for T079, and **three measurements** for T088. The automation itself no longer
+stands in the way — the six faults that did are fixed and recorded in `.github/memories/repo/ui-automation-drive.md`.
 
 ---
 
@@ -307,12 +316,15 @@ was decided in the task and must not be re-opened here.
 
 ## 4. Step 3 — the live end-to-end pass
 
-Drive the real application. The tooling is in `scripts/` and is documented in `docs/scripts/scripts-automation-ui-automation.md` — read §1 and §2
-of that file before the first click; it records the primitives, the timing constants and the two capabilities that do
-not exist (there is no `Invoke` for a hover, and `AutomationElement.FromPoint` answers "a pane" for WinUI content).
+Drive the real application. The tooling is in `scripts/` and is documented in `docs/scripts/scripts-automation-ui-automation.md` — read §1, §2
+and **§11** of that file before the first click; §1–§2 record the primitives, the timing constants and the two
+capabilities that do not exist (there is no `Invoke` for a hover, and `AutomationElement.FromPoint` answers "a pane" for
+WinUI content), and §11 lists the six driver faults that stopped the 2026-10-19 run and the fix for each.
 
 Sign-in: the app's own account and PIN. Pass them at run time (`scripts/ui-automation/ui-drive.ps1 -Action signin -Identifier <user>
--Pin <pin>`); **never** write a credential into the document, a script, a test or a commit.
+-Pin <pin>`); **never** write a credential into the document, a script, a test or a commit. The account is the person
+whose rows you mean to drive — `-User`/`-Identifier` default to `MTM_WAITLIST_DEV_USER` then `%USERNAME%`, and a
+credential the store refuses leaves the app sitting on the sign-in stage, which reads like a launch failure.
 
 | Task | Drive | Record against |
 |---|---|---|
@@ -325,8 +337,11 @@ Sign-in: the app's own account and PIN. Pass them at run time (`scripts/ui-autom
 
 T079's first item is the one that was missing a mechanism until T097 built it, so it is the item to watch: the hopper
 `Size` cell must enlarge its size's reference picture the way the card's other pictures do. The pictures live in the
-`Waitlist\Hoppers` folder under the configured picture folder, one file per size word (`Small.png`, `Medium.png`,
-`Large.png`); the folder is a setting on **Settings → Storage Paths** and the naming contract is
+`Waitlist\hopper` folder under the picture root, one file per size word (`Small`, `Medium`, `Large`, with a `.png`,
+`.jpg` or `.jpeg` extension — the plant's three files are JPEGs); the folder is a setting on
+**Settings → Pictures → Where the picture files are kept** with a
+**Browse** button beside it, its shipped
+default is the share's own `...\Images\Waitlist\hopper` path, and the naming contract is
 `docs/guides/guides-pictures-image-naming.md`. If a size's picture is absent the shared placeholder must draw — that is FR-080, not a defect.
 
 Tick each task **only** with the evidence in hand, and put the evidence in the task's own line — the file's own rule

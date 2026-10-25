@@ -189,6 +189,16 @@ triggers belong to `mtm_waitlist` and also match. **There is no `mtm_mock` scrip
 > `Database/Mock/Bootstrap/update_table_descriptions.sql` — leaving the existing six shapes' mirrors
 > untouched, and the service populated the shape on its next refresh (8 746 rows). The host now holds
 > **14 tables and 16 procedures**, which is the repository's own set.
+
+> **Correction 2026-10-21 — the repository now has eight shapes.** The work-order search window on the Setup
+> entry page reads a new shape, `work_order_search`. It adds one mirror table and its stage twin, one `_get` and
+> one `_refresh` procedure, so the repository's set is now **16 tables and 18 procedures** (two tables and two
+> procedures beyond the host's 2026-10-16 state). Until those four artifacts and the updated
+> `sp_visual_read_shape_freshness_get` are deployed, the new window is live-only: it works against Infor Visual
+> and returns nothing while Infor Visual is unreachable, because the mirror it would fall back to does not exist
+> yet. Deploy them in the same order as the 2026-10-16 note — the two table `create.sql` files, then the two
+> procedures, then `Database/Mock/Bootstrap/update_table_descriptions.sql` — and the service populates the shape
+> on its next refresh.
 ### 2.2 The running service is an older build
 
 Its own status API reports `"serviceVersion":"1.0.0"`, started **2026-10-05 12:19**; the repository is

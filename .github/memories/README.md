@@ -39,6 +39,11 @@ so those are machine-local and will NOT be committed when you push.
 - `repo/tool-budget.md` — which tool groups were disabled to get under the model's 128-tool ceiling
   (owner decisions, 2026-10-11), which must never be disabled, and the 2026-10-17 retirement of the
   MCP-based code-exploration server (exploration now runs on built-in code intelligence and search).
+- `repo/ui-automation-drive.md` — driving the app with Windows UI Automation: the five-minute recipe that works on
+  this workstation, and the ten roadblocks that stopped driven runs (empty `-Exe` default, thrown connection string,
+  hardcoded sign-in account, missing `TogglePattern`, single-look finds, a `NumberBox` that ignored `ValuePattern`,
+  the PIN, which MySQL to read the store from, walk steps that legitimately report `NOT REACHED`, and XamlMcp still
+  unwired) with the fix for each.
 - `repo/workstation-elevation.md` — which account to use when administrator rights are needed on this
   workstation, when elevation is *not* needed, and the owner-approved exception that lets it name a password.
 - `repo/workstation-secrets.md` — the `MTM_Waitlist.Mock.Service` host's per-user environment variables,

@@ -218,7 +218,7 @@ label must never be written to the store and must never be compared as though it
 
 ## 7. The sort control
 
-A flyout on the shell, beside the existing My Requests and building controls (FR-011). Implemented as a
+A flyout on the shell, beside the existing Local Work Centers and building controls (FR-011). Implemented as a
 `MenuFlyout` of `RadioMenuFlyoutItem` elements sharing a `GroupName` with `IsChecked` on the selected one — the
 documented WinUI 3 mechanism for mutually-exclusive menu options (Microsoft Learn, *Menu flyout and menu bar*).
 

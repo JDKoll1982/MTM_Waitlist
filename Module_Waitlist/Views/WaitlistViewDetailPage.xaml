@@ -9,7 +9,9 @@
     xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
     mc:Ignorable="d">
 
-    <Grid x:Name="ContentArea">
+    <Grid
+        x:Name="ContentArea"
+        MaxWidth="{StaticResource PageContentMaxWidth}">
         <ScrollViewer IsTabStop="True">
             <Grid
                 x:Name="ContentPanel"
@@ -125,25 +127,23 @@
                             Grid.Column="1"
                             FontWeight="SemiBold"
                             Text="Requested By" />
-                        <TextBlock
+                        <sharedControls:AutoScrollTextView
                             Grid.Row="1"
                             Grid.Column="2"
+                            VerticalAlignment="Center"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{x:Bind ViewModel.Item.RequestedByName, Mode=OneWay}"
-                            TextTrimming="CharacterEllipsis"
-                            TextWrapping="NoWrap" />
+                            Text="{x:Bind ViewModel.Item.RequestedByName, Mode=OneWay}" />
                         <TextBlock
                             Grid.Row="2"
                             Grid.Column="1"
                             FontWeight="SemiBold"
                             Text="Work Center" />
-                        <TextBlock
+                        <sharedControls:AutoScrollTextView
                             Grid.Row="2"
                             Grid.Column="2"
+                            VerticalAlignment="Center"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{x:Bind ViewModel.Item.RequestedPressName, Mode=OneWay}"
-                            TextTrimming="CharacterEllipsis"
-                            TextWrapping="NoWrap" />
+                            Text="{x:Bind ViewModel.Item.RequestedPressName, Mode=OneWay}" />
                         <TextBlock
                             Grid.Row="3"
                             Grid.Column="1"
@@ -423,11 +423,11 @@
                                         <!-- Who sent it, by name. The message type (created / accepted / completed /
                                              canceled / note updated) is deliberately not shown: the user needs to
                                              know who said something, not which audit event carried it. -->
-                                        <TextBlock
+                                        <sharedControls:AutoScrollTextView
                                             Grid.Column="1"
+                                            VerticalAlignment="Center"
                                             FontWeight="SemiBold"
-                                            Text="{x:Bind ActorDisplayName}"
-                                            TextTrimming="CharacterEllipsis" />
+                                            Text="{x:Bind ActorDisplayName}" />
                                         <!-- What was said, in the entry's own words. -->
                                         <TextBlock
                                             Grid.Column="2"

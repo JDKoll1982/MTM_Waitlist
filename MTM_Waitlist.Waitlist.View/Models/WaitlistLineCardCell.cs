@@ -2,11 +2,12 @@ using System.Collections.Generic;
 using System.Linq;
 
 using MTM_Waitlist.Module_Shared.Helpers;
+using MTM_Waitlist.Module_Waitlist.Helpers;
 
 namespace MTM_Waitlist.Module_Waitlist.Models;
 
 /// <summary>
-/// One resolved cell of a card's detail grid: the label a person reads on top, and the value beneath it
+/// One resolved cell of a card's detail grid: the label a person reads, and the value beside it on the same line
 /// (<c>data-model.md</c> §7).
 /// </summary>
 /// <remarks>
@@ -55,6 +56,29 @@ public sealed class WaitlistLineCardCell
     public int Order { get; init; }
 
     /// <summary>
+    /// The slot the detail panel places this cell in, in row-major order, or <c>-1</c> before the panel laid it
+    /// out. <see cref="CellsToDraw"/> is what fills it in.
+    /// </summary>
+    public int Slot { get; private set; } = -1;
+
+    /// <summary>
+    /// Whether the cell draws the hairline along its left edge. Only a cell in the panel's second column does:
+    /// the outer edge of the cell area carries no border of its own, so the line a person sees between two cells
+    /// is the separator, never a box around the data (FR-028).
+    /// </summary>
+    public bool DrawsLeftHairline => Slot >= 0 && WaitlistCardCellLayout.ColumnFor(Slot) > 0;
+
+    /// <summary>
+    /// Whether the cell draws the hairline along its top edge. Only a cell in the panel's second row does, so the
+    /// area's top edge carries no border of its own (FR-028).
+    /// </summary>
+    public bool DrawsTopHairline => Slot >= 0 && WaitlistCardCellLayout.RowFor(Slot) > 0;
+
+    /// <summary>Places the cell in a panel slot, which is what its hairlines are read from.</summary>
+    /// <param name="slot">The slot's zero-based position, in row-major order.</param>
+    internal void PlaceAt(int slot) => Slot = slot;
+
+    /// <summary>
     /// The part whose reference picture this cell opens, or empty for the many cells that open none
     /// (FR-078). On the hopper Items it is the size word itself, which is the key that size's reference
     /// picture is filed under.
@@ -77,6 +101,17 @@ public sealed class WaitlistLineCardCell
     /// <summary>Whether this cell opens a reference picture at all, whatever the picture resolved to.</summary>
     public bool OpensReferencePicture =>
         !string.IsNullOrWhiteSpace(ReferencePartNumber) && !string.IsNullOrWhiteSpace(ReferencePartScope);
+
+    /// <summary>
+    /// Whether the cell's value is a description, which the card draws through the application's shared one-line
+    /// scrolling text control rather than clipping it with an ellipsis (FR-053).
+    /// </summary>
+    /// <remarks>
+    /// It is derived from the label the cell was produced for rather than set by each surface, so the card, the
+    /// request page and any later reader of a cell agree about which values scroll. See
+    /// <see cref="WaitlistCardCellRules.DrawsScrollingText"/> for the rule itself.
+    /// </remarks>
+    public bool UsesScrollingText => WaitlistCardCellRules.DrawsScrollingText(Label);
 
     /// <summary>
     /// The picture the cell's value draws: the hopper's reference image, and the application's one shared
@@ -105,6 +140,11 @@ public sealed class WaitlistLineCardCell
             .Where(cell => cell is not null && cell.HasValue)
             .Select(cell => cell!)
             .OrderBy(cell => cell.Order)
+            .Select((cell, slot) =>
+            {
+                cell.PlaceAt(slot);
+                return cell;
+            })
             .ToArray();
     }
 }

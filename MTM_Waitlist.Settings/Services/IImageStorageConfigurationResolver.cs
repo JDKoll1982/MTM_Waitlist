@@ -47,6 +47,31 @@ public interface IImageStorageConfigurationResolver
     Task<string> GetHopperFolderPathAsync();
 
     /// <summary>
+    /// Gets the effective folder holding the lugger pictures, with database override support.
+    /// Resolution order:
+    /// 1. Database override from config_settings_values (<c>image_storage.lugger_folder_path</c>)
+    /// 2. appsettings.json ImageStorage.LuggerFolderPath
+    /// 3. Hard-coded default from <c>ConfigSettingKeys.ImageStorageLuggerFolderPathDefault</c>
+    /// </summary>
+    /// <returns>The effective lugger picture folder, absolute or relative to the picture folder.</returns>
+    /// <exception cref="InvalidOperationException">If configuration cannot be resolved</exception>
+    Task<string> GetLuggerFolderPathAsync();
+
+    /// <summary>
+    /// Gets the picture every surface draws where it has no picture of its own, with database override support.
+    /// Resolution order:
+    /// 1. Database override from config_settings_values (<c>image_storage.no_image_path</c>)
+    /// 2. appsettings.json ImageStorage.NoImagePath
+    /// 3. Hard-coded default from <c>ConfigSettingKeys.ImageStorageNoImagePathDefault</c>
+    /// </summary>
+    /// <returns>
+    /// The effective no-picture artwork, absolute or relative to the application folder. Blank means the artwork that
+    /// ships with the application.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">If configuration cannot be resolved</exception>
+    Task<string> GetNoImagePathAsync();
+
+    /// <summary>
     /// Gets the effective local picture cache folder with database override support.
     /// Resolution order:
     /// 1. Database override from config_settings_values (if set and not null)

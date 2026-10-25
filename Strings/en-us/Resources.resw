@@ -612,6 +612,32 @@
   <data name="Setup_DunnagePair_ScrapSelection.Message" xml:space="preserve">
     <value>Choose a scrap type or select "No Scrap" to continue.</value>
   </data>
+  <!-- Work-order search window (Setup entry page magnifier): the title, the two buttons the window shows, and
+       the three sentences it can say instead of a list. -->
+  <data name="Setup_WorkOrderSearch.Title" xml:space="preserve">
+    <value>Find a Work Order</value>
+  </data>
+  <data name="Setup_WorkOrderSearch.Accept" xml:space="preserve">
+    <value>Use Work Order</value>
+  </data>
+  <data name="Setup_WorkOrderSearch.Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Setup_WorkOrderSearch.Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="Setup_WorkOrderSearch.SelectionRequired" xml:space="preserve">
+    <value>Select a work order first.</value>
+  </data>
+  <data name="Setup_WorkOrderSearch.Searching" xml:space="preserve">
+    <value>Searching open work orders...</value>
+  </data>
+  <data name="Setup_WorkOrderSearch.NoMatches" xml:space="preserve">
+    <value>No open work orders match those filters.</value>
+  </data>
+  <data name="Setup_WorkOrderSearch.Failed" xml:space="preserve">
+    <value>The work orders could not be read just now. Try again.</value>
+  </data>
   <data name="Setup_NoDunnage.DialogTitle" xml:space="preserve">
     <value>Continue without dunnage?</value>
   </data>
@@ -624,11 +650,11 @@
   <data name="Setup_NoDunnage.Cancel" xml:space="preserve">
     <value>No</value>
   </data>
-  <data name="Waitlist_MyRequestsToggle.Header" xml:space="preserve">
-    <value>My Requests</value>
+  <data name="Waitlist_EmptyState.Message" xml:space="preserve">
+    <value>Tap the + button to add the first request for this Work Center.</value>
   </data>
-  <data name="Waitlist_MyRequestsToggle_AutomationProperties.Name" xml:space="preserve">
-    <value>Show only my requests</value>
+  <data name="Waitlist_EmptyState_Filtered.Message" xml:space="preserve">
+    <value>No requests are waiting at this computer's Local Work Centers. Turn the filter off to see every work center.</value>
   </data>
 
   <!-- Details page: a section whose read threw reports the failure in place with a retry, rather than
@@ -861,6 +887,9 @@
   <data name="RequestItem_pickup_outside_service.DisplayName" xml:space="preserve">
     <value>Outside Service</value>
   </data>
+  <data name="RequestItem_finished_product.DisplayName" xml:space="preserve">
+    <value>Finished Product</value>
+  </data>
   <data name="RequestItem_pickup_riser_table.DisplayName" xml:space="preserve">
     <value>Riser Table</value>
   </data>
@@ -868,10 +897,10 @@
     <value>Dunnage</value>
   </data>
   <data name="RequestItem_pickup_scrap.DisplayName" xml:space="preserve">
-    <value>Scrap / Offal removal</value>
+    <value>Scrap</value>
   </data>
   <data name="RequestItem_pickup_hopper.DisplayName" xml:space="preserve">
-    <value>Pickup Hopper (do not return)</value>
+    <value>Pickup Hopper</value>
   </data>
   <data name="RequestItem_deliver_coil.DisplayName" xml:space="preserve">
     <value>Coil</value>
@@ -880,7 +909,7 @@
     <value>Riser Table</value>
   </data>
   <data name="RequestItem_deliver_hopper.DisplayName" xml:space="preserve">
-    <value>Hopper (scrap)</value>
+    <value>Hopper</value>
   </data>
   <data name="RequestItem_deliver_flatstock.DisplayName" xml:space="preserve">
     <value>Flatstock</value>
@@ -1134,6 +1163,51 @@
   <data name="Waitlist_Card_OpenDetails.Text" xml:space="preserve">
     <value>Open details</value>
   </data>
+  <data name="PartStock_Dialog.Title" xml:space="preserve">
+    <value>Part stock</value>
+  </data>
+  <data name="PartStock_Dialog.Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="PartStock_Dialog.SourceLabel" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="PartStock_Dialog.SourceWipApp" xml:space="preserve">
+    <value>WIP App</value>
+  </data>
+  <data name="PartStock_Dialog.SourceVisualLive" xml:space="preserve">
+    <value>Infor Visual</value>
+  </data>
+  <data name="PartStock_Dialog.SourceVisualCached" xml:space="preserve">
+    <value>Infor Visual (saved copy)</value>
+  </data>
+  <data name="PartStock_Dialog.CachedAsOf" xml:space="preserve">
+    <value>Infor Visual could not be reached. Showing the saved copy from {0}.</value>
+  </data>
+  <data name="PartStock_Dialog.CachedUnknownAge" xml:space="preserve">
+    <value>Infor Visual could not be reached. Showing the saved copy.</value>
+  </data>
+  <data name="PartStock_Dialog.TotalLabel" xml:space="preserve">
+    <value>Total on hand</value>
+  </data>
+  <data name="PartStock_Dialog.LocationHeader" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="PartStock_Dialog.QuantityHeader" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="PartStock_Dialog.Loading" xml:space="preserve">
+    <value>Looking up this part...</value>
+  </data>
+  <data name="PartStock_Dialog.NoStock" xml:space="preserve">
+    <value>No stock is recorded for this part.</value>
+  </data>
+  <data name="PartStock_Dialog.NoLocations" xml:space="preserve">
+    <value>This part's stock is not held in any location this lookup can show.</value>
+  </data>
+  <data name="PartStock_Dialog.Unavailable" xml:space="preserve">
+    <value>The stock for this part could not be read right now.</value>
+  </data>
   <data name="Waitlist_Card_Ring.TimeLeft" xml:space="preserve">
     <value>Time left on this request</value>
   </data>
@@ -1151,9 +1225,6 @@
   </data>
   <data name="Waitlist_Card_DieShop.LocatedInDieShop" xml:space="preserve">
     <value>Located In Die Shop</value>
-  </data>
-  <data name="Waitlist_Card_PendingSource.InDevelopment" xml:space="preserve">
-    <value>In development</value>
   </data>
   <data name="Die Location" xml:space="preserve">
     <value>Die Location</value>
@@ -1287,6 +1358,15 @@
   </data>
   <data name="Shell_SortOrder.Label" xml:space="preserve">
     <value>Sort by</value>
+  </data>
+  <data name="Shell_LocalWorkCentersFilter_On.Label" xml:space="preserve">
+    <value>Local Work Centers</value>
+  </data>
+  <data name="Shell_LocalWorkCentersFilter_Off.Label" xml:space="preserve">
+    <value>All Requests</value>
+  </data>
+  <data name="Shell_LocalWorkCentersFilter_AutomationProperties.Name" xml:space="preserve">
+    <value>Show only this computer's Local Work Centers</value>
   </data>
   <data name="Shell_SignOut.Label" xml:space="preserve">
     <value>Sign out</value>
@@ -1684,6 +1764,12 @@
   </data>
   <data name="Permission_settings_session_length.Gates" xml:space="preserve">
     <value>Change how long a sign-in lasts.</value>
+  </data>
+  <data name="Permission_settings_lugger_arrangement.Label" xml:space="preserve">
+    <value>Lugger arrangement</value>
+  </data>
+  <data name="Permission_settings_lugger_arrangement.Gates" xml:space="preserve">
+    <value>Manage the luggers and the scrap types each one takes.</value>
   </data>
   <data name="Permission_setup_dunnage_quick_add.Label" xml:space="preserve">
     <value>Quick Add dunnage</value>
@@ -2286,11 +2372,88 @@
   <data name="Settings_PartPictures_Missing_NotListable.Text" xml:space="preserve">
     <value>{0} part numbers cannot be listed here: they are not read by any list this application already holds. Type one in above to give it a picture.</value>
   </data>
-  <data name="Settings_StoragePaths_SectionTitle.Text" xml:space="preserve">
-    <value>Where pictures are kept</value>
+  <!-- The single Pictures panel: the picture assignments, the picture folders and the copies kept on this
+       computer, behind one heading. -->
+  <data name="Settings_Images_SectionTitle.Text" xml:space="preserve">
+    <value>Pictures</value>
   </data>
-  <data name="Settings_StoragePaths_Description.Text" xml:space="preserve">
-    <value>The folder every picture sits under, the folder holding the key files, and how long a replaced picture is kept.</value>
+  <data name="Settings_Images_Description.Text" xml:space="preserve">
+    <value>Which pictures the app shows, where they are kept, and the copies on this computer.</value>
+  </data>
+  <data name="Settings_Images_Browse.Text" xml:space="preserve">
+    <value>Browse…</value>
+  </data>
+  <data name="Settings_Images_AssignmentsTitle.Text" xml:space="preserve">
+    <value>Pictures the app shows</value>
+  </data>
+  <data name="Settings_Images_AssignmentsDescription.Text" xml:space="preserve">
+    <value>Which picture an item or work center shows, and what it shows when it has none.</value>
+  </data>
+  <data name="Settings_Images_ItemPicturesTitle.Text" xml:space="preserve">
+    <value>Item pictures</value>
+  </data>
+  <data name="Settings_Images_ItemPicturesDescription.Text" xml:space="preserve">
+    <value>The picture each item uses across the app.</value>
+  </data>
+  <data name="Settings_Images_ItemPicturesAction.Content" xml:space="preserve">
+    <value>Manage items</value>
+  </data>
+  <data name="Settings_Images_WorkCenterPicturesTitle.Text" xml:space="preserve">
+    <value>Work center pictures</value>
+  </data>
+  <data name="Settings_Images_WorkCenterPicturesDescription.Text" xml:space="preserve">
+    <value>Pictures for work center selections and detail pages.</value>
+  </data>
+  <data name="Settings_Images_WorkCenterPicturesAction.Content" xml:space="preserve">
+    <value>Manage work centers</value>
+  </data>
+  <data name="Settings_Images_PartPicturesAction.Content" xml:space="preserve">
+    <value>Open part pictures</value>
+  </data>
+  <data name="Settings_Images_FoldersTitle.Text" xml:space="preserve">
+    <value>Where the picture files are kept</value>
+  </data>
+  <data name="Settings_Images_FoldersDescription.Text" xml:space="preserve">
+    <value>Where every picture is read from, and how long a replaced one is kept.</value>
+  </data>
+  <data name="Settings_Images_PictureFolderDescription.Text" xml:space="preserve">
+    <value>The folder every picture sits under.</value>
+  </data>
+  <data name="Settings_Images_DunnageRootDescription.Text" xml:space="preserve">
+    <value>Where the dunnage pictures live, one folder per type and part.</value>
+  </data>
+  <data name="Settings_Images_KeepDaysDescription.Text" xml:space="preserve">
+    <value>How long a replaced picture is kept before cleanup.</value>
+  </data>
+  <data name="Settings_Images_CacheTitle.Text" xml:space="preserve">
+    <value>Copies on this computer</value>
+  </data>
+  <data name="Settings_Images_CacheDescription.Text" xml:space="preserve">
+    <value>Pictures are copied here when the app starts, so the waitlist reads them from local disk. Changed pictures are copied again; deleted ones are removed.</value>
+  </data>
+  <data name="Settings_Images_CacheToggleTitle.Text" xml:space="preserve">
+    <value>Cache pictures on this computer</value>
+  </data>
+  <data name="Settings_Images_CacheToggleDescription.Text" xml:space="preserve">
+    <value>Applies to every computer. Off, pictures are read from the share.</value>
+  </data>
+  <data name="Settings_Images_CacheFolderTitle.Text" xml:space="preserve">
+    <value>Cache folder</value>
+  </data>
+  <data name="Settings_Images_CacheFolderDescription.Text" xml:space="preserve">
+    <value>Where the copies are kept, mirroring the share's folders.</value>
+  </data>
+  <data name="Settings_Images_CacheFolderSave.Content" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Settings_Images_CacheCopyTitle.Text" xml:space="preserve">
+    <value>Copy pictures now</value>
+  </data>
+  <data name="Settings_Images_CacheCopyDescription.Text" xml:space="preserve">
+    <value>Runs the same copy the app runs at startup, without a restart.</value>
+  </data>
+  <data name="Settings_Images_CacheCopyAction.Content" xml:space="preserve">
+    <value>Copy now</value>
   </data>
   <data name="Settings_StoragePaths_ImageFolder.Label" xml:space="preserve">
     <value>Picture folder</value>
@@ -2302,10 +2465,46 @@
     <value>Hopper picture folder</value>
   </data>
   <data name="Settings_StoragePaths_HopperFolder.Hint" xml:space="preserve">
-    <value>The three hopper size pictures live here, one file per size named after it: Small.png, Medium.png and Large.png. A relative path is read under the picture folder.</value>
+    <value>One file per size — Small, Medium, Large — as .png, .jpg or .jpeg. A relative path is read under the picture folder.</value>
+  </data>
+  <data name="Settings_StoragePaths_HopperFolderBrowse.Text" xml:space="preserve">
+    <value>Browse…</value>
+  </data>
+  <data name="Settings_StoragePaths_HopperFolderBrowse.Name" xml:space="preserve">
+    <value>Browse for the hopper picture folder</value>
   </data>
   <data name="Settings_StoragePaths_HopperFolderNeeded.Text" xml:space="preserve">
     <value>A hopper picture folder is needed before this can be saved.</value>
+  </data>
+  <data name="Settings_StoragePaths_LuggerFolder.Label" xml:space="preserve">
+    <value>Lugger picture folder</value>
+  </data>
+  <data name="Settings_StoragePaths_LuggerFolder.Hint" xml:space="preserve">
+    <value>One file per lugger, named Lugger01 to Lugger99, as .png, .jpg, .jpeg, .bmp or .gif. A relative path is read under the picture folder.</value>
+  </data>
+  <data name="Settings_StoragePaths_LuggerFolderBrowse.Text" xml:space="preserve">
+    <value>Browse…</value>
+  </data>
+  <data name="Settings_StoragePaths_LuggerFolderBrowse.Name" xml:space="preserve">
+    <value>Browse for the lugger picture folder</value>
+  </data>
+  <data name="Settings_StoragePaths_LuggerFolderNeeded.Text" xml:space="preserve">
+    <value>A lugger picture folder is needed before this can be saved.</value>
+  </data>
+  <data name="Settings_StoragePaths_NoImagePath.Label" xml:space="preserve">
+    <value>No picture image</value>
+  </data>
+  <data name="Settings_StoragePaths_NoImagePath.Hint" xml:space="preserve">
+    <value>Drawn wherever an item, work center or lugger has no picture of its own.</value>
+  </data>
+  <data name="Settings_StoragePaths_NoImagePathBrowse.Text" xml:space="preserve">
+    <value>Browse…</value>
+  </data>
+  <data name="Settings_StoragePaths_NoImagePathBrowse.Name" xml:space="preserve">
+    <value>Browse for the no picture image</value>
+  </data>
+  <data name="Settings_StoragePaths_NoImageMissing.Text" xml:space="preserve">
+    <value>Storage settings saved. That image was not found, so the built-in no-picture image is drawn.</value>
   </data>
   <data name="Settings_StoragePaths_ArchiveKeepDays.Label" xml:space="preserve">
     <value>Keep a replaced picture for (days)</value>
@@ -2444,5 +2643,129 @@
   </data>
   <data name="Settings_LogPanel_EntryPayload.Text" xml:space="preserve">
     <value>Payload</value>
+  </data>
+  <!-- Feature 013-lugger-location-config (task T008). The lugger arrangement screen and the notice strip. -->
+  <data name="Settings_Lugger_Arrangement.Title" xml:space="preserve">
+    <value>Lugger arrangement</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.EntryTitle" xml:space="preserve">
+    <value>Lugger arrangement</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.EntryDescription" xml:space="preserve">
+    <value>Name the luggers, set their status, and choose the scrap types each one takes.</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.NameLabel" xml:space="preserve">
+    <value>Lugger name</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.StatusLabel" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.StatusAvailable" xml:space="preserve">
+    <value>Available</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.StatusBackup" xml:space="preserve">
+    <value>Backup</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.StatusFull" xml:space="preserve">
+    <value>Full</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.StatusDoNotUse" xml:space="preserve">
+    <value>Do Not Use</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.ScrapTypeLabel" xml:space="preserve">
+    <value>Scrap type</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.DumpPointLabel" xml:space="preserve">
+    <value>Dump point</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.NoScrapTypes" xml:space="preserve">
+    <value>No scrap types</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.EditAction" xml:space="preserve">
+    <value>Edit arrangement</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.CloseEditorAction" xml:space="preserve">
+    <value>Close editor</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.AddAction" xml:space="preserve">
+    <value>Add lugger</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.RenameAction" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.RemoveAction" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.StatusAction" xml:space="preserve">
+    <value>Set status</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.AssignAction" xml:space="preserve">
+    <value>Assign scrap type</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.UnassignAction" xml:space="preserve">
+    <value>Unassign</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.PromoteAction" xml:space="preserve">
+    <value>Make dump point</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.CancelAction" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.ReasonLabel" xml:space="preserve">
+    <value>Reason</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.ReasonRequired" xml:space="preserve">
+    <value>A reason is required when a lugger is set to Do Not Use.</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.Unavailable" xml:space="preserve">
+    <value>The lugger arrangement could not be read. Try again.</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.WriteFailed" xml:space="preserve">
+    <value>That change could not be saved. The arrangement still shows what the store holds. Try the change again.</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.StoreOutOfDate" xml:space="preserve">
+    <value>This change could not be saved because the waitlist store is missing part of the lugger arrangement. The database needs updating before the arrangement can be changed.</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.RetryAction" xml:space="preserve">
+    <value>Try again</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.Refused" xml:space="preserve">
+    <value>That change was refused. Review the name and the reason, then try again.</value>
+  </data>
+  <data name="Lugger_Notice.LuggerAdded" xml:space="preserve">
+    <value>{0} was added.</value>
+  </data>
+  <data name="Lugger_Notice.LuggerAddedForScrap" xml:space="preserve">
+    <value>{0} was added for {1}.</value>
+  </data>
+  <data name="Lugger_Notice.LuggerRenamed" xml:space="preserve">
+    <value>{0} was renamed to {1}.</value>
+  </data>
+  <data name="Lugger_Notice.LuggerRenamedForScrap" xml:space="preserve">
+    <value>{0} was renamed to {1} for {2}.</value>
+  </data>
+  <data name="Lugger_Notice.LuggerRemoved" xml:space="preserve">
+    <value>{0} was removed.</value>
+  </data>
+  <data name="Lugger_Notice.LuggerRemovedForScrap" xml:space="preserve">
+    <value>{0} was removed from {1}.</value>
+  </data>
+  <data name="Lugger_Notice.StatusChanged" xml:space="preserve">
+    <value>{0} changed from {1} to {2} for {3}.</value>
+  </data>
+  <data name="Lugger_Notice.DumpPointPromoted" xml:space="preserve">
+    <value>The dump point for {2} moved from {0} to {1}.</value>
+  </data>
+  <data name="Lugger_Notice.AssignmentAdded" xml:space="preserve">
+    <value>{0} now takes {1}.</value>
+  </data>
+  <data name="Lugger_Notice.AssignmentRemoved" xml:space="preserve">
+    <value>{0} no longer takes {1}.</value>
+  </data>
+  <data name="Lugger_Notice.AssignmentReordered" xml:space="preserve">
+    <value>{0} moved from position {1} to {2} for {3}.</value>
+  </data>
+  <data name="Lugger_Notice.Fallback" xml:space="preserve">
+    <value>The lugger arrangement changed.</value>
   </data>
 </root>

@@ -250,12 +250,29 @@
                 </AutoSuggestBox.ItemTemplate>
             </AutoSuggestBox>
         </Grid>
+        <!--
+        The pane expands only when expanding it costs the page nothing.
+
+        The window's width is not the page's width. The content sits inside the pane plus the shell's own inset
+        (NavigationViewPageContentMargin, 56 either side), and every page caps its content column at 1080. An
+        expanded pane leaves the page  window - 260 - 112 - 17  and a compact rail leaves it  window - 48 - 112 - 17
+        (the 17 is the window's own chrome, measured rather than assumed). At the 1280 this setting used to carry,
+        crossing the threshold made the window forty pixels wider and the page two hundred and twelve pixels
+        narrower: measured on 2026-10-24, the page's viewport went from 1104 px at 1281 to 971 px at 1360, and every
+        settings row and waitlist card re-wrapped into the narrower column. That is the whole of the "scaling issue"
+        seen while taking screenshots at laptop widths.
+
+        1500 is comfortably past the 1469 at which the expanded pane would only just leave the 1080-px content
+        column intact, so the page never re-wraps because the window grew. Below it the rail stays compact, which is
+        also where a 15-inch screen at 125-150% scaling lives, so the page keeps its full width and the item labels
+        stay one hover away in a tooltip.
+        -->
         <NavigationView
             AutomationProperties.AutomationId="ShellPage_Navigation"
             x:Name="NavigationViewControl"
             Canvas.ZIndex="0"
             DisplayModeChanged="NavigationViewControl_DisplayModeChanged"
-            ExpandedModeThresholdWidth="1280"
+            ExpandedModeThresholdWidth="1500"
             OpenPaneLength="260"
             CompactPaneLength="48"
             Header="{x:Bind ViewModel}"
@@ -321,21 +338,21 @@
                                 Orientation="Horizontal"
                                 Spacing="6"
                                 VerticalAlignment="Center"
-                                Visibility="{Binding IsMyRequestsVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                                Visibility="{Binding IsWaitlistHeaderControlsVisible, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <TextBlock
                                     VerticalAlignment="Center"
                                     Style="{ThemeResource BodyTextBlockStyle}"
-                                    Text="{Binding MyRequestsFilterLabel}" />
+                                    Text="{Binding LocalWorkCentersFilterLabel}" />
                                 <ToggleSwitch
-                                    AutomationProperties.AutomationId="ShellPage_MyRequestsToggle"
+                                    AutomationProperties.AutomationId="ShellPage_LocalWorkCentersToggle"
                                     MinWidth="0"
                                     MinHeight="0"
                                     VerticalAlignment="Center"
-                                    IsOn="{Binding ShowMyRequestsOnly, Mode=TwoWay}"
-                                    Toggled="MyRequestsToggle_Toggled"
+                                    IsOn="{Binding ShowLocalWorkCentersOnly, Mode=TwoWay}"
+                                    Toggled="LocalWorkCentersToggle_Toggled"
                                     OffContent=""
                                     OnContent=""
-                                    AutomationProperties.Name="Show only my requests" />
+                                    AutomationProperties.Name="{Binding LocalWorkCentersFilterAutomationName}" />
                             </StackPanel>
                             <!-- What the list is sorted by. Every option shares one group name so the control
                                  offers them as a radio set; which one is ticked is set from the view model when
@@ -346,7 +363,7 @@
                                 Margin="16,0,0,0"
                                 VerticalAlignment="Center"
                                 Content="{Binding SortOrderLabel}"
-                                Visibility="{Binding IsMyRequestsVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+                                Visibility="{Binding IsWaitlistHeaderControlsVisible, Converter={StaticResource BoolToVisibilityConverter}}"
                                 shared:TooltipBehavior.ResourceKey="Shell_SortOrder_Tooltip"
                                 shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/ViewModels/ShellViewModel.cs|MTM_Waitlist.Core/Contracts/Services/WaitlistSortOrder.cs|MTM_Waitlist.Core/Services/UrgencyCalculator.cs"
                                 shared:TooltipBehavior.FallbackText="Choose what the list is sorted by.">
@@ -515,21 +532,21 @@
                                         Orientation="Horizontal"
                                         Spacing="6"
                                         VerticalAlignment="Center"
-                                        Visibility="{Binding IsMyRequestsVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        Visibility="{Binding IsWaitlistHeaderControlsVisible, Converter={StaticResource BoolToVisibilityConverter}}">
                                         <TextBlock
                                             VerticalAlignment="Center"
                                             Style="{ThemeResource BodyTextBlockStyle}"
-                                            Text="{Binding MyRequestsFilterLabel}" />
+                                            Text="{Binding LocalWorkCentersFilterLabel}" />
                                         <ToggleSwitch
-                                            AutomationProperties.AutomationId="ShellPage_MyRequestsToggleDefault"
+                                            AutomationProperties.AutomationId="ShellPage_LocalWorkCentersToggleDefault"
                                             MinWidth="0"
                                             MinHeight="0"
                                             VerticalAlignment="Center"
-                                            IsOn="{Binding ShowMyRequestsOnly, Mode=TwoWay}"
-                                            Toggled="MyRequestsToggle_Toggled"
+                                            IsOn="{Binding ShowLocalWorkCentersOnly, Mode=TwoWay}"
+                                            Toggled="LocalWorkCentersToggle_Toggled"
                                             OffContent=""
                                             OnContent=""
-                                            AutomationProperties.Name="Show only my requests" />
+                                            AutomationProperties.Name="{Binding LocalWorkCentersFilterAutomationName}" />
                                     </StackPanel>
                                     <!-- The same sort control as the navigation-view header carries, for the shell
                                          state where no page supplies its own header. -->
@@ -539,7 +556,7 @@
                                         Margin="16,0,0,0"
                                         VerticalAlignment="Center"
                                         Content="{Binding SortOrderLabel}"
-                                        Visibility="{Binding IsMyRequestsVisible, Converter={StaticResource BoolToVisibilityConverter}}"
+                                        Visibility="{Binding IsWaitlistHeaderControlsVisible, Converter={StaticResource BoolToVisibilityConverter}}"
                                         shared:TooltipBehavior.ResourceKey="Shell_SortOrder_Tooltip"
                                         shared:TooltipBehavior.AssociatedFiles="Module_Core/Views/ShellPage.xaml|Module_Core/ViewModels/ShellViewModel.cs|MTM_Waitlist.Core/Contracts/Services/WaitlistSortOrder.cs|MTM_Waitlist.Core/Services/UrgencyCalculator.cs"
                                         shared:TooltipBehavior.FallbackText="Choose what the list is sorted by.">

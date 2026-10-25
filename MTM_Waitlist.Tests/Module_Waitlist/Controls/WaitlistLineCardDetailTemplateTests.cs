@@ -23,15 +23,15 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.Controls;
 /// Two halves. The <b>markup</b> half reads the per-Item template dictionary from disk as XML, because it
 /// lives in the application project this suite deliberately does not reference: it pins that the dictionary
 /// carries one template for each of the twenty-four Items, that every template draws its cells through the
-/// one shared cell (label on top, value beneath, no label at all on the die-shop cell), and that each slot's
+/// one shared cell (label and value on one line, no label at all on the die-shop cell), and that each slot's
 /// span and visibility are read off the row's own cell count.
 /// </para>
 /// <para>
 /// The <b>resolution</b> half drives <see cref="WaitlistViewViewModel.ResolveDeclaredCells"/> against the
 /// <b>shipped</b> declaration seed, so what is checked is the cells the real configuration produces rather
 /// than a copy of it: every drawn label is one of the Item's settled cells, every declared field the card
-/// does not show stays undrawn, and the two cells with no source of their own — <c>Destination</c> and
-/// <c>Lugger Location</c> — behave as the spec writes them (FR-054 to FR-060, FR-089).
+/// does not show stays undrawn, and the one cell whose value the requesting job's arrangement decides —
+/// <c>Lugger Location</c> on <c>pickup-scrap</c> — names the lugger the arrangement settled (FR-022 to FR-027).
 /// </para>
 /// </remarks>
 [TestClass]
@@ -42,6 +42,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
     private const string CellTemplateKey = "WaitlistLineCardDetailCell";
     private const string ScrollingCellTemplateKey = "WaitlistLineCardDetailScrollingCell";
     private const string PictureCellTemplateKey = "WaitlistLineCardDetailPictureCell";
+    private const string CellTemplateSelectorKey = "WaitlistCardCellTemplateSelector";
     private const string SpanConverterKey = "WaitlistCardCellSpanConverter";
     private const string VisibilityConverterKey = "WaitlistCardCellVisibilityConverter";
     private const string LabelConverterKey = "WaitlistCardCellLabelConverter";
@@ -69,7 +70,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
         ["pickup-hopper"] = ["Size"],
         ["deliver-coil"] = ["Coil number", "Quantity in house", "Coil description", "Average coil weight"],
         ["deliver-flatstock"] = ["Part", "Quantity", "Destination"],
-        ["deliver-component"] = ["Component", "Total Qty In House", "Item Type"],
+        ["deliver-component"] = ["Part description", "Total Qty In House", "Item Type"],
         ["deliver-die"] = ["Die", "Die Location", "Pickup location"],
         ["deliver-dunnage"] = ["Dunnage part", "Home Location", "Home location"],
         ["deliver-wrong-coil"] = ["Coil number", "Correct coil"],
@@ -91,7 +92,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
         ["pickup-die"] = ["Quantity"],
         ["deliver-die"] = ["Quantity"],
         ["pickup-component"] = ["Part description", "Quantity"],
-        ["deliver-component"] = ["Part description", "Quantity"],
+        ["deliver-component"] = ["Component", "Quantity"],
         ["pickup-dunnage"] = ["Description", "Quantity on hand"],
         ["deliver-dunnage"] = ["Description", "Quantity on hand"],
         ["pickup-scrap"] = ["Quantity involved", "Scrap lugger"],
@@ -149,12 +150,68 @@ public sealed class WaitlistLineCardDetailTemplateTests
     }
 
     /// <summary>
-    /// Every template draws its cells through the one shared cell: the label on top with the value beneath and
-    /// the two touching, the label taken from the cell's own declaration rather than written into the markup,
-    /// and no label at all on the label-less die-shop cell (FR-028, FR-055, FR-059, FR-104).
+    /// The three cell templates share one type scale, one gap between the label and its value, and one left edge,
+    /// so a description cell and a plain cell beside it do not read at two different sizes or start at two
+    /// different places (FR-028, FR-053).
+    /// </summary>
+    /// <remarks>
+    /// The left edge is the cells' own; the card centres the grid they sit in, which is what keeps a panel whose
+    /// lower row is empty in the middle of its section rather than against the top of it (FR-027). Centring each
+    /// pair inside its cell was tried and rejected: it puts the six cells' contents on six different axes.
+    /// </remarks>
+    [TestMethod]
+    public void UI_WaitlistLineCardDetailTemplateTests_EveryCellTemplate_SharesTheOneTypeScaleGapAndLeftEdge()
+    {
+        foreach (var (key, anatomy) in new[]
+        {
+            (CellTemplateKey, "the plain cell"),
+            (ScrollingCellTemplateKey, "the scrolling cell"),
+            (PictureCellTemplateKey, "the picture cell"),
+        })
+        {
+            var root = TemplateFor(LoadTemplateDictionary(), key).Elements().Single();
+            var grid = root.Elements().Single();
+
+            Assert.AreEqual(
+                "12,5",
+                (string?)root.Attribute("Padding"),
+                $"{anatomy} does not carry the cell's own padding, so its text sits against the rule beside it (FR-028).");
+            Assert.IsTrue(
+                double.Parse((string?)grid.Attribute("ColumnSpacing") ?? "0", CultureInfo.InvariantCulture) >= 6d,
+                $"{anatomy} draws its label and value with no column gap, so the separator's trailing space is collapsed and the pair reads run-together (FR-028).");
+
+            Assert.AreEqual(
+                "Stretch",
+                (string?)grid.Attribute("HorizontalAlignment"),
+                $"{anatomy} does not start its label and value at the cell's left edge, so one row of cells starts at one place and the next at another (FR-028).");
+
+            var label = root
+                .Descendants(s_presentation + "TextBlock")
+                .Single(text => ((string?)text.Attribute("Text"))?.Contains("Label", StringComparison.Ordinal) == true);
+
+            Assert.AreEqual(
+                "12",
+                (string?)label.Attribute("FontSize"),
+                $"{anatomy} draws its label at a different size from the other cells, so the panel has no single type scale (FR-028).");
+
+            var value = root
+                .Descendants()
+                .Single(element => ((string?)element.Attribute("Text"))?.Contains("Value", StringComparison.Ordinal) == true);
+
+            Assert.AreEqual(
+                "15",
+                (string?)value.Attribute("FontSize"),
+                $"{anatomy} draws its value at a different size from the other cells, so the panel has no single type scale (FR-028).");
+        }
+    }
+
+    /// <summary>
+    /// Every template draws its cells through the one shared cell: the label on the same line as its value, the
+    /// two read as `Label: value`, the label taken from the cell's own declaration rather than written into the
+    /// markup, and no label at all on the label-less die-shop cell (FR-028, FR-055, FR-059, FR-104).
     /// </summary>
     [TestMethod]
-    public void UI_WaitlistLineCardDetailTemplateTests_EveryTemplate_DrawsItsCellsLabelOnTopAndValueBeneath()
+    public void UI_WaitlistLineCardDetailTemplateTests_EveryTemplate_DrawsItsCellsLabelAndValueOnOneLine()
     {
         var dictionary = LoadTemplateDictionary();
         var cell = TemplateFor(dictionary, CellTemplateKey);
@@ -168,6 +225,10 @@ public sealed class WaitlistLineCardDetailTemplateTests
             (string?)label!.Attribute("Text") ?? string.Empty,
             LabelConverterKey,
             "The cell's label is not resolved through the resource mechanism, so a declaration naming a resource would show its key (FR-104).");
+        StringAssert.Contains(
+            (string?)label.Attribute("Text") ?? string.Empty,
+            "ConverterParameter=separator",
+            "The label carries no separator, so it would run straight into its value instead of reading `Label: value` (FR-028).");
 
         var values = cell
             .Descendants(s_presentation + "TextBlock")
@@ -177,14 +238,41 @@ public sealed class WaitlistLineCardDetailTemplateTests
         Assert.AreEqual(1, values.Count, "The shared cell must draw the cell's value exactly once (FR-028).");
         Assert.IsTrue(
             label.IsBefore(values[0]),
-            "The label is not drawn above the value (FR-028).");
+            "The label is not drawn ahead of the value (FR-028).");
 
-        var stack = label.Parent!;
+        var row = label.Parent!;
 
         Assert.AreEqual(
-            0d,
-            double.Parse((string?)stack.Attribute("Spacing") ?? "0", CultureInfo.InvariantCulture),
-            "The label does not abut its value: the cell leaves a gap between the two (FR-028).");
+            "Grid",
+            row.Name.LocalName,
+            "The label and its value are stacked rather than read on one line (FR-028).");
+        Assert.AreEqual(
+            "1",
+            (string?)values[0].Attribute("Grid.Column"),
+            "The value is not the second column of the label's own row, so the two do not read as `Label: value` (FR-028).");
+
+        // The gap between the label and its value is layout, not a character: the separator the label carries ends
+        // with a space, and a trailing space at the end of a line is collapsed, so `Part Type: WIP` was drawn as
+        // `Part Type:WIP`. A real column gap is the only thing that survives that.
+        Assert.IsTrue(
+            double.Parse((string?)row.Attribute("ColumnSpacing") ?? "0", CultureInfo.InvariantCulture) >= 6d,
+            "The label and its value are drawn with no column gap, so the separator's trailing space is collapsed and the pair reads run-together (FR-028).");
+
+        // The cell's two halves are told apart by weight, size and colour rather than by position alone: the label
+        // sits small and secondary, the value larger, semibold and in the primary text colour, so the answer reads
+        // first and the question that produced it second.
+        Assert.AreEqual(
+            "12",
+            (string?)label.Attribute("FontSize"),
+            "The cell's label is drawn at the wrong size for the card's type scale (FR-028).");
+        Assert.AreEqual(
+            "15",
+            (string?)values[0].Attribute("FontSize"),
+            "The cell's value is drawn at the wrong size for the card's type scale (FR-028).");
+        StringAssert.Contains(
+            (string?)values[0].Attribute("FontWeight") ?? string.Empty,
+            "SemiBold",
+            "The cell's value is not drawn a weight heavier than the body, so the label and the value read as one run of text (FR-028).");
 
         // The one cell with no label at all is the die-shop cell, and its label is hidden rather than blanked.
         StringAssert.Contains(
@@ -192,18 +280,19 @@ public sealed class WaitlistLineCardDetailTemplateTests
             "IsLabelLess",
             "The cell's label is not hidden for the label-less cell, so the die-shop phrase would carry an empty label above it (FR-055).");
 
-        // Each cell closes itself off from its neighbours along its top and its left edge, and the grids below
-        // carry no spacing of their own: the two together are what draws one continuous line between two cells
-        // and one under the title, rather than a gap with a floating rule in it (FR-028).
+        // Each cell closes itself off from the cell above it and the cell to its left, and from nothing else, so
+        // the cell area carries no border around its outside edge: the thickness is decided by the slot the cell
+        // was laid out in, through one converter, rather than by an offset per slot in every Item's template
+        // (FR-028).
         foreach (var (key, anatomy) in new[] { (CellTemplateKey, "the plain cell"), (ScrollingCellTemplateKey, "the scrolling cell"), (PictureCellTemplateKey, "the picture cell") })
         {
             var root = TemplateFor(dictionary, key).Elements().Single();
 
             Assert.AreEqual("Border", root.Name.LocalName, $"{anatomy} is not closed off by a border, so nothing separates two cells (FR-028).");
-            Assert.AreEqual(
-                "1,1,0,0",
-                (string?)root.Attribute("BorderThickness"),
-                $"{anatomy}'s separator is not a hairline along its top and left edge (FR-028).");
+            StringAssert.Contains(
+                (string?)root.Attribute("BorderThickness") ?? string.Empty,
+                "WaitlistCardCellBorderConverter",
+                $"{anatomy}'s separator is a fixed thickness rather than the one its slot calls for, so the cell area would keep a border around its outside edge (FR-028).");
             Assert.IsNotNull(
                 root.Attribute("BorderBrush"),
                 $"{anatomy}'s separator is drawn in no colour, so it would be invisible (FR-028).");
@@ -233,12 +322,17 @@ public sealed class WaitlistLineCardDetailTemplateTests
 
             foreach (var slot in slots)
             {
-                var presenter = (string?)slot.Attribute("ContentTemplate") ?? string.Empty;
+                // A cell's line is chosen by the cell itself through the cell selector, which resolves to one of
+                // the two shared line templates; the hopper Items' pictured cell names its template outright.
+                var presenter = (string?)slot.Attribute("ContentTemplateSelector") is { Length: > 0 } selector
+                    ? selector
+                    : (string?)slot.Attribute("ContentTemplate") ?? string.Empty;
 
                 Assert.IsTrue(
                     presenter.Contains(CellTemplateKey, StringComparison.Ordinal)
                         || presenter.Contains(ScrollingCellTemplateKey, StringComparison.Ordinal)
-                        || presenter.Contains(PictureCellTemplateKey, StringComparison.Ordinal),
+                        || presenter.Contains(PictureCellTemplateKey, StringComparison.Ordinal)
+                        || presenter.Contains(CellTemplateSelectorKey, StringComparison.Ordinal),
                     $"`{key}` draws a cell through something other than a shared cell, so the anatomy differs per Item (FR-028).");
 
                 // A cell that kept to its own height would leave the rule between two rows of cells stopping at
@@ -299,24 +393,49 @@ public sealed class WaitlistLineCardDetailTemplateTests
     }
 
     /// <summary>
-    /// `other` draws the request description in full and scrolling rather than clipped, through the application's
-    /// shared scrolling text control (FR-053).
+    /// Every cell whose value is a description is drawn in full and scrolling rather than clipped, through the
+    /// application's shared scrolling text control, and the choice is made by the cell rather than pinned per slot
+    /// (FR-053).
     /// </summary>
+    /// <remarks>
+    /// <c>other</c> was the first description on a card, and its template named the scrolling cell outright — which
+    /// left the part description on <c>deliver-component</c> and the coil description on both coil Items clipped
+    /// with an ellipsis. Every slot now asks the cell selector, and the cell's own label decides, so an Item added
+    /// later inherits the behaviour without its template being edited.
+    /// </remarks>
     [TestMethod]
-    public void UI_WaitlistLineCardDetailTemplateTests_Other_DrawsTheRequestDescriptionInFullThroughTheScrollingText()
+    public void UI_WaitlistLineCardDetailTemplateTests_EveryDescriptionCell_IsDrawnInFullThroughTheScrollingText()
     {
         var dictionary = LoadTemplateDictionary();
-        var other = TemplateFor(dictionary, "WaitlistLineCardDetail_other");
 
-        var slot = Slots(other)[0];
+        // The selector is declared after the two line templates it names, and both are wired: a selector with no
+        // templates would draw nothing where a cell belongs.
+        var selector = dictionary.Root!
+            .Elements()
+            .SingleOrDefault(element => element.Name.LocalName == "WaitlistCardCellTemplateSelector");
+        Assert.IsNotNull(selector, "The cell selector is not declared, so a cell's own label cannot choose its line (FR-053).");
+        StringAssert.Contains((string?)selector!.Attribute("PlainTemplate") ?? string.Empty, CellTemplateKey, "The selector's plain line is not the shared cell.");
+        StringAssert.Contains((string?)selector.Attribute("ScrollingTemplate") ?? string.Empty, ScrollingCellTemplateKey, "The selector's scrolling line is not the shared scrolling cell.");
 
-        StringAssert.Contains(
-            (string?)slot.Attribute("ContentTemplate") ?? string.Empty,
-            ScrollingCellTemplateKey,
-            "`other`'s description is drawn as a fixed cell, so a long description would be clipped rather than scrolled (FR-053).");
+        // Every slot asks it: no Item pins a line template of its own any more, and no Item can forget to.
+        foreach (var (key, template) in DetailTemplates())
+        {
+            foreach (var slot in Slots(template))
+            {
+                if (((string?)slot.Attribute("ContentTemplate") ?? string.Empty).Contains(PictureCellTemplateKey, StringComparison.Ordinal))
+                {
+                    continue;
+                }
 
+                StringAssert.Contains(
+                    (string?)slot.Attribute("ContentTemplateSelector") ?? string.Empty,
+                    CellTemplateSelectorKey,
+                    $"`{key}` draws a cell through a pinned template, so a description in that slot would be clipped rather than scrolled (FR-053).");
+            }
+        }
+
+        // The scrolling line itself is the shared control, drawing the cell's own value.
         var scrolling = TemplateFor(dictionary, ScrollingCellTemplateKey);
-
         var scroller = scrolling
             .Descendants()
             .SingleOrDefault(element => element.Name.LocalName == "AutoScrollTextView");
@@ -328,16 +447,36 @@ public sealed class WaitlistLineCardDetailTemplateTests
             (string?)scroller!.Attribute("Text") ?? string.Empty,
             "Value",
             "The scrolling cell does not draw the cell's own value (FR-053).");
+    }
 
-        var elsewhere = DetailTemplates()
-            .Where(pair => pair.Key != "WaitlistLineCardDetail_other")
-            .SelectMany(pair => Slots(pair.Value))
-            .Count(slot => ((string?)slot.Attribute("ContentTemplate"))?.Contains(ScrollingCellTemplateKey, StringComparison.Ordinal) == true);
+    /// <summary>
+    /// The rule the selector reads: a cell whose label says its value is a description scrolls, and no other cell
+    /// does (FR-053).
+    /// </summary>
+    [TestMethod]
+    public void UI_WaitlistLineCardDetailTemplateTests_OnlyDescriptionValues_AreDrawnByTheScrollingText()
+    {
+        // Every description label the shipped declarations carry, drawn on a card or not.
+        foreach (var label in new[] { "Request description", "Part description", "Coil description", "Description", "COIL DESCRIPTION" })
+        {
+            Assert.IsTrue(
+                WaitlistCardCellRules.DrawsScrollingText(label),
+                $"'{label}' is a description, so its value must scroll rather than be clipped (FR-053).");
+            Assert.IsTrue(
+                new WaitlistLineCardCell { Label = label, Value = "a sentence" }.UsesScrollingText,
+                $"A cell declared as '{label}' does not ask the card for the scrolling line (FR-053).");
+        }
 
-        Assert.AreEqual(
-            0,
-            elsewhere,
-            "A fixed-value cell is drawn as the scrolling line, which is for the request description alone (FR-053).");
+        // Nothing else does: a code, a count, a place and a phrase stay on the fixed line.
+        foreach (var label in new[] { "Part", "Total Qty In House", "Item Type", "Die Location", "Lugger Location", "Scrap Type", "Size", "# of Skids", "" })
+        {
+            Assert.IsFalse(
+                WaitlistCardCellRules.DrawsScrollingText(label),
+                $"'{label}' is not a description, so it must not take the scrolling line (FR-053).");
+            Assert.IsFalse(
+                new WaitlistLineCardCell { Label = label, Value = "a value" }.UsesScrollingText,
+                $"A cell declared as '{label}' asks for the scrolling line and does not hold a description (FR-053).");
+        }
     }
 
     /// <summary>
@@ -378,13 +517,6 @@ public sealed class WaitlistLineCardDetailTemplateTests
                 cells > 2,
                 WaitlistCardCellLayout.CarriesBottomRow(cells),
                 $"With {cells} cells the panel's bottom row is drawn when it should collapse, or the reverse (FR-026).");
-
-            // No cells is the same statement as no data: the title pair is then the whole of the zone's
-            // content and is centred in the card, and any other count keeps it over its cells (FR-027).
-            Assert.AreEqual(
-                cells == 0,
-                WaitlistCardCellLayout.TitleIsCentred(cells),
-                $"With {cells} cells the title pair is centred when it should sit over its cells, or the reverse (FR-027).");
         }
 
         // And every template reads that rule off the row's own cell count rather than hard-setting a shape.
@@ -780,11 +912,11 @@ public sealed class WaitlistLineCardDetailTemplateTests
 
     /// <summary>
     /// `Destination` is drawn on `deliver-flatstock` alone, resolved from the request's own requesting work
-    /// centre rather than from anything the requester was asked, and `Lugger Location` is declared and drawn with
-    /// the plainly-worded placeholder its unbuilt source leaves it with (FR-034, FR-042, FR-057, FR-089).
+    /// centre rather than from anything the requester was asked, and the scrap card's `Lugger Location` names the
+    /// lugger the arrangement settled for the job's scrap type (FR-022, FR-027, FR-042, FR-057).
     /// </summary>
     [TestMethod]
-    public void ViewModel_WaitlistLineCardDetailTemplateTests_ResolveDeclaredCells_DrawsDestinationFromTheRequestAndPlacesTheLuggerLocation()
+    public void ViewModel_WaitlistLineCardDetailTemplateTests_ResolveDeclaredCells_DrawsDestinationFromTheRequestAndNamesTheScrapsLugger()
     {
         var answers = Answers([("Destination", "Somewhere else"), (WaitlistCardCellRules.DieShopAnswerLabel, "true")]);
 
@@ -813,34 +945,129 @@ public sealed class WaitlistLineCardDetailTemplateTests
                 "Destination is read from an answer, which is the question that was retired (FR-057, FR-089).");
         }
 
-        // Lugger Location stays declared on the scrap Item, and its cell is now DRAWN with a plainly-worded
-        // placeholder because its source is designed but not yet built: hiding it told the person nothing, while a
-        // placeholder says the cell is coming. The future source is a resolver arm and no card change (FR-034).
+        // `Lugger Location` stays declared on the scrap Item and is drawn from the value the arrangement read
+        // handed the snapshot, so the handler reads the lugger to walk to; the label is still the declared one and
+        // the card's layout does not change (FR-022, FR-027).
         Assert.IsTrue(
             WaitlistCardCellRules.IsCell("pickup-scrap", "Lugger Location"),
-            "Lugger Location is no longer a cell of `pickup-scrap`, so a future source could not reveal it without a card change (FR-034).");
+            "Lugger Location is no longer a cell of `pickup-scrap`, so the resolved lugger could never reach the card (FR-027).");
+
+        var scrapDeclaration = Declaration(
+            "pickup-scrap",
+            ("Scrap type", RequestItemFieldDefinition.Sources.Job, 1, false),
+            ("Lugger Location", RequestItemFieldDefinition.Sources.Job, 2, false));
 
         var scrap = WaitlistViewViewModel.CreateSessionOrder(
             Shape("pickup-scrap"),
-            Job(),
-            Declaration(
-                "pickup-scrap",
-                ("Scrap type", RequestItemFieldDefinition.Sources.Job, 1, false),
-                ("Lugger Location", RequestItemFieldDefinition.Sources.Job, 2, false)));
+            ScrapJob(),
+            scrapDeclaration);
 
         var lugger = scrap.Cells.SingleOrDefault(cell => string.Equals(cell.Label, "Lugger Location", StringComparison.OrdinalIgnoreCase));
 
         Assert.IsNotNull(
             lugger,
-            "Lugger Location is not drawn, so the person sees no cell at all where a value is coming (FR-034).");
+            "The scrap card draws no Lugger Location cell although the arrangement named a lugger for the job's scrap type (FR-022).");
         Assert.AreEqual(
-            WaitlistCardCellRules.PendingSourcePhrase("pickup-scrap", "Lugger Location"),
+            "Door 6 Lugger",
             lugger!.Value,
-            "The Lugger Location cell does not draw the in-development placeholder, so it would be showing a value nothing produced (FR-034, FR-089).");
-        Assert.IsTrue(scrap.Cells.Any(cell => string.Equals(cell.Label, "Scrap type", StringComparison.OrdinalIgnoreCase)), "The scrap Item's own Scrap Type cell went missing with it (FR-034).");
+            "The Lugger Location cell does not draw the lugger the snapshot carries, so the handler is sent nowhere (FR-022).");
+        Assert.IsTrue(scrap.Cells.Any(cell => string.Equals(cell.Label, "Scrap type", StringComparison.OrdinalIgnoreCase)), "The scrap Item's own Scrap Type cell went missing with it (FR-030).");
+    }
+
+    /// <summary>
+    /// The scrap card reads as one statement — the material, then where it is dumped — so `Lugger Location` is
+    /// drawn in the second column beside `Scrap type`, in the top row, whatever order the Item's declaration
+    /// happens to carry.
+    /// </summary>
+    [TestMethod]
+    public void ViewModel_WaitlistLineCardDetailTemplateTests_ResolveDeclaredCells_PlacesTheLuggerInTheSecondColumnBesideTheScrapType()
+    {
+        // The shipped declaration: scrap type first, the lugger last, with the three fields the card excludes
+        // sitting between them.
+        var shipped = WaitlistViewViewModel.CreateSessionOrder(
+            Shape("pickup-scrap"),
+            ScrapJob(),
+            Declaration(
+                "pickup-scrap",
+                ("Scrap Type", RequestItemFieldDefinition.Sources.Job, 1, false),
+                ("Quantity involved", RequestItemFieldDefinition.Sources.Job, 2, false),
+                ("Scrap lugger", RequestItemFieldDefinition.Sources.Job, 3, false),
+                ("Pickup work center", RequestItemFieldDefinition.Sources.Fixed, 4, false),
+                ("Lugger Location", RequestItemFieldDefinition.Sources.Job, 5, false)));
+
+        Assert.AreEqual(2, shipped.Cells.Count, "The scrap card draws a cell other than the scrap type and the lugger (FR-030, FR-027).");
+        Assert.AreEqual("Scrap Type", shipped.Cells[0].Label, "The scrap card no longer opens with the scrap type, so the lugger is not the second column (FR-027).");
+        Assert.AreEqual("Lugger Location", shipped.Cells[1].Label, "The lugger is not drawn beside the scrap type (FR-022, FR-027).");
+
+        // A store whose declaration lists the two the other way round draws the same card: the pair's order is
+        // the card's rule, not the configuration's.
+        var reversed = WaitlistViewViewModel.CreateSessionOrder(
+            Shape("pickup-scrap"),
+            ScrapJob(),
+            Declaration(
+                "pickup-scrap",
+                ("Lugger Location", RequestItemFieldDefinition.Sources.Job, 1, false),
+                ("Scrap Type", RequestItemFieldDefinition.Sources.Job, 2, false)));
+
+        Assert.AreEqual("Scrap Type", reversed.Cells[0].Label, "The lugger took the first column because the declaration listed it first.");
+        Assert.AreEqual("Lugger Location", reversed.Cells[1].Label, "The lugger is not the second column when the declaration lists it first.");
+
+        // And the second column of the top row is where the template draws the second cell.
+        Assert.AreEqual(0, WaitlistCardCellLayout.RowFor(1), "The second cell is not on the panel's top row.");
+        Assert.AreEqual(1, WaitlistCardCellLayout.ColumnFor(1), "The second cell is not in the panel's second column.");
+        Assert.AreEqual(1, WaitlistCardCellLayout.ColumnSpanFor(1, 2), "A two-cell panel draws each cell in its own column rather than spanning.");
+    }
+
+    /// <summary>
+    /// A scrap card whose job carries no lugger — no scrap decision, or a scrap type the arrangement has no lugger
+    /// for — draws no lugger cell at all, never a dash and never a blank, and no card anywhere still draws the
+    /// retired "In development" placeholder (FR-025, FR-026, FR-039).
+    /// </summary>
+    [TestMethod]
+    public void ViewModel_WaitlistLineCardDetailTemplateTests_ResolveDeclaredCells_OmitsTheLuggerCellWhenNothingResolvedAndNeverDrawsInDevelopment()
+    {
+        var scrapDeclaration = Declaration(
+            "pickup-scrap",
+            ("Scrap type", RequestItemFieldDefinition.Sources.Job, 1, false),
+            ("Lugger Location", RequestItemFieldDefinition.Sources.Job, 2, false));
+
+        // The job's scrap type is real, and the arrangement answered no lugger for it: the cell is absent rather
+        // than filled with a substitute value (FR-026).
+        var gap = WaitlistViewViewModel.CreateSessionOrder(
+            Shape("pickup-scrap"),
+            Job() with { ScrapType = "Galvanized Steel" },
+            scrapDeclaration);
+
         Assert.IsFalse(
-            WaitlistCardCellRules.IsPendingSourceField("pickup-scrap", "Scrap type"),
-            "Scrap Type is treated as a cell waiting on its source, but its source resolves today (FR-034).");
+            gap.Cells.Any(cell => string.Equals(cell.Label, "Lugger Location", StringComparison.OrdinalIgnoreCase)),
+            "A scrap type with no lugger still draws a Lugger Location cell, so a substitute value reached the card (FR-026).");
+        Assert.IsTrue(
+            gap.Cells.Any(cell => string.Equals(cell.Label, "Scrap type", StringComparison.OrdinalIgnoreCase)),
+            "The scrap card lost its Scrap Type cell along with the missing lugger (FR-030).");
+
+        // A job with no real scrap decision is the other way the value stays null (FR-025).
+        var noDecision = WaitlistViewViewModel.CreateSessionOrder(
+            Shape("pickup-scrap"),
+            Job() with { ScrapType = "Scrap Type Required" },
+            scrapDeclaration);
+
+        Assert.IsFalse(
+            noDecision.Cells.Any(cell => string.Equals(cell.Label, "Lugger Location", StringComparison.OrdinalIgnoreCase)),
+            "A job with no scrap decision still draws a Lugger Location cell (FR-025).");
+
+        // The placeholder's wording has no cell left to serve: no Item draws it anywhere. The phrase's resource key
+        // is checked too, because a resurrected branch would draw the key itself once the retired resource is gone
+        // (FR-039).
+        foreach (var item in RequestItemCatalog.Items)
+        {
+            foreach (var cell in DrawnCells(item.Id))
+            {
+                Assert.IsFalse(
+                    cell.Value.Contains("In development", StringComparison.OrdinalIgnoreCase)
+                        || cell.Value.Contains("PendingSource", StringComparison.OrdinalIgnoreCase),
+                    $"`{item.Id}` draws '{cell.Value}', which is the retired in-development placeholder rather than a value (FR-039).");
+            }
+        }
     }
 
     /// <summary>
@@ -1003,6 +1230,82 @@ public sealed class WaitlistLineCardDetailTemplateTests
             source,
             "SelectTemplateCore(object item)",
             "The selector no longer answers the one-argument template question, which other presenters ask (FR-025).");
+    }
+
+    /// <summary>
+    /// The cell selector, which every slot of every Item's template asks, has to answer both template questions for
+    /// the same reason the per-Item selector does: a <c>ContentControl</c> asks the two-argument one, and the base
+    /// implementation answers that with null — which makes the presenter draw the cell's type name where its label
+    /// and value belong (FR-028, FR-053).
+    /// </summary>
+    [TestMethod]
+    public void UI_WaitlistLineCardDetailTemplateTests_CellSelector_AnswersBothTemplateQuestionOverloads()
+    {
+        var path = Path.Combine(
+            RepositoryPatternScan.FindRepositoryRoot(),
+            "Module_Waitlist",
+            "Controls",
+            "WaitlistCardCellTemplateSelector.cs");
+
+        Assert.IsTrue(File.Exists(path), $"The cell template selector is gone from '{path}' (FR-053).");
+
+        var source = File.ReadAllText(path);
+
+        StringAssert.Contains(
+            source,
+            "SelectTemplateCore(object item, DependencyObject container)",
+            "The cell selector overrides only the one-argument template question, so a ContentControl would be handed "
+            + "no cell template at all and every card would draw a type name where its label and value belong (FR-053).");
+
+        StringAssert.Contains(
+            source,
+            "SelectTemplateCore(object item)",
+            "The cell selector no longer answers the one-argument template question (FR-053).");
+    }
+
+    /// <summary>
+    /// Every description the shipped seed puts on a card asks for the scrolling line, and nothing else on those
+    /// cards does — the rule is read from the declarations the app actually ships, not from a copy of them
+    /// (FR-053).
+    /// </summary>
+    [TestMethod]
+    public void UI_WaitlistLineCardDetailTemplateTests_EveryShippedDescriptionCell_AsksForTheScrollingLine()
+    {
+        // The job a component's two cells read, so `deliver-component`'s part description resolves.
+        var job = Job() with
+        {
+            ComponentFacts = new Dictionary<string, RequestComponentFacts>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["FGT0002000"] = new RequestComponentFacts(
+                    "BLANK, 16GA, UNPAINTED, 42.5 X 18.25",
+                    "2,885"),
+            },
+        };
+
+        foreach (var (itemCode, label) in new[]
+        {
+            ("pickup-coil", "Coil description"),
+            ("deliver-coil", "Coil description"),
+            ("deliver-component", "Part description"),
+            ("other", "Request description"),
+        })
+        {
+            var cells = WaitlistLineCardCell.CellsToDraw(
+                WaitlistViewViewModel
+                    .CreateSessionOrder(Shape(itemCode), job, SeedDeclarations()[itemCode])
+                    .Cells);
+
+            var description = cells.SingleOrDefault(cell => string.Equals(cell.Label?.Trim(), label, StringComparison.OrdinalIgnoreCase));
+
+            Assert.IsNotNull(description, $"`{itemCode}` no longer draws its '{label}' cell, so this test proves nothing about it.");
+            Assert.IsTrue(
+                description!.UsesScrollingText,
+                $"`{itemCode}`'s '{label}' is drawn as a fixed cell, so a long description is clipped rather than scrolled (FR-053).");
+            Assert.AreEqual(
+                1,
+                cells.Count(cell => cell.UsesScrollingText),
+                $"`{itemCode}` asks for the scrolling line on more than its description (FR-053).");
+        }
     }
 
     /// <summary>The per-Item detail templates, keyed exactly the way the card's selector looks them up.</summary>
@@ -1201,6 +1504,16 @@ public sealed class WaitlistLineCardDetailTemplateTests
         DunnageParts = [new RequestDunnagePart { PartNumber = "DUN0000100", HomeLocation = "A-12" }],
     };
 
+    /// <summary>
+    /// The same job with a real scrap decision and the lugger the arrangement settled for it, which is what the
+    /// scrap card's `Lugger Location` cell reads (FR-022).
+    /// </summary>
+    private static RequestJobPartAvailability ScrapJob() => Job() with
+    {
+        ScrapType = "3003 Aluminum",
+        LuggerLocation = "Door 6 Lugger",
+    };
+
     /// <summary>Captures what the facade forwards to the store's log, so a warning can be observed without a store.</summary>
     private sealed class RecordingAppLogSink : IAppLogSink
     {
@@ -1217,3 +1530,4 @@ public sealed class WaitlistLineCardDetailTemplateTests
         public void Warn(string module, string message, string? errorType = null) => Warnings.Add(message);
     }
 }
+

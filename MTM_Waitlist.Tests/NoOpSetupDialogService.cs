@@ -7,5 +7,7 @@ public sealed class NoOpSetupDialogService : ISetupDialogService
 {
     public Task<SetupDunnagePart?> ShowDunnageImageSearchDialogAsync() => Task.FromResult<SetupDunnagePart?>(null);
 
+    public Task<SetupWorkOrderSearchResult?> ShowWorkOrderSearchDialogAsync() => Task.FromResult<SetupWorkOrderSearchResult?>(null);
+
     public Task<bool> ConfirmNoDunnageAsync() => Task.FromResult(true);
 }

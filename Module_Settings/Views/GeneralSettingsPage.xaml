@@ -1,0 +1,225 @@
+<Page
+    x:Class="MTM_Waitlist.Module_Settings.Views.GeneralSettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helpers="using:MTM_Waitlist.Module_Core.Helpers"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:views="using:MTM_Waitlist.Module_Settings.Views"
+    xmlns:wct="using:CommunityToolkit.WinUI.Controls"
+    xmlns:xaml="using:Microsoft.UI.Xaml"
+    x:Name="RootPage"
+    mc:Ignorable="d">
+
+<Page.Resources>
+    <helpers:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+
+    <!--
+        Settings page typography and row chrome.
+
+        Every description and status line on the page uses SettingsDescriptionStyle, and every
+        value pill in a two-column pick list uses SettingsListPillStyle. Section headings use the
+        platform BodyStrong style directly. Keeping these three in one place is what stops the
+        page drifting back into a mix of margins, brushes and font sizes.
+    -->
+    <Style x:Key="SettingsDescriptionStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="SettingsListPillStyle" TargetType="Border">
+        <Setter Property="Padding" Value="10,6,10,6" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!--
+        Pictures panel row chrome.
+
+        The merged panel holds three cards, and between them a dozen rows of "label, description, control". The
+        measurements live here rather than on each row, so a folder box and the Browse button beside it sit in
+        one straight column instead of every row inventing its own width.
+    -->
+    <Style x:Key="SettingsFormRowStyle" TargetType="Grid">
+        <Setter Property="ColumnSpacing" Value="16" />
+    </Style>
+
+    <Style x:Key="SettingsRowTitleStyle" TargetType="TextBlock">
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="SettingsFolderBoxStyle" TargetType="TextBox">
+        <Setter Property="MinWidth" Value="300" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="SettingsFolderButtonStyle" TargetType="Button">
+        <Setter Property="MinWidth" Value="96" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+</Page.Resources>
+    <ScrollViewer
+        HorizontalScrollBarVisibility="Disabled"
+        HorizontalScrollMode="Disabled"
+        VerticalScrollBarVisibility="Auto">
+        <Grid
+            MaxWidth="{StaticResource PageContentMaxWidth}"
+            Padding="0,0,0,48"
+            HorizontalAlignment="Stretch"
+            RowSpacing="28">
+            <StackPanel Spacing="10">
+                <TextBlock Style="{ThemeResource TitleTextBlockStyle}" Text="General" />
+                <TextBlock Style="{StaticResource SettingsDescriptionStyle}" Text="Settings every person may change for themselves: how the app looks, whether pictures enlarge, whether a new request announces itself, and which version is installed." />
+<TextBox
+    AutomationProperties.AutomationId="GeneralSettingsPage_SearchBox"
+    Header="Search"
+    PlaceholderText="Search settings"
+    Text="{x:Bind ViewModel.SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+<wct:SettingsExpander
+    AutomationProperties.AutomationId="SettingsPage_AppearanceExpander"
+    x:Name="AppearanceExpander"
+    x:Load="{x:Bind ViewModel.IsAppearancePanelVisible, Mode=OneWay}"
+    Description="Choose the appearance used throughout MTM Waitlist."
+    Header="App Theme"
+    HorizontalAlignment="Stretch"
+    IsExpanded="False">
+    <wct:SettingsExpander.HeaderIcon>
+        <SymbolIcon Symbol="Setting" />
+    </wct:SettingsExpander.HeaderIcon>
+
+    <TextBlock
+        VerticalAlignment="Center"
+        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+        Text="{x:Bind ViewModel.SelectedThemeText, Mode=OneWay}" />
+
+    <wct:SettingsExpander.Items>
+        <wct:SettingsCard
+            Description="Light, dark, or the default that follows Windows."
+            Header="Theme">
+            <StackPanel Orientation="Horizontal" Spacing="24">
+                <RadioButton
+                    AutomationProperties.AutomationId="SettingsPage_ThemeLightOption"
+                    x:Uid="Settings_Theme_Light"
+                    VerticalAlignment="Center"
+                    Command="{x:Bind ViewModel.SwitchThemeCommand}"
+                    GroupName="AppTheme"
+                    IsChecked="{x:Bind ViewModel.ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}">
+                    <RadioButton.CommandParameter>
+                        <xaml:ElementTheme>Light</xaml:ElementTheme>
+                    </RadioButton.CommandParameter>
+                </RadioButton>
+                <RadioButton
+                    AutomationProperties.AutomationId="SettingsPage_ThemeDarkOption"
+                    x:Uid="Settings_Theme_Dark"
+                    VerticalAlignment="Center"
+                    Command="{x:Bind ViewModel.SwitchThemeCommand}"
+                    GroupName="AppTheme"
+                    IsChecked="{x:Bind ViewModel.ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}">
+                    <RadioButton.CommandParameter>
+                        <xaml:ElementTheme>Dark</xaml:ElementTheme>
+                    </RadioButton.CommandParameter>
+                </RadioButton>
+                <RadioButton
+                    AutomationProperties.AutomationId="SettingsPage_ThemeDefaultOption"
+                    x:Uid="Settings_Theme_Default"
+                    VerticalAlignment="Center"
+                    Command="{x:Bind ViewModel.SwitchThemeCommand}"
+                    GroupName="AppTheme"
+                    IsChecked="{x:Bind ViewModel.ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Default, Mode=OneWay}">
+                    <RadioButton.CommandParameter>
+                        <xaml:ElementTheme>Default</xaml:ElementTheme>
+                    </RadioButton.CommandParameter>
+                </RadioButton>
+            </StackPanel>
+        </wct:SettingsCard>
+
+        <!-- Enlarge pictures (009). A reading preference of the signed-in person, so there is no
+             permission gate in front of it: anybody may decide this for themselves.
+             Hidden with Visibility rather than x:Load on purpose: an element inside a
+             SettingsExpander's item collection is not in the page's namescope, and the generated
+             x:Load binding resolves it with FindName — which answers null and terminates the
+             process the moment this page is opened (verified 2026-09-24, .NET Runtime event log). -->
+        <wct:SettingsCard
+            AutomationProperties.AutomationId="SettingsPage_EnlargePicturesCard"
+            AutomationProperties.Name="{x:Bind ViewModel.EnlargePicturesTitle}"
+            Description="{x:Bind ViewModel.EnlargePicturesDescription}"
+            Header="{x:Bind ViewModel.EnlargePicturesTitle}"
+            Visibility="{x:Bind ViewModel.IsEnlargePicturesPanelVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+            <ToggleSwitch
+                AutomationProperties.AutomationId="SettingsPage_EnlargePicturesSwitch"
+                AutomationProperties.Name="{x:Bind ViewModel.EnlargePicturesTitle}"
+                IsOn="{x:Bind ViewModel.EnlargePicturesOnClick, Mode=TwoWay}"
+                OffContent="Off"
+                OnContent="On" />
+        </wct:SettingsCard>
+    </wct:SettingsExpander.Items>
+</wct:SettingsExpander>
+
+<wct:SettingsCard
+    AutomationProperties.AutomationId="SettingsPage_NewRequestAlertsExpander"
+    x:Name="NewRequestAlertsExpander"
+    x:Load="{x:Bind ViewModel.IsNewRequestAlertsPanelVisible, Mode=OneWay}"
+    Description="{x:Bind ViewModel.NewRequestAlertsDescription, Mode=OneWay}"
+    Header="New Request Alerts"
+    HorizontalAlignment="Stretch">
+    <wct:SettingsCard.HeaderIcon>
+        <FontIcon Glyph="&#xEA8F;" />
+    </wct:SettingsCard.HeaderIcon>
+
+    <ToggleSwitch
+        AutomationProperties.AutomationId="SettingsPage_NewRequestAlerts_Toggle"
+        IsEnabled="{x:Bind ViewModel.IsNewRequestAlertsAvailable, Mode=OneWay}"
+        IsOn="{x:Bind ViewModel.NewRequestAlertsEnabled, Mode=TwoWay}"
+        OffContent="Off"
+        OnContent="On" />
+</wct:SettingsCard>
+
+<wct:SettingsExpander
+    AutomationProperties.AutomationId="SettingsPage_AboutExpander"
+    x:Name="AboutExpander"
+    x:Load="{x:Bind ViewModel.IsAboutPanelVisible, Mode=OneWay}"
+    Header="About / App Info"
+    HorizontalAlignment="Stretch"
+    IsExpanded="False">
+    <wct:SettingsExpander.HeaderIcon>
+        <SymbolIcon Symbol="ContactInfo" />
+    </wct:SettingsExpander.HeaderIcon>
+
+    <wct:SettingsExpander.Items>
+        <wct:SettingsCard>
+            <wct:SettingsCard.Header>
+                <TextBlock
+                    x:Uid="Settings_AppVersion_Title"
+                    Text="App Version" />
+            </wct:SettingsCard.Header>
+            <wct:SettingsCard.HeaderIcon>
+                <SymbolIcon Symbol="Important" />
+            </wct:SettingsCard.HeaderIcon>
+            <TextBlock
+                VerticalAlignment="Center"
+                Style="{ThemeResource BodyTextBlockStyle}"
+                Text="{x:Bind ViewModel.VersionDescription, Mode=OneWay}" />
+        </wct:SettingsCard>
+
+        <wct:SettingsCard>
+            <wct:SettingsCard.Header>
+                <TextBlock
+                    x:Uid="Settings_AboutApp_Title"
+                    Text="About MTM Waitlist" />
+            </wct:SettingsCard.Header>
+            <wct:SettingsCard.Description>
+                <TextBlock
+                    x:Uid="Settings_AboutDescription"
+                    Text="MTM Waitlist helps teams track, prioritize, and complete material requests in real time." />
+            </wct:SettingsCard.Description>
+            <wct:SettingsCard.HeaderIcon>
+                <SymbolIcon Symbol="ContactInfo" />
+            </wct:SettingsCard.HeaderIcon>
+        </wct:SettingsCard>
+    </wct:SettingsExpander.Items>
+</wct:SettingsExpander>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</Page>

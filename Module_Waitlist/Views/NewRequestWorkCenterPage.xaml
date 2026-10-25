@@ -44,19 +44,24 @@
                     BorderThickness="1"
                     CornerRadius="12">
                     <Grid>
+                        <!--
+                        The photo pane takes a share of the card rather than a fixed width, so a wider card gives the
+                        picture and the details beside it more room instead of leaving one of them clipped. The floor
+                        keeps the picture readable when the card is at its narrowest.
+                        -->
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="300" />
+                            <ColumnDefinition Width="140" />
                             <ColumnDefinition Width="1" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <!-- Left pane: square work center photo with a neutral frame. -->
+                        <!-- Left pane: compact rectangular work center photo (Shift+click shows it in full). -->
                         <Border
                             Grid.Column="0"
                             Padding="8"
                             CornerRadius="12,0,0,12"
                             Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                            <Grid>
+                            <Grid VerticalAlignment="Center" Height="90">
                                 <Border
                                     CornerRadius="10"
                                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -67,7 +72,7 @@
                                     <sharedControls:ClickToEnlargeImageView
                                         AutomationProperties.Name="{x:Bind WorkCenterName}"
                                         Source="{x:Bind ResolvedImagePath, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
-                                        Stretch="UniformToFill" />
+                                        Stretch="Uniform" />
                                 </Border>
                                 <!-- Blue photo frame, only on the selected card. -->
                                 <Border
@@ -87,31 +92,38 @@
                             Grid.Column="2"
                             Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
                             CornerRadius="0,12,12,0">
-                            <StackPanel Padding="12" VerticalAlignment="Center">
+                            <StackPanel Padding="12,8" VerticalAlignment="Center">
                                 <!-- The card's five values are drawn by the one-line scrolling control (009 B1/B2): a
                                      work-centre name or a job summary that runs long scrolls across its own line
                                      instead of wrapping and pushing the card taller. -->
                                 <sharedControls:AutoScrollTextView
+                                    Margin="0,0,0,8"
                                     FontSize="20"
                                     FontWeight="SemiBold"
-                                    Text="{x:Bind WorkCenterName}" />
-                                <sharedControls:AutoScrollTextView
-                                    Margin="0,2,0,8"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Text="{x:Bind Building}" />
+                                    Text="{x:Bind TitleDisplay}" />
                                 <Border Height="1" Margin="0,0,0,8" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
 
-                                <TextBlock Text="Current Job" Style="{StaticResource SetupFieldLabelStyle}" />
-                                <sharedControls:AutoScrollTextView Margin="0,2,0,6" FontWeight="SemiBold" Text="{x:Bind CurrentJobSummary}" />
-                                <Border Height="1" Margin="0,0,0,6" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
-
-                                <TextBlock Text="Part Number" Style="{StaticResource SetupFieldLabelStyle}" />
-                                <sharedControls:AutoScrollTextView Margin="0,2,0,6" FontWeight="SemiBold" Text="{x:Bind CurrentPartSummary}" />
-                                <Border Height="1" Margin="0,0,0,6" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
-
-                                <TextBlock Text="Last Updated" Style="{StaticResource SetupFieldLabelStyle}" />
-                                <sharedControls:AutoScrollTextView Margin="0,2,0,6" FontWeight="SemiBold" Text="{x:Bind LastUpdatedDisplay}" />
-                            </StackPanel>
+                                <Grid ColumnSpacing="8" RowSpacing="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" VerticalAlignment="Center" Text="Current Job:" Style="{StaticResource SetupFieldLabelStyle}" />
+                                    <sharedControls:AutoScrollTextView Grid.Row="0" Grid.Column="1" FontWeight="SemiBold" Text="{x:Bind CurrentJobSummary}" />
+                                    <Border Grid.Row="1" Grid.ColumnSpan="2" Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
+                                    <TextBlock Grid.Row="2" VerticalAlignment="Center" Text="Part Number:" Style="{StaticResource SetupFieldLabelStyle}" />
+                                    <sharedControls:AutoScrollTextView Grid.Row="2" Grid.Column="1" FontWeight="SemiBold" Text="{x:Bind CurrentPartSummary}" />
+                                    <Border Grid.Row="3" Grid.ColumnSpan="2" Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
+                                    <TextBlock Grid.Row="4" VerticalAlignment="Center" Text="Last Updated:" Style="{StaticResource SetupFieldLabelStyle}" />
+                                    <sharedControls:AutoScrollTextView Grid.Row="4" Grid.Column="1" FontWeight="SemiBold" Text="{x:Bind LastUpdatedDisplay}" />
+                                </Grid>                            </StackPanel>
                         </Border>
                     </Grid>
                 </Border>
@@ -209,10 +221,10 @@
                             SelectionMode="None"
                             ScrollViewer.VerticalScrollBarVisibility="Disabled"
                             ScrollViewer.VerticalScrollMode="Disabled"
-                            SizeChanged="WorkCenterGridView_SizeChanged">
+                            shared:CardGridSizing.MinimumCardWidth="300">
                             <GridView.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <ItemsWrapGrid Orientation="Horizontal" />
+                                    <ItemsWrapGrid HorizontalAlignment="Stretch" ItemHeight="190" Orientation="Horizontal" />
                                 </ItemsPanelTemplate>
                             </GridView.ItemsPanel>
                         </GridView>
@@ -242,10 +254,10 @@
                             SelectionMode="None"
                             ScrollViewer.VerticalScrollBarVisibility="Disabled"
                             ScrollViewer.VerticalScrollMode="Disabled"
-                            SizeChanged="WorkCenterGridView_SizeChanged">
+                            shared:CardGridSizing.MinimumCardWidth="300">
                             <GridView.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <ItemsWrapGrid Orientation="Horizontal" />
+                                    <ItemsWrapGrid HorizontalAlignment="Stretch" ItemHeight="190" Orientation="Horizontal" />
                                 </ItemsPanelTemplate>
                             </GridView.ItemsPanel>
                         </GridView>
@@ -258,6 +270,7 @@
             <Button
                 AutomationProperties.AutomationId="NewRequestWorkCenterPage_CancelButton"
                 Content="Cancel"
+                ContentTemplate="{StaticResource ActionBarCancelTemplate}"
                 Command="{x:Bind ViewModel.CancelCommand}"
                 Style="{StaticResource AccentButtonStyle}" />
         </StackPanel>

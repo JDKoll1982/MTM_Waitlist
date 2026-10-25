@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 
 using Microsoft.Extensions.Configuration;
 
+using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Mock.Contracts;
 using MTM_Waitlist.Mock.Models;
 
@@ -55,14 +56,24 @@ public sealed class MockServiceRefreshClient : IMockServiceRefreshClient
 
     private readonly HttpClient _httpClient;
     private readonly IConfiguration? _configuration;
+    private readonly IPersonIdentity? _identity;
 
     /// <summary>Creates the client.</summary>
     /// <param name="httpClient">Optional client; a shared, 10-second-timeout client is used by default.</param>
     /// <param name="configuration">Optional configuration supplying the endpoint and user-name fallbacks.</param>
-    public MockServiceRefreshClient(HttpClient? httpClient = null, IConfiguration? configuration = null)
+    /// <param name="identity">
+    /// Who is signed in, used as the user name to present when no installation setting names one. The service
+    /// authorizes that name against the application's own store, so the person using the application is the only
+    /// name that can be presented on their behalf.
+    /// </param>
+    public MockServiceRefreshClient(
+        HttpClient? httpClient = null,
+        IConfiguration? configuration = null,
+        IPersonIdentity? identity = null)
     {
         _httpClient = httpClient ?? s_sharedClient;
         _configuration = configuration;
+        _identity = identity;
     }
 
     /// <inheritdoc />
@@ -72,7 +83,7 @@ public sealed class MockServiceRefreshClient : IMockServiceRefreshClient
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var options = MockServiceClientOptions.Resolve(_configuration);
+        var options = MockServiceClientOptions.Resolve(_configuration, _identity?.SignInName);
 
         if (string.IsNullOrWhiteSpace(options.Endpoint))
         {

@@ -18,4 +18,33 @@ public sealed record VisualDispositionInputRow
 
     /// <summary>Whether the work order has an outside-vendor operation.</summary>
     public bool HasOutsideVendorOperation { get; init; }
+
+    /// <summary>
+    /// The <c>RESOURCE_ID</c> of the operation that follows the job's own at the asked work centre, or
+    /// <see langword="null"/> when there is none.
+    /// </summary>
+    public string? NextOperationResourceId { get; init; }
+
+    /// <summary>
+    /// Whether work is still owed on the part — the job's own operation has not closed, or an operation follows
+    /// it — or <see langword="null"/> when the read did not carry the routing (a cached row written before it was
+    /// read). <see langword="false"/> means that operation has closed and nothing follows.
+    /// </summary>
+    public bool? HasRemainingOperation { get; init; }
+
+    /// <summary>
+    /// Whether the part has customer-order lines — i.e. it is a part the plant sells — or <see langword="null"/>
+    /// when the read did not carry it. It is what separates Finished Goods from WIP once nothing remains in the
+    /// routing: a part nothing buys exists only to feed another work order.
+    /// </summary>
+    public bool? HasCustomerDemand { get; init; }
+
+    /// <summary>The plant's own product classification of the part (<c>PART.PRODUCT_CODE</c>).</summary>
+    public string ProductCode { get; init; } = string.Empty;
+
+    /// <summary>The plant's own commodity classification of the part (<c>PART.COMMODITY_CODE</c>).</summary>
+    public string CommodityCode { get; init; } = string.Empty;
+
+    /// <summary>The part's description, whose words break a customer-supplied tie.</summary>
+    public string PartDescription { get; init; } = string.Empty;
 }

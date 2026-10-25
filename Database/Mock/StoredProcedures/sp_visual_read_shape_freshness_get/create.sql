@@ -126,6 +126,15 @@ FROM (
         CASE WHEN COUNT(*) = 0 OR SUM(is_seed_content) = COUNT(*) THEN 1 ELSE 0 END AS is_seed_content,
         COUNT(*) AS row_count
     FROM visual_part_warehouse_quantities_result
+
+    UNION ALL
+
+    SELECT
+        'work_order_search' AS shape_key,
+        MAX(refreshed_utc) AS refreshed_utc,
+        CASE WHEN COUNT(*) = 0 OR SUM(is_seed_content) = COUNT(*) THEN 1 ELSE 0 END AS is_seed_content,
+        COUNT(*) AS row_count
+    FROM visual_work_order_search_result
 ) AS f
 WHERE p_shape_key IS NULL OR f.shape_key = p_shape_key
 ORDER BY f.shape_key;

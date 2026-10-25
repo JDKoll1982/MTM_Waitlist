@@ -10,6 +10,8 @@
 --          4. `Coil number` to `Coil Number` on assist-coil-turn only. The coil Items keep `Coil number`, which
 --             is the label their own cell is declared and read under, so this move is scoped to the one Item
 --             whose cell is spelled `Coil Number` (data-model.md §9).
+--          5. `Part number` to `Part` on pickup-fg, and 6. `Part and quantity` to `Part` on pickup-wip, so the
+--             four returning pickups all draw the part the work centre is making under one label.
 -- Method:  Each statement rewrites one label inside detail_fields_json through JSON_SEARCH, so the path is the
 --          path the label actually sits at rather than a guessed array index: a store whose fields were added,
 --          removed or reordered still moves the label it holds, and a store that does not hold it is left
@@ -66,3 +68,23 @@ SET detail_fields_json = JSON_REPLACE(
     updated_utc = UTC_TIMESTAMP()
 WHERE item = 'assist-coil-turn'
   AND JSON_SEARCH(detail_fields_json, 'one', 'Coil number', NULL, '$[*].label') IS NOT NULL;
+
+-- 5. The finished-goods pickup's part label: the card reads the part the work centre is making as `Part`.
+UPDATE waitlist_request_item_configs
+SET detail_fields_json = JSON_REPLACE(
+        detail_fields_json,
+        JSON_UNQUOTE(JSON_SEARCH(detail_fields_json, 'one', 'Part number', NULL, '$[*].label')),
+        'Part'),
+    updated_utc = UTC_TIMESTAMP()
+WHERE item = 'pickup-fg'
+  AND JSON_SEARCH(detail_fields_json, 'one', 'Part number', NULL, '$[*].label') IS NOT NULL;
+
+-- 6. The work-in-process pickup's part label, for the same reason.
+UPDATE waitlist_request_item_configs
+SET detail_fields_json = JSON_REPLACE(
+        detail_fields_json,
+        JSON_UNQUOTE(JSON_SEARCH(detail_fields_json, 'one', 'Part and quantity', NULL, '$[*].label')),
+        'Part'),
+    updated_utc = UTC_TIMESTAMP()
+WHERE item = 'pickup-wip'
+  AND JSON_SEARCH(detail_fields_json, 'one', 'Part and quantity', NULL, '$[*].label') IS NOT NULL;

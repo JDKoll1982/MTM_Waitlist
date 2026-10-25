@@ -111,7 +111,8 @@ public sealed class SampleOrderTests
             unpictured.EffectiveImagePath,
             "A material that cannot be pictured draws the one shared placeholder, not a blank and not artwork.");
 
-        // A request that names no material at all — a table assist, a consumable, a dunnage request.
+        // A request that names no material part and resolved no picture of its own — a table assist, a
+        // consumable, a dunnage request whose part nobody pictured.
         var noMaterial = new SampleOrder { ItemCode = "pickup-dunnage" };
 
         Assert.AreEqual(

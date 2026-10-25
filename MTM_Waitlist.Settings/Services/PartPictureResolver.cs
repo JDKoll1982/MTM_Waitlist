@@ -130,27 +130,31 @@ public sealed class PartPictureResolver : IPartPictureResolver
     /// <returns>The path of a usable picture, or <see langword="null"/> so the caller draws the placeholder.</returns>
     /// <remarks>
     /// There is no override row and no hand-dropped-file search here, because the whole point of this folder is that
-    /// three files with three known names are placed in it. A size word that is not one of the three, a folder the
-    /// store cannot name, and a file the picture rule refuses all answer null rather than substituting artwork:
-    /// the card then draws the one shared placeholder (FR-079, FR-080, FR-089).
+    /// three files with three known names are placed in it. Each name is tried with every extension the application
+    /// accepts, in one fixed order, because the shop's three pictures are JPEGs and a pinned extension drew the
+    /// placeholder over artwork that was already there (2026-10-23). A size word that is not one of the three, a
+    /// folder the store cannot name, and a file the picture rule refuses all answer null rather than substituting
+    /// artwork: the card then draws the one shared placeholder (FR-079, FR-080, FR-089).
     /// </remarks>
     private async Task<string?> ResolveHopperSizePictureAsync(string size)
     {
-        var relative = PartPictureLayout.HopperPictureRelativePath(size);
-        if (string.IsNullOrWhiteSpace(relative))
+        var names = PartPictureLayout.HopperPictureFileNames(size);
+        if (names.Count == 0)
         {
             return null;
         }
 
+        string? folder = null;
+
         try
         {
-            var folder = await _configurationResolver.GetHopperFolderPathAsync().ConfigureAwait(false);
+            var configured = await _configurationResolver.GetHopperFolderPathAsync().ConfigureAwait(false);
 
-            if (!string.IsNullOrWhiteSpace(folder))
+            if (!string.IsNullOrWhiteSpace(configured))
             {
                 // The configured folder replaces the layout's default one, so moving the artwork is a setting
                 // rather than a release. An absolute folder is taken whole and the picture root is not consulted.
-                relative = $"{AppStoragePaths.NormalizeSeparators(folder.Trim()).TrimEnd('/')}/{PartPictureLayout.HopperPictureFileName(size)}";
+                folder = AppStoragePaths.NormalizeSeparators(configured.Trim()).TrimEnd('/');
             }
         }
         catch (Exception ex)
@@ -161,12 +165,24 @@ public sealed class PartPictureResolver : IPartPictureResolver
         }
 
         var root = await ResolveRootAsync().ConfigureAwait(false);
-        var usable = ResolveUsableFile(PartPictureLayout.HopperSizeScope, relative, root);
 
-        return usable is null
-            ? null
-            : await EnsureLocalCopyAsync(PartPictureLayout.HopperSizeScope, relative, usable).ConfigureAwait(false)
+        foreach (var name in names)
+        {
+            var relative = folder is null
+                ? $"{PartPictureLayout.WaitlistCollection}/{PartPictureLayout.HoppersFolder}/{name}"
+                : $"{folder}/{name}";
+
+            var usable = ResolveUsableFile(PartPictureLayout.HopperSizeScope, relative, root);
+            if (usable is null)
+            {
+                continue;
+            }
+
+            return await EnsureLocalCopyAsync(PartPictureLayout.HopperSizeScope, relative, usable).ConfigureAwait(false)
                 ?? usable;
+        }
+
+        return null;
     }
 
     /// <summary>

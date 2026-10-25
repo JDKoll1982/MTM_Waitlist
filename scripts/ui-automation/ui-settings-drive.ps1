@@ -33,7 +33,9 @@
 
 [CmdletBinding()]
 param(
-    [string]$User = 'jkoll',
+    # The person this workstation signs in as, resolved the same way uia-surface-walk.ps1 resolves it, so a committed
+    # script does not name one machine's account.
+    [string]$User = $(if ($env:MTM_WAITLIST_DEV_USER) { $env:MTM_WAITLIST_DEV_USER } else { $env:USERNAME }),
 
     [string]$Pin = $env:MTM_WAITLIST_DEV_PIN,
 

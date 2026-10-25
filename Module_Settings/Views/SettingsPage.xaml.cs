@@ -1,12 +1,16 @@
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.ViewModels;
 
 namespace MTM_Waitlist.Module_Settings.Views;
 
+/// <summary>
+/// The settings hub. It owns no setting: each card opens the page that does, so the handlers that used to live here
+/// moved with the markup they belong to.
+/// </summary>
 public sealed partial class SettingsPage : Page
 {
     public SettingsViewModel ViewModel
@@ -25,97 +29,53 @@ public sealed partial class SettingsPage : Page
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
+
+        // The Devices card is drawn from the registry's own answer, so the hub loads it like the Devices page does.
         _ = ViewModel.ComputerManagement.LoadAsync();
     }
 
-    private async void RequestItemImages_Click(object sender, RoutedEventArgs e)
-    {
-        var dialog = new RequestItemImagesDialog(App.GetService<RequestItemImagesDialogViewModel>())
-        {
-            XamlRoot = XamlRoot
-        };
-
-        await dialog.ShowAsync();
-    }
-
-    private async void WorkCenterImages_Click(object sender, RoutedEventArgs e)
-    {
-        var dialog = new WorkCenterImagesDialog(App.GetService<WorkCenterImagesDialogViewModel>())
-        {
-            XamlRoot = XamlRoot
-        };
-
-        await dialog.ShowAsync();
-    }
-
-    /// <summary>Stores the two storage folders and the retention period that are in the boxes.</summary>
+    /// <summary>Fills the suggestion list as the reader types.</summary>
     /// <remarks>
-    /// Through the view model's command for the same reason the cache folder is: the value that is saved is the one
-    /// the command validated, and a test can drive it without a control.
+    /// Only user input is answered: setting the box's text from a chosen suggestion also raises this event, and
+    /// re-filtering on it would replace the list the reader is looking at with a single entry.
     /// </remarks>
-    private void SaveStoragePaths_Click(object sender, RoutedEventArgs e) =>
-        ViewModel.SaveStoragePathsCommand.Execute(null);
-
-    /// <summary>Stores the picture cache folder that is in the box.</summary>
-    /// <remarks>
-    /// Through the view model's command rather than the box's own text, so that the value saved is the one the
-    /// command validates and the same one a test can drive without a control.
-    /// </remarks>
-    private void SavePictureCacheFolder_Click(object sender, RoutedEventArgs e) =>
-        ViewModel.SavePictureCacheFolderCommand.Execute(null);
-
-    /// <summary>Copies the pictures onto this computer without waiting for the next start.</summary>
-    private void RefreshPictureCache_Click(object sender, RoutedEventArgs e) =>
-        ViewModel.RefreshPictureCacheCommand.Execute(null);
-
-    /// <summary>Stores how much the log store keeps, for every computer.</summary>
-    /// <remarks>
-    /// Through the view model's command for the same reason the cache folder is: the value that is saved is the one
-    /// the command validated and adopted, and a test can drive it without a control.
-    /// </remarks>
-    private void SaveLogStoreLevel_Click(object sender, RoutedEventArgs e) =>
-        ViewModel.SaveLogStoreLevelCommand.Execute(null);
-
-    private async void AddComputer_Click(object sender, RoutedEventArgs e)
+    private void OnSearchTextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
     {
-        if (!ViewModel.ComputerManagement.CanManageComputers)
+        if (args.Reason != AutoSuggestionBoxTextChangeReason.UserInput)
         {
             return;
         }
 
-        var editViewModel = App.GetService<ComputerEditDialogViewModel>();
-        editViewModel.ConfigureForAdd();
+        ViewModel.PageSearchQuery = sender.Text;
+        ViewModel.UpdatePageSearch(sender.Text);
+        sender.ItemsSource = ViewModel.PageSearchSuggestions;
+    }
 
-        var dialog = new ComputerEditDialog(editViewModel)
+    /// <summary>Puts the chosen suggestion's own name in the box.</summary>
+    private void OnSearchSuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+    {
+        if (args.SelectedItem is SettingsSearchTarget target)
         {
-            XamlRoot = XamlRoot
-        };
-
-        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
-        {
-            await ViewModel.ComputerManagement.LoadAsync();
+            sender.Text = target.Title;
         }
     }
 
-    private async void EditComputer_Click(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// Opens the setting the reader settled on.
+    /// </summary>
+    /// <remarks>
+    /// Enter without picking a suggestion still works: the first match is taken, so the search does not require a
+    /// second gesture to be useful.
+    /// </remarks>
+    private void OnSearchQuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
     {
-        var selected = ViewModel.ComputerManagement.SelectedComputer;
-        if (!ViewModel.ComputerManagement.CanManageComputers || selected is null)
+        var target = args.ChosenSuggestion as SettingsSearchTarget ?? ViewModel.FindPageSearch(args.QueryText);
+
+        if (target is null)
         {
             return;
         }
 
-        var editViewModel = App.GetService<ComputerEditDialogViewModel>();
-        editViewModel.ConfigureForEdit(selected);
-
-        var dialog = new ComputerEditDialog(editViewModel)
-        {
-            XamlRoot = XamlRoot
-        };
-
-        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
-        {
-            await ViewModel.ComputerManagement.LoadAsync();
-        }
+        ViewModel.OpenSearchTargetCommand.Execute(target);
     }
 }

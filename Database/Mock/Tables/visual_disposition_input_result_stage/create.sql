@@ -18,12 +18,19 @@ CREATE TABLE IF NOT EXISTS visual_disposition_input_result_stage (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     work_order VARCHAR(64) NOT NULL,
     part_number VARCHAR(64) NOT NULL,
+    work_center VARCHAR(64) NOT NULL DEFAULT '*',
     work_order_status VARCHAR(8) NULL,
     open_work_order_quantity DECIMAL(18,4) NOT NULL DEFAULT 0,
     finished_goods_quantity DECIMAL(18,4) NOT NULL DEFAULT 0,
     has_outside_vendor_operation TINYINT(1) NOT NULL DEFAULT 0,
+    next_operation_resource_id VARCHAR(16) NULL,
+    has_remaining_operation TINYINT(1) NULL,
+    has_customer_demand TINYINT(1) NULL,
+    product_code VARCHAR(64) NULL,
+    commodity_code VARCHAR(64) NULL,
+    part_description VARCHAR(256) NULL,
     refreshed_utc DATETIME NOT NULL,
     is_seed_content TINYINT(1) NOT NULL DEFAULT 0,
     PRIMARY KEY (id),
-    UNIQUE KEY uq_visual_disposition_input_result_lookup_key (work_order, part_number)
+    UNIQUE KEY uq_visual_disposition_input_result_lookup_key (work_order, part_number, work_center)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;

@@ -30,9 +30,14 @@ public sealed record RequestJobPartAvailability(
     public bool HasAnySubordinate => HasCoil || HasFlatstock || HasDie || HasComponent || HasDunnage;
 
     /// <summary>
-    /// Whether the requesting job has <b>finished goods</b> to pick up — stock completed at a finished-goods
-    /// location. This is the work the <c>pickup-fg</c> Item names, so the Item is offered on the job's real work
-    /// rather than hidden by a fixed list (FR-094).
+    /// Whether the derivation read the requesting job's part as <b>finished goods</b> — stock completed at a
+    /// finished-goods location.
+    /// <para>
+    /// The <c>pickup-fg</c> Item is the generic product pickup: it is offered when the derivation named work in
+    /// progress or subcontracted work for neither of them, so it is what a job offers when its product type could
+    /// not be named (see <c>RequestItemPickerRules.ProductPickupItemId</c>). The flag also feeds the card's
+    /// <c>Part Type</c> cell.
+    /// </para>
     /// </summary>
     public bool HasFinishedGoodsToReturn { get; init; }
 
@@ -44,8 +49,9 @@ public sealed record RequestJobPartAvailability(
     public bool HasNonconformingStockToReturn { get; init; }
 
     /// <summary>
-    /// Whether the requesting job has <b>work in progress</b> to pick up — quantity still open on the work order.
-    /// This is the work the <c>pickup-wip</c> Item names (FR-094).
+    /// Whether the derivation read the requesting job's part as <b>work in progress</b> — quantity still open on
+    /// the work order. The <c>pickup-wip</c> Item is offered exactly when this flag is the derived product type,
+    /// beside the card's <c>Part Type</c> cell.
     /// </summary>
     public bool HasWorkInProgressToReturn { get; init; }
 
@@ -80,6 +86,19 @@ public sealed record RequestJobPartAvailability(
     public RequestDisposition Disposition { get; init; } = RequestDisposition.Unknown;
 
     /// <summary>
+    /// What kind of part the requesting job's part is — coil, flatstock, hardware, stamped part, tooling and so on —
+    /// read from the plant's own Infor Visual <c>PRODUCT_CODE</c> and <c>COMMODITY_CODE</c>.
+    /// <para>
+    /// This is a different question from <see cref="Disposition"/>: that one says what <b>state</b> the job's product
+    /// is in, this one says what the part <b>is</b>. The card's <c>Part Type</c> cell draws this; the disposition
+    /// still decides which product pickup the picker offers. It is
+    /// <see cref="RequestPartType.Unknown"/> when neither code named a kind, and the cell is then left out rather
+    /// than filled with a guess (FR-089).
+    /// </para>
+    /// </summary>
+    public RequestPartType PartType { get; init; } = RequestPartType.Unknown;
+
+    /// <summary>
     /// The requesting job's component part numbers, in the job's own order (FR-035).
     /// <para>
     /// This is the list an Item whose configuration declares an enumerated answer <b>with no list of its own</b>
@@ -88,6 +107,31 @@ public sealed record RequestJobPartAvailability(
     /// </para>
     /// </summary>
     public IReadOnlyList<string> ComponentPartNumbers { get; init; } = Array.Empty<string>();
+
+    /// <summary>
+    /// What is known about each of the job's components, keyed by part number (case-insensitive): its description
+    /// and the total quantity on hand. A component the job lists but whose facts could not be read is absent, so
+    /// its cell is left out rather than filled with a guess.
+    /// </summary>
+    public IReadOnlyDictionary<string, RequestComponentFacts> ComponentFacts { get; init; } = NoComponentFacts.Value;
+
+    // Held in a nested type so it is built on first use, whatever order the static members of this record initialise in.
+    private static class NoComponentFacts
+    {
+        public static readonly IReadOnlyDictionary<string, RequestComponentFacts> Value =
+            new Dictionary<string, RequestComponentFacts>(StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>A copy of this snapshot carrying the given component facts, keyed case-insensitively by part number.</summary>
+    public RequestJobPartAvailability WithComponentFacts(IEnumerable<KeyValuePair<string, RequestComponentFacts>>? facts) => this with
+    {
+        ComponentFacts = facts is null
+            ? NoComponentFacts.Value
+            : facts
+                .Where(pair => !string.IsNullOrWhiteSpace(pair.Key))
+                .GroupBy(pair => pair.Key.Trim(), StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(group => group.Key, group => group.First().Value, StringComparer.OrdinalIgnoreCase),
+    };
 
     /// <summary>
     /// The number of the coil the requesting job carries (its <c>MMC</c> subordinate), or empty when it has none.
@@ -157,6 +201,14 @@ public sealed record RequestJobPartAvailability(
     public string ScrapType { get; init; } = string.Empty;
 
     /// <summary>
+    /// The lugger the requesting job's scrap is dumped into, as the arrangement read named it, or <see langword="null" />
+    /// when nothing names one — the job has no real scrap decision, or its scrap type has no lugger assigned. The
+    /// scrap Item's <c>Lugger Location</c> cell reads this, and a null leaves the cell out rather than filling it
+    /// with a substitute value (FR-022, FR-025, FR-026).
+    /// </summary>
+    public string? LuggerLocation { get; init; }
+
+    /// <summary>
     /// Every die assigned to the requesting job, in the job's own order (FR-054).
     /// <para>
     /// This is the list the die step shows as selectable cards, and the list an Item whose configuration names
@@ -199,6 +251,16 @@ public sealed record RequestJobPartAvailability(
         HasNonconformingStockToReturn = disposition == RequestDisposition.Ncm,
         HasWorkInProgressToReturn = disposition == RequestDisposition.WorkInProcess,
         HasOutsideServiceWorkToReturn = disposition == RequestDisposition.OutsideService,
+    };
+
+    /// <summary>
+    /// A copy of this snapshot carrying the part's own derived <b>kind</b>, which is what the card's
+    /// <c>Part Type</c> cell draws. It moves nothing else: the disposition and the four returning gates are the
+    /// disposition's business, and the picker's choice of product Item is unchanged by what the part is made of.
+    /// </summary>
+    public RequestJobPartAvailability WithPartType(RequestPartType partType) => this with
+    {
+        PartType = partType,
     };
 
     /// <summary>

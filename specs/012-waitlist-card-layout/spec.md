@@ -59,7 +59,7 @@ The detail grid is determined by the request's Item, never chosen per row. An It
 3. **Given** an Item declaring two cells, **When** its card is drawn, **Then** the bottom row is collapsed.
 4. **Given** an Item declaring one cell, **When** its card is drawn, **Then** that cell spans the full width.
 5. **Given** an Item declaring no cells, **When** its card is drawn, **Then** both lower rows are absent and the title row occupies the vacated space as one full-width row.
-6. **Given** any cell, **When** it is drawn, **Then** its label sits on top with its value beneath.
+6. **Given** any cell, **When** it is drawn, **Then** its label and its value read on one line, the label small and secondary, the value larger and semibold, with a real gap between them.
 7. **Given** two requests of the same Item, **When** both are drawn, **Then** their panels have the same shape and the same height.
 8. **Given** a die request and a coil request, **When** both are drawn, **Then** `Die Location` appears only on the die request.
 9. **Given** a cell whose source cannot be read, **When** the card is drawn, **Then** the cell is absent and a warning is written to the database log.
@@ -176,8 +176,8 @@ Five answers join the New Request workflow, and each appears on the matching car
 - FR-024: The detail zone MUST be an inner grid of three rows and two columns, with the title pair in row 1 across both columns and the detail cells in rows 2 and 3.
 - FR-025: The cells a card shows MUST be determined by the request's Item and MUST NOT be chosen per row.
 - FR-026: The grid's geometry MUST follow the number of cells the Item fills: four cells as two rows of two; three cells with the third spanning the bottom row; two cells with the bottom row collapsed; one cell spanning the full width; no cells with both lower rows removed.
-- FR-027: With no cells, the title row MUST take the vacated space as one full-width row.
-- FR-028: Every cell MUST be a label on top with its value beneath, apart from the label-less die-shop cell.
+- FR-027: The detail grid MUST be centred in its area whatever it is holding, so a panel whose lower row is empty stays in the middle of the section instead of sitting against the top of it; with no cells, the title row MUST take the vacated space as one full-width row. [Amended 2026-10-22, owner direction. The grid used to be centred only when the row resolved no data and pinned to the top otherwise, which left a two-cell card's grid at the top of a taller section with an empty stretch beneath it.]
+- FR-028: Every cell MUST read `Label: value` on one line, apart from the label-less die-shop cell: the label small, secondary and semibold, the value a step larger, semibold and in the primary text colour, with a real gap between the two that does not depend on the separator's trailing space, and the pair starting from the cell's left edge. [Amended 2026-10-22, owner direction, replacing the earlier "label on top with its value beneath": the shipped cards have drawn the pair on one line since the cell area returned to the card, and with only a trailing space between them the pair read `Part Type:WIP`. Centring each pair inside its cell was tried the same day and rejected — it put the six cells' contents on six different axes — so what the card centres is the grid, not the cell (FR-027).]
 - FR-029: `Die Location` MUST be shown on the two die Items and on no other Item.
 
 **Detail cells by Item**
@@ -288,6 +288,10 @@ Five answers join the New Request workflow, and each appears on the matching car
 - FR-109: Each picture on the hero card MUST carry a small caption beneath it saying what it is, because a picture standing alone beside a title names nothing. [Added 2026-10-16, owner direction.]
 - FR-110: The hero card's `Remaining Time` value MUST state the time left **against the time the Item allotted**, so the countdown is readable as a proportion rather than as a number on its own. [Added 2026-10-16, owner direction.]
 
+**Added by the owner's review of the card's description cells**
+
+- FR-111: Every card cell whose value is a **description** MUST be drawn in full by the one-line scrolling control rather than clipped with an ellipsis, and the rule MUST follow the value rather than the Item: the request description on `other`, the part description on `deliver-component`, and the coil description on both coil Items. It MUST NOT be pinned per panel slot, because a description sits in the third slot on a coil card and the first on a component card, and it moves as soon as a value ahead of it is missing. This broadens FR-053 from `other` alone. [Added 2026-10-22, owner direction, after a component card clipped its part description.]
+
 ### Key Entities
 
 - **Request row**: one waiting request as it appears in the list. Holds its Item, its lifecycle state, its requesting work centre, the requester, the material handler, and when it was raised and closed.
@@ -328,7 +332,7 @@ Five answers join the New Request workflow, and each appears on the matching car
 ## Assumptions
 
 - **Informed defaults.** A status row with nothing to say is removed rather than blanked, and the detail panel behaves the same way. A handler condition outranks an overdue marking, and an overdue marking outranks the lifecycle word. A closed request's ring measures the time taken and a live request's measures the time left. An Item with no configured allotment uses the labelled fifteen-minute default. A skid count left alone is one. A hopper image that is missing or unusable draws the shared placeholder.
-- **Cells with no source yet.** `Lugger Location` on `pickup-scrap`, and `Destination` on `deliver-flatstock`, are planned cells that no source currently supplies, so each is hidden until a source exists rather than being filled. Every other cell named in FR-030 to FR-053 resolves from the request, the requesting job, the Item's configuration, or the plant system.
+- **Cells with no source yet.** `Destination` on `deliver-flatstock` is a planned cell that no source currently supplies, so it is hidden until a source exists rather than being filled. `Lugger Location` on `pickup-scrap` is no longer in this state: 013-lugger-location-config gives it a source in configuration, so the cell is drawn with the lugger the arrangement assigns to the job's scrap type. Every other cell named in FR-030 to FR-053 resolves from the request, the requesting job, the Item's configuration, or the plant system.
 - **Accepted risks (recorded, not fixed).** A handler condition hides the lifecycle state on the card for as long as it is set, and an overdue marking hides it too; both are deliberate, visible trade-offs rather than silent ones. The fuzzy part search is deliberately live-only, so it degrades to what the operator typed when the plant system is unreachable instead of serving a stale answer. Adding four conditions to a vocabulary that held four opens the status palette to eight states, which every reader of the palette must now handle.
 - **Scope.** Only the waitlist list rows change. The request detail page is untouched. The four lifecycle words themselves are unchanged; the four conditions are an addition to the vocabulary. No new real action is added beyond opening a request and setting a condition; printing is not added to the card at all, and belongs to the request's detail page later (D59). Setup, Settings and the mock and visual-fallback surfaces are untouched. The mirror and fallback model is unchanged, and the fuzzy search is not given a cached read shape.
 - **Dependencies.** The work depends on the requesting job's own data being readable, on the plant system being reachable for the live reads, and on the Item configurations being brought into line with the card so that a label the card shows is the label configuration declares.

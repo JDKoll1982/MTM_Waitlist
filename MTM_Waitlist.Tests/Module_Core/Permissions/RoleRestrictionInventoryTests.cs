@@ -49,6 +49,7 @@ public sealed class RoleRestrictionInventoryTests
         new("Picture cache", "SettingsViewModel", PermissionKeys.SettingsStoragePaths),
         new("Cached Infor Visual data", "SettingsViewModel", PermissionKeys.SettingsCacheRefresh),
         new("How long a sign-in lasts", "SettingsViewModel", PermissionKeys.SettingsSessionLength),
+        new("Lugger arrangement", "SettingsViewModel", PermissionKeys.SettingsLuggerArrangement),
         new("The developer log panel", "DeveloperLogPanelViewModel", PermissionKeys.SettingsLogPanel),
         new("Machine setup and its configuration", "MachineSetupGate", PermissionKeys.SettingsMachineConfiguration),
         new("Minutes allowed per item", "UrgencyAllotmentEditorViewModel", PermissionKeys.SettingsUrgencyMinutes),

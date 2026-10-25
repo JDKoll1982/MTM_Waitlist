@@ -67,7 +67,7 @@ full name through `NavigationService`.
 `mtm_receiving_application` are read and written live on every operation. A failure is reported as a per-screen
 unavailable state with a manual retry - never as sample rows and never as a persistent banner.
 
-**Only Infor Visual reads use a cache.** The five read shapes the app depends on resolve through
+**Only Infor Visual reads use a cache.** The eight read shapes the app depends on resolve through
 `MTM_Waitlist.Mock`, which attempts the live Visual query and serves the same result shape from the `mtm_mock`
 mirror only when the reachability probe has settled that Infor Visual is unreachable, or when a live attempt
 finds it unreachable. A reachable-but-empty result is a real answer and is never replaced. There is no manual

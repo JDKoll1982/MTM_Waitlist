@@ -69,6 +69,18 @@ public static class RequestItemCatalog
     public static string DisplayNameResourceKeyFor(string itemId) => $"RequestItem_{itemId.Replace('-', '_')}.DisplayName";
 
     /// <summary>
+    /// The three product pickups — finished goods, WIP and outside service — are <b>one</b> choice on the Item
+    /// step. A person picking up the job's own product is not asked which of the three it is: the job decides
+    /// that, and the card states it in its <c>Part Type</c> cell (FR-091). They therefore share one Item-step
+    /// label while keeping their own catalog display names for the screens that list the catalog row by row.
+    /// </summary>
+    public static bool SharesProductPickupLabel(string? itemId) =>
+        itemId is "pickup-fg" or "pickup-wip" or "pickup-outside-service";
+
+    /// <summary>The resource key for the label the three product pickups share on the Item step.</summary>
+    public const string ProductPickupLabelResourceKey = "RequestItem_finished_product.DisplayName";
+
+    /// <summary>
     /// The Item's umbrella phrase for card Line 1: the Category's own word, or an Item-specific phrase
     /// where the Item defines one (contract §2). The two wrong-material phrases are pinned verbatim and
     /// resolved through the resource mechanism (FR-022), with the pinned text itself as the fallback so
@@ -125,6 +137,27 @@ public static class RequestItemCatalog
 
         return string.IsNullOrWhiteSpace(localized) || string.Equals(localized, key, StringComparison.Ordinal)
             ? item.NormalizedName
+            : localized;
+    }
+
+    /// <summary>
+    /// The name the New Request Item step offers for an Item. The three product pickups answer with the one
+    /// shared label (see <see cref="SharesProductPickupLabel"/>); every other Item answers with its own name.
+    /// </summary>
+    public static string ResolveItemStepLabel(RequestItemDefinition item)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+
+        if (!SharesProductPickupLabel(item.Id))
+        {
+            return ResolveDisplayName(item);
+        }
+
+        var localized = ProductPickupLabelResourceKey.GetLocalized();
+
+        return string.IsNullOrWhiteSpace(localized)
+            || string.Equals(localized, ProductPickupLabelResourceKey, StringComparison.Ordinal)
+            ? "Finished Product"
             : localized;
     }
 

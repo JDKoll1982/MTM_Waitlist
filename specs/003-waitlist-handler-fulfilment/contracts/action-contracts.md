@@ -196,7 +196,7 @@ is `#FCE100`, on which white text is unreadable. These values are the accessible
 
 **`Done` and `Cancelled` are currently unreachable on the list.** `WaitlistViewViewModel` builds its rows from
 `GetActiveRequests` alone, which returns `Pending` and `Accepted` only, so a resolved request never reaches the
-card and those two colours cannot be seen there — the "Show only my requests" toggle filters that same active
+card and those two colours cannot be seen there — the list's work-center filter narrows that same active
 set. They are implemented, mapped and tested so that wherever a resolved request *is* drawn it is coloured
 consistently; surfacing resolved requests on the list is a product decision, not part of this contract.
 

@@ -34,6 +34,21 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- `work_order_status` remains a raw Visual status code (C/R/U/F/X). The status MEANING is
 -- owned solely by RequestDispositionStatusCodes (Open = {R,U,F}, Closed = {C}, X never FG) —
 -- this cache never interprets it (data-model.md §3.5, FR-018).
+--
+-- `work_center` is part of the key because the routing answer is anchored on it: a work order's
+-- "next operation" differs per work centre, so one row per (work order, part) could only ever be
+-- right for one of them. `'*'` is the wildcard the baseline seed uses for rows captured before the
+-- column existed; `sp_visual_disposition_input_get` prefers an exact match and only then the
+-- wildcard, and a wildcard row carries NULL in both routing columns, so it never claims a routing
+-- answer it does not have.
+--
+-- `next_operation_resource_id` / `has_remaining_operation` are the routing, and both are NULL when
+-- it was not read: NULL is "unknown", 0/other-resource is "no operation remains", and a resource id
+-- is the operation that follows the job's own (research 2026-10-23).
+--
+-- `has_customer_demand` decides Finished Goods against WIP once nothing remains in the routing: a part
+-- with customer-order lines is the end product, and a part nothing buys exists only to feed another
+-- work order. NULL when the read did not carry it.
 -- ============================================================
 
 USE mtm_mock;
@@ -44,14 +59,21 @@ CREATE TABLE IF NOT EXISTS visual_disposition_input_result (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     work_order VARCHAR(64) NOT NULL,
     part_number VARCHAR(64) NOT NULL,
+    work_center VARCHAR(64) NOT NULL DEFAULT '*',
     work_order_status VARCHAR(8) NULL,
     open_work_order_quantity DECIMAL(18,4) NOT NULL DEFAULT 0,
     finished_goods_quantity DECIMAL(18,4) NOT NULL DEFAULT 0,
     has_outside_vendor_operation TINYINT(1) NOT NULL DEFAULT 0,
+    next_operation_resource_id VARCHAR(16) NULL,
+    has_remaining_operation TINYINT(1) NULL,
+    has_customer_demand TINYINT(1) NULL,
+    product_code VARCHAR(64) NULL,
+    commodity_code VARCHAR(64) NULL,
+    part_description VARCHAR(256) NULL,
     refreshed_utc DATETIME NOT NULL,
     is_seed_content TINYINT(1) NOT NULL DEFAULT 0,
     PRIMARY KEY (id),
-    UNIQUE KEY uq_visual_disposition_input_result_lookup_key (work_order, part_number)
+    UNIQUE KEY uq_visual_disposition_input_result_lookup_key (work_order, part_number, work_center)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- ============================================================
@@ -78,14 +100,21 @@ CREATE TABLE IF NOT EXISTS visual_disposition_input_result_stage (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     work_order VARCHAR(64) NOT NULL,
     part_number VARCHAR(64) NOT NULL,
+    work_center VARCHAR(64) NOT NULL DEFAULT '*',
     work_order_status VARCHAR(8) NULL,
     open_work_order_quantity DECIMAL(18,4) NOT NULL DEFAULT 0,
     finished_goods_quantity DECIMAL(18,4) NOT NULL DEFAULT 0,
     has_outside_vendor_operation TINYINT(1) NOT NULL DEFAULT 0,
+    next_operation_resource_id VARCHAR(16) NULL,
+    has_remaining_operation TINYINT(1) NULL,
+    has_customer_demand TINYINT(1) NULL,
+    product_code VARCHAR(64) NULL,
+    commodity_code VARCHAR(64) NULL,
+    part_description VARCHAR(256) NULL,
     refreshed_utc DATETIME NOT NULL,
     is_seed_content TINYINT(1) NOT NULL DEFAULT 0,
     PRIMARY KEY (id),
-    UNIQUE KEY uq_visual_disposition_input_result_lookup_key (work_order, part_number)
+    UNIQUE KEY uq_visual_disposition_input_result_lookup_key (work_order, part_number, work_center)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- ============================================================
@@ -539,4 +568,113 @@ CREATE TABLE IF NOT EXISTS visual_work_order_lookup_result_stage (
     is_seed_content TINYINT(1) NOT NULL DEFAULT 0,
     PRIMARY KEY (id),
     UNIQUE KEY uq_visual_work_order_lookup_result_work_order (normalized_work_order, part_number)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ============================================================
+-- Artifact: visual_work_order_search_result
+-- ============================================================
+
+-- ============================================================
+-- Object:      visual_work_order_search_result
+-- Database:    mtm_mock
+-- Engine:      MySQL 5.7
+-- Kind:        Table / create (mirror, shape 8 of 8)
+-- Created:     2026-10-21
+-- Feature:     001-module-mock-visual-fallback (read shape 8, playbook step 2)
+-- Shape key:   work_order_search
+-- Source read: Database/InforVisual/Queues/Module_Setup/Queries/GetWorkOrderSearch.sql
+-- Caller:      SetupLookupService.SearchWorkOrdersAsync
+-- ============================================================
+--
+-- Stores the flattened result of the Infor Visual work-order search so the dialog can answer while
+-- Infor Visual is unreachable (FR-002, FR-004). Read exactly once from a snapshot: the live table
+-- always resolves to a complete result because refreshes swap it atomically with its _stage twin
+-- (FR-006).
+--
+-- One row per work order. The customer is the latest CUST_ORDER_ALLOC allocation that names the order
+-- (see the source read's header); an order with no allocation keeps an empty customer and is what a
+-- customer-filtered search legitimately excludes.
+--
+-- The three `work_order_text` / `part_filter` / `customer_filter` columns are the shape's declared
+-- INPUTS, held beside the outputs because the refresh procedure reads every declared parameter and
+-- column out of the payload. They carry the row's own work order, part and customer, exactly as
+-- `inventory_locations` holds its PartNumber input beside its PartNumber output; the read procedure
+-- filters on the output columns.
+--
+-- No baseline seed rows ship for this shape. Unlike a lookup, an empty search result is a valid
+-- answer ("nothing matches yet"), so a fresh install serves an empty set until the on-host service's
+-- first refresh lands. This mirrors the `employee_by_number` decision.
+--
+-- Banned-word note: `work_order` appears in the artifact name and columns for the same reason
+-- `visual_work_order_lookup_result` carries it (R9 deviation, data-model.md §3.1).
+-- ============================================================
+
+USE mtm_mock;
+
+SET NAMES utf8mb4;
+
+CREATE TABLE IF NOT EXISTS visual_work_order_search_result (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    work_order_text VARCHAR(32) NOT NULL,
+    part_filter VARCHAR(64) NOT NULL,
+    customer_filter VARCHAR(120) NOT NULL,
+    work_order VARCHAR(32) NOT NULL,
+    part_number VARCHAR(64) NOT NULL,
+    part_description VARCHAR(255) NULL,
+    customer_name VARCHAR(120) NULL,
+    work_center VARCHAR(32) NULL,
+    status VARCHAR(4) NULL,
+    want_date DATE NULL,
+    refreshed_utc DATETIME NOT NULL,
+    is_seed_content TINYINT(1) NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_visual_work_order_search_result_work_order (work_order),
+    KEY idx_visual_work_order_search_result_part_number (part_number),
+    KEY idx_visual_work_order_search_result_customer_name (customer_name)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ============================================================
+-- Artifact: visual_work_order_search_result_stage
+-- ============================================================
+
+-- ============================================================
+-- Object:      visual_work_order_search_result_stage
+-- Database:    mtm_mock
+-- Engine:      MySQL 5.7
+-- Kind:        Table / create (stage twin of shape 8)
+-- Created:     2026-10-21
+-- Feature:     001-module-mock-visual-fallback (read shape 8, playbook step 2)
+-- ============================================================
+--
+-- Identical-structure staging twin. Written ONLY by sp_visual_work_order_search_refresh and
+-- never read by the application. The refresh procedure truncates it, loads the complete new
+-- result, then performs an atomic multi-table RENAME TABLE swap with the live mirror.
+--
+-- The index names are intentionally identical to the live mirror's so the swap does not change the
+-- live table's key names (the keys travel with the table).
+-- See data-model.md §3.6.
+-- ============================================================
+
+USE mtm_mock;
+
+SET NAMES utf8mb4;
+
+CREATE TABLE IF NOT EXISTS visual_work_order_search_result_stage (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    work_order_text VARCHAR(32) NOT NULL,
+    part_filter VARCHAR(64) NOT NULL,
+    customer_filter VARCHAR(120) NOT NULL,
+    work_order VARCHAR(32) NOT NULL,
+    part_number VARCHAR(64) NOT NULL,
+    part_description VARCHAR(255) NULL,
+    customer_name VARCHAR(120) NULL,
+    work_center VARCHAR(32) NULL,
+    status VARCHAR(4) NULL,
+    want_date DATE NULL,
+    refreshed_utc DATETIME NOT NULL,
+    is_seed_content TINYINT(1) NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_visual_work_order_search_result_work_order (work_order),
+    KEY idx_visual_work_order_search_result_part_number (part_number),
+    KEY idx_visual_work_order_search_result_customer_name (customer_name)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;

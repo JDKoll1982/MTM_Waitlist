@@ -54,3 +54,23 @@ SET detail_fields_json = JSON_REPLACE(
     updated_utc = UTC_TIMESTAMP()
 WHERE item = 'assist-coil-turn'
   AND JSON_SEARCH(detail_fields_json, 'one', 'Coil Number', NULL, '$[*].label') IS NOT NULL;
+
+-- 5. The finished-goods pickup's part label back to its previous spelling.
+UPDATE waitlist_request_item_configs
+SET detail_fields_json = JSON_REPLACE(
+        detail_fields_json,
+        JSON_UNQUOTE(JSON_SEARCH(detail_fields_json, 'one', 'Part', NULL, '$[*].label')),
+        'Part number'),
+    updated_utc = UTC_TIMESTAMP()
+WHERE item = 'pickup-fg'
+  AND JSON_SEARCH(detail_fields_json, 'one', 'Part', NULL, '$[*].label') IS NOT NULL;
+
+-- 6. The work-in-process pickup's part label back to its previous spelling.
+UPDATE waitlist_request_item_configs
+SET detail_fields_json = JSON_REPLACE(
+        detail_fields_json,
+        JSON_UNQUOTE(JSON_SEARCH(detail_fields_json, 'one', 'Part', NULL, '$[*].label')),
+        'Part and quantity'),
+    updated_utc = UTC_TIMESTAMP()
+WHERE item = 'pickup-wip'
+  AND JSON_SEARCH(detail_fields_json, 'one', 'Part', NULL, '$[*].label') IS NOT NULL;

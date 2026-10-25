@@ -174,6 +174,7 @@ public sealed class PermissionBaselineParityTests
         PermissionKeys.CacheRefreshApi,
         PermissionKeys.AdminUsers,
         PermissionKeys.AdminResetPassword,
+        PermissionKeys.SettingsLuggerArrangement,
     ];
 
     /// <summary>The role whose whole row is stated rather than compared against a retired list.</summary>

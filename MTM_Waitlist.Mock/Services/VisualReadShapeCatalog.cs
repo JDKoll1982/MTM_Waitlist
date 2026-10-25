@@ -3,7 +3,7 @@ using MTM_Waitlist.Mock.Models;
 namespace MTM_Waitlist.Mock.Services;
 
 /// <summary>
-/// The shipped read-shape catalog — the seven shapes the service refreshes.
+/// The shipped read-shape catalog — the eight shapes the service refreshes.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -22,7 +22,7 @@ namespace MTM_Waitlist.Mock.Services;
 /// </remarks>
 public static class VisualReadShapeCatalog
 {
-    /// <summary>Creates the seven shipped read-shape definitions.</summary>
+    /// <summary>Creates the eight shipped read-shape definitions.</summary>
     public static IReadOnlyList<VisualReadShape> Create() =>
     [
         new VisualReadShape
@@ -110,14 +110,21 @@ public static class VisualReadShapeCatalog
             InputParameters =
             [
                 new VisualShapeParameter("WorkOrder", "nvarchar(30)", IsRequired: true),
-                new VisualShapeParameter("PartNumber", "nvarchar(60)", IsRequired: true)
+                new VisualShapeParameter("PartNumber", "nvarchar(60)", IsRequired: true),
+                new VisualShapeParameter("WorkCenter", "nvarchar(30)", IsRequired: true)
             ],
             OutputColumns =
             [
                 new VisualShapeColumn("WorkOrderStatus", "nvarchar(8)"),
                 new VisualShapeColumn("OpenWorkOrderQuantity", "decimal(18,4)"),
                 new VisualShapeColumn("FinishedGoodsQuantity", "decimal(18,4)"),
-                new VisualShapeColumn("HasOutsideVendorOperation", "bit")
+                new VisualShapeColumn("HasOutsideVendorOperation", "bit"),
+                new VisualShapeColumn("NextOperationResourceId", "nvarchar(16)"),
+                new VisualShapeColumn("HasRemainingOperation", "bit"),
+                new VisualShapeColumn("HasCustomerDemand", "bit"),
+                new VisualShapeColumn("ProductCode", "nvarchar(64)"),
+                new VisualShapeColumn("CommodityCode", "nvarchar(64)"),
+                new VisualShapeColumn("PartDescription", "nvarchar(256)")
             ]
         },
         new VisualReadShape
@@ -155,6 +162,33 @@ public static class VisualReadShapeCatalog
                 new VisualShapeColumn("PartNumber", "nvarchar(60)"),
                 new VisualShapeColumn("WarehouseQuantity", "decimal(18,4)"),
                 new VisualShapeColumn("FinishedGoodsQuantity", "decimal(18,4)")
+            ]
+        },
+        new VisualReadShape
+        {
+            Key = "work_order_search",
+            Module = VisualReadShapeModule.ModuleSetup,
+            SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Setup/Queries/GetWorkOrderSearch.sql",
+            PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/work_order_search_population.sql",
+            InputParameters =
+            [
+                // The three things an operator searches BY. Each may be empty (an empty filter is no
+                // constraint), so the read is always handed all three values.
+                new VisualShapeParameter("WorkOrderText", "nvarchar(60)", IsRequired: true),
+                new VisualShapeParameter("PartFilter", "nvarchar(60)", IsRequired: true),
+                new VisualShapeParameter("CustomerFilter", "nvarchar(120)", IsRequired: true)
+            ],
+            OutputColumns =
+            [
+                // One row per open, addressable work order. The customer is the real name from the
+                // allocation (CUST_ORDER_ALLOC.CUST_NAME), never the customer id.
+                new VisualShapeColumn("WorkOrder", "nvarchar(32)"),
+                new VisualShapeColumn("PartNumber", "nvarchar(64)"),
+                new VisualShapeColumn("PartDescription", "nvarchar(255)"),
+                new VisualShapeColumn("CustomerName", "nvarchar(120)"),
+                new VisualShapeColumn("WorkCenter", "nvarchar(32)"),
+                new VisualShapeColumn("Status", "nvarchar(4)"),
+                new VisualShapeColumn("WantDate", "date")
             ]
         }
     ];

@@ -1,9 +1,10 @@
 namespace MTM_Waitlist.Module_Core.Permissions;
 
 /// <summary>
-/// The nineteen permission keys, one per gated action. The fifteen originals are spelled exactly as the
+/// The twenty permission keys, one per gated action. The fifteen originals are spelled exactly as the
 /// specification's Verbatim Constraints section pins them (FR-045, FR-046); the four added by 010-startup-rebuild
-/// are pinned by the machine-configuration contract's section 5 and plan D11.
+/// are pinned by the machine-configuration contract's section 5 and plan D11; the one added by
+/// 011-lugger-location-config is pinned by that feature's persistence-and-permission contract, section 4.
 /// </summary>
 /// <remarks>
 /// This is the one canonical source for those spellings. Nothing else in the application restates the literals:
@@ -65,6 +66,9 @@ public static class PermissionKeys
     /// <summary>Changing how long a session lasts.</summary>
     public const string SettingsSessionLength = "permission.settings.session_length";
 
+    /// <summary>Changing the lugger arrangement: the luggers and the scrap types each is assigned to.</summary>
+    public const string SettingsLuggerArrangement = "permission.settings.lugger_arrangement";
+
     /// <summary>Quick Add dunnage definitions.</summary>
     public const string SetupDunnageQuickAdd = "permission.setup.dunnage_quick_add";
 
@@ -99,6 +103,7 @@ public static class PermissionKeys
         SettingsIgnoredLocationsEdit,
         SettingsLogPanel,
         SettingsSessionLength,
+        SettingsLuggerArrangement,
         SetupDunnageQuickAdd,
         SetupWorkCenters,
         AdminUsers,

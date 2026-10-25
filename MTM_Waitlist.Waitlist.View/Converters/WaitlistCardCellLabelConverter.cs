@@ -18,9 +18,21 @@ namespace MTM_Waitlist.Module_Waitlist.Converters;
 /// </remarks>
 public sealed class WaitlistCardCellLabelConverter : IValueConverter
 {
+    /// <summary>
+    /// The parameter that asks for the label's separator, so a cell that draws its value on the same line reads
+    /// `Label: value` rather than running the two together.
+    /// </summary>
+    public const string SeparatorParameter = "separator";
+
     /// <inheritdoc />
-    public object Convert(object value, Type targetType, object parameter, string language) =>
-        value is string label ? label.GetLocalized() : string.Empty;
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        var text = value is string label ? label.GetLocalized() : string.Empty;
+
+        return string.Equals(parameter as string, SeparatorParameter, StringComparison.Ordinal) && text.Length > 0
+            ? text + ": "
+            : text;
+    }
 
     /// <inheritdoc />
     public object ConvertBack(object value, Type targetType, object parameter, string language) =>

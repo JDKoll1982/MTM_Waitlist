@@ -193,7 +193,7 @@ MTM_Waitlist.Waitlist.View/
     ├── WaitlistViewViewModel.cs                  # build one card per row; sort from the preference
     └── WaitlistViewDetailViewModel.cs            # the Item's fields, read from configuration
 
-Module_Core/Views/ShellPage.xaml                  # + the sort flyout beside My Requests and the building selector
+Module_Core/Views/ShellPage.xaml                  # + the sort flyout beside Local Work Centers and the building selector
 ViewModels/ShellViewModel.cs                      # the sort control's state and the preference write
 Services/DependencyInjection/ServiceRegistrationExtensions.cs   # composition root: availability snapshot, new services
 Strings/en-us/Resources.resw                      # new keys; retired type/subtype keys removed

@@ -28,15 +28,29 @@
             The thumbnail. A plain click enlarges it, except where that click already belongs to something else — a
             button, or a list row that acts on a click — in which case Shift+click is the enlarging gesture. The
             control works that out from where it sits, so no surface has to declare anything. See the code-behind.
+
+            It sits in a frame of its own so the picture can be clipped to the space it was given. A surface that
+            asks for Stretch=None wants the artwork at its own size, and at its own size a picture larger than the
+            card would otherwise draw outside it.
         -->
-        <Image
-            x:Name="Thumbnail"
-            AutomationProperties.Name="{Binding Path=(AutomationProperties.Name), ElementName=Root}"
-            PointerPressed="OnThumbnailPointerPressed"
-            PointerReleased="OnThumbnailPointerReleased"
-            Source="{Binding Source, ElementName=Root}"
-            Stretch="{Binding Stretch, ElementName=Root}"
-            Tapped="OnThumbnailTapped" />
+        <Grid x:Name="ThumbnailFrame">
+            <!--
+                Centred rather than stretched into the slot: with Stretch=None the picture keeps its own size, and a
+                picture that keeps its own size in a frame smaller than itself has to be laid out from the middle,
+                or the frame clips away everything but one corner of it.
+            -->
+            <Image
+                x:Name="Thumbnail"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                AutomationProperties.Name="{Binding Path=(AutomationProperties.Name), ElementName=Root}"
+                Opacity="{Binding ThumbnailOpacity, ElementName=Root}"
+                PointerPressed="OnThumbnailPointerPressed"
+                PointerReleased="OnThumbnailPointerReleased"
+                Source="{Binding Source, ElementName=Root}"
+                Stretch="{Binding Stretch, ElementName=Root}"
+                Tapped="OnThumbnailTapped" />
+        </Grid>
 
         <!--
             The enlarged view. A Popup rather than a dialog, because the view has to cover the page it was opened

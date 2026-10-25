@@ -76,7 +76,7 @@ public sealed class InlineSqlAuditTests
             "the seam's implementation.",
         ["MTM_Waitlist.Core/Services/WipFloorInventoryService.cs"] =
             "reads the checked-in MTMWipApp queue scripts GetWipFloorQuantities.sql and "
-            + "GetWipInventoryPartNumbers.sql; the C# carries the script "
+            + "GetWipInventoryPartNumbers.sql and GetWipInventoryLocations.sql; the C# carries the script "
             + "names only and never statement text (Discovery/03 §C — stays live).",
     };
 

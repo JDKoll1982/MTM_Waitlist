@@ -39,13 +39,29 @@ public sealed class ImageStorageOptions
     public string DunnageRootPath { get; init; } = AppStoragePaths.DunnageRootDefault;
 
     /// <summary>
-    /// The folder the hopper reference pictures sit in, relative to <see cref="SharedFolderPath"/> unless it is
-    /// given as an absolute path.
-    /// Default: <c>Waitlist\Hoppers</c> beneath the picture folder — the application's own collection, in the one
-    /// folder set aside for hopper artwork. A plant-wide setting like the picture folder, and this is the fallback.
+    /// The folder the hopper reference pictures sit in, one file per size word.
+    /// Default: the share's own <c>Images\Waitlist\hopper</c> folder (<see cref="AppStoragePaths.HopperFolderDefault"/>),
+    /// given in full rather than beneath <see cref="SharedFolderPath"/> because that is where the artwork lives.
+    /// A plant-wide setting like the picture folder, and this is the fallback.
     /// The files inside it are named after the size word they picture; the contract is <c>docs/guides/guides-pictures-image-naming.md</c>.
     /// </summary>
     public string HopperFolderPath { get; init; } = ConfigSettingKeys.ImageStorageHopperFolderPathDefault;
+
+    /// <summary>
+    /// The folder the lugger pictures sit in, one file per lugger named after its place in the arrangement.
+    /// Default: the share's own <c>Images\Waitlist\lugger</c> folder
+    /// (<see cref="AppStoragePaths.LuggerFolderDefault"/>). A plant-wide setting like the picture folder, and this is
+    /// the fallback a plant that names no folder is left with.
+    /// </summary>
+    public string LuggerFolderPath { get; init; } = ConfigSettingKeys.ImageStorageLuggerFolderPathDefault;
+
+    /// <summary>
+    /// The picture every surface draws where it has no picture of its own.
+    /// Default: the shipped artwork (<see cref="ConfigSettingKeys.ImageStorageNoImagePathDefault"/>). A plant-wide
+    /// setting, so the same "no picture" artwork is read on every computer rather than only on the one that chose
+    /// it.
+    /// </summary>
+    public string NoImagePath { get; init; } = ConfigSettingKeys.ImageStorageNoImagePathDefault;
 
     /// <summary>
     /// The folder on this computer that every picture is mirrored into at startup.
