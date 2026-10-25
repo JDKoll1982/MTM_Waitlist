@@ -1,0 +1,150 @@
+{
+  "workflow": "companion",
+  "specName": "One set of rules for every screen, window and dialog",
+  "branch": "master",
+  "currentStep": "specify",
+  "status": "specified",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-10-25T19:57:00.953Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-10-25T20:00:14.404Z"
+    }
+  ],
+  "telemetryInstanceId": "c4fc0bc7-f330-4e0b-86a1-f4ca6b4ad3ce",
+  "coverage": {
+    "FR-001": {
+      "title": "Every dialog opens as its own window owned by the main window"
+    },
+    "FR-002": {
+      "title": "A dialog stays centred on its owner while the owner moves or resizes"
+    },
+    "FR-003": {
+      "title": "A dialog never opens larger than its owner; its body scrolls instead"
+    },
+    "FR-004": {
+      "title": "A dialog declares a minimum and preferred width from the shared sizing values"
+    },
+    "FR-005": {
+      "title": "A dialog's title names the subject it acts on"
+    },
+    "FR-006": {
+      "title": "Message and question dialogs are windowed too, and come from the standard set"
+    },
+    "FR-007": {
+      "title": "A converted dialog keeps the visual styling it had"
+    },
+    "FR-008": {
+      "title": "One shared set covers every message kind: acknowledge, confirm, decide, destructive, leave, retry"
+    },
+    "FR-009": {
+      "title": "For each kind the action order, default action and cancel position are the same everywhere"
+    },
+    "FR-010": {
+      "title": "Message wording names the subject and the consequence of the default action"
+    },
+    "FR-011": {
+      "title": "A message dialog returns the same answer shape its callers already expect"
+    },
+    "FR-012": {
+      "title": "One shared entry point raises every message; no screen builds its own"
+    },
+    "FR-013": {
+      "title": "Every screen draws its content in one capped centred column"
+    },
+    "FR-014": {
+      "title": "Every screen uses the shared spacing scale"
+    },
+    "FR-015": {
+      "title": "Every screen takes its colours from the theme brushes"
+    },
+    "FR-016": {
+      "title": "Every screen takes its text sizes from the shared type scale"
+    },
+    "FR-017": {
+      "title": "Every screen adapts at the declared breakpoints without clipping"
+    },
+    "FR-018": {
+      "title": "Every operable control carries an accessible name and a stable identifier"
+    },
+    "FR-019": {
+      "title": "Automation identifiers are unique within a screen"
+    },
+    "FR-020": {
+      "title": "Every screen is operable by keyboard alone in reading order"
+    },
+    "FR-021": {
+      "title": "No XAML file or its code uses an API the api-rules instruction file forbids"
+    },
+    "FR-022": {
+      "title": "Named replacements are in use; navigation stays on the existing services"
+    },
+    "FR-023": {
+      "title": "One inventory lists every surface including the service console window and pages"
+    },
+    "FR-024": {
+      "title": "Every surface lives in its own file declaring exactly one type"
+    },
+    "FR-025": {
+      "title": "The inventory is checked automatically so it cannot go stale"
+    },
+    "FR-026": {
+      "title": "Every XAML file meets the rules with no exclusion list and no per-file exemption"
+    },
+    "FR-027": {
+      "title": "A surface that cannot meet the rules is rearranged, keeping its behaviour"
+    },
+    "FR-028": {
+      "title": "Every tooltip is declared through the shared tooltip behaviour"
+    },
+    "FR-029": {
+      "title": "New converters and resource dictionaries are registered in the same change"
+    },
+    "FR-030": {
+      "title": "A dialog awaits its own show call directly"
+    },
+    "FR-031": {
+      "title": "A diagnostic surface raised over a dialog is a window, not a page"
+    }
+  },
+  "size": "oversized",
+  "classification": {
+    "projectedFiles": 96,
+    "projectedTasks": 52,
+    "scopeSignal": "larger",
+    "verdict": "oversized"
+  },
+  "expectations": [
+    "Flyouts and the picture enlarge overlay are not modal windows and are not converted",
+    "Flow behaviour, wording, gestures and return values are preserved, not redesigned",
+    "The three instruction files are the authority; this feature does not rewrite them",
+    "Screens are aligned and made consistent, not rebuilt"
+  ],
+  "context": [
+    "area: all 77 XAML files (Module_Core, Module_Startup, Module_Settings, Module_Setup, Module_Waitlist, Module_Shared, Module_Mock, MTM_Waitlist.Mock.Service, root, Styles)",
+    "constraint: winui3-adoption.instructions (spacing scale, type ramp, capped column, adaptive breakpoints, theme brushes)",
+    "constraint: winui3-api-rules.instructions (forbidden APIs and their named replacements)",
+    "constraint: winui3-ui-automation.instructions (accessible names, automation ids, keyboard reach, focus order)",
+    "measurement: 8 ContentDialog-rooted dialog files, 14 screens raising a ContentDialog in code, 1 dialog already windowed with DevWinUI.WindowedContentDialog",
+    "measurement: no XAML file declares more than one type, so no embedded-type split is needed",
+    "measurement: PageContentMaxWidth (1080) exists; 3 pages still carry a literal MaxWidth (720, 720, 960)",
+    "living spec: none configured for this project",
+    "measurement: 14 screens construct their own dialog; only 2 shared prompts exist (waitlist action prompt, setup dialog service)",
+    "measurement: no dialog in the application uses three actions, so the standard message set needs at most two",
+    "decision: message-only dialogs are windowed and come from one standard set of six kinds",
+    "decision: the service console (separate executable) is in scope: its window and both pages",
+    "decision: no exemptions - every XAML file is treated as a production page, including the control inspector, the developer log panel and the service console",
+    "decision: a surface that cannot meet the rules without rearrangement has its layout redesigned, with behaviour preserved",
+    "constraint: api rules also require the shared tooltip behaviour, resource registration in the same change, direct await of the dialog show call, and a window for a diagnostic surface raised over a dialog"
+  ],
+  "intent": "Bring every XAML surface, with no exemptions, onto one set of layout, sizing, automation and platform rules; move every dialog, message and question into its own window centred on the main window with one standard message set; redesign any layout that cannot comply."
+}
