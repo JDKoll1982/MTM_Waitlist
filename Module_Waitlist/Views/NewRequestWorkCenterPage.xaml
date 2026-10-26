@@ -218,7 +218,7 @@
                             SelectionMode="None"
                             ScrollViewer.VerticalScrollBarVisibility="Disabled"
                             ScrollViewer.VerticalScrollMode="Disabled"
-                            shared:CardGridSizing.MaximumColumns="4"
+                            shared:CardGridSizing.MaximumColumns="3"
                             shared:CardGridSizing.MinimumCardWidth="300">
                             <GridView.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -252,7 +252,7 @@
                             SelectionMode="None"
                             ScrollViewer.VerticalScrollBarVisibility="Disabled"
                             ScrollViewer.VerticalScrollMode="Disabled"
-                            shared:CardGridSizing.MaximumColumns="4"
+                            shared:CardGridSizing.MaximumColumns="3"
                             shared:CardGridSizing.MinimumCardWidth="300">
                             <GridView.ItemsPanel>
                                 <ItemsPanelTemplate>

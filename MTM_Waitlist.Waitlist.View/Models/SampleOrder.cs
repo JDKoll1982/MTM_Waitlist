@@ -180,9 +180,11 @@ public sealed class SampleOrder : INotifyPropertyChanged
 
     /// <summary>
     /// The part this request is <b>about</b>, or empty when the request names no part at all. It is the material
-    /// the card draws a picture of: the coil or flatstock the job holds, the die the request is for, or the
-    /// component the operator picked. It is captured where the card's own identifier is resolved, so the picture
-    /// and the second line can never disagree about which part the request is about.
+    /// the card draws a picture of: the coil or flatstock the job holds, the die the request is for, the
+    /// component the operator picked, or — on a hopper request, which names no part — the size word the operator
+    /// chose, which is the key that size's hopper picture is filed under. It is captured where the card's own
+    /// identifier is resolved, so the picture and the second line can never disagree about which part the request
+    /// is about.
     /// </summary>
     public string MaterialPartNumber { get; set; } = string.Empty;
 
@@ -195,7 +197,8 @@ public sealed class SampleOrder : INotifyPropertyChanged
     /// <summary>
     /// The store scope the material part belongs to — which of the systems it is a part of. Empty when the
     /// request names no part. A Visual part and a WIP part that share a number are two parts, so the scope
-    /// travels beside the number and never instead of it (FR-002).
+    /// travels beside the number and never instead of it (FR-002). A hopper request carries the hopper pictures'
+    /// own scope, because a size word is not a part number and must not be looked up as one (FR-078, D22).
     /// </summary>
     public string MaterialPartScope { get; set; } = string.Empty;
 

@@ -388,8 +388,73 @@ public sealed class WaitlistViewViewModelFieldTests
             "It draws the one shared placeholder instead.");
     }
 
-    // ── The flyout's command: one condition, set on the row, by the row's own handler ─────────────────
+    /// <summary>
+    /// A hopper request names no material part, so its row carried nothing the picture resolver could read and the
+    /// card's left spot always drew the shared placeholder. The size the operator chose is what such a request is
+    /// about, and its word is the key that size's hopper picture is filed under, so the row now carries the size as
+    /// its picture key in the hopper pictures' own scope — the same word, and therefore the same file, the Size
+    /// cell on the same card opens (FR-077, FR-078, D22).
+    /// </summary>
+    [TestMethod]
+    public void ViewModel_WaitlistViewViewModelFieldTests_CreateSessionOrder_CarriesTheHopperSizeAsTheCardsLeftPicture()
+    {
+        foreach (var hopper in new[] { "pickup-hopper", "deliver-hopper" })
+        {
+            var row = WaitlistViewViewModel.CreateSessionOrder(
+                Shape(hopper, new Dictionary<string, string> { ["Size"] = "Large" }, inputValue: null));
 
+            Assert.AreEqual(
+                "Large",
+                row.MaterialPartNumber,
+                $"`{hopper}`'s card carries no picture key, so its left spot can only draw the placeholder.");
+            Assert.AreEqual(
+                PartPictureLayout.HopperSizeScope,
+                row.MaterialPartScope,
+                $"`{hopper}`'s picture is not read from the hopper pictures, so the resolver would look for a part called 'Large'.");
+        }
+    }
+
+    /// <summary>
+    /// A hopper request whose captured answer is not one of the three sizes pictures nothing: no file is named
+    /// after a word that is not a size, and the card draws the one shared placeholder rather than standing artwork
+    /// in for an answer nobody gave (FR-079, FR-089).
+    /// </summary>
+    [TestMethod]
+    public void ViewModel_WaitlistViewViewModelFieldTests_CreateSessionOrder_LeavesAHopperRowWithNoSizeOnTheSharedPlaceholder()
+    {
+        var row = WaitlistViewViewModel.CreateSessionOrder(Shape("pickup-hopper"));
+
+        Assert.AreEqual(
+            string.Empty,
+            row.MaterialPartNumber,
+            "A word that is not a size names no hopper picture, so the row carries no picture key.");
+        Assert.AreEqual(
+            string.Empty,
+            row.MaterialPartScope,
+            "And it carries no scope either, so nothing is looked up on its behalf.");
+        Assert.AreEqual(
+            ImagePicturePolicy.NoImagePath,
+            row.EffectiveImagePath,
+            "The card draws the one shared placeholder.");
+    }
+
+    /// <summary>
+    /// The hopper's key is the only row that is not a part: every other request that names a material part keeps
+    /// the Visual part scope, so a part picture is still looked up as a part (FR-002, FR-019).
+    /// </summary>
+    [TestMethod]
+    public void ViewModel_WaitlistViewViewModelFieldTests_CreateSessionOrder_KeepsAPartRequestsPictureInTheVisualPartScope()
+    {
+        var row = WaitlistViewViewModel.CreateSessionOrder(Shape("pickup-coil"), CoilJob());
+
+        Assert.AreEqual("MMC0001000", row.MaterialPartNumber, "The coil card still pictures the coil the job holds.");
+        Assert.AreEqual(
+            PartPictureLayout.VisualPartScope,
+            row.MaterialPartScope,
+            "A coil's picture is looked up as a Visual part, not as a hopper size.");
+    }
+
+    // ── The flyout's command: one condition, set on the row, by the row's own handler ─────────────────
     /// <summary>
     /// The command the status word's flyout invokes writes the chosen condition through the seam that reports
     /// the affected rows, for the row's own material handler (FR-070, FR-072, FR-076).

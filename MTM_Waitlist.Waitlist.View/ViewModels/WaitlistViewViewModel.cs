@@ -1180,16 +1180,26 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         // see the dunnage catalogue, so a dunnage card would otherwise always draw the placeholder.
         var dunnagePartPicturePath = WaitlistRequestTitles.ResolveDunnagePartPicturePath(context, jobAvailability);
 
+        // A hopper request names no material part either, but it too is about one thing the operator picked: the
+        // size they chose, and its word is the key that size's hopper picture is filed under. The size is handed to
+        // the picture resolver in place of a part number, in the hopper pictures' own scope rather than a part
+        // scope, so the card's left spot draws the very picture the New Request hopper step drew and the card's
+        // Size cell opens (FR-077, FR-078, D22). A hopper request with no size captured pictures nothing and keeps
+        // the shared placeholder.
+        var hopperSize = WaitlistCardCellRules.HopperSizeAnswer(request.Item, request);
+
         var item = new SampleOrder
         {
             Id = request.Id.GetHashCode(),
             RequestId = request.Id,
             ItemCode = request.Item,
-            MaterialPartNumber = materialPartNumber ?? string.Empty,
+            MaterialPartNumber = materialPartNumber ?? hopperSize ?? string.Empty,
             StockLookupPartNumber = string.Equals(request.Item, "deliver-component", StringComparison.OrdinalIgnoreCase)
                 ? context.Component?.Trim() ?? string.Empty
                 : string.Empty,
-            MaterialPartScope = materialPartNumber is null ? string.Empty : PartPictureLayout.VisualPartScope,
+            MaterialPartScope = hopperSize is not null
+                ? PartPictureLayout.HopperSizeScope
+                : materialPartNumber is null ? string.Empty : PartPictureLayout.VisualPartScope,
             // Empty for every request that is not about a dunnage part, which draws the one shared placeholder.
             ResolvedPartImagePath = dunnagePartPicturePath ?? string.Empty,
             RequesterEmployeeNumber = request.RequesterEmployeeNumber,
@@ -1674,7 +1684,10 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     /// the row as it was — and the card then draws the one shared placeholder rather than a picture of the kind of
     /// request or the part's family (FR-014, FR-019, FR-020). A dunnage request is left alone here for the same
     /// reason: it names no material part, and the dunnage part's picture is already carried by
-    /// <see cref="CreateSessionOrder"/>, which is where the requesting job is in hand.
+    /// <see cref="CreateSessionOrder"/>, which is where the requesting job is in hand. A hopper request is
+    /// resolved here like any other row: <see cref="CreateSessionOrder"/> hands it the size word as the part and
+    /// the hopper pictures' own scope, so the left spot draws the size's picture through this same resolver
+    /// (FR-077, FR-078).
     /// </summary>
     /// <remarks>
     /// A resolver that cannot answer is not worth failing the whole list for: the row keeps its placeholder, the

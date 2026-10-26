@@ -143,6 +143,7 @@
                             CanReorderItems="True"
                             DragItemsCompleted="OnLuggerDragItemsCompleted"
                             IsItemClickEnabled="False"
+                            shared:CardGridSizing.MaximumColumns="3"
                             shared:CardGridSizing.MinimumCardWidth="240"
                             ItemContainerStyle="{StaticResource ArrangementTileItemContainerStyle}"
                             ItemsSource="{x:Bind ViewModel.Luggers, Mode=OneWay}"

@@ -369,6 +369,58 @@ public static class WaitlistCardCellRules
     public static string ReferencePictureScope => PartPictureLayout.HopperSizeScope;
 
     /// <summary>
+    /// The size word a hopper request captured, which is also the key its card's <b>left picture</b> is filed
+    /// under, or <see langword="null" /> when the request is not a hopper request or captured no size
+    /// (FR-077, FR-078, D22).
+    /// </summary>
+    /// <remarks>
+    /// On a hopper request the size is the one thing the operator chose, so it is the thing the card's left spot
+    /// pictures — the same word, and therefore the same file, the Size cell on the same card opens. The answer is
+    /// read the way the Size cell reads it, including the fall-back to the request's one answer, so a row stored
+    /// before the size was captured under its label still pictures the size it carries. A request with no size
+    /// pictures nothing, and the card draws the one shared placeholder rather than artwork chosen for it (FR-089).
+    /// </remarks>
+    /// <param name="itemCode">The request's Item code.</param>
+    /// <param name="request">The request, whose captured answers are read.</param>
+    public static string? HopperSizeAnswer(string? itemCode, WaitlistRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        if (IsHopperItem(itemCode) is false)
+        {
+            return null;
+        }
+
+        // Only one of the three sizes names a hopper picture, so a request whose answer is some other word
+        // pictures nothing rather than asking the resolver for a file named after it (FR-079).
+        var captured = CapturedSize(request);
+
+        return PartPictureLayout.IsHopperSizeCode(captured) ? captured!.Trim() : null;
+    }
+
+    /// <summary>
+    /// The size a hopper request carries: the answer it captured under the size's label, and failing that the
+    /// request's one answer, which is how a row stored before the label was declared still carries its size.
+    /// </summary>
+    /// <param name="request">The request, whose captured answers are read.</param>
+    private static string? CapturedSize(WaitlistRequest request)
+    {
+        if (request.Answers is { Count: > 0 } answers)
+        {
+            foreach (var answer in answers)
+            {
+                if (string.Equals(answer.Key?.Trim(), SizeAnswerLabel, StringComparison.OrdinalIgnoreCase)
+                    && !string.IsNullOrWhiteSpace(answer.Value))
+                {
+                    return answer.Value.Trim();
+                }
+            }
+        }
+
+        return string.IsNullOrWhiteSpace(request.InputValue) ? null : request.InputValue.Trim();
+    }
+
+    /// <summary>
     /// The word a description cell's label carries, in every spelling the shipped declarations use: the request
     /// description (<c>other</c>), the part description (<c>deliver-component</c>), the coil description (both coil
     /// Items) and the dunnage <c>Description</c>, which is declared but not drawn today.
