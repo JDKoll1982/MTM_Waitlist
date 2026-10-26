@@ -93,6 +93,32 @@ public sealed class WaitlistLineCardCellTests
     }
 
     /// <summary>
+    /// A cell that draws a picture says so, and a cell that does not keeps the default — which is what the card's
+    /// cell template selector asks before it chooses the pictured cell (owner decision, 2026-10-26).
+    /// </summary>
+    [TestMethod]
+    public void Model_WaitlistLineCardCellTests_DrawsPicture_IsSetOnlyByACellThatPicturesItsValue()
+    {
+        var pictured = new WaitlistLineCardCell
+        {
+            Label = "Lugger Location",
+            Value = "Door 6 Lugger",
+            Order = 2,
+            DrawsPicture = true,
+            ResolvedReferenceImagePath = @"C:\pictures\Lugger06.png",
+        };
+
+        var plain = new WaitlistLineCardCell { Label = "Scrap Type", Value = "3003 Aluminum", Order = 1 };
+
+        Assert.IsTrue(pictured.DrawsPicture, "the lugger cell does not say it draws a picture");
+        Assert.AreEqual(@"C:\pictures\Lugger06.png", pictured.EffectiveReferenceImagePath, "the pictured cell lost the picture it was handed");
+        Assert.IsFalse(plain.DrawsPicture, "a cell that pictures nothing claims to draw a picture");
+        Assert.IsFalse(
+            plain.EffectiveReferenceImagePath.Contains(@"pictures", StringComparison.OrdinalIgnoreCase),
+            "a cell with no picture resolved a path it was never handed");
+    }
+
+    /// <summary>
     /// FR-006 and FR-018: a cell that resolved no value is not added to a card's cells at all, so nothing is
     /// padded and the panel's geometry follows the cells that remain (FR-026).
     /// </summary>

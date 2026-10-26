@@ -209,6 +209,18 @@ public sealed record RequestJobPartAvailability(
     public string? LuggerLocation { get; init; }
 
     /// <summary>
+    /// The picture that belongs to <see cref="LuggerLocation"/>, resolved where the arrangement was in hand, or
+    /// empty when the lugger has none or nothing named one.
+    /// </summary>
+    /// <remarks>
+    /// A lugger's picture is filed under its place in the arrangement rather than under its name, so only the
+    /// arrangement can answer which file it is. Carrying the answer here is what lets a waitlist card draw the
+    /// lugger beside the cell that names it and in the card's own left spot (owner decision, 2026-10-26). Empty is
+    /// not a fault: the card draws the application's one shared placeholder, exactly as it does for a part.
+    /// </remarks>
+    public string LuggerLocationImagePath { get; init; } = string.Empty;
+
+    /// <summary>
     /// Every die assigned to the requesting job, in the job's own order (FR-054).
     /// <para>
     /// This is the list the die step shows as selectable cards, and the list an Item whose configuration names

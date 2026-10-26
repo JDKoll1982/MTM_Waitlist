@@ -11,7 +11,7 @@ namespace MTM_Waitlist.Module_Startup.Services;
 /// <remarks>
 /// <para>
 /// <b>It cannot stop the launch, whatever it does.</b> The catalogue marks this entry best effort and bounds it at
-/// ten seconds, and the runner turns any failure into a skip, so a share that is down costs the launch nothing
+/// thirty seconds, and the runner turns any failure into a skip, so a share that is down costs the launch nothing
 /// but a line on the feed (FR-026). That is deliberate: the application is perfectly usable reading pictures from
 /// the share, and it is not usable without a shell.
 /// </para>
@@ -70,7 +70,20 @@ public sealed class PictureCacheStep : ILaunchStep
     /// <param name="cancellationToken">Cancelled when the launch is abandoned or the stated maximum passes.</param>
     private async Task<LaunchStepOutcome> RefreshAsync(CancellationToken cancellationToken)
     {
+        var started = System.Diagnostics.Stopwatch.GetTimestamp();
+
+        AppLog.Info(LogModule, "The picture refresh step has started.");
+
         var result = await _pictureCache.SynchronizeAsync(cancellationToken).ConfigureAwait(false);
+
+        var elapsed = System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalSeconds.ToString("0.0", System.Globalization.CultureInfo.CurrentCulture);
+
+        AppLog.Info(
+            LogModule,
+            $"The picture refresh step answered after {elapsed} second(s): {result.Copied} copied, {result.Removed} removed, "
+            + $"{result.ArchivesRemoved} replaced copies cleaned up, {result.NotCopied} could not be copied, "
+            + $"{result.SourcesSkipped.Count} source(s) left alone, {result.DestinationsUnavailable.Count} whose folder "
+            + "could not be written.");
 
         if (result.DestinationsUnavailable.Count > 0)
         {

@@ -344,7 +344,9 @@
                                 Grid.Column="0"
                                 VerticalAlignment="Center"
                                 Style="{ThemeResource BodyLargeStrongTextBlockStyle}"
-                                Text="{Binding HeaderText}" />
+                                Text="{Binding HeaderText}"
+                                TextTrimming="CharacterEllipsis"
+                                TextWrapping="NoWrap" />
                             <StackPanel
                                 Grid.Column="1"
                                 Orientation="Horizontal"
@@ -541,7 +543,9 @@
                                         Grid.Column="0"
                                         VerticalAlignment="Center"
                                         Style="{ThemeResource BodyLargeStrongTextBlockStyle}"
-                                        Text="{Binding HeaderText}" />
+                                        Text="{Binding HeaderText}"
+                                        TextTrimming="CharacterEllipsis"
+                                        TextWrapping="NoWrap" />
                                     <StackPanel
                                         Grid.Column="1"
                                         Orientation="Horizontal"

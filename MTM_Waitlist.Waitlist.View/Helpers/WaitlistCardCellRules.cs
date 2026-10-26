@@ -140,6 +140,15 @@ public static class WaitlistCardCellRules
     /// </summary>
     private const string SizeAnswerLabel = "Size";
 
+    /// <summary>
+    /// The declared label the scrap Item's lugger cell carries. Its value is the lugger's name, and the picture
+    /// beside it is the lugger's own artwork, filed under that lugger's place in the arrangement.
+    /// </summary>
+    private const string LuggerLocationLabel = "Lugger Location";
+
+    /// <summary>The Item code of the one request whose card names and pictures the lugger its scrap goes into.</summary>
+    private const string ScrapItemCode = "pickup-scrap";
+
     /// <summary>Whether anything at all is drawn for an Item: the four collapsing Items draw no cells.</summary>
     /// <param name="itemCode">The request's Item code.</param>
     public static bool DrawsNoCells(string? itemCode) =>
@@ -249,6 +258,23 @@ public static class WaitlistCardCellRules
     public static bool IsRequestWorkCentreField(string? label) =>
         !string.IsNullOrWhiteSpace(label)
         && string.Equals(label.Trim(), RequestWorkCentreLabel, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Whether a request is the scrap Item, whose card draws the lugger its material is dumped into and pictures
+    /// that lugger in its own left spot (owner decision, 2026-10-26).
+    /// </summary>
+    /// <param name="itemCode">The request's Item code.</param>
+    public static bool IsScrapItem(string? itemCode) =>
+        string.Equals(ItemCode(itemCode), ScrapItemCode, StringComparison.Ordinal);
+
+    /// <summary>
+    /// Whether a declared field is the scrap Item's <c>Lugger Location</c>, whose value the card pictures with the
+    /// lugger's own artwork (owner decision, 2026-10-26).
+    /// </summary>
+    /// <param name="label">The label the field was declared under.</param>
+    public static bool IsLuggerLocationField(string? label) =>
+        !string.IsNullOrWhiteSpace(label)
+        && string.Equals(label.Trim(), LuggerLocationLabel, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Whether a declared field is the die Items' die-shop direction, whose answer decides whether the card

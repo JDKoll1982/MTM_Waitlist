@@ -129,6 +129,36 @@ public sealed class LaunchStepRunnerTests
         Assert.IsFalse(feed.Entries[^1].Succeeded);
     }
 
+    /// <summary>
+    /// A step that passes its bound says what it was still doing, not only how long it was given: a duration is not
+    /// a reason, and a person reading the line cannot tell a share that never answered from one that was simply
+    /// slower than the allowance (owner decision, 2026-10-26).
+    /// </summary>
+    [TestMethod]
+    public async Task Service_LaunchStepRunnerTests_RunAsync_WhenAStepPassesItsStatedMaximumSaysWhatItWasStillWaitingOn()
+    {
+        // Arrange: the picture refresh, whose target is the share the copies come from.
+        var feed = new LaunchActivityFeed();
+        var runner = new LaunchStepRunner(feed);
+
+        var step = StepWith(
+            "picture-cache",
+            (_, _) => NeverFinishes(),
+            maximum: s_tightBound,
+            bestEffort: true,
+            target: "the picture share");
+
+        // Act
+        var outcome = await runner.RunAsync(step, Context(feed), CancellationToken.None);
+
+        // Assert
+        StringAssert.Contains(outcome.Diagnosis!, "did not finish within", "the bound it passed has to stay in the line");
+        StringAssert.Contains(
+            outcome.Diagnosis!,
+            "still waiting on the picture share",
+            "the line states the duration rather than why the work was cut off");
+    }
+
     [TestMethod]
     public async Task Service_LaunchStepRunnerTests_RunAsync_WhenABestEffortStepThrowsIsSkippedSoTheLaunchCarriesOn()
     {

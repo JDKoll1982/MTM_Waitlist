@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 
+using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Settings.ViewModels;
 using MTM_Waitlist.Module_Settings.Views;
 
@@ -26,6 +27,10 @@ static partial class ServiceRegistrationExtensions
     /// </summary>
     static partial void RegisterLuggerArrangementPage(IServiceCollection services)
     {
+        // The question asked when a status change leaves a scrap type with no available lugger. It lives here
+        // because the dialog it opens belongs to the window, which only the composition root owns.
+        services.AddSingleton<ILuggerBackupPrompt, MTM_Waitlist.Services.LuggerBackupPrompt>();
+
         services.AddTransient<LuggerArrangementViewModel>();
         services.AddTransient<LuggerArrangementPage>();
 

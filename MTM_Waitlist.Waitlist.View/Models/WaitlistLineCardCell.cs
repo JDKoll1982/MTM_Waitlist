@@ -98,9 +98,23 @@ public sealed class WaitlistLineCardCell
     /// </summary>
     public string ResolvedReferenceImagePath { get; set; } = string.Empty;
 
-    /// <summary>Whether this cell opens a reference picture at all, whatever the picture resolved to.</summary>
+    /// <summary>
+    /// Whether this cell opens a reference picture at all, whatever the picture resolved to.
+    /// </summary>
     public bool OpensReferencePicture =>
         !string.IsNullOrWhiteSpace(ReferencePartNumber) && !string.IsNullOrWhiteSpace(ReferencePartScope);
+
+    /// <summary>
+    /// Whether the cell draws a picture beside its value, whatever key that picture was found by.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="OpensReferencePicture"/> answers "can this cell open a picture by part and scope", which is how
+    /// the hopper size cell finds its file; a lugger's picture is filed under its place in the arrangement instead,
+    /// so it has no part number to name. This flag is what the card's cell template selector asks, so both kinds of
+    /// pictured cell are drawn the same way — picture, then the value in words — and a cell that pictures nothing
+    /// keeps the plain or scrolling line.
+    /// </remarks>
+    public bool DrawsPicture { get; init; }
 
     /// <summary>
     /// Whether the cell's value is a description, which the card draws through the application's shared one-line

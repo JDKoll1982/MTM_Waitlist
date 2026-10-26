@@ -7,6 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Shared.Helpers;
 using MTM_Waitlist.Module_Waitlist.Helpers;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
@@ -416,6 +417,10 @@ public sealed class WaitlistLineCardDetailTemplateTests
         Assert.IsNotNull(selector, "The cell selector is not declared, so a cell's own label cannot choose its line (FR-053).");
         StringAssert.Contains((string?)selector!.Attribute("PlainTemplate") ?? string.Empty, CellTemplateKey, "The selector's plain line is not the shared cell.");
         StringAssert.Contains((string?)selector.Attribute("ScrollingTemplate") ?? string.Empty, ScrollingCellTemplateKey, "The selector's scrolling line is not the shared scrolling cell.");
+        StringAssert.Contains(
+            (string?)selector.Attribute("PictureTemplate") ?? string.Empty,
+            PictureCellTemplateKey,
+            "A cell that pictures its value cannot reach the pictured cell, so a lugger's cell would draw its name without the lugger.");
 
         // Every slot asks it: no Item pins a line template of its own any more, and no Item can forget to.
         foreach (var (key, template) in DetailTemplates())
@@ -1519,6 +1524,58 @@ public sealed class WaitlistLineCardDetailTemplateTests
         ScrapType = "3003 Aluminum",
         LuggerLocation = "Door 6 Lugger",
     };
+
+    /// <summary>
+    /// The scrap card pictures the lugger it names: the picture sits beside the value in the same cell, and the
+    /// card's own left spot draws that picture rather than the shared placeholder (owner decision, 2026-10-26).
+    /// </summary>
+    [TestMethod]
+    public void ViewModel_WaitlistLineCardDetailTemplateTests_ResolveDeclaredCells_PicturesTheLuggerInItsCellAndInTheCardsLeftSpot()
+    {
+        var declaration = Declaration(
+            "pickup-scrap",
+            ("Scrap type", RequestItemFieldDefinition.Sources.Job, 1, false),
+            ("Lugger Location", RequestItemFieldDefinition.Sources.Job, 2, false));
+
+        var card = WaitlistViewViewModel.CreateSessionOrder(
+            Shape("pickup-scrap"),
+            ScrapJob() with { LuggerLocationImagePath = @"C:\pictures\Lugger06.png" },
+            declaration);
+
+        var lugger = card.Cells.Single(cell => string.Equals(cell.Label, "Lugger Location", StringComparison.OrdinalIgnoreCase));
+
+        Assert.IsTrue(lugger.DrawsPicture, "the lugger cell names a lugger and draws no picture beside it");
+        Assert.AreEqual(@"C:\pictures\Lugger06.png", lugger.EffectiveReferenceImagePath, "the lugger cell pictures something other than the lugger");
+
+        Assert.AreEqual(
+            @"C:\pictures\Lugger06.png",
+            card.EffectiveImagePath,
+            "the card's left spot does not draw the lugger its material is dumped into");
+
+        // The lugger's picture is not looked up as a part, so the row names no part for the resolver to chase.
+        Assert.AreEqual(string.Empty, card.MaterialPartNumber, "the card would ask the part resolver for the lugger's picture");
+        Assert.AreEqual(string.Empty, card.MaterialPartScope);
+    }
+
+    /// <summary>
+    /// A lugger with no picture still draws the pictured cell, and the cell falls back to the application's one
+    /// shared placeholder — the same answer a size with no picture gives (FR-080).
+    /// </summary>
+    [TestMethod]
+    public void ViewModel_WaitlistLineCardDetailTemplateTests_ResolveDeclaredCells_ALuggerWithNoPictureStillDrawsThePicturedCell()
+    {
+        var card = WaitlistViewViewModel.CreateSessionOrder(
+            Shape("pickup-scrap"),
+            ScrapJob(),
+            Declaration(
+                "pickup-scrap",
+                ("Lugger Location", RequestItemFieldDefinition.Sources.Job, 2, false)));
+
+        var lugger = card.Cells.Single(cell => string.Equals(cell.Label, "Lugger Location", StringComparison.OrdinalIgnoreCase));
+
+        Assert.IsTrue(lugger.DrawsPicture, "a lugger that resolved draws the pictured cell whether or not its file was found");
+        Assert.AreEqual(ImagePicturePolicy.NoImagePath, lugger.EffectiveReferenceImagePath, "the cell draws a blank rather than the shared placeholder");
+    }
 
     /// <summary>Captures what the facade forwards to the store's log, so a warning can be observed without a store.</summary>
     private sealed class RecordingAppLogSink : IAppLogSink

@@ -169,6 +169,52 @@ public sealed class LuggerArrangementPageMarkupTests
     }
 
     /// <summary>
+    /// A card's two actions sit in a bordered band of their own, inside a five-row layout whose star rows centre
+    /// the facts and the actions in the card (owner decision, 2026-10-26).
+    /// </summary>
+    [TestMethod]
+    public void UI_LuggerArrangementPageMarkupTests_EachCard_PutsItsTwoActionsInABorderedBandOfTheirOwn()
+    {
+        var tile = TileOf(LoadPage());
+
+        // The content grid is the card's own words-and-actions column: five rows, star / auto / star / auto / star.
+        var content = tile
+            .Descendants(s_presentation + "Grid")
+            .SingleOrDefault(grid => grid.Elements(s_presentation + "Grid.RowDefinitions").Any());
+
+        Assert.IsNotNull(content, "The card no longer declares the rows its content is laid out in.");
+
+        var heights = content
+            .Element(s_presentation + "Grid.RowDefinitions")!
+            .Elements(s_presentation + "RowDefinition")
+            .Select(row => (string?)row.Attribute("Height"))
+            .ToArray();
+
+        CollectionAssert.AreEqual(
+            new[] { "*", "Auto", "*", "Auto", "*" },
+            heights,
+            "The card's content is not laid out as star / auto / star / auto / star.");
+
+        // The actions are drawn inside a border of their own, and that border takes the second auto row.
+        var band = content
+            .Elements(s_presentation + "Border")
+            .SingleOrDefault(border => border.Descendants(s_presentation + "Button").Any());
+
+        Assert.IsNotNull(band, "The card's two actions are not inside a card of their own.");
+        Assert.AreEqual("3", (string?)band!.Attribute("Grid.Row"), "The actions' band is not in the second auto row.");
+        StringAssert.Contains(
+            (string?)band.Attribute("BorderBrush") ?? string.Empty,
+            "CardStrokeColorDefaultBrush",
+            "The actions' band draws no border, so it does not read as a card.");
+        StringAssert.Contains(
+            (string?)band.Attribute("Background") ?? string.Empty,
+            "SolidBackgroundFillColor",
+            "The actions' band is see-through, so the card's picture shows through the buttons.");
+
+        Assert.AreEqual(2, band.Descendants(s_presentation + "Button").Count(), "The band holds something other than the card's two actions.");
+    }
+
+    /// <summary>
     /// The editor is a modal window of its own, opened by a card's own Edit, so it carries no lugger picker, offers
     /// the scrap types as a choice rather than free text, and shows "Make dump point" only when there is a backup to
     /// promote ahead of (FR-006, FR-011, FR-018, FR-030).

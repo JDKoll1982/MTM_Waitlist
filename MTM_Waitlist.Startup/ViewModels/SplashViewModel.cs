@@ -149,6 +149,12 @@ public sealed partial class SplashViewModel : ObservableObject
     /// <summary>The statement shown while the picture refresh's failure is held: what went wrong and what is used.</summary>
     public string PictureCopyHoldText => "Startup_Launch.PictureCopiesNotRefreshed".GetLocalized();
 
+    /// <summary>
+    /// What the held statement means for the pictures on this computer, drawn after the reason so the strip reads
+    /// headline, why, and what it costs.
+    /// </summary>
+    public string PictureCopyHoldDetailText => "Startup_Launch.PictureCopiesNotRefreshedDetail".GetLocalized();
+
     /// <summary>The button that ends the hold, which is the person saying they have read it.</summary>
     public string ContinueActionText => "Startup_Launch.ContinueAction".GetLocalized();
 

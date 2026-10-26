@@ -1396,7 +1396,10 @@
     <value>Continue</value>
   </data>
   <data name="Startup_Launch.PictureCopiesNotRefreshed" xml:space="preserve">
-    <value>The picture copies could not be brought up to date, so the pictures already stored on this computer are the ones being used. Continue to carry on.</value>
+    <value>The picture copies could not be brought up to date.</value>
+  </data>
+  <data name="Startup_Launch.PictureCopiesNotRefreshedDetail" xml:space="preserve">
+    <value>The pictures already stored on this computer are the ones being used. Continue to carry on.</value>
   </data>
   <data name="Startup_Launch.EndedByWindowClose" xml:space="preserve">
     <value>The startup window was closed, so the application is ending. Open it again to start it up.</value>
@@ -2737,6 +2740,24 @@
   </data>
   <data name="Settings_Lugger_Arrangement.Refused" xml:space="preserve">
     <value>That change was refused. Review the name and the reason, then try again.</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.BackupPromptTitle" xml:space="preserve">
+    <value>No available lugger left</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.BackupPromptMessage" xml:space="preserve">
+    <value>{0} will no longer be available for {1}, and the only other lugger taking that scrap is {2}, which is a backup. Making {2} available now means handlers still have somewhere to walk. Choosing to keep it as a backup leaves the arrangement untouched, and you become responsible for setting an available lugger for {1}.</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.BackupPromptAct" xml:space="preserve">
+    <value>Make it available</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.BackupPromptKeep" xml:space="preserve">
+    <value>Keep it as a backup</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.BackupPromoted" xml:space="preserve">
+    <value>{0} is now available for {1}.</value>
+  </data>
+  <data name="Settings_Lugger_Arrangement.BackupLeftAsBackup" xml:space="preserve">
+    <value>{0} is still a backup for {1}. No lugger is available for that scrap, so setting one is now your responsibility.</value>
   </data>
   <data name="Lugger_Notice.LuggerAdded" xml:space="preserve">
     <value>{0} was added.</value>

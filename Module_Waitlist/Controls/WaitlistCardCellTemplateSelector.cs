@@ -34,11 +34,28 @@ public sealed class WaitlistCardCellTemplateSelector : DataTemplateSelector
     /// <summary>The key of the scrolling cell template, as the dictionary declares it.</summary>
     public const string ScrollingTemplateKey = "WaitlistLineCardDetailScrollingCell";
 
+    /// <summary>The key of the pictured cell template, as the dictionary declares it.</summary>
+    public const string PictureTemplateKey = "WaitlistLineCardDetailPictureCell";
+
     /// <summary>The cell drawn for a value that fits on one line, with its label beside it.</summary>
     public DataTemplate? PlainTemplate { get; set; }
 
     /// <summary>The cell drawn for a description, which scrolls its value past rather than clipping it.</summary>
     public DataTemplate? ScrollingTemplate { get; set; }
+
+    /// <summary>
+    /// The cell drawn for a value that carries a picture — the hopper's size and the scrap card's lugger — so the
+    /// picture sits beside the word rather than in place of it (FR-077, FR-078).
+    /// </summary>
+    public DataTemplate? PictureTemplate { get; set; }
+
+    /// <summary>
+    /// Whether the given item is drawn by the pictured cell: true for a cell that pictures its value, false for
+    /// every other cell and for anything that is not a cell at all.
+    /// </summary>
+    /// <param name="item">The item the presenter is drawing.</param>
+    /// <returns><see langword="true"/> when the pictured cell is the right template for it.</returns>
+    public static bool WantsPictureCell(object? item) => item is WaitlistLineCardCell { DrawsPicture: true };
 
     /// <summary>
     /// Whether the given item is drawn by the scrolling cell: true for a cell whose value is a description, false
@@ -50,7 +67,7 @@ public sealed class WaitlistCardCellTemplateSelector : DataTemplateSelector
 
     /// <summary>The template for one cell.</summary>
     /// <param name="item">The item the presenter is drawing, expected to be a cell.</param>
-    /// <returns>The scrolling template for a description, the plain one otherwise.</returns>
+    /// <returns>The pictured cell for a value with a picture, the scrolling one for a description, the plain one otherwise.</returns>
     protected override DataTemplate SelectTemplateCore(object item) => Resolve(item);
 
     /// <summary>
@@ -59,14 +76,24 @@ public sealed class WaitlistCardCellTemplateSelector : DataTemplateSelector
     /// </summary>
     /// <param name="item">The item the presenter is drawing, expected to be a cell.</param>
     /// <param name="container">The element the presenter is drawing it into, which this selector does not use.</param>
-    /// <returns>The scrolling template for a description, the plain one otherwise.</returns>
+    /// <returns>The pictured cell for a value with a picture, the scrolling one for a description, the plain one otherwise.</returns>
     protected override DataTemplate SelectTemplateCore(object item, DependencyObject container) => Resolve(item);
 
-    private DataTemplate Resolve(object item) =>
-        (WantsScrollingCell(item) ? ScrollingTemplate : null)
+    private DataTemplate Resolve(object item)
+    {
+        // A cell that pictures its value is drawn by the pictured cell and nothing else: a picture is what makes
+        // that cell worth drawing, so falling back to a line without it would lose the thing being shown.
+        if (WantsPictureCell(item) && PictureTemplate is { } picture)
+        {
+            return picture;
+        }
+
+        return (WantsScrollingCell(item) ? ScrollingTemplate : null)
             ?? PlainTemplate
             ?? ScrollingTemplate
+            ?? PictureTemplate
             ?? EmptyTemplate;
+    }
 
     /// <summary>
     /// The template drawn when neither of the selector's own templates can be resolved.

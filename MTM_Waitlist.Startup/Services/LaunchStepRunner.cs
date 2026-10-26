@@ -205,11 +205,19 @@ public sealed class LaunchStepRunner
             remedies ?? LaunchRemedySet.RetryOnly);
     }
 
-    /// <summary>Records a step that passed its stated maximum, naming the bound it passed.</summary>
+    /// <summary>Records a step that passed its stated maximum, naming the bound it passed and what it was still doing.</summary>
+    /// <remarks>
+    /// The line says where the step had got to as well as how long it was given. "Did not finish within ten
+    /// seconds" is a duration, and a person reading it cannot tell a share that never answered from one that was
+    /// simply slower than the allowance — so the step's own target is named, and the person learns that the work
+    /// was cut off there rather than that it failed for no stated reason.
+    /// </remarks>
     private LaunchStepOutcome RecordOverrun(LaunchStep descriptor)
     {
-        var diagnosis =
-            $"{descriptor.Name} did not finish within the {DescribeMaximum(descriptor.MaximumWait)} it is allowed.";
+        var diagnosis = descriptor.Target is { Length: > 0 } target
+            ? $"{descriptor.Name} did not finish within the {DescribeMaximum(descriptor.MaximumWait)} it is allowed, "
+                + $"so it was stopped while it was still waiting on {target}."
+            : $"{descriptor.Name} did not finish within the {DescribeMaximum(descriptor.MaximumWait)} it is allowed.";
 
         return RecordFailure(descriptor, diagnosis);
     }

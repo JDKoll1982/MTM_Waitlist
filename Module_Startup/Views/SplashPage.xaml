@@ -119,7 +119,9 @@
                 <!--
                     The picture refresh is best effort, so it does not stop the launch — but it is stated here and
                     the window waits until the person has read it, because the surface that replaces this one says
-                    nothing about pictures and a machine drawing stale copies would never find out.
+                    nothing about pictures and a machine drawing stale copies would never find out. The strip reads
+                    headline, then why in the failing line beneath it, then what that means for the pictures this
+                    computer holds.
                 -->
                 <TextBlock
                     x:Name="PictureCopyHoldTextBlock"
@@ -132,6 +134,12 @@
                     x:Name="ErrorTextBlock"
                     AutomationProperties.AutomationId="SplashPage_ErrorText"
                     TextWrapping="Wrap" />
+                <TextBlock
+                    x:Name="PictureCopyHoldDetailTextBlock"
+                    AutomationProperties.AutomationId="SplashPage_PictureCopyHoldDetail"
+                    Text="{x:Bind ViewModel.PictureCopyHoldDetailText}"
+                    TextWrapping="Wrap"
+                    Visibility="{x:Bind ViewModel.IsHoldingForPictureCopies, Mode=OneWay}" />
             </StackPanel>
         </Border>
 

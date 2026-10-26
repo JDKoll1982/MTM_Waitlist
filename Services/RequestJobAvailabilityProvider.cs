@@ -31,6 +31,7 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
     private readonly RequestDispositionResolver _dispositionResolver;
     private readonly IAverageCoilWeightService _averageCoilWeightService;
     private readonly ILuggerArrangementService _luggerArrangement;
+    private readonly ILuggerImageResolver? _luggerImages;
     private readonly IPartStockService? _partStockService;
 
     public RequestJobAvailabilityProvider(
@@ -38,7 +39,8 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
         RequestDispositionResolver dispositionResolver,
         IAverageCoilWeightService averageCoilWeightService,
         ILuggerArrangementService luggerArrangement,
-        IPartStockService? partStockService = null)
+        IPartStockService? partStockService = null,
+        ILuggerImageResolver? luggerImages = null)
     {
         ArgumentNullException.ThrowIfNull(activeJobItemResolver);
         ArgumentNullException.ThrowIfNull(dispositionResolver);
@@ -50,6 +52,7 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
         _averageCoilWeightService = averageCoilWeightService;
         _luggerArrangement = luggerArrangement;
         _partStockService = partStockService;
+        _luggerImages = luggerImages;
     }
 
     /// <inheritdoc />
@@ -206,9 +209,69 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
                 $"The scrap type '{availability.ScrapType}' has no lugger assigned, so the `Lugger Location` cell at work center '{workCenter}' is left out. Assign the type to a lugger in the lugger arrangement so handlers know where to walk.");
         }
 
-        return resolution.LuggerLocation is null
-            ? availability
-            : availability with { LuggerLocation = resolution.LuggerLocation };
+        if (resolution.LuggerLocation is null)
+        {
+            return availability;
+        }
+
+        // The lugger's picture is filed under its place in the arrangement, so only the snapshot just read can say
+        // which file it is. A lugger whose name the rows carry no place for — the one named with its status beside
+        // it because no lugger of the type can receive material — resolves to no picture, and the card draws the
+        // shared placeholder rather than another lugger's artwork.
+        var image = await ResolveLuggerPictureAsync(arrangement, resolution.LuggerLocation, cancellationToken)
+            .ConfigureAwait(false);
+
+        return availability with
+        {
+            LuggerLocation = resolution.LuggerLocation,
+            LuggerLocationImagePath = image ?? string.Empty,
+        };
+    }
+
+    /// <summary>
+    /// The picture for the lugger the arrangement named, or <see langword="null"/> when it has none.
+    /// </summary>
+    /// <remarks>
+    /// A resolver that fails, or one that is not wired, answers no picture rather than failing the availability
+    /// read: the card still draws the placeholder, and the picker is not held up by a share that cannot be read.
+    /// </remarks>
+    private async Task<string?> ResolveLuggerPictureAsync(
+        LuggerArrangementSnapshot arrangement,
+        string luggerLocation,
+        CancellationToken cancellationToken)
+    {
+        if (_luggerImages is null)
+        {
+            return null;
+        }
+
+        var position = arrangement.Rows
+            .Where(row => string.Equals(row.LuggerName, luggerLocation, StringComparison.Ordinal)
+                && row.LuggerDisplayPosition is > 0)
+            .Select(row => row.LuggerDisplayPosition!.Value)
+            .FirstOrDefault();
+
+        if (position <= 0)
+        {
+            return null;
+        }
+
+        try
+        {
+            return await _luggerImages.ResolveAsync(position, cancellationToken).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error(
+                "Waitlist",
+                ex,
+                $"The picture for lugger '{luggerLocation}' could not be resolved; the card draws the no-image placeholder.");
+            return null;
+        }
     }
 
     /// <summary>

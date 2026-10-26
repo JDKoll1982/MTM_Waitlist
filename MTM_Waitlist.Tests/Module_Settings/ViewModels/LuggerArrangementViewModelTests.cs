@@ -5,6 +5,7 @@ using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
+using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Settings.ViewModels;
 using MTM_Waitlist.Tests.Fixtures;
 
@@ -275,11 +276,141 @@ public sealed class LuggerArrangementViewModelTests
         return (service, viewModel);
     }
 
-    private static LuggerArrangementViewModel BuildViewModel(FakeArrangementService service, bool held = true) =>
+    private static LuggerArrangementViewModel BuildViewModel(
+        FakeArrangementService service,
+        bool held = true,
+        ILuggerBackupPrompt? backupPrompt = null) =>
         new(
             service,
             new FakePermissionService(held),
-            new FakePersonIdentity { UserId = 12, SignInName = "DBRUCK", DisplayName = ActorName, EmployeeNumber = ActorNumber });
+            new FakePersonIdentity { UserId = 12, SignInName = "DBRUCK", DisplayName = ActorName, EmployeeNumber = ActorNumber },
+            backupPrompt: backupPrompt);
+
+    /// <summary>
+    /// The question asked when a lugger stops being available. It records what it was asked and answers what the
+    /// test stated, so both halves — that it was asked, and what the editor did with the answer — are provable.
+    /// </summary>
+    private sealed class FakeBackupPrompt : ILuggerBackupPrompt
+    {
+        internal FakeBackupPrompt(bool answer) => Answer = answer;
+
+        internal bool Answer { get; set; }
+
+        internal List<(string ChangedLugger, string ScrapType, string BackupLugger)> Asked { get; } = [];
+
+        public Task<bool> AskToMakeBackupAvailableAsync(
+            string changedLuggerName,
+            string scrapType,
+            string backupLuggerName,
+            CancellationToken cancellationToken = default)
+        {
+            Asked.Add((changedLuggerName, scrapType, backupLuggerName));
+            return Task.FromResult(Answer);
+        }
+    }
+
+    /// <summary>
+    /// A lugger stopped being available while another lugger on the same scrap type is only a backup, so the editor
+    /// offers to make that backup available — and does, when the person says yes (owner decision, 2026-10-26).
+    /// </summary>
+    [TestMethod]
+    public async Task ViewModel_LuggerArrangementViewModelTests_SetStatusAsync_LeavingAvailableOffersToMakeTheBackupAvailable()
+    {
+        // Arrange: Door 6 is the available lugger for 3003 Aluminum, and Extra is its backup.
+        var service = new FakeArrangementService();
+        var prompt = new FakeBackupPrompt(answer: true);
+        var viewModel = BuildViewModel(service, backupPrompt: prompt);
+        await viewModel.InitializeAsync();
+
+        viewModel.SelectLugger(viewModel.Luggers.Single(row => row.PublicId == Door6));
+        viewModel.StatusInput = LuggerStatus.Full;
+
+        // Act
+        await viewModel.SetStatusAsync();
+
+        // Assert: the question names the lugger that is leaving, the scrap type, and the backup that could cover it.
+        var asked = prompt.Asked.Single();
+        Assert.AreEqual("Door 6 Lugger", asked.ChangedLugger);
+        Assert.AreEqual("3003 Aluminum", asked.ScrapType);
+        Assert.AreEqual("Extra Lugger", asked.BackupLugger);
+
+        Assert.AreEqual(LuggerStatus.Available, service.StoredStatus(Extra), "the backup was made available");
+        StringAssert.Contains(viewModel.MessageText, "Extra Lugger", "the editor says what it did");
+    }
+
+    /// <summary>
+    /// Answering no keeps the backup a backup, and the editor says who is now responsible for the scrap type rather
+    /// than leaving the consequence to be discovered (owner decision, 2026-10-26).
+    /// </summary>
+    [TestMethod]
+    public async Task ViewModel_LuggerArrangementViewModelTests_SetStatusAsync_KeepingTheBackupSaysWhoIsResponsible()
+    {
+        // Arrange
+        var service = new FakeArrangementService();
+        var prompt = new FakeBackupPrompt(answer: false);
+        var viewModel = BuildViewModel(service, backupPrompt: prompt);
+        await viewModel.InitializeAsync();
+
+        viewModel.SelectLugger(viewModel.Luggers.Single(row => row.PublicId == Door6));
+        viewModel.StatusInput = LuggerStatus.DoNotUse;
+        viewModel.ReasonInput = "Cracked";
+
+        // Act
+        await viewModel.SetStatusAsync();
+
+        // Assert
+        Assert.AreEqual(1, prompt.Asked.Count, "the question is asked once for the one backup");
+        Assert.AreEqual(LuggerStatus.Backup, service.StoredStatus(Extra), "the backup is left exactly as it was");
+        StringAssert.Contains(viewModel.MessageText, "Extra Lugger");
+        StringAssert.Contains(viewModel.MessageText, "responsibility", "the consequence has to be stated, not implied");
+    }
+
+    /// <summary>
+    /// A status change that costs no scrap type its available lugger asks nothing: no other lugger takes the type,
+    /// or another available lugger still does (owner decision, 2026-10-26).
+    /// </summary>
+    [TestMethod]
+    public async Task ViewModel_LuggerArrangementViewModelTests_SetStatusAsync_WithNoBackupToOfferAsksNothing()
+    {
+        // Arrange: Galvanized Steel is held by Door 7 alone, so there is no backup to offer.
+        var service = new FakeArrangementService();
+        var prompt = new FakeBackupPrompt(answer: true);
+        var viewModel = BuildViewModel(service, backupPrompt: prompt);
+        await viewModel.InitializeAsync();
+
+        viewModel.SelectLugger(viewModel.Luggers.Single(row => row.PublicId == Door7));
+        viewModel.StatusInput = LuggerStatus.Full;
+
+        // Act
+        await viewModel.SetStatusAsync();
+
+        // Assert
+        Assert.AreEqual(0, prompt.Asked.Count, "a type with no backup has nobody to promote");
+        Assert.AreEqual(LuggerStatus.Full, service.StoredStatus(Door7));
+    }
+
+    /// <summary>
+    /// A lugger that is already available, or that stays available, is not a change that costs anything, so the
+    /// question is not asked (owner decision, 2026-10-26).
+    /// </summary>
+    [TestMethod]
+    public async Task ViewModel_LuggerArrangementViewModelTests_SetStatusAsync_StayingAvailableAsksNothing()
+    {
+        // Arrange
+        var service = new FakeArrangementService();
+        var prompt = new FakeBackupPrompt(answer: true);
+        var viewModel = BuildViewModel(service, backupPrompt: prompt);
+        await viewModel.InitializeAsync();
+
+        viewModel.SelectLugger(viewModel.Luggers.Single(row => row.PublicId == Door6));
+        viewModel.StatusInput = LuggerStatus.Available;
+
+        // Act
+        await viewModel.SetStatusAsync();
+
+        // Assert
+        Assert.AreEqual(0, prompt.Asked.Count);
+    }
 
     /// <summary>Answers the one gate this screen reads.</summary>
     private sealed class FakePermissionService : IPermissionService
@@ -426,6 +557,38 @@ public sealed class LuggerArrangementViewModelTests
             CancellationToken cancellationToken = default)
         {
             StatusWrites.Add((luggerPublicId, status, reason, actorEmployeeNumber, actorEmployeeName));
+
+            // The store really does keep the new status, so the double does too: a reload after a write must show
+            // what the write did, or a test about what happens next would be testing a stale arrangement.
+            if (WriteFailure is null && WriteAnswer > 0)
+            {
+                var lugger = Luggers.FirstOrDefault(candidate => candidate.PublicId == luggerPublicId);
+
+                if (lugger is not null)
+                {
+                    var index = Luggers.IndexOf(lugger);
+                    Luggers[index] = new Lugger
+                    {
+                        Id = lugger.Id,
+                        PublicId = lugger.PublicId,
+                        Name = lugger.Name,
+                        Status = status,
+                        StatusReason = reason,
+                        DisplayPosition = lugger.DisplayPosition,
+                        CreatedUtc = lugger.CreatedUtc,
+                        UpdatedUtc = lugger.UpdatedUtc,
+                    };
+                }
+
+                for (var index = 0; index < Rows.Count; index++)
+                {
+                    if (string.Equals(Rows[index].LuggerPublicId, luggerPublicId, StringComparison.Ordinal))
+                    {
+                        Rows[index] = Rows[index] with { LuggerStatus = status, LuggerStatusReason = reason };
+                    }
+                }
+            }
+
             return WriteAsync();
         }
 

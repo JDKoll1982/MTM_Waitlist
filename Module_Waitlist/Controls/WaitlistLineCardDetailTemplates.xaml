@@ -193,6 +193,7 @@
     -->
     <controls:WaitlistCardCellTemplateSelector
         x:Key="WaitlistCardCellTemplateSelector"
+        PictureTemplate="{StaticResource WaitlistLineCardDetailPictureCell}"
         PlainTemplate="{StaticResource WaitlistLineCardDetailCell}"
         ScrollingTemplate="{StaticResource WaitlistLineCardDetailScrollingCell}" />
 

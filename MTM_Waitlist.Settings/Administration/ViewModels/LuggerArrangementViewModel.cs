@@ -43,6 +43,7 @@ public partial class LuggerArrangementViewModel : ObservableRecipient, INavigati
     private readonly IPermissionService _permissionService;
     private readonly IPersonIdentity _personIdentity;
     private readonly ILuggerImageResolver? _luggerImages;
+    private readonly ILuggerBackupPrompt? _backupPrompt;
 
     private LuggerArrangementSnapshot _snapshot = LuggerArrangementSnapshot.Empty;
 
@@ -50,12 +51,14 @@ public partial class LuggerArrangementViewModel : ObservableRecipient, INavigati
         ILuggerArrangementService arrangementService,
         IPermissionService permissionService,
         IPersonIdentity personIdentity,
-        ILuggerImageResolver? luggerImages = null)
+        ILuggerImageResolver? luggerImages = null,
+        ILuggerBackupPrompt? backupPrompt = null)
     {
         _arrangementService = arrangementService ?? throw new ArgumentNullException(nameof(arrangementService));
         _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
         _personIdentity = personIdentity ?? throw new ArgumentNullException(nameof(personIdentity));
         _luggerImages = luggerImages;
+        _backupPrompt = backupPrompt;
     }
 
     /// <summary>The work the page's arrival started, so a page or a test can wait for the first read.</summary>
@@ -396,7 +399,17 @@ public partial class LuggerArrangementViewModel : ObservableRecipient, INavigati
             cancellationToken).ConfigureAwait(true);
     }
 
-    /// <summary>Sets the chosen lugger's status, refusing a blank reason for <c>Do Not Use</c> before the call (FR-019).</summary>
+    /// <summary>
+    /// Sets the chosen lugger's status, refusing a blank reason for <c>Do Not Use</c> before the call (FR-019),
+    /// and offering to make a backup available when this change leaves a scrap type with no available lugger.
+    /// </summary>
+    /// <remarks>
+    /// <b>The question is asked after the write, never instead of it.</b> The store accepts the new status whatever
+    /// the arrangement looks like afterwards, so the change is not refused and not held back: what the person is
+    /// offered is the one action that keeps handlers walking to a lugger for the scrap types this lugger was
+    /// holding. Answering no changes nothing further and leaves the responsibility with them, which the editor's
+    /// own message states rather than a dialog that goes away (owner decision, 2026-10-26).
+    /// </remarks>
     [RelayCommand]
     public async Task SetStatusAsync(CancellationToken cancellationToken = default)
     {
@@ -416,8 +429,16 @@ public partial class LuggerArrangementViewModel : ObservableRecipient, INavigati
 
         var reason = requiresReason ? ReasonInput.Trim() : null;
         var publicId = SelectedLugger.PublicId;
+        var luggerName = SelectedLugger.Name;
 
-        await ApplyAsync(
+        // Read before the write: once it lands, the load below reports the new status and the change this asks
+        // about would look like no change at all.
+        var leavingAvailable = string.Equals(SelectedLugger.Status, LuggerStatus.Available, StringComparison.Ordinal)
+            && string.Equals(status, LuggerStatus.Available, StringComparison.Ordinal) is false;
+
+        var backups = leavingAvailable ? BackupsLeavingNoAvailableLugger(publicId) : [];
+
+        var written = await ApplyAsync(
             () => _arrangementService.SetStatusAsync(
                 publicId,
                 status,
@@ -426,6 +447,143 @@ public partial class LuggerArrangementViewModel : ObservableRecipient, INavigati
                 ActorEmployeeName(),
                 cancellationToken),
             cancellationToken).ConfigureAwait(true);
+
+        if (!written || backups.Count == 0)
+        {
+            return;
+        }
+
+        await OfferBackupsAsync(luggerName, backups, cancellationToken).ConfigureAwait(true);
+    }
+
+    /// <summary>
+    /// Asks, one lugger at a time, whether each backup that is now the only other lugger for a scrap type should
+    /// be made available, and makes the ones the person chose available.
+    /// </summary>
+    /// <param name="changedLuggerName">The lugger whose status change prompted the question.</param>
+    /// <param name="backups">The backups to offer, in the order they were found.</param>
+    /// <param name="cancellationToken">The caller's token.</param>
+    private async Task OfferBackupsAsync(
+        string changedLuggerName,
+        IReadOnlyList<(string PublicId, string Name, string ScrapType)> backups,
+        CancellationToken cancellationToken)
+    {
+        foreach (var backup in backups)
+        {
+            var makeAvailable = _backupPrompt is not null
+                && await _backupPrompt
+                    .AskToMakeBackupAvailableAsync(changedLuggerName, backup.ScrapType, backup.Name, cancellationToken)
+                    .ConfigureAwait(true);
+
+            if (makeAvailable is false)
+            {
+                // Said in the editor because that is where the person is: the arrangement itself is unchanged, so
+                // a line that disappeared with the dialog would leave nothing on screen about it.
+                MessageText = string.Format(
+                    System.Globalization.CultureInfo.CurrentCulture,
+                    Localize(
+                        "Settings_Lugger_Arrangement.BackupLeftAsBackup",
+                        "{0} is still a backup for {1}. No lugger is available for that scrap, so setting one is now your responsibility."),
+                    backup.Name,
+                    backup.ScrapType);
+
+                continue;
+            }
+
+            var promoted = await ApplyAsync(
+                () => _arrangementService.SetStatusAsync(
+                    backup.PublicId,
+                    LuggerStatus.Available,
+                    null,
+                    ActorEmployeeNumber(),
+                    ActorEmployeeName(),
+                    cancellationToken),
+                cancellationToken).ConfigureAwait(true);
+
+            if (promoted)
+            {
+                MessageText = string.Format(
+                    System.Globalization.CultureInfo.CurrentCulture,
+                    Localize("Settings_Lugger_Arrangement.BackupPromoted", "{0} is now available for {1}."),
+                    backup.Name,
+                    backup.ScrapType);
+            }
+        }
+    }
+
+    /// <summary>
+    /// The shipped wording for a key, or the caller's sentence when the key resolves to nothing.
+    /// </summary>
+    /// <remarks>
+    /// The fallback exists so a message this screen composes itself is still a sentence when resources cannot be
+    /// read — which is what a headless host sees — rather than a resource key shown where an answer belongs.
+    /// </remarks>
+    private static string Localize(string key, string fallback)
+    {
+        var localized = key.GetLocalized();
+
+        return string.IsNullOrWhiteSpace(localized) || string.Equals(localized, key, StringComparison.Ordinal)
+            ? fallback
+            : localized;
+    }
+
+    /// <summary>
+    /// The backup luggers that would be left holding a scrap type on their own once this lugger stops being
+    /// available: one per scrap type the lugger takes, in that type's own try order.
+    /// </summary>
+    /// <param name="changedLuggerPublicId">The lugger whose status is changing.</param>
+    /// <returns>One entry per backup lugger, naming the scrap type it is the last other lugger for.</returns>
+    /// <remarks>
+    /// Only a <c>Backup</c> is offered. A scrap type still held by another <c>Available</c> lugger loses nothing
+    /// when this one stops being available, and one whose only other lugger is <c>Full</c> or <c>Do Not Use</c> has
+    /// no lugger that could be made available without a person deciding that on its own terms.
+    /// </remarks>
+    private IReadOnlyList<(string PublicId, string Name, string ScrapType)> BackupsLeavingNoAvailableLugger(
+        string changedLuggerPublicId)
+    {
+        if (_snapshot.Rows.Count == 0)
+        {
+            return [];
+        }
+
+        var mine = _snapshot.Rows
+            .Where(row => string.Equals(row.LuggerPublicId, changedLuggerPublicId, StringComparison.Ordinal)
+                && !string.IsNullOrWhiteSpace(row.ScrapTypeKey))
+            .Select(row => row.ScrapTypeKey!)
+            .Distinct(StringComparer.Ordinal);
+
+        var offers = new List<(string PublicId, string Name, string ScrapType)>();
+
+        foreach (var key in mine)
+        {
+            var others = _snapshot.Rows
+                .Where(row => string.Equals(row.ScrapTypeKey, key, StringComparison.Ordinal)
+                    && string.Equals(row.LuggerPublicId, changedLuggerPublicId, StringComparison.Ordinal) is false
+                    && !string.IsNullOrWhiteSpace(row.LuggerPublicId))
+                .ToArray();
+
+            if (others.Length == 0
+                || others.Any(row => string.Equals(row.LuggerStatus, LuggerStatus.Available, StringComparison.Ordinal)))
+            {
+                continue;
+            }
+
+            var backup = others
+                .Where(row => string.Equals(row.LuggerStatus, LuggerStatus.Backup, StringComparison.Ordinal))
+                .OrderBy(row => row.SortPosition ?? int.MaxValue)
+                .ThenBy(row => row.LuggerName, StringComparer.Ordinal)
+                .FirstOrDefault();
+
+            if (backup is null
+                || offers.Any(offer => string.Equals(offer.PublicId, backup.LuggerPublicId, StringComparison.Ordinal)))
+            {
+                continue;
+            }
+
+            offers.Add((backup.LuggerPublicId, backup.LuggerName, backup.ScrapType ?? key));
+        }
+
+        return offers;
     }
 
     /// <summary>Gives the chosen scrap type to the chosen lugger, after the luggers it already has (FR-006).</summary>
@@ -560,7 +718,13 @@ public partial class LuggerArrangementViewModel : ObservableRecipient, INavigati
     /// “could not be read” reports a write fault as a read fault and takes away the very list the reader would use
     /// to see that nothing changed — the store still answers the read, so the cards on screen are still true.
     /// </remarks>
-    private async Task ApplyAsync(Func<Task<int>> write, CancellationToken cancellationToken)
+    /// <param name="write">The write to run, answering how many rows it matched.</param>
+    /// <param name="cancellationToken">The caller's token.</param>
+    /// <returns>
+    /// <see langword="true"/> when the write landed, so a caller with a follow-on action can tell a saved change
+    /// from a refused one.
+    /// </returns>
+    private async Task<bool> ApplyAsync(Func<Task<int>> write, CancellationToken cancellationToken)
     {
         IsBusy = true;
         MessageText = string.Empty;
@@ -572,10 +736,11 @@ public partial class LuggerArrangementViewModel : ObservableRecipient, INavigati
             if (affectedRows == 0)
             {
                 MessageText = RefusedText;
-                return;
+                return false;
             }
 
             await LoadArrangementAsync(cancellationToken).ConfigureAwait(true);
+            return true;
         }
         catch (OperationCanceledException)
         {
@@ -584,16 +749,19 @@ public partial class LuggerArrangementViewModel : ObservableRecipient, INavigati
         catch (LuggerArrangementRefusalException ex)
         {
             MessageText = ex.Message;
+            return false;
         }
         catch (LuggerArrangementStoreOutOfDateException ex)
         {
             AppLog.Error("LuggerArrangement", ex, "A lugger arrangement change could not be saved because the store is behind this build.");
 
             MessageText = StoreOutOfDateText;
+            return false;
         }
         catch (Exception ex)
         {
             ShowWriteFailure(ex);
+            return false;
         }
         finally
         {

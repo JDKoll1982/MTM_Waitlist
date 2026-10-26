@@ -80,7 +80,7 @@ public sealed class LaunchBudgetTests
             Assert.IsTrue(step.MaximumWait > TimeSpan.Zero, $"'{step.Id}' still states its own maximum");
             Assert.IsTrue(
                 step.MaximumWait <= LaunchStepCatalog.Ceiling,
-                $"'{step.Id}' is still inside the 30-second ceiling");
+                $"'{step.Id}' is still inside the single-wait ceiling");
         }
     }
 }

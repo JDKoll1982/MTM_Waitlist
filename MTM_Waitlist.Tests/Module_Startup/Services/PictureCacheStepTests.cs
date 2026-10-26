@@ -194,9 +194,10 @@ public sealed class PictureCacheStepTests
             // Act
             await step.RunAsync(Context(), CancellationToken.None);
 
-            // Assert
-            Assert.AreEqual(1, sink.Messages.Count, "the fault has to be recorded once rather than not at all");
-            StringAssert.Contains(sink.Messages[0], "dunnage pictures");
+            // Assert: the fault is a recorded error, once — the step's own progress lines sit beside it and are not
+            // faults.
+            Assert.AreEqual(1, sink.Errors.Count, "the fault has to be recorded once rather than not at all");
+            StringAssert.Contains(sink.Errors[0], "dunnage pictures");
             CollectionAssert.Contains(sink.Areas.ToArray(), "PictureCache");
         }
         finally
@@ -246,6 +247,9 @@ public sealed class PictureCacheStepTests
         /// <summary>What was recorded, in the order it was recorded.</summary>
         public List<string> Messages { get; } = [];
 
+        /// <summary>Only the faults recorded, so a test about a fault is not counting the progress lines beside it.</summary>
+        public List<string> Errors { get; } = [];
+
         /// <summary>The part of the application each entry came from.</summary>
         public List<string> Areas { get; } = [];
 
@@ -268,6 +272,7 @@ public sealed class PictureCacheStepTests
         {
             Areas.Add(module);
             Messages.Add(message);
+            Errors.Add(message);
         }
     }
 

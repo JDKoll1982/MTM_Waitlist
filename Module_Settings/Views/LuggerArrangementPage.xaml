@@ -204,8 +204,11 @@
                                                     Background="{x:Bind StatusBadgeBackground, Converter={StaticResource HexColorToBrushConverter}}" />
 
                                                 <!--
-                                                    The card's words fill it and its two actions sit on its own bottom edge, so
-                                                    Edit and Rename line up across a row however long a lugger's name is.
+                                                    The card's words and its two actions each take a band of their own,
+                                                    with equal breathing room above, between and below them: five rows
+                                                    of star, auto, star, auto, star. The bands therefore stay centred in
+                                                    whatever height the card is given, and the actions line up across a
+                                                    row however long a lugger's name is.
                                                 -->
                                                 <Grid
                                                     Grid.Column="1"
@@ -214,6 +217,9 @@
                                                     <Grid.RowDefinitions>
                                                         <RowDefinition Height="*" />
                                                         <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="*" />
+                                                        <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="*" />
                                                     </Grid.RowDefinitions>
 
                                                     <!--
@@ -222,7 +228,7 @@
                                                         whatever space is left, and the scrap types it takes on the right.
                                                     -->
                                                     <Border
-                                                        Grid.Row="0"
+                                                        Grid.Row="1"
                                                         Padding="8"
                                                         VerticalAlignment="Top"
                                                         Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
@@ -269,25 +275,37 @@
                                                         </Grid>
                                                     </Border>
 
-                                                    <StackPanel
-                                                        Grid.Row="1"
-                                                        Orientation="Horizontal"
-                                                        Spacing="8">
-                                                        <Button
-                                                            MinWidth="88"
-                                                            AutomationProperties.AutomationId="LuggerArrangementPage_OpenEditor"
-                                                            Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
-                                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                                            Click="OnEditLuggerClick"
-                                                            Content="{x:Bind EditActionText}" />
-                                                        <Button
-                                                            MinWidth="88"
-                                                            AutomationProperties.AutomationId="LuggerArrangementPage_Rename"
-                                                            Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
-                                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                                                            Click="OnRenameLuggerClick"
-                                                            Content="{x:Bind RenameActionText}" />
-                                                    </StackPanel>
+                                                    <!--
+                                                        The two actions sit in their own bordered band rather than
+                                                        floating on the card's picture, so they read as one control
+                                                        group on every card.
+                                                    -->
+                                                    <Border
+                                                        Grid.Row="3"
+                                                        Padding="8"
+                                                        Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
+                                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="6">
+                                                        <StackPanel
+                                                            Orientation="Horizontal"
+                                                            Spacing="8">
+                                                            <Button
+                                                                MinWidth="88"
+                                                                AutomationProperties.AutomationId="LuggerArrangementPage_OpenEditor"
+                                                                Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
+                                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                                Click="OnEditLuggerClick"
+                                                                Content="{x:Bind EditActionText}" />
+                                                            <Button
+                                                                MinWidth="88"
+                                                                AutomationProperties.AutomationId="LuggerArrangementPage_Rename"
+                                                                Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
+                                                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                                                Click="OnRenameLuggerClick"
+                                                                Content="{x:Bind RenameActionText}" />
+                                                        </StackPanel>
+                                                    </Border>
                                                 </Grid>
                                             </Grid>
                                         </Grid>

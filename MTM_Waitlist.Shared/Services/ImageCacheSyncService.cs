@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using System.Globalization;
+using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Shared.Helpers;
 
 namespace MTM_Waitlist.Module_Shared.Services;
@@ -57,6 +59,9 @@ public sealed record ImageCacheSource(
 /// </remarks>
 public sealed class ImageCacheSyncService : IImageCacheSyncService
 {
+    /// <summary>The area this service's own lines are recorded under, the same one the launch step uses.</summary>
+    private const string LogModule = "PictureCache";
+
     private readonly Func<CancellationToken, Task<IReadOnlyList<ImageCacheSource>>> _sources;
 
     /// <summary>Initializes a new ImageCacheSyncService.</summary>
@@ -80,15 +85,42 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
         }
         catch (OperationCanceledException)
         {
+            AppLog.Info(LogModule, "The picture refresh was stopped before its sources were read.");
+
             throw;
         }
-        catch (Exception)
+        catch (Exception exception)
         {
             // A root that cannot be resolved at all — a store that will not answer the setting, or a share that
             // has gone — is the same answer as an unreachable source, and must never reach the caller as a
             // failure: this runs during startup, and a cache is not worth losing the shell for.
+            AppLog.Error(
+                LogModule,
+                exception,
+                "The picture sources could not be resolved, so no copy was refreshed and the pictures already on this computer are the ones being used.");
+
             return ImageCacheSyncResult.NothingToDo;
         }
+
+        if (sources.Count == 0)
+        {
+            AppLog.Warn(
+                LogModule,
+                "The picture refresh was given no sources, so there was nothing to copy. Check the picture folder settings for this machine.");
+
+            return ImageCacheSyncResult.NothingToDo;
+        }
+
+        AppLog.Info(
+            LogModule,
+            $"The picture refresh started over {sources.Count} source(s): "
+            + string.Join(
+                "; ",
+                sources.Select(source =>
+                    $"'{source.Label}' reads '{source.SourceRoot}' and writes '{source.CacheRoot}'"
+                    + (source.ExcludedTopLevelFolders is { Count: > 0 } excluded
+                        ? $" (leaving {string.Join(", ", excluded)} to their own stores)"
+                        : string.Empty))));
 
         // Off the calling thread: this walks two folder trees over the network, and the caller is the splash
         // screen's own thread. The token is handed to the walk rather than to the task, because a walk that is
@@ -101,6 +133,8 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
         catch (OperationCanceledException)
         {
             // Stopped before the walk began, so nothing was done — which is exactly what this result says.
+            AppLog.Info(LogModule, "The picture refresh was stopped before its walk began, so nothing was copied or removed.");
+
             return ImageCacheSyncResult.NothingToDo;
         }
     }
@@ -114,6 +148,12 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
     /// anything it has not yet compared against the share.
     /// </param>
     /// <returns>A summary of what was copied and removed.</returns>
+    /// <remarks>
+    /// Every source is logged twice — as it is reached and as it answers — so a refresh that stops short can be
+    /// read back to the source it was stopped on, and a source that was left alone says which of the two reasons
+    /// left it alone. The counts are the same numbers the result carries, so the log and the splash cannot tell two
+    /// different stories about one run.
+    /// </remarks>
     public static ImageCacheSyncResult Synchronize(
         IReadOnlyList<ImageCacheSource> sources,
         CancellationToken cancellationToken = default)
@@ -125,6 +165,8 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
         var skipped = new List<string>();
         var destinationsUnavailable = new List<string>();
 
+        var started = Stopwatch.GetTimestamp();
+
         foreach (var source in sources)
         {
             // A stopped run ends here rather than throwing. The launch cancels this step the moment it passes its
@@ -133,11 +175,28 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
             // copied: the next run compares against it and finishes the job.
             if (cancellationToken.IsCancellationRequested)
             {
+                // Recorded as a warning rather than as progress: the store keeps warnings by default, and a refresh
+                // that was cut off is exactly the thing a person comes back to the log to explain. The counts are
+                // what it managed, so the next run's starting point is readable.
+                AppLog.Warn(
+                    LogModule,
+                    $"The picture refresh was stopped after {Elapsed(started)} with '{source.Label}' not begun, so "
+                    + $"{copied} picture(s) had been copied and {removed} removed by then. The copies on this computer "
+                    + "were left as they stood.");
+
                 break;
             }
 
             if (string.IsNullOrWhiteSpace(source.SourceRoot) || Directory.Exists(source.SourceRoot) is false)
             {
+                // The share is named, because "the pictures could not be read" with no folder in it is a fault
+                // nobody can act on: the reader needs to know which root was missing to see whether the setting or
+                // the share is the thing that moved.
+                AppLog.Warn(
+                    LogModule,
+                    $"Source '{source.Label}' was left exactly as it is: '{source.SourceRoot}' is "
+                    + (string.IsNullOrWhiteSpace(source.SourceRoot) ? "not set for this machine." : "not there or not readable."));
+
                 skipped.Add(source.Label);
                 continue;
             }
@@ -148,9 +207,20 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
                 // before the walk, is what keeps the two faults apart: reporting this one as an unreachable share
                 // sends an administrator to look at a share that is perfectly healthy, and says nothing about the
                 // folder that actually needs fixing.
+                AppLog.Warn(
+                    LogModule,
+                    $"Source '{source.Label}' was readable but no copy could be written: the folder '{source.CacheRoot}' "
+                    + "could not be created or written to by this account.");
+
                 destinationsUnavailable.Add(source.Label);
                 continue;
             }
+
+            AppLog.Info(
+                LogModule,
+                $"Source '{source.Label}' is being walked: reading '{source.SourceRoot}' into '{source.CacheRoot}'.");
+
+            var sourceStarted = Stopwatch.GetTimestamp();
 
             try
             {
@@ -159,18 +229,39 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
                 removed += sourceResult.Removed;
                 archivesRemoved += sourceResult.ArchivesRemoved;
                 notCopied += sourceResult.NotCopied;
+
+                // The same four numbers the result carries, plus how long the source took: a share that answers in
+                // a second and one that takes twenty-five look identical in the counts, and the second is what a
+                // stopped refresh is read against.
+                AppLog.Info(
+                    LogModule,
+                    $"Source '{source.Label}' finished in {Elapsed(sourceStarted)}: {sourceResult.Copied} copied, "
+                    + $"{sourceResult.Removed} removed, {sourceResult.ArchivesRemoved} replaced copies cleaned up, "
+                    + $"{sourceResult.NotCopied} could not be copied.");
             }
             catch (OperationCanceledException)
             {
                 throw;
             }
-            catch (Exception)
+            catch (Exception exception)
             {
                 // Reported rather than thrown, and reported *after* the walk: a source that failed half way is not
                 // pruned, because the files it would have been compared against were never all read.
+                AppLog.Error(
+                    LogModule,
+                    exception,
+                    $"Source '{source.Label}' could not be read, so nothing under it was touched and the pictures already "
+                    + $"on this computer are the ones being used. It was left after {Elapsed(sourceStarted)}.");
+
                 skipped.Add(source.Label);
             }
         }
+
+        AppLog.Info(
+            LogModule,
+            $"The picture refresh finished in {Elapsed(started)}: {copied} copied, {removed} removed, "
+            + $"{archivesRemoved} replaced copies cleaned up, {notCopied} could not be copied, "
+            + $"{skipped.Count} source(s) left alone and {destinationsUnavailable.Count} whose folder could not be written.");
 
         return new ImageCacheSyncResult(copied, removed, skipped, archivesRemoved)
         {
@@ -178,6 +269,11 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
             NotCopied = notCopied,
         };
     }
+
+    /// <summary>How long something took, said the way the rest of the launch says it.</summary>
+    /// <param name="started">The timestamp taken with <see cref="Stopwatch.GetTimestamp"/> before the work.</param>
+    private static string Elapsed(long started) =>
+        Stopwatch.GetElapsedTime(started).TotalSeconds.ToString("0.0", CultureInfo.CurrentCulture) + " second(s)";
 
     /// <summary>Mirrors one source, returning what it did.</summary>
     /// <remarks>
@@ -203,6 +299,12 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
                 // The share was only half read, so the deletion pass below must not run: every copy whose original
                 // sits in the part that was never read would look like a copy whose original is gone, and the
                 // pictures this machine is still drawing would be deleted out from under it.
+                AppLog.Warn(
+                    LogModule,
+                    $"Source '{source.Label}' was stopped after reading part of '{source.SourceRoot}': {copied} picture(s) "
+                    + $"had been copied and {notCopied} could not be. Nothing was removed, because the share was only "
+                    + "half read.");
+
                 return (copied, 0, 0, notCopied);
             }
 
@@ -240,12 +342,17 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
                 File.SetLastWriteTimeUtc(cachePath, File.GetLastWriteTimeUtc(sharedPath));
                 copied++;
             }
-            catch (Exception)
+            catch (Exception exception)
             {
                 // One picture that will not copy — held open on this machine, or a name the file system refuses —
                 // must not abandon the other hundred and forty and leave the cache half built with nothing said.
-                // The count carries the fault out to the caller, which reports it.
+                // The count carries the fault out to the caller, which reports it; the picture's own path and fault
+                // are recorded here, because a count on its own cannot say which picture to go and look at.
                 notCopied++;
+
+                AppLog.Warn(
+                    LogModule,
+                    $"The picture '{sharedPath}' could not be copied to '{cachePath}': {exception.GetType().Name}: {exception.Message}");
             }
         }
 

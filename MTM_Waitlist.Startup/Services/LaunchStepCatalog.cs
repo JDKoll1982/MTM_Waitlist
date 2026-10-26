@@ -22,8 +22,8 @@ namespace MTM_Waitlist.Module_Startup.Services;
 /// <para>
 /// <b>The catalogue is bounded, and it proves it.</b> The construction validates the shipped list, so a future
 /// edit that adds a step without a maximum, or a best-effort step at the ceiling, fails immediately rather than
-/// shipping an unbounded wait. <see cref="Ceiling"/> is the 30 seconds FR-003 and SC-002 call the ceiling for any
-/// single wait on the launch path; the two best-effort steps — the picture refresh and the external-system
+/// shipping an unbounded wait. <see cref="Ceiling"/> is the 45 seconds that bounds any single wait on the launch
+/// path, and it is the launch's own budget; the two best-effort steps — the picture refresh and the external-system
 /// priming — are bounded more tightly because neither may hold the launch (FR-026, FR-027).
 /// </para>
 /// <para>
@@ -37,13 +37,21 @@ namespace MTM_Waitlist.Module_Startup.Services;
 public sealed class LaunchStepCatalog
 {
     /// <summary>
-    /// The ceiling for any single wait on the launch path: 30 seconds (FR-003, SC-002).
+    /// The ceiling for any single wait on the launch path: 45 seconds, which is also the whole launch's budget, so
+    /// no one step is ever given more time than the launch has.
     /// </summary>
-    public static TimeSpan Ceiling { get; } = TimeSpan.FromSeconds(30);
+    /// <remarks>
+    /// It moved from 30 seconds on 2026-10-26, when the picture refresh was given 30 seconds of its own: a
+    /// best-effort step has to be bounded <b>more</b> tightly than the ceiling, so leaving the ceiling where it was
+    /// would have refused the refresh's new allowance as the whole ceiling. The ceiling is still a ceiling — it is
+    /// what <see cref="Validate"/> enforces — and the launch-wide budget remains the thing that stops a walk made of
+    /// many bounded steps from adding up to an unbounded wait.
+    /// </remarks>
+    public static TimeSpan Ceiling { get; } = TimeSpan.FromSeconds(45);
 
     /// <summary>
     /// The launch sequence, in the order it runs. Declared after <see cref="Ceiling"/> so a ceiling-sized bound
-    /// reads as the ceiling rather than as a second 30.
+    /// reads as the ceiling rather than as a second number.
     /// </summary>
     /// <remarks>
     /// <b>One entry per thing the launch does.</b> Where this list used to hold a phase — "reading this computer's
@@ -62,7 +70,7 @@ public sealed class LaunchStepCatalog
             "Refreshing the picture copies",
             "Copies the shared pictures this computer keeps. Recorded, never blocking.",
             LaunchStepCategory.Pictures,
-            TimeSpan.FromSeconds(10),
+            TimeSpan.FromSeconds(30),
             true,
             "the picture share"),
         new(

@@ -1188,6 +1188,14 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         // the shared placeholder.
         var hopperSize = WaitlistCardCellRules.HopperSizeAnswer(request.Item, request);
 
+        // The scrap Item names no material part, but it names the lugger its material is dumped into — so that
+        // lugger is what its card is about, and its picture is what the card's left spot draws. It is carried here
+        // for the same reason the hopper size is: the lugger's picture is filed under the lugger's place in the
+        // arrangement, which only the availability snapshot in hand can name (owner decision, 2026-10-26).
+        var luggerImagePath = WaitlistCardCellRules.IsScrapItem(request.Item)
+            ? jobAvailability?.LuggerLocationImagePath ?? string.Empty
+            : string.Empty;
+
         var item = new SampleOrder
         {
             Id = request.Id.GetHashCode(),
@@ -1201,7 +1209,9 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
                 ? PartPictureLayout.HopperSizeScope
                 : materialPartNumber is null ? string.Empty : PartPictureLayout.VisualPartScope,
             // Empty for every request that is not about a dunnage part, which draws the one shared placeholder.
-            ResolvedPartImagePath = dunnagePartPicturePath ?? string.Empty,
+            // The scrap card's lugger stands in for it for the same reason the dunnage part does: it is the one
+            // thing the operator's request is about, and the list would otherwise have no way to picture it.
+            ResolvedPartImagePath = dunnagePartPicturePath ?? luggerImagePath,
             RequesterEmployeeNumber = request.RequesterEmployeeNumber,
             AssignedMaterialHandler = request.AssignedMaterialHandler,
             AssignedMaterialHandlerName = request.AssignedMaterialHandlerName,
@@ -1420,6 +1430,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
                 // Request hopper step drew (FR-077, FR-078, D22). Any other answer-sourced cell opens none.
                 ReferencePartNumber = WaitlistCardCellRules.ReferencePicturePart(request.Item, label, answer) ?? string.Empty,
                 ReferencePartScope = WaitlistCardCellRules.ReferencePictureScope,
+                DrawsPicture = WaitlistCardCellRules.ReferencePicturePart(request.Item, label, answer) is not null,
             };
         }
 
@@ -1429,7 +1440,22 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             // draws no Die cell and nothing is logged for it (FR-057, RequestJobFieldValues). The label that
             // resolves is the declared one, and an answer captured under it outranks the job's own (FR-082).
             var jobValue = RequestJobFieldValues.Resolve(label, jobAvailability, AnswersWithComponent(request));
-            return new WaitlistLineCardCell { Label = label, Value = jobValue ?? string.Empty, Order = field.Order };
+
+            // The scrap Item's lugger cell is pictured with the lugger's own artwork, beside the name the card
+            // already spells out — the same shape the hopper card's size cell has. The picture is resolved where
+            // the arrangement is in hand, so this cell carries it rather than looking one up (owner decision,
+            // 2026-10-26). A lugger with no picture draws the application's one shared placeholder, exactly as a
+            // size with no picture does, because a cell that names a lugger and shows nothing reads as broken.
+            var isLuggerLocation = WaitlistCardCellRules.IsLuggerLocationField(label);
+
+            return new WaitlistLineCardCell
+            {
+                Label = label,
+                Value = jobValue ?? string.Empty,
+                Order = field.Order,
+                DrawsPicture = isLuggerLocation && !string.IsNullOrWhiteSpace(jobValue),
+                ResolvedReferenceImagePath = isLuggerLocation ? jobAvailability?.LuggerLocationImagePath ?? string.Empty : string.Empty,
+            };
         }
 
         if (string.Equals(source, RequestItemFieldDefinition.Sources.Fixed, StringComparison.OrdinalIgnoreCase))
