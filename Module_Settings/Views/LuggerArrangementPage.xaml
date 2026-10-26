@@ -162,6 +162,22 @@
                                     <Border
                                         AutomationProperties.Name="{x:Bind Name}"
                                         Style="{StaticResource ArrangementTile}">
+                                        <!--
+                                            The card draws the lugger's own picture behind its words, so nothing a
+                                            person reads or clicks may be see-through: the theme's translucent
+                                            control fill would let the picture show through the very buttons they
+                                            are meant to press. Only the fills the Button template reaches for are
+                                            restated here, and only inside this card, so the rest of the page keeps
+                                            the framework's own buttons.
+                                        -->
+                                        <Border.Resources>
+                                            <StaticResource x:Key="ButtonBackground" ResourceKey="SolidBackgroundFillColorBaseBrush" />
+                                            <StaticResource x:Key="ButtonBackgroundPointerOver" ResourceKey="SolidBackgroundFillColorSecondaryBrush" />
+                                            <StaticResource x:Key="ButtonBackgroundPressed" ResourceKey="SolidBackgroundFillColorTertiaryBrush" />
+                                            <StaticResource x:Key="ButtonBorderBrush" ResourceKey="CardStrokeColorDefaultBrush" />
+                                            <StaticResource x:Key="ButtonBorderBrushPointerOver" ResourceKey="CardStrokeColorDefaultBrush" />
+                                            <StaticResource x:Key="ButtonBorderBrushPressed" ResourceKey="CardStrokeColorDefaultBrush" />
+                                        </Border.Resources>
                                         <Grid>
                                             <!--
                                                 The lugger's own picture, drawn behind the card's words at a quarter
@@ -202,14 +218,14 @@
 
                                                     <!--
                                                         The card's three facts sit in one bordered strip of their own: the
-                                                        lugger's name on the left, its status in the middle of whatever
-                                                        space is left, and the scrap types it takes on the right.
+                                                        lugger's name on the left, its status centred in the middle of
+                                                        whatever space is left, and the scrap types it takes on the right.
                                                     -->
                                                     <Border
                                                         Grid.Row="0"
                                                         Padding="8"
                                                         VerticalAlignment="Top"
-                                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                                        Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
                                                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                                         BorderThickness="1"
                                                         CornerRadius="6">
@@ -230,7 +246,7 @@
 
                                                             <Border
                                                                 Grid.Column="1"
-                                                                HorizontalAlignment="Left"
+                                                                HorizontalAlignment="Center"
                                                                 VerticalAlignment="Center"
                                                                 Padding="8,2"
                                                                 Background="{x:Bind StatusBadgeBackground, Converter={StaticResource HexColorToBrushConverter}}"
@@ -260,11 +276,15 @@
                                                         <Button
                                                             MinWidth="88"
                                                             AutomationProperties.AutomationId="LuggerArrangementPage_OpenEditor"
+                                                            Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
+                                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                                             Click="OnEditLuggerClick"
                                                             Content="{x:Bind EditActionText}" />
                                                         <Button
                                                             MinWidth="88"
                                                             AutomationProperties.AutomationId="LuggerArrangementPage_Rename"
+                                                            Background="{ThemeResource SolidBackgroundFillColorBaseBrush}"
+                                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                                             Click="OnRenameLuggerClick"
                                                             Content="{x:Bind RenameActionText}" />
                                                     </StackPanel>
