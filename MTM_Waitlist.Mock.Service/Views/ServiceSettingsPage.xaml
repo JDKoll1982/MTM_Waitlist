@@ -19,7 +19,11 @@
         heading and a note that says what the setting is — the same shape the main application's settings
         window uses.
     -->
-    <ScrollViewer MaxWidth="{StaticResource PageContentMaxWidth}" Padding="24">
+    <ScrollViewer
+        MaxWidth="{StaticResource PageContentMaxWidth}"
+        Padding="24"
+        HorizontalScrollBarVisibility="Disabled"
+        HorizontalScrollMode="Disabled">
         <StackPanel Spacing="16">
 
             <StackPanel Spacing="4">

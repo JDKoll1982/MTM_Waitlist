@@ -12,8 +12,16 @@
         One page with a read-only state rather than two pages: the fields sit in a form at the top and the actions
         in a clearly separated area below, each with its own heading, and no control carries a fixed width.
     -->
-    <ScrollViewer Padding="24">
-        <StackPanel Spacing="16" MaxWidth="{StaticResource PageContentMaxWidth}" HorizontalAlignment="Left">
+    <!--
+        Horizontal scrolling is off so the viewport width is the measure width. With it on, a ScrollViewer measures
+        its child with unlimited width, the capped column then sizes to its own content, and the page reads as if it had
+        a minimum width that the window cannot widen.
+    -->
+    <ScrollViewer
+        Padding="24"
+        HorizontalScrollBarVisibility="Disabled"
+        HorizontalScrollMode="Disabled">
+        <StackPanel Spacing="16" MaxWidth="{StaticResource PageContentMaxWidth}">
 
             <Grid ColumnSpacing="12">
                 <Grid.ColumnDefinitions>

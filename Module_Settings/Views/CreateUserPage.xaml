@@ -12,8 +12,16 @@
         A form and nothing else: no actions area, no active control, and no fixed width anywhere. Every label is
         localised through the view model rather than through x:Uid, so the resource map keeps one owner.
     -->
-    <ScrollViewer Padding="24">
-        <StackPanel Spacing="16" MaxWidth="{StaticResource PageContentMaxWidth}" HorizontalAlignment="Left">
+    <!--
+        Horizontal scrolling is off so the viewport width is the measure width. With it on, a ScrollViewer measures
+        its child with unlimited width, the capped column then sizes to its own content, and the page reads as if it had
+        a minimum width that the window cannot widen.
+    -->
+    <ScrollViewer
+        Padding="24"
+        HorizontalScrollBarVisibility="Disabled"
+        HorizontalScrollMode="Disabled">
+        <StackPanel Spacing="16" MaxWidth="{StaticResource PageContentMaxWidth}">
 
             <TextBlock Style="{ThemeResource TitleTextBlockStyle}" Text="{x:Bind ViewModel.TitleText}" />
             <TextBlock

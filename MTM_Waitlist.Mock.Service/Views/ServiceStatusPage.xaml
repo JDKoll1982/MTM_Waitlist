@@ -14,7 +14,11 @@
         where the title bar and the navigation pane end instead of leaving a band of empty space down the
         left of the surface.
     -->
-    <ScrollViewer MaxWidth="{StaticResource PageContentMaxWidth}" Padding="24">
+    <ScrollViewer
+        MaxWidth="{StaticResource PageContentMaxWidth}"
+        Padding="24"
+        HorizontalScrollBarVisibility="Disabled"
+        HorizontalScrollMode="Disabled">
         <StackPanel Spacing="16">
 
             <Grid ColumnSpacing="16">

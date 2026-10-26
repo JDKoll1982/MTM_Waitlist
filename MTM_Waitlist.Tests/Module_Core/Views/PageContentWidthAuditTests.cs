@@ -137,6 +137,94 @@ public sealed class PageContentWidthAuditTests
     }
 
     /// <summary>
+    /// The shell fills the window in both directions, so a page is never left at the width its own content asked for.
+    /// </summary>
+    /// <remarks>
+    /// <b>The defect this pins.</b> Reported on the running app: the page in the shell read as if it had a minimum width
+    /// the window could not widen. Two things caused it, and both are silent. A page-level <c>ScrollViewer</c> measures
+    /// its child with unlimited width unless horizontal scrolling is switched off, so the capped column sized to its own
+    /// content; and a capped element that is left-aligned is also content-sized, because alignment overrides the stretch
+    /// that would otherwise fill the column. Neither shows up in a build, and neither shows up at one window size.
+    /// </remarks>
+    [TestMethod]
+    public void Audit_PageContentWidthAuditTests_TheShellPageHostStretchesInBothDirections()
+    {
+        var document = System.Xml.Linq.XDocument.Parse(Read("Module_Core", "Views", "ShellPage.xaml"));
+
+        // x:Name lives in the XAML namespace, so it is matched by its qualified name rather than as a bare attribute.
+        var xName = System.Xml.Linq.XName.Get("Name", "http://schemas.microsoft.com/winfx/2006/xaml");
+
+        foreach (var (name, element) in new[]
+        {
+            ("the page frame", document.Descendants().FirstOrDefault(e => (string?)e.Attribute(xName) == "NavigationFrame")),
+            ("the navigation view", document.Descendants().FirstOrDefault(e => (string?)e.Attribute(xName) == "NavigationViewControl")),
+        })
+        {
+            Assert.IsNotNull(element, $"{name} is not in the shell any more, so the page has nowhere to be shown.");
+
+            Assert.AreEqual("Stretch", (string?)element.Attribute("HorizontalAlignment"), $"{name} does not fill the width of the window.");
+            Assert.AreEqual("Stretch", (string?)element.Attribute("VerticalAlignment"), $"{name} does not fill the height of the window.");
+        }
+    }
+
+    [TestMethod]
+    public void Audit_PageContentWidthAuditTests_NoPageMeasuresItsColumnUnconstrained()
+    {
+        var offenders = new List<string>();
+
+        foreach (var page in PagesOnTheInventory().Where(page => !IsTheFrame(page)))
+        {
+            var root = System.Xml.Linq.XDocument.Parse(Read(page.Split('/'))).Root;
+            var content = root?.Elements().FirstOrDefault();
+
+            if (content is { } element && element.Name.LocalName == "ScrollViewer"
+                && (string?)element.Attribute("HorizontalScrollMode") != "Disabled")
+            {
+                offenders.Add($"{page} (HorizontalScrollMode={((string?)element.Attribute("HorizontalScrollMode") ?? "Enabled")})");
+            }
+        }
+
+        Assert.AreEqual(
+            0,
+            offenders.Count,
+            "these pages scroll horizontally, so their content is measured with unlimited width and the capped column "
+                + "sizes to its own content instead of to the window: " + string.Join(", ", offenders));
+    }
+
+    [TestMethod]
+    public void Audit_PageContentWidthAuditTests_NoPagePinsItsCappedColumn()
+    {
+        var offenders = new List<string>();
+
+        foreach (var page in PagesOnTheInventory().Where(page => !IsTheFrame(page)))
+        {
+            foreach (var element in System.Xml.Linq.XDocument.Parse(Read(page.Split('/'))).Descendants())
+            {
+                var capped = ((string?)element.Attribute("MaxWidth") ?? string.Empty)
+                    .Contains("PageContentMaxWidth", StringComparison.Ordinal);
+
+                if (!capped)
+                {
+                    continue;
+                }
+
+                var alignment = (string?)element.Attribute("HorizontalAlignment");
+
+                if (alignment is not null and not "Stretch")
+                {
+                    offenders.Add($"{page} (<{element.Name.LocalName}> HorizontalAlignment={alignment})");
+                }
+            }
+        }
+
+        Assert.AreEqual(
+            0,
+            offenders.Count,
+            "an aligned element is content-sized rather than stretch-sized, so the capped column stops filling the window "
+                + "and the page reads as having a minimum width: " + string.Join(", ", offenders));
+    }
+
+    /// <summary>
     /// Whether <paramref name="page"/> is the application frame rather than a screen's content.
     /// </summary>
     /// <remarks>

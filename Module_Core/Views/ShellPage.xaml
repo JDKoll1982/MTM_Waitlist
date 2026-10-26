@@ -197,7 +197,18 @@
             PendingTemplate="{StaticResource HeaderStepPendingTemplate}" />
     </Page.Resources>
 
-    <Grid>
+    <!--
+        The shell fills the window in both directions, and states it.
+
+        Every element here already amounted to a stretch, but nothing said so, and a page's own host is the one place
+        where a default is not a promise: a page frame that stops short leaves the page at whatever width its content
+        asked for, which reads as a minimum width the window cannot widen. Stating the stretch keeps the frame tied to
+        the window no matter what is placed inside it.
+
+        The stage presenter in MainWindow.xaml stretches too, so this is the second half of one chain: window, page,
+        navigation view, page frame, page.
+    -->
+    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <Grid
             x:Name="AppTitleBar"
             Height="{Binding ElementName=NavigationViewControl, Path=CompactPaneLength}"
@@ -273,6 +284,10 @@
             Canvas.ZIndex="0"
             DisplayModeChanged="NavigationViewControl_DisplayModeChanged"
             ExpandedModeThresholdWidth="1500"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            HorizontalContentAlignment="Stretch"
+            VerticalContentAlignment="Stretch"
             OpenPaneLength="260"
             CompactPaneLength="48"
             Header="{x:Bind ViewModel}"
@@ -696,13 +711,22 @@
                     </behaviors:NavigationViewHeaderBehavior.DefaultHeaderTemplate>
                 </behaviors:NavigationViewHeaderBehavior>
             </i:Interaction.Behaviors>
-            <Grid Margin="{StaticResource NavigationViewPageContentMargin}">
+            <Grid
+                Margin="{StaticResource NavigationViewPageContentMargin}"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <Frame x:Name="NavigationFrame" Grid.Row="0" />
+                <Frame
+                    x:Name="NavigationFrame"
+                    Grid.Row="0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch" />
 
                 <!--
                   Read-only fallback status, on its own row at the foot of the shell: no new navigation route and

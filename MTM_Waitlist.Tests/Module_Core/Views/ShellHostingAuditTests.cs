@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Tests.Module_Mock;
 
@@ -102,9 +102,15 @@ public sealed class ShellHostingAuditTests
             noticeIndex > frameIndex,
             "the cached-data notice is declared before the frame, so it is drawn above the page rather than below it");
 
-        StringAssert.Contains(
-            shell,
-            "<Frame x:Name=\"NavigationFrame\" Grid.Row=\"0\" />",
+        // The frame is declared over several lines because it also states that it fills its row in both directions,
+        // so the row it keeps is asserted from the element's attributes rather than from one exact line.
+        var frame = System.Xml.Linq.XDocument.Parse(shell).Descendants().FirstOrDefault(
+            e => (string?)e.Attribute(System.Xml.Linq.XName.Get("Name", "http://schemas.microsoft.com/winfx/2006/xaml")) == "NavigationFrame");
+
+        Assert.IsNotNull(frame, "the shell no longer hosts a page frame");
+        Assert.AreEqual(
+            "0",
+            (string?)frame.Attribute("Grid.Row"),
             "the page must keep the row that expands, so the notice below it cannot push it down");
 
         StringAssert.Contains(
