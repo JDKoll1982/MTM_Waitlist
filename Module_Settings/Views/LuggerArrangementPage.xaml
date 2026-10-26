@@ -75,7 +75,7 @@
 
     <Grid x:Name="RootPage" Padding="24">
         <ScrollViewer VerticalScrollBarVisibility="Auto" VerticalScrollMode="Enabled">
-            <StackPanel MaxWidth="{StaticResource PageContentMaxWidth}" Spacing="16">
+            <StackPanel Spacing="16">
 
                 <TextBlock Style="{ThemeResource TitleTextBlockStyle}" Text="{x:Bind ViewModel.TitleText}" />
 

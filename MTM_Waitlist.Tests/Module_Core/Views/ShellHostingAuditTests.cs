@@ -132,32 +132,42 @@ public sealed class ShellHostingAuditTests
     }
 
     /// <summary>
-    /// The pane expands only at a window width where the page keeps its whole content column.
+    /// Widening the window never narrows the page.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// <b>The defect this pins.</b> Measured on 2026-10-24 while taking screenshots at laptop widths: with the
-    /// threshold at 1280, a window of 1360 showed the page a <em>narrower</em> viewport than a window of 1281 —
-    /// 971 px against 1104 px — because the navigation pane expanded and took 260 px out of a window that had only
-    /// grown by 79. Every settings row re-wrapped, and the page read as if it had not been bound to the window at
-    /// all.
+    /// <b>The defect this pins.</b> Measured on 2026-10-24 while taking screenshots at laptop widths: with the pane's
+    /// threshold at 1280, a window of 1360 showed the page a <em>narrower</em> viewport than a window of 1281 — 971 px
+    /// against 1104 px — because the navigation pane expanded and took 260 px out of a window that had only grown by 79.
+    /// It came back with the content ceiling removed: measured again on 2026-10-25, the page went from 1311 px at a
+    /// 1519-px window to 1119 px at 1520.
     /// </para>
     /// <para>
-    /// The arithmetic is read from the files rather than restated here, so raising the content column, widening the
-    /// pane or changing the shell's inset cannot quietly reintroduce the inversion.
+    /// Both times the cause was the same, so this asserts the cause is gone rather than working out whether the
+    /// threshold happens to be far enough along: the pane has one display mode and one width, so the content area
+    /// changes only when the window does. The window's own minimum keeps the pane from squeezing the page out of
+    /// existence.
     /// </para>
     /// </remarks>
     [TestMethod]
     public void Audit_ShellHostingAuditTests_WideningTheWindowNeverNarrowsThePage()
     {
-        // The window's own chrome: measured on this build as the difference between the window rectangle and the
-        // content viewport (113 px of pane-plus-inset at a compact 1180 window, where the files account for 160).
-        const int WindowChromePixels = 17;
-
         var shell = Read("Module_Core", "Views", "ShellPage.xaml");
 
-        var threshold = AttributeValue(shell, "ExpandedModeThresholdWidth");
         var pane = AttributeValue(shell, "OpenPaneLength");
+        Assert.IsTrue(pane > 0, "the pane declares no width, so this audit cannot tell what the page has left.");
+
+        StringAssert.Contains(
+            shell,
+            "PaneDisplayMode=\"Left\"",
+            "the pane picks its display mode from the window's width, so crossing that width grows the pane and shrinks "
+                + "the page: widening the window would narrow the page");
+
+        Assert.IsFalse(
+            shell.Contains("ExpandedModeThresholdWidth", StringComparison.Ordinal),
+            "a width threshold is still declared, so the pane still switches mode and still takes its growth out of the page");
+
+        var minimumWindow = AttributeValue(Read("MainWindow.xaml"), "MinWidth");
 
         var inset = System.Text.RegularExpressions.Regex
             .Match(Read("Styles", "Thickness.xaml"), @"x:Key=""NavigationViewPageContentMargin"">([^<]+)<")
@@ -166,21 +176,12 @@ public sealed class ShellHostingAuditTests
             .Select(part => int.Parse(part.Trim(), System.Globalization.CultureInfo.InvariantCulture))
             .ToArray();
 
-        var column = int.Parse(
-            System.Text.RegularExpressions.Regex
-                .Match(Read("Styles", "Thickness.xaml"), @"x:Key=""PageContentMaxWidth"">(\d+)<")
-                .Groups[1].Value,
-            System.Globalization.CultureInfo.InvariantCulture);
-
-        Assert.IsTrue(column > 0, "the page content column is not declared, so this audit cannot tell what to compare against.");
-
-        var viewportWhenExpanded = threshold - pane - inset[0] - inset[2] - WindowChromePixels;
+        var narrowestPage = minimumWindow - pane - inset[0] - inset[2];
 
         Assert.IsTrue(
-            viewportWhenExpanded >= column,
-            $"The pane expands at {threshold} px, where it leaves the page {viewportWhenExpanded} px — less than the "
-                + $"{column} px content column every settings page draws. Crossing that width therefore makes the window "
-                + "wider and the page narrower, which is the scaling defect this setting is meant to avoid.");
+            narrowestPage >= 300,
+            $"at the window's own minimum of {minimumWindow} px the page is {narrowestPage} px wide, which is too narrow to "
+                + "read a card or a settings row in. Raise the window's minimum rather than letting the pane take the page.");
     }
 
     /// <summary>One integer markup attribute's value, which must be declared exactly once in the file.</summary>

@@ -22,7 +22,6 @@
     -->
     <Grid
         x:Name="RootGrid"
-        MaxWidth="{StaticResource PageContentMaxWidth}"
         Padding="32"
         AutomationProperties.AutomationId="BlockedStateWindow_Root"
         AutomationProperties.Name="The launch stopped"

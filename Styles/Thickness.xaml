@@ -27,17 +27,6 @@
     <Thickness x:Key="NavigationViewHeaderMargin">56,34,0,0</Thickness>
     <Thickness x:Key="NavigationViewPageContentMargin">56,24,56,0</Thickness>
 
-    <!--
-        The widest a page's content column may grow, in effective pixels.
-
-        Without a ceiling every page stretches to the window, so on a wide monitor a waitlist card spans two
-        thousand pixels with its label at one end and its buttons at the other, and a settings card stretches the
-        same way — the content reads as if it had come away from its frame. Capping it keeps a readable column that
-        stays centred however wide the window is, which is the same figure the settings pages already caps itself
-        at and the figure the shell's navigation threshold is worked out from.
-    -->
-    <x:Double x:Key="PageContentMaxWidth">1080</x:Double>
-
     <Thickness x:Key="MenuBarContentMargin">36,24,36,0</Thickness>
 
     <Thickness x:Key="SettingsPageHyperlinkButtonMargin">-12,4,0,0</Thickness>

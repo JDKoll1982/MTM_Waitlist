@@ -1,4 +1,4 @@
-<Page
+﻿<Page
     x:Class="MTM_Waitlist.Module_Core.Views.ShellPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -262,28 +262,24 @@
             </AutoSuggestBox>
         </Grid>
         <!--
-        The pane expands only when expanding it costs the page nothing.
+        The pane always shows, and always at the same width.
 
-        The window's width is not the page's width. The content sits inside the pane plus the shell's own inset
-        (NavigationViewPageContentMargin, 56 either side), and every page caps its content column at 1080. An
-        expanded pane leaves the page  window - 260 - 112 - 17  and a compact rail leaves it  window - 48 - 112 - 17
-        (the 17 is the window's own chrome, measured rather than assumed). At the 1280 this setting used to carry,
-        crossing the threshold made the window forty pixels wider and the page two hundred and twelve pixels
-        narrower: measured on 2026-10-24, the page's viewport went from 1104 px at 1281 to 971 px at 1360, and every
-        settings row and waitlist card re-wrapped into the narrower column. That is the whole of the "scaling issue"
-        seen while taking screenshots at laptop widths.
+        The window's width is not the page's width: the content sits inside the pane plus the shell's own inset
+        (NavigationViewPageContentMargin, 56 either side). A pane that grows when the window passes a threshold takes
+        that width out of the page, so the window gets wider and the page gets narrower — measured on 2026-10-25, the
+        page went from 1311 px at a 1519-px window to 1119 px at 1520, and every card re-wrapped.
 
-        1500 is comfortably past the 1469 at which the expanded pane would only just leave the 1080-px content
-        column intact, so the page never re-wraps because the window grew. Below it the rail stays compact, which is
-        also where a 15-inch screen at 125-150% scaling lives, so the page keeps its full width and the item labels
-        stay one hover away in a tooltip.
+        Capping the page's column hid that, at the cost of the page never filling a wide window. The page fills now, so
+        the cause is removed instead: one display mode, one pane width, and the content area therefore grows and
+        shrinks only with the window. The window's own minimum (MainWindow's MinWidth) is what keeps the pane from
+        squeezing the page out of existence, rather than a mode switch.
         -->
         <NavigationView
             AutomationProperties.AutomationId="ShellPage_Navigation"
             x:Name="NavigationViewControl"
             Canvas.ZIndex="0"
             DisplayModeChanged="NavigationViewControl_DisplayModeChanged"
-            ExpandedModeThresholdWidth="1500"
+            PaneDisplayMode="Left"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             HorizontalContentAlignment="Stretch"

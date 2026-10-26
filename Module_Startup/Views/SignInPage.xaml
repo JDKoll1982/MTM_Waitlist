@@ -24,7 +24,6 @@
     -->
     <Grid
         x:Name="RootGrid"
-        MaxWidth="{StaticResource PageContentMaxWidth}"
         Padding="32"
         AutomationProperties.AutomationId="SignInWindow_Root"
         AutomationProperties.Name="Sign in"

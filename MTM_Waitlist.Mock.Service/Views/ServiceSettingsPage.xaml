@@ -20,7 +20,6 @@
         window uses.
     -->
     <ScrollViewer
-        MaxWidth="{StaticResource PageContentMaxWidth}"
         Padding="24"
         HorizontalScrollBarVisibility="Disabled"
         HorizontalScrollMode="Disabled">

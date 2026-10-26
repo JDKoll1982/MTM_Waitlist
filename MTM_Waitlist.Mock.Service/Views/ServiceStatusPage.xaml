@@ -15,7 +15,6 @@
         left of the surface.
     -->
     <ScrollViewer
-        MaxWidth="{StaticResource PageContentMaxWidth}"
         Padding="24"
         HorizontalScrollBarVisibility="Disabled"
         HorizontalScrollMode="Disabled">

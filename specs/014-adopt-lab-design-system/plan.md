@@ -206,3 +206,25 @@ the shell's chain — `ShellPage`'s root grid, the `NavigationView` with its con
 with its content alignment — so the frame is tied to the window whatever is placed inside it. Three audits in
 `PageContentWidthAuditTests` keep it that way: the shell host must stretch in both directions, no page may measure its
 column unconstrained, and no page may pin its capped column.
+
+### N8 — the page ceiling is removed: the shell's contents expand, full stop (supersedes N5 and the cap half of N7)
+
+The owner asked for this plainly after seeing the running app: **the shell's contents expand horizontally without
+question**. The 1080-px ceiling that had been added earlier — because on a 2900-px window a card spanned the whole width —
+is therefore gone: the resource, the setter, and every page's reference to it. A review of the running app confirms the
+page now fills: at a 2400-px window the waitlist list measures 2011 px and its card 1999 px, and at 3456 px the card is
+3055 px.
+
+Removing the ceiling exposed the fault the ceiling had been masking, so it was fixed at its cause rather than left
+behind. The navigation pane switched display mode at `ExpandedModeThresholdWidth`, and when it did it took 260 px out of
+the page: measured on 2026-10-25, the page went from **1311 px at a 1519-px window to 1119 px at 1520**. With a capped
+column that was invisible, because the page had slack. It is not invisible now. The pane therefore has one display mode —
+`PaneDisplayMode="Left"`, always expanded, one width — and the window's own `MinWidth` was raised to 900 so the pane can
+never squeeze the page out of existence. Swept on the running app after the change: 1300 → 911, 1499 → 1110,
+1500 → 1111, 1520 → 1131, 1700 → 1311, 2400 → 2011. Monotonic, with no inversion at any crossing.
+
+`PageContentWidthAuditTests` was rewritten to the new policy rather than deleted: the ceiling must be gone everywhere, a
+setup step must stretch and carry no maximum, no page may pin or cap its content, no page may measure its content
+unconstrained, the shell host must stretch in both directions, and the pane must never switch mode.
+`ShellHostingAuditTests.WideningTheWindowNeverNarrowsThePage` now asserts the pane has one mode and one width, and that
+the window's minimum leaves the page at least 300 px.

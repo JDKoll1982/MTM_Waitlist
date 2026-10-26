@@ -11,7 +11,7 @@
 
     <Grid
         x:Name="ContentArea"
-        MaxWidth="{StaticResource PageContentMaxWidth}">
+>
         <ScrollViewer IsTabStop="True">
             <Grid
                 x:Name="ContentPanel"

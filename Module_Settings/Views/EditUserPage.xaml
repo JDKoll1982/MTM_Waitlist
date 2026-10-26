@@ -21,7 +21,7 @@
         Padding="24"
         HorizontalScrollBarVisibility="Disabled"
         HorizontalScrollMode="Disabled">
-        <StackPanel Spacing="16" MaxWidth="{StaticResource PageContentMaxWidth}">
+        <StackPanel Spacing="16">
 
             <Grid ColumnSpacing="12">
                 <Grid.ColumnDefinitions>

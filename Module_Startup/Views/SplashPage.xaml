@@ -27,7 +27,6 @@
         covers what a person is reading (FR-005).
     -->
     <Grid
-        MaxWidth="{StaticResource PageContentMaxWidth}"
         Padding="32,28"
         RowSpacing="16"
         VerticalAlignment="Center">

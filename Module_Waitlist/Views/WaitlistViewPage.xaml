@@ -1,4 +1,4 @@
-<Page
+﻿<Page
     x:Class="MTM_Waitlist.Module_Waitlist.Views.WaitlistViewPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -31,7 +31,7 @@
          spans the whole window with its label at one end and its buttons at the other. -->
     <Grid
         x:Name="ContentArea"
-        MaxWidth="{StaticResource PageContentMaxWidth}">
+>
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup x:Name="FabLayoutStates">
                 <VisualState x:Name="CompactFabState">

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Page
     x:Class="MTM_Waitlist.Module_Settings.Views.PermissionsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -42,7 +42,7 @@
         <x:Double x:Key="PermissionPersonColumnWidth">240</x:Double>
     </Page.Resources>
 
-    <Grid Padding="24" MaxWidth="{StaticResource PageContentMaxWidth}">
+    <Grid Padding="24">
         <ScrollViewer VerticalScrollBarVisibility="Auto" VerticalScrollMode="Enabled">
             <StackPanel Spacing="16">
 
