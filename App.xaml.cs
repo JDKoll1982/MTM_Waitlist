@@ -388,6 +388,7 @@ public partial class App : Application
     /// Shows the surface the launch handed back, which is the only way the shell is reached (S4).
     /// </summary>
     /// <remarks>
+    /// <para>
     /// <b>The hand-over is marshalled onto the UI thread, and it has to be.</b> The launch runs its steps with
     /// <c>ConfigureAwait(false)</c> on purpose, so a slow store never blocks the interface, which means this event
     /// is raised on a thread-pool thread. Every surface it leads to is a window: building, activating or closing
@@ -395,12 +396,56 @@ public partial class App : Application
     /// host deliberately does not await. On 2026-09-27 that left the first real launch sitting on the launch
     /// window with its feed complete and "The launch ended at MachineSetup" in the log, which is a silent stop of
     /// exactly the kind SC-001 forbids.
+    /// </para>
+    /// <para>
+    /// <b>A picture refresh that did not work holds the window before the surface takes it.</b> The refresh is best
+    /// effort (FR-026), so it never stops the launch — but the launch window is what states it, and the surface
+    /// that replaces it says nothing about pictures. The window therefore stays, with the failure and the button
+    /// that lets the person go on, until they acknowledge it (owner decision, 2026-10-26). A launch that stopped at
+    /// a stated stop is not held: that surface is the person's next action, and a picture notice in front of it
+    /// would delay the remedy they came for.
+    /// </para>
     /// </remarks>
-    private static void OnLaunchShellReady(object? sender, LaunchOutcome outcome)
+    private static async void OnLaunchShellReady(object? sender, LaunchOutcome outcome)
     {
         AppLog.Info("Launch", $"The launch ended at {outcome}.");
+
+        try
+        {
+            if (HoldsForThePictureCopies(outcome))
+            {
+                var hold = GetService<IPictureCopyHold>();
+
+                if (hold.HoldIfTheRefreshFailed(GetService<ILaunchActivityFeed>().Entries))
+                {
+                    AppLog.Info(
+                        "Launch",
+                        "The picture copies could not be refreshed, so the launch window is holding until that is read.");
+                    await hold.WaitAsync().ConfigureAwait(false);
+                }
+            }
+        }
+        catch (Exception exception)
+        {
+            // The hold is a courtesy on top of a launch that has already ended, so failing to hold may delay the
+            // surface by nothing at all and must certainly not prevent it.
+            AppLog.Error("Launch", exception, "The picture-copy statement could not be held, so the launch surface is being shown.");
+        }
+
         RunOnUiThread(() => HandOverToSurface(outcome));
     }
+
+    /// <summary>
+    /// Whether an outcome is one the picture-copy statement is worth holding the window for, which is every
+    /// surface that says nothing about pictures.
+    /// </summary>
+    /// <param name="outcome">Where the launch ended.</param>
+    /// <remarks>
+    /// A stated stop and an ending are excluded: the first is already the person's next action with its remedies,
+    /// and the second is the process going away.
+    /// </remarks>
+    private static bool HoldsForThePictureCopies(LaunchOutcome outcome)
+        => outcome is LaunchOutcome.MainScreens or LaunchOutcome.SignIn or LaunchOutcome.MachineSetup;
 
     /// <summary>
     /// Builds and shows the surface an outcome means, and refuses to let a surface failure end the process.

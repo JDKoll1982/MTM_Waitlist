@@ -115,21 +115,42 @@
             Grid.Row="3"
             Padding="12,8"
             Visibility="Collapsed">
-            <TextBlock
-                x:Name="ErrorTextBlock"
-                AutomationProperties.AutomationId="SplashPage_ErrorText"
-                TextWrapping="Wrap" />
+            <StackPanel Spacing="4">
+                <!--
+                    The picture refresh is best effort, so it does not stop the launch — but it is stated here and
+                    the window waits until the person has read it, because the surface that replaces this one says
+                    nothing about pictures and a machine drawing stale copies would never find out.
+                -->
+                <TextBlock
+                    x:Name="PictureCopyHoldTextBlock"
+                    AutomationProperties.AutomationId="SplashPage_PictureCopyHoldText"
+                    FontWeight="SemiBold"
+                    Text="{x:Bind ViewModel.PictureCopyHoldText}"
+                    TextWrapping="Wrap"
+                    Visibility="{x:Bind ViewModel.IsHoldingForPictureCopies, Mode=OneWay}" />
+                <TextBlock
+                    x:Name="ErrorTextBlock"
+                    AutomationProperties.AutomationId="SplashPage_ErrorText"
+                    TextWrapping="Wrap" />
+            </StackPanel>
         </Border>
 
         <!--
             The button bar. The one window is the only window, so this is a second way out beside the window's own
-            close box, and it ends the process exactly as closing the window does.
+            close box, and it ends the process exactly as closing the window does. While a failed picture refresh is
+            being held, the person is also offered the way on.
         -->
         <StackPanel
             Grid.Row="4"
             HorizontalAlignment="Right"
             Orientation="Horizontal"
             Spacing="8">
+            <Button
+                x:Name="ContinueButton"
+                AutomationProperties.AutomationId="SplashPage_ContinueButton"
+                Click="OnContinueClick"
+                Content="{x:Bind ViewModel.ContinueActionText}"
+                Visibility="{x:Bind ViewModel.IsHoldingForPictureCopies, Mode=OneWay}" />
             <Button
                 x:Name="CloseButton"
                 AutomationProperties.AutomationId="SplashPage_CloseButton"

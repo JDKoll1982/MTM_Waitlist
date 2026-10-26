@@ -75,6 +75,11 @@ public static class ModuleDependencyInjectionExtensions
         // permitted to probe the external system, rather than becoming a second probe path with its own idea of
         // what "unreachable" means (FR-026, FR-027).
         services.AddSingleton<ILaunchStep, PictureCacheStep>();
+
+        // The hold that keeps the launch window on a picture refresh that did not work until the person has read
+        // it. It is one instance for this process: the line it reads and the button that ends it belong to the one
+        // window a launch has.
+        services.AddSingleton<IPictureCopyHold, PictureCopyHold>();
         services.AddSingleton<ILaunchStep, VisualVerdictPrimingStep>();
 
         // The launch window's size, so a workstation can be given a different one without a code change

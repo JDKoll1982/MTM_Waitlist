@@ -233,6 +233,33 @@ public sealed class SplashViewModelTests
         Assert.AreEqual("Reading this computer's saved settings", viewModel.CurrentStep);
     }
 
+    [TestMethod]
+    public void ViewModel_SplashViewModelTests_PictureCopyHold_ShowsTheStatementWhileTheWindowIsHeldAndClearsItAfterwards()
+    {
+        // Arrange: the launch has ended and the refresh's failure is held, which is what keeps the launch window
+        // in place until the person has read it.
+        var feed = new LaunchActivityFeed();
+        feed.Append(Line("picture-cache", LaunchFeedEntryKind.StepFailed, "The picture share could not be read.", "the picture share", false));
+
+        var hold = new PictureCopyHold();
+        var viewModel = new SplashViewModel(new LaunchStepCatalog(), feed, hold);
+
+        // Act
+        hold.HoldIfTheRefreshFailed(feed.Entries);
+
+        // Assert: the surface says what is being used, and the cause the line carries is kept beside it.
+        Assert.IsTrue(viewModel.IsHoldingForPictureCopies, "the window is held, so the surface has to say why");
+        Assert.IsFalse(string.IsNullOrWhiteSpace(viewModel.PictureCopyHoldText), "the statement has no words");
+        Assert.IsFalse(string.IsNullOrWhiteSpace(viewModel.ContinueActionText), "the way on has no words");
+        Assert.AreEqual("The picture share could not be read.", viewModel.Diagnosis);
+
+        // Act: the person acknowledges it, which is what lets the launch carry on to its surface.
+        hold.Acknowledge();
+
+        // Assert
+        Assert.IsFalse(viewModel.IsHoldingForPictureCopies, "the statement stays on screen after it was acknowledged");
+    }
+
     /// <summary>One feed line, the way the runner writes it.</summary>
     private static LaunchFeedEntry Line(
         string stepId,

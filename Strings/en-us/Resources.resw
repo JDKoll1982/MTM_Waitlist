@@ -1392,6 +1392,12 @@
   <data name="Startup_Launch.CloseAction" xml:space="preserve">
     <value>Close</value>
   </data>
+  <data name="Startup_Launch.ContinueAction" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="Startup_Launch.PictureCopiesNotRefreshed" xml:space="preserve">
+    <value>The picture copies could not be brought up to date, so the pictures already stored on this computer are the ones being used. Continue to carry on.</value>
+  </data>
   <data name="Startup_Launch.EndedByWindowClose" xml:space="preserve">
     <value>The startup window was closed, so the application is ending. Open it again to start it up.</value>
   </data>

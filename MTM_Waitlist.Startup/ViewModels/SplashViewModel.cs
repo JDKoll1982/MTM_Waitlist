@@ -38,6 +38,7 @@ public sealed partial class SplashViewModel : ObservableObject
 {
     private readonly LaunchStepCatalog _catalog;
     private readonly ILaunchActivityFeed _feed;
+    private readonly IPictureCopyHold? _pictureCopyHold;
 
     /// <summary>
     /// The step whose work waits on something outside this computer and is therefore still in flight, or
@@ -48,14 +49,22 @@ public sealed partial class SplashViewModel : ObservableObject
     /// <summary>Creates the launch window's state over the sequence and the lines the launch writes.</summary>
     /// <param name="catalog">The sequence the launch walks, which is where the total comes from.</param>
     /// <param name="feed">The lines the launch writes, which is where the rows come from.</param>
-    /// <exception cref="ArgumentNullException">Either argument is <c>null</c>.</exception>
-    public SplashViewModel(LaunchStepCatalog catalog, ILaunchActivityFeed feed)
+    /// <param name="pictureCopyHold">
+    /// The hold that keeps this window on a picture refresh that did not work, or <c>null</c> when the surface has
+    /// no such statement to hold.
+    /// </param>
+    /// <exception cref="ArgumentNullException">Either of the first two arguments is <c>null</c>.</exception>
+    public SplashViewModel(
+        LaunchStepCatalog catalog,
+        ILaunchActivityFeed feed,
+        IPictureCopyHold? pictureCopyHold = null)
     {
         ArgumentNullException.ThrowIfNull(catalog);
         ArgumentNullException.ThrowIfNull(feed);
 
         _catalog = catalog;
         _feed = feed;
+        _pictureCopyHold = pictureCopyHold;
 
         // A launch that is already under way when the surface appears has lines the surface never saw, so the
         // feed is read once before the subscription starts and nothing is drawn twice.
@@ -65,6 +74,12 @@ public sealed partial class SplashViewModel : ObservableObject
         }
 
         _feed.EntryAppended += OnEntryAppended;
+
+        if (_pictureCopyHold is not null)
+        {
+            IsHoldingForPictureCopies = _pictureCopyHold.IsHolding;
+            _pictureCopyHold.Changed += OnPictureCopyHoldChanged;
+        }
     }
 
     /// <summary>
@@ -120,6 +135,23 @@ public sealed partial class SplashViewModel : ObservableObject
     /// <summary>The row that stopped the launch, or <c>null</c> when nothing has stopped it.</summary>
     public SplashFeedLine? DiagnosedLine { get; private set; }
 
+    /// <summary>
+    /// Whether this window is holding a picture refresh that did not work until the person acknowledges it.
+    /// </summary>
+    /// <remarks>
+    /// The launch has already ended when this turns on: what is held is the window, so the failure is read before
+    /// the surface that knows nothing about pictures takes its place. The cause stays in
+    /// <see cref="Diagnosis"/> and is drawn beside this statement rather than replaced by it.
+    /// </remarks>
+    [ObservableProperty]
+    public partial bool IsHoldingForPictureCopies { get; set; }
+
+    /// <summary>The statement shown while the picture refresh's failure is held: what went wrong and what is used.</summary>
+    public string PictureCopyHoldText => "Startup_Launch.PictureCopiesNotRefreshed".GetLocalized();
+
+    /// <summary>The button that ends the hold, which is the person saying they have read it.</summary>
+    public string ContinueActionText => "Startup_Launch.ContinueAction".GetLocalized();
+
     /// <summary>The surface's own name, which is what the mark at the top of it stands for.</summary>
     public string TitleText => "Startup_Launch.Title".GetLocalized();
 
@@ -129,6 +161,17 @@ public sealed partial class SplashViewModel : ObservableObject
     /// <summary>Copies one line the launch wrote into the surface's list, on the surface's own thread.</summary>
     private void OnEntryAppended(object? sender, LaunchFeedEntry entry)
         => UiThreadMarshaller(() => Apply(entry));
+
+    /// <summary>Follows the hold, which is begun and acknowledged off the surface's thread.</summary>
+    private void OnPictureCopyHoldChanged(object? sender, EventArgs args)
+    {
+        if (_pictureCopyHold is null)
+        {
+            return;
+        }
+
+        UiThreadMarshaller(() => IsHoldingForPictureCopies = _pictureCopyHold.IsHolding);
+    }
 
     /// <summary>Adds the row and refreshes everything the surface reads from it.</summary>
     /// <param name="entry">The line the launch wrote.</param>

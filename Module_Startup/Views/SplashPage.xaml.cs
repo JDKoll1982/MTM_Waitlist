@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Startup.Services;
 using MTM_Waitlist.Module_Startup.ViewModels;
 
 namespace MTM_Waitlist.Module_Startup.Views;
@@ -76,7 +77,9 @@ internal sealed partial class SplashPage : Page, ILaunchStageSurface
         ProgressTextBlock.Text = ViewModel.ProgressText;
         ErrorTextBlock.Text = ViewModel.Diagnosis ?? string.Empty;
 
-        ErrorStrip.Visibility = string.IsNullOrWhiteSpace(ViewModel.Diagnosis)
+        // The strip carries either the cause of a stop or the statement that a failed picture refresh is being
+        // held, and it is away only when it has neither to say.
+        ErrorStrip.Visibility = string.IsNullOrWhiteSpace(ViewModel.Diagnosis) && ViewModel.IsHoldingForPictureCopies is false
             ? Visibility.Collapsed
             : Visibility.Visible;
     }
@@ -84,7 +87,10 @@ internal sealed partial class SplashPage : Page, ILaunchStageSurface
     /// <summary>Redraws the parts that are not the bound collection, when either of them changes.</summary>
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
-        if (args.PropertyName is nameof(SplashViewModel.ProgressText) or nameof(SplashViewModel.Diagnosis))
+        if (args.PropertyName
+            is nameof(SplashViewModel.ProgressText)
+            or nameof(SplashViewModel.Diagnosis)
+            or nameof(SplashViewModel.IsHoldingForPictureCopies))
         {
             DrawState();
         }
@@ -108,6 +114,16 @@ internal sealed partial class SplashPage : Page, ILaunchStageSurface
         ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
         Unloaded -= OnUnloaded;
     }
+
+    /// <summary>
+    /// Ends the hold on a picture refresh that did not work, which lets the launch carry on to its surface.
+    /// </summary>
+    /// <remarks>
+    /// The hold is the statement's own button rather than a second decision: the refresh has already been given up
+    /// on, the copies on this computer are the ones in use, and the person is saying they have read that.
+    /// </remarks>
+    private void OnContinueClick(object sender, RoutedEventArgs e)
+        => App.GetService<IPictureCopyHold>().Acknowledge();
 
     /// <summary>
     /// Ends the process from the surface's own button bar.

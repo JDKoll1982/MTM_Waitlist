@@ -29,9 +29,10 @@ namespace MTM_Waitlist.Module_Startup.Services;
 public sealed class PictureCacheStep : ILaunchStep
 {
     /// <summary>
-    /// The catalogue entry this step answers for.
+    /// The catalogue entry this step answers for. Shared with the hold that keeps the launch window on a refresh
+    /// that did not work, so the two cannot disagree about which line they are talking about.
     /// </summary>
-    private const string StepId = "picture-cache";
+    internal const string StepId = "picture-cache";
 
     /// <summary>The module name every entry this step records carries.</summary>
     private const string LogModule = "PictureCache";
