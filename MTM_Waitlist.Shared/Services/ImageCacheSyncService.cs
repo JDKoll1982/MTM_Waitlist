@@ -44,6 +44,13 @@ public sealed record ImageCacheSource(
 /// cache is the only thing still working.
 /// </para>
 /// <para>
+/// <b>A cancelled run stops quietly and reports what it did.</b> The launch stops this step the moment it passes
+/// its stated maximum, and the walk answers that by returning the counts it has reached rather than by throwing:
+/// the refresh is best effort by contract, and an exception escaping a thread-pool thread is reported as a crash
+/// in a step that cannot be allowed to fail (FR-026). A cancelled walk never deletes anything, because the share
+/// was only half read and every copy it had not compared yet would look like a copy whose original is gone.
+/// </para>
+/// <para>
 /// The sources are supplied as a factory rather than as values because both roots are settings that a person can
 /// change while the application is running: the run reads them when it starts, not when the service is built.
 /// </para>
@@ -84,15 +91,28 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
         }
 
         // Off the calling thread: this walks two folder trees over the network, and the caller is the splash
-        // screen's own thread.
-        return await Task.Run(() => Synchronize(sources, cancellationToken), cancellationToken).ConfigureAwait(false);
+        // screen's own thread. The token is handed to the walk rather than to the task, because a walk that is
+        // stopped has to answer with what it managed to do: an exception raised on a thread-pool thread is
+        // reported as an unhandled fault, and this step's whole contract is that it cannot fail (FR-026).
+        try
+        {
+            return await Task.Run(() => Synchronize(sources, cancellationToken)).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            // Stopped before the walk began, so nothing was done — which is exactly what this result says.
+            return ImageCacheSyncResult.NothingToDo;
+        }
     }
 
     /// <summary>
     /// The whole synchronisation, over an explicit set of sources, so the rule can be tested without a share.
     /// </summary>
     /// <param name="sources">The picture sources to mirror.</param>
-    /// <param name="cancellationToken">Cancellation token for the operation.</param>
+    /// <param name="cancellationToken">
+    /// Stops the walk. A cancelled walk returns the counts it reached rather than throwing, and never deletes
+    /// anything it has not yet compared against the share.
+    /// </param>
     /// <returns>A summary of what was copied and removed.</returns>
     public static ImageCacheSyncResult Synchronize(
         IReadOnlyList<ImageCacheSource> sources,
@@ -107,7 +127,14 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
 
         foreach (var source in sources)
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            // A stopped run ends here rather than throwing. The launch cancels this step the moment it passes its
+            // stated maximum, and an exception escaping a thread-pool thread is what the debugger reports as an
+            // unhandled fault in a step that is best effort by contract (FR-026). What is already copied stays
+            // copied: the next run compares against it and finishes the job.
+            if (cancellationToken.IsCancellationRequested)
+            {
+                break;
+            }
 
             if (string.IsNullOrWhiteSpace(source.SourceRoot) || Directory.Exists(source.SourceRoot) is false)
             {
@@ -155,7 +182,9 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
     /// <summary>Mirrors one source, returning what it did.</summary>
     /// <remarks>
     /// The caller has already established that the source can be read and that the copies can be written: this walk
-    /// is only ever entered for a source that has a readable root and a usable destination.
+    /// is only ever entered for a source that has a readable root and a usable destination. A cancelled walk leaves
+    /// before the deletion pass, because a half-read share cannot tell a copy whose original is gone from one whose
+    /// original was in the part it never reached.
     /// </remarks>
     private static (int Copied, int Removed, int ArchivesRemoved, int NotCopied) SynchronizeSource(
         ImageCacheSource source,
@@ -169,7 +198,13 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
 
         foreach (var sharedPath in Directory.EnumerateFiles(source.SourceRoot, "*", SearchOption.AllDirectories))
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            if (cancellationToken.IsCancellationRequested)
+            {
+                // The share was only half read, so the deletion pass below must not run: every copy whose original
+                // sits in the part that was never read would look like a copy whose original is gone, and the
+                // pictures this machine is still drawing would be deleted out from under it.
+                return (copied, 0, 0, notCopied);
+            }
 
             if (ImageCachePaths.IsSupportedPicture(sharedPath) is false)
             {
@@ -218,7 +253,12 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
 
         foreach (var cachePath in Directory.EnumerateFiles(source.CacheRoot, "*", SearchOption.AllDirectories))
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            if (cancellationToken.IsCancellationRequested)
+            {
+                // Safe to stop here: the share was read in full, so every copy removed so far was removed for the
+                // right reason and the rest are simply left for the next run.
+                return (copied, removed, 0, notCopied);
+            }
 
             if (ImageCachePaths.IsSupportedPicture(cachePath) is false)
             {
@@ -297,11 +337,17 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
             AppStoragePaths.ArchiveFolderName,
             SearchOption.AllDirectories))
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            if (cancellationToken.IsCancellationRequested)
+            {
+                break;
+            }
 
             foreach (var path in Directory.EnumerateFiles(archiveFolder, "*", SearchOption.AllDirectories))
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
 
                 if (ImageCachePaths.IsSupportedPicture(path) is false)
                 {

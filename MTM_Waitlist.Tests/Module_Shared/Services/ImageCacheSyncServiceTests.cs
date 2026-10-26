@@ -154,6 +154,52 @@ public sealed class ImageCacheSyncServiceTests
     }
 
     /// <summary>
+    /// A run that is cancelled stops quietly and answers with what it did: the launch stops this step the moment it
+    /// passes its stated maximum, and an exception escaping that cancellation is reported as a crash in a step that
+    /// cannot be allowed to fail.
+    /// </summary>
+    [TestMethod]
+    public async Task Service_ImageCacheSyncServiceTests_ACancelledRunAnswersInsteadOfThrowing()
+    {
+        WriteSharedPicture(@"request_item\pickup-coil.png");
+
+        using var cancelled = new CancellationTokenSource();
+        await cancelled.CancelAsync();
+
+        var result = await new ImageCacheSyncService(_ => Task.FromResult<IReadOnlyList<ImageCacheSource>>(
+                [Source(_shareRoot, _cacheRoot)]))
+            .SynchronizeAsync(cancelled.Token);
+
+        Assert.IsNotNull(result, "a cancelled refresh answers with a result, and never throws out of the task");
+    }
+
+    /// <summary>
+    /// A cancelled run deletes nothing. The share was only half read, so a copy that has not been compared yet is
+    /// not a copy whose original is gone — treating it as one would take pictures away from a machine that is still
+    /// using them.
+    /// </summary>
+    [TestMethod]
+    public void Service_ImageCacheSyncServiceTests_ACancelledRunDeletesNothingAlreadyCached()
+    {
+        WriteSharedPicture(@"request_item\pickup-coil.png");
+        ImageCacheSyncService.Synchronize([Source(_shareRoot, _cacheRoot)]);
+
+        // The original is gone, so an uncancelled run would remove this copy.
+        File.Delete(Path.Combine(_shareRoot, "request_item", "pickup-coil.png"));
+
+        using var cancelled = new CancellationTokenSource();
+        cancelled.Cancel();
+
+        var result = ImageCacheSyncService.Synchronize([Source(_shareRoot, _cacheRoot)], cancelled.Token);
+
+        Assert.AreEqual(0, result.Removed, "a cancelled run removes nothing");
+        Assert.AreEqual(0, result.Copied);
+        Assert.IsTrue(
+            File.Exists(Path.Combine(_cacheRoot, "request_item", "pickup-coil.png")),
+            "the copies already held stay exactly where they are");
+    }
+
+    /// <summary>
     /// A source that cannot be read — an unreachable share, or one that fails part way — is reported and left
     /// exactly as it is. Emptying the cache on a network blip would take the pictures away at the one moment the
     /// cache is the only thing still working.

@@ -22,7 +22,8 @@ public interface IImageCacheSyncService
     /// <remarks>
     /// Best effort by design: a picture source that cannot be reached is reported and left exactly as it is, and no
     /// failure here may stop the application starting. The application is usable without a cache; it is not usable
-    /// without a shell.
+    /// without a shell. A cancelled run is therefore not a failure either: it stops walking and answers with what it
+    /// managed to copy, having deleted nothing, so the next run picks up where this one stopped.
     /// </remarks>
     Task<ImageCacheSyncResult> SynchronizeAsync(CancellationToken cancellationToken = default);
 }
