@@ -228,3 +228,17 @@ setup step must stretch and carry no maximum, no page may pin or cap its content
 unconstrained, the shell host must stretch in both directions, and the pane must never switch mode.
 `ShellHostingAuditTests.WideningTheWindowNeverNarrowsThePage` now asserts the pane has one mode and one width, and that
 the window's minimum leaves the page at least 300 px.
+
+### N9 — both work-center screens cap their card grids at four columns
+
+With the page ceiling gone the card grids filled the window, so the column count grew with the monitor: at a 3456-px
+window the 300-px width floor solved to nine columns on each grid, each card a thumbnail with a caption. Both
+work-center selection screens — `SetupWorkCenterPage` and `NewRequestWorkCenterPage`, on both of their grids — now
+declare `CardGridSizing.MaximumColumns="4"`.
+
+The ceiling is the solver's own: `CardGridLayout.Solve` already accepted a maximum column count and already had a test
+for it (`ACeilingCapsTheColumnsAndWidensTheCards`), so nothing new was needed in the layout. What was missing was the
+pages asking for it, and `WorkCenterGridCeilingMarkupTests` now requires all four grids to.
+
+Measured on the running app on the setup screen: a 1500-px window gives 3 columns of 329 px, 2400 gives 4 of 469, and
+3400 gives 4 of 719 — the count stops at four and the cards take the extra width instead.
