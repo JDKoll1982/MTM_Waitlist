@@ -189,3 +189,20 @@ inventory lists.
 FR-009 fixes the order, the position and the default per kind; FR-027 preserves each screen's wording. Both hold because
 a screen may name its own affirmative and dismissive labels — "Remove", "Clear all", "Yes" — while the kind still
 decides which slot they sit in and which one Enter takes.
+
+### N7 — the shell and the page columns stretch, and now say so
+
+Reported after the run: the page in the shell read as if it had a minimum width the window could not widen. Two silent
+causes, both of which leave every other check green.
+
+A page-level `ScrollViewer` measures its child with **unlimited width** unless horizontal scrolling is switched off, so
+the capped column sized to its own content rather than to the viewport. `CreateUserPage`, `EditUserPage` and the two
+service console pages had exactly that, because `HorizontalScrollMode` defaults to `Enabled`. And a capped element that
+also carries `HorizontalAlignment="Left"` is content-sized too, because alignment overrides the stretch that would
+otherwise fill the column — the same trap the design system already records for `MaxWidth` with `Center`.
+
+Fixed by switching horizontal scrolling off on those four pages, dropping the left alignment, and stating the stretch on
+the shell's chain — `ShellPage`'s root grid, the `NavigationView` with its content alignment, and the `NavigationFrame`
+with its content alignment — so the frame is tied to the window whatever is placed inside it. Three audits in
+`PageContentWidthAuditTests` keep it that way: the shell host must stretch in both directions, no page may measure its
+column unconstrained, and no page may pin its capped column.
