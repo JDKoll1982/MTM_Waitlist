@@ -72,6 +72,12 @@ public sealed class LuggerArrangementPageMarkupTests
                 .FirstOrDefault(attribute => attribute.Name.LocalName == "CardGridSizing.MinimumCardWidth")
                 ?.Value,
             "The grid does not declare the narrowest card it may draw, so nothing sizes it from the container.");
+        Assert.AreEqual(
+            "3",
+            grid.Attributes()
+                .FirstOrDefault(attribute => attribute.Name.LocalName == "CardGridSizing.MaximumColumns")
+                ?.Value,
+            "The arrangement grid draws more than three cards across, so a wide window turns the luggers into a wall of thumbnails.");
         Assert.IsNull(
             grid.Attribute("SizeChanged"),
             "The page computes card widths itself again instead of letting the shared sizing follow the container.");

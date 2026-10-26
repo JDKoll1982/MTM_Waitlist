@@ -7,13 +7,13 @@ using MTM_Waitlist.Tests.Module_Mock;
 namespace MTM_Waitlist.Tests.Module_Shared.Services;
 
 /// <summary>
-/// Both work-center selection screens draw at most four cards across.
+/// Both work-center selection screens draw at most three cards across.
 /// </summary>
 /// <remarks>
 /// <para>
 /// <b>Why a ceiling at all.</b> The pages fill the window now, so the number of cards in a row would otherwise grow with
 /// the monitor. Measuring against the width floor of 300 px and the default gap, a 3456-px window solved to nine
-/// columns on each grid; at four the row still reads as a row of choices rather than as a wall of thumbnails.
+/// columns on each grid; at three the row still reads as a row of choices rather than as a wall of thumbnails.
 /// </para>
 /// <para>
 /// The ceiling itself is the solver's (<c>CardGridLayout.Solve</c> takes a maximum column count and already has a test
@@ -25,7 +25,7 @@ namespace MTM_Waitlist.Tests.Module_Shared.Services;
 public sealed class WorkCenterGridCeilingMarkupTests
 {
     /// <summary>The column count both screens cap at.</summary>
-    private const int Ceiling = 4;
+    private const int Ceiling = 3;
 
     private static readonly XNamespace s_presentation = "http://schemas.microsoft.com/winfx/2006/xaml/presentation";
 
@@ -41,7 +41,7 @@ public sealed class WorkCenterGridCeilingMarkupTests
     ];
 
     [TestMethod]
-    public void Audit_WorkCenterGridCeilingMarkupTests_BothScreensCapEveryCardGridAtFour()
+    public void Audit_WorkCenterGridCeilingMarkupTests_BothScreensCapEveryCardGridAtThree()
     {
         foreach (var page in s_pages)
         {

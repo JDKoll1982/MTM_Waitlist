@@ -99,7 +99,7 @@
                 <ItemsControl AutomationProperties.AutomationId="SetupWorkOrderPage_OperationTiles" ItemsSource="{x:Bind ViewModel.State.SequenceResults, Mode=OneWay}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="4" />
+                            <ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="3" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>

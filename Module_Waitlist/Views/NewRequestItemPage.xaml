@@ -51,7 +51,7 @@
                         <ItemsPanelTemplate>
                             <ItemsWrapGrid
                                 Orientation="Horizontal"
-                                MaximumRowsOrColumns="4" />
+                                MaximumRowsOrColumns="3" />
                         </ItemsPanelTemplate>
                     </GridView.ItemsPanel>
                     <GridView.ItemTemplate>
