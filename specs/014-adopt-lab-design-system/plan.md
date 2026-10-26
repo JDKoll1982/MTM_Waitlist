@@ -242,3 +242,24 @@ pages asking for it, and `WorkCenterGridCeilingMarkupTests` now requires all fou
 
 Measured on the running app on the setup screen: a 1500-px window gives 3 columns of 329 px, 2400 gives 4 of 469, and
 3400 gives 4 of 719 — the count stops at four and the cards take the extra width instead.
+
+### N10 — the scrolling text control is DevWinUI's, the work-center step has one building chooser, and the submit ring is collapsed
+
+Three changes asked for together.
+
+**The scrolling control.** All forty-six uses of the hand-rolled `AutoScrollTextView` now use `DevWinUI.AutoScrollView`
+with the value as its child `TextBlock`, and the hand-rolled control and its two implementation tests are gone. The
+reason is the reported fault: values that fitted their field were still slid across it. `AutoScrollView` decides from
+`ChildPresenter.ActualWidth > LayoutRoot.ActualWidth` before it starts a pass, which is the rule the application wanted;
+ours decided for itself and got it wrong. The `Text`/`FontSize`/`FontWeight`/`Foreground`/`TextAlignment` attributes moved
+onto the inner `TextBlock`; row, alignment, margin, size, tooltip and automation attributes stayed on the host.
+
+**One building chooser.** The new-request work-center step carried its own building button and card flyout beside the
+shell's header selector, so the header could name one building while the cards below came from another. The step's
+chooser, its two handlers and its fly-out plumbing are removed; the view model's `SelectedBuilding` now reads
+`IBuildingSelectionService.SelectedBuilding` rather than holding a copy, and `OnBuildingChanged` re-applies the filter so
+the step follows a change made in the header while it is open.
+
+**The submit gap.** `NewRequestSummaryPage`'s submit button carried an inactive `ProgressRing`, which draws nothing but
+still holds its sixteen pixels plus the panel's eight-pixel spacing — the gap at the leading edge. It is now collapsed
+unless `IsSubmitting`.

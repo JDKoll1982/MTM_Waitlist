@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
@@ -438,13 +438,19 @@ public sealed class WaitlistLineCardDetailTemplateTests
         var scrolling = TemplateFor(dictionary, ScrollingCellTemplateKey);
         var scroller = scrolling
             .Descendants()
-            .SingleOrDefault(element => element.Name.LocalName == "AutoScrollTextView");
+            .SingleOrDefault(element => element.Name.LocalName == "AutoScrollView");
 
         Assert.IsNotNull(
             scroller,
-            "The scrolling cell does not use the application's shared scrolling text control (FR-053).");
+            "The scrolling cell does not use the shared scrolling control (FR-053).");
+
+        // The value is the Text of the TextBlock the scrolling control carries, not an attribute of the host.
+        var line = scroller!.Descendants()
+            .SingleOrDefault(element => element.Name.LocalName == "TextBlock");
+
+        Assert.IsNotNull(line, "The scrolling cell carries no line to draw.");
         StringAssert.Contains(
-            (string?)scroller!.Attribute("Text") ?? string.Empty,
+            (string?)line!.Attribute("Text") ?? string.Empty,
             "Value",
             "The scrolling cell does not draw the cell's own value (FR-053).");
     }

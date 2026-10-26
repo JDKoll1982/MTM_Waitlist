@@ -1,4 +1,4 @@
-<Page
+﻿<Page
     x:Class="MTM_Waitlist.Module_Waitlist.Views.NewRequestComponentPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
+    xmlns:dev="using:DevWinUI"
     mc:Ignorable="d">
 
     <Grid Style="{StaticResource SetupPageGridStyle}" RowSpacing="16">
@@ -78,13 +79,16 @@
                                         <!-- The value is drawn by the one-line scrolling control (009 B1/B2). Its
                                              strong-body size and weight are set here because the control draws its
                                              own text and cannot inherit a TextBlock style. -->
-                                        <sharedControls:AutoScrollTextView
-                                            HorizontalAlignment="Stretch"
-                                            FontSize="14"
-                                            FontWeight="SemiBold"
-                                            Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                                            TextAlignment="Center"
-                                            Text="{x:Bind Title}" />
+                                        <dev:AutoScrollView IsPlaying="True"
+                                            HorizontalAlignment="Stretch">
+                                            <TextBlock
+                                                FontSize="14"
+                                                FontWeight="SemiBold"
+                                                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                                TextAlignment="Center"
+                                                Text="{x:Bind Title}"
+                                                TextTrimming="CharacterEllipsis" />
+                                        </dev:AutoScrollView>
                                     </StackPanel>
                                 </Border>
 

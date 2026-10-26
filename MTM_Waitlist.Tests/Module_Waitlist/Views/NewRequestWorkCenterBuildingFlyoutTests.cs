@@ -1,58 +1,94 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Tests.Module_Mock;
 
 namespace MTM_Waitlist.Tests.Module_Waitlist.Views;
 
 /// <summary>
-/// US5 (FR-021, FR-022): the wizard's own building choice is the same flyout of cards, and it leaves out the
-/// building in effect too.
+/// The work-center step takes its building from the shell, and offers no second choice of its own.
 /// </summary>
+/// <remarks>
+/// The step used to carry its own building button and flyout beside the shell's header selector. Two choosers for one
+/// value is how the header comes to say one building while the cards below it come from another, so the page-level one
+/// is gone: the shell chooses, and the step reads and follows that choice.
+/// </remarks>
 [TestClass]
 public sealed class NewRequestWorkCenterBuildingFlyoutTests
 {
     [TestMethod]
-    public void UI_NewRequestWorkCenterBuildingFlyoutTests_TheWizard_BuildsTheBuildingListAsCards()
+    public void UI_NewRequestWorkCenterBuildingFlyoutTests_TheStep_OffersNoBuildingChoiceOfItsOwn()
     {
         var markup = Markup();
 
-        StringAssert.Contains(markup, "<Flyout Opening=\"BuildingFlyout_Opening\">", "The choice is made in a flyout.");
-        StringAssert.Contains(markup, "ItemTemplate=\"{StaticResource PartPictureCardTemplate}\"", "Its entries are the shared card.");
-        StringAssert.Contains(markup, "ItemsSource=\"{x:Bind ViewModel.BuildingCards, Mode=OneWay}\"", "It offers the cards, not the plain names.");
-        StringAssert.Contains(markup, "ItemClick=\"BuildingCard_Click\"", "Choosing a card makes the choice.");
-        StringAssert.Contains(markup, "SelectionMode=\"None\"", "A card is chosen by clicking it.");
+        foreach (var forbidden in new[]
+                 {
+                     "NewRequestWorkCenterPage_BuildingButton",
+                     "NewRequestWorkCenterPage_BuildingCards",
+                     "BuildingFlyout_Opening",
+                     "BuildingCard_Click",
+                     "ViewModel.BuildingCards",
+                 })
+        {
+            Assert.IsFalse(
+                markup.Contains(forbidden, StringComparison.Ordinal),
+                $"The step still offers its own building choice ('{forbidden}'), so two places can set the same value.");
+        }
     }
 
     [TestMethod]
-    public void UI_NewRequestWorkCenterBuildingFlyoutTests_TheWizard_NoLongerOffersADropDownForTheBuilding()
-    {
-        var markup = Markup();
-
-        Assert.IsFalse(markup.Contains("BuildingCombo", StringComparison.Ordinal), "The drop-down is replaced, not left beside the cards.");
-        Assert.IsFalse(markup.Contains("ComboBox", StringComparison.Ordinal), "No drop-down remains on the step.");
-    }
-
-    [TestMethod]
-    public void UI_NewRequestWorkCenterBuildingFlyoutTests_TheBuildingInEffect_IsNotAmongTheWizardsCards()
+    public void UI_NewRequestWorkCenterBuildingFlyoutTests_TheStep_ReadsTheShellsBuilding()
     {
         var source = ViewModelSource();
 
-        StringAssert.Contains(source, "public ObservableCollection<BuildingCardOption> BuildingCards", "The cards are the flyout's source.");
         StringAssert.Contains(
             source,
-            "!string.Equals(building, current, StringComparison.OrdinalIgnoreCase)",
-            "The building currently in effect is left out (FR-022).");
-        StringAssert.Contains(source, "RefreshBuildingCards();", "The list is rebuilt when the building changes and as the flyout opens.");
-        StringAssert.Contains(source, "public void SelectBuilding(string? building)", "Choosing a card selects the building.");
+            "public string SelectedBuilding => _buildingSelectionService.SelectedBuilding;",
+            "The step does not read the shell's building, so it has a value of its own again.");
+
+        Assert.IsFalse(
+            source.Contains("public void SelectBuilding(", StringComparison.Ordinal),
+            "The step can still set the building itself, which is the second chooser coming back under another name.");
+
+        StringAssert.Contains(
+            source,
+            "var selectedBuilding = _buildingSelectionService.SelectedBuilding;",
+            "The filter does not compare each work center against the shell's building.");
     }
 
     [TestMethod]
-    public void UI_NewRequestWorkCenterBuildingFlyoutTests_ChoosingACard_SelectsTheBuildingRatherThanRestatingIt()
+    public void UI_NewRequestWorkCenterBuildingFlyoutTests_TheStep_FollowsAChangeMadeWhileItIsOpen()
     {
-        var codeBehind = CodeBehind();
+        var source = ViewModelSource();
 
-        StringAssert.Contains(codeBehind, "is BuildingCardOption card", "The handler reads the building off the card.");
-        StringAssert.Contains(codeBehind, "ViewModel.SelectBuilding(card.Building)", "The building the card carries is the building chosen.");
+        StringAssert.Contains(
+            source,
+            "_buildingSelectionService.BuildingChanged += OnBuildingChanged;",
+            "The step does not listen for the shell changing building, so its cards would stay on the old one.");
+
+        StringAssert.Contains(
+            source,
+            "private void OnBuildingChanged(object? sender, EventArgs e) => ApplyFilter();",
+            "A change of building does not re-apply the filter, so the cards do not follow the header.");
+    }
+
+    [TestMethod]
+    public void UI_NewRequestWorkCenterBuildingFlyoutTests_TheShell_StillCarriesTheOneChooser()
+    {
+        var shell = File.ReadAllText(Path.Combine(
+            RepositoryPatternScan.FindRepositoryRoot(),
+            "Module_Core",
+            "Views",
+            "ShellPage.xaml"));
+
+        StringAssert.Contains(
+            shell,
+            "ShellPage_FacilitySelector",
+            "The shell no longer offers a building, so nothing on the screen can change it.");
+
+        StringAssert.Contains(
+            shell,
+            "FacilityCard_Click",
+            "The shell's building cards no longer make the choice.");
     }
 
     private static string Markup() =>
@@ -61,13 +97,6 @@ public sealed class NewRequestWorkCenterBuildingFlyoutTests
             "Module_Waitlist",
             "Views",
             "NewRequestWorkCenterPage.xaml"));
-
-    private static string CodeBehind() =>
-        File.ReadAllText(Path.Combine(
-            RepositoryPatternScan.FindRepositoryRoot(),
-            "Module_Waitlist",
-            "Views",
-            "NewRequestWorkCenterPage.xaml.cs"));
 
     private static string ViewModelSource() =>
         File.ReadAllText(Path.Combine(

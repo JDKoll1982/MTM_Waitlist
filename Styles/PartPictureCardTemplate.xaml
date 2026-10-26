@@ -1,8 +1,9 @@
-<ResourceDictionary
+﻿<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:settingsConverters="using:MTM_Waitlist.Module_Settings.Converters"
-    xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls">
+    xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
+    xmlns:dev="using:DevWinUI">
 
     <!--
         The two converters this card needs are declared here rather than reached for from the application resources.
@@ -74,12 +75,15 @@
                         width when it does not fit (009). The card's own strong-body size is set here because the
                         control draws its own text and cannot inherit a TextBlock style.
                     -->
-                    <sharedControls:AutoScrollTextView
-                        HorizontalAlignment="Stretch"
-                        FontSize="14"
-                        FontWeight="SemiBold"
-                        TextAlignment="Center"
-                        Text="{Binding Title}" />
+                    <dev:AutoScrollView IsPlaying="True"
+                        HorizontalAlignment="Stretch">
+                        <TextBlock
+                            FontSize="14"
+                            FontWeight="SemiBold"
+                            TextAlignment="Center"
+                            Text="{Binding Title}"
+                            TextTrimming="CharacterEllipsis" />
+                    </dev:AutoScrollView>
                 </StackPanel>
             </Border>
 

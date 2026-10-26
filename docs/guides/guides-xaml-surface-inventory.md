@@ -1,4 +1,4 @@
-﻿# Every XAML surface in the application
+# Every XAML surface in the application
 
 **Feature**: `014-adopt-lab-design-system` (FR-023, FR-024, FR-025)  
 **Checked by**: `MTM_Waitlist.Tests/Module_Core/Views/SurfaceInventoryAuditTests.cs`
@@ -34,9 +34,9 @@ rather than the eight content dialogs and one windowed editor the codebase held 
 | `Window` | 3 |
 | `Page` | 43 |
 | `Dialog` | 9 |
-| `Control` | 11 |
+| `Control` | 10 |
 | `ResourceDictionary` | 11 |
-| **All** | **79** |
+| **All** | **78** |
 
 ## The inventory
 
@@ -51,7 +51,6 @@ Paths are relative to the repository root. *Modal* says whether the surface open
 | Control | Module_Settings | DeveloperLogPanelView.xaml | `Module_Settings/Views/DeveloperLogPanelView.xaml` | no |
 | Control | Module_Settings | ImageOverrideEditorControl.xaml | `Module_Settings/Views/ImageOverrideEditorControl.xaml` | no |
 | Control | Module_Settings | PermissionHoldersView.xaml | `Module_Settings/Views/PermissionHoldersView.xaml` | no |
-| Control | Module_Shared | AutoScrollTextView.xaml | `Module_Shared/Controls/AutoScrollTextView.xaml` | no |
 | Control | Module_Shared | ClickToEnlargeImageView.xaml | `Module_Shared/Controls/ClickToEnlargeImageView.xaml` | no |
 | Control | Module_Shared | RotatingTextView.xaml | `Module_Shared/Controls/RotatingTextView.xaml` | no |
 | Control | Module_Startup | SetUpPanel.xaml | `Module_Startup/Views/SetUpPanel.xaml` | no |

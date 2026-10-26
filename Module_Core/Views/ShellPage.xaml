@@ -8,6 +8,7 @@
     xmlns:headerModels="using:MTM_Waitlist.Module_Core.Models"
     xmlns:helpers="using:MTM_Waitlist.Module_Core.Helpers"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
+    xmlns:dev="using:DevWinUI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Waitlist.Models"
     xmlns:mock="using:MTM_Waitlist.Module_Mock.Views"
@@ -485,12 +486,15 @@
                                          the box stays 220 px wide and a long name scrolls through it rather than
                                          being cut off with an ellipsis. Body size and colour are set here because
                                          the control draws its own text and cannot inherit a TextBlock style. -->
-                                    <sharedControls:AutoScrollTextView
+                                    <dev:AutoScrollView IsPlaying="True"
                                         VerticalAlignment="Center"
-                                        MaxWidth="220"
-                                        FontSize="14"
-                                        Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                                        Text="{Binding CurrentUserDisplayName}" />
+                                        MaxWidth="220">
+                                        <TextBlock
+                                            FontSize="14"
+                                            Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                            Text="{Binding CurrentUserDisplayName}"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </dev:AutoScrollView>
                                 </StackPanel>
                             </Button>
                         </Grid>
@@ -675,12 +679,15 @@
                                             <!-- The signed-in name is drawn by the one-line scrolling control (009
                                                  B1/B2) here too, so the flyout and the header cannot disagree about
                                                  how a long name is shown. -->
-                                            <sharedControls:AutoScrollTextView
+                                            <dev:AutoScrollView IsPlaying="True"
                                                 VerticalAlignment="Center"
-                                                MaxWidth="220"
-                                                FontSize="14"
-                                                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                                                Text="{Binding CurrentUserDisplayName}" />
+                                                MaxWidth="220">
+                                                <TextBlock
+                                                    FontSize="14"
+                                                    Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                                    Text="{Binding CurrentUserDisplayName}"
+                                                    TextTrimming="CharacterEllipsis" />
+                                            </dev:AutoScrollView>
                                         </StackPanel>
                                     </Button>
                                 </Grid>

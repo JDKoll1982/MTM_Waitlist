@@ -1,10 +1,11 @@
-<UserControl
+﻿<UserControl
     x:Class="MTM_Waitlist.Module_Settings.Views.ImageOverrideEditorControl"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:shared="using:MTM_Waitlist.Module_Shared.Services"
     xmlns:models="using:MTM_Waitlist.Module_Settings.Models"    xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"    mc:Ignorable="d"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dev="using:DevWinUI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">
 
     <!--
@@ -150,10 +151,13 @@
                                                                  (009 B1/B2): it sits in a fixed 180 px column beside
                                                                  the preview, so a long name scrolls rather than wrapping
                                                                  the row taller. -->
-                                                            <sharedControls:AutoScrollTextView
+                                                            <dev:AutoScrollView IsPlaying="True"
                                                                 Grid.Column="0"
-                                                                VerticalAlignment="Center"
-                                                                Text="{x:Bind DisplayName}" />
+                                                                VerticalAlignment="Center">
+                                                                <TextBlock
+                                                                    Text="{x:Bind DisplayName}"
+                                                                    TextTrimming="CharacterEllipsis" />
+                                                            </dev:AutoScrollView>
 
                                                             <!-- 48x48 preview of the effective image -->
                                                             <Border
@@ -226,12 +230,15 @@
                                                              in one piece. The caption's size is set here because the
                                                              control draws its own text and cannot inherit a TextBlock
                                                              style. -->
-                                                        <sharedControls:AutoScrollTextView
-                                                            FontSize="12"
-                                                            Foreground="{ThemeResource SystemFillColorCautionBrush}"
-                                                            Text="{x:Bind WarningMessage, Mode=OneWay}"
+                                                        <dev:AutoScrollView IsPlaying="True"
                                                             shared:TooltipBehavior.FallbackText="{x:Bind WarningMessage, Mode=OneWay}"
-                                                            Visibility="{x:Bind HasWarning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                                            Visibility="{x:Bind HasWarning, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                            <TextBlock
+                                                                FontSize="12"
+                                                                Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                                                Text="{x:Bind WarningMessage, Mode=OneWay}"
+                                                                TextTrimming="CharacterEllipsis" />
+                                                        </dev:AutoScrollView>
                                                     </StackPanel>
                                                 </Border>
                                             </DataTemplate>

@@ -1,4 +1,4 @@
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -490,14 +490,23 @@ public sealed class WaitlistLineCardMarkupTests
         var status = Named(LoadCard(), "StatusZone");
 
         StringAssert.Contains(
-            (string?)Named(status, "StatusPersonText").Attribute("Text") ?? string.Empty,
+            LineText(Named(status, "StatusPersonText")),
             "Order.PersonText",
             "The person row must read the row's own person, which is the requester while unclaimed and the handler once claimed (FR-022).");
         StringAssert.Contains(
-            (string?)Named(status, "StatusRequesterText").Attribute("Text") ?? string.Empty,
+            LineText(Named(status, "StatusRequesterText")),
             "Order.RequesterText",
             "The fourth row must read the requester, which the row answers only once the request has closed (FR-022).");
     }
+
+    /// <summary>
+    /// The value a scrolling row draws. The row is a host for a line, so the binding is the line's <c>Text</c> rather
+    /// than an attribute of the row itself.
+    /// </summary>
+    private static string LineText(System.Xml.Linq.XElement row) =>
+        (string?)row.Descendants()
+            .FirstOrDefault(element => element.Name.LocalName == "TextBlock")
+            ?.Attribute("Text") ?? string.Empty;
 
     [TestMethod]
     public void UI_WaitlistLineCardMarkupTests_Card_OpensAFlyoutFromTheStatusWordOnlyForTheRowsOwnHandler()

@@ -1,4 +1,4 @@
-using System.Collections.Specialized;
+﻿using System.Collections.Specialized;
 
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -21,19 +21,6 @@ public sealed partial class NewRequestWorkCenterPage : Page
         InitializeComponent();
     }
 
-    /// <summary>
-    /// Rebuilds the building flyout's cards as it opens, so the building in effect is never among them (FR-022).
-    /// </summary>
-    private void BuildingFlyout_Opening(object? sender, object e) => ViewModel.RefreshBuildingCards();
-
-    /// <summary>Chooses the building whose card was clicked, which is the same choice the drop-down used to make.</summary>
-    private void BuildingCard_Click(object sender, ItemClickEventArgs e)
-    {
-        if (e.ClickedItem is BuildingCardOption card)
-        {
-            ViewModel.SelectBuilding(card.Building);
-        }
-    }
 
     private void HotWorkCentersGridView_ItemClick(object sender, ItemClickEventArgs e)
     {

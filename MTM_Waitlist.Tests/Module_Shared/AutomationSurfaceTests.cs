@@ -1,4 +1,4 @@
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -66,15 +66,13 @@ public sealed class AutomationSurfaceTests
         AssertNamed(shell, "ShellPage_CurrentUserButtonDefault", "The signed-in-user badge (narrow layout)");
     }
 
-    /// <summary>The wizard's building selector and its submit button, which draws a ring beside its caption.</summary>
+    /// <summary>
+    /// The wizard's submit button is named. The building selector that used to sit beside it is gone: the shell's own
+    /// selector is the only place the building is chosen, so there is nothing on the step to name.
+    /// </summary>
     [TestMethod]
-    public void UI_AutomationSurfaceTests_TheWizardsBuildingSelectorAndSubmitButtonAreNamed()
+    public void UI_AutomationSurfaceTests_TheWizardsSubmitButtonIsNamed()
     {
-        AssertNamed(
-            LoadXaml("Module_Waitlist", "Views", "NewRequestWorkCenterPage.xaml"),
-            "NewRequestWorkCenterPage_BuildingButton",
-            "The new-request building selector");
-
         AssertNamed(
             LoadXaml("Module_Waitlist", "Views", "NewRequestSummaryPage.xaml"),
             "NewRequestSummaryPage_SubmitButton",

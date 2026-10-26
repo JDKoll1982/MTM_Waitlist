@@ -7,6 +7,7 @@
     xmlns:models="using:MTM_Waitlist.Module_Shared.Models"
     xmlns:shared="using:MTM_Waitlist.Module_Shared.Services"
     xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
+    xmlns:dev="using:DevWinUI"
     mc:Ignorable="d">
 
     <Page.Resources>
@@ -96,11 +97,14 @@
                                 <!-- The card's five values are drawn by the one-line scrolling control (009 B1/B2): a
                                      work-centre name or a job summary that runs long scrolls across its own line
                                      instead of wrapping and pushing the card taller. -->
-                                <sharedControls:AutoScrollTextView
-                                    Margin="0,0,0,8"
-                                    FontSize="20"
-                                    FontWeight="SemiBold"
-                                    Text="{x:Bind TitleDisplay}" />
+                                <dev:AutoScrollView IsPlaying="True"
+                                    Margin="0,0,0,8">
+                                    <TextBlock
+                                        FontSize="20"
+                                        FontWeight="SemiBold"
+                                        Text="{x:Bind TitleDisplay}"
+                                        TextTrimming="CharacterEllipsis" />
+                                </dev:AutoScrollView>
                                 <Border Height="1" Margin="0,0,0,8" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
 
                                 <Grid ColumnSpacing="8" RowSpacing="4">
@@ -116,13 +120,34 @@
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
                                     <TextBlock Grid.Row="0" VerticalAlignment="Center" Text="Current Job:" Style="{StaticResource SetupFieldLabelStyle}" />
-                                    <sharedControls:AutoScrollTextView Grid.Row="0" Grid.Column="1" FontWeight="SemiBold" Text="{x:Bind CurrentJobSummary}" />
+                                    <dev:AutoScrollView IsPlaying="True"
+                                        Grid.Row="0"
+                                        Grid.Column="1">
+                                        <TextBlock
+                                            FontWeight="SemiBold"
+                                            Text="{x:Bind CurrentJobSummary}"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </dev:AutoScrollView>
                                     <Border Grid.Row="1" Grid.ColumnSpan="2" Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
                                     <TextBlock Grid.Row="2" VerticalAlignment="Center" Text="Part Number:" Style="{StaticResource SetupFieldLabelStyle}" />
-                                    <sharedControls:AutoScrollTextView Grid.Row="2" Grid.Column="1" FontWeight="SemiBold" Text="{x:Bind CurrentPartSummary}" />
+                                    <dev:AutoScrollView IsPlaying="True"
+                                        Grid.Row="2"
+                                        Grid.Column="1">
+                                        <TextBlock
+                                            FontWeight="SemiBold"
+                                            Text="{x:Bind CurrentPartSummary}"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </dev:AutoScrollView>
                                     <Border Grid.Row="3" Grid.ColumnSpan="2" Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
                                     <TextBlock Grid.Row="4" VerticalAlignment="Center" Text="Last Updated:" Style="{StaticResource SetupFieldLabelStyle}" />
-                                    <sharedControls:AutoScrollTextView Grid.Row="4" Grid.Column="1" FontWeight="SemiBold" Text="{x:Bind LastUpdatedDisplay}" />
+                                    <dev:AutoScrollView IsPlaying="True"
+                                        Grid.Row="4"
+                                        Grid.Column="1">
+                                        <TextBlock
+                                            FontWeight="SemiBold"
+                                            Text="{x:Bind LastUpdatedDisplay}"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </dev:AutoScrollView>
                                 </Grid>                            </StackPanel>
                         </Border>
                     </Grid>
@@ -155,34 +180,6 @@
                 Header="Search"
                 PlaceholderText="Search by work center, work order, sequence, or part number"
                 Text="{x:Bind ViewModel.FilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-            <Button
-                AutomationProperties.AutomationId="NewRequestWorkCenterPage_BuildingButton"
-                AutomationProperties.Name="Choose the building"
-                HorizontalAlignment="Left"
-                MinWidth="200"
-                shared:TooltipBehavior.ResourceKey="NewRequest_SelectBuilding_Tooltip"
-                shared:TooltipBehavior.FallbackText="Choose the building whose work centers to show.">
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <TextBlock VerticalAlignment="Center" Text="{x:Bind ViewModel.SelectedBuilding, Mode=OneWay}" />
-                    <FontIcon FontSize="12" Glyph="&#xE70D;" />
-                </StackPanel>
-                <Button.Flyout>
-                    <!-- A flyout of cards rather than a drop-down (FR-021, FR-022): the list is rebuilt as it
-                         opens, and the building in effect is not among them. -->
-                    <Flyout Opening="BuildingFlyout_Opening">
-                        <GridView
-                            AutomationProperties.AutomationId="NewRequestWorkCenterPage_BuildingCards"
-                            AutomationProperties.Name="Choose a building"
-                            MaxHeight="420"
-                            IsItemClickEnabled="True"
-                            ItemClick="BuildingCard_Click"
-                            ItemTemplate="{StaticResource PartPictureCardTemplate}"
-                            ItemsSource="{x:Bind ViewModel.BuildingCards, Mode=OneWay}"
-                            ScrollViewer.VerticalScrollBarVisibility="Auto"
-                            SelectionMode="None" />
-                    </Flyout>
-                </Button.Flyout>
-            </Button>
         </StackPanel>
 
         <StackPanel Grid.Row="1" Spacing="8">

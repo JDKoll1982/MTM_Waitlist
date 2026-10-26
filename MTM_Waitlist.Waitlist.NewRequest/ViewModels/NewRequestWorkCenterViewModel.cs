@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -83,11 +83,6 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         get; set;
     } = string.Empty;
 
-    [ObservableProperty]
-    public partial string SelectedBuilding
-    {
-        get; set;
-    } = string.Empty;
 
     [ObservableProperty]
     public partial bool IsOtherWorkCentersExpanded
@@ -105,42 +100,16 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
 
     public ObservableCollection<WorkCenterSelectionItem> OtherWorkCenters { get; } = new();
 
-    public IReadOnlyList<string> Buildings => _buildingSelectionService.Buildings;
-
     /// <summary>
-    /// The buildings the step's flyout offers: every building except the one in effect (FR-022).
+    /// The building this step shows work centers for: the shell's own selection, and nothing else.
     /// </summary>
     /// <remarks>
-    /// Rebuilt when the flyout opens and whenever the building changes, because the one value that decides its
-    /// contents is the building in effect. A building has no picture of its own, so each card draws the shared
-    /// no-image picture and is still offered and still selectable (FR-023).
+    /// The step used to offer a second, page-level building choice beside the one the shell carries in its header.
+    /// Two choosers for one value meant the header could say one building while the cards below it came from another.
+    /// The step now reads the shell's selection and follows it, including while the step is open
+    /// (<see cref="OnBuildingChanged"/>).
     /// </remarks>
-    public ObservableCollection<BuildingCardOption> BuildingCards { get; } = new();
-
-    /// <summary>Rebuilds the flyout's entries, leaving out the building currently in effect.</summary>
-    public void RefreshBuildingCards()
-    {
-        var current = SelectedBuilding;
-
-        BuildingCards.Clear();
-
-        foreach (var building in Buildings.Where(building =>
-                     !string.IsNullOrWhiteSpace(building)
-                     && !string.Equals(building, current, StringComparison.OrdinalIgnoreCase)))
-        {
-            BuildingCards.Add(new BuildingCardOption(building, "NewRequestWorkCenterPage_BuildingCard"));
-        }
-    }
-
-    /// <summary>Chooses a building from the flyout, which re-reads the work centers for it.</summary>
-    /// <param name="building">The building that was chosen. A blank one changes nothing.</param>
-    public void SelectBuilding(string? building)
-    {
-        if (!string.IsNullOrWhiteSpace(building))
-        {
-            SelectedBuilding = building;
-        }
-    }
+    public string SelectedBuilding => _buildingSelectionService.SelectedBuilding;
 
     public string OtherWorkCentersHeader => IsOtherWorkCentersExpanded
         ? "Hide Other Work Centers"
@@ -181,8 +150,6 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         IsNoActiveJobWarningVisible = false;
 
         _buildingSelectionService.BuildingChanged += OnBuildingChanged;
-        SelectedBuilding = _buildingSelectionService.SelectedBuilding;
-        RefreshBuildingCards();
         FilterText = string.Empty;
 
         await LoadWorkCentersAsync().ConfigureAwait(true);
@@ -306,11 +273,7 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         ApplyFilter();
     }
 
-    private void OnBuildingChanged(object? sender, EventArgs e)
-    {
-        SelectedBuilding = _buildingSelectionService.SelectedBuilding;
-        ApplyFilter();
-    }
+    private void OnBuildingChanged(object? sender, EventArgs e) => ApplyFilter();
 
     /// <summary>
     /// Takes the chosen work centre and moves the wizard on, attributing the request to the person who is

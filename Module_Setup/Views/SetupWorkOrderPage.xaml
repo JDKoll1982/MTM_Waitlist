@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:shared="using:MTM_Waitlist.Module_Shared.Services"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dev="using:DevWinUI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Setup.Models"
     xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
@@ -80,7 +81,11 @@
                                     <!-- The description is drawn by the one-line scrolling control (009 B1/B2): this
                                          tile is capped at 260 px, so a long description scrolls its own line
                                          instead of wrapping and making the tile taller than its neighbours. -->
-                                    <sharedControls:AutoScrollTextView Text="{x:Bind Description}" />
+                                    <dev:AutoScrollView IsPlaying="True">
+                                        <TextBlock
+                                            Text="{x:Bind Description}"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </dev:AutoScrollView>
                                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind WorkCenter}" />
                                 </StackPanel>
                             </Button>
@@ -105,7 +110,11 @@
                                     <!-- The operation's description is drawn by the one-line scrolling control
                                          (009 B1/B2): this tile is capped at 220 px, so a long description scrolls
                                          instead of wrapping. -->
-                                    <sharedControls:AutoScrollTextView Text="{x:Bind Description}" />
+                                    <dev:AutoScrollView IsPlaying="True">
+                                        <TextBlock
+                                            Text="{x:Bind Description}"
+                                            TextTrimming="CharacterEllipsis" />
+                                    </dev:AutoScrollView>
                                 </StackPanel>
                             </Button>
                         </DataTemplate>

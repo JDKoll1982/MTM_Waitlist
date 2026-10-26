@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Waitlist.Models"
     xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
+    xmlns:dev="using:DevWinUI"
     mc:Ignorable="d">
 
     <Grid
@@ -127,23 +128,29 @@
                             Grid.Column="1"
                             FontWeight="SemiBold"
                             Text="Requested By" />
-                        <sharedControls:AutoScrollTextView
+                        <dev:AutoScrollView IsPlaying="True"
                             Grid.Row="1"
                             Grid.Column="2"
-                            VerticalAlignment="Center"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{x:Bind ViewModel.Item.RequestedByName, Mode=OneWay}" />
+                            VerticalAlignment="Center">
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind ViewModel.Item.RequestedByName, Mode=OneWay}"
+                                TextTrimming="CharacterEllipsis" />
+                        </dev:AutoScrollView>
                         <TextBlock
                             Grid.Row="2"
                             Grid.Column="1"
                             FontWeight="SemiBold"
                             Text="Work Center" />
-                        <sharedControls:AutoScrollTextView
+                        <dev:AutoScrollView IsPlaying="True"
                             Grid.Row="2"
                             Grid.Column="2"
-                            VerticalAlignment="Center"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{x:Bind ViewModel.Item.RequestedPressName, Mode=OneWay}" />
+                            VerticalAlignment="Center">
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind ViewModel.Item.RequestedPressName, Mode=OneWay}"
+                                TextTrimming="CharacterEllipsis" />
+                        </dev:AutoScrollView>
                         <TextBlock
                             Grid.Row="3"
                             Grid.Column="1"
@@ -423,11 +430,14 @@
                                         <!-- Who sent it, by name. The message type (created / accepted / completed /
                                              canceled / note updated) is deliberately not shown: the user needs to
                                              know who said something, not which audit event carried it. -->
-                                        <sharedControls:AutoScrollTextView
+                                        <dev:AutoScrollView IsPlaying="True"
                                             Grid.Column="1"
-                                            VerticalAlignment="Center"
-                                            FontWeight="SemiBold"
-                                            Text="{x:Bind ActorDisplayName}" />
+                                            VerticalAlignment="Center">
+                                            <TextBlock
+                                                FontWeight="SemiBold"
+                                                Text="{x:Bind ActorDisplayName}"
+                                                TextTrimming="CharacterEllipsis" />
+                                        </dev:AutoScrollView>
                                         <!-- What was said, in the entry's own words. -->
                                         <TextBlock
                                             Grid.Column="2"

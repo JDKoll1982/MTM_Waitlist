@@ -1,4 +1,4 @@
-<Page
+﻿<Page
     x:Class="MTM_Waitlist.Module_Waitlist.Views.NewRequestSummaryPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -238,10 +238,16 @@
                 IsEnabled="{x:Bind ViewModel.CanSubmit, Mode=OneWay}">
                 <Button.Content>
                     <StackPanel Orientation="Horizontal" Spacing="8">
+                        <!--
+                            Collapsed rather than merely inactive. An inactive ProgressRing draws nothing but still
+                            holds its sixteen pixels, which left a gap the width of a spinner at the leading edge of
+                            the button whenever nothing was being submitted.
+                        -->
                         <ProgressRing
                             Width="16"
                             Height="16"
-                            IsActive="{x:Bind ViewModel.IsSubmitting, Mode=OneWay}" />
+                            IsActive="{x:Bind ViewModel.IsSubmitting, Mode=OneWay}"
+                            Visibility="{x:Bind ViewModel.IsSubmitting, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                         <FontIcon FontSize="16" Glyph="&#xE724;" />
                         <TextBlock Text="Submit" VerticalAlignment="Center" />
                     </StackPanel>

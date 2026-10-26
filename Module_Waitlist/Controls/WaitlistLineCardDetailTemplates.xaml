@@ -1,10 +1,11 @@
-<ResourceDictionary
+﻿<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:settingsConverters="using:MTM_Waitlist.Module_Settings.Converters"
     xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
     xmlns:controls="using:MTM_Waitlist.Module_Waitlist.Controls"
-    xmlns:waitlistConverters="using:MTM_Waitlist.Module_Waitlist.Converters">
+    xmlns:waitlistConverters="using:MTM_Waitlist.Module_Waitlist.Converters"
+    xmlns:dev="using:DevWinUI">
 
     <!--
         The detail column's per-Item arrangements, one template per Item, all in this one dictionary
@@ -118,13 +119,16 @@
                     Text="{Binding Label, Converter={StaticResource WaitlistCardCellLabelConverter}, ConverterParameter=separator}"
                     TextTrimming="CharacterEllipsis"
                     Visibility="{Binding IsLabelLess, Converter={StaticResource WaitlistCardCellLabelVisibilityConverter}, ConverterParameter=Invert}" />
-                <sharedControls:AutoScrollTextView
+                <dev:AutoScrollView IsPlaying="True"
                     Grid.Column="1"
-                    VerticalAlignment="Center"
-                    FontSize="15"
-                    FontWeight="SemiBold"
-                    Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                    Text="{Binding Value}" />
+                    VerticalAlignment="Center">
+                    <TextBlock
+                        FontSize="15"
+                        FontWeight="SemiBold"
+                        Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                        Text="{Binding Value}"
+                        TextTrimming="CharacterEllipsis" />
+                </dev:AutoScrollView>
             </Grid>
         </Border>
     </DataTemplate>

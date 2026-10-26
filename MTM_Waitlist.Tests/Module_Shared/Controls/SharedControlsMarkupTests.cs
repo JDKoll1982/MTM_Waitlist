@@ -1,4 +1,4 @@
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -68,8 +68,8 @@ public sealed class SharedControlsMarkupTests
     }
 
     /// <summary>
-    /// The shared card's title is the one-line control, and no longer a wrapping TextBlock — the wrap is what let
-    /// a long value push the card out of shape or get cut off.
+    /// The shared card's title is the one-line scrolling control, and no longer a wrapping <c>TextBlock</c> — the wrap
+    /// is what let a long value push the card out of shape or get cut off.
     /// </summary>
     [TestMethod]
     public void UI_SharedControlsMarkupTests_TheSharedCardTitle_IsDrawnByTheOneLineScrollingText()
@@ -78,88 +78,66 @@ public sealed class SharedControlsMarkupTests
 
         var title = card
             .Descendants()
-            .FirstOrDefault(element => element.Name.LocalName == "AutoScrollTextView"
-                && ((string?)element.Attribute("Text"))?.Contains("Title", StringComparison.Ordinal) == true);
+            .FirstOrDefault(element => element.Name.LocalName == "AutoScrollView"
+                && element.Descendants(s_presentation + "TextBlock")
+                    .Any(line => ((string?)line.Attribute("Text"))?.Contains("Title", StringComparison.Ordinal) == true));
 
-        Assert.IsNotNull(title, "The card's title is not drawn by the one-line scrolling text control.");
+        Assert.IsNotNull(title, "The card's title is not drawn by the one-line scrolling control.");
+
+        var line = title!.Descendants(s_presentation + "TextBlock")
+            .Single(line => ((string?)line.Attribute("Text"))?.Contains("Title", StringComparison.Ordinal) == true);
 
         Assert.AreEqual(
-            0,
-            card.Descendants()
-                .Count(element => element.Name.LocalName == "TextBlock"
-                    && ((string?)element.Attribute("Text"))?.Contains("Title", StringComparison.Ordinal) == true),
-            "The card still draws its title with a TextBlock, which is what wrapped.");
-    }
-
-    /// <summary>The text control holds its line: one line, no wrapping, and a viewport that hides the overflow.</summary>
-    [TestMethod]
-    public void UI_SharedControlsMarkupTests_TheTextControl_KeepsItsLineOnOneLine()
-    {
-        var control = Load("Module_Shared", "Controls", "AutoScrollTextView.xaml");
-
-        var line = control
-            .Descendants()
-            .FirstOrDefault(element => element.Name.LocalName == "TextBlock");
-
-        Assert.IsNotNull(line, "The text control has no line to draw.");
-        Assert.AreEqual("1", (string?)line!.Attribute("MaxLines"), "The line must be limited to one line.");
-        Assert.AreEqual("NoWrap", (string?)line.Attribute("TextWrapping"), "The line must not wrap; it scrolls instead.");
-        Assert.IsNotNull(
-            control.Descendants().FirstOrDefault(element => element.Name.LocalName == "RectangleGeometry"),
-            "The line is not clipped to its field, so the part that scrolls would be drawn outside it.");
+            "CharacterEllipsis",
+            (string?)line.Attribute("TextTrimming"),
+            "The title must be trimmed rather than wrapped, so a long value cannot change the card's height.");
     }
 
     /// <summary>
-    /// The line repeats without a jump. The control draws the value twice, one copy a gap behind the other on a
-    /// track, and slides that track by exactly one copy plus the gap, for ever: as a pass ends, the second copy is
-    /// standing where the first one began. A single copy — what this control drew before — slides the value past and
-    /// then snaps back to the first character, which is the jerk the reader saw, and the last characters are only
-    /// ever half in view.
+    /// Every one-line value is drawn by DevWinUI's scrolling control, not by one of ours.
     /// </summary>
+    /// <remarks>
+    /// The hand-rolled control this replaced decided for itself whether a value overflowed, and it got that wrong often
+    /// enough that values which fitted were still slid across their field. <c>DevWinUI.AutoScrollView</c> measures the
+    /// child against its own bounding box and only starts the pass when the child is wider, which is the rule the
+    /// application wanted in the first place. Keeping the library control means the rule is not ours to regress.
+    /// </remarks>
     [TestMethod]
-    public void UI_SharedControlsMarkupTests_TheTextControl_LoopsTheValueInsteadOfSnappingBack()
+    public void UI_SharedControlsMarkupTests_TheOneLineValues_AreDrawnByTheLibraryScrollingControl()
     {
-        var control = Load("Module_Shared", "Controls", "AutoScrollTextView.xaml");
+        var offenders = new List<string>();
 
-        var copies = control
-            .Descendants(s_presentation + "TextBlock")
-            .Where(line => ((string?)line.Attribute("Text"))?.Contains("Text", StringComparison.Ordinal) == true)
-            .ToList();
+        foreach (var file in ScannedXaml())
+        {
+            var text = File.ReadAllText(Path.Combine(
+                RepositoryPatternScan.FindRepositoryRoot(),
+                file.Replace('/', Path.DirectorySeparatorChar)));
 
-        Assert.AreEqual(
-            2,
-            copies.Count,
-            "The control must draw the value twice, so the copy that follows can take over from the one being watched.");
-
-        var track = control
-            .Descendants(s_presentation + "StackPanel")
-            .SingleOrDefault(panel => (string?)panel.Attribute("Orientation") == "Horizontal");
-
-        Assert.IsNotNull(track, "The two copies must sit on a horizontal track, so their widths add up along the scroll.");
-        StringAssert.Contains(
-            (string?)track!.Attribute("Spacing") ?? string.Empty,
-            "Gap",
-            "The copies need the gap between them that stops the loop running the value onto itself.");
+            if (text.Contains("AutoScrollTextView", StringComparison.Ordinal))
+            {
+                offenders.Add($"{file} still names the removed control");
+            }
+        }
 
         Assert.AreEqual(
-            "Collapsed",
-            (string?)copies[1].Attribute("Visibility"),
-            "The second copy is drawn only while the track moves; standing still it would be a duplicate the reader could see.");
-
-        var codeBehind = File.ReadAllText(Path.Combine(
-            RepositoryPatternScan.FindRepositoryRoot(),
-            "Module_Shared",
-            "Controls",
-            "AutoScrollTextView.xaml.cs"));
-
-        StringAssert.Contains(codeBehind, "IterationBehavior.Forever", "The pass repeats for as long as the line is on screen.");
-        StringAssert.Contains(codeBehind, "Track.StartAnimation(pass)", "The track is what moves, not one copy of the value.");
-        StringAssert.Contains(
-            codeBehind,
-            "Target = \"Translation\"",
-            "The pass drives the element's Translation; naming that property on the composition visual is refused at run time.");
-        StringAssert.Contains(codeBehind, "Echo.Visibility", "The copy that follows is shown only while the track is moving.");
+            0,
+            offenders.Count,
+            "the hand-rolled scrolling text control is gone; every one-line value uses DevWinUI's AutoScrollView: "
+                + string.Join(", ", offenders));
     }
+
+    /// <summary>Every XAML file in the repository, addressed from its root.</summary>
+    private static IEnumerable<string> ScannedXaml()
+    {
+        var root = RepositoryPatternScan.FindRepositoryRoot();
+        var scope = new RepositoryScanScope { Extensions = [".xaml"] };
+
+        return RepositoryPatternScan
+            .EnumerateScannedFiles(root, scope)
+            .Select(path => Path.GetRelativePath(root, path).Replace('\\', '/'));
+    }
+
+
 
     /// <summary>
     /// The picture control draws the picture it was handed and owns the enlarged view, so a surface that uses it

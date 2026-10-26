@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dev="using:DevWinUI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Settings.Models"
     xmlns:vm="using:MTM_Waitlist.Module_Settings.ViewModels"
@@ -195,15 +196,21 @@
                                     row scrolls a long title or detail instead of growing the row. The sizes are set
                                     here because the control draws its own text and cannot inherit a TextBlock
                                     style. -->
-                                <sharedControls:AutoScrollTextView
-                                    FontSize="14"
-                                    FontWeight="SemiBold"
-                                    Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                                    Text="{x:Bind Title}" />
-                                <sharedControls:AutoScrollTextView
-                                    FontSize="12"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Text="{x:Bind Detail}" />
+                                <dev:AutoScrollView IsPlaying="True">
+                                    <TextBlock
+                                        FontSize="14"
+                                        FontWeight="SemiBold"
+                                        Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                        Text="{x:Bind Title}"
+                                        TextTrimming="CharacterEllipsis" />
+                                </dev:AutoScrollView>
+                                <dev:AutoScrollView IsPlaying="True">
+                                    <TextBlock
+                                        FontSize="12"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="{x:Bind Detail}"
+                                        TextTrimming="CharacterEllipsis" />
+                                </dev:AutoScrollView>
                             </StackPanel>
                         </DataTemplate>
                     </ListView.ItemTemplate>
@@ -280,11 +287,14 @@
                                     column beside two fixed ones, so a long path scrolls its own line instead of
                                     wrapping into the next row. The caption's size and colour are set here because
                                     the control draws its own text and cannot inherit a TextBlock style. -->
-                                <sharedControls:AutoScrollTextView
-                                    Grid.Column="1"
-                                    FontSize="12"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Text="{x:Bind RelativePath}" />
+                                <dev:AutoScrollView IsPlaying="True"
+                                    Grid.Column="1">
+                                    <TextBlock
+                                        FontSize="12"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="{x:Bind RelativePath}"
+                                        TextTrimming="CharacterEllipsis" />
+                                </dev:AutoScrollView>
                                 <TextBlock Grid.Column="2" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind SystemName}" />
                             </Grid>
                         </DataTemplate>

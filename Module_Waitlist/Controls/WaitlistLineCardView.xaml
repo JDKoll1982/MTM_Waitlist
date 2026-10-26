@@ -1,4 +1,4 @@
-<UserControl
+﻿<UserControl
     x:Class="MTM_Waitlist.Module_Waitlist.Controls.WaitlistLineCardView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -7,6 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
+    xmlns:dev="using:DevWinUI"
     x:Name="Root"
     mc:Ignorable="d">
 
@@ -291,20 +292,26 @@
                         Rows 3 and 4: the person, and - once the request has closed - the requester (FR-022). A row
                         with no value is removed rather than left blank (FR-018).
                     -->
-                    <sharedControls:AutoScrollTextView
+                    <dev:AutoScrollView IsPlaying="True"
                         x:Name="StatusPersonText"
                         HorizontalAlignment="Center"
-                        Text="{Binding Order.PersonText, ElementName=Root}"
-                        TextAlignment="Center"
-                        Visibility="{Binding Order.HasPerson, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        Visibility="{Binding Order.HasPerson, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <TextBlock
+                            Text="{Binding Order.PersonText, ElementName=Root}"
+                            TextAlignment="Center"
+                            TextTrimming="CharacterEllipsis" />
+                    </dev:AutoScrollView>
 
-                    <sharedControls:AutoScrollTextView
+                    <dev:AutoScrollView IsPlaying="True"
                         x:Name="StatusRequesterText"
                         HorizontalAlignment="Center"
-                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Text="{Binding Order.RequesterText, ElementName=Root}"
-                        TextAlignment="Center"
-                        Visibility="{Binding Order.HasRequester, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        Visibility="{Binding Order.HasRequester, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <TextBlock
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{Binding Order.RequesterText, ElementName=Root}"
+                            TextAlignment="Center"
+                            TextTrimming="CharacterEllipsis" />
+                    </dev:AutoScrollView>
                 </StackPanel>
             </Border>
 

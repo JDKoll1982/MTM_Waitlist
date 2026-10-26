@@ -5,6 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:shared="using:MTM_Waitlist.Module_Shared.Services"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dev="using:DevWinUI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Settings.Models"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
@@ -264,18 +265,24 @@
                         <!-- Fact 2: the sign-in name. Drawn by the one-line scrolling control (009 B1/B2) rather
                              than cut off with an ellipsis, so the value can be read in full; the tooltip still
                              holds it in one piece. -->
-                        <sharedControls:AutoScrollTextView
+                        <dev:AutoScrollView IsPlaying="True"
                             Grid.Column="1"
                             VerticalAlignment="Center"
-                            Text="{x:Bind UsernameNormalized}"
-                            shared:TooltipBehavior.FallbackText="{x:Bind UsernameNormalized}" />
+                            shared:TooltipBehavior.FallbackText="{x:Bind UsernameNormalized}">
+                            <TextBlock
+                                Text="{x:Bind UsernameNormalized}"
+                                TextTrimming="CharacterEllipsis" />
+                        </dev:AutoScrollView>
 
                         <!-- Fact 3: the employee number. -->
-                        <sharedControls:AutoScrollTextView
+                        <dev:AutoScrollView IsPlaying="True"
                             Grid.Column="2"
                             VerticalAlignment="Center"
-                            Text="{x:Bind EmployeeIdentifier}"
-                            shared:TooltipBehavior.FallbackText="{x:Bind EmployeeIdentifier}" />
+                            shared:TooltipBehavior.FallbackText="{x:Bind EmployeeIdentifier}">
+                            <TextBlock
+                                Text="{x:Bind EmployeeIdentifier}"
+                                TextTrimming="CharacterEllipsis" />
+                        </dev:AutoScrollView>
 
                         <!-- Fact 4: the role, carried by the glyph and colour the one badge lookup holds for it. -->
                         <Grid
@@ -292,10 +299,13 @@
                                 with the glyph at its left and the line indented clear of it gives the line a
                                 bounded width, so it scrolls instead of overflowing. The cell carries no column
                                 definitions of its own, so the table still declares exactly the five facts. -->
-                            <sharedControls:AutoScrollTextView
+                            <dev:AutoScrollView IsPlaying="True"
                                 Margin="22,0,0,0"
-                                Text="{x:Bind RoleText}"
-                                shared:TooltipBehavior.FallbackText="{x:Bind RoleText}" />
+                                shared:TooltipBehavior.FallbackText="{x:Bind RoleText}">
+                                <TextBlock
+                                    Text="{x:Bind RoleText}"
+                                    TextTrimming="CharacterEllipsis" />
+                            </dev:AutoScrollView>
                         </Grid>
 
                         <!--

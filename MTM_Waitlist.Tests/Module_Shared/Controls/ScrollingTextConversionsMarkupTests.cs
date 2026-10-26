@@ -1,4 +1,4 @@
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -97,7 +97,7 @@ public sealed class ScrollingTextConversionsMarkupTests
         foreach (var (file, bindings) in s_converted)
         {
             var elements = Load(file);
-            var drawn = TextOf(elements, "AutoScrollTextView");
+            var drawn = TextOf(elements, "AutoScrollView");
 
             missing.AddRange(bindings
                 .Where(binding => !drawn.Contains(binding, StringComparer.Ordinal))
@@ -139,11 +139,20 @@ public sealed class ScrollingTextConversionsMarkupTests
     }
 
     /// <summary>The text a control or a line draws, from its own <c>Text</c> attribute.</summary>
-    private static List<string> TextOf(XDocument document, string localName) =>
+    /// <summary>
+    /// The values drawn by every <paramref name="controlName"/> in the document.
+    /// </summary>
+    /// <remarks>
+    /// The scrolling control is a host: the value is the <c>Text</c> of the <c>TextBlock</c> it carries, not an attribute
+    /// of the host itself.
+    /// </remarks>
+    private static List<string> TextOf(XDocument document, string controlName) =>
         document
             .Descendants()
-            .Where(element => element.Name.LocalName == localName)
-            .Select(element => (string?)element.Attribute("Text") ?? string.Empty)
+            .Where(element => element.Name.LocalName == controlName)
+            .SelectMany(element => element.Descendants()
+                .Where(line => line.Name.LocalName == "TextBlock")
+                .Select(line => (string?)line.Attribute("Text") ?? string.Empty))
             .ToList();
 
     private static XDocument Load(string relativePath)
