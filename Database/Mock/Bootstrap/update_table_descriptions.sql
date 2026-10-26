@@ -16,6 +16,8 @@
 --   011   sixth mirror table (employee_by_number) + its stage twin
 --   012   seventh mirror table (part_warehouse_quantities) + its stage twin
 --   013   eighth mirror table (work_order_search) + its stage twin
+--   2026-10-26  shape 5 routing rework: the guarded blocks below put the seven columns and the
+--               work-centre lookup key onto a mirror that was deployed before they existed
 -- ============================================================
 
 USE mtm_mock;
@@ -133,6 +135,99 @@ MODIFY COLUMN location VARCHAR(64) NOT NULL COMMENT 'Visual location/warehouse c
 MODIFY COLUMN on_hand_quantity DECIMAL(18,4) NOT NULL DEFAULT 0 COMMENT 'Pooled on-hand quantity for the part at the location.',
 MODIFY COLUMN refreshed_utc DATETIME NOT NULL COMMENT 'UTC time of the refresh that produced this row.',
 MODIFY COLUMN is_seed_content TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 for baseline seed rows; 0 for refreshed content.';
+
+-- ============================================================
+-- Existing mirrors are brought up to shape before they are described
+-- ============================================================
+-- `CREATE TABLE IF NOT EXISTS` cannot add a column to a table that already exists, and a plain
+-- MODIFY against a column the store does not have stops this script on the first run after the
+-- change. An `mtm_mock` deployed before the shape-5 routing rework therefore failed here with
+-- "Unknown column 'work_center'", which aborted the whole cache phase of the install. So every
+-- column shape 5 gained is added by a guarded block below, and the MODIFY statements that
+-- describe them run afterwards.
+--
+-- The lookup key is replaced by the same guard rather than left alone: the read and the refresh
+-- both address a row by (work order, part, work centre), and the older key without the work
+-- centre could only ever hold one work centre's routing answer for a work order.
+--
+--   Owning artifacts: Database/Mock/Tables/visual_disposition_input_result/create.sql and
+--     Database/Mock/Tables/visual_disposition_input_result_stage/create.sql.
+--   A row that predates the change reads `'*'` in `work_center` — the wildcard the get procedure
+--     already prefers last — and NULL in the routing columns, which the caller reads as "routing
+--     not read" rather than "no operation remains".
+-- ============================================================
+
+SET @has_column := (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'visual_disposition_input_result' AND column_name = 'work_center');
+SET @sql_stmt := IF(@has_column = 0, 'ALTER TABLE visual_disposition_input_result ADD COLUMN work_center VARCHAR(64) NOT NULL DEFAULT ''*'' COMMENT ''Work centre the routing answer is anchored on; * marks a row seeded before the routing was read.'' AFTER part_number', 'SELECT ''visual_disposition_input_result.work_center already exists''');
+PREPARE stmt FROM @sql_stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_column := (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'visual_disposition_input_result' AND column_name = 'next_operation_resource_id');
+SET @sql_stmt := IF(@has_column = 0, 'ALTER TABLE visual_disposition_input_result ADD COLUMN next_operation_resource_id VARCHAR(16) NULL COMMENT ''RESOURCE_ID of the first open operation after the job own; OUTSIDE_SERVICE means Outside Service.'' AFTER has_outside_vendor_operation', 'SELECT ''visual_disposition_input_result.next_operation_resource_id already exists''');
+PREPARE stmt FROM @sql_stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_column := (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'visual_disposition_input_result' AND column_name = 'has_remaining_operation');
+SET @sql_stmt := IF(@has_column = 0, 'ALTER TABLE visual_disposition_input_result ADD COLUMN has_remaining_operation TINYINT(1) NULL COMMENT ''1 when an open operation remains after the job own, 0 when nothing follows it, NULL when the routing was not read.'' AFTER next_operation_resource_id', 'SELECT ''visual_disposition_input_result.has_remaining_operation already exists''');
+PREPARE stmt FROM @sql_stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_column := (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'visual_disposition_input_result' AND column_name = 'has_customer_demand');
+SET @sql_stmt := IF(@has_column = 0, 'ALTER TABLE visual_disposition_input_result ADD COLUMN has_customer_demand TINYINT(1) NULL COMMENT ''1 when the part has customer-order lines in Visual, so it is a part the plant sells; NULL when not read. Decides Finished Goods against WIP when nothing follows.'' AFTER has_remaining_operation', 'SELECT ''visual_disposition_input_result.has_customer_demand already exists''');
+PREPARE stmt FROM @sql_stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_column := (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'visual_disposition_input_result' AND column_name = 'product_code');
+SET @sql_stmt := IF(@has_column = 0, 'ALTER TABLE visual_disposition_input_result ADD COLUMN product_code VARCHAR(64) NULL COMMENT ''Infor Visual PART.PRODUCT_CODE: the plant part category (FG_PRESS, RM_PRESS, MFG_TOOLING, EXP_*).'' AFTER has_customer_demand', 'SELECT ''visual_disposition_input_result.product_code already exists''');
+PREPARE stmt FROM @sql_stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_column := (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'visual_disposition_input_result' AND column_name = 'commodity_code');
+SET @sql_stmt := IF(@has_column = 0, 'ALTER TABLE visual_disposition_input_result ADD COLUMN commodity_code VARCHAR(64) NULL COMMENT ''Infor Visual PART.COMMODITY_CODE: the material or part kind (E Stamped Item, M Matl Coil, M Fast Fastener...).'' AFTER product_code', 'SELECT ''visual_disposition_input_result.commodity_code already exists''');
+PREPARE stmt FROM @sql_stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_column := (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'visual_disposition_input_result' AND column_name = 'part_description');
+SET @sql_stmt := IF(@has_column = 0, 'ALTER TABLE visual_disposition_input_result ADD COLUMN part_description VARCHAR(256) NULL COMMENT ''Infor Visual PART.DESCRIPTION, whose words break a customer-supplied tie.'' AFTER commodity_code', 'SELECT ''visual_disposition_input_result.part_description already exists''');
+PREPARE stmt FROM @sql_stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @lookup_key_columns := (SELECT COALESCE(GROUP_CONCAT(column_name ORDER BY seq_in_index), '') FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'visual_disposition_input_result' AND index_name = 'uq_visual_disposition_input_result_lookup_key');
+SET @sql_stmt := IF(@lookup_key_columns NOT IN ('', 'work_order,part_number,work_center'), 'ALTER TABLE visual_disposition_input_result DROP INDEX uq_visual_disposition_input_result_lookup_key', 'SELECT ''visual_disposition_input_result lookup key already includes the work centre''');
+PREPARE stmt FROM @sql_stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_lookup_key := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'visual_disposition_input_result' AND index_name = 'uq_visual_disposition_input_result_lookup_key');
+SET @sql_stmt := IF(@has_lookup_key = 0, 'ALTER TABLE visual_disposition_input_result ADD UNIQUE KEY uq_visual_disposition_input_result_lookup_key (work_order, part_number, work_center)', 'SELECT ''visual_disposition_input_result lookup key is present''');
+PREPARE stmt FROM @sql_stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_column := (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'visual_disposition_input_result_stage' AND column_name = 'work_center');
+SET @sql_stmt := IF(@has_column = 0, 'ALTER TABLE visual_disposition_input_result_stage ADD COLUMN work_center VARCHAR(64) NOT NULL DEFAULT ''*'' COMMENT ''Work centre the routing answer is anchored on; * marks a row seeded before the routing was read.'' AFTER part_number', 'SELECT ''visual_disposition_input_result_stage.work_center already exists''');
+PREPARE stmt FROM @sql_stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_column := (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'visual_disposition_input_result_stage' AND column_name = 'next_operation_resource_id');
+SET @sql_stmt := IF(@has_column = 0, 'ALTER TABLE visual_disposition_input_result_stage ADD COLUMN next_operation_resource_id VARCHAR(16) NULL COMMENT ''RESOURCE_ID of the first open operation after the job own; OUTSIDE_SERVICE means Outside Service.'' AFTER has_outside_vendor_operation', 'SELECT ''visual_disposition_input_result_stage.next_operation_resource_id already exists''');
+PREPARE stmt FROM @sql_stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_column := (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'visual_disposition_input_result_stage' AND column_name = 'has_remaining_operation');
+SET @sql_stmt := IF(@has_column = 0, 'ALTER TABLE visual_disposition_input_result_stage ADD COLUMN has_remaining_operation TINYINT(1) NULL COMMENT ''1 when an open operation remains after the job own, 0 when nothing follows it, NULL when the routing was not read.'' AFTER next_operation_resource_id', 'SELECT ''visual_disposition_input_result_stage.has_remaining_operation already exists''');
+PREPARE stmt FROM @sql_stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_column := (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'visual_disposition_input_result_stage' AND column_name = 'has_customer_demand');
+SET @sql_stmt := IF(@has_column = 0, 'ALTER TABLE visual_disposition_input_result_stage ADD COLUMN has_customer_demand TINYINT(1) NULL COMMENT ''1 when the part has customer-order lines in Visual, so it is a part the plant sells; NULL when not read. Decides Finished Goods against WIP when nothing follows.'' AFTER has_remaining_operation', 'SELECT ''visual_disposition_input_result_stage.has_customer_demand already exists''');
+PREPARE stmt FROM @sql_stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_column := (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'visual_disposition_input_result_stage' AND column_name = 'product_code');
+SET @sql_stmt := IF(@has_column = 0, 'ALTER TABLE visual_disposition_input_result_stage ADD COLUMN product_code VARCHAR(64) NULL COMMENT ''Infor Visual PART.PRODUCT_CODE: the plant part category (FG_PRESS, RM_PRESS, MFG_TOOLING, EXP_*).'' AFTER has_customer_demand', 'SELECT ''visual_disposition_input_result_stage.product_code already exists''');
+PREPARE stmt FROM @sql_stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_column := (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'visual_disposition_input_result_stage' AND column_name = 'commodity_code');
+SET @sql_stmt := IF(@has_column = 0, 'ALTER TABLE visual_disposition_input_result_stage ADD COLUMN commodity_code VARCHAR(64) NULL COMMENT ''Infor Visual PART.COMMODITY_CODE: the material or part kind (E Stamped Item, M Matl Coil, M Fast Fastener...).'' AFTER product_code', 'SELECT ''visual_disposition_input_result_stage.commodity_code already exists''');
+PREPARE stmt FROM @sql_stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_column := (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'visual_disposition_input_result_stage' AND column_name = 'part_description');
+SET @sql_stmt := IF(@has_column = 0, 'ALTER TABLE visual_disposition_input_result_stage ADD COLUMN part_description VARCHAR(256) NULL COMMENT ''Infor Visual PART.DESCRIPTION, whose words break a customer-supplied tie.'' AFTER commodity_code', 'SELECT ''visual_disposition_input_result_stage.part_description already exists''');
+PREPARE stmt FROM @sql_stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @lookup_key_columns := (SELECT COALESCE(GROUP_CONCAT(column_name ORDER BY seq_in_index), '') FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'visual_disposition_input_result_stage' AND index_name = 'uq_visual_disposition_input_result_lookup_key');
+SET @sql_stmt := IF(@lookup_key_columns NOT IN ('', 'work_order,part_number,work_center'), 'ALTER TABLE visual_disposition_input_result_stage DROP INDEX uq_visual_disposition_input_result_lookup_key', 'SELECT ''visual_disposition_input_result_stage lookup key already includes the work centre''');
+PREPARE stmt FROM @sql_stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @has_lookup_key := (SELECT COUNT(*) FROM information_schema.statistics WHERE table_schema = DATABASE() AND table_name = 'visual_disposition_input_result_stage' AND index_name = 'uq_visual_disposition_input_result_lookup_key');
+SET @sql_stmt := IF(@has_lookup_key = 0, 'ALTER TABLE visual_disposition_input_result_stage ADD UNIQUE KEY uq_visual_disposition_input_result_lookup_key (work_order, part_number, work_center)', 'SELECT ''visual_disposition_input_result_stage lookup key is present''');
+PREPARE stmt FROM @sql_stmt; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
 -- ------------------------------------------------------------
 -- Shape 5: disposition_input
