@@ -61,29 +61,17 @@
                             Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
                             CornerRadius="12"
                             Visibility="{x:Bind ViewModel.IsItemPresent, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <StackPanel
+                            <sharedControls:ClickToEnlargeImageView
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                Spacing="6">
-                                <sharedControls:ClickToEnlargeImageView
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    AutomationProperties.AutomationId="WaitlistViewDetailPage_RequestTypeImage"
-                                    AutomationProperties.Name="Request type picture"
-                                    Source="{x:Bind ViewModel.Item.EffectiveImagePath, Mode=OneWay, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
-                                    Stretch="Uniform" />
-                                <!-- The hero card carries two pictures and neither said what it was, so each now
-                                     states it: a lone picture beside a title names nothing on its own. -->
-                                <TextBlock
-                                    HorizontalAlignment="Center"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Style="{ThemeResource CaptionTextBlockStyle}"
-                                    Text="Request type" />
-                            </StackPanel>
+                                AutomationProperties.AutomationId="WaitlistViewDetailPage_RequestTypeImage"
+                                AutomationProperties.Name="Request picture"
+                                Source="{x:Bind ViewModel.Item.EffectiveImagePath, Mode=OneWay, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
+                                Stretch="Uniform" />
                         </Border>
 
-                        <!-- The active work center / press image, shown like the request-type image
-                             on the right of the same hero card (click to enlarge). -->
+                        <!-- The active work center / press image, shown like the request image on the right of the
+                             same hero card (click to enlarge). -->
                         <Border
                             Grid.Column="3"
                             Grid.RowSpan="6"
@@ -96,23 +84,13 @@
                             Background="{ThemeResource ControlAltFillColorSecondaryBrush}"
                             CornerRadius="12"
                             Visibility="{x:Bind ViewModel.IsItemPresent, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <StackPanel
+                            <sharedControls:ClickToEnlargeImageView
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"
-                                Spacing="6">
-                                <sharedControls:ClickToEnlargeImageView
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    AutomationProperties.AutomationId="WaitlistViewDetailPage_WorkCenterImage"
-                                    AutomationProperties.Name="Work center picture"
-                                    Source="{x:Bind ViewModel.Item.EffectiveWorkCenterImagePath, Mode=OneWay, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
-                                    Stretch="Uniform" />
-                                <TextBlock
-                                    HorizontalAlignment="Center"
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Style="{ThemeResource CaptionTextBlockStyle}"
-                                    Text="Work center" />
-                            </StackPanel>
+                                AutomationProperties.AutomationId="WaitlistViewDetailPage_WorkCenterImage"
+                                AutomationProperties.Name="Work center picture"
+                                Source="{x:Bind ViewModel.Item.EffectiveWorkCenterImagePath, Mode=OneWay, Converter={StaticResource ResolvedImagePathToSourceConverter}}"
+                                Stretch="Uniform" />
                         </Border>
 
                         <TextBlock

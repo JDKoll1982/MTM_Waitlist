@@ -579,6 +579,16 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
             ResolveItem();
             LoadTemplateSections();
             IsSectionLoadFailed = false;
+
+            // The pictures are resolved once the row exists, which is what this page used to leave to an image
+            // location change: without this the hero card drew the shared placeholder for both pictures however
+            // well the files resolved. The rebuild that follows the requesting job's read comes back through here,
+            // so the row is pictured again with the job's answer in hand — which is where a scrap request's lugger
+            // picture comes from (owner decision, 2026-10-26).
+            if (Item is { } pictured)
+            {
+                _ = RefreshResolvedPathsAsync(pictured);
+            }
         }
         catch (Exception ex)
         {
@@ -990,28 +1000,72 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         // draws the one shared placeholder (FR-014).
         item.ResolvedPartImagePath = await ResolvePartPictureAsync(item).ConfigureAwait(false);
 
+        await ResolveWorkCenterPictureAsync(item).ConfigureAwait(false);
+
+        OnPropertyChanged(nameof(Item));
+    }
+
+    /// <summary>
+    /// Resolves the picture of the work centre the request was raised at, which is what the hero card's right spot
+    /// draws (owner decision, 2026-10-26).
+    /// </summary>
+    /// <remarks>
+    /// The request names its work centre, not its catalogue id, so the id is looked up by that name against the
+    /// same catalogue the list reads. An id the row already carries is used as it is, so a row that came from the
+    /// list is not asked a second question. A work centre with no picture, or a catalogue that cannot be read,
+    /// leaves the path empty — which draws the one shared placeholder rather than a hole.
+    /// </remarks>
+    private async Task ResolveWorkCenterPictureAsync(SampleOrder item)
+    {
         if (_imageLocationService is null || !_imageLocationService.IsInitialized)
         {
-            OnPropertyChanged(nameof(Item));
             return;
         }
 
-        if (item.WorkCenterCatalogId.HasValue)
+        try
         {
-            var resolvedWorkCenterPath = await _imageLocationService
-                .ResolveWorkCenterImagePathAsync(item.WorkCenterCatalogId.Value.ToString())
+            var workCenterId = item.WorkCenterCatalogId;
+
+            if (workCenterId is null)
+            {
+                var workCenters = await _imageLocationService.GetActiveWorkCentersAsync().ConfigureAwait(false);
+
+                var match = workCenters?.FirstOrDefault(workCenter =>
+                    string.Equals(workCenter.DisplayName?.Trim(), item.RequestedPressName?.Trim(), StringComparison.OrdinalIgnoreCase));
+
+                if (match is null)
+                {
+                    AppLog.Info(
+                        "WaitlistDetail",
+                        $"The request's work center '{item.RequestedPressName}' is not in the work center catalogue, so the hero card draws the placeholder for it.");
+
+                    return;
+                }
+
+                workCenterId = match.WorkCenterId;
+                item.WorkCenterCatalogId = workCenterId;
+            }
+
+            var resolvedPath = await _imageLocationService
+                .ResolveWorkCenterImagePathAsync(workCenterId.Value.ToString())
                 .ConfigureAwait(false);
 
             // Left unset when the file is not a picture the application will draw, so the page falls back to the
             // application's no-image placeholder rather than a hole: an empty picture and a placeholder are not
             // the same answer.
-            if (ImageFileProbe.IsUsablePicture(resolvedWorkCenterPath))
-            {
-                item.WorkCenterImagePath = resolvedWorkCenterPath;
-            }
+            item.WorkCenterImagePath = ImageFileProbe.IsUsablePicture(resolvedPath) ? resolvedPath : string.Empty;
         }
-
-        OnPropertyChanged(nameof(Item));
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error(
+                "WaitlistDetail",
+                ex,
+                $"The picture for work center '{item.RequestedPressName}' could not be resolved; the hero card will draw the no-image placeholder.");
+        }
     }
 
     /// <summary>The row's material picture, or empty when the request names no part or its part cannot be pictured.</summary>
