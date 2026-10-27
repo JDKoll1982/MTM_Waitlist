@@ -1,6 +1,7 @@
 using System.Globalization;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
+using MTM_Waitlist.Module_Shared.Helpers;
 using MTM_Waitlist.Module_Shared.Models;
 
 namespace MTM_Waitlist.Module_Shared.Services;
@@ -33,20 +34,12 @@ public sealed class DunnageTypeVisibilityCatalogService : IDunnageTypeVisibility
 
         var visible = allTypes
             .Where(type => !visibilityByTypeId.TryGetValue(type.Id, out var isVisible) || isVisible)
-            .Select(type => new DunnageTypeVisibilityOption
-            {
-                Id = type.Id,
-                Name = type.Name,
-            })
+            .Select(ToOption)
             .ToArray();
 
         var hidden = allTypes
             .Where(type => visibilityByTypeId.TryGetValue(type.Id, out var isVisible) && !isVisible)
-            .Select(type => new DunnageTypeVisibilityOption
-            {
-                Id = type.Id,
-                Name = type.Name,
-            })
+            .Select(ToOption)
             .ToArray();
 
         AppLog.Info("SettingsDunnageVisibility", $"GetCatalogAsync completed. VisibleCount={visible.Length}, HiddenCount={hidden.Length}.");
@@ -139,6 +132,7 @@ public sealed class DunnageTypeVisibilityCatalogService : IDunnageTypeVisibility
                 Id = Convert.ToString(GetValue(row, "id"), CultureInfo.InvariantCulture)?.Trim() ?? string.Empty,
                 NumericId = GetInt64(row, "id"),
                 Name = Convert.ToString(GetValue(row, "type_name"), CultureInfo.InvariantCulture)?.Trim() ?? string.Empty,
+                ImagePath = Convert.ToString(GetValue(row, "image_path"), CultureInfo.InvariantCulture),
             })
             .Where(item => item.NumericId > 0 && !string.IsNullOrWhiteSpace(item.Id) && !string.IsNullOrWhiteSpace(item.Name))
             .GroupBy(item => item.Id, StringComparer.OrdinalIgnoreCase)
@@ -153,6 +147,30 @@ public sealed class DunnageTypeVisibilityCatalogService : IDunnageTypeVisibility
     {
         return row.TryGetValue(key, out var value) ? value : null;
     }
+
+    /// <summary>
+    /// One row of the catalogue, drawn as a card on either list.
+    /// </summary>
+    private static DunnageTypeVisibilityOption ToOption(DunnageTypeRecord type) =>
+        new()
+        {
+            Id = type.Id,
+            Name = type.Name,
+            ImagePath = ResolveImagePath(type.ImagePath),
+        };
+
+    /// <summary>
+    /// The picture a type's card draws: the type's own file when the receiving store names one and it is on this
+    /// machine's Dunnage root, and the shared placeholder otherwise.
+    /// </summary>
+    /// <param name="storedPath">The store's own <c>image_path</c>, or null or blank for a type with no picture.</param>
+    /// <remarks>
+    /// The stored value is relative to the Dunnage image root, which is what the whole application's dunnage
+    /// pictures are relative to, so the one resolver answers it rather than this screen re-deriving a path from a
+    /// root of its own. A type whose file has gone missing draws the placeholder, exactly as a part card does.
+    /// </remarks>
+    private static string ResolveImagePath(string? storedPath) =>
+        DunnageImagePathResolver.GetDisplayPath(storedPath) ?? ImagePicturePolicy.NoImagePath;
 
     private static bool GetBoolean(IReadOnlyDictionary<string, object?> row, string key)
     {
@@ -219,5 +237,8 @@ public sealed class DunnageTypeVisibilityCatalogService : IDunnageTypeVisibility
         public string Name { get; init; } = string.Empty;
 
         public long NumericId { get; init; }
+
+        /// <summary>The store's own <c>image_path</c>, relative to the Dunnage image root, or null for no picture.</summary>
+        public string? ImagePath { get; init; }
     }
 }

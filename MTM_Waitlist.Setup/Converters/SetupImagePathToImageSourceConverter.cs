@@ -2,7 +2,6 @@ using System.IO;
 
 using Microsoft.UI.Xaml.Data;
 
-using MTM_Waitlist.Module_Setup.Services;
 using MTM_Waitlist.Module_Shared.Helpers;
 
 namespace MTM_Waitlist.Module_Setup.Converters;

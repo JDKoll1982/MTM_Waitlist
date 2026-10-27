@@ -10,6 +10,26 @@
 
 ---
 
+## 2026-10-27 — the dunnage types on the visibility screen show their pictures again
+
+**What changed:** the **Dunnage Type Visibility** list on the Operations settings page drew the no-picture
+image for every type, even though the receiving application holds a picture for most of them. It now draws the
+type's own picture, the same one the dunnage workflow uses.
+
+**Why it matters:** the list is how a person decides which types a handler is offered, and a screen where every
+type looks identical cannot be scanned — you have to read twenty-one labels to find one.
+
+**What to expect:**
+
+- **The picture is the type's own file,** read from the receiving application's dunnage types and found on the
+  shared Dunnage image folder, exactly as a dunnage part's picture is.
+- **A type with no picture still shows the no-picture image** — as does a type whose artwork is on the share but
+  is not square, which is the application's one picture rule and is not relaxed for this screen.
+- **IT Department:** this needs the updated `sp_receiving_dunnage_types_get_all` procedure applied to
+  `mtm_receiving_application`. Until it is, the screen keeps drawing the no-picture image even with the new build.
+
+---
+
 ## 2026-10-22 — a dunnage request now shows the picture of the dunnage part you asked for
 
 **What changed:** the waitlist card for a **Pickup Dunnage** or **Deliver Dunnage** request used to draw the

@@ -15,9 +15,10 @@ namespace MTM_Waitlist.Module_Shared.Models;
 /// </para>
 /// <para>
 /// <see cref="ImagePath"/> defaults to the application's one shared no-image placeholder rather than an empty
-/// string, which is what keeps the card from drawing a blank space. A dunnage type's own picture is unchanged by
-/// this feature and keeps its own storage and arrangement (FR-033): this screen's read supplies a type's name and
-/// identifier and no picture path, so the placeholder is the honest answer here.
+/// string, which is what keeps the card from drawing a blank space. The read supplies the type's own
+/// <c>image_path</c> resolved onto this machine's Dunnage image root, exactly as a dunnage part's picture is
+/// resolved, so a type that has a picture on the share draws it; a type with no picture, or one whose file is not
+/// there, answers the placeholder.
 /// </para>
 /// </remarks>
 

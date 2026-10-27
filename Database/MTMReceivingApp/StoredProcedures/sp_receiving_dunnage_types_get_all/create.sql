@@ -19,7 +19,11 @@
 -- procedure is left exactly as it is: the MTM_Receiving_Application's own screens still call it.
 --
 -- Contract:
---   OUT one row per usable type: id, type_name — same two columns and same ordering as the statement it replaces.
+--   OUT one row per usable type: id, type_name, image_path — the caller's own predicate and ordering, plus the
+--   type's picture. `image_path` is the same column the receiving application's own `sp_Dunnage_Types_GetAll`
+--   returns, so a type drawn here and a type drawn on the dunnage workflow resolve to the same file. It is a path
+--   relative to the Dunnage image root (for example `Types/DunnageType-Boxes.png`), which
+--   `DunnageImagePathResolver.GetDisplayPath` turns into a file on this machine.
 -- ============================================================
 
 USE mtm_receiving_application;
@@ -27,7 +31,7 @@ USE mtm_receiving_application;
 DROP PROCEDURE IF EXISTS sp_receiving_dunnage_types_get_all;
 
 CREATE PROCEDURE sp_receiving_dunnage_types_get_all()
-SELECT id, type_name
+SELECT id, type_name, image_path
 FROM dunnage_types
 WHERE type_name IS NOT NULL
     AND TRIM(type_name) <> ''

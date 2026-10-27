@@ -1,8 +1,8 @@
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MTM_Waitlist.Module_Setup.Services;
+using MTM_Waitlist.Module_Shared.Helpers;
 
-namespace MTM_Waitlist.Tests.Module_Setup.Services;
+namespace MTM_Waitlist.Tests.Module_Shared.Helpers;
 
 [TestClass]
 public sealed class DunnageImagePathResolverTests

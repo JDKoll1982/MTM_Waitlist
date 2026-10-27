@@ -20,6 +20,7 @@ using MTM_Waitlist.Module_Waitlist.Views;
 using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Module_Core.Views;
 using MTM_Waitlist.ViewModels;
+using MTM_Waitlist.Module_Shared.Helpers;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Shared.ViewModels;
 using MTM_Waitlist.Module_Shared.Views;

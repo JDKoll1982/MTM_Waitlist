@@ -1,8 +1,6 @@
 using System.IO;
 
-using MTM_Waitlist.Module_Shared.Helpers;
-
-namespace MTM_Waitlist.Module_Setup.Services;
+namespace MTM_Waitlist.Module_Shared.Helpers;
 
 /// <summary>
 /// Resolves Dunnage image files referenced by DB-relative paths (for example
@@ -12,6 +10,12 @@ namespace MTM_Waitlist.Module_Setup.Services;
 /// (on this site that share is reached as <c>X:</c>; it is named here as <c>\\mtmanu-fs01\Expo Drive</c> so the
 /// root works on a machine that has no drive mapping).
 /// </summary>
+/// <remarks>
+/// It lives beside <see cref="ImageCachePaths"/> rather than in one module because more than one module reads a
+/// Dunnage picture: the Setup workflow draws dunnage parts and types, the waitlist calls it for a request's parts,
+/// and the settings screen draws a dunnage type's own picture. The rule — which root, which file, and whether a
+/// local copy is preferred — is stated once here so those surfaces cannot answer it differently.
+/// </remarks>
 public static class DunnageImagePathResolver
 {
     private const string EnvironmentVariable = "MTM_DUNNAGE_IMAGE_ROOT";
