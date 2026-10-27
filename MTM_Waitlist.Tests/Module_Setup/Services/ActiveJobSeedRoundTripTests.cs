@@ -10,8 +10,8 @@ namespace MTM_Waitlist.Tests.Module_Setup.Services;
 
 /// <summary>
 /// The eight-configuration round-trip proof for the active-job read path (§D18, FR-039): the seven job shapes
-/// that <c>seed_setup_active_jobs_eight_configurations</c> deploys, plus the no-row case, read back through
-/// <see cref="ActiveJobItemResolverService"/>'s <b>own</b> deserializer.
+/// that <c>seed_setup_active_jobs_eight_configurations</c> used to deploy, plus the no-row case, read back
+/// through <see cref="ActiveJobItemResolverService"/>'s <b>own</b> deserializer.
 /// <para>
 /// <b>The fixtures are this test's own.</b> Every row is written here, with hard-coded values, under a work
 /// centre named for this run, and deleted again in <see cref="TestCleanupAsync"/>. The test deliberately does
@@ -47,8 +47,9 @@ public sealed class ActiveJobSeedRoundTripTests
     private static readonly string[] s_retiredFixtureWorkCentres =
         { "900-1", "900-2", "900-3", "900-4", "900-5", "900-6", "900-7" };
 
-    // The seven shapes, copied from seed_setup_active_jobs_eight_configurations. The keys are PascalCase
-    // because SetupPersistenceService serializes the models directly; a hand-written shape that merely looked
+    // The seven shapes, copied from seed_setup_active_jobs_eight_configurations before that seed was retired.
+    // They live only here now, so this test is what keeps the matrix proved; the keys are PascalCase because
+    // SetupPersistenceService serializes the models directly, and a hand-written shape that merely looked
     // plausible would make this a test of itself.
 
     /// <summary>Coil only: an <c>MMC</c> subordinate with a real scrap type.</summary>

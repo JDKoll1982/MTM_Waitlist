@@ -1010,3 +1010,17 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- 2026-10-20: seed_waitlist_request_item_configs and seed_waitlist_request_item_configs_label_move now declare the part
 --     the work centre is making as `Part` on pickup-fg and pickup-wip (was `Part number` / `Part and quantity`),
 --     so all four returning pickups draw Part, Part Type and # of Skids. No schema change.
+
+-- 2026-10-27: seed_dev_masked_baseline no longer truncates or inserts `core_computers_registry`.
+--     The note above records that it once did, and that a validation run could rewrite a real store's computers.
+--     The seed now seeds no computers at all: a computer enters the registry when its own machine setup
+--     completes, so a freshly built store reaches the setup stage instead of arriving already configured. The
+--     new `core_computer_buildings` table and `core_buildings_catalog` are described by their own artifacts.
+
+-- 2026-10-27: seed_setup_active_jobs_eight_configurations retired (create.sql removed, rollback kept).
+--     The seed put seven invented work orders on real work centres, so every work-centre card claimed a job was
+--     running that nobody had set up. Its run-4 visibility matrix is proved by
+--     MTM_Waitlist.Tests/Module_Setup/Services/ActiveJobSeedRoundTripTests, which writes and deletes its own
+--     rows, so no seed is needed for it. A fresh store has no `setup_active_jobs` rows and every work centre
+--     reads "None" until a real Setup save records one. The remaining rollback is the cleanup for a database
+--     restored from an older seed.
