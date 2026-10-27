@@ -43,6 +43,7 @@ public sealed class RoleRestrictionInventoryTests
         new("Ignored locations, read", "SettingsViewModel", PermissionKeys.SettingsIgnoredLocations),
         new("Ignored locations, change", "SettingsViewModel", PermissionKeys.SettingsIgnoredLocationsEdit),
         new("Hot work centres", "SettingsViewModel", PermissionKeys.SettingsHotWorkCenters),
+        new("The plant's buildings", "SettingsViewModel", PermissionKeys.SettingsBuildings),
         new("Dunnage-type visibility", "SettingsViewModel", PermissionKeys.SettingsHotWorkCenters),
         new("Part pictures", "SettingsViewModel", PermissionKeys.SettingsPartPictures),
         new("Picture and key folders", "SettingsViewModel", PermissionKeys.SettingsStoragePaths),

@@ -7646,3 +7646,223 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+-- Stored Procedure: sp_core_buildings_get
+-- Engine: MySQL 5.7
+--
+-- Purpose: the buildings every chooser offers, in the catalog's own display order. The caller decides whether a
+--          withdrawn building is drawn: `is_active` travels with each row so a screen that must show what a work
+--          centre still names can do so, and a chooser that must not offer it filters on the flag it received.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_core_buildings_get;
+
+CREATE PROCEDURE sp_core_buildings_get()
+SELECT
+    building_name,
+    is_active,
+    sort_rank,
+    updated_utc
+FROM core_buildings_catalog
+ORDER BY sort_rank ASC, building_name ASC;
+
+-- Stored Procedure: sp_core_buildings_upsert
+-- Engine: MySQL 5.7
+--
+-- Purpose: add a building, or rename one that exists.
+--
+-- Contract:
+--   IN  p_original_name  VARCHAR(64)  the building being edited, or NULL/'' to add a new one
+--   IN  p_building_name  VARCHAR(64)  the name the building is to carry
+--   OUT the affected-row count, through the non-query seam.
+--
+-- Why a rename rewrites the rows that name the building
+--   A work centre records `setup_work_centers_catalog.building` and a computer records
+--   `core_computer_buildings.building_name`; both are plain names rather than identifiers. Renaming only the
+--   catalog row would leave every work centre and every computer naming a building the catalog no longer holds,
+--   which is a screen full of buildings that cannot be chosen. So the three writes are one transaction: the
+--   rename either lands everywhere or nowhere.
+--
+-- Why a duplicate name is left to the store
+--   `uq_core_buildings_catalog_building_name` is the authority on a name being taken, and it is enforced here
+--   rather than by a read-then-write the application would have to race. A colliding name raises the store's
+--   own duplicate-key error, which the caller reports as a refusal.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_core_buildings_upsert;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_core_buildings_upsert(
+    IN p_original_name VARCHAR(64),
+    IN p_building_name VARCHAR(64)
+)
+BEGIN
+    DECLARE v_now_utc DATETIME;
+    DECLARE v_next_rank INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    SET v_now_utc = fn_server_utc_now();
+
+    START TRANSACTION;
+
+    IF p_original_name IS NULL OR p_original_name = '' THEN
+        SELECT COALESCE(MAX(sort_rank), 0) + 10
+        INTO v_next_rank
+        FROM core_buildings_catalog;
+
+        INSERT INTO core_buildings_catalog (
+            public_id,
+            building_name,
+            is_active,
+            sort_rank,
+            created_utc,
+            updated_utc
+        )
+        VALUES (
+            UUID(),
+            p_building_name,
+            1,
+            v_next_rank,
+            v_now_utc,
+            v_now_utc
+        );
+    ELSE
+        UPDATE core_buildings_catalog
+        SET building_name = p_building_name,
+            updated_utc = v_now_utc
+        WHERE building_name = p_original_name;
+
+        UPDATE setup_work_centers_catalog
+        SET building = p_building_name,
+            updated_utc = v_now_utc
+        WHERE building = p_original_name;
+
+        UPDATE core_computer_buildings
+        SET building_name = p_building_name,
+            updated_utc = v_now_utc
+        WHERE building_name = p_original_name;
+    END IF;
+
+    COMMIT;
+END$$
+
+DELIMITER ;
+
+-- Stored Procedure: sp_core_computer_building_get
+-- Engine: MySQL 5.7
+--
+-- Purpose: the building one computer stands in, which is the answer every building chooser opens on.
+--
+-- Contract:
+--   IN  p_computer_name  VARCHAR(128)  a registry `computer_name` or its normalised hostname
+--   OUT building_name, or no row when the computer has never been set up
+--
+-- No row is an answer rather than a failure: a computer that has never been configured has no building, and the
+-- caller falls back to the plant default. Returning the default here would make "never asked" indistinguishable
+-- from "answered Expo Drive".
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_core_computer_building_get;
+
+CREATE PROCEDURE sp_core_computer_building_get(
+    IN p_computer_name VARCHAR(128)
+)
+SELECT
+    cb.building_name
+FROM core_computer_buildings cb
+INNER JOIN core_computers_registry r ON r.id = cb.computer_id
+WHERE r.computer_name = p_computer_name
+   OR r.hostname_normalized = p_computer_name
+ORDER BY r.id ASC
+LIMIT 1;
+
+-- Stored Procedure: sp_core_computer_building_set
+-- Engine: MySQL 5.7
+--
+-- Purpose: record which building one computer stands in. Machine setup is the only caller, through
+--          `MachineConfigurationService`, which is the single writer of a computer's configuration rows.
+--
+-- Contract:
+--   IN  p_computer_name  VARCHAR(128)  a registry `computer_name` or its normalised hostname
+--   OUT the affected-row count, through the non-query seam. A name that matches no registry row writes nothing,
+--       which the caller reports as a configuration that was not written rather than as a success.
+--
+-- Why one row per computer is updated in place
+--   `uq_core_computer_buildings_computer_id` is the identity here, not the row: a computer that is set up again
+--   moves to the building it was asked for instead of gaining a second row, so nothing has to pick between two
+--   answers later.
+--
+-- Why an unchanged answer reports zero rows
+--   Setting a computer to the building it already stands in changes nothing, and the store reports that as zero
+--   rows. The caller reads its answer back rather than counting rows, so a save that changed nothing is still a
+--   save that succeeded.
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_core_computer_building_set;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_core_computer_building_set(
+    IN p_computer_name VARCHAR(128),
+    IN p_building_name VARCHAR(64)
+)
+BEGIN
+    DECLARE v_computer_id BIGINT DEFAULT NULL;
+    DECLARE v_now_utc DATETIME;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    SET v_now_utc = fn_server_utc_now();
+
+    SELECT r.id
+    INTO v_computer_id
+    FROM core_computers_registry r
+    WHERE r.computer_name = p_computer_name
+       OR r.hostname_normalized = p_computer_name
+    ORDER BY r.id ASC
+    LIMIT 1;
+
+    IF v_computer_id IS NOT NULL THEN
+        START TRANSACTION;
+
+        IF EXISTS (SELECT 1 FROM core_computer_buildings WHERE computer_id = v_computer_id) THEN
+            UPDATE core_computer_buildings
+            SET building_name = p_building_name,
+                updated_utc = v_now_utc
+            WHERE computer_id = v_computer_id;
+        ELSE
+            INSERT INTO core_computer_buildings (
+                public_id,
+                computer_id,
+                building_name,
+                created_utc,
+                updated_utc
+            )
+            VALUES (
+                UUID(),
+                v_computer_id,
+                p_building_name,
+                v_now_utc,
+                v_now_utc
+            );
+        END IF;
+
+        COMMIT;
+    END IF;
+END$$
+
+DELIMITER ;

@@ -243,6 +243,17 @@ internal sealed class WaitlistTestBuildingSelectionService : IBuildingSelectionS
         remove { }
     }
 
+    public event EventHandler? BuildingsChanged
+    {
+        add { }
+        remove { }
+    }
+
+    /// <inheritdoc />
+    public Task InitializeAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+    /// <inheritdoc />
+    public Task RefreshAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
     /// <inheritdoc />
     public IReadOnlyList<string> Buildings => ["Expo Drive"];
 

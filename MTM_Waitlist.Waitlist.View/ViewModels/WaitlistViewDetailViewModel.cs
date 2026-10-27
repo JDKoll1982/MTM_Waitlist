@@ -630,7 +630,8 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
 
         if (match is null && _lastOrderId is int orderId)
         {
-            var requests = _requestService.GetActiveRequests(_buildingSelectionService.SelectedBuilding);
+            var requests = _requestService.GetActiveRequests(
+                BuildingScope.AsFilter(_buildingSelectionService.SelectedBuilding));
             match = requests.FirstOrDefault(request => request.Id.GetHashCode() == orderId);
         }
 

@@ -10,6 +10,11 @@
 -- This seed does not remove the retired role, does not insert `it_department`, and does not repoint the masked
 -- `test.admin` account. Those belong entirely to `seed_role_admin_to_it_department`, so two seeds never own the
 -- same rows and the reversal stays exact for the reason it states.
+--
+-- This seed seeds no computers and no waitlist requests. A freshly built store therefore holds no configured
+-- workstation and no request cards, so the first launch runs the whole startup workflow — machine setup, then
+-- sign-in — and the waitlist board starts empty. A computer enters the registry when its own setup completes,
+-- and a request enters the queue when somebody raises one.
 
 USE mtm_waitlist;
 
@@ -285,44 +290,12 @@ ON DUPLICATE KEY UPDATE
     assigned_utc = VALUES(assigned_utc),
     assigned_by_user_id = VALUES(assigned_by_user_id);
 
-TRUNCATE TABLE core_computers_registry;
-
-INSERT INTO
-    core_computers_registry (
-        public_id,
-        computer_name,
-        hostname_normalized,
-        mac_address_normalized,
-        display_name,
-        location,
-        is_registered,
-        created_utc,
-        updated_utc
-    )
-VALUES (
-        UUID(),
-        'johnspc',
-        'johnspc',
-        'd8-43-ae-47-d0-d6',
-        'John''s Computer',
-        NULL,
-        1,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        'mtmfg-161',
-        'mtmfg-161',
-        'f4-f1-9e-38-64-d3',
-        'MTMFG 161',
-        NULL,
-        1,
-        UTC_TIMESTAMP(),
-        UTC_TIMESTAMP()
-    )
-ON DUPLICATE KEY UPDATE
-    computer_name = VALUES(computer_name),
-    updated_utc = VALUES(updated_utc);
+-- No computers are seeded.
+--
+-- The registry used to be truncated and given two rows, which meant a freshly built store already had a
+-- configured workstation and machine setup never ran. A computer is now registered by the machine itself when
+-- somebody completes setup, so the seed leaves the registry empty and the first launch of a fresh store reaches
+-- the setup stage as it would on a machine the store has never seen. Nothing here deletes a registered computer
+-- either: re-running this seed must not revoke the fleet.
 
 SET FOREIGN_KEY_CHECKS = 1;

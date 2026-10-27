@@ -109,6 +109,13 @@ public static class PermissionRegistry
             Fallback: false,
             new[] { "SettingsViewModel" }),
         new Entry(
+            PermissionKeys.SettingsBuildings,
+            LabelResourceKey(PermissionKeys.SettingsBuildings),
+            GatesResourceKey(PermissionKeys.SettingsBuildings),
+            Area.Settings,
+            Fallback: false,
+            new[] { "SettingsViewModel" }),
+        new Entry(
             PermissionKeys.SettingsPartPictures,
             LabelResourceKey(PermissionKeys.SettingsPartPictures),
             GatesResourceKey(PermissionKeys.SettingsPartPictures),

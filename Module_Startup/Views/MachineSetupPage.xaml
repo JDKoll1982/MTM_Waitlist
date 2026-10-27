@@ -110,6 +110,15 @@
                         AutomationProperties.AutomationId="MachineSetupWindow_Location"
                         Header="{x:Bind ViewModel.LocationLabelText}"
                         Text="{x:Bind ViewModel.Location, Mode=TwoWay}" />
+                    <!-- The building this workstation belongs to (its own row in core_computer_buildings). Every
+                         building chooser in the session opens on this answer, so it is asked once, here. -->
+                    <ComboBox
+                        x:Name="BuildingBox"
+                        AutomationProperties.AutomationId="MachineSetupWindow_Building"
+                        Header="{x:Bind ViewModel.BuildingLabelText}"
+                        HorizontalAlignment="Stretch"
+                        ItemsSource="{x:Bind ViewModel.Buildings, Mode=OneWay}"
+                        SelectedItem="{x:Bind ViewModel.Building, Mode=TwoWay}" />
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>

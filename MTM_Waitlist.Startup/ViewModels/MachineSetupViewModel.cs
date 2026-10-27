@@ -1,3 +1,5 @@
+using System.Collections.ObjectModel;
+
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -15,11 +17,13 @@ namespace MTM_Waitlist.Module_Startup.ViewModels;
 /// </summary>
 /// <remarks>
 /// <para>
-/// <b>This screen asks for the location and for nothing else</b> (FR-049). The name is read from the computer and
-/// shown; it has no input control bound to it, so there is nothing to type. Where pictures come from is held once
-/// for the plant and changed from the settings panel, so nothing here captures a folder and the draft this screen
-/// saves carries no picture source. A machine counts as configured once the store holds its record and its name,
-/// which is why a save that changed nothing is still a save that succeeded.
+/// <b>This screen asks for where the computer stands and which building it belongs to</b> (FR-049). The name is
+/// read from the computer and shown; it has no input control bound to it, so there is nothing to type. Where
+/// pictures come from is held once for the plant and changed from the settings panel, so nothing here captures a
+/// folder and the draft this screen saves carries no picture source. The building is chosen from the plant's list
+/// and becomes the default every building chooser in the session opens on. A machine counts as configured once
+/// the store holds its record and its name, which is why a save that changed nothing is still a save that
+/// succeeded.
 /// </para>
 /// <para>
 /// <b>One writer, and this screen never writes rows itself.</b> The draft it captures goes to
@@ -49,6 +53,7 @@ internal sealed partial class MachineSetupViewModel : ObservableObject
     private readonly IMachineSetupGate _gate;
     private readonly IMachineConfigurationService _configuration;
     private readonly IMachineFacts _machine;
+    private readonly IBuildingCatalogService? _buildingCatalog;
 
     /// <summary>The authorisation this screen's save is allowed by, or <c>null</c> before anybody signs in.</summary>
     private MachineSetupAuthorization? _authorization;
@@ -60,14 +65,24 @@ internal sealed partial class MachineSetupViewModel : ObservableObject
     /// <param name="gate">The gate that authenticates an authorised person and authorises configuration only.</param>
     /// <param name="configuration">The one writer of this computer's configuration rows.</param>
     /// <param name="machine">This computer's facts, which are where the name the screen shows is read from.</param>
+    /// <param name="buildingCatalog">
+    /// The plant's building list, which is what the building choice is drawn from. A screen without it still
+    /// configures the computer: the building is left as the computer already holds it.
+    /// </param>
     public MachineSetupViewModel(
         IMachineSetupGate gate,
         IMachineConfigurationService configuration,
-        IMachineFacts machine)
+        IMachineFacts machine,
+        IBuildingCatalogService? buildingCatalog = null)
     {
         _gate = gate ?? throw new ArgumentNullException(nameof(gate));
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         _machine = machine ?? throw new ArgumentNullException(nameof(machine));
+        _buildingCatalog = buildingCatalog;
+
+        // The list is read as the screen is built, so the choice is offered from the plant's catalog rather than
+        // from a name written here. The screen is usable before the read answers; the choice simply starts empty.
+        _ = LoadBuildingsAsync();
     }
 
     /// <summary>
@@ -93,6 +108,17 @@ internal sealed partial class MachineSetupViewModel : ObservableObject
     /// <summary>Where this computer stands, which is the only value a person supplies here (FR-049, FR-050).</summary>
     [ObservableProperty]
     public partial string Location { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The building this workstation belongs to, chosen from the plant's list. It is what every building chooser
+    /// in the session opens on, so the answer given here is read back as the session's default.
+    /// </summary>
+    [ObservableProperty]
+    public partial string Building { get; set; } = string.Empty;
+
+    /// <summary>The buildings the choice offers, in the catalog's display order.</summary>
+    public ObservableCollection<string> Buildings { get; } = new();
+
     /// <summary>
     /// Whether the gate has authorised a person to configure this computer. It is what offers the capture form,
     /// and the save checks it again before writing (FR-007).
@@ -149,6 +175,8 @@ internal sealed partial class MachineSetupViewModel : ObservableObject
     public string ComputerNameLabelText => "Startup_MachineSetup.ComputerNameLabel".GetLocalized();
 
     public string LocationLabelText => "Startup_MachineSetup.LocationLabel".GetLocalized();
+
+    public string BuildingLabelText => "Startup_MachineSetup.BuildingLabel".GetLocalized();
 
     /// <summary>What the sign-in name field says while it is empty, so what belongs in it is never in doubt.</summary>
     public string SignInNameHintText => "Startup_MachineSetup.SignInNameHint".GetLocalized();
@@ -320,7 +348,51 @@ internal sealed partial class MachineSetupViewModel : ObservableObject
     /// </remarks>
     private MachineConfigurationDraft BuildDraft() => new(
         ComputerName.Trim(),
-        Location?.Trim() ?? string.Empty);
+        Location?.Trim() ?? string.Empty,
+        Building?.Trim() ?? string.Empty);
+
+    /// <summary>
+    /// Reads the plant's building list, and starts the choice on the building this computer already holds or, when
+    /// it holds none, on the first building the plant lists.
+    /// </summary>
+    /// <remarks>
+    /// A store that cannot be read leaves the choice empty, which the save treats as "leave the building as it
+    /// is" rather than as an answer: setup must not refuse to configure a computer because a suggestion was not
+    /// available.
+    /// </remarks>
+    private async Task LoadBuildingsAsync()
+    {
+        if (_buildingCatalog is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var buildings = await _buildingCatalog.GetSelectableBuildingNamesAsync().ConfigureAwait(true);
+            var storedBuilding = await _buildingCatalog.GetComputerBuildingAsync(_machine.Hostname).ConfigureAwait(true);
+
+            Buildings.Clear();
+            foreach (var building in buildings)
+            {
+                Buildings.Add(building);
+            }
+
+            if (string.IsNullOrWhiteSpace(Building))
+            {
+                Building = FirstNonBlank(
+                    storedBuilding,
+                    Buildings.FirstOrDefault());
+            }
+        }
+        catch (Exception exception)
+        {
+            AppLog.Error(
+                "MachineSetup",
+                exception,
+                "The plant's building list could not be read, so setup offers no building choice and leaves the computer's answer as it is.");
+        }
+    }
 
     /// <summary>Why the sign-in was refused, in the reader's own words (FR-007).</summary>
     private static string DescribeRefusal(string? refusalReason) => refusalReason switch

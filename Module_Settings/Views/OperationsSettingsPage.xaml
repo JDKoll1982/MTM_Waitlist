@@ -97,14 +97,39 @@
         <wct:SettingsCard
             Description="Select the computer whose Local press list you are editing."
             Header="Computer">
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <ComboBox
+                    AutomationProperties.AutomationId="SettingsPage_HotWorkCenters_ComputerCombo"
+                    MinWidth="280"
+                    DisplayMemberPath="Label"
+                    IsEnabled="{x:Bind ViewModel.CanManageHotWorkCenters, Mode=OneWay}"
+                    ItemsSource="{x:Bind ViewModel.AvailableWorkstations, Mode=OneWay}"
+                    SelectedValue="{x:Bind ViewModel.SelectedWorkstation, Mode=TwoWay}"
+                    SelectedValuePath="Key" />
+                <!--
+                    The scope switch. Off shows every building's work centres; on shows only the ones in the
+                    building the chosen computer was set up in, and the switch states that building.
+                -->
+                <ToggleSwitch
+                    AutomationProperties.AutomationId="SettingsPage_HotWorkCenters_BuildingFilterToggle"
+                    AutomationProperties.Name="Limit the work center list to the saved building"
+                    MinWidth="240"
+                    VerticalAlignment="Center"
+                    IsOn="{x:Bind ViewModel.IsBuildingFilterEnabled, Mode=TwoWay}"
+                    OffContent="All Work Centers"
+                    OnContent="{x:Bind ViewModel.BuildingFilterToggleLabel, Mode=OneWay}" />
+            </StackPanel>
+        </wct:SettingsCard>
+
+        <wct:SettingsCard
+            Description="Which building the work centers are drawn from while the switch above is off. The last entry shows every building."
+            Header="Building">
             <ComboBox
-                AutomationProperties.AutomationId="SettingsPage_HotWorkCenters_ComputerCombo"
+                AutomationProperties.AutomationId="SettingsPage_HotWorkCenters_BuildingCombo"
                 MinWidth="280"
-                DisplayMemberPath="Label"
-                IsEnabled="{x:Bind ViewModel.CanManageHotWorkCenters, Mode=OneWay}"
-                ItemsSource="{x:Bind ViewModel.AvailableWorkstations, Mode=OneWay}"
-                SelectedValue="{x:Bind ViewModel.SelectedWorkstation, Mode=TwoWay}"
-                SelectedValuePath="Key" />
+                IsEnabled="{x:Bind ViewModel.IsBuildingChoiceEnabled, Mode=OneWay}"
+                ItemsSource="{x:Bind ViewModel.BuildingChoices, Mode=OneWay}"
+                SelectedItem="{x:Bind ViewModel.SelectedWorkCenterBuilding, Mode=TwoWay}" />
         </wct:SettingsCard>
 
         <wct:SettingsCard
@@ -194,6 +219,109 @@
                 <TextBlock
                     Style="{StaticResource SettingsDescriptionStyle}"
                     Text="{x:Bind ViewModel.HotWorkCentersStatusMessage, Mode=OneWay}" />
+            </StackPanel>
+        </wct:SettingsCard>
+    </wct:SettingsExpander.Items>
+</wct:SettingsExpander>
+
+<wct:SettingsExpander
+    AutomationProperties.AutomationId="SettingsPage_BuildingsExpander"
+    x:Name="BuildingsExpander"
+    x:Load="{x:Bind ViewModel.IsBuildingsPanelVisible, Mode=OneWay}"
+    Description="The plant's buildings. A work centre and a computer both name one, so renaming a building updates every row that named it."
+    Header="Buildings"
+    HorizontalAlignment="Stretch"
+    IsExpanded="False">
+    <wct:SettingsExpander.HeaderIcon>
+        <SymbolIcon Symbol="Map" />
+    </wct:SettingsExpander.HeaderIcon>
+
+    <ProgressRing
+        Width="20"
+        Height="20"
+        VerticalAlignment="Center"
+        IsActive="{x:Bind ViewModel.IsBuildingsBusy, Mode=OneWay}" />
+
+    <wct:SettingsExpander.Items>
+        <wct:SettingsCard
+            ContentAlignment="Vertical"
+            HorizontalContentAlignment="Stretch"
+            Header="Buildings">
+            <ItemsControl
+                AutomationProperties.AutomationId="SettingsPage_BuildingsList"
+                ItemsSource="{x:Bind ViewModel.EditableBuildings, Mode=OneWay}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid
+                            Margin="0,4"
+                            ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <FontIcon
+                                Grid.Column="0"
+                                VerticalAlignment="Center"
+                                FontSize="14"
+                                Glyph="&#xE707;"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock
+                                Grid.Column="1"
+                                VerticalAlignment="Center"
+                                Text="{Binding}" />
+                            <Button
+                                AutomationProperties.Name="{Binding}"
+                                Grid.Column="2"
+                                VerticalAlignment="Center"
+                                Command="{Binding ViewModel.EditBuildingCommand, ElementName=RootPage}"
+                                CommandParameter="{Binding}"
+                                Content="Edit"
+                                IsEnabled="{Binding ViewModel.CanManageBuildings, ElementName=RootPage}" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </wct:SettingsCard>
+
+        <wct:SettingsCard
+            ContentAlignment="Vertical"
+            HorizontalContentAlignment="Stretch"
+            Description="Choose a building above to rename it, or press New for a building that does not exist yet."
+            Header="Add or rename">
+            <StackPanel Spacing="8">
+                <TextBlock Style="{StaticResource SettingsDescriptionStyle}" Text="{x:Bind ViewModel.BuildingEditHeading, Mode=OneWay}" />
+                <Grid ColumnSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox
+                        AutomationProperties.AutomationId="SettingsPage_Buildings_NameInput"
+                        Grid.Column="0"
+                        IsEnabled="{x:Bind ViewModel.CanManageBuildings, Mode=OneWay}"
+                        PlaceholderText="Building name"
+                        Text="{x:Bind ViewModel.BuildingNameInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button
+                        AutomationProperties.AutomationId="SettingsPage_Buildings_SaveButton"
+                        Grid.Column="1"
+                        VerticalAlignment="Stretch"
+                        Command="{x:Bind ViewModel.SaveBuildingCommand}"
+                        Content="Save"
+                        IsEnabled="{x:Bind ViewModel.CanManageBuildings, Mode=OneWay}"
+                        Style="{StaticResource AccentButtonStyle}" />
+                    <Button
+                        AutomationProperties.AutomationId="SettingsPage_Buildings_NewButton"
+                        Grid.Column="2"
+                        VerticalAlignment="Stretch"
+                        Command="{x:Bind ViewModel.BeginNewBuildingCommand}"
+                        Content="New"
+                        IsEnabled="{x:Bind ViewModel.CanManageBuildings, Mode=OneWay}" />
+                </Grid>
+                <TextBlock
+                    Style="{StaticResource SettingsDescriptionStyle}"
+                    Text="{x:Bind ViewModel.BuildingsStatusMessage, Mode=OneWay}" />
             </StackPanel>
         </wct:SettingsCard>
     </wct:SettingsExpander.Items>

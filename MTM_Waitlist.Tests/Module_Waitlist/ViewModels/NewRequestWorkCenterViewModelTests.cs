@@ -474,6 +474,16 @@ public sealed class NewRequestWorkCenterViewModelTests
 
         public event EventHandler? BuildingChanged;
 
+        public event EventHandler? BuildingsChanged
+        {
+            add { }
+            remove { }
+        }
+
+        public Task InitializeAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public Task RefreshAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
         public IReadOnlyList<string> Buildings { get; } = new[] { "Expo Drive", "Vits Drive" };
 
         public string SelectedBuilding

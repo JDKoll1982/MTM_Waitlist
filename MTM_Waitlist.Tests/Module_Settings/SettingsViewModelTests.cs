@@ -1027,6 +1027,98 @@ public sealed class SettingsViewModelTests
         Assert.IsFalse(viewModel.IsPictureCacheBusy);
     }
 
+    [TestMethod]
+    public async Task ViewModel_SettingsViewModelTests_TheLocalWorkCentersFilter_StartsOnTheSavedBuildingAndOffersEveryBuildingOnDemand()
+    {
+        var catalog = new FakeWorkCenterCatalogService
+        {
+            Catalog = new WorkCenterCatalogResult
+            {
+                HotWorkCenters = ["100-03"],
+                OtherWorkCenters = ["100-06", "V100-33"],
+                WorkCenterDetails = new Dictionary<string, WorkCenterDetail>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["100-03"] = new() { Building = "Expo Drive" },
+                    ["100-06"] = new() { Building = "Expo Drive" },
+                    ["V100-33"] = new() { Building = "Vits Drive" },
+                },
+            },
+        };
+
+        var buildings = new FakeBuildingCatalogService();
+        buildings.ComputerBuildings["test-workstation"] = "Expo Drive";
+
+        var viewModel = BuildViewModel(
+            new InMemoryScopedPreferenceStore(),
+            workCenterCatalogService: catalog,
+            buildingCatalogService: buildings);
+
+        await viewModel.HotWorkCentersLoad;
+
+        Assert.AreEqual("Expo Drive", viewModel.SelectedWorkstationBuilding, "The selected computer's own building is read.");
+        Assert.IsTrue(viewModel.IsBuildingFilterEnabled, "The list starts narrowed to the saved building.");
+        StringAssert.Contains(viewModel.BuildingFilterToggleLabel, "Expo Drive", "The toggle states the building in effect.");
+        Assert.IsFalse(viewModel.IsBuildingChoiceEnabled, "While the filter is on the building is not a choice.");
+        CollectionAssert.AreEquivalent(
+            new[] { "100-06" },
+            viewModel.OtherWorkCenters.ToArray(),
+            "Only the saved building's other work centers are offered.");
+
+        // Off: every building's work centres are offered, and the building becomes a choice with All as the last
+        // entry of its own list.
+        viewModel.IsBuildingFilterEnabled = false;
+
+        CollectionAssert.AreEquivalent(new[] { "100-06", "V100-33" }, viewModel.OtherWorkCenters.ToArray());
+        Assert.IsTrue(viewModel.IsBuildingChoiceEnabled);
+        Assert.AreEqual(
+            BuildingScope.AllBuildings,
+            viewModel.BuildingChoices[^1],
+            "The every-building entry is the last choice.");
+
+        viewModel.SelectedWorkCenterBuilding = "Vits Drive";
+        CollectionAssert.AreEquivalent(new[] { "V100-33" }, viewModel.OtherWorkCenters.ToArray());
+
+        viewModel.SelectedWorkCenterBuilding = BuildingScope.AllBuildings;
+        CollectionAssert.AreEquivalent(new[] { "100-06", "V100-33" }, viewModel.OtherWorkCenters.ToArray());
+    }
+
+    [TestMethod]
+    public async Task ViewModel_SettingsViewModelTests_SaveBuilding_IsRefusedWithoutItsOwnPermission()
+    {
+        var buildings = new FakeBuildingCatalogService();
+        var viewModel = BuildViewModel(
+            new InMemoryScopedPreferenceStore(),
+            buildingCatalogService: buildings);
+
+        viewModel.BuildingNameInput = "Third Site";
+        await viewModel.SaveBuildingCommand.ExecuteAsync(null);
+
+        Assert.AreEqual(0, buildings.Saves.Count, "Nothing is written without the building permission.");
+        StringAssert.Contains(viewModel.BuildingsStatusMessage, "permission");
+    }
+
+    [TestMethod]
+    public async Task ViewModel_SettingsViewModelTests_SaveBuilding_WritesWhatTheStoreAcceptedAndReloadsTheList()
+    {
+        var buildings = new FakeBuildingCatalogService
+        {
+            SaveResult = BuildingSaveResult.Saved("Third Site"),
+        };
+
+        var viewModel = BuildViewModel(
+            new InMemoryScopedPreferenceStore(),
+            [PermissionKeys.SettingsBuildings],
+            buildingCatalogService: buildings);
+
+        viewModel.BuildingNameInput = "Third Site";
+        await viewModel.SaveBuildingCommand.ExecuteAsync(null);
+
+        Assert.AreEqual(1, buildings.Saves.Count);
+        Assert.IsNull(buildings.Saves[0].Original, "With nothing selected the save adds a building rather than renaming one.");
+        Assert.AreEqual("Third Site", buildings.Saves[0].Name);
+        StringAssert.Contains(viewModel.BuildingsStatusMessage, "Third Site");
+    }
+
     private static SettingsViewModel BuildViewModel(
         InMemoryScopedPreferenceStore settings,
         string[]? heldPermissionKeys = null,
@@ -1035,7 +1127,9 @@ public sealed class SettingsViewModelTests
         IConfigSettingsValueService? configSettingsValueService = null,
         IImageCacheSyncService? imageCacheSyncService = null,
         RecordingNavigationService? navigationService = null,
-        IFolderBrowserService? folderBrowserService = null)
+        IFolderBrowserService? folderBrowserService = null,
+        IWorkCenterCatalogService? workCenterCatalogService = null,
+        IBuildingCatalogService? buildingCatalogService = null)
     {
         var viewModel = BuildViewModelWithoutLoading(
            settings,
@@ -1045,7 +1139,9 @@ public sealed class SettingsViewModelTests
            configSettingsValueService,
            imageCacheSyncService,
            navigationService,
-           folderBrowserService);
+           folderBrowserService,
+           workCenterCatalogService,
+           buildingCatalogService);
 
         // The stub answers from an already-completed task, so this settles synchronously and no test has to
         // sleep waiting for a gate to make up its mind.
@@ -1065,7 +1161,9 @@ public sealed class SettingsViewModelTests
         IConfigSettingsValueService? configSettingsValueService = null,
         IImageCacheSyncService? imageCacheSyncService = null,
         RecordingNavigationService? navigationService = null,
-        IFolderBrowserService? folderBrowserService = null)
+        IFolderBrowserService? folderBrowserService = null,
+        IWorkCenterCatalogService? workCenterCatalogService = null,
+        IBuildingCatalogService? buildingCatalogService = null)
     {
         var person = new FakePersonIdentity();
         var computerManagement = new ComputerManagementViewModel(new FakeComputerRegistryService(), new FakeMachineFacts());
@@ -1081,7 +1179,7 @@ public sealed class SettingsViewModelTests
             new FakeThemeSelectorService(),
             new IgnoredLocationsService(settings, permissions),
             settings,
-            new FakeWorkCenterCatalogService(),
+            workCenterCatalogService ?? new FakeWorkCenterCatalogService(),
             new FakeDunnageTypeVisibilityCatalogService(),
             new NewRequestAlertService(settings),
             permissions,
@@ -1093,7 +1191,8 @@ public sealed class SettingsViewModelTests
             imageStorageConfigurationResolver,
             configSettingsValueService,
             imageCacheSyncService,
-            folderBrowserService: folderBrowserService);
+            folderBrowserService: folderBrowserService,
+            buildingCatalogService: buildingCatalogService);
     }
 
     /// <summary>

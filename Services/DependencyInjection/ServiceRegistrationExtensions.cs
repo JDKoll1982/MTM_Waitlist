@@ -56,6 +56,9 @@ public static partial class ServiceRegistrationExtensions
         services.AddSingleton<IFolderBrowserService, WindowsFolderBrowserService>();
         services.AddSingleton<IIgnoredLocationsService, MTM_Waitlist.Module_Core.Services.IgnoredLocationsService>();
         services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
+        // The building list every chooser reads, and the one writer of a building. Registered before the
+        // selection service so the selection service is built over the catalog rather than over its own defaults.
+        services.AddSingleton<IBuildingCatalogService, MTM_Waitlist.Module_Core.Services.BuildingCatalogService>();
         services.AddSingleton<IBuildingSelectionService, BuildingSelectionService>();
         services.AddTransient<INavigationViewService, NavigationViewService>();
         services.AddSingleton<PageService>();

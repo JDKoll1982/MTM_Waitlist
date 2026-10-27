@@ -1,10 +1,11 @@
 namespace MTM_Waitlist.Module_Core.Permissions;
 
 /// <summary>
-/// The twenty permission keys, one per gated action. The fifteen originals are spelled exactly as the
+/// The twenty-one permission keys, one per gated action. The fifteen originals are spelled exactly as the
 /// specification's Verbatim Constraints section pins them (FR-045, FR-046); the four added by 010-startup-rebuild
 /// are pinned by the machine-configuration contract's section 5 and plan D11; the one added by
-/// 011-lugger-location-config is pinned by that feature's persistence-and-permission contract, section 4.
+/// 011-lugger-location-config is pinned by that feature's persistence-and-permission contract, section 4; the one
+/// added with the buildings catalog gates the Operations screen's building list.
 /// </summary>
 /// <remarks>
 /// This is the one canonical source for those spellings. Nothing else in the application restates the literals:
@@ -25,6 +26,13 @@ public static class PermissionKeys
 
     /// <summary>Hot work centres.</summary>
     public const string SettingsHotWorkCenters = "permission.settings.hot_work_centers";
+
+    /// <summary>
+    /// Adding a building to the plant's list and renaming one that exists. Kept apart from
+    /// <see cref="SettingsHotWorkCenters"/> because a building is a plant-wide fact that both a work centre and a
+    /// computer name, not one computer's press list.
+    /// </summary>
+    public const string SettingsBuildings = "permission.settings.buildings";
 
     /// <summary>Part pictures.</summary>
     public const string SettingsPartPictures = "permission.settings.part_pictures";
@@ -93,6 +101,7 @@ public static class PermissionKeys
         CacheRefreshApi,
         SettingsIgnoredLocations,
         SettingsHotWorkCenters,
+        SettingsBuildings,
         SettingsPartPictures,
         SettingsCacheRefresh,
         SettingsUrgencyMinutes,

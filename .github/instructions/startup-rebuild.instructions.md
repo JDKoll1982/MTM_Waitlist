@@ -95,17 +95,22 @@ the check that enforces it.
 
 ## Adding a machine-configuration field
 
-`IMachineConfigurationService` is the **only** writer of this machine's own name and its location, and
-`MachineConfigurationService` is its only implementation. Where pictures come from is not this machine's
-configuration: the shared pictures folder is held once for the whole plant and changed from the settings panel
-(FR-040).
+`IMachineConfigurationService` is the **only** writer of this machine's own name, its location and the building it
+stands in, and `MachineConfigurationService` is its only implementation. Where pictures come from is not this
+machine's configuration: the shared pictures folder is held once for the whole plant and changed from the settings
+panel (FR-040).
 
 - For a field on the machine's own registry row, extend `MachineConfigurationDraft` and the service's save and
   read, over the `sp_core_computers_registry_*` procedures. Do not write the row from a screen.
-- The machine-setup stage asks for this computer's location and for nothing else (FR-049, SC-018). Its name is
-  read from the computer itself, shown, and cannot be typed; the draft it saves carries no picture source. A
-  machine is configured once the store holds its record and its name, so never add a field a machine must fill
+- The machine-setup stage asks where this computer stands and which building it belongs to (FR-049, SC-018). Its
+  name is read from the computer itself, shown, and cannot be typed; the draft it saves carries no picture source.
+  A machine is configured once the store holds its record and its name, so never add a field a machine must fill
   in before it can be used (FR-041).
+- **The building is written beside the name, not into the registry row.** It belongs to the computer through
+  `core_computer_buildings` (`sp_core_computer_building_set`, reached through `IBuildingCatalogService`), and the
+  service above is still the one writer: a screen never calls that procedure. An empty `Building` in the draft
+  leaves whatever the computer already holds, which is what a host without the catalog amounts to. The same answer
+  is what every building chooser in the session opens on, through `IBuildingSelectionService`.
 - Nothing reads or writes a folder of this machine's own any more. The storage resolver's cascade is the
   plant-wide setting and then the shipped default, `MachineConfigurationSourceKinds` and `PictureSource` name
   only the rows that are being retired, and the dunnage root is the shipped default. Do not add a folder to

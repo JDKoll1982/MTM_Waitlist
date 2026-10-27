@@ -238,9 +238,10 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         OtherWorkCenters.Clear();
 
         var normalizedFilter = FilterText.Trim();
-        var selectedBuilding = _buildingSelectionService.SelectedBuilding;
+        var selectedBuilding = BuildingScope.AsFilter(_buildingSelectionService.SelectedBuilding);
         var filteredItems = _allWorkCenters.Where(item =>
-            string.Equals(item.Building, selectedBuilding, StringComparison.OrdinalIgnoreCase)
+            (selectedBuilding is null
+                || string.Equals(item.Building, selectedBuilding, StringComparison.OrdinalIgnoreCase))
             && (string.IsNullOrWhiteSpace(normalizedFilter)
                 || item.WorkCenterName.Contains(normalizedFilter, StringComparison.OrdinalIgnoreCase)
                 || item.CurrentWorkOrder.Contains(normalizedFilter, StringComparison.OrdinalIgnoreCase)
@@ -346,6 +347,18 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         _state.WorkCenter = normalizedWorkCenter;
         _state.RequesterEmployeeNumber = verification.EmployeeNumber;
         _state.RequesterEmployeeName = verification.EmployeeName;
+
+        // The request is filed under the building of the work centre it names. That is the same answer the shell
+        // carries while one building is in effect, and it is the only answer while every building is: a request
+        // cannot be filed against "every building", so the work centre decides it.
+        var requestBuilding = string.IsNullOrWhiteSpace(workCenterItem.Building)
+            ? BuildingScope.AsFilter(_buildingSelectionService.SelectedBuilding)
+            : workCenterItem.Building.Trim();
+
+        if (!string.IsNullOrWhiteSpace(requestBuilding))
+        {
+            _state.Building = requestBuilding;
+        }
 
         AppLog.Info("NewRequestWorkCenter", $"Selected workstation '{normalizedWorkCenter}' for employee '{verification.EmployeeNumber}'.");
         _navigationService.NavigateTo(typeof(NewRequestJobTypeViewModel).FullName!, _state);

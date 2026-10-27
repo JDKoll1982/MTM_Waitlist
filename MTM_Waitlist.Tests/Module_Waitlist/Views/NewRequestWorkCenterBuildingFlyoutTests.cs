@@ -51,8 +51,8 @@ public sealed class NewRequestWorkCenterBuildingFlyoutTests
 
         StringAssert.Contains(
             source,
-            "var selectedBuilding = _buildingSelectionService.SelectedBuilding;",
-            "The filter does not compare each work center against the shell's building.");
+            "var selectedBuilding = BuildingScope.AsFilter(_buildingSelectionService.SelectedBuilding);",
+            "The filter does not compare each work center against the shell's building, with the All choice read as every building.");
     }
 
     [TestMethod]

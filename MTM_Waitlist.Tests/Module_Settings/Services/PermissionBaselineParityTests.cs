@@ -162,6 +162,21 @@ public sealed class PermissionBaselineParityTests
     };
 
     /// <summary>
+    /// The key added with the buildings catalog, and the roles its baseline is stated to ship to.
+    /// </summary>
+    /// <remarks>
+    /// A building is named by both a work centre and a computer, so editing the list is a plant-wide change and
+    /// ships to the three roles that own plant-wide facts. No retired list describes it, so it is asserted against
+    /// its stated set and every one of the nine roles is checked.
+    /// </remarks>
+    private static readonly Dictionary<string, string[]> StatedSetsIntroducedWithTheBuildingsCatalog =
+        new(StringComparer.Ordinal)
+        {
+            [PermissionKeys.SettingsBuildings] =
+                ["plant_manager", "it_department", "developer"],
+        };
+
+    /// <summary>
     /// The keys <c>material_handler_lead</c> holds, which is its whole row: no retired list can describe it
     /// because the role was added by Phase 3, so the specification's Assumptions state it instead. Two of the
     /// four come from the eleven lists it is absent from (handling requests, and the service cache API, which
@@ -263,7 +278,9 @@ public sealed class PermissionBaselineParityTests
     {
         var baselines = ReadShippedBaselines();
 
-        foreach (var (key, statedRoles) in StatedSetsWithNoPredecessor.Concat(StatedSetsIntroducedByThisFeature))
+        foreach (var (key, statedRoles) in StatedSetsWithNoPredecessor
+                     .Concat(StatedSetsIntroducedByThisFeature)
+                     .Concat(StatedSetsIntroducedWithTheBuildingsCatalog))
         {
             var expectedTrue = new HashSet<string>(statedRoles, StringComparer.Ordinal);
 
@@ -461,7 +478,9 @@ public sealed class PermissionBaselineParityTests
 
             // Every key with no predecessor, both the three the store has always carried and the four this feature
             // adds, so a store missing one of the four is reported here rather than passing quietly.
-            foreach (var (key, statedRoles) in StatedSetsWithNoPredecessor.Concat(StatedSetsIntroducedByThisFeature))
+            foreach (var (key, statedRoles) in StatedSetsWithNoPredecessor
+                         .Concat(StatedSetsIntroducedByThisFeature)
+                         .Concat(StatedSetsIntroducedWithTheBuildingsCatalog))
             {
                 Assert.AreEqual(
                     statedRoles.Contains(roleCode, StringComparer.Ordinal),

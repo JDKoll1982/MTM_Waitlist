@@ -257,6 +257,15 @@ public sealed class WaitlistViewDetailViewModelTests
             remove { }
         }
 
+        public event EventHandler? BuildingsChanged
+        {
+            add { }
+            remove { }
+        }
+
+        public Task InitializeAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public Task RefreshAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
         public IReadOnlyList<string> Buildings => new[] { "Expo Drive" };
 
         public string SelectedBuilding { get; set; } = "Expo Drive";

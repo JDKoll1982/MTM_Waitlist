@@ -50,11 +50,16 @@ public sealed class MachineConfigurationService : IMachineConfigurationService
 
     private readonly IMySqlHelperServer _mySqlHelperServer;
     private readonly IMachineFacts _machineFacts;
+    private readonly IBuildingCatalogService? _buildingCatalog;
 
-    public MachineConfigurationService(IMySqlHelperServer mySqlHelperServer, IMachineFacts machineFacts)
+    public MachineConfigurationService(
+        IMySqlHelperServer mySqlHelperServer,
+        IMachineFacts machineFacts,
+        IBuildingCatalogService? buildingCatalog = null)
     {
         _mySqlHelperServer = mySqlHelperServer ?? throw new ArgumentNullException(nameof(mySqlHelperServer));
         _machineFacts = machineFacts ?? throw new ArgumentNullException(nameof(machineFacts));
+        _buildingCatalog = buildingCatalog;
     }
 
     /// <inheritdoc />
@@ -116,6 +121,25 @@ public sealed class MachineConfigurationService : IMachineConfigurationService
         var computerId = existing is null
             ? await RegisterAsync(displayName, location, cancellationToken).ConfigureAwait(false)
             : await UpdateAsync(existing, displayName, location, cancellationToken).ConfigureAwait(false);
+
+        // The building is written beside the name rather than into the registry row: it belongs to the computer
+        // through its own table, and this service is the one writer of a computer's configuration rows. An empty
+        // choice leaves what the computer already holds, so a screen that does not offer the control cannot clear it.
+        var building = draft.Building?.Trim() ?? string.Empty;
+        if (building.Length > 0 && _buildingCatalog is not null)
+        {
+            var buildingWritten = await _buildingCatalog
+                .SetComputerBuildingAsync(_machineFacts.Hostname, building, cancellationToken)
+                .ConfigureAwait(false);
+
+            if (!buildingWritten)
+            {
+                return new MachineConfigurationSaveResult(
+                    Succeeded: false,
+                    RefusalReason: MachineConfigurationRefusals.ConfigurationNotWritten,
+                    ComputerId: computerId);
+            }
+        }
 
         // Success is read back rather than inferred from a changed-row count (FR-041). The store reports zero
         // changed rows for a write that sets a column to the value it already holds, so counting rows would

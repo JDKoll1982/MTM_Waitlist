@@ -24,6 +24,8 @@ internal static class SettingsSearchCatalog
 
         new("Local work centers", "Operations", SettingsViewModel.OperationsSettingsRouteViewModelName, "HotWorkCentersExpander",
             "work centre center workstation computer local press list"),
+        new("Buildings", "Operations", SettingsViewModel.OperationsSettingsRouteViewModelName, "BuildingsExpander",
+            "building buildings plant facility site rename add work centre center computer"),
         new("Dunnage type visibility", "Operations", SettingsViewModel.OperationsSettingsRouteViewModelName, "DunnageTypeVisibilityExpander",
             "dunnage type show hide visibility receiving lists"),
         new("Ignored Infor Visual locations", "Operations", SettingsViewModel.OperationsSettingsRouteViewModelName, "IgnoredLocationsExpander",

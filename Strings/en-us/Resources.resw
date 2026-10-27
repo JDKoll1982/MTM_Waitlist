@@ -1530,6 +1530,9 @@
   <data name="Startup_MachineSetup.LocationLabel" xml:space="preserve">
     <value>Where this computer stands</value>
   </data>
+  <data name="Startup_MachineSetup.BuildingLabel" xml:space="preserve">
+    <value>Building this workstation belongs to</value>
+  </data>
   <data name="Startup_MachineSetup.SaveAction" xml:space="preserve">
     <value>Save this computer</value>
   </data>
@@ -1713,6 +1716,12 @@
   </data>
   <data name="Permission_settings_hot_work_centers.Gates" xml:space="preserve">
     <value>Manage the Local work centres shown for this computer.</value>
+  </data>
+  <data name="Permission_settings_buildings.Label" xml:space="preserve">
+    <value>Buildings</value>
+  </data>
+  <data name="Permission_settings_buildings.Gates" xml:space="preserve">
+    <value>Add a building to the plant's list, or rename one that exists.</value>
   </data>
   <data name="Permission_settings_part_pictures.Label" xml:space="preserve">
     <value>Part pictures</value>

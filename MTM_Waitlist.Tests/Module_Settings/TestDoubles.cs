@@ -1,4 +1,5 @@
 using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
@@ -219,6 +220,49 @@ internal sealed class FakeWorkCenterCatalogService : IWorkCenterCatalogService
 
     public Task<string?> SaveHotWorkCentersAsync(string workstationName, IReadOnlyCollection<string> hotWorkCenters, CancellationToken cancellationToken = default) =>
         Task.FromResult<string?>(null);
+}
+
+/// <summary>
+/// The plant's building list and each computer's building, held in memory, so a test can say what the store would
+/// answer without a database.
+/// </summary>
+internal sealed class FakeBuildingCatalogService : IBuildingCatalogService
+{
+    /// <summary>The names the catalog offers, in the order it offers them.</summary>
+    public List<string> Buildings { get; } = new() { "Expo Drive", "Vits Drive" };
+
+    /// <summary>The building each computer stands in, keyed by computer name.</summary>
+    public Dictionary<string, string> ComputerBuildings { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Every write this double was asked to make, so a refused save can be told from one that landed.</summary>
+    public List<(string? Original, string Name)> Saves { get; } = new();
+
+    public BuildingSaveResult SaveResult { get; set; } = BuildingSaveResult.Saved("Expo Drive");
+
+    public Task<IReadOnlyList<BuildingRecord>> GetBuildingsAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<BuildingRecord>>(
+            Buildings.Select((name, index) => new BuildingRecord { BuildingName = name, IsActive = true, SortRank = index }).ToArray());
+
+    public Task<IReadOnlyList<string>> GetSelectableBuildingNamesAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<string>>(Buildings.ToArray());
+
+    public Task<string?> GetComputerBuildingAsync(string computerName, CancellationToken cancellationToken = default) =>
+        Task.FromResult(ComputerBuildings.TryGetValue(computerName, out var building) ? building : null);
+
+    public Task<string?> GetCurrentComputerBuildingAsync(CancellationToken cancellationToken = default) =>
+        GetComputerBuildingAsync("test-workstation", cancellationToken);
+
+    public Task<bool> SetComputerBuildingAsync(string computerName, string buildingName, CancellationToken cancellationToken = default)
+    {
+        ComputerBuildings[computerName] = buildingName;
+        return Task.FromResult(true);
+    }
+
+    public Task<BuildingSaveResult> SaveBuildingAsync(string? originalName, string buildingName, CancellationToken cancellationToken = default)
+    {
+        Saves.Add((originalName, buildingName));
+        return Task.FromResult(SaveResult);
+    }
 }
 
 /// <summary>

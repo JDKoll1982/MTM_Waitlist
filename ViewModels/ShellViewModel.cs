@@ -271,17 +271,19 @@ public partial class ShellViewModel : ObservableRecipient
     public IReadOnlyList<string> Buildings => _buildingSelectionService.Buildings;
 
     /// <summary>
-    /// The buildings the flyout offers: every building except the one in effect (FR-022).
+    /// The buildings the flyout offers: every building except the one in effect (FR-022), with the "every
+    /// building" card last.
     /// </summary>
     /// <remarks>
     /// Rebuilt when the flyout opens rather than kept in step with every change, because the one value that
     /// decides its contents is the building in effect and that is exactly what opening the flyout is about to
     /// change. A building has no picture of its own in this application, so each card draws the one shared
-    /// no-image picture: the entry is still offered and still selectable (FR-023).
+    /// no-image picture: the entry is still offered and still selectable (FR-023). The last card stands for every
+    /// building and is left out only when every building is already in effect, by the same rule as a building.
     /// </remarks>
     public ObservableCollection<BuildingCardOption> BuildingCards { get; } = new();
 
-    /// <summary>Rebuilds the flyout's entries, leaving out the building currently in effect.</summary>
+    /// <summary>Rebuilds the flyout's entries, leaving out the choice currently in effect.</summary>
     public void RefreshBuildingCards()
     {
         var current = SelectedBuilding;
@@ -293,6 +295,11 @@ public partial class ShellViewModel : ObservableRecipient
                      && !string.Equals(building, current, StringComparison.OrdinalIgnoreCase)))
         {
             BuildingCards.Add(new BuildingCardOption(building, "ShellPage_FacilityCard"));
+        }
+
+        if (!BuildingScope.IsAllBuildings(current))
+        {
+            BuildingCards.Add(BuildingCardOption.ForAllBuildings("ShellPage_FacilityCard"));
         }
     }
 
@@ -343,9 +350,16 @@ public partial class ShellViewModel : ObservableRecipient
         _setupWorkflowState.PropertyChanged += OnSetupWorkflowStateChanged;
         _personIdentity = personIdentity;
         SelectedBuilding = _buildingSelectionService.SelectedBuilding;
+        _buildingSelectionService.BuildingChanged += OnBuildingSelectionChanged;
+        _buildingSelectionService.BuildingsChanged += OnBuildingsChanged;
         RefreshBuildingCards();
         HeaderText = "MTM Waitlist";
         RefreshUserInfo();
+
+        // The list and this computer's own building are read once as the shell opens, so the session starts on the
+        // building this workstation was set up in rather than on a name written in code. The read answers through
+        // the events above when it arrives, which is why nothing here waits for it.
+        _ = _buildingSelectionService.InitializeAsync();
     }
 
     /// <summary>
@@ -622,7 +636,9 @@ public partial class ShellViewModel : ObservableRecipient
     {
         HeaderText = string.IsNullOrWhiteSpace(SelectedBuilding)
             ? "Waitlist"
-            : $"Waitlist for \"{SelectedBuilding}\"";
+            : BuildingScope.IsAllBuildings(SelectedBuilding)
+                ? "Waitlist for every building"
+                : $"Waitlist for \"{SelectedBuilding}\"";
     }
 
     private void UpdateWaitlistDetailHeader()
@@ -675,4 +691,29 @@ public partial class ShellViewModel : ObservableRecipient
             UpdateWaitlistHeader();
         }
     }
+
+    /// <summary>
+    /// Follows a choice made anywhere else — the read that arrives after the shell opens, or another screen's
+    /// own selection — so the header never states a building the rest of the application is not using.
+    /// </summary>
+    private void OnBuildingSelectionChanged(object? sender, EventArgs e)
+    {
+        if (!string.Equals(SelectedBuilding, _buildingSelectionService.SelectedBuilding, StringComparison.Ordinal))
+        {
+            SelectedBuilding = _buildingSelectionService.SelectedBuilding;
+        }
+
+        RefreshBuildingCards();
+
+        if (_isWaitlistPageActive)
+        {
+            UpdateWaitlistHeader();
+        }
+    }
+
+    /// <summary>
+    /// Follows an edit to the plant's building list, so a building added or renamed on the settings screen is
+    /// offered in the header without the session restarting.
+    /// </summary>
+    private void OnBuildingsChanged(object? sender, EventArgs e) => RefreshBuildingCards();
 }

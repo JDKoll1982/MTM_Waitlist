@@ -31,6 +31,7 @@ public sealed class PermissionRegistryTests
         "permission.cache.refresh_api",
         "permission.settings.ignored_locations",
         "permission.settings.hot_work_centers",
+        "permission.settings.buildings",
         "permission.settings.part_pictures",
         "permission.settings.cache_refresh",
         "permission.settings.urgency_minutes",

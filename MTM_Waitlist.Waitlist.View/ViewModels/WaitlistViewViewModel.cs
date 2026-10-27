@@ -152,7 +152,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     {
         AppLog.Info("Waitlist", $"Local-Work-Centers filter {(value ? "enabled" : "disabled")} for {_localWorkCenterNames.Count} configured Local Work Center(s).");
         OnPropertyChanged(nameof(EmptyStateMessage));
-        _ = LoadOrdersAsync(_buildingSelectionService.SelectedBuilding);
+        _ = LoadOrdersAsync(BuildingScope.AsFilter(_buildingSelectionService.SelectedBuilding));
     }
 
     /// <summary>
@@ -217,7 +217,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         // It is never replaced by sample rows and it is not an app-wide banner.
         StoreUnavailable = new InternalStoreUnavailableState(
             MySqlDatabaseTarget.MtmWaitlist,
-            _ => LoadOrdersAsync(_buildingSelectionService.SelectedBuilding),
+            _ => LoadOrdersAsync(BuildingScope.AsFilter(_buildingSelectionService.SelectedBuilding)),
             storeAvailabilityTracker,
             dispatcherQueue);
         StoreUnavailable.PropertyChanged += OnStoreUnavailablePropertyChanged;
@@ -644,7 +644,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             _isSubscribed = true;
         }
 
-        await LoadOrdersAsync(_buildingSelectionService.SelectedBuilding);
+        await LoadOrdersAsync(BuildingScope.AsFilter(_buildingSelectionService.SelectedBuilding));
         await OpenLuggerChangeNoticesAsync();
         StartMinuteTicker();
     }
@@ -906,7 +906,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
     private async void OnBuildingChanged(object? sender, EventArgs e)
     {
-        await LoadOrdersAsync(_buildingSelectionService.SelectedBuilding);
+        await LoadOrdersAsync(BuildingScope.AsFilter(_buildingSelectionService.SelectedBuilding));
     }
 
     private async void OnRequestsChanged(object? sender, EventArgs e)
@@ -915,7 +915,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         // job each work centre is running is not what changed. Re-reading it costs one live read per work centre
         // per row, which is what left a person waiting several seconds to see a card they had just acted on, so
         // this reload reuses what the cold load before it read.
-        await LoadOrdersCoreAsync(_buildingSelectionService.SelectedBuilding, reuseJobData: true)
+        await LoadOrdersCoreAsync(BuildingScope.AsFilter(_buildingSelectionService.SelectedBuilding), reuseJobData: true)
             .ConfigureAwait(false);
     }
 
@@ -924,13 +924,13 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         _ = RefreshAsync();
     }
 
-    private async Task LoadOrdersAsync(string building)
+    private async Task LoadOrdersAsync(string? building)
         => await LoadOrdersCoreAsync(building, reuseJobData: false).ConfigureAwait(false);
 
     /// <summary>
     /// Rebuilds the list from the store.
     /// </summary>
-    /// <param name="building">The building whose rows are wanted.</param>
+    /// <param name="building">The building whose rows are wanted, or <c>null</c> for every building.</param>
     /// <param name="reuseJobData">
     /// Whether the job data and the resolved pictures the cold load before this one read may be reused instead of
     /// read again. Passing <see langword="true" /> is only correct for a reload raised by a change in the store —
@@ -938,7 +938,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     /// handler and touches neither the job its work centre is running, nor that job's allotted window, nor any
     /// picture. A cold load reads all of it again, and is therefore the refresh point.
     /// </param>
-    private async Task LoadOrdersCoreAsync(string building, bool reuseJobData)
+    private async Task LoadOrdersCoreAsync(string? building, bool reuseJobData)
     {
         var refreshVersion = Interlocked.Increment(ref _refreshVersion);
         await Task.Yield();
@@ -1959,7 +1959,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         return source.Where(order => IsLocalWorkCenterOrder(order, localWorkCenterNames)).ToArray();
     }
 
-    public Task RefreshAsync() => LoadOrdersAsync(_buildingSelectionService.SelectedBuilding);
+    public Task RefreshAsync() => LoadOrdersAsync(BuildingScope.AsFilter(_buildingSelectionService.SelectedBuilding));
     public string SearchQuery
     {
         get; private set;

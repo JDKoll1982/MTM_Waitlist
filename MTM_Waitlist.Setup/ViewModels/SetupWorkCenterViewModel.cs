@@ -137,9 +137,11 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
         _buildingSelectionService.BuildingChanged += OnBuildingChanged;
         StatusMessage = State.StatusMessage;
         FilterText = string.Empty;
-        BuildingInput = _buildingSelectionService.SelectedBuilding;
+        BuildingInput = ResolveBuildingInput();
+        var buildingFilter = BuildingScope.AsFilter(_buildingSelectionService.SelectedBuilding);
         SelectedWorkCenter = State.WorkCenters.FirstOrDefault(item =>
-            string.Equals(item.Building, _buildingSelectionService.SelectedBuilding, StringComparison.OrdinalIgnoreCase)
+            (buildingFilter is null
+                || string.Equals(item.Building, buildingFilter, StringComparison.OrdinalIgnoreCase))
             && string.Equals(item.Name, State.SelectedWorkCenter, StringComparison.OrdinalIgnoreCase));
         _ = LoadWorkCentersAsync();
         _ = LoadPermissionsAsync();
@@ -225,7 +227,7 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
         if (result.Success)
         {
             WorkCenterNameInput = string.Empty;
-            BuildingInput = _buildingSelectionService.SelectedBuilding;
+            BuildingInput = ResolveBuildingInput();
             await LoadWorkCentersAsync().ConfigureAwait(true);
         }
     }
@@ -250,7 +252,7 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
         if (result.Success)
         {
             WorkCenterNameInput = string.Empty;
-            BuildingInput = _buildingSelectionService.SelectedBuilding;
+            BuildingInput = ResolveBuildingInput();
             await LoadWorkCentersAsync().ConfigureAwait(true);
         }
     }
@@ -293,7 +295,7 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
 
         WorkCenterNameInput = value.Name;
         BuildingInput = string.IsNullOrWhiteSpace(value.Building)
-            ? _buildingSelectionService.SelectedBuilding
+            ? ResolveBuildingInput()
             : value.Building;
     }
 
@@ -304,9 +306,16 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
 
     private void OnBuildingChanged(object? sender, EventArgs e)
     {
-        BuildingInput = _buildingSelectionService.SelectedBuilding;
+        BuildingInput = ResolveBuildingInput();
         ApplyFilter();
     }
+
+    /// <summary>
+    /// The building a work centre added from this screen is filed under: the one in effect, or nothing while every
+    /// building is in effect, because "every building" is not a building a work centre can stand in.
+    /// </summary>
+    private string ResolveBuildingInput() =>
+        BuildingScope.AsFilter(_buildingSelectionService.SelectedBuilding) ?? string.Empty;
 
     private async Task LoadWorkCentersAsync()
     {
@@ -405,9 +414,10 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
         _displayedOtherWorkCenters.Clear();
 
         var normalizedFilter = FilterText.Trim();
-        var selectedBuilding = _buildingSelectionService.SelectedBuilding;
+        var selectedBuilding = BuildingScope.AsFilter(_buildingSelectionService.SelectedBuilding);
         var filteredItems = State.WorkCenters.Where(item =>
-            string.Equals(item.Building, selectedBuilding, StringComparison.OrdinalIgnoreCase)
+            (selectedBuilding is null
+                || string.Equals(item.Building, selectedBuilding, StringComparison.OrdinalIgnoreCase))
             && (string.IsNullOrWhiteSpace(normalizedFilter)
                 || item.Name.Contains(normalizedFilter, StringComparison.OrdinalIgnoreCase)
                 || item.CurrentWorkOrder.Contains(normalizedFilter, StringComparison.OrdinalIgnoreCase)

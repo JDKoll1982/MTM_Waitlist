@@ -61,11 +61,12 @@ public sealed class PermissionsViewModelTests
 
         var settings = viewModel.Cards.Single(card => card.Columns.Any(column => column.Key == PermissionKeys.SettingsHotWorkCenters));
 
-        // Thirteen rather than eight since 010-startup-rebuild (T052) added its four keys to the Settings area
-        // and 013-lugger-location-config added the lugger arrangement: machine configuration, the
-        // ignored-locations edit key, the log panel, the session length and the lugger arrangement. Settings is
-        // still the largest card, which is the shape this assertion exists to notice.
-        Assert.AreEqual(13, settings.Columns.Count, "The largest card carries thirteen permissions.");
+        // Fourteen rather than eight since 010-startup-rebuild (T052) added its four keys to the Settings area,
+        // 013-lugger-location-config added the lugger arrangement, and the buildings catalog added its own key:
+        // machine configuration, the ignored-locations edit key, the log panel, the session length, the lugger
+        // arrangement and the buildings. Settings is still the largest card, which is the shape this assertion
+        // exists to notice.
+        Assert.AreEqual(14, settings.Columns.Count, "The largest card carries fourteen permissions.");
     }
 
     [TestMethod]

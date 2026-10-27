@@ -83,6 +83,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         PermissionKeys.SettingsSessionLength,
         PermissionKeys.SettingsLogPanel,
         PermissionKeys.SettingsHotWorkCenters,
+        PermissionKeys.SettingsBuildings,
         PermissionKeys.SettingsPartPictures,
         PermissionKeys.SettingsStoragePaths,
         PermissionKeys.SettingsCacheRefresh,
@@ -107,6 +108,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         nameof(IsAppearancePanelVisible),
         nameof(IsEnlargePicturesPanelVisible),
         nameof(IsHotWorkCentersPanelVisible),
+        nameof(IsBuildingsPanelVisible),
         nameof(IsDunnageTypeVisibilityPanelVisible),
         nameof(IsIgnoredLocationsPanelVisible),
         nameof(IsSessionLengthPanelVisible),
@@ -142,6 +144,24 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     private readonly IPictureEnlargePreference? _pictureEnlargePreference;
     private readonly ILogStoreLevelService? _logStoreLevelService;
     private readonly IFolderBrowserService? _folderBrowserService;
+    private readonly IBuildingCatalogService? _buildingCatalogService;
+    private readonly IBuildingSelectionService? _buildingSelectionService;
+
+    /// <summary>
+    /// Every candidate work centre before the building filter is applied, so switching the filter re-reads nothing
+    /// from the store and a work centre pinned or unpinned is added to one list rather than to two.
+    /// </summary>
+    private IReadOnlyList<string> _allOtherWorkCenters = Array.Empty<string>();
+
+    /// <summary>The building each catalog work centre records, which is what the Local Work Centers filter matches on.</summary>
+    private IReadOnlyDictionary<string, string> _workCenterBuildings =
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// The catalog read a workstation change started, so the screen's own load can wait for it rather than leave a
+    /// second, concurrent read of the same catalog behind.
+    /// </summary>
+    private Task _catalogLoad = Task.CompletedTask;
 
     // Suppresses the OnNewRequestAlertsEnabledChanged side effect while the initial value is loaded in the
     // constructor, so opening the page does not log a misleading "changed" or re-persist.
@@ -198,6 +218,40 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         get; set;
     } = string.Empty;
 
+    /// <summary>
+    /// The building the selected computer was told it stands in when it was set up. It is what the Local Work
+    /// Centers filter uses in "Saved Building" mode, and what the toggle's own text states.
+    /// </summary>
+    [ObservableProperty]
+    public partial string SelectedWorkstationBuilding
+    {
+        get; set;
+    } = string.Empty;
+
+    /// <summary>
+    /// Whether the candidate work centres are limited to the selected computer's saved building (<c>true</c>) or
+    /// drawn from every building (<c>false</c>). The toggle beside the computer choice is this flag.
+    /// </summary>
+    /// <remarks>
+    /// On by default: the list an operator pins a computer's press list from is the list of work centres in the
+    /// building that computer stands in, and the whole plant is the exception they switch to.
+    /// </remarks>
+    [ObservableProperty]
+    public partial bool IsBuildingFilterEnabled
+    {
+        get; set;
+    } = true;
+
+    /// <summary>
+    /// The building the candidate list is narrowed to while the filter is off: one building, or
+    /// <see cref="BuildingScope.AllBuildings"/> for the whole plant.
+    /// </summary>
+    [ObservableProperty]
+    public partial string SelectedWorkCenterBuilding
+    {
+        get; set;
+    } = BuildingScope.AllBuildings;
+
     [ObservableProperty]
     public partial bool IsHotWorkCentersBusy
     {
@@ -209,6 +263,44 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     {
         get; set;
     } = string.Empty;
+
+    /// <summary>The building the Buildings panel is renaming, or <c>null</c> while a new one is being added.</summary>
+    [ObservableProperty]
+    public partial string? SelectedBuildingForEdit
+    {
+        get; set;
+    }
+
+    /// <summary>The name the Buildings panel is about to write.</summary>
+    [ObservableProperty]
+    public partial string BuildingNameInput
+    {
+        get; set;
+    } = string.Empty;
+
+    /// <summary>Whether the Buildings panel is reading or writing, so its save is not started twice.</summary>
+    [ObservableProperty]
+    public partial bool IsBuildingsBusy
+    {
+        get; set;
+    }
+
+    /// <summary>What the Buildings panel says about the last save: the confirmation or the stated refusal.</summary>
+    [ObservableProperty]
+    public partial string BuildingsStatusMessage
+    {
+        get; set;
+    } = string.Empty;
+
+    /// <summary>
+    /// Whether the signed-in person may add or rename a building, answered from
+    /// <c>permission.settings.buildings</c> rather than from a list of role names kept here.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool CanManageBuildings
+    {
+        get; set;
+    }
 
     [ObservableProperty]
     public partial bool IsDunnageTypeVisibilityBusy
@@ -430,6 +522,30 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     public ObservableCollection<string> HotWorkCenters { get; } = new();
 
     public ObservableCollection<string> OtherWorkCenters { get; } = new();
+
+    /// <summary>
+    /// The buildings the Local Work Centers filter offers, with <see cref="BuildingScope.AllBuildings"/> last.
+    /// </summary>
+    public ObservableCollection<string> BuildingChoices { get; } = new();
+
+    /// <summary>The plant's buildings, in catalog order, as the Buildings panel lists them for editing.</summary>
+    public ObservableCollection<string> EditableBuildings { get; } = new();
+
+    /// <summary>
+    /// What the filter's toggle says: the saved building's own name while the filter is on, and the words
+    /// "All Work Centers" while it is off.
+    /// </summary>
+    public string BuildingFilterToggleLabel => IsBuildingFilterEnabled
+        ? string.IsNullOrWhiteSpace(SelectedWorkstationBuilding)
+            ? "Saved Building"
+            : $"Saved Building — {SelectedWorkstationBuilding}"
+        : "All Work Centers";
+
+    /// <summary>
+    /// Whether the building choice beside the filter can be used: it can only when the filter is off, because
+    /// while the filter is on the answer is the selected computer's saved building and is not a choice.
+    /// </summary>
+    public bool IsBuildingChoiceEnabled => !IsBuildingFilterEnabled;
 
     public ObservableCollection<DunnageTypeVisibilityOption> VisibleDunnageTypes { get; } = new();
 
@@ -903,6 +1019,16 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         string.Join(" ", OtherWorkCenters),
         string.Join(" ", AvailableWorkstations.Select(option => option.Label)));
 
+    /// <summary>
+    /// The Buildings panel: the plant's building list, which both a work centre and a computer name.
+    /// </summary>
+    public bool IsBuildingsPanelVisible => MatchesSearch(
+        "building",
+        "buildings",
+        "plant",
+        "facility",
+        string.Join(" ", EditableBuildings));
+
     public bool IsDunnageTypeVisibilityPanelVisible => MatchesSearch(
         "dunnage",
         "visibility",
@@ -1179,7 +1305,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         "display name",
         string.Join(" ", ComputerManagement.Computers.Select(record => record.GetDisplayLabel())));
 
-    public bool IsOperationsCategoryVisible => IsHotWorkCentersPanelVisible || IsDunnageTypeVisibilityPanelVisible || IsImagesPanelVisible || IsComputersPanelVisible || IsIgnoredLocationsPanelVisible || IsSessionLengthPanelVisible || IsDeveloperLogPanelVisible || IsLogStoreLevelPanelVisible || IsNewRequestAlertsPanelVisible || IsUrgencyAllotmentsPanelVisible;
+    public bool IsOperationsCategoryVisible => IsHotWorkCentersPanelVisible || IsBuildingsPanelVisible || IsDunnageTypeVisibilityPanelVisible || IsImagesPanelVisible || IsComputersPanelVisible || IsIgnoredLocationsPanelVisible || IsSessionLengthPanelVisible || IsDeveloperLogPanelVisible || IsLogStoreLevelPanelVisible || IsNewRequestAlertsPanelVisible || IsUrgencyAllotmentsPanelVisible;
 
     public bool IsAboutCategoryVisible => IsAboutPanelVisible;
 
@@ -1209,7 +1335,9 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         IImageCacheSyncService? imageCacheSyncService = null,
         IPictureEnlargePreference? pictureEnlargePreference = null,
         ILogStoreLevelService? logStoreLevelService = null,
-        IFolderBrowserService? folderBrowserService = null)
+        IFolderBrowserService? folderBrowserService = null,
+        IBuildingCatalogService? buildingCatalogService = null,
+        IBuildingSelectionService? buildingSelectionService = null)
     {
         AppLog.Info("SettingsViewModel", "Constructor started.");
         _themeSelectorService = themeSelectorService;
@@ -1234,6 +1362,11 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         // Optional for the same reason as the resolver: a host with no folder dialog still opens this screen. The
         // box is then typed into and the Browse button does nothing, which is what a missing dialog amounts to.
         _folderBrowserService = folderBrowserService;
+
+        // Optional for the same reason: a host with no building catalog still opens this screen. The Buildings
+        // panel is then empty and the filter has nothing to narrow by, rather than the screen failing to open.
+        _buildingCatalogService = buildingCatalogService;
+        _buildingSelectionService = buildingSelectionService;
         ComputerManagement = computerManagement;
         UrgencyAllotments = urgencyAllotments;
 
@@ -1258,6 +1391,10 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         _ = InitializePictureCacheAsync();
         _ = InitializeLogStoreLevelAsync();
 
+        // The two reads the panels depend on are kept, so a page or a test can await them rather than poll.
+        HotWorkCentersLoad = InitializeHotWorkCentersAsync();
+        BuildingsLoad = InitializeBuildingsAsync();
+
         SwitchThemeCommand = new RelayCommand<ElementTheme>(
             async (param) =>
             {
@@ -1268,7 +1405,8 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 }
             });
 
-        _ = InitializeHotWorkCentersAsync();
+        HotWorkCentersLoad = InitializeHotWorkCentersAsync();
+        BuildingsLoad = InitializeBuildingsAsync();
         _ = InitializeDunnageTypeVisibilityAsync();
         RefreshSearchVisibility();
         AppLog.Info("SettingsViewModel", $"Constructor completed. Theme='{ElementTheme}', Version='{VersionDescription}'.");
@@ -1282,6 +1420,15 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     /// rather than wait a fixed time and hope. It is <see cref="Task.CompletedTask"/> until the first entry.
     /// </remarks>
     public Task PermissionLoad { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
+    /// The Local Work Centers read this screen started when it was built, including the catalog and the selected
+    /// computer's saved building, so a caller can await the settled list instead of polling.
+    /// </summary>
+    public Task HotWorkCentersLoad { get; private set; } = Task.CompletedTask;
+
+    /// <summary>The plant's building list read this screen started when it was built.</summary>
+    public Task BuildingsLoad { get; private set; } = Task.CompletedTask;
 
     /// <summary>
     /// Loads this screen's permission answers when the page is reached, so the gates are read per visit rather
@@ -1330,6 +1477,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
             CanManageSessionLength = answers[PermissionKeys.SettingsSessionLength];
             CanOpenDeveloperLogPanel = answers[PermissionKeys.SettingsLogPanel];
             CanManageHotWorkCenters = answers[PermissionKeys.SettingsHotWorkCenters];
+            CanManageBuildings = answers[PermissionKeys.SettingsBuildings];
             CanManageImageLocationSettings = answers[PermissionKeys.SettingsPartPictures];
             CanManageStoragePaths = answers[PermissionKeys.SettingsStoragePaths];
             CanRequestCacheRefresh = answers[PermissionKeys.SettingsCacheRefresh];
@@ -1412,7 +1560,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
             return;
         }
 
-        _ = LoadCatalogForWorkstationAsync(value);
+        _catalogLoad = LoadCatalogForWorkstationAsync(value);
     }
 
     [RelayCommand]
@@ -1436,14 +1584,14 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
             return;
         }
 
-        var existingOthers = OtherWorkCenters
+        var existingOthers = _allOtherWorkCenters
             .Where(value => !string.Equals(value, normalizedWorkCenter, StringComparison.OrdinalIgnoreCase))
             .ToArray();
 
         HotWorkCenters.Add(normalizedWorkCenter);
         SortCollection(HotWorkCenters);
-        ReplaceCollectionValues(OtherWorkCenters, existingOthers);
-        RefreshSearchVisibility();
+        _allOtherWorkCenters = existingOthers;
+        ApplyWorkCenterBuildingFilter();
 
         await SaveCurrentHotWorkCentersAsync().ConfigureAwait(true);
     }
@@ -1469,13 +1617,12 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
         ReplaceCollectionValues(HotWorkCenters, updatedHot);
 
-        if (!OtherWorkCenters.Any(value => string.Equals(value, normalizedWorkCenter, StringComparison.OrdinalIgnoreCase)))
+        if (!_allOtherWorkCenters.Any(value => string.Equals(value, normalizedWorkCenter, StringComparison.OrdinalIgnoreCase)))
         {
-            OtherWorkCenters.Add(normalizedWorkCenter);
-            SortCollection(OtherWorkCenters);
+            _allOtherWorkCenters = _allOtherWorkCenters.Append(normalizedWorkCenter).ToArray();
         }
 
-        RefreshSearchVisibility();
+        ApplyWorkCenterBuildingFilter();
 
         await SaveCurrentHotWorkCentersAsync().ConfigureAwait(true);
     }
@@ -1560,13 +1707,12 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 ?? currentWorkstation;
 
             var workstationChanged = !string.Equals(SelectedWorkstation, resolvedWorkstation, StringComparison.OrdinalIgnoreCase);
-            if (string.IsNullOrWhiteSpace(SelectedWorkstation))
+            if (string.IsNullOrWhiteSpace(SelectedWorkstation) || workstationChanged)
             {
+                // The property change is what starts the catalog read, so the wait is on that read rather than on a
+                // second one started here.
                 SelectedWorkstation = resolvedWorkstation;
-            }
-            else if (workstationChanged)
-            {
-                SelectedWorkstation = resolvedWorkstation;
+                await _catalogLoad.ConfigureAwait(true);
             }
             else
             {
@@ -1591,10 +1737,22 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         {
             var catalog = await _workCenterCatalogService.GetCatalogAsync(workstationName).ConfigureAwait(true);
             ReplaceCollectionValues(HotWorkCenters, catalog.HotWorkCenters);
-            ReplaceCollectionValues(OtherWorkCenters, catalog.OtherWorkCenters);
+
+            // The candidates are held before the building filter is applied, so switching the filter narrows what
+            // was read rather than reading the catalog again.
+            _allOtherWorkCenters = catalog.OtherWorkCenters.ToArray();
+            _workCenterBuildings = catalog.WorkCenterDetails
+                .Where(detail => !string.IsNullOrWhiteSpace(detail.Value.Building))
+                .ToDictionary(
+                    detail => detail.Key,
+                    detail => detail.Value.Building,
+                    StringComparer.OrdinalIgnoreCase);
+
+            await LoadWorkstationBuildingAsync(workstationName).ConfigureAwait(true);
+            ApplyWorkCenterBuildingFilter();
             HotWorkCentersStatusMessage = string.Empty;
             RefreshSearchVisibility();
-            AppLog.Info("SettingsViewModel", $"LoadCatalogForWorkstationAsync completed. Workstation='{workstationName}', HotCount={HotWorkCenters.Count}, OtherCount={OtherWorkCenters.Count}.");
+            AppLog.Info("SettingsViewModel", $"LoadCatalogForWorkstationAsync completed. Workstation='{workstationName}', HotCount={HotWorkCenters.Count}, OtherCount={OtherWorkCenters.Count}, Building='{SelectedWorkstationBuilding}'.");
         }
         catch (Exception ex)
         {
@@ -1605,6 +1763,247 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         {
             IsHotWorkCentersBusy = false;
         }
+    }
+
+    /// <summary>
+    /// Reads the building the selected computer was set up in, which is what the filter's "Saved Building" mode
+    /// narrows to and what the toggle states.
+    /// </summary>
+    private async Task LoadWorkstationBuildingAsync(string workstationName)
+    {
+        if (_buildingCatalogService is null)
+        {
+            return;
+        }
+
+        try
+        {
+            SelectedWorkstationBuilding = await _buildingCatalogService
+                .GetComputerBuildingAsync(workstationName)
+                .ConfigureAwait(true) ?? string.Empty;
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error(
+                "SettingsHotWorkCenters",
+                ex,
+                $"The saved building for workstation '{workstationName}' could not be read, so the Local Work Centers filter falls back to every building.");
+            SelectedWorkstationBuilding = string.Empty;
+        }
+
+        OnPropertyChanged(nameof(BuildingFilterToggleLabel));
+
+        if (IsBuildingFilterEnabled)
+        {
+            SelectedWorkCenterBuilding = SelectedWorkstationBuilding;
+        }
+    }
+
+    /// <summary>
+    /// Narrows the candidate work centres to the building the filter asks for: the selected computer's saved
+    /// building while the filter is on, otherwise the building chosen beside it, or every building when that choice
+    /// is <see cref="BuildingScope.AllBuildings"/>.
+    /// </summary>
+    /// <remarks>
+    /// A work centre the catalog holds no building for is always offered: hiding a work centre this screen cannot
+    /// classify would be a guess, and a person could not explain why it had disappeared.
+    /// </remarks>
+    private void ApplyWorkCenterBuildingFilter()
+    {
+        var buildingFilter = BuildingScope.AsFilter(
+            IsBuildingFilterEnabled ? SelectedWorkstationBuilding : SelectedWorkCenterBuilding);
+
+        var visible = _allOtherWorkCenters.Where(name =>
+            buildingFilter is null
+            || !_workCenterBuildings.TryGetValue(name, out var building)
+            || string.Equals(building, buildingFilter, StringComparison.OrdinalIgnoreCase));
+
+        ReplaceCollectionValues(OtherWorkCenters, visible);
+        RefreshSearchVisibility();
+    }
+
+    /// <summary>
+    /// Turns the Local Work Centers filter on or off. Turning it on follows the selected computer's saved building;
+    /// turning it off leaves the building choice beside it, which starts on every building.
+    /// </summary>
+    partial void OnIsBuildingFilterEnabledChanged(bool value)
+    {
+        SelectedWorkCenterBuilding = value && !string.IsNullOrWhiteSpace(SelectedWorkstationBuilding)
+            ? SelectedWorkstationBuilding
+            : BuildingScope.AllBuildings;
+
+        OnPropertyChanged(nameof(BuildingFilterToggleLabel));
+        OnPropertyChanged(nameof(IsBuildingChoiceEnabled));
+        ApplyWorkCenterBuildingFilter();
+    }
+
+    partial void OnSelectedWorkCenterBuildingChanged(string value) => ApplyWorkCenterBuildingFilter();
+
+    partial void OnSelectedWorkstationBuildingChanged(string value) =>
+        OnPropertyChanged(nameof(BuildingFilterToggleLabel));
+
+    /// <summary>Clears the Buildings panel so the next save adds a building rather than renaming one.</summary>
+    [RelayCommand]
+    private void BeginNewBuilding()
+    {
+        SelectedBuildingForEdit = null;
+        BuildingNameInput = string.Empty;
+        BuildingsStatusMessage = string.Empty;
+    }
+
+    /// <summary>Loads one building into the panel so it can be renamed.</summary>
+    /// <param name="building">The building to edit. A blank one changes nothing.</param>
+    [RelayCommand]
+    private void EditBuilding(string? building)
+    {
+        if (string.IsNullOrWhiteSpace(building))
+        {
+            return;
+        }
+
+        SelectedBuildingForEdit = building.Trim();
+        BuildingsStatusMessage = string.Empty;
+    }
+
+    /// <summary>What the panel is about to do, so Save is never pressed without knowing whether it adds or renames.</summary>
+    public string BuildingEditHeading => string.IsNullOrWhiteSpace(SelectedBuildingForEdit)
+        ? "Adding a new building."
+        : $"Renaming '{SelectedBuildingForEdit}'.";
+
+    /// <summary>Choosing a building to rename fills the name box with the name it already has.</summary>
+    partial void OnSelectedBuildingForEditChanged(string? value)
+    {
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            BuildingNameInput = value;
+        }
+
+        OnPropertyChanged(nameof(BuildingEditHeading));
+    }
+
+    /// <summary>
+    /// Adds the building named in the panel, or renames the one chosen there.
+    /// </summary>
+    /// <remarks>
+    /// The write goes through <see cref="IBuildingCatalogService"/>, whose procedure also rewrites the work centres
+    /// and the computers that name the old spelling, so a rename cannot leave anything naming a building the
+    /// catalog no longer holds. The selection service is asked to read again afterwards, which is what carries a
+    /// new or renamed building into the shell's chooser without restarting the session.
+    /// </remarks>
+    [RelayCommand]
+    private async Task SaveBuildingAsync()
+    {
+        if (!CanManageBuildings)
+        {
+            BuildingsStatusMessage = "You do not have permission to change the building list.";
+            return;
+        }
+
+        if (_buildingCatalogService is null || IsBuildingsBusy)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(BuildingNameInput))
+        {
+            BuildingsStatusMessage = "A building name is required.";
+            return;
+        }
+
+        IsBuildingsBusy = true;
+        try
+        {
+            var result = await _buildingCatalogService
+                .SaveBuildingAsync(SelectedBuildingForEdit, BuildingNameInput)
+                .ConfigureAwait(true);
+
+            BuildingsStatusMessage = result.Message;
+
+            if (!result.Succeeded)
+            {
+                return;
+            }
+
+            SelectedBuildingForEdit = null;
+            BuildingNameInput = string.Empty;
+            await LoadBuildingsAsync().ConfigureAwait(true);
+
+            if (_buildingSelectionService is not null)
+            {
+                await _buildingSelectionService.RefreshAsync().ConfigureAwait(true);
+            }
+
+            AppLog.Info("SettingsBuildings", $"Building saved. Message='{BuildingsStatusMessage}'.");
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("SettingsBuildings", ex, "SaveBuildingAsync failed.");
+            BuildingsStatusMessage = $"Unable to save the building: {ex.Message}";
+        }
+        finally
+        {
+            IsBuildingsBusy = false;
+        }
+    }
+
+    /// <summary>Reads the plant's buildings for both the Buildings panel and the Local Work Centers filter.</summary>
+    private async Task InitializeBuildingsAsync()
+    {
+        IsBuildingsBusy = true;
+        try
+        {
+            await LoadBuildingsAsync().ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("SettingsBuildings", ex, "The plant's building list could not be read.");
+            BuildingsStatusMessage = $"Unable to load the buildings: {ex.Message}";
+        }
+        finally
+        {
+            IsBuildingsBusy = false;
+        }
+    }
+
+    /// <summary>
+    /// Fills the Buildings panel and the filter's building choice from the catalog, in the catalog's own order, with
+    /// <see cref="BuildingScope.AllBuildings"/> last in the choice.
+    /// </summary>
+    private async Task LoadBuildingsAsync()
+    {
+        if (_buildingCatalogService is null)
+        {
+            return;
+        }
+
+        var buildings = await _buildingCatalogService.GetBuildingsAsync().ConfigureAwait(true);
+        var active = buildings
+            .Where(building => building.IsActive && !string.IsNullOrWhiteSpace(building.BuildingName))
+            .Select(building => building.BuildingName)
+            .ToArray();
+
+        EditableBuildings.Clear();
+        foreach (var building in active)
+        {
+            EditableBuildings.Add(building);
+        }
+
+        BuildingChoices.Clear();
+        foreach (var building in active)
+        {
+            BuildingChoices.Add(building);
+        }
+
+        BuildingChoices.Add(BuildingScope.AllBuildings);
+
+        // A building that was renamed or withdrawn is no longer a choice, so the filter falls back to every
+        // building rather than to a name the list does not hold.
+        if (!BuildingChoices.Contains(SelectedWorkCenterBuilding, StringComparer.OrdinalIgnoreCase))
+        {
+            SelectedWorkCenterBuilding = BuildingScope.AllBuildings;
+        }
+
+        RefreshSearchVisibility();
     }
 
     private async Task SaveCurrentHotWorkCentersAsync()

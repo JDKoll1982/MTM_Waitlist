@@ -148,9 +148,9 @@ public sealed class LaunchIdentityReadOnlyTests
             .ToList();
 
         CollectionAssert.AreEquivalent(
-            new[] { "ComputerName", "Location" },
+            new[] { "Building", "ComputerName", "Location" },
             members,
-            "The machine-configuration draft carries something other than this computer's identity, so a screen could write a folder into it (FR-040).");
+            "The machine-configuration draft carries something other than this computer's identity and the building it stands in, so a screen could write a folder into it (FR-040).");
     }
 
     /// <summary>

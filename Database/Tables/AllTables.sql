@@ -113,6 +113,32 @@ CREATE TABLE IF NOT EXISTS auth_roles_assignments (
 
 SET FOREIGN_KEY_CHECKS = 1;
 
+-- Create table: core_buildings_catalog
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+SET NAMES utf8mb4;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+CREATE TABLE IF NOT EXISTS core_buildings_catalog (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    public_id CHAR(36) NOT NULL,
+    building_name VARCHAR(64) NOT NULL DEFAULT 'Expo Drive' COMMENT 'The building as people name it, and exactly the value a work centre or a computer records.',
+    is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT '0 withdraws the building from every chooser without deleting the rows that name it.',
+    sort_rank INT NOT NULL DEFAULT 100 COMMENT 'Display order inside the choosers.',
+    created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was created.',
+    updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp of the last write.',
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_core_buildings_catalog_public_id (public_id),
+    UNIQUE KEY uq_core_buildings_catalog_building_name (building_name),
+    KEY idx_core_buildings_catalog_is_active (is_active),
+    KEY idx_core_buildings_catalog_sort_rank (sort_rank)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'The buildings the plant is split into, as the one list every building chooser reads.';
+
+SET FOREIGN_KEY_CHECKS = 1;
+
 -- Create table: config_settings_values
 -- Engine: MySQL 5.7
 
@@ -991,5 +1017,30 @@ CREATE TABLE IF NOT EXISTS waitlist_lugger_arrangement_changes (
     KEY idx_waitlist_lugger_arrangement_changes_changed_utc (changed_utc),
     KEY idx_waitlist_lugger_arrangement_changes_lugger_id (lugger_id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'Append-only record of every edit to the lugger arrangement: what changed, from what to what, by whom and when.';
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- Create table: core_computer_buildings
+-- Engine: MySQL 5.7
+
+USE mtm_waitlist;
+
+SET NAMES utf8mb4;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+CREATE TABLE IF NOT EXISTS core_computer_buildings (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    public_id CHAR(36) NOT NULL,
+    computer_id BIGINT NOT NULL COMMENT 'The computer, from core_computers_registry.id.',
+    building_name VARCHAR(64) NOT NULL DEFAULT 'Expo Drive' COMMENT 'The building this computer stands in, spelled as core_buildings_catalog.building_name spells it.',
+    created_utc DATETIME NOT NULL COMMENT 'UTC timestamp when the row was created.',
+    updated_utc DATETIME NOT NULL COMMENT 'UTC timestamp of the last write.',
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_core_computer_buildings_public_id (public_id),
+    UNIQUE KEY uq_core_computer_buildings_computer_id (computer_id),
+    KEY idx_core_computer_buildings_building_name (building_name),
+    CONSTRAINT fk_core_computer_buildings_core_computers_registry_computer_id FOREIGN KEY (computer_id) REFERENCES core_computers_registry (id)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = 'The building each computer stands in, chosen when that computer is set up.';
 
 SET FOREIGN_KEY_CHECKS = 1;

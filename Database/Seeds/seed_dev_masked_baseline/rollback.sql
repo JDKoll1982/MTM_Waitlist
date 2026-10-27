@@ -24,10 +24,6 @@ WHERE
         )
     );
 
-DELETE FROM core_computers_registry
-WHERE
-    computer_name = 'johnspc';
-
 DELETE FROM core_users_profiles WHERE username_normalized = 'johnk';
 
 DELETE FROM core_users_profiles

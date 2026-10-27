@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Tests.Module_Mock;
 
@@ -51,6 +52,28 @@ public sealed class ShellBuildingFlyoutTests
             "!string.Equals(building, current, StringComparison.OrdinalIgnoreCase)",
             "The building currently in effect is left out (FR-022).");
         StringAssert.Contains(source, "RefreshBuildingCards();", "The list is rebuilt when the building changes and as the flyout opens.");
+    }
+
+    [TestMethod]
+    public void ViewModel_ShellBuildingFlyoutTests_TheEveryBuildingCard_IsOfferedLastAndIsNotABuilding()
+    {
+        var card = BuildingCardOption.ForAllBuildings("ShellPage_FacilityCard");
+
+        Assert.IsTrue(card.IsAllBuildings);
+        Assert.AreEqual(BuildingScope.AllBuildings, card.Building);
+        Assert.AreEqual(BuildingScope.AllBuildings, card.Title);
+        Assert.AreEqual("Assets/Placeholders/default-no-image.png", card.ImagePath, "The every-building card draws the one shared placeholder too.");
+        StringAssert.Contains(card.AutomationId, "All Buildings");
+
+        var source = ViewModelSource();
+        StringAssert.Contains(
+            source,
+            "BuildingCards.Add(BuildingCardOption.ForAllBuildings(\"ShellPage_FacilityCard\"));",
+            "The every-building card is offered by the shell's own card list.");
+        Assert.IsTrue(
+            source.IndexOf("foreach (var building in Buildings", StringComparison.Ordinal)
+                < source.IndexOf("BuildingCards.Add(BuildingCardOption.ForAllBuildings", StringComparison.Ordinal),
+            "The every-building card is added after the buildings, so it is the last entry in the flyout.");
     }
 
     [TestMethod]

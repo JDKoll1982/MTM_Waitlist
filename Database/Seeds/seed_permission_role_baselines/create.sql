@@ -420,6 +420,40 @@ ON DUPLICATE KEY UPDATE
     value_type = VALUES(value_type),
     updated_utc = VALUES(updated_utc);
 
+-- ---------------------------------------------------------------------------
+-- Buildings catalog — permission.settings.buildings
+--
+--   A building is a plant-wide fact that both a work centre and a computer name, so changing the list is kept
+--   apart from one computer's press list: Plant Manager, IT Department and Developer answer 1 and every other
+--   role answers 0. A role with no row here would be refused anyway; the nine rows exist so each role's answer
+--   is recorded in this file rather than inferred from an absence.
+-- ---------------------------------------------------------------------------
+INSERT INTO
+    config_settings_values (
+        public_id,
+        setting_key,
+        scope_type,
+        scope_key,
+        setting_value_bool,
+        value_type,
+        updated_by_user_id,
+        updated_utc
+    )
+VALUES
+    (UUID(), 'permission.settings.buildings', 'role', 'role:developer', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.buildings', 'role', 'role:it_department', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.buildings', 'role', 'role:plant_manager', 1, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.buildings', 'role', 'role:production_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.buildings', 'role', 'role:setup_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.buildings', 'role', 'role:material_handler_lead', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.buildings', 'role', 'role:material_handler', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.buildings', 'role', 'role:production', 0, 'bool', NULL, UTC_TIMESTAMP()),
+    (UUID(), 'permission.settings.buildings', 'role', 'role:setup', 0, 'bool', NULL, UTC_TIMESTAMP())
+ON DUPLICATE KEY UPDATE
+    setting_value_bool = VALUES(setting_value_bool),
+    value_type = VALUES(value_type),
+    updated_utc = VALUES(updated_utc);
+
 -- The plant's list of locations to hide (FR-024). The value is the normalized, uppercase, comma-separated form
 -- `IgnoredLocationsService` returns, so the store holds the same shape the code compares against rather than a
 -- second shape that has to be parsed back. `value_type` is `text`, which is the vocabulary this table already
