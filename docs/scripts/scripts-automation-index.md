@@ -11,6 +11,7 @@ ships with the application — the app's own behaviour never depends on these fi
 | [`database/`](../../scripts/database/) | `Move-PartPictureLayout.ps1` — the one-time picture-share move. |
 | [`diagnostics/`](../../scripts/diagnostics/) | `capture-debug-output.ps1`, `dump-wer.ps1` / `dump-wer.cmd`, `show-blame.ps1` — capture and read what the app and the test host report. |
 | [`service/`](../../scripts/service/) | `measure-reliability-window.ps1` — measure the Mock service reliability criteria. |
+| [`store/`](../../scripts/store/) | `publish-app-payload.ps1` — publish the application in the shape the MTM Loader delivers, with its `build-manifest.json`. Documented on its own page. |
 | [`spec-kit/`](../../scripts/spec-kit/) | `companion-clear-concerns.py`, `companion-open-tasks.py`, `run-ralph-deepseek.ps1` — work with the Spec Kit Companion and the Ralph loop. |
 | [`ui-automation/`](../../scripts/ui-automation/) | Driving the running app through UI Automation; documented on its own page. |
 
@@ -222,6 +223,26 @@ A seeded run proves the **metric** and that its thresholds bite. It is synthetic
 about the service's real-world reliability. Never report a seeded result as the measured outcome of SC-007/SC-008;
 the real measurement needs the durable history in `specs/004-unified-card-item-picker/tasks.md` T230 and then 30
 days on the host.
+
+## Application store — `scripts/store/`
+
+### publish-app-payload.ps1
+
+Publishes the application the way the MTM Loader delivers it: the loader-shaped publish (unpackaged, self-contained
+.NET and Windows App SDK, not single-file, not trimmed), a `build-manifest.json` written last from the files actually
+published, and a full hash verification of the folder before anything is copied to the share.
+
+Full details, including what the loader requires and what the script refuses to do, are on its own page:
+[scripts-store-publish-app-payload.md](./scripts-store-publish-app-payload.md).
+
+```powershell
+# publish, write and verify the manifest; changes nothing outside the repository
+pwsh -ExecutionPolicy Bypass -File scripts/store/publish-app-payload.ps1
+
+# then copy the verified payload to the store, as the deployment account
+pwsh -ExecutionPolicy Bypass -File scripts/store/publish-app-payload.ps1 `
+  -Destination '\\mtmanu-fs01\Expo Drive\MH_RESOURCE\Material_Handler\MTM Application Store\MTM Waitlist Application'
+```
 
 ## Spec Kit — `scripts/spec-kit/`
 

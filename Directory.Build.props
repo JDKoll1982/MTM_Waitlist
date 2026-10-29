@@ -4,7 +4,7 @@
       The application's version, and the only place it is written.
 
       Every project under this file takes it from here, so the application, each module library and the on-host
-      service all report one version rather than one each. The SDK derives AssemblyVersion (1.1.0.0), FileVersion
+      service all report one version rather than one each. The SDK derives AssemblyVersion (1.1.1.0), FileVersion
       and InformationalVersion from it, which is what the Settings screen's App Version line, the diagnostics
       context recorded on every log entry, and the service's reported version all read.
 
@@ -13,7 +13,7 @@
         - Package.appxmanifest  -> the MSIX identity version (four parts)
         - app.manifest, MTM_Waitlist.Mock.Service/app.manifest -> the native assembly identity
     -->
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(AppxPackage)'=='false'">

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MTM Waitlist Application — version 1.1.1</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --page: #f4f6f8;
+    --surface: #ffffff;
+    --ink: #1b1f24;
+    --ink-muted: #4d5865;
+    --rule: #d7dde4;
+    --accent: #0f5c94;
+    --accent-ink: #ffffff;
+    --badge: #e7f0f8;
+    --note: #fff8e6;
+    --note-rule: #d9b45a;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --page: #14181d;
+      --surface: #1c2229;
+      --ink: #e8edf2;
+      --ink-muted: #a7b3c1;
+      --rule: #2f3944;
+      --accent: #7cb6e6;
+      --accent-ink: #0b1420;
+      --badge: #22303d;
+      --note: #2a2416;
+      --note-rule: #7a6533;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 0 16px 64px;
+    background: var(--page);
+    color: var(--ink);
+    font: 16px/1.6 "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  header.masthead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    padding: 32px 0 24px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  header.masthead img {
+    width: 72px;
+    height: auto;
+    border-radius: 8px;
+  }
+
+  header.masthead p {
+    margin: 4px 0 0;
+    color: var(--ink-muted);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 2rem;
+    line-height: 1.2;
+  }
+
+  h2 {
+    margin: 40px 0 12px;
+    font-size: 1.3rem;
+  }
+
+  h3 {
+    margin: 24px 0 8px;
+    font-size: 1.05rem;
+  }
+
+  p, li { max-width: 68ch; }
+
+  ul { padding-left: 22px; }
+  li { margin: 6px 0; }
+
+  .release-line {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--badge);
+    font-weight: 600;
+  }
+
+  .note {
+    margin: 24px 0 0;
+    padding: 16px 20px;
+    background: var(--note);
+    border-left: 4px solid var(--note-rule);
+    border-radius: 4px;
+  }
+
+  .note p { margin: 0; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 0;
+    background: var(--surface);
+  }
+
+  caption {
+    text-align: left;
+    color: var(--ink-muted);
+    padding-bottom: 8px;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border: 1px solid var(--rule);
+    vertical-align: top;
+  }
+
+  th { background: var(--badge); }
+
+  a {
+    color: var(--accent);
+    text-underline-offset: 2px;
+  }
+
+  a:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+    color: var(--ink-muted);
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="masthead">
+    <img src="../../Assets/Brand/mtm-logo.jpg" alt="MTM" width="72" height="72" />
+    <div>
+      <h1>MTM Waitlist Application</h1>
+      <p class="release-line">Released October 29, 2026</p>
+      <p>Version 1.1.1</p>
+    </div>
+  </header>
+
+  <main>
+    <article aria-labelledby="summary-heading">
+      <h2 id="summary-heading">Highlights</h2>
+      <ul>
+        <li>The application now updates through the MTM Loader, which replaces it safely and keeps one previous copy in case the new one will not start.</li>
+        <li>Nothing you do changes. Every screen, every request and every save works exactly as it did in the previous version.</li>
+        <li>This release is groundwork: the screens for the generic request flow now exist, so they can be reviewed before any database work is written.</li>
+      </ul>
+
+      <div class="note">
+        <p><strong>No action is needed.</strong> If the MTM Loader offers you version 1.1.1, take it. Requests you have already raised are untouched.</p>
+      </div>
+
+      <h2>What changed</h2>
+
+      <h3>Updates arrive through the MTM Loader</h3>
+      <p>The application is now published in the form the MTM Loader delivers, with a file list it checks before it switches you to a new version. The Loader copies the new version to your machine, verifies every file, and only then makes it the one you run. If the new version does not start, the previous one is still there.</p>
+
+      <h3>Groundwork for the generic request flow</h3>
+      <p>New screens have been built for a generic request: choosing a work center, category and item, stating the part with its stage and sequence, choosing dunnage, stating a scrap type, searching for a die, giving a needed-by time, reviewing, and seeing the result. In this release they are not part of the application you run. They are being reviewed first, so the layout and the wording are settled before any of the data work is written.</p>
+
+      <h3>Behind the scenes</h3>
+      <ul>
+        <li>The screens are built so the same layouts will work when their real data arrives, without being rewritten.</li>
+        <li>Every piece of that temporary material is named so one search finds all of it, and a check now fails the build if any of it is reachable from the application you run.</li>
+      </ul>
+
+      <h2>Why it matters</h2>
+      <p>Two things come out of this release. The next version of the generic request flow will be laid out and agreed before it is connected to the plant systems, which is cheaper than changing a screen that is already saving data. And from this version on, the application reaches a floor machine the same way the other MTM applications do: through the Loader, verified, with a way back.</p>
+
+      <h2>Action you need to take</h2>
+      <p>None. The application keeps its settings, its saved requests and its pictures. There is no database step, no reconfiguration and no sign-in change.</p>
+
+      <h2>Release details</h2>
+      <table>
+        <caption>This release</caption>
+        <tbody>
+          <tr>
+            <th scope="row">Version</th>
+            <td>1.1.1</td>
+          </tr>
+          <tr>
+            <th scope="row">Released</th>
+            <td>October 29, 2026</td>
+          </tr>
+          <tr>
+            <th scope="row">Delivered by</th>
+            <td>The MTM Loader, from the MTM Application Store</td>
+          </tr>
+          <tr>
+            <th scope="row">Change type</th>
+            <td>Patch: internal groundwork only, with no change to how the application behaves</td>
+          </tr>
+          <tr>
+            <th scope="row">Work covered</th>
+            <td>The generic request screen layer and its review preview</td>
+          </tr>
+          <tr>
+            <th scope="row">Known issues</th>
+            <td>None reported for this release</td>
+          </tr>
+        </tbody>
+      </table>
+    </article>
+  </main>
+
+  <footer>
+    <p>Released October 29, 2026. If something does not look right after the update, tell the person who supports the waitlist application and name version 1.1.1.</p>
+  </footer>
+
+</div>
+</body>
+</html>
