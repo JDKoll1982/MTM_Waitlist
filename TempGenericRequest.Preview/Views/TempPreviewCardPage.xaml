@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="MTM_Waitlist.GenericRequest.Temp.TempPreviewCardPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:card="using:MTM_Waitlist.GenericRequest.Controls">
+
+    <ScrollViewer HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+        <StackPanel Padding="24" Spacing="16">
+            <TextBlock x:Uid="TempGenericRequest_Card_Title" Style="{StaticResource TitleTextBlockStyle}" />
+            <TextBlock
+                x:Uid="TempGenericRequest_Card_Intro"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                TextWrapping="Wrap"
+                Style="{StaticResource BodyTextBlockStyle}" />
+
+            <TextBlock x:Uid="TempGenericRequest_Card_Generic_Heading" Style="{StaticResource BodyStrongTextBlockStyle}" />
+            <card:GenericRequestCard Model="{x:Bind GenericModel}" />
+
+            <TextBlock x:Uid="TempGenericRequest_Card_WorkOrder_Heading" Style="{StaticResource BodyStrongTextBlockStyle}" />
+            <!--
+                A stand-in for the work-order card, drawn here only so the two can be judged side by side. The real
+                card is a control inside the shipping application, which this preview cannot reference without
+                dragging the application's startup and packaging into it.
+            -->
+            <Border
+                Padding="16"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8">
+                <Grid ColumnSpacing="16" RowSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Spacing="2">
+                        <TextBlock
+                            x:Uid="TempGenericRequest_Card_WorkOrder_Number"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}" />
+                        <TextBlock Text="{x:Bind WorkOrderNumber}" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Spacing="2">
+                        <TextBlock
+                            x:Uid="TempGenericRequest_Card_WorkOrder_Part"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}" />
+                        <TextBlock Text="{x:Bind WorkOrderPart}" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Spacing="2">
+                        <TextBlock
+                            x:Uid="TempGenericRequest_Card_WorkOrder_Sequence"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}" />
+                        <TextBlock Text="{x:Bind WorkOrderSequence}" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="3" Spacing="2">
+                        <TextBlock
+                            x:Uid="TempGenericRequest_Card_WorkOrder_Due"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Style="{StaticResource CaptionTextBlockStyle}" />
+                        <TextBlock Text="{x:Bind WorkOrderDue}" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

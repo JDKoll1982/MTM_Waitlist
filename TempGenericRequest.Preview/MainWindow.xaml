@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="MTM_Waitlist.GenericRequest.Temp.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Padding="16" ColumnSpacing="16">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="280" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0" Spacing="12">
+            <TextBlock
+                x:Uid="TempGenericRequest_Window_Title"
+                TextWrapping="Wrap"
+                Style="{StaticResource SubtitleTextBlockStyle}" />
+            <TextBlock
+                x:Uid="TempGenericRequest_Shell_Hint"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                TextWrapping="Wrap"
+                Style="{StaticResource CaptionTextBlockStyle}" />
+            <ComboBox
+                x:Name="TempScreenPicker"
+                x:Uid="TempGenericRequest_Scenario_Screen"
+                HorizontalAlignment="Stretch"
+                SelectionChanged="OnScreenChanged" />
+            <ComboBox
+                x:Name="TempScenarioPicker"
+                x:Uid="TempGenericRequest_Scenario_Presentation"
+                HorizontalAlignment="Stretch"
+                SelectionChanged="OnScenarioChanged" />
+            <ComboBox
+                x:Name="TempVariantPicker"
+                x:Uid="TempGenericRequest_Scenario_Variant"
+                HorizontalAlignment="Stretch"
+                SelectionChanged="OnVariantChanged" />
+        </StackPanel>
+
+        <ContentControl
+            x:Name="TempContent"
+            Grid.Column="1"
+            HorizontalContentAlignment="Stretch"
+            VerticalContentAlignment="Stretch" />
+    </Grid>
+</Window>

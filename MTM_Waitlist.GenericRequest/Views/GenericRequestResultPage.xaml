@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="MTM_Waitlist.GenericRequest.Views.GenericRequestResultPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:MTM_Waitlist.GenericRequest.Controls"
+    HorizontalAlignment="Stretch"
+    VerticalAlignment="Stretch">
+
+    <controls:GenericRequestStepFrame
+        AttemptedAtDisplay="{x:Bind ViewModel.AttemptedAtDisplay, Mode=OneWay}"
+        BackCommand="{x:Bind ViewModel.BackCommand}"
+        ContinueVisible="False"
+        EmptyKey="{x:Bind ViewModel.EmptyKey}"
+        IntroKey="{x:Bind ViewModel.IntroKey}"
+        Presentation="{x:Bind ViewModel.Presentation, Mode=OneWay}"
+        RetryCommand="{x:Bind ViewModel.RetryCommand}"
+        TitleKey="{x:Bind ViewModel.TitleKey}">
+        <controls:GenericRequestStepFrame.Body>
+            <StackPanel Spacing="12">
+                <TextBlock
+                    x:Uid="GenericRequest_Result_Success_Title"
+                    TextWrapping="Wrap"
+                    Style="{StaticResource SubtitleTextBlockStyle}" />
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock
+                        x:Uid="GenericRequest_Result_Number"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Style="{StaticResource BodyTextBlockStyle}" />
+                    <TextBlock
+                        Text="{x:Bind ViewModel.RequestNumber}"
+                        TextTrimming="CharacterEllipsis"
+                        Style="{StaticResource BodyStrongTextBlockStyle}" />
+                </StackPanel>
+            </StackPanel>
+        </controls:GenericRequestStepFrame.Body>
+    </controls:GenericRequestStepFrame>
+</Page>

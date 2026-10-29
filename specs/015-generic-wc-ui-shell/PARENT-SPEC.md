@@ -1,17 +1,22 @@
+> **This is not the active specification.** It is the combined feature specification as it stood before the
+> split, kept so the whole feature can be read in one place and so no decision is lost. It is decomposed into
+> eight specification files, 015 through 022, listed in [BREAKDOWN.md](./BREAKDOWN.md). Where this file and a
+> chunk disagree, the chunk is authoritative.
+
 # Feature Specification: Generic Work Center Request
 
-**Feature Branch**: `015-generic-work-center-request`
+**Feature Branch**: `015-generic-work-center-request` — *the pre-split feature; its eight chunks are 015 to 022*
 **Created**: 2026-10-27
 **Status**: Draft
 **Input**: Owner request: "A Work Center that is not reliant on a Work Order. Instead of pulling request data from the work order the requester is responsible for stating what they need. Part Numbers must be validated against part numbers in Visual. Dunnage uses the Substitute as a page. If picking up scrap the requester is responsible for stating the scrap type during the request process. A new Generic Request Flow and Generic Request cards need to be established as new modules/projects."
 
-The decisions below were settled with the owner in review on 2026-10-27: the generic designation is a flag on the work center catalog; a stated part is proved real against the WIP application or Infor Visual according to a WIP/finished-good choice the requester makes first; the dunnage step *is* the substitute catalogue, shown as a page; scrap types come from the configured lugger arrangement; generic requests share the existing queue and board but draw their own card; the flow and its views are built as new projects; and a die is found through a new Visual-backed search by die number or part number that lists every die a part has, with locations.
+The decisions below were settled with the owner: the generic designation is a flag on the work center catalog; a stated part is proved against Infor Visual **and** the WIP floor, which together supply the sequences the part runs at, and the chosen sequence decides which system owns the quantity — the WIP floor by part and sequence for work in process, Infor Visual by part number for a finished good (owner changes, 2026-10-29); the dunnage step *is* the substitute catalogue, shown as a page; scrap types come from the plant's one scrap-type list; generic requests share the existing queue and board but draw their own card; the flow and its views are built as new projects; and a die is found through a new Visual-backed search by die number or part number that lists every die a part has, with locations. Three questions were answered on 2026-10-29: a running job may be read **only if the requester asks for it** (Q1), the floor is read before Visual when a sequence has no operation state (Q2), and a part the floor holds but Visual does not know **is** requestable from the floor's own records (Q3).
 
 ## User Scenarios & Testing
 
 ### User Story 1 - A work center with no work order can still ask for what it needs (Priority: P1)
 
-A press operator works at a work center that has nothing on the board — no active setup job, no work order to point at. Until now the request wizard stopped at that work center because it had nothing to read. The operator opens the wizard, picks that work center, and instead of the app reading a job, the app asks them what they need: which category and item, which part, and the few questions that item requires. They confirm, and the request appears on the same waitlist board as every other request, ready for a handler.
+A press operator works at a work center that has nothing on the board — no active setup job, no work order to point at. Until now the request wizard stopped at that work center because it had nothing to read. The operator opens the wizard, picks that work center, and instead of the app reading a job, the app asks them what they need: which category and item, which part, and the few questions that item requires. They confirm, and the request appears on the same waitlist board as every other request, ready for a handler. If a job does happen to be running at that work center, the wizard offers to fill the request from it — a convenience the operator can decline, never a requirement.
 
 **Why this priority**: this is the feature. Every other story exists to make one of those answers provable or to draw the result correctly. Without it, a work center can only ask for material by first inventing a work order.
 
@@ -24,29 +29,37 @@ A press operator works at a work center that has nothing on the board — no act
 3. **Given** a generic work center is selected, **When** the wizard reaches any step that a work-order request fills from the job (die, component, coil, hopper, dunnage, scrap), **Then** the requester answers that step themselves and no job value is read, shown, or guessed.
 4. **Given** a requester has answered everything the chosen item requires, **When** they confirm, **Then** one request is raised into the waitlist queue and appears on the board.
 5. **Given** a work center that is **not** designated generic, **When** it is selected, **Then** the existing work-order flow runs exactly as it does today.
-6. **Given** a generic work center that happens to have an active job, **When** a request is raised there, **Then** the generic flow is used and the job is not read.
+6. **Given** a generic work center that happens to have an active job, **When** a request is raised there, **Then** the generic flow is used and the job is not read unless the requester asks for it.
+7. **Given** a generic work center with a running job, **When** the requester declines the offer to fill the request from it, **Then** the request proceeds exactly as it would with no job at all, and the refusal is not recorded as a failure.
+8. **Given** the requester accepts that offer, **When** the request is filled from the job, **Then** every value taken from it is marked as coming from the job, each one can still be changed before the request is raised, and the job is recorded as the request's provenance rather than as its identity.
 
 ---
 
-### User Story 2 - A stated part is proved to be a real part (Priority: P1)
+### User Story 2 - The stated part's sequence decides where its quantity comes from (Priority: P1)
 
-A machinist needs a part brought to their work center. They are asked one question before anything else: is the part they want a WIP part or a finished good? They answer, then type the number into a box that completes as they type and only ever offers genuine parts. A WIP choice is proved against the WIP floor's records; a finished good is proved against Infor Visual. Once the part is proved, the app says whether any of it is on hand — and a part with nothing on hand is still allowed through, because the machinist may know something the stock figure does not.
+A machinist needs a part brought to their work center. They type the number into a box that completes as they type, and the app answers with the sequences it can attribute to that part — from Visual where Visual records them, and from the floor's own records where the floor holds the part at a sequence. They pick the sequence the part is actually standing at. That one answer tells the app where the quantity lives: a sequence still open means the part is work in process, so the floor's own record is asked by part and sequence; a sequence already closed means the part is a finished good, so Infor Visual is asked by part number; a sequence the floor supplied answers for itself. Either way the app shows a number — the units on hand, or zero — and zero is a warning rather than a wall, because the machinist may know something the stock figure does not.
 
-**Why this priority**: it is the only thing standing between a free-text part number and a handler walking to a bin that does not exist. Everything downstream — the card, the pick, the audit — assumes the number is real.
+**Why this priority**: it is the only thing standing between a free-text part number and a handler walking to a bin that does not exist. Everything downstream — the card, the pick, the audit — assumes the number is real and its quantity has an owner.
 
-**Independent Test**: raise one request for a WIP part and one for a finished good; then try to submit a made-up number, and a real number with no stock, and confirm the first is refused while the second warns and proceeds.
+**Independent Test**: enter a part that carries several sequences, choose an open one and then a closed one, and confirm the two quantities come from different systems; then enter an unknown number, and a real part with nothing on hand, and confirm the first is refused while the second warns and proceeds.
 
 **Acceptance Scenarios**:
 
-1. **Given** the part question is shown, **When** it appears, **Then** it asks first whether the part is WIP or a finished good, and a part number cannot be accepted before that answer is given.
-2. **Given** WIP is chosen, **When** the requester types a number, **Then** completions are drawn from the WIP application and the accepted number must exist there.
-3. **Given** a finished good is chosen, **When** the requester types a number, **Then** completions are drawn from Infor Visual and the accepted number must exist there.
-4. **Given** a typed number that matches no genuine part, **When** the requester tries to continue, **Then** the flow refuses to advance and says the number is not a known part.
-5. **Given** a proved part, **When** the flow checks availability, **Then** it reports whether any of that part is on hand and which system answered.
-6. **Given** a proved part with no stock on hand, **When** the requester continues, **Then** they may still raise the request, having seen a warning that none was on hand.
-7. **Given** the WIP application or Infor Visual cannot be reached, **When** the requester tries to prove a part, **Then** no unverified number is accepted, the step reports that source as unavailable with the time of the attempt and a retry, and the flow does not fall back to any cached or sample part list.
-8. **Given** a part with no stock, **When** the request is raised, **Then** the stored request carries the part and the fact that none was on hand — never an invented quantity or an invented stock figure.
-9. **Given** the requester changes the answer from WIP to finished good, or back, **When** the change is made, **Then** the previously typed number is cleared and must be proved again against the newly chosen source.
+1. **Given** the part step is shown, **When** the requester types a number, **Then** completions are drawn from Infor Visual and from the WIP floor's part records, and the accepted number must be one either knows.
+2. **Given** an accepted part, **When** the sequence list is returned, **Then** it lists every sequence attributable to that part — those Visual records (where the part is the order's own part, and where it appears as a requirement at an operation) together with those the floor holds the part at — each once, with its sequence number, its description where one exists, and the source that supplied it.
+3. **Given** a part Infor Visual does not know but the floor holds at one or more sequences, **When** the requester types it and the step continues, **Then** the part is accepted, its sequences come from the floor's records, and the floor is named as the source.
+4. **Given** a part number neither Infor Visual nor the floor knows, **When** the requester tries to continue, **Then** the flow refuses to advance and names both sources it searched.
+5. **Given** a part both know but no sequence can be attributed to, **When** the requester tries to continue, **Then** the flow refuses to advance and says no sequence was found.
+6. **Given** the sequence list, **When** no sequence has been chosen yet, **Then** no quantity is read, and the flow does not advance.
+7. **Given** a chosen sequence whose operation is open — released, unreleased or firmed — **When** the quantity is read, **Then** it comes from the WIP floor by part and sequence.
+8. **Given** a chosen sequence whose operation is closed, **When** the quantity is read, **Then** it comes from Infor Visual by part number.
+9. **Given** a quantity was read, **When** the step is shown, **Then** it states the units on hand — `0` where none is on hand — with the system that answered, and never a blank, a dash, or an estimate.
+10. **Given** a chosen sequence whose operation is routed to outside service, **When** the step is shown, **Then** it says the part is not inventoried while it is outside, shows no number rather than `0`, and the requester may still raise the request having seen that.
+11. **Given** a part with nothing on hand, **When** the requester continues, **Then** they may still raise the request, having seen a warning, and the request carries the part, the chosen sequence, the quantity shown and the system that answered.
+12. **Given** the owning system cannot be reached, **When** the quantity is read, **Then** no unverified part or sequence is accepted, the step reports that system unavailable with the time of the attempt and a retry, and the flow does not fall back to a cached, sample or fabricated sequence list or quantity.
+13. **Given** a part has been accepted and a sequence chosen, **When** the requester changes the part, **Then** the chosen sequence and the quantity are cleared and a sequence must be chosen again.
+14. **Given** a sequence whose every operation is cancelled, **When** the list is returned, **Then** that sequence is not offered, because no material can be requested at a stage that will not run.
+15. **Given** a chosen sequence for which Visual records no operation state — including one the floor supplied — **When** the quantity is read, **Then** the WIP floor is read first for that part and sequence, Infor Visual by part number only when the floor holds none, and the step states which system answered.
 
 ---
 
@@ -164,8 +177,14 @@ A setup lead opens the work center catalog and marks the work centers that raise
 ### Edge Cases
 
 - A generic work center has an active job and the requester wants the job anyway: no job-derived path is offered from a generic work center; the request is generic (User Story 1, scenario 6).
-- Both the WIP application and Infor Visual are unreachable: a part cannot be proved, so no request can be raised from that step; the step reports both sources unavailable with retries, and no cached part list is offered.
-- A number exists in Visual and in the WIP application: the requester's WIP/finished-good answer decides which system proves it, and the other system is never consulted.
+- Both the owning systems are unreachable: a part cannot be proved and no quantity can be read, so no request can be raised from that step; the step reports the failures with retries, and offers no cached sequence list and no cached quantity.
+- A part exists in Infor Visual and on the WIP floor at once: the chosen sequence decides which system answers, so the presence of a part in either system never picks the answer for the requester.
+- The same part number carries different sequence numbers on different orders: the list is the distinct union, so each number appears once, and the chosen sequence is what the request carries.
+- A chosen sequence's operation closes between the list being shown and the quantity being read: the read uses the state as it stands at read time and states which system answered, rather than reporting a stage that no longer applies.
+- A chosen sequence is routed to an outside vendor: nothing inventories it, so the step says the part is not inventoried rather than reporting `0`, and the request may still be raised.
+- The WIP floor holds a part at a sequence Infor Visual records no operation for: that floor record IS a legitimate sequence source (Q3), so it is offered with the floor named as its source and the floor answers the quantity directly.
+- The WIP floor holds a part against an operation that is not a usable sequence number — the live data carries `N/A` — so it cannot distinguish a stage: it is not offered as a sequence, and the part is refused only if no other source yields one.
+- The requester fills a generic request from a running job and then edits one of the values: the edit wins, and that value no longer reads as taken from the job.
 - A scrap type is renamed or removed from the arrangement after a generic request carries it: the request keeps the wording the requester stated, and the lugger cell reports the missing assignment rather than an invented lugger.
 - A die has no location recorded: the result row lists the die and states that no location is recorded, rather than an empty cell.
 - A die search returns more dies than fit one screen: every match is reachable, and the requester can see how many matched.
@@ -186,25 +205,25 @@ A setup lead opens the work center catalog and marks the work centers that raise
 
 **The generic flow**
 
-- **FR-004**: Selecting a generic work center in the request wizard MUST continue the wizard without requiring an active job and without failing the work center because it has none.
+- **FR-004**: Selecting a generic work center in the request wizard MUST continue the wizard without requiring an active job and without failing the work center because it has none. Where an active job does exist at that work center, the wizard MUST offer the requester the choice of filling the request from it, MUST NOT take that choice for them, and MUST NOT fail or block the request when they decline.
 - **FR-005**: A generic request MUST offer the same categories and the same items a work-order request offers, driven by the same configured request-item definitions.
-- **FR-006**: Every answer a work-order request takes from the job MUST instead be asked of the requester, and no job value MUST be read, shown, or inferred during a generic request.
-- **FR-007**: A generic request MUST NOT store a work order number, and MUST NOT display one on any surface.
+- **FR-006**: Every answer a work-order request takes from the job MUST instead be asked of the requester, and no job value MUST be read, shown or inferred during a generic request unless the requester chose the optional job fill; where they did choose it, every value taken from the job MUST be shown as taken from it and MUST remain changeable before the request is raised.
+- **FR-007**: A generic request MUST NOT use a work order as its identity and MUST NOT display one on its card; where the requester filled the request from a running job, that job MUST be recorded as the request's provenance and shown on its detail page, never as the request's identity.
 - **FR-008**: A request raised at a generic work center MUST enter the same waitlist queue and appear on the same board as every other request.
 - **FR-009**: The generic flow MUST be built as its own flow, and its views as their own projects, so that the work-order flow is not modified to accommodate it; the existing work-order flow's behaviour MUST remain unchanged.
 - **FR-010**: Clearing a work center's designation MUST NOT alter requests already raised there; an in-progress generic request MUST complete as generic.
 
 **A stated part**
 
-- **FR-011**: Where an item requires a part number, the generic flow MUST ask first whether the part is WIP or a finished good, and MUST NOT accept a part number before that answer is given.
-- **FR-012**: The part number MUST be entered through a completion control that offers matches as the requester types, and it MUST NOT be possible to submit a value that was not completed to a genuine part.
-- **FR-013**: A WIP part MUST be proved against the WIP application's records, and a finished good MUST be proved against Infor Visual; the system the requester chose MUST be the only one consulted for that part.
-- **FR-014**: A typed number that matches no genuine part MUST be refused with a message naming the source that was searched, and the flow MUST NOT advance with it.
-- **FR-015**: Changing the WIP/finished-good answer MUST clear the previously entered part and require it to be proved again against the newly chosen source.
-- **FR-016**: Once a part is proved, the system MUST check whether any of it is on hand and MUST report the finding and the system that answered.
-- **FR-017**: Finding no stock on hand MUST warn and MUST NOT block the request.
-- **FR-018**: Where the proving source cannot be reached, the flow MUST report that source as unavailable with the time of the attempt and a retry, MUST accept no unverified part, and MUST NOT substitute a cached, mirror, sample, or fabricated part list.
-- **FR-019**: A generic request MUST NOT store a quantity; the request carries the part and, when none was on hand, the recorded fact that none was.
+- **FR-011**: The part-number entry MUST offer completions drawn from Infor Visual and from the WIP floor's own part records, and the accepted part number MUST be one of them; a number neither knows MUST be refused with a message naming both sources searched, and the flow MUST NOT advance.
+- **FR-012**: For an accepted part, the system MUST list every sequence it can attribute to that part — the sequences Infor Visual records (where the part is the work order's own part, and where it appears as a requirement at an operation) together with the sequences the WIP floor holds the part at — each listed once, with its sequence number, its description where one exists, and the source that supplied it; a sequence whose every operation is cancelled MUST NOT be offered, and a floor record whose operation is not a usable sequence number MUST NOT be turned into one.
+- **FR-013**: A part for which neither Infor Visual nor the WIP floor yields a sequence MUST be refused with a message saying so, because no quantity can be attributed to it, and the flow MUST NOT advance.
+- **FR-014**: The requester MUST choose one sequence before any quantity is read, the chosen sequence MUST travel with the request, and changing the part MUST clear the chosen sequence and any quantity already read for it.
+- **FR-015**: The chosen sequence's own state in Infor Visual MUST decide which system owns the quantity — an open operation (released, unreleased or firmed) is work in process and its quantity MUST come from the WIP floor by part and sequence; a closed operation is a finished good and its quantity MUST come from Infor Visual by part number. A sequence routed to outside service MUST NOT have a quantity read at all, because outside-service material is not inventoried anywhere. The requester MUST NOT be asked which system to use.
+- **FR-016**: Where Infor Visual records no operation state for the chosen sequence — including a sequence the WIP floor supplied — the WIP floor MUST be read first for that part and sequence, and Infor Visual by part number only when the floor holds none, and the step MUST state which system answered.
+- **FR-017**: The quantity MUST be shown as a number of units on hand — `0` when the owning system holds none — and MUST NOT be left blank on that ground, drawn as a dash, or estimated; where the chosen sequence is outside service the step MUST say the part is not inventoried instead of showing `0`; the flow MUST NOT ask the requester for a quantity.
+- **FR-018**: Finding `0` on hand MUST warn and MUST NOT block the request, and the request MUST record the part, the chosen sequence, the quantity shown and the system that answered.
+- **FR-019**: Where the owning system cannot be reached, the flow MUST report that system unavailable with the time of the attempt and a retry, MUST accept no unverified part or sequence, and MUST NOT substitute a cached, mirror, sample or fabricated sequence list or quantity.
 
 **Dunnage**
 
@@ -266,7 +285,7 @@ A setup lead opens the work center catalog and marks the work centers that raise
 ### Key Entities
 
 - **Generic work center designation**: whether requests raised at a named work center are generic; held against the work center record itself, editable by a permitted person.
-- **Stated part**: the part number the requester named, whether it is WIP or a finished good, which system proved it, and whether stock was on hand when the request was raised.
+- **Stated part**: the part number the requester named, the sequence they chose for it and which source supplied that sequence, which system supplied the quantity, and the quantity on hand that system returned when the request was raised — or the fact that the part is not inventoried because the sequence is outside service.
 - **Dunnage selection**: the single dunnage part chosen from the catalogue page.
 - **Stated scrap type**: the scrap type the requester named, with the lugger the arrangement assigns at the time the request is read.
 - **Die selection**: one or more dies found by search, each with its own number and location, each producing its own request.
@@ -278,28 +297,41 @@ A setup lead opens the work center catalog and marks the work centers that raise
 ### Measurable Outcomes
 
 - **SC-001**: A requester at a generic work center can raise a complete request without a work order, in under 90 seconds for a part request and under 2 minutes for a dunnage, scrap or die request.
-- **SC-002**: Zero generic requests are accepted carrying a part number, dunnage part, scrap type or die that could not be proved against its owning system.
+- **SC-002**: Zero generic requests are accepted carrying a part number, sequence, dunnage part, scrap type or die that could not be proved against Infor Visual or the WIP floor, or attributed to a sequence either can supply.
 - **SC-003**: Zero generic requests carry a work order number, on any surface, in any export.
 - **SC-004**: Zero generic cards or detail pages show a sample, placeholder, or invented value in place of a fact the request does not have.
 - **SC-005**: A handler can tell a generic request from a work-order request on the board without opening either, and can act on it through the existing fulfilment flow.
 - **SC-006**: A part with no stock on hand is still raisable, with the warning visible on the request afterwards, in 100% of cases.
 - **SC-007**: The work-order flow's behaviour is unchanged: every existing request scenario still passes with the generic flow present.
 - **SC-008**: A part number that several dies belong to returns every die and location in one search, with no die silently omitted.
+- **SC-009**: A part number returns every sequence Infor Visual records for it in one search with none omitted, and the quantity shown for a chosen sequence comes from the system that sequence's state assigns — with nothing on hand shown as `0`, never blank, and outside-service work shown as not inventoried rather than `0`.
 
 ## Assumptions
 
 - **A1**: The generic designation is a field on the existing work center catalog, maintained through the setup/settings surface that already governs that catalog, under its existing permission.
 - **A2**: The requester's identity continues to come from sign-in plus the existing employee verification; the generic flow adds no second identity step.
 - **A3**: Generic requests share the existing waitlist queue and board; only their card layout differs.
-- **A4**: A generic request captures no quantity; the request names the part and, when none was on hand, records that.
+- **A4**: A generic request captures no requested quantity; it records the quantity on hand it was shown and the system that supplied it.
 - **A5**: Choosing several dies raises one request per die, matching how a work-order request with several dies already behaves.
 - **A6**: One dunnage part per request is the scope; several dunnage parts on one request is out of scope.
 - **A7**: The scrap types offered are the plant's one existing scrap-type list, the list the Setup scrap picker and the lugger arrangement editor already share; the generic flow introduces no second list.
 - **A8**: Categories, items and their configured questions are shared with the work-order flow, so a change to a request item applies to both.
-- **A9**: A generic work center that still has an active job still uses the generic flow; the job is never read there.
+- **A9**: A generic work center that still has an active job still uses the generic flow; the job is offered as an optional fill and is never read unless the requester chooses it (Q1, answered 2026-10-29).
 - **A10**: A die's association with a part is established from Infor Visual, preferring an association Visual records explicitly and falling back to the part's work-order history; the outcome FR-033 requires is that every die Visual ties to the part is listed.
+- **A11**: "Every available sequence for a part" means the distinct union of the sequences Infor Visual records (where that part is the work order's own part and where it appears as a requirement at an operation) and the sequences the WIP floor holds the part at, because Visual holds sequences per routing rather than per part; the same number appearing more than once is listed once, with the sources it came from.
+- **A12**: The sequence list is the union of what Infor Visual records for the part and what the WIP floor holds it at, by owner decision on 2026-10-29, so a part Infor Visual does not know MAY be requested from the floor's own records; a floor record whose operation is not a usable sequence number cannot supply one.
+- **A13**: A sequence's stage is taken from the operation states the plant already relies on for disposition — released, unreleased and firmed count as open (work in process); closed counts as a finished good; cancelled sequences are excluded rather than offered; an operation routed to outside service is never inventoried.
+- **A14**: How inventory is split across the two systems, as the owner stated it on 2026-10-29: WIP items are inventoried only in the WIP application, by part number and sequence into a location; Infor Visual holds what is left that is neither work in process nor outside service; outside-service material is not inventoried at all.
+- **A15**: The requesting work center is always where a stated part should go — an owner decision taken on 2026-10-29 — so no delivery-point question is asked and the request's work center doubles as its destination.
+- **A16**: Where Infor Visual records no operation state for a chosen sequence, the WIP floor is read first and Infor Visual only when the floor holds none — owner decision on 2026-10-29 (Q2), which FR-016 and FR-019 carry.
 
-## Open Questions
+## Questions and Decisions
 
-- **Q1**: Should a generic work center ever be able to read an active job on purpose, or is the job permanently out of scope once the designation is set? (Assumed out of scope, A9.)
-- **Q2**: When an item names a part but the plant also needs to know where it should go, is the requesting work center always the destination? (Assumed yes; no delivery-point question is asked.)
+None outstanding. Three questions were answered by the owner on 2026-10-29, and each answer is carried by
+requirements rather than left as a note:
+
+| Question, in the words a person using the app would use | Answer | Carried by |
+|---|---|---|
+| At a work center the plant has marked as generic, may the person say "actually, read the job that is running here" and have the request filled from it? | **Yes, optionally** — offered, never assumed, and declining changes nothing. The job is recorded as provenance and never becomes the request's identity. | [FR-004](./spec.md#L203), [FR-006](./spec.md#L205), [FR-007](./spec.md#L206), [A9](./spec.md#L314) |
+| Someone picks a part and a sequence, and Visual knows the part but not the stage of that sequence. Keep looking on the floor first and fall back to Visual, or refuse and ask for the routing to be fixed? | **Floor first**, then Visual when the floor holds none. | [FR-016](./spec.md#L218), [A16](./spec.md#L321) |
+| The WIP app holds a part at a sequence that Infor Visual does not know at all. Requestable from the floor's own records, or turned away? | **Yes** — the floor is a legitimate sequence source, so such a part is requestable and its sequence comes from the floor. | [FR-011](./spec.md#L213), [FR-012](./spec.md#L214), [A12](./spec.md#L317) |

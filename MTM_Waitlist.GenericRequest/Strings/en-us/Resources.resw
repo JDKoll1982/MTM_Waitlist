@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <!-- Screen wording for the generic request flow. Every key is a resource the views and the step presenter read. -->
+  <data name="GenericRequest_StepFrame_Back.Content" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="GenericRequest_Dunnage_Empty.Text" xml:space="preserve">
+    <value>This item has no dunnage types.</value>
+  </data>
+  <data name="GenericRequest_WorkCenter_Intro.Text" xml:space="preserve">
+    <value>Pick the work center the request belongs to. Only the work centers this building runs are offered.</value>
+  </data>
+  <data name="GenericRequest_Scrap_Title.Text" xml:space="preserve">
+    <value>State the scrap type</value>
+  </data>
+  <data name="GenericRequest_Details_Description.PlaceholderText" xml:space="preserve">
+    <value>What is this request for?</value>
+  </data>
+  <data name="GenericRequest_Part_Search.PlaceholderText" xml:space="preserve">
+    <value>Part number or description</value>
+  </data>
+  <data name="GenericRequest_Summary_Die.Label" xml:space="preserve">
+    <value>Die</value>
+  </data>
+  <data name="GenericRequest_Part_Stage_Wip.Content" xml:space="preserve">
+    <value>Work in progress</value>
+  </data>
+  <data name="GenericRequest_Die_Intro.Text" xml:space="preserve">
+    <value>Search by die number or description, then pick the one the request needs.</value>
+  </data>
+  <data name="GenericRequest_Part_Empty.Text" xml:space="preserve">
+    <value>No part matches this item.</value>
+  </data>
+  <data name="GenericRequest_Result_Empty.Text" xml:space="preserve">
+    <value>Nothing has been raised yet.</value>
+  </data>
+  <data name="GenericRequest_Dunnage_Selected.Label" xml:space="preserve">
+    <value>Selected</value>
+  </data>
+  <data name="GenericRequest_Scrap_Luggers.Label" xml:space="preserve">
+    <value>Luggers</value>
+  </data>
+  <data name="GenericRequest_Part_Intro.Text" xml:space="preserve">
+    <value>Find the part, choose whether it is a work in progress or a finished good, then choose its sequence.</value>
+  </data>
+  <data name="GenericRequest_Dunnage_Title.Text" xml:space="preserve">
+    <value>Choose dunnage</value>
+  </data>
+  <data name="GenericRequest_Details_Empty.Text" xml:space="preserve">
+    <value>There is nothing to state for this request.</value>
+  </data>
+  <data name="GenericRequest_Details_Intro.Text" xml:space="preserve">
+    <value>Say when the part is needed, how many, and anything a handler should know.</value>
+  </data>
+  <data name="GenericRequest_StepFrame_Continue.Content" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="GenericRequest_Die_SearchButton.Content" xml:space="preserve">
+    <value>Search</value>
+  </data>  <data name="GenericRequest_Die_Empty.Text" xml:space="preserve">
+    <value>No die matches that search.</value>
+  </data>
+  <data name="GenericRequest_Dunnage_Intro.Text" xml:space="preserve">
+    <value>Choose a dunnage type, then the part that stands in for it.</value>
+  </data>
+  <data name="GenericRequest_Result_Title.Text" xml:space="preserve">
+    <value>Result</value>
+  </data>
+  <data name="GenericRequest_Result_Intro.Text" xml:space="preserve">
+    <value>What happened when the request was raised.</value>
+  </data>  <data name="GenericRequest_Result_Success_Title.Text" xml:space="preserve">
+    <value>The request was raised</value>
+  </data>
+  <data name="GenericRequest_Summary_Empty.Text" xml:space="preserve">
+    <value>There is nothing to review yet.</value>
+  </data>
+  <data name="GenericRequest_Details_NeededBy_Date.Header" xml:space="preserve">
+    <value>Needed by, date</value>
+  </data>
+  <data name="GenericRequest_Summary_Quantity.Label" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="GenericRequest_Summary_Description.Label" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="GenericRequest_Summary_WorkCenter.Label" xml:space="preserve">
+    <value>Work center</value>
+  </data>
+  <data name="GenericRequest_Summary_Part.Label" xml:space="preserve">
+    <value>Part</value>
+  </data>
+  <data name="GenericRequest_Part_Title.Text" xml:space="preserve">
+    <value>State the part</value>
+  </data>
+  <data name="GenericRequest_StepFrame_Unavailable_Title.Text" xml:space="preserve">
+    <value>This step could not be read</value>
+  </data>
+  <data name="GenericRequest_Scrap_Empty.Text" xml:space="preserve">
+    <value>No scrap type is recorded.</value>
+  </data>
+  <data name="GenericRequest_Result_Number.Label" xml:space="preserve">
+    <value>Request number</value>
+  </data>
+  <data name="GenericRequest_Details_Quantity.Header" xml:space="preserve">
+    <value>Quantity</value>
+  </data>
+  <data name="GenericRequest_Category_Intro.Text" xml:space="preserve">
+    <value>The category narrows the item list to the things this work center handles.</value>
+  </data>
+  <data name="GenericRequest_Summary_Scrap.Label" xml:space="preserve">
+    <value>Scrap type</value>
+  </data>
+  <data name="GenericRequest_Summary_Sequence.Label" xml:space="preserve">
+    <value>Sequence</value>
+  </data>
+  <data name="GenericRequest_Part_Sequence_Title.Text" xml:space="preserve">
+    <value>Sequence</value>
+  </data>
+  <data name="GenericRequest_Category_Empty.Text" xml:space="preserve">
+    <value>This work center has no categories.</value>
+  </data>
+  <data name="GenericRequest_Details_Description.Header" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="GenericRequest_StepFrame_Unavailable_Attempted.Label" xml:space="preserve">
+    <value>Last attempt</value>
+  </data>
+  <data name="GenericRequest_Dunnage_Parts_Title.Text" xml:space="preserve">
+    <value>Dunnage parts</value>
+  </data>
+  <data name="GenericRequest_Part_Stage_FinishedGood.Content" xml:space="preserve">
+    <value>Finished good</value>
+  </data>
+  <data name="GenericRequest_Item_Title.Text" xml:space="preserve">
+    <value>Choose an item</value>
+  </data>
+  <data name="GenericRequest_Die_Title.Text" xml:space="preserve">
+    <value>Find the die</value>
+  </data>
+  <data name="GenericRequest_Category_Title.Text" xml:space="preserve">
+    <value>Choose a category</value>
+  </data>
+  <data name="GenericRequest_Die_Search.PlaceholderText" xml:space="preserve">
+    <value>Die number or description</value>
+  </data>
+  <data name="GenericRequest_Scrap_Intro.Text" xml:space="preserve">
+    <value>Pick the scrap type the request needs. The lugger count is how many are free to use.</value>
+  </data>
+  <data name="GenericRequest_Item_Intro.Text" xml:space="preserve">
+    <value>Pick the item this request is about.</value>
+  </data>
+  <data name="GenericRequest_Part_Stage.Label" xml:space="preserve">
+    <value>Stage</value>
+  </data>
+  <data name="GenericRequest_WorkCenter_Empty.Text" xml:space="preserve">
+    <value>No work center runs in this building.</value>
+  </data>
+  <data name="GenericRequest_Summary_Submit.Content" xml:space="preserve">
+    <value>Raise the request</value>
+  </data>
+  <data name="GenericRequest_Summary_Intro.Text" xml:space="preserve">
+    <value>Check every answer. Going back keeps what you already chose.</value>
+  </data>
+  <data name="GenericRequest_WorkCenter_Title.Text" xml:space="preserve">
+    <value>Choose a work center</value>
+  </data>
+  <data name="GenericRequest_Summary_Dunnage.Label" xml:space="preserve">
+    <value>Dunnage</value>
+  </data>
+  <data name="GenericRequest_Details_Title.Text" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="GenericRequest_Item_Empty.Text" xml:space="preserve">
+    <value>This category has no items.</value>
+  </data>
+  <data name="GenericRequest_Summary_Category.Label" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="GenericRequest_Summary_Stage.Label" xml:space="preserve">
+    <value>Stage</value>
+  </data>
+  <data name="GenericRequest_Summary_Item.Label" xml:space="preserve">
+    <value>Item</value>
+  </data>
+  <data name="GenericRequest_Summary_Title.Text" xml:space="preserve">
+    <value>Review the request</value>
+  </data>
+  <data name="GenericRequest_StepFrame_Retry.Content" xml:space="preserve">
+    <value>Try again</value>
+  </data>
+  <data name="GenericRequest_Details_NeededBy_Time.Header" xml:space="preserve">
+    <value>Needed by, time</value>
+  </data>
+  <data name="GenericRequest_Summary_NeededBy.Label" xml:space="preserve">
+    <value>Needed by</value>
+  </data>
+  <data name="GenericRequest_Dunnage_Types_Title.Text" xml:space="preserve">
+    <value>Dunnage types</value>
+  </data>
+</root>

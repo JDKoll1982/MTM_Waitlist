@@ -30,13 +30,13 @@ rather than the eight content dialogs and one windowed editor the codebase held 
 
 | Kind | Count |
 |---|---|
-| `App` | 2 |
-| `Window` | 3 |
-| `Page` | 43 |
+| `App` | 3 |
+| `Window` | 4 |
+| `Page` | 54 |
 | `Dialog` | 9 |
-| `Control` | 10 |
+| `Control` | 13 |
 | `ResourceDictionary` | 11 |
-| **All** | **78** |
+| **All** | **94** |
 
 ## The inventory
 
@@ -46,6 +46,7 @@ Paths are relative to the repository root. *Modal* says whether the surface open
 |---|---|---|---|---|
 | App | (root) | App.xaml | `App.xaml` | no |
 | App | MTM_Waitlist.Mock.Service | App.xaml | `MTM_Waitlist.Mock.Service/App.xaml` | no |
+| App | TempGenericRequest.Preview | App.xaml | `TempGenericRequest.Preview/App.xaml` | no |
 | Control | MTM_Waitlist.Shared | MessageDialogContent.xaml | `MTM_Waitlist.Shared/Dialogs/MessageDialogContent.xaml` | no |
 | Control | Module_Mock | ReadStatusIndicator.xaml | `Module_Mock/Views/ReadStatusIndicator.xaml` | no |
 | Control | Module_Settings | DeveloperLogPanelView.xaml | `Module_Settings/Views/DeveloperLogPanelView.xaml` | no |
@@ -56,6 +57,9 @@ Paths are relative to the repository root. *Modal* says whether the surface open
 | Control | Module_Startup | SetUpPanel.xaml | `Module_Startup/Views/SetUpPanel.xaml` | no |
 | Control | Module_Waitlist | WaitlistLineCardView.xaml | `Module_Waitlist/Controls/WaitlistLineCardView.xaml` | no |
 | Control | Module_Waitlist | WaitlistStatusFlyout.xaml | `Module_Waitlist/Controls/WaitlistStatusFlyout.xaml` | no |
+| Control | MTM_Waitlist.GenericRequest | GenericRequestStepFrame.xaml | `MTM_Waitlist.GenericRequest/Controls/GenericRequestStepFrame.xaml` | no |
+| Control | MTM_Waitlist.GenericRequest.Controls | GenericRequestCard.xaml | `MTM_Waitlist.GenericRequest.Controls/Controls/GenericRequestCard.xaml` | no |
+| Control | TempGenericRequest.Preview | TempPreviewCardPage.xaml | `TempGenericRequest.Preview/Views/TempPreviewCardPage.xaml` | no |
 | Dialog | Module_Settings | ComputerEditDialog.xaml | `Module_Settings/Views/ComputerEditDialog.xaml` | yes |
 | Dialog | Module_Settings | LuggerEditorDialog.xaml | `Module_Settings/Views/LuggerEditorDialog.xaml` | yes |
 | Dialog | Module_Settings | LuggerNameDialog.xaml | `Module_Settings/Views/LuggerNameDialog.xaml` | yes |
@@ -108,6 +112,17 @@ Paths are relative to the repository root. *Modal* says whether the surface open
 | Page | Module_Waitlist | NewRequestWorkCenterPage.xaml | `Module_Waitlist/Views/NewRequestWorkCenterPage.xaml` | no |
 | Page | Module_Waitlist | WaitlistViewDetailPage.xaml | `Module_Waitlist/Views/WaitlistViewDetailPage.xaml` | no |
 | Page | Module_Waitlist | WaitlistViewPage.xaml | `Module_Waitlist/Views/WaitlistViewPage.xaml` | no |
+| Page | MTM_Waitlist.GenericRequest.Controls | GenericRequestDetailPage.xaml | `MTM_Waitlist.GenericRequest.Controls/Views/GenericRequestDetailPage.xaml` | no |
+| Page | MTM_Waitlist.GenericRequest | GenericRequestCategoryPage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestCategoryPage.xaml` | no |
+| Page | MTM_Waitlist.GenericRequest | GenericRequestDetailsPage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestDetailsPage.xaml` | no |
+| Page | MTM_Waitlist.GenericRequest | GenericRequestDiePage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestDiePage.xaml` | no |
+| Page | MTM_Waitlist.GenericRequest | GenericRequestDunnagePage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestDunnagePage.xaml` | no |
+| Page | MTM_Waitlist.GenericRequest | GenericRequestItemPage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestItemPage.xaml` | no |
+| Page | MTM_Waitlist.GenericRequest | GenericRequestPartPage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestPartPage.xaml` | no |
+| Page | MTM_Waitlist.GenericRequest | GenericRequestResultPage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestResultPage.xaml` | no |
+| Page | MTM_Waitlist.GenericRequest | GenericRequestScrapTypePage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestScrapTypePage.xaml` | no |
+| Page | MTM_Waitlist.GenericRequest | GenericRequestSummaryPage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestSummaryPage.xaml` | no |
+| Page | MTM_Waitlist.GenericRequest | GenericRequestWorkCenterPage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestWorkCenterPage.xaml` | no |
 | ResourceDictionary | Module_Waitlist | WaitlistLineCardDetailTemplates.xaml | `Module_Waitlist/Controls/WaitlistLineCardDetailTemplates.xaml` | no |
 | ResourceDictionary | Styles | ControlInspector.xaml | `Styles/ControlInspector.xaml` | no |
 | ResourceDictionary | Styles | Dialogs.xaml | `Styles/Dialogs.xaml` | no |
@@ -122,6 +137,7 @@ Paths are relative to the repository root. *Modal* says whether the surface open
 | Window | MTM_Waitlist.Mock.Service | ServiceShellWindow.xaml | `MTM_Waitlist.Mock.Service/Views/ServiceShellWindow.xaml` | no |
 | Window | (root) | MainWindow.xaml | `MainWindow.xaml` | no |
 | Window | Module_Shared | ControlInspectorDetailWindow.xaml | `Module_Shared/Views/ControlInspectorDetailWindow.xaml` | no |
+| Window | TempGenericRequest.Preview | MainWindow.xaml | `TempGenericRequest.Preview/MainWindow.xaml` | no |
 
 ## What the audit enforces
 

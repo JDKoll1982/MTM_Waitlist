@@ -1,0 +1,995 @@
+{
+  "workflow": "companion",
+  "specName": "Generic Work Center — Screen Layer and Preview Host",
+  "branch": "master",
+  "status": "completed",
+  "currentStep": "implement",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:25:52.996Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-10-29T14:26:10.349Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:29:14.109Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:29:14.484Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:29:24.240Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:30:08.270Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:30:08.670Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-10-29T14:30:39.486Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T001",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:31:44.555Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T002",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:31:45.036Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T003",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:31:45.630Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T004",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:31:49.866Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:31:50.263Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:31:50.668Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:31:51.092Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:35:30.662Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T009",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:35:31.101Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T010",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:35:31.471Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T011",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:35:31.824Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T012",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:35:36.232Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T013",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:35:36.629Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T014",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:35:37.006Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T015",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:35:37.440Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T016",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:35:41.650Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:35:42.040Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T018",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:35:42.400Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T019",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:35:42.767Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T020",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:37:42.979Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T021",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:37:43.441Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T022",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:37:43.850Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T023",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:37:44.313Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T024",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:37:44.764Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T025",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:37:45.306Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T026",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:45:58.498Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T027",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:45:58.897Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T028",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:45:59.390Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T029",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:45:59.813Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T030",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:46:05.234Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T031",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:46:05.685Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T032",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:46:06.098Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T033",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:46:06.497Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T034",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:56:57.290Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T035",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:56:57.791Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-10-29T14:56:57.891Z"
+    }
+  ],
+  "telemetryInstanceId": "ec1a7833-5d33-4ab2-a447-90a74d297d36",
+  "classification": {
+    "projectedFiles": 42,
+    "projectedTasks": 22,
+    "scopeSignal": "three new projects, eleven screens with view models, a card with four variants, a preview host, and a build-time Temp-naming guard",
+    "verdict": "oversized"
+  },
+  "unattended": true,
+  "size": "oversized",
+  "decisions": [
+    {
+      "decision": "separate preview application, not an application mode",
+      "why": "constitution II and the retired-symbol audit forbid a demo mode in the product",
+      "rejected": "a feature key swapping seam implementations inside the app"
+    },
+    {
+      "decision": "one seam interface with a method per data need",
+      "why": "expresses every data need without a file per method",
+      "rejected": "one interface per step"
+    },
+    {
+      "decision": "one result type carrying a presentation value",
+      "why": "makes exactly-one-of-three impossible to violate and lets the retry control follow the state",
+      "rejected": "three booleans on the view model"
+    },
+    {
+      "decision": "one step frame control draws all three presentations",
+      "why": "ten pages share the same empty, unavailable and retry surface",
+      "rejected": "a merged resource dictionary of data templates"
+    },
+    {
+      "decision": "the Temp boundary is enforced by a source-scanning test",
+      "why": "matches the repo existing audits and can name the offending file and token",
+      "rejected": "a Roslyn analyzer"
+    },
+    {
+      "decision": "work-order comparison drawn by a Temp stand-in inside the preview app",
+      "why": "the real card lives in the shipping app project which the preview app cannot reference without dragging in startup and packaging",
+      "rejected": "moving the work-order card into a library in this chunk"
+    },
+    {
+      "decision": "a static page-host seam (GenericRequestPageServices) so every screen has a parameterless constructor",
+      "why": "Frame.Navigate activates a page by type and cannot pass a view model, and the page-activation audit enforces it",
+      "rejected": "leaving the screens constructor-only and exempting them from the audit"
+    },
+    {
+      "decision": "one availability read on the seam for the three screens that read no rows",
+      "why": "all ten screens must report the same three presentations without inventing an empty list",
+      "rejected": "letting the preview set a view model's presentation directly"
+    }
+  ],
+  "step_summaries": {
+    "plan": {
+      "summary": "Planned three new projects: the flow library with its seam and ten screens, the card library, and a separate preview application.",
+      "key_finding": "the repository audits every XAML file against a surface inventory and scans the whole tree, so each new view needs an inventory row and must fill its window."
+    },
+    "tasks": {
+      "summary": "35 tasks in six phases: setup of three projects, foundational seam and presenter, ten screens plus the preview host, the cards, the Temp boundary audit, then the inventory and the gates."
+    },
+    "implement": {
+      "summary": "Built three projects: the flow library with its seam and ten screens, the card library, and the separate preview application, plus the Temp boundary audit and the inventory rows."
+    }
+  },
+  "approach": "Three new projects sit outside the shipped application: the flow library holds the seam, the view models and the ten screens; the card library holds the generic card and its detail page; and a separate preview application supplies every screen from an in-memory scenario. A source-scanning audit fails the build if any Temp-named artefact reaches the application.",
+  "coverage": {
+    "FR-001": {
+      "title": "The flow's views MUST be built as their own projects, separate from the work-order wizard",
+      "tasks": [
+        "T001",
+        "T016",
+        "T017",
+        "T018",
+        "T019",
+        "T020",
+        "T021",
+        "T022",
+        "T023",
+        "T024",
+        "T025"
+      ]
+    },
+    "FR-002": {
+      "title": "The generic card and its detail page MUST be built as their own project",
+      "tasks": [
+        "T002",
+        "T030",
+        "T031"
+      ]
+    },
+    "FR-003": {
+      "title": "The preview host MUST be a separate project the shipped application does not reference",
+      "tasks": [
+        "T003",
+        "T007",
+        "T027"
+      ]
+    },
+    "FR-004": {
+      "title": "Every step of a generic request MUST exist as a laid-out view",
+      "tasks": [
+        "T012",
+        "T016",
+        "T017",
+        "T018",
+        "T019",
+        "T020",
+        "T021",
+        "T022",
+        "T023",
+        "T024",
+        "T025"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestFlowRulesTests.cs"
+      ]
+    },
+    "FR-005": {
+      "title": "Each view MUST be bound to a view model and read no database, service or file directly",
+      "tasks": [
+        "T008",
+        "T014",
+        "T016",
+        "T017",
+        "T018",
+        "T019",
+        "T020",
+        "T021",
+        "T022",
+        "T023",
+        "T024",
+        "T025"
+      ]
+    },
+    "FR-006": {
+      "title": "Each view MUST render populated, empty and unavailable, with attempt time and retry",
+      "tasks": [
+        "T009",
+        "T014",
+        "T015"
+      ]
+    },
+    "FR-007": {
+      "title": "Long values MUST be accommodated without overlap or clipping",
+      "tasks": [
+        "T019",
+        "T030"
+      ]
+    },
+    "FR-008": {
+      "title": "Every screen MUST adapt from the narrowest supported width to a wide monitor",
+      "tasks": [
+        "T016",
+        "T017",
+        "T018",
+        "T019",
+        "T020",
+        "T021",
+        "T022",
+        "T023",
+        "T024",
+        "T025"
+      ]
+    },
+    "FR-009": {
+      "title": "Every user-visible string MUST come from a resource key and interactive elements carry automation names",
+      "tasks": [
+        "T004",
+        "T005",
+        "T006",
+        "T016",
+        "T017",
+        "T018",
+        "T019",
+        "T020",
+        "T021",
+        "T022",
+        "T023",
+        "T024",
+        "T025",
+        "T030",
+        "T031",
+        "T034"
+      ]
+    },
+    "FR-010": {
+      "title": "Every data need MUST be expressed as an interface declared outside the application",
+      "tasks": [
+        "T008"
+      ]
+    },
+    "FR-011": {
+      "title": "The preview host MUST supply those interfaces from in-memory scenarios",
+      "tasks": [
+        "T026"
+      ]
+    },
+    "FR-012": {
+      "title": "The preview host MUST offer a way to choose a screen, a variant and a scenario",
+      "tasks": [
+        "T027",
+        "T032"
+      ]
+    },
+    "FR-013": {
+      "title": "The preview host MUST NOT connect to or write to any store",
+      "tasks": [
+        "T026"
+      ]
+    },
+    "FR-014": {
+      "title": "Preview scenarios MUST present the awkward real values",
+      "tasks": [
+        "T026"
+      ]
+    },
+    "FR-015": {
+      "title": "The generic card MUST draw its own layout and no work-order cells",
+      "tasks": [
+        "T013",
+        "T030"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestCardRulesTests.cs"
+      ]
+    },
+    "FR-016": {
+      "title": "The generic card MUST be previewable in its part, dunnage, scrap and die variants",
+      "tasks": [
+        "T030",
+        "T032"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestCardRulesTests.cs"
+      ]
+    },
+    "FR-017": {
+      "title": "Generic and work-order cards MUST be viewable in one list and distinguishable",
+      "tasks": [
+        "T032"
+      ]
+    },
+    "FR-018": {
+      "title": "No generic card MUST draw a blank or placeholder cell",
+      "tasks": [
+        "T011",
+        "T013",
+        "T030"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestCardRulesTests.cs"
+      ]
+    },
+    "FR-019": {
+      "title": "No runtime switch MAY select preview data and the retired identifiers stay absent",
+      "tasks": [
+        "T033"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/TempArtefactBoundaryAuditTests.cs"
+      ]
+    },
+    "FR-020": {
+      "title": "The shipped application MUST build and run with the preview host absent",
+      "tasks": [
+        "T007",
+        "T035"
+      ]
+    },
+    "FR-021": {
+      "title": "Every artefact standing in for real data MUST begin with Temp in the shape its kind allows",
+      "tasks": [
+        "T003",
+        "T026",
+        "T027",
+        "T032",
+        "T033"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/TempArtefactBoundaryAuditTests.cs"
+      ]
+    },
+    "FR-022": {
+      "title": "The preview host's project, assembly and root namespace MUST carry the Temp naming",
+      "tasks": [
+        "T003"
+      ]
+    },
+    "FR-023": {
+      "title": "A build-time check MUST fail naming the offending artefact",
+      "tasks": [
+        "T033"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/TempArtefactBoundaryAuditTests.cs"
+      ]
+    },
+    "FR-024": {
+      "title": "The check MUST allow the preview project and test code and list other exemptions explicitly",
+      "tasks": [
+        "T033"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/TempArtefactBoundaryAuditTests.cs"
+      ]
+    },
+    "FR-025": {
+      "title": "The check MUST NOT rely on the words the retired-symbol audit forbids",
+      "tasks": [
+        "T033"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/TempArtefactBoundaryAuditTests.cs"
+      ]
+    },
+    "FR-026": {
+      "title": "Removing a Temp artefact MUST require no other edit to keep the build green",
+      "tasks": [
+        "T033"
+      ]
+    }
+  },
+  "currentTask": null,
+  "task_summaries": {
+    "T001": {
+      "status": "DONE",
+      "did": "Created the flow library project with root namespace MTM_Waitlist.GenericRequest, referencing Core.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/MTM_Waitlist.GenericRequest.csproj"
+      ]
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "Created the card library project with root namespace MTM_Waitlist.GenericRequest.Controls.",
+      "files": [
+        "MTM_Waitlist.GenericRequest.Controls/MTM_Waitlist.GenericRequest.Controls.csproj"
+      ]
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "Created the preview application with assembly TempGenericRequest.Preview and root namespace MTM_Waitlist.GenericRequest.Temp, referencing both new libraries only.",
+      "files": [
+        "TempGenericRequest.Preview/TempGenericRequest.Preview.csproj",
+        "TempGenericRequest.Preview/app.manifest"
+      ]
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "Wrote 66 screen-wording entries for the flow.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Strings/en-us/Resources.resw"
+      ]
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "Wrote 17 wording entries for the card and detail page.",
+      "files": [
+        "MTM_Waitlist.GenericRequest.Controls/Strings/en-us/Resources.resw"
+      ]
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "Wrote 16 Temp-prefixed entries for the preview application.",
+      "files": [
+        "TempGenericRequest.Preview/Strings/en-us/Resources.resw"
+      ]
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "Added the three projects to the solution; the shipping application gained no project reference.",
+      "files": [
+        "MTM_Waitlist.sln"
+      ]
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "Declared the step and presentation enumerations plus the two seams.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Contracts/GenericRequestStep.cs",
+        "MTM_Waitlist.GenericRequest/Contracts/IGenericRequestStepData.cs",
+        "MTM_Waitlist.GenericRequest/Contracts/IGenericRequestNavigator.cs"
+      ]
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "Wrote the typed step result with its three factories and the draft the flow carries.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestStepResult.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestDraft.cs"
+      ]
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "Wrote the eight option rows the screens draw.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestOptions.cs"
+      ]
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "Wrote the card model, its cell and its history entry.",
+      "files": [
+        "MTM_Waitlist.GenericRequest.Controls/Models/GenericRequestCardModel.cs"
+      ]
+    },
+    "T012": {
+      "status": "DONE",
+      "did": "Wrote the routing rule with conditional dunnage, scrap and die steps.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Services/GenericRequestFlowRules.cs"
+      ]
+    },
+    "T013": {
+      "status": "DONE",
+      "did": "Wrote the cell rule that omits a cell with no value.",
+      "files": [
+        "MTM_Waitlist.GenericRequest.Controls/Helpers/GenericRequestCardRules.cs"
+      ]
+    },
+    "T014": {
+      "status": "DONE",
+      "did": "Wrote the step view-model base with load, presentation, retry and continue/back.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestStepViewModel.cs"
+      ]
+    },
+    "T015": {
+      "status": "DONE",
+      "did": "Built the three-state step frame with the attempt time and retry control on the unavailable state only.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Controls/GenericRequestStepFrame.xaml",
+        "MTM_Waitlist.GenericRequest/Controls/GenericRequestStepFrame.xaml.cs"
+      ]
+    },
+    "T016": {
+      "status": "DONE",
+      "did": "Laid out the work center step and its view model.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestWorkCenterPage.xaml",
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestWorkCenterPage.xaml.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestWorkCenterViewModel.cs"
+      ]
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "Laid out the category step and its view model.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestCategoryPage.xaml",
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestCategoryPage.xaml.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestCategoryViewModel.cs"
+      ]
+    },
+    "T018": {
+      "status": "DONE",
+      "did": "Laid out the item step and its view model.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestItemPage.xaml",
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestItemPage.xaml.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestItemViewModel.cs"
+      ]
+    },
+    "T019": {
+      "status": "DONE",
+      "did": "Laid out the part step with stage choice and sequence list, and its view model.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestPartPage.xaml",
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestPartPage.xaml.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestPartViewModel.cs"
+      ]
+    },
+    "T020": {
+      "status": "DONE",
+      "did": "Laid out the dunnage catalogue step as type list, part grid and selection summary, with its view model.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestDunnagePage.xaml",
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestDunnagePage.xaml.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestDunnageViewModel.cs"
+      ]
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "Laid out the scrap type step with lugger availability, and its view model.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestScrapTypePage.xaml",
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestScrapTypePage.xaml.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestScrapTypeViewModel.cs"
+      ]
+    },
+    "T022": {
+      "status": "DONE",
+      "did": "Laid out the die search step and its view model.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestDiePage.xaml",
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestDiePage.xaml.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestDieViewModel.cs"
+      ]
+    },
+    "T023": {
+      "status": "DONE",
+      "did": "Laid out the details step with needed-by date and time, quantity and description, and its view model.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestDetailsPage.xaml",
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestDetailsPage.xaml.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestDetailsViewModel.cs"
+      ]
+    },
+    "T024": {
+      "status": "DONE",
+      "did": "Laid out the summary step as a review list of every answer, and its view model.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestSummaryPage.xaml",
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestSummaryPage.xaml.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestSummaryViewModel.cs"
+      ]
+    },
+    "T025": {
+      "status": "DONE",
+      "did": "Laid out the result step and its view model, reporting honestly that nothing has been raised.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestResultPage.xaml",
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestResultPage.xaml.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestResultViewModel.cs"
+      ]
+    },
+    "T026": {
+      "status": "DONE",
+      "did": "Wrote the in-memory step data answering every seam method from the chosen scenario, including the awkward values, with no connection opened.",
+      "files": [
+        "TempGenericRequest.Preview/Temp/TempGenericRequestStepData.cs",
+        "TempGenericRequest.Preview/Temp/TempPreviewValues.cs",
+        "TempGenericRequest.Preview/Temp/TempPreviewScenario.cs"
+      ]
+    },
+    "T027": {
+      "status": "DONE",
+      "did": "Wrote the navigator that swaps the hosted page and the window that offers screen, scenario and variant choice.",
+      "files": [
+        "TempGenericRequest.Preview/Temp/TempGenericRequestNavigator.cs",
+        "TempGenericRequest.Preview/Temp/TempPreviewScreen.cs",
+        "TempGenericRequest.Preview/MainWindow.xaml",
+        "TempGenericRequest.Preview/MainWindow.xaml.cs",
+        "TempGenericRequest.Preview/App.xaml",
+        "TempGenericRequest.Preview/App.xaml.cs"
+      ]
+    },
+    "T028": {
+      "status": "DONE",
+      "did": "Proved the card rule draws only its variant cells and omits a cell with no value; three tests pass.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestCardRulesTests.cs"
+      ]
+    },
+    "T029": {
+      "status": "DONE",
+      "did": "Proved the routing rule reaches the conditional steps and clamps at both ends; four tests pass.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestFlowRulesTests.cs"
+      ]
+    },
+    "T030": {
+      "status": "DONE",
+      "did": "Built the generic card control, drawing only the cells its variant rule returns.",
+      "files": [
+        "MTM_Waitlist.GenericRequest.Controls/Controls/GenericRequestCard.xaml",
+        "MTM_Waitlist.GenericRequest.Controls/Controls/GenericRequestCard.xaml.cs"
+      ]
+    },
+    "T031": {
+      "status": "DONE",
+      "did": "Built the detail page: the card's facts plus requester, time raised and history.",
+      "files": [
+        "MTM_Waitlist.GenericRequest.Controls/Views/GenericRequestDetailPage.xaml",
+        "MTM_Waitlist.GenericRequest.Controls/Views/GenericRequestDetailPage.xaml.cs"
+      ]
+    },
+    "T032": {
+      "status": "DONE",
+      "did": "Built the card preview page: generic card beside a work-order comparison in one list, with variant choice.",
+      "files": [
+        "TempGenericRequest.Preview/Views/TempPreviewCardPage.xaml",
+        "TempGenericRequest.Preview/Views/TempPreviewCardPage.xaml.cs"
+      ]
+    },
+    "T033": {
+      "status": "DONE",
+      "did": "Wrote the Temp boundary audit: it walks the application's reference graph, names the offending artefact, allows only the preview project and test code, and proves itself against a synthetic offence.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/TempArtefactBoundaryAuditTests.cs"
+      ]
+    },
+    "T034": {
+      "status": "DONE",
+      "did": "Listed all sixteen new XAML files in the surface inventory and corrected its totals to 94.",
+      "files": [
+        "docs/guides/guides-xaml-surface-inventory.md"
+      ]
+    },
+    "T035": {
+      "status": "DONE",
+      "did": "Solution builds with 0 warnings and 0 errors; the full suite passes 2464 with 52 skipped; the shipped application builds alone with the preview absent."
+    }
+  },
+  "verified": [
+    {
+      "what": "solution build",
+      "command": "dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 65.6,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:01:05.31"
+    },
+    {
+      "what": "full test suite",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 60.3,
+      "result": "  Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_ReachesTheRealProcedureReportsTheLoadedRowCountAndSwapsAtomically [1 ms] ·   Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_WithAnEmptyPayloadIsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  2464, Skipped:    52, Total:  2516, Duration: 32 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "shipped application builds alone",
+      "command": "dotnet build MTM_Waitlist.csproj -c Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 41.0,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:40.73"
+    },
+    {
+      "what": "the library resources reach the preview application's merged resource index",
+      "result": "all five sampled keys (step titles, the submit label, the preview window title, a card label) are present in the built TempGenericRequest.Preview.pri",
+      "warnings": [
+        "the preview host was never launched in this session, so this is a static check of the resource index rather than a rendered screen"
+      ]
+    }
+  ],
+  "concerns": [
+    {
+      "note": "{\"what\": \"the work-order card in the comparison is a Temp stand-in, not the real control\", \"why\": \"the real card lives inside the shipping application project, which the preview cannot reference without dragging in its startup and packaging\", \"impact\": \"the pair can drift; re-check it when the live verification chunk runs\"}"
+    },
+    {
+      "note": "{\"what\": \"the preview host was never launched, so nothing has been judged visually\", \"why\": \"no interactive desktop session was available in this run\", \"impact\": \"layout, dark-theme legibility and long-value behaviour are unverified by eye; the checks recorded here are build, suite and resource-index evidence\"}"
+    }
+  ],
+  "last_action": "all 35 tasks done; solution builds 0 warnings and 0 errors; suite passes 2464 with 52 skipped"
+}

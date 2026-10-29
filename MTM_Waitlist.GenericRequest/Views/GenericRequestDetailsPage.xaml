@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="MTM_Waitlist.GenericRequest.Views.GenericRequestDetailsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:MTM_Waitlist.GenericRequest.Controls"
+    HorizontalAlignment="Stretch"
+    VerticalAlignment="Stretch">
+
+    <controls:GenericRequestStepFrame
+        AttemptedAtDisplay="{x:Bind ViewModel.AttemptedAtDisplay, Mode=OneWay}"
+        BackCommand="{x:Bind ViewModel.BackCommand}"
+        ContinueCommand="{x:Bind ViewModel.ContinueCommand}"
+        EmptyKey="{x:Bind ViewModel.EmptyKey}"
+        IntroKey="{x:Bind ViewModel.IntroKey}"
+        Presentation="{x:Bind ViewModel.Presentation, Mode=OneWay}"
+        RetryCommand="{x:Bind ViewModel.RetryCommand}"
+        TitleKey="{x:Bind ViewModel.TitleKey}">
+        <controls:GenericRequestStepFrame.Body>
+            <StackPanel Spacing="16">
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <DatePicker
+                        x:Uid="GenericRequest_Details_NeededBy_Date"
+                        AutomationProperties.Name="{x:Bind ViewModel.Title}"
+                        SelectedDate="{x:Bind ViewModel.NeededByDate, Mode=TwoWay}" />
+                    <TimePicker
+                        Grid.Column="1"
+                        x:Uid="GenericRequest_Details_NeededBy_Time"
+                        AutomationProperties.Name="{x:Bind ViewModel.Title}"
+                        SelectedTime="{x:Bind ViewModel.NeededByTime, Mode=TwoWay}" />
+                    <NumberBox
+                        Grid.Column="2"
+                        MinWidth="140"
+                        x:Uid="GenericRequest_Details_Quantity"
+                        AutomationProperties.Name="{x:Bind ViewModel.Title}"
+                        Minimum="1"
+                        SpinButtonPlacementMode="Compact"
+                        Value="{x:Bind ViewModel.Quantity, Mode=TwoWay}" />
+                </Grid>
+                <TextBox
+                    Height="160"
+                    x:Uid="GenericRequest_Details_Description"
+                    AcceptsReturn="True"
+                    AutomationProperties.Name="{x:Bind ViewModel.Title}"
+                    Text="{x:Bind ViewModel.Description, Mode=TwoWay}"
+                    TextWrapping="Wrap" />
+            </StackPanel>
+        </controls:GenericRequestStepFrame.Body>
+    </controls:GenericRequestStepFrame>
+</Page>
