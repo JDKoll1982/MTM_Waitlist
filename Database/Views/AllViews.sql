@@ -35,6 +35,7 @@ SELECT
     building,
     work_center_name,
     is_active,
+    is_generic,
     sort_rank,
     created_utc,
     updated_utc
