@@ -336,6 +336,13 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
 
         if (value is null)
         {
+            // Nothing selected means nothing to designate: the toggle goes back to off rather than keeping the value of
+            // the card that has just been cleared, which would offer a write for a work center that is not chosen.
+            _suppressGenericWrite = true;
+            SelectedWorkCenterIsGeneric = false;
+            _suppressGenericWrite = false;
+            OnPropertyChanged(nameof(GenericToggleHeader));
+            RefreshGenericPreviewAvailability();
             return;
         }
 
