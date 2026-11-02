@@ -30,11 +30,13 @@
             <ComboBox
                 x:Name="TempScreenPicker"
                 x:Uid="TempGenericRequest_Scenario_Screen"
+                DisplayMemberPath="Label"
                 HorizontalAlignment="Stretch"
                 SelectionChanged="OnScreenChanged" />
             <ComboBox
                 x:Name="TempScenarioPicker"
                 x:Uid="TempGenericRequest_Scenario_Presentation"
+                DisplayMemberPath="Label"
                 HorizontalAlignment="Stretch"
                 SelectionChanged="OnScenarioChanged" />
             <ComboBox

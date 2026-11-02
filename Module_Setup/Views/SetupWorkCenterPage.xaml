@@ -235,7 +235,6 @@
                 exists and invites them to ask for it.
             -->
             <StackPanel
-                Orientation="Horizontal"
                 Spacing="12"
                 Visibility="{x:Bind ViewModel.CanManageWorkCenters, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                 <ToggleSwitch
@@ -243,12 +242,13 @@
                     x:Uid="Setup_WorkCenter_GenericToggle"
                     Header="{x:Bind ViewModel.GenericToggleHeader, Mode=OneWay}"
                     IsOn="{x:Bind ViewModel.SelectedWorkCenterIsGeneric, Mode=TwoWay}"
+                    HorizontalAlignment="Left"
                     MinWidth="360" />
                 <Button
                     AutomationProperties.AutomationId="SetupWorkCenterPage_GenericPreviewButton"
                     AutomationProperties.Name="{x:Bind ViewModel.GenericPreviewLabel, Mode=OneWay}"
                     x:Uid="Setup_WorkCenter_GenericPreview"
-                    VerticalAlignment="Bottom"
+                    HorizontalAlignment="Left"
                     Command="{x:Bind ViewModel.OpenGenericPreviewCommand}"
                     Content="Preview the generic request flow"
                     Visibility="{x:Bind ViewModel.CanOpenGenericPreview, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />

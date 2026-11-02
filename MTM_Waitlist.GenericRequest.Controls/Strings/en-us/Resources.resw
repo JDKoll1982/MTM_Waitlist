@@ -83,10 +83,10 @@
   <data name="GenericRequest_Card_NeededBy.Label" xml:space="preserve">
     <value>Needed by</value>
   </data>
-  <data name="GenericRequest_Card_RaisedBy.Label" xml:space="preserve">
+  <data name="GenericRequest_Card_RaisedBy.Text" xml:space="preserve">
     <value>Raised by</value>
   </data>
-  <data name="GenericRequest_Card_RaisedAt.Label" xml:space="preserve">
+  <data name="GenericRequest_Card_RaisedAt.Text" xml:space="preserve">
     <value>Raised</value>
   </data>
   <data name="GenericRequest_Card_History_Title.Text" xml:space="preserve">

@@ -92,10 +92,10 @@
   <data name="GenericRequest_Result_Empty.Text" xml:space="preserve">
     <value>Nothing has been raised yet.</value>
   </data>
-  <data name="GenericRequest_Dunnage_Selected.Label" xml:space="preserve">
+  <data name="GenericRequest_Dunnage_Selected.Text" xml:space="preserve">
     <value>Selected</value>
   </data>
-  <data name="GenericRequest_Scrap_Luggers.Label" xml:space="preserve">
+  <data name="GenericRequest_Scrap_Luggers.Text" xml:space="preserve">
     <value>Luggers</value>
   </data>
   <data name="GenericRequest_Part_Intro.Text" xml:space="preserve">
@@ -156,7 +156,7 @@
   <data name="GenericRequest_Scrap_Empty.Text" xml:space="preserve">
     <value>No scrap type is recorded.</value>
   </data>
-  <data name="GenericRequest_Result_Number.Label" xml:space="preserve">
+  <data name="GenericRequest_Result_Number.Text" xml:space="preserve">
     <value>Request number</value>
   </data>
   <data name="GenericRequest_Details_Quantity.Header" xml:space="preserve">
@@ -180,7 +180,7 @@
   <data name="GenericRequest_Details_Description.Header" xml:space="preserve">
     <value>Description</value>
   </data>
-  <data name="GenericRequest_StepFrame_Unavailable_Attempted.Label" xml:space="preserve">
+  <data name="GenericRequest_StepFrame_Unavailable_Attempted.Text" xml:space="preserve">
     <value>Last attempt</value>
   </data>
   <data name="GenericRequest_Dunnage_Parts_Title.Text" xml:space="preserve">
@@ -207,7 +207,7 @@
   <data name="GenericRequest_Item_Intro.Text" xml:space="preserve">
     <value>Pick the item this request is about.</value>
   </data>
-  <data name="GenericRequest_Part_Stage.Label" xml:space="preserve">
+  <data name="GenericRequest_Part_Stage.Header" xml:space="preserve">
     <value>Stage</value>
   </data>
   <data name="GenericRequest_WorkCenter_Empty.Text" xml:space="preserve">

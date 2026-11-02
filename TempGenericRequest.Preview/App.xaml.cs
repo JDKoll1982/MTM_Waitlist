@@ -16,7 +16,7 @@ public partial class App : Application
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        _window = new MainWindow(ReadMarkedWorkCenter(args.Arguments));
+        _window = new MainWindow(ReadMarkedWorkCenter());
         _window.Activate();
     }
 
@@ -28,33 +28,18 @@ public partial class App : Application
     /// one it is showing the flow for. Nothing is read from the plant: the name is only a label, and the preview's
     /// values stay in memory.
     /// </remarks>
-    private static string? ReadMarkedWorkCenter(string? arguments)
+    private static string? ReadMarkedWorkCenter()
     {
-        if (string.IsNullOrWhiteSpace(arguments))
-        {
-            return null;
-        }
+        // The process command line, not LaunchActivatedEventArgs.Arguments: an unpackaged WinUI app receives no
+        // activation arguments here, so the parsed name was always empty and the window showed a blank line where the
+        // marked work center belongs.
+        var arguments = Environment.GetCommandLineArgs();
+        var index = Array.FindIndex(
+            arguments,
+            argument => string.Equals(argument, "--work-center", StringComparison.OrdinalIgnoreCase));
 
-        const string marker = "--work-center";
-
-        var index = arguments.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
-        if (index < 0)
-        {
-            return null;
-        }
-
-        var remainder = arguments[(index + marker.Length)..].Trim();
-        if (remainder.Length == 0)
-        {
-            return null;
-        }
-
-        if (remainder[0] == '"')
-        {
-            var closing = remainder.IndexOf('"', 1);
-            return closing > 1 ? remainder[1..closing] : remainder[1..];
-        }
-
-        return remainder.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+        return index >= 0 && index + 1 < arguments.Length && !string.IsNullOrWhiteSpace(arguments[index + 1])
+            ? arguments[index + 1].Trim('"')
+            : null;
     }
 }

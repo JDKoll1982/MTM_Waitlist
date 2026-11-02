@@ -64,13 +64,13 @@
   </data>
   <data name="TempGenericRequest_MarkedWorkCenter.Text" xml:space="preserve">
     <value>Showing the flow for the work center you marked: {0}</value>
-  </data>  <data name="TempGenericRequest_Scenario_Screen.Label" xml:space="preserve">
+  </data>  <data name="TempGenericRequest_Scenario_Screen.Header" xml:space="preserve">
     <value>Screen</value>
   </data>
-  <data name="TempGenericRequest_Scenario_Presentation.Label" xml:space="preserve">
+  <data name="TempGenericRequest_Scenario_Presentation.Header" xml:space="preserve">
     <value>Presentation</value>
   </data>
-  <data name="TempGenericRequest_Scenario_Variant.Label" xml:space="preserve">
+  <data name="TempGenericRequest_Scenario_Variant.Header" xml:space="preserve">
     <value>Card variant</value>
   </data>
   <data name="TempGenericRequest_Scenario_Populated.Text" xml:space="preserve">
@@ -94,16 +94,16 @@
   <data name="TempGenericRequest_Card_WorkOrder_Heading.Text" xml:space="preserve">
     <value>Work order</value>
   </data>
-  <data name="TempGenericRequest_Card_WorkOrder_Number.Label" xml:space="preserve">
+  <data name="TempGenericRequest_Card_WorkOrder_Number.Text" xml:space="preserve">
     <value>Work order</value>
   </data>
-  <data name="TempGenericRequest_Card_WorkOrder_Part.Label" xml:space="preserve">
+  <data name="TempGenericRequest_Card_WorkOrder_Part.Text" xml:space="preserve">
     <value>Part</value>
   </data>
-  <data name="TempGenericRequest_Card_WorkOrder_Sequence.Label" xml:space="preserve">
+  <data name="TempGenericRequest_Card_WorkOrder_Sequence.Text" xml:space="preserve">
     <value>Sequence</value>
   </data>
-  <data name="TempGenericRequest_Card_WorkOrder_Due.Label" xml:space="preserve">
+  <data name="TempGenericRequest_Card_WorkOrder_Due.Text" xml:space="preserve">
     <value>Due</value>
   </data>
   <data name="TempGenericRequest_Shell_Hint.Text" xml:space="preserve">
