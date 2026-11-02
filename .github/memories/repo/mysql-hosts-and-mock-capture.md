@@ -1,18 +1,23 @@
 # MySQL hosts reachable from this workstation, and the mock baseline capture
 
-Recorded 2026-10-16. Two **different** MySQL servers answer from this workstation, and confusing them is
-the expensive mistake this note exists to prevent.
+Recorded 2026-10-16; environment re-verified 2026-11-02. Two **different** MySQL servers answer from this
+workstation, and confusing them is the expensive mistake this note exists to prevent.
 
 | Address | Version | What is there |
 | --- | --- | --- |
-| `localhost` | **8.0.46** | A pristine development instance. Schemas: `mysql`, `information_schema`, `performance_schema`, `sys`, `sakila`, `world`. **No `mtm_mock`, no `mtm_waitlist`** until something deploys them. |
-| `172.16.1.104` | **5.7.24** | The plant host `V-MTMFG-5`. Every operational store, and the **warm** `mtm_mock` mirror. |
+| `127.0.0.1` | **8.0.46** | The local MySQL Server 8.0 instance (`MySQL80` service). Schemas: `information_schema`, `mysql`, `performance_schema`, `sys`, `sakila`, `world`, and `mtm_mock` once it is deployed. **No `mtm_waitlist`** locally. |
+| `172.16.1.104` | **8.0.46** | The plant host `V-MTMFG-5`. Every operational store (`mtm_waitlist`, `mtm_wip_application_winforms`, `mtm_receiving_application`, plus their `_test` twins), and the **warm** `mtm_mock` mirror. |
 
 Verified by comparing `@@server_uuid` on both, so this is not an inference from an address looking local —
-`localhost` and `172.16.1.104` are genuinely separate processes.
+`127.0.0.1` and `172.16.1.104` are genuinely separate processes. Both were on 8.0.46 on 2026-11-02; the
+plant host has since been upgraded off 5.7.24, so there is **one** server version to target.
 
-**Why it matters.** `localhost` is the safe place to *prove* a database artifact loads. Building `mtm_mock`
-there and loading a seed into it touches nothing live:
+**MAMP is retired.** It is not installed as a service, not used to reach any store, and must not come back
+into a script, a document or an instruction. The client is `mysql.exe` from **MySQL Server 8.0** or **MySQL
+Workbench 8.0** — both under `C:\Program Files\MySQL\`.
+
+**Why it matters.** The local instance (`127.0.0.1`, reached as `localhost`) is the safe place to *prove* a
+database artifact loads. Building `mtm_mock` there and loading a seed into it touches nothing live:
 
 ```powershell
 $env:MYSQL_PWD='root'

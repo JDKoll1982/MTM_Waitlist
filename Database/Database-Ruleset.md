@@ -1,10 +1,12 @@
 # MTM_Waitlist Database Ruleset
 
 ## Decision Lock
-This document applies your completed naming conventions and database architecture decisions as hard requirements for MySQL 5.7 schema work.
+This document applies your completed naming conventions and database architecture decisions as hard requirements for MySQL Server 8.0 schema work.
 
 ## Engine and Environment
-- MySQL 5.7.
+- MySQL Server 8.0 (8.0.46 on both the plant host and the local development instance).
+- MySQL Workbench 8.0 is the client used to inspect and query the stores. MAMP is retired and is not part of this
+  environment.
 - utf8mb4 / utf8mb4_unicode_ci.
 - Separate dev/test/prod databases.
 - Production identity/session data stays production-only.

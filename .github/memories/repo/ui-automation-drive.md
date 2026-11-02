@@ -125,12 +125,13 @@ sign-in window with `-Action dump` before trying again.
 
 ### 8. Reading the store after a driven action
 
-The app's `appsettings.json` names the plant host, but from the home workstation `mysql.exe` **cannot reach**
-`172.16.1.104` (error 2003) while a local server holds the same database names. Read the local one:
+The app's `appsettings.json` names the plant host. Read the store the app is actually talking to: when
+`172.16.1.104` answers, read that one; when it does not, the local MySQL Server 8.0 instance holds whatever
+was deployed to it, and `mtm_waitlist` is only there if something deployed it.
 
 ```powershell
 $env:MYSQL_PWD = 'root'
-& 'C:\Program Files\MySQL\MySQL Server 8.4\bin\mysql.exe' -h 127.0.0.1 -u root `
+& 'C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe' -h 127.0.0.1 -u root `
     -e "SELECT id, work_center, item, status, handler_status, answers_json FROM mtm_waitlist.waitlist_requests_queue ORDER BY id DESC LIMIT 5;"
 ```
 

@@ -44,7 +44,7 @@
     MySQL password. Prefer the MYSQL_PWD environment variable over this parameter.
 
 .PARAMETER MysqlExe
-    Path to mysql.exe. Default: resolved from PATH, else the MySQL 9.6 install.
+    Path to mysql.exe. Default: resolved from PATH, else the MySQL Server 8.0 install.
 
 .PARAMETER SkipSeedCapture
     Deploy the committed baseline seed without re-recording it from this host. Use it when the host's mirror is

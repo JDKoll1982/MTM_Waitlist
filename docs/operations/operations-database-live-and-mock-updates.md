@@ -11,7 +11,7 @@ The branch itself carries no code or schema change, so "the changes on this bran
 
 | Compared | Against | Result of the comparison |
 | --- | --- | --- |
-| `Database/` artifacts (file-per-artifact `create.sql` / `rollback.sql`) | the live MySQL server `172.16.1.104` (5.7.24) | 1 missing procedure, 1 missing column rename, 5 stale procedures |
+| `Database/` artifacts (file-per-artifact `create.sql` / `rollback.sql`) | the live MySQL server `172.16.1.104` (5.7.24 when this was written; **8.0.46 since the upgrade**) | 1 missing procedure, 1 missing column rename, 5 stale procedures |
 | `Database/Mock/` artifacts | `mtm_mock` on that server | already current — nothing to do |
 | Repo version (`1.1.0`) | the running `MTM_Waitlist.Mock.Service` (status API `http://172.16.1.104:5760/api/status`) | the running service is the **1.0.0** build from 2026-10-05 |
 | Procedure names called by production code | every routine in the four stores | exactly one routine is called but does not exist |

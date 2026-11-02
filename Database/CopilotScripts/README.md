@@ -207,8 +207,8 @@ Diagnostic scripts (not part of the deploy path) live beside their artifacts:
 
 ## Conventions
 
-- **MySQL 5.7 syntax** is the target (production host); the local dev server is 9.6, so
-  every artifact is verified to run on both.
+- **MySQL Server 8.0 syntax** is the target (plant host and local development instance are both 8.0.46), so
+  every artifact is verified against 8.0 and there is no second server version to test against.
 - Each artifact ships `create.sql` + `rollback.sql` in the same change and is registered
   in the master lists (locked DB ruleset).
 - Never edit `AllTables.sql` / `AllSPs.sql` / `AllSeeds.sql` by hand — regenerate them.

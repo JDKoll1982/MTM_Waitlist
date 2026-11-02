@@ -27,7 +27,7 @@
     what the application itself resolves.
 
 .PARAMETER MysqlExe
-    Full path to mysql.exe. Discovered from PATH, then the usual MySQL Server install locations, then MAMP.
+    Full path to mysql.exe. Discovered from PATH, then the usual MySQL Server 8.0 install locations.
 
 .PARAMETER Apply
     Apply every create.sql in the schema, rather than only reporting. Without it the script changes nothing.
@@ -100,20 +100,11 @@ function Resolve-MysqlExe {
 
     $candidates = @(
         'C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe',
-        'C:\Program Files\MySQL\MySQL Server 5.7\bin\mysql.exe',
-        'C:\Program Files (x86)\MySQL\MySQL Server 8.0\bin\mysql.exe',
-        'C:\Program Files (x86)\MySQL\MySQL Server 5.7\bin\mysql.exe',
-        'C:\MAMP\bin\mysql\bin\mysql.exe'
+        'C:\Program Files (x86)\MySQL\MySQL Server 8.0\bin\mysql.exe'
     )
 
     foreach ($candidate in $candidates) {
         if (Test-Path $candidate) { return $candidate }
-    }
-
-    foreach ($root in @('C:\MAMP\bin\mysql', 'C:\wamp64\bin\mysql', 'C:\xampp\mysql')) {
-        if (-not (Test-Path $root)) { continue }
-        $found = Get-ChildItem $root -Recurse -Filter mysql.exe -ErrorAction SilentlyContinue | Select-Object -First 1
-        if ($found) { return $found.FullName }
     }
 
     throw 'mysql.exe was not found. Pass -MysqlExe with its full path.'

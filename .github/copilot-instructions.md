@@ -203,6 +203,19 @@ When executing complex, cross-file architectural edits, you must strictly move t
   command line, or a log.
 - The service's own state is **not** in the install folder: configuration, run records and backups live under
   `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\`. Deleting only the install folder keeps the credential and backups.
+## Database Environment (MySQL Server 8.0, MySQL Workbench)
+- **MySQL Server 8.0 is the only engine.** The plant host `172.16.1.104` and the local development instance on
+  `127.0.0.1:3306` both run **8.0.46** (verified 2026-11-02), so there is one server version to target and no
+  cross-version syntax split. The local instance is the `MySQL80` service.
+- **MySQL Workbench 8.0 is the client and inspection tool.** `mysql.exe` from the Server 8.0 install is the
+  command-line equivalent; both live under `C:\Program Files\MySQL\`.
+- **MAMP is retired and must not come back.** It is no longer installed as a service, is not used to reach any
+  store, and must not appear in a script, an instruction, a memory note or a document. A MAMP client-discovery
+  branch in a script is dead code — delete it rather than restoring it.
+- Which server to read is a decision, not a default: `127.0.0.1` holds only what was deployed to it (`mtm_mock`,
+  and `mtm_waitlist` only if something deployed it), while `172.16.1.104` holds every operational store and the
+  warm mirror. `.github/memories/repo/mysql-hosts-and-mock-capture.md` carries the detail.
+
 ## Known Build Quirks
 - `PRI175` / `PRI224 root node not found` during `dotnet build` is usually stale PRI artifacts or a running `MTM_Waitlist.exe` locking the output — not a code error. Stop the running app, delete stale `*.pri` under `obj/`/`bin/`, and rebuild before debugging the code.
 - `WMC9999: Could not find any resources appropriate for the specified culture ... ErrorMessages.resources` during `dotnet build` is a **MASKED XAML error, not an environment problem**. This machine's WindowsAppSDK 2.3.1 `XamlCompiler` (in `tools\net472` of the `microsoft.windowsappsdk.winui` package) is missing its `ErrorMessages.resources` satellite, so the compiler cannot report the underlying cause — any real XAML compile error (bad type, bad binding, wrong member name) surfaces only as this generic WMC9999. Treat WMC9999 as "there is a real XAML error somewhere; the tool can't tell you where." To surface the real error: temporarily introduce a deliberate C# error (e.g. duplicate a command) so the compiler reports the actual file/type problem, or bisect by simplifying the recently-changed XAML files.

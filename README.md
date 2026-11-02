@@ -12,7 +12,8 @@ Infor Visual for ERP data.
 | OS | Windows 10 1809 (build 17763) or later |
 | SDK | .NET 10 SDK |
 | Runtime (build machine) | none beyond the SDK - the app and the Windows App SDK are both published self-contained |
-| Database (running the app) | MySQL 5.7 reachable at the configured host, plus Infor Visual SQL Server |
+| Database (running the app) | MySQL Server 8.0 reachable at the configured host, plus Infor Visual SQL Server |
+| Database (inspecting the stores) | MySQL Workbench 8.0. MAMP is not used anywhere in this stack |
 
 ## Build and test
 

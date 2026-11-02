@@ -5,7 +5,9 @@ applyTo: "Database/**/*.sql"
 # MTM_Waitlist Database SQL Rules (Locked)
 
 ## Platform
-- Engine: MySQL 5.7.
+- Engine: MySQL Server 8.0 (verified 8.0.46 on both the plant host and the local development instance).
+- Client and inspection tool: MySQL Workbench 8.0. MAMP is retired — it is not installed, not used, and not a
+  supported way to reach any store.
 - Charset/collation defaults: utf8mb4 / utf8mb4_unicode_ci.
 - Keep all SQL identifiers lowercase snake_case.
 - Avoid quoted identifiers unless unavoidable.

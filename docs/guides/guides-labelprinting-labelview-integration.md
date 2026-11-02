@@ -165,7 +165,7 @@ Which database? Labels for the receiving application belong to **`mtm_receiving_
 and work-center labels belong to **`mtm_waitlist`**. Put the tables in the owning store — do not
 duplicate the catalogue across stores.
 
-### 4.4 Schema (MySQL 5.7, `Database/` layout, names per the locked SQL ruleset)
+### 4.4 Schema (MySQL Server 8.0, `Database/` layout, names per the locked SQL ruleset)
 
 Three tables. Names follow `{category}_{table}_{action_or_purpose}`, primary key `id`, public UUID
 `public_id`, `is_`/`has_` booleans, `_utc` timestamps. Note `display_sequence` rather than any

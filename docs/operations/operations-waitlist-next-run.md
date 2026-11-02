@@ -469,7 +469,8 @@ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
   remain hand-maintained. Every new artifact needs a `create.sql` **and** a `rollback.sql`, and needs
   `Database/Bootstrap/update_table_descriptions.sql` touched — that is mandatory whenever any SQL artifact under
   `Database/` is added, modified or removed.
-- **MySQL 5.7 syntax is the target.** Verify any artifact on both 5.7 and the newer local server.
+- **MySQL Server 8.0 is the only target.** The plant host and the local development instance both run 8.0.46, so
+  there is no second server version to verify an artifact against.
 
 ---
 

@@ -48,7 +48,8 @@ the source of truth, not this table.
 
 - Read back from `HKCU\Environment`; all four values match what was written.
 - `MTM_WAITLIST_DB_CONNECTION_STRING` resolves and connects to **all four** databases (`mtm_mock`, `mtm_waitlist`,
-  `mtm_wip_application_winforms`, `mtm_receiving_application`) on MySQL **5.7.24**.
+  `mtm_wip_application_winforms`, `mtm_receiving_application`) on MySQL **8.0.46** (the host was 5.7.24 when this
+  was first verified on 2026-09-11; re-verified 2026-11-02 after the upgrade).
 - The Visual path connects to `VISUAL`/`MTMFG` and reports `SUSER_SNAME() = SHOP2` with 42,852 open work orders
   visible (re-verified after the login was corrected to `SHOP2`).
 
