@@ -27,6 +27,8 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
     private readonly IWorkCenterCatalogService _workCenterCatalogService;
     private readonly IBuildingSelectionService _buildingSelectionService;
     private readonly IPermissionService _permissionService;
+    private readonly IGenericRequestPreviewLauncher _genericPreviewLauncher;
+    private bool _suppressGenericWrite;
     private readonly HashSet<string> _hotWorkCenterNames = new(StringComparer.OrdinalIgnoreCase);
     private readonly ObservableCollection<SetupWorkCenter> _displayedHotWorkCenters = new();
     private readonly ObservableCollection<SetupWorkCenter> _displayedOtherWorkCenters = new();
@@ -114,6 +116,45 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
         get; set;
     }
 
+    /// <summary>
+    /// Whether requests raised at the selected work center use the generic request flow (016 FR-001).
+    /// </summary>
+    /// <remarks>
+    /// Two-way with the page's toggle. A change is written only when it disagrees with the selected work center's own
+    /// value, so selecting a different card — which pushes that card's value in — never writes anything, and the only
+    /// write that ever happens is one the person made.
+    /// </remarks>
+    [ObservableProperty]
+    public partial bool SelectedWorkCenterIsGeneric
+    {
+        get; set;
+    }
+
+    /// <summary>
+    /// Whether the preview of the generic request flow can be opened for the selected work center.
+    /// </summary>
+    /// <remarks>
+    /// True only when the signed-in person may manage work centers, that work center is marked generic, and the
+    /// preview host is actually on this machine. A machine without it shows nothing rather than a button that cannot
+    /// work.
+    /// </remarks>
+    [ObservableProperty]
+    public partial bool CanOpenGenericPreview
+    {
+        get; set;
+    }
+
+    /// <summary>The toggle's heading, naming the work center it would change.</summary>
+    public string GenericToggleHeader => SelectedWorkCenter is { } workCenter
+        ? string.Format(
+            System.Globalization.CultureInfo.CurrentCulture,
+            "Setup_WorkCenter_GenericToggle.Header".GetLocalized(),
+            workCenter.Name)
+        : "Setup_WorkCenter_GenericToggle.None".GetLocalized();
+
+    /// <summary>The preview button's label, read for the automation name as well as drawn as its content.</summary>
+    public string GenericPreviewLabel => "Setup_WorkCenter_GenericPreview.Content".GetLocalized();
+
     public SetupWorkCenterViewModel(
         INavigationService navigationService,
         ISetupWorkflowService workflowService,
@@ -121,7 +162,8 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
         IWorkCenterImageService imageLocationService,
         IWorkCenterCatalogService workCenterCatalogService,
         IBuildingSelectionService buildingSelectionService,
-        IPermissionService permissionService)
+        IPermissionService permissionService,
+        IGenericRequestPreviewLauncher genericPreviewLauncher)
     {
         _navigationService = navigationService;
         _workflowService = workflowService;
@@ -130,6 +172,7 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
         _workCenterCatalogService = workCenterCatalogService;
         _buildingSelectionService = buildingSelectionService;
         _permissionService = permissionService;
+        _genericPreviewLauncher = genericPreviewLauncher;
     }
 
     public void OnNavigatedTo(object parameter)
@@ -171,6 +214,9 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
                 ex,
                 "The work-centre setup permission could not be read, so the management controls stay hidden rather than being offered on a guess.");
         }
+
+        // The preview offer depends on this answer, so it is re-evaluated once the permission read has landed.
+        RefreshGenericPreviewAvailability();
     }
 
     public void OnNavigatedFrom()
@@ -297,6 +343,94 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
         BuildingInput = string.IsNullOrWhiteSpace(value.Building)
             ? ResolveBuildingInput()
             : value.Building;
+
+        // The card's own value is pushed into the toggle, so selecting a card never counts as a decision.
+        _suppressGenericWrite = true;
+        SelectedWorkCenterIsGeneric = value.IsGeneric;
+        _suppressGenericWrite = false;
+        OnPropertyChanged(nameof(GenericToggleHeader));
+        RefreshGenericPreviewAvailability();
+    }
+
+    /// <summary>
+    /// Writes the designation the person just chose, and only when the permission and the value both allow it.
+    /// </summary>
+    /// <remarks>
+    /// The control is absent for anyone without the permission (FR-002), so this is a second lock rather than the
+    /// lock: a reachable command must still refuse. A refused write puts the toggle back where it was, because a
+    /// toggle that stays flipped while nothing was stored is the screen lying about the plant.
+    /// </remarks>
+    partial void OnSelectedWorkCenterIsGenericChanged(bool value)
+    {
+        if (_suppressGenericWrite || SelectedWorkCenter is not { } workCenter || workCenter.IsGeneric == value)
+        {
+            return;
+        }
+
+        _ = ApplyGenericDesignationAsync(workCenter, value);
+    }
+
+    private async Task ApplyGenericDesignationAsync(SetupWorkCenter workCenter, bool isGeneric)
+    {
+        if (!CanManageWorkCenters)
+        {
+            StatusMessage = "You do not have permission to manage workstations.";
+            RevertGenericToggle(workCenter);
+            return;
+        }
+
+        var result = await _workCenterService
+            .SetWorkCenterGenericAsync(workCenter.Id, isGeneric)
+            .ConfigureAwait(true);
+
+        StatusMessage = result.Message;
+
+        if (!result.Success)
+        {
+            RevertGenericToggle(workCenter);
+            return;
+        }
+
+        workCenter.IsGeneric = isGeneric;
+        RefreshGenericPreviewAvailability();
+    }
+
+    private void RevertGenericToggle(SetupWorkCenter workCenter)
+    {
+        _suppressGenericWrite = true;
+        SelectedWorkCenterIsGeneric = workCenter.IsGeneric;
+        _suppressGenericWrite = false;
+    }
+
+    /// <summary>
+    /// Offers the preview only when it would actually work: the permission, the mark, and a preview on this machine.
+    /// </summary>
+    private void RefreshGenericPreviewAvailability() =>
+        CanOpenGenericPreview = CanManageWorkCenters
+            && SelectedWorkCenter is { IsGeneric: true }
+            && _genericPreviewLauncher.ResolvePreviewExecutable() is not null;
+
+    /// <summary>
+    /// Opens the generic request preview for the selected work center, so the flow that mark produces can be walked
+    /// before the live reads exist.
+    /// </summary>
+    [RelayCommand]
+    private async Task OpenGenericPreviewAsync()
+    {
+        if (!CanManageWorkCenters || SelectedWorkCenter is not { } workCenter)
+        {
+            return;
+        }
+
+        if (!workCenter.IsGeneric)
+        {
+            StatusMessage = "Mark this work center generic first, so the preview opens the flow its requests will use.";
+            return;
+        }
+
+        var result = await _genericPreviewLauncher.LaunchAsync(workCenter.Name).ConfigureAwait(true);
+        StatusMessage = result.Message;
+        RefreshGenericPreviewAvailability();
     }
 
     partial void OnFilterTextChanged(string value)

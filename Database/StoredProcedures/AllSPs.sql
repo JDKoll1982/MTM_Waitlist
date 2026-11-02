@@ -3783,6 +3783,31 @@ FROM setup_work_centers_catalog
 WHERE id = p_id
 LIMIT 1;
 
+-- Stored Procedure: sp_setup_work_centers_generic_set
+-- Engine: MySQL 5.7
+-- Feature: 016-generic-wc-request-foundation (FR-001, FR-002, FR-004)
+--
+-- Sets or clears one work center's generic designation. Separate from the upsert on purpose: the
+-- designation is its own decision, taken from its own control under its own permission, and it must not be
+-- able to change a name or a building as a side effect.
+-- ============================================================
+
+USE mtm_waitlist;
+
+DROP PROCEDURE IF EXISTS sp_setup_work_centers_generic_set;
+
+CREATE PROCEDURE sp_setup_work_centers_generic_set(
+    IN p_work_center_id VARCHAR(32),
+    IN p_is_generic TINYINT(1),
+    IN p_modified_by_user_id BIGINT
+)
+UPDATE setup_work_centers_catalog
+SET
+    is_generic = IF(p_is_generic = 0, 0, 1),
+    updated_by_user_id = COALESCE(p_modified_by_user_id, updated_by_user_id),
+    updated_utc = UTC_TIMESTAMP()
+WHERE id = CAST(NULLIF(TRIM(p_work_center_id), '') AS UNSIGNED);
+
 -- Stored Procedure: sp_setup_work_centers_get_all
 -- Engine: MySQL 5.7
 
@@ -3796,6 +3821,7 @@ SELECT
     building,
     work_center_name,
     is_active,
+    is_generic,
     updated_utc
 FROM vw_setup_work_centers_active
 ORDER BY sort_rank ASC, work_center_name ASC;

@@ -14,6 +14,7 @@ public static class ModuleDependencyInjectionExtensions
         services.AddSingleton<InforVisualSqlQueryService>();
         services.AddSingleton<IWorkOrderValidationService, WorkOrderValidationService>();
         services.AddSingleton<ISetupWorkCenterService, SetupWorkCenterService>();
+        services.AddSingleton<IGenericRequestPreviewLauncher, GenericRequestPreviewLauncher>();
         services.AddSingleton<IInforVisualLookupService, SetupLookupService>();
         services.AddSingleton<ISubordinatePartService, SetupLookupService>();
         services.AddSingleton<IWorkOrderSearchService, SetupLookupService>();

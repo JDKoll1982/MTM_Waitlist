@@ -107,6 +107,7 @@
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
@@ -121,9 +122,29 @@
                                             Text="{x:Bind TitleDisplay}"
                                             TextTrimming="CharacterEllipsis" />
                                     </dev:AutoScrollView>
-                                    <Button
+                                    <!--
+                                        The generic designation, so a person can see at a glance which work centers raise
+                                        generic requests instead of running a job (016 FR-001). It is information about
+                                        the work center, not a control: the control that changes it is on the page above,
+                                        and it is absent for anyone without the permission (FR-002).
+                                    -->
+                                    <Border
                                         Grid.Row="0"
                                         Grid.Column="1"
+                                        Padding="8,2"
+                                        VerticalAlignment="Center"
+                                        Background="{ThemeResource AccentFillColorSecondaryBrush}"
+                                        CornerRadius="4"
+                                        Visibility="{x:Bind IsGeneric, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <TextBlock
+                                            x:Uid="Setup_WorkCenter_GenericBadge"
+                                            Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                                            Style="{StaticResource CaptionTextBlockStyle}"
+                                            Text="Generic" />
+                                    </Border>
+                                    <Button
+                                        Grid.Row="0"
+                                        Grid.Column="2"
                                         Width="36"
                                         Height="36"
                                         Padding="0"
@@ -208,6 +229,30 @@
             <TextBlock x:Uid="Setup_Workstation_Title" Style="{StaticResource SetupPageTitleStyle}" Text="Select Work Center" />
             <TextBlock x:Uid="Setup_Workstation_Subtitle" Style="{StaticResource SetupPageSubtitleStyle}" Text="Choose where this setup is being performed." />
             <TextBox AutomationProperties.AutomationId="SetupWorkCenterPage_SearchInput" x:Uid="Setup_Workstation_SearchInput" Header="Search" PlaceholderText="Search by work center, work order, sequence, or part number" Text="{x:Bind ViewModel.FilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <!--
+                The generic designation control (016 FR-001, FR-002). Absent, not disabled, for anyone without
+                permission.setup.work_centers: a greyed-out control still tells an unauthorised person the setting
+                exists and invites them to ask for it.
+            -->
+            <StackPanel
+                Orientation="Horizontal"
+                Spacing="12"
+                Visibility="{x:Bind ViewModel.CanManageWorkCenters, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                <ToggleSwitch
+                    AutomationProperties.AutomationId="SetupWorkCenterPage_GenericToggle"
+                    x:Uid="Setup_WorkCenter_GenericToggle"
+                    Header="{x:Bind ViewModel.GenericToggleHeader, Mode=OneWay}"
+                    IsOn="{x:Bind ViewModel.SelectedWorkCenterIsGeneric, Mode=TwoWay}"
+                    MinWidth="360" />
+                <Button
+                    AutomationProperties.AutomationId="SetupWorkCenterPage_GenericPreviewButton"
+                    AutomationProperties.Name="{x:Bind ViewModel.GenericPreviewLabel, Mode=OneWay}"
+                    x:Uid="Setup_WorkCenter_GenericPreview"
+                    VerticalAlignment="Bottom"
+                    Command="{x:Bind ViewModel.OpenGenericPreviewCommand}"
+                    Content="Preview the generic request flow"
+                    Visibility="{x:Bind ViewModel.CanOpenGenericPreview, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+            </StackPanel>
             <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" TextWrapping="WrapWholeWords" />
         </StackPanel>
 

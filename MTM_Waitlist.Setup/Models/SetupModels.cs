@@ -172,6 +172,8 @@ public sealed class SetupWorkCenter : ObservableObject
 
     private bool _isSelected;
 
+    private bool _isGeneric;
+
     /// <summary>
     /// Whether this workstation is the currently selected card in the selection grid.
     /// Drives the card's selection outline and blue photo frame.
@@ -189,6 +191,21 @@ public sealed class SetupWorkCenter : ObservableObject
     public string Building { get; set; } = string.Empty;
 
     public bool IsActive { get; set; } = true;
+
+    /// <summary>
+    /// Whether requests raised at this work center use the generic request flow instead of a work order
+    /// (016-generic-wc-request-foundation, FR-001).
+    /// </summary>
+    /// <remarks>
+    /// Read from <c>setup_work_centers_catalog.is_generic</c> and changed only from this screen, under
+    /// <c>permission.setup.work_centers</c>. It raises a change notification because the card's badge and the
+    /// page's toggle both read it, and clearing the mark has to be visible without a reload (FR-004).
+    /// </remarks>
+    public bool IsGeneric
+    {
+        get => _isGeneric;
+        set => SetProperty(ref _isGeneric, value);
+    }
 
     /// <summary>
     /// Resolved image path for the workstation's work center. Populated by the

@@ -49,6 +49,7 @@ public sealed class SetupWorkCenterService : ISetupWorkCenterService
                     Building = GetValue(row, "building"),
                     IsActive = string.Equals(GetValue(row, "is_active"), "1", StringComparison.OrdinalIgnoreCase)
                         || string.Equals(GetValue(row, "is_active"), "true", StringComparison.OrdinalIgnoreCase),
+                    IsGeneric = IsTrue(GetValue(row, "is_generic")),
                     CurrentWorkOrder = activeJobRow is null ? string.Empty : GetValue(activeJobRow, "work_order"),
                     CurrentPartNumber = activeJobRow is null ? string.Empty : GetValue(activeJobRow, "part_number"),
                     CurrentSequenceNumber = activeJobRow is null ? string.Empty : GetValue(activeJobRow, "sequence_number"),
@@ -139,6 +140,42 @@ public sealed class SetupWorkCenterService : ISetupWorkCenterService
         };
     }
 
+    /// <summary>
+    /// Marks or clears one work center's generic designation (016-generic-wc-request-foundation, FR-001).
+    /// </summary>
+    /// <remarks>
+    /// The permission is the caller's business: this is the write, and the page decides who may reach it. A row that
+    /// does not exist reports zero affected rows, which the caller must treat as a refusal rather than a success.
+    /// </remarks>
+    public async Task<SetupSelectionResult> SetWorkCenterGenericAsync(string workstationId, bool isGeneric, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(workstationId))
+        {
+            return new SetupSelectionResult { Success = false, Message = "Workstation ID is required." };
+        }
+
+        var affectedRows = await _mySqlHelperServer.ExecuteStoredProcedureNonQueryAsync(
+            "sp_setup_work_centers_generic_set",
+            new Dictionary<string, object?>
+            {
+                ["p_work_center_id"] = workstationId.Trim(),
+                ["p_is_generic"] = isGeneric ? 1 : 0,
+                ["p_modified_by_user_id"] = null,
+            },
+            MySqlDatabaseTarget.MtmWaitlist,
+            cancellationToken).ConfigureAwait(false);
+
+        return new SetupSelectionResult
+        {
+            Success = affectedRows > 0,
+            Message = affectedRows > 0
+                ? (isGeneric
+                    ? "Work center marked generic: requests raised there use the generic request flow."
+                    : "Generic marking cleared: requests raised there follow the work-order flow.")
+                : "Unable to change the generic marking for that work center.",
+        };
+    }
+
     public async Task<IReadOnlyList<SetupWorkCenterHistoryEntry>> GetWorkCenterHistoryAsync(string workCenterName, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(workCenterName))
@@ -163,6 +200,10 @@ public sealed class SetupWorkCenterService : ISetupWorkCenterService
             })
             .ToArray();
     }
+
+    private static bool IsTrue(string raw) =>
+        string.Equals(raw, "1", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(raw, "true", StringComparison.OrdinalIgnoreCase);
 
     private static string GetValue(IReadOnlyDictionary<string, object?> row, string key)
     {

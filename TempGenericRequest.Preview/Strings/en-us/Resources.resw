@@ -62,7 +62,9 @@
   <data name="TempGenericRequest_Window_Title.Text" xml:space="preserve">
     <value>Generic request preview</value>
   </data>
-  <data name="TempGenericRequest_Scenario_Screen.Label" xml:space="preserve">
+  <data name="TempGenericRequest_MarkedWorkCenter.Text" xml:space="preserve">
+    <value>Showing the flow for the work center you marked: {0}</value>
+  </data>  <data name="TempGenericRequest_Scenario_Screen.Label" xml:space="preserve">
     <value>Screen</value>
   </data>
   <data name="TempGenericRequest_Scenario_Presentation.Label" xml:space="preserve">

@@ -19,6 +19,10 @@
                 TextWrapping="Wrap"
                 Style="{StaticResource SubtitleTextBlockStyle}" />
             <TextBlock
+                x:Name="TempMarkedWorkCenter"
+                TextWrapping="Wrap"
+                Style="{StaticResource BodyTextBlockStyle}" />
+            <TextBlock
                 x:Uid="TempGenericRequest_Shell_Hint"
                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                 TextWrapping="Wrap"

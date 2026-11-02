@@ -387,12 +387,39 @@ EXECUTE stmt;
 
 DEALLOCATE PREPARE stmt;
 
+-- 016-generic-wc-request-foundation: the generic designation. Additive and idempotent, so an existing
+-- store gains the column with every row at 0 — no work center becomes generic because of this change
+-- (FR-003). The view, sp_setup_work_centers_get_all and sp_setup_work_centers_generic_set read it.
+SET
+    @has_is_generic_column := (
+        SELECT COUNT(*)
+        FROM information_schema.columns
+        WHERE
+            table_schema = DATABASE()
+            AND table_name = 'setup_work_centers_catalog'
+            AND column_name = 'is_generic'
+    );
+
+SET
+    @sql_stmt := IF(
+        @has_is_generic_column = 0,
+        'ALTER TABLE setup_work_centers_catalog ADD COLUMN is_generic TINYINT(1) NOT NULL DEFAULT 0 AFTER is_active',
+        'SELECT ''setup_work_centers_catalog.is_generic already exists'''
+    );
+
+PREPARE stmt FROM @sql_stmt;
+
+EXECUTE stmt;
+
+DEALLOCATE PREPARE stmt;
+
 ALTER TABLE setup_work_centers_catalog
 MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
 MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for work center catalog row.',
 MODIFY COLUMN building VARCHAR(64) NOT NULL DEFAULT 'Expo Drive' COMMENT 'Facility building where the work center is located.',
 MODIFY COLUMN work_center_name VARCHAR(64) NOT NULL COMMENT 'Work center or press display name.',
 MODIFY COLUMN is_active TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether this work center is active.',
+MODIFY COLUMN is_generic TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Whether requests raised at this work center use the generic request flow instead of a work order (016 FR-001).',
 MODIFY COLUMN sort_rank INT NOT NULL DEFAULT 100 COMMENT 'Sort order rank for UI lists.',
 MODIFY COLUMN created_by_user_id BIGINT NULL COMMENT 'User who created the work center row.',
 MODIFY COLUMN updated_by_user_id BIGINT NULL COMMENT 'User who last updated the work center row.',

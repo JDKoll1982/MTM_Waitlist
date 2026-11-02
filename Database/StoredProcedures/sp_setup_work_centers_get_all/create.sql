@@ -11,6 +11,7 @@ SELECT
     building,
     work_center_name,
     is_active,
+    is_generic,
     updated_utc
 FROM vw_setup_work_centers_active
 ORDER BY sort_rank ASC, work_center_name ASC;

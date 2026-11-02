@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS setup_work_centers_catalog (
     building VARCHAR(64) NOT NULL DEFAULT 'Expo Drive',
     work_center_name VARCHAR(64) NOT NULL,
     is_active TINYINT(1) NOT NULL DEFAULT 1,
+    is_generic TINYINT(1) NOT NULL DEFAULT 0,
     sort_rank INT NOT NULL DEFAULT 100,
     created_by_user_id BIGINT NULL,
     updated_by_user_id BIGINT NULL,

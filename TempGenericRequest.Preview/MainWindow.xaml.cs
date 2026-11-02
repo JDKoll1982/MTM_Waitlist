@@ -1,3 +1,5 @@
+using System.Globalization;
+
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -25,6 +27,9 @@ public sealed partial class MainWindow : Window
     private IReadOnlyList<TempPreviewScreen> _screens = Array.Empty<TempPreviewScreen>();
     private bool _syncing;
 
+    /// <summary>The work center the setup screen marked, or empty when the preview was started on its own.</summary>
+    public string MarkedWorkCenter { get; }
+
     /// <summary>The flow's steps, in order, so the chooser lists them the way the flow visits them.</summary>
     private static readonly GenericRequestStep[] s_stepOrder =
     [
@@ -40,11 +45,28 @@ public sealed partial class MainWindow : Window
         GenericRequestStep.Result,
     ];
 
-    public MainWindow()
+    public MainWindow(string? markedWorkCenter = null)
     {
         InitializeComponent();
 
         Title = "TempGenericRequest_Window_Title.Text".GetLocalized();
+
+        MarkedWorkCenter = markedWorkCenter ?? string.Empty;
+
+        if (!string.IsNullOrWhiteSpace(MarkedWorkCenter))
+        {
+            // The step's own draft preselects this when the scenario lists the work center, so the flow opens where
+            // the person who marked it would expect it to.
+            _navigator.Draft.WorkCenter = MarkedWorkCenter;
+            TempMarkedWorkCenter.Text = string.Format(
+                CultureInfo.CurrentCulture,
+                "TempGenericRequest_MarkedWorkCenter.Text".GetLocalized(),
+                MarkedWorkCenter);
+        }
+        else
+        {
+            TempMarkedWorkCenter.Visibility = Visibility.Collapsed;
+        }
 
         _navigator.StepChanged += (_, step) => ShowStep(step);
 

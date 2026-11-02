@@ -41,8 +41,7 @@ public interface IWorkOrderSearchService
 }
 
 public interface ISetupWorkCenterService
-{
-    Task<IReadOnlyList<SetupWorkCenter>> GetWorkCentersAsync(CancellationToken cancellationToken = default);
+{    Task<IReadOnlyList<SetupWorkCenter>> GetWorkCentersAsync(CancellationToken cancellationToken = default);
 
     Task<SetupSelectionResult> AddWorkCenterAsync(string workstationName, string building, CancellationToken cancellationToken = default);
 
@@ -50,7 +49,48 @@ public interface ISetupWorkCenterService
 
     Task<SetupSelectionResult> RemoveWorkCenterAsync(string workstationId, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Marks or clears one work center's generic designation — whether requests raised there use the generic
+    /// request flow instead of a work order (016-generic-wc-request-foundation, FR-001).
+    /// </summary>
+    /// <remarks>
+    /// Its own write rather than a parameter on the update: the designation is a separate decision under its own
+    /// rule, and setting it must not be able to rename a work center or move it to another building. The caller is
+    /// responsible for the permission; this method only performs the write, and reports 0 affected rows as a
+    /// refusal rather than a success.
+    /// </remarks>
+    Task<SetupSelectionResult> SetWorkCenterGenericAsync(string workstationId, bool isGeneric, CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<SetupWorkCenterHistoryEntry>> GetWorkCenterHistoryAsync(string workCenterName, CancellationToken cancellationToken = default);
+}
+
+/// <summary>
+/// Starts the generic request preview host, the developer tool that walks the generic request flow against
+/// in-memory values (015-generic-wc-ui-shell).
+/// </summary>
+/// <remarks>
+/// <para>
+/// The preview is a separate program on a developer's machine, never part of this application's build, and it
+/// reads nothing — no database, no queue, no file. This contract exists so the setup screen can open it for the work
+/// center the reviewer just marked, which is the only way to look at the flow before the live reads land in 016 to
+/// 021. Nothing else in the application may depend on it.
+/// </para>
+/// <para>
+/// A machine without the preview reports that plainly. There is no fallback to a substitute and no silent failure,
+/// because an operator screen that pretends to preview something would be worse than one that says it cannot.
+/// </para>
+/// </remarks>
+public interface IGenericRequestPreviewLauncher
+{
+    /// <summary>Where the preview host is on this machine, or <see langword="null"/> when it is not present.</summary>
+    string? ResolvePreviewExecutable();
+
+    /// <summary>
+    /// Start the preview, telling it which work center the reviewer marked so its window says so.
+    /// </summary>
+    /// <param name="workCenterName">The work center whose generic flow is being previewed.</param>
+    /// <param name="cancellationToken">Cancels the wait for the start, not the preview itself.</param>
+    Task<SetupSelectionResult> LaunchAsync(string workCenterName, CancellationToken cancellationToken = default);
 }
 
 public interface IDunnageWorkflowService
