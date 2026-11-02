@@ -23,8 +23,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MTM_Waitlist.Waitlist.NewRe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MTM_Waitlist.Waitlist.Controls", "MTM_Waitlist.Waitlist.Controls\MTM_Waitlist.Waitlist.Controls.csproj", "{DC4FCE9F-B816-4677-BCAF-3AD2A433F11C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MTM_Waitlist.Reporting", "MTM_Waitlist.Reporting\MTM_Waitlist.Reporting.csproj", "{507A4F30-B0BF-4C49-9A70-D926708F69AB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MTM_Waitlist.Mock.Service", "MTM_Waitlist.Mock.Service\MTM_Waitlist.Mock.Service.csproj", "{ED1802B2-7529-4C82-AB0F-9F44B40D3575}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MTM_Waitlist.Mock", "MTM_Waitlist.Mock\MTM_Waitlist.Mock.csproj", "{FFC2B3E1-9D54-441B-8FC9-4A957310F1D3}"
@@ -167,18 +165,6 @@ Global
 		{DC4FCE9F-B816-4677-BCAF-3AD2A433F11C}.Release|x64.Build.0 = Release|x64
 		{DC4FCE9F-B816-4677-BCAF-3AD2A433F11C}.Release|x86.ActiveCfg = Release|x64
 		{DC4FCE9F-B816-4677-BCAF-3AD2A433F11C}.Release|x86.Build.0 = Release|x64
-		{507A4F30-B0BF-4C49-9A70-D926708F69AB}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{507A4F30-B0BF-4C49-9A70-D926708F69AB}.Debug|Any CPU.Build.0 = Debug|x64
-		{507A4F30-B0BF-4C49-9A70-D926708F69AB}.Debug|x64.ActiveCfg = Debug|x64
-		{507A4F30-B0BF-4C49-9A70-D926708F69AB}.Debug|x64.Build.0 = Debug|x64
-		{507A4F30-B0BF-4C49-9A70-D926708F69AB}.Debug|x86.ActiveCfg = Debug|x64
-		{507A4F30-B0BF-4C49-9A70-D926708F69AB}.Debug|x86.Build.0 = Debug|x64
-		{507A4F30-B0BF-4C49-9A70-D926708F69AB}.Release|Any CPU.ActiveCfg = Release|x64
-		{507A4F30-B0BF-4C49-9A70-D926708F69AB}.Release|Any CPU.Build.0 = Release|x64
-		{507A4F30-B0BF-4C49-9A70-D926708F69AB}.Release|x64.ActiveCfg = Release|x64
-		{507A4F30-B0BF-4C49-9A70-D926708F69AB}.Release|x64.Build.0 = Release|x64
-		{507A4F30-B0BF-4C49-9A70-D926708F69AB}.Release|x86.ActiveCfg = Release|x64
-		{507A4F30-B0BF-4C49-9A70-D926708F69AB}.Release|x86.Build.0 = Release|x64
 		{ED1802B2-7529-4C82-AB0F-9F44B40D3575}.Debug|Any CPU.ActiveCfg = Debug|x64
 		{ED1802B2-7529-4C82-AB0F-9F44B40D3575}.Debug|Any CPU.Build.0 = Debug|x64
 		{ED1802B2-7529-4C82-AB0F-9F44B40D3575}.Debug|x64.ActiveCfg = Debug|x64

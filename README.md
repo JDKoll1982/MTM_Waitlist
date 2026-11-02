@@ -50,7 +50,6 @@ Testable non-view code lives in the libraries below, which both the app and the 
 | `MTM_Waitlist.Waitlist.View` | The waitlist list, its line cards, the status flyout and the detail surface. |
 | `MTM_Waitlist.Waitlist.NewRequest` | Raising a request: part, work centre, quantity, hopper artwork, review. |
 | `MTM_Waitlist.Waitlist.Controls` | Controls shared by the waitlist surfaces. |
-| `MTM_Waitlist.Reporting` | Reporting surfaces. |
 | `MTM_Waitlist.Tests` | All tests, organised per module. |
 
 Namespaces stay `MTM_Waitlist.Module_*.*` across the split, so XAML `{x:Bind}` paths and test `using` lines are

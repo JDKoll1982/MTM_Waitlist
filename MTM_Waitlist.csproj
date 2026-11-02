@@ -126,7 +126,6 @@
     <ProjectReference Include="MTM_Waitlist.Waitlist.View\MTM_Waitlist.Waitlist.View.csproj" />
     <ProjectReference Include="MTM_Waitlist.Waitlist.NewRequest\MTM_Waitlist.Waitlist.NewRequest.csproj" />
     <ProjectReference Include="MTM_Waitlist.Waitlist.Controls\MTM_Waitlist.Waitlist.Controls.csproj" />
-    <ProjectReference Include="MTM_Waitlist.Reporting\MTM_Waitlist.Reporting.csproj" />
     <ProjectReference Include="MTM_Waitlist.Mock\MTM_Waitlist.Mock.csproj" />
   </ItemGroup>
 
@@ -142,7 +141,6 @@
     <Compile Remove="MTM_Waitlist.Waitlist.NewRequest\**\*.cs" />
     <Compile Remove="MTM_Waitlist.Waitlist.Controls\**\*.cs" />
     <Compile Remove="MTM_Waitlist.Startup\**\*.cs" />
-    <Compile Remove="MTM_Waitlist.Reporting\**\*.cs" />
     <Compile Remove="MTM_Waitlist.Mock\**\*.cs" />
     <Compile Remove="MTM_Waitlist.Mock.Service\**\*.cs" />
     <Compile Remove="MTM_Waitlist.GenericRequest\**\*.cs" />
