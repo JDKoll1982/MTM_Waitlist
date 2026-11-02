@@ -145,12 +145,17 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
     }
 
     /// <summary>The toggle's heading, naming the work center it would change.</summary>
+    /// <remarks>
+    /// The key is deliberately not <c>Setup_WorkCenter_GenericToggle.…</c>: <c>x:Uid</c> reads every key under an
+    /// element's uid as a property to set on that element, so a key of that shape is applied at load time and a
+    /// property the control does not have (here a heading for "nothing selected") throws in InitializeComponent.
+    /// </remarks>
     public string GenericToggleHeader => SelectedWorkCenter is { } workCenter
         ? string.Format(
             System.Globalization.CultureInfo.CurrentCulture,
-            "Setup_WorkCenter_GenericToggle.Header".GetLocalized(),
+            "Setup_WorkCenter_GenericToggleHeader.Text".GetLocalized(),
             workCenter.Name)
-        : "Setup_WorkCenter_GenericToggle.None".GetLocalized();
+        : "Setup_WorkCenter_GenericNoSelection.Text".GetLocalized();
 
     /// <summary>The preview button's label, read for the automation name as well as drawn as its content.</summary>
     public string GenericPreviewLabel => "Setup_WorkCenter_GenericPreview.Content".GetLocalized();

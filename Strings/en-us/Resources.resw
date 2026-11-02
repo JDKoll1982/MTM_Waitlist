@@ -370,10 +370,10 @@
   <data name="Setup_WorkCenter_GenericBadge.Text" xml:space="preserve">
     <value>Generic</value>
   </data>
-  <data name="Setup_WorkCenter_GenericToggle.Header" xml:space="preserve">
+  <data name="Setup_WorkCenter_GenericToggleHeader.Text" xml:space="preserve">
     <value>Generic request flow for {0}</value>
   </data>
-  <data name="Setup_WorkCenter_GenericToggle.None" xml:space="preserve">
+  <data name="Setup_WorkCenter_GenericNoSelection.Text" xml:space="preserve">
     <value>Select a work center to set how its requests are raised</value>
   </data>
   <data name="Setup_WorkCenter_GenericToggle.OnContent" xml:space="preserve">

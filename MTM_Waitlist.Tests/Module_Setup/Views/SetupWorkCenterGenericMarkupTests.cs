@@ -76,6 +76,57 @@ public sealed class SetupWorkCenterGenericMarkupTests
             "the designation write does not use its own procedure");
     }
 
+    [TestMethod]
+    public void Audit_SetupWorkCenterGenericMarkupTests_NoResourceKeyIsReadAsAPropertyTheControlLacks()
+    {
+        // x:Uid reads every resource key under an element's uid as a property to set on that element at load time. A
+        // key whose suffix names no property on the control throws in InitializeComponent, so the page never loads and
+        // the shell silently stays where it was — which is exactly how a resource key named "...GenericToggle.None"
+        // broke the work-center screen. This pins the suffixes this page may use.
+        var allowedSuffixes = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "Text",
+            "Content",
+            "Header",
+            "PlaceholderText",
+            "OnContent",
+            "OffContent",
+            "AutomationProperties.Name",
+        };
+
+        var pageUids = Regex
+            .Matches(Read(PagePath), "x:Uid=\"(?<uid>[^\"]+)\"", RegexOptions.CultureInvariant)
+            .Select(match => match.Groups["uid"].Value)
+            .ToHashSet(StringComparer.Ordinal);
+
+        Assert.IsTrue(pageUids.Count > 0, "the page declares no resource uids at all, so this audit would check nothing");
+
+        var resourceKeys = Regex
+            .Matches(Read("Strings/en-us/Resources.resw"), "<data name=\"(?<key>[^\"]+)\"", RegexOptions.CultureInvariant)
+            .Select(match => match.Groups["key"].Value);
+
+        var offenders = new List<string>();
+
+        foreach (var key in resourceKeys)
+        {
+            foreach (var uid in pageUids.Where(uid => key.StartsWith(uid + ".", StringComparison.Ordinal)))
+            {
+                var suffix = key[(uid.Length + 1)..];
+
+                if (!allowedSuffixes.Contains(suffix))
+                {
+                    offenders.Add($"{key} (uid {uid} would be asked for a '{suffix}' property)");
+                }
+            }
+        }
+
+        Assert.AreEqual(
+            0,
+            offenders.Count,
+            "these resource keys would be applied as properties the control does not have, which stops the page from "
+                + "loading: " + string.Join(", ", offenders));
+    }
+
     /// <summary>
     /// The markup around the element carrying one automation id, so an attribute on it can be asserted without
     /// depending on how the element is laid out across lines.
