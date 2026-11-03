@@ -1,5 +1,7 @@
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
+using MTM_Waitlist.GenericRequest.Controls;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Shared.Helpers;
 using MTM_Waitlist.Module_Waitlist.Models;
@@ -37,6 +39,24 @@ public sealed partial class WaitlistViewPage : Page
         // falls back to the no-image placeholder only if the asset is missing from the deployment. The folder
         // this used to look in first (Assets/Images) has never existed in this repository.
         EmptyStateImage.Source = PictureSource.FromPath("Assets/Placeholders/waitlist-empty-state.png");
+    }
+
+    /// <summary>
+    /// Open one generic request in full.
+    /// </summary>
+    /// <remarks>
+    /// A generic card carries no actions of its own, so the whole card is the way in. The page takes the request as
+    /// the navigation parameter rather than resolving a view model, so there is no page key to route it by; it is
+    /// reached by type on the shell's own frame, which keeps the back stack and every other navigation behaviour.
+    /// </remarks>
+    private void OnGenericCardTapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { DataContext: SampleOrder { GenericCard: { } card } })
+        {
+            return;
+        }
+
+        App.GetService<INavigationService>().Frame?.Navigate(typeof(GenericRequestDetailPage), card);
     }
 
     /// <summary>

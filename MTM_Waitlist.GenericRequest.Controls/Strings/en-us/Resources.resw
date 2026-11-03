@@ -110,4 +110,16 @@
   <data name="GenericRequest_Card_Detail_Title.Text" xml:space="preserve">
     <value>Generic request</value>
   </data>
+  <data name="GenericRequest_Card_Category.Label" xml:space="preserve">
+    <value>Category</value>
+  </data>
+  <data name="GenericRequest_Card_Answer.Label" xml:space="preserve">
+    <value>Asked for</value>
+  </data>
+  <data name="GenericRequest_Card_Description.Label" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="GenericRequest_Card_Kind_Answer.Text" xml:space="preserve">
+    <value>Request</value>
+  </data>
 </root>

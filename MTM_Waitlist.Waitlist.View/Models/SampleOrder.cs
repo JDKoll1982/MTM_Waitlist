@@ -39,6 +39,53 @@ public sealed class SampleOrder : INotifyPropertyChanged
     public string? Note { get; set; }
 
     /// <summary>
+    /// Whether this row is a generic request: raised at a work centre with no work order anywhere (FR-008).
+    /// Read from the stored flag, never inferred from a blank work order, and what the board's template selector
+    /// keys on to draw the generic card instead of the work-order card (FR-022).
+    /// </summary>
+    public bool IsGeneric { get; set; }
+
+    /// <summary>
+    /// The value the requester stated, for a generic request: the answer the item's own configuration asked for
+    /// (FR-007, FR-023). Empty for a work-order request, which states nothing of its own.
+    /// </summary>
+    public string GenericAnswer { get; set; } = string.Empty;
+
+    /// <summary>The requester's optional free-text description, or null when they wrote none (FR-016).</summary>
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// The allotment the request's Item configures, or null when it configures none. Distinct from
+    /// <see cref="AllottedMinutes"/>, which resolves a labelled default because the work-order card's ring needs a
+    /// scale: a generic request states nothing rather than invent a figure (FR-013, FR-014).
+    /// </summary>
+    public int? ConfiguredAllottedMinutes { get; set; }
+
+    /// <summary>
+    /// The generic card this row draws, or null for a work-order request.
+    /// </summary>
+    /// <remarks>
+    /// Built from the row rather than from a second read, for the same reason the work-order card's cells are: the
+    /// board has already read everything the card states. The category and item wording are the row's own two lines,
+    /// so a generic card and a work-order card name the same request the same way (FR-024).
+    /// </remarks>
+    public MTM_Waitlist.GenericRequest.Controls.Models.GenericRequestCardModel? GenericCard => IsGeneric
+        ? new MTM_Waitlist.GenericRequest.Controls.Models.GenericRequestCardModel
+        {
+            RequestNumber = RequestId?.ToString() ?? string.Empty,
+            Variant = MTM_Waitlist.GenericRequest.Controls.Models.GenericRequestCardVariant.Answer,
+            WorkCenter = RequestedPressName,
+            CategoryText = Title,
+            ItemName = Subtitle,
+            StatedValue = GenericAnswer,
+            Description = Description ?? string.Empty,
+            NeededBy = TargetTimeUtc,
+            RaisedBy = RequestedByName,
+            RaisedAt = RequestedUtc,
+        }
+        : null;
+
+    /// <summary>
     /// Card <b>Line 1</b> — the Item's umbrella phrase: the Category's own word, or the Item's own phrase where
     /// the Item defines one. Read from the Item catalog, never from a stored request type (FR-005).
     /// </summary>

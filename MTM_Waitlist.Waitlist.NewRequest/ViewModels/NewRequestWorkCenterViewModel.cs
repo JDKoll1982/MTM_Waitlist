@@ -42,6 +42,12 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
     /// </summary>
     private readonly IEmployeeDirectoryService _employeeDirectoryService;
 
+    /// <summary>
+    /// Opens the generic request flow when the chosen work center is designated generic (FR-005). Required, so a
+    /// missing registration fails at start-up rather than sending a generic work center into the work-order flow.
+    /// </summary>
+    private readonly IGenericRequestLauncher _genericRequestLauncher;
+
     private NewRequestFlowState? _state;
     private HashSet<string> _activeJobWorkCenters = new(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> _hotWorkCenterNames = new(StringComparer.OrdinalIgnoreCase);
@@ -126,7 +132,8 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         INewRequestFlowService flowService,
         IBuildingSelectionService buildingSelectionService,
         IPersonIdentity personIdentity,
-        IEmployeeDirectoryService employeeDirectoryService)
+        IEmployeeDirectoryService employeeDirectoryService,
+        IGenericRequestLauncher genericRequestLauncher)
     {
         _navigationService = navigationService;
         _workCenterCatalogService = workCenterCatalogService;
@@ -134,6 +141,7 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         _buildingSelectionService = buildingSelectionService;
         _personIdentity = personIdentity;
         _employeeDirectoryService = employeeDirectoryService;
+        _genericRequestLauncher = genericRequestLauncher;
     }
 
     public async void OnNavigatedTo(object parameter)
@@ -223,6 +231,7 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
                     Building = detail?.Building ?? string.Empty,
                     LastUpdatedUtc = detail?.LastUpdatedUtc,
                     HasActiveJob = detail?.HasActiveJob ?? false,
+                    IsGeneric = detail?.IsGeneric ?? false,
                     CurrentWorkOrder = detail?.CurrentWorkOrder ?? string.Empty,
                     CurrentPartNumber = detail?.CurrentPartNumber ?? string.Empty,
                     CurrentSequenceNumber = detail?.CurrentSequenceNumber ?? string.Empty,
@@ -307,7 +316,10 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         }
 
         var normalizedWorkCenter = workCenterItem.WorkCenterName.Trim();
-        if (!_activeJobWorkCenters.Contains(normalizedWorkCenter))
+
+        // A generic work center is expected to have no job, so the job gate below is exactly the check that must not
+        // apply to it (FR-005). Every other work center keeps the rule unchanged (FR-010).
+        if (!workCenterItem.IsGeneric && !_activeJobWorkCenters.Contains(normalizedWorkCenter))
         {
             AppLog.Info("NewRequestWorkCenter", $"Blocked workstation selection for '{normalizedWorkCenter}' because no active setup job exists.");
             IsNoActiveJobWarningVisible = true;
@@ -361,6 +373,14 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
         }
 
         AppLog.Info("NewRequestWorkCenter", $"Selected workstation '{normalizedWorkCenter}' for employee '{verification.EmployeeNumber}'.");
+
+        // A generic work center states its own answers, so the flow that reads a job is not the one that runs here.
+        if (workCenterItem.IsGeneric)
+        {
+            _genericRequestLauncher.Launch(normalizedWorkCenter, _state.Building);
+            return;
+        }
+
         _navigationService.NavigateTo(typeof(NewRequestJobTypeViewModel).FullName!, _state);
     }
 

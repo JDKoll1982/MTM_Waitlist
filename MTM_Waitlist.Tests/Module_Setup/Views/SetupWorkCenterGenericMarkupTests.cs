@@ -186,10 +186,17 @@ public sealed class SetupWorkCenterGenericMarkupTests
             Read(PagePath).Contains("CanOpenGenericPreview", StringComparison.Ordinal),
             "the work center step still offers the preview");
 
+        // The preview launcher is gone from every surface: the generic flow is entered from the work center step
+        // itself, when the chosen work center is designated generic, and no screen offers a preview any more
+        // (016-generic-wc-request-foundation, FR-005, FR-030).
+        Assert.IsFalse(
+            Read("Module_Waitlist/Views/WaitlistViewPage.xaml").Contains("OnGenericPreviewClick", StringComparison.Ordinal),
+            "the board still offers the retired generic request preview");
+
         StringAssert.Contains(
-            Read("Module_Waitlist/Views/WaitlistViewPage.xaml"),
-            "Click=\"OnGenericPreviewClick\"",
-            "no screen opens the generic request preview");
+            Read("MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestWorkCenterViewModel.cs"),
+            "_genericRequestLauncher.Launch(",
+            "no screen enters the generic request flow, so a designated work center has no way to raise a request");
     }
 
     /// <summary>

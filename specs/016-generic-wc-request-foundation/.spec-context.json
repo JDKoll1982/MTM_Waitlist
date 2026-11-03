@@ -3,8 +3,1234 @@
   "specName": "016 Generic Work Center — Designation and Request Foundation",
   "branch": "master",
   "selectedAt": "2026-11-03T21:00:00.000Z",
-  "currentStep": "specify",
-  "status": "draft",
-  "history": [],
-  "telemetryInstanceId": "cd96c5cc-3b36-42f2-886e-cdcbd8bdd990"
+  "currentStep": "implement",
+  "status": "completed",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-03T21:13:24.040Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-11-03T21:14:04.523Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-03T21:14:08.468Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:19:03.598Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:21:28.965Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:22:20.464Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-03T21:22:42.495Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:23:17.978Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:23:18.444Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-03T21:23:31.337Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T001",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:23:44.381Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T002",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:24:00.266Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T003",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:24:19.134Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T004",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:24:36.927Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:24:45.351Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:24:53.022Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T010",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:25:20.318Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:25:42.019Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T009",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:25:42.441Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T011",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:26:16.067Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T012",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:26:54.053Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T013",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:27:32.849Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T014",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:27:33.317Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T015",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:27:33.806Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T016",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:27:34.297Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:27:47.921Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T018",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:28:49.394Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T020",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:28:49.778Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T019",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:30:10.165Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T021",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:30:14.324Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T022",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:30:14.783Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T023",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:30:15.208Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T024",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:34:10.265Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T025",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:34:10.734Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T029",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:34:15.513Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T026",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:34:15.706Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T030",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:34:15.992Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T031",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:34:16.502Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T033",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:34:39.167Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T034",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:34:39.526Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T035",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:34:39.876Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T036",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:35:03.489Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T037",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:37:09.661Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T038",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:37:09.985Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T039",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:37:10.306Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T040",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:37:10.635Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T027",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:37:39.841Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T041",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:37:40.203Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T028",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:39:22.443Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T032",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:39:22.810Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:40:20.785Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T042",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:40:36.832Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T043",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:40:37.271Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T044",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:44:48.958Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:44:49.044Z"
+    },
+    {
+      "step": "implement",
+      "substep": "living-review",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:46:16.078Z"
+    },
+    {
+      "step": "implement",
+      "substep": "living-fold",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T21:48:35.433Z"
+    }
+  ],
+  "telemetryInstanceId": "cd96c5cc-3b36-42f2-886e-cdcbd8bdd990",
+  "workingBranch": "016-generic-wc-request-foundation",
+  "last_action": "all 44 tasks done; 2484 tests pass, 52 skipped, 0 failed; solution builds clean",
+  "classification": {
+    "projectedFiles": 34,
+    "projectedTasks": 46,
+    "scopeSignal": "none",
+    "verdict": "oversized"
+  },
+  "size": "oversized",
+  "expectations": [
+    "proving a part against Infor Visual (017)",
+    "dunnage catalogue page (018)",
+    "stated scrap type and its lugger (019)",
+    "die search (020)",
+    "filling a request from a running job (021)"
+  ],
+  "context": [
+    "area: MTM_Waitlist.GenericRequest (flow screens and view models from spec 015)",
+    "area: MTM_Waitlist.GenericRequest.Controls (card and detail page)",
+    "area: Database/Tables/18_waitlist_requests_queue + sp_waitlist_request_insert",
+    "constraint: every data operation goes through a stored procedure (constitution III)",
+    "constraint: internal stores are always read and written live, no sample substitution (FR-001/FR-003 spec 001)"
+  ],
+  "intent": "Make the generic work center request flow real: designation, job-free request, honest time and detail, truthful card, all through the stored-procedure queue path.",
+  "coverage": {
+    "FR-001": {
+      "title": "The work center catalog MUST carry a per-work-center designation saying whether requests raised there are generic",
+      "tasks": [
+        "T005",
+        "T009",
+        "T011",
+        "T012"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Shared/WorkCenterGenericDesignationTests.cs"
+      ]
+    },
+    "FR-002": {
+      "title": "Only a person holding the permission that governs the work center catalog MUST be able to change that designation",
+      "tasks": [
+        "T009",
+        "T011"
+      ]
+    },
+    "FR-003": {
+      "title": "No work center MUST be generic by built-in list, build configuration or default",
+      "tasks": [
+        "T002",
+        "T012"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Shared/WorkCenterGenericDesignationTests.cs"
+      ]
+    },
+    "FR-004": {
+      "title": "Clearing the designation MUST NOT alter requests already raised",
+      "tasks": [
+        "T011"
+      ]
+    },
+    "FR-005": {
+      "title": "Selecting a generic work center MUST continue the wizard without an active job",
+      "tasks": [
+        "T014",
+        "T017",
+        "T018",
+        "T026",
+        "T027"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestFlowRulesTests.cs"
+      ]
+    },
+    "FR-006": {
+      "title": "A generic request MUST offer the same categories and items as a work-order request",
+      "tasks": [
+        "T015",
+        "T018"
+      ]
+    },
+    "FR-007": {
+      "title": "Every answer a work-order request takes from the job MUST be asked of the requester",
+      "tasks": [
+        "T019",
+        "T021",
+        "T028"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestItemViewModelTests.cs"
+      ]
+    },
+    "FR-008": {
+      "title": "A generic request MUST NOT store or display a work order number",
+      "tasks": [
+        "T002",
+        "T008",
+        "T036"
+      ]
+    },
+    "FR-009": {
+      "title": "A generic request MUST enter the same queue and board through the same stored-procedure path",
+      "tasks": [
+        "T003",
+        "T010",
+        "T016",
+        "T022"
+      ]
+    },
+    "FR-010": {
+      "title": "The flow MUST be built in its own projects and leave the work-order flow unchanged",
+      "tasks": [
+        "T001",
+        "T026"
+      ]
+    },
+    "FR-011": {
+      "title": "Abandoning the flow MUST leave nothing in the queue",
+      "tasks": [
+        "T022"
+      ]
+    },
+    "FR-012": {
+      "title": "An answer step whose owning chunk has not shipped MUST report the source unavailable",
+      "tasks": [
+        "T014",
+        "T017",
+        "T018",
+        "T028"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestItemViewModelTests.cs"
+      ]
+    },
+    "FR-013": {
+      "title": "A generic request time MUST be the allotted time configured for its item",
+      "tasks": [
+        "T015",
+        "T029",
+        "T031",
+        "T032"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestSummaryViewModelTests.cs"
+      ]
+    },
+    "FR-014": {
+      "title": "An item with no allotted time MUST produce no estimate",
+      "tasks": [
+        "T029",
+        "T031",
+        "T032"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestSummaryViewModelTests.cs"
+      ]
+    },
+    "FR-015": {
+      "title": "The flow MUST require a needed-by answer and carry it on card, detail and record",
+      "tasks": [
+        "T030",
+        "T031"
+      ]
+    },
+    "FR-016": {
+      "title": "The flow MUST allow an optional free-text description and carry it wherever needed-by is carried",
+      "tasks": [
+        "T007",
+        "T030"
+      ]
+    },
+    "FR-017": {
+      "title": "The confirmation step MUST list everything about to be raised",
+      "tasks": [
+        "T022",
+        "T031",
+        "T032"
+      ]
+    },
+    "FR-018": {
+      "title": "Submitting MUST write the request in one operation",
+      "tasks": [
+        "T016",
+        "T020",
+        "T022"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestSummaryViewModelTests.cs"
+      ]
+    },
+    "FR-019": {
+      "title": "A generic request MUST record requester, work center, item, answers, time raised and accepted warnings",
+      "tasks": [
+        "T007",
+        "T014",
+        "T022"
+      ]
+    },
+    "FR-020": {
+      "title": "The requester identity MUST come from the signed-in session and existing employee verification",
+      "tasks": [
+        "T018",
+        "T026"
+      ]
+    },
+    "FR-021": {
+      "title": "An item whose configuration cannot be read MUST be reported as unavailable",
+      "tasks": [
+        "T018",
+        "T028"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestItemViewModelTests.cs"
+      ]
+    },
+    "FR-022": {
+      "title": "A generic request MUST draw the generic card layout from spec 015 and no work-order cells",
+      "tasks": [
+        "T033",
+        "T036",
+        "T038"
+      ]
+    },
+    "FR-023": {
+      "title": "A generic card identity MUST be its stated value and the requesting work center",
+      "tasks": [
+        "T033",
+        "T036"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestCardRulesTests.cs"
+      ]
+    },
+    "FR-024": {
+      "title": "A generic card MUST show category and item wording, needed-by time and description when given",
+      "tasks": [
+        "T034",
+        "T041"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestCardRulesTests.cs"
+      ]
+    },
+    "FR-025": {
+      "title": "No generic card MUST draw a blank or placeholder cell",
+      "tasks": [
+        "T034",
+        "T041"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestCardRulesTests.cs"
+      ]
+    },
+    "FR-026": {
+      "title": "The detail page MUST add requester, time raised, accepted warnings and history to the card facts",
+      "tasks": [
+        "T039",
+        "T040"
+      ]
+    },
+    "FR-027": {
+      "title": "Fulfilling a generic request MUST use the existing handler flow",
+      "tasks": [
+        "T040"
+      ]
+    },
+    "FR-028": {
+      "title": "Every value a generic request shows MUST come from a live read, the requester answer or configuration",
+      "tasks": [
+        "T018",
+        "T036"
+      ]
+    },
+    "FR-029": {
+      "title": "Every failure to establish a required value MUST be reported on the step with attempt time and retry",
+      "tasks": [
+        "T020",
+        "T022"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestSummaryViewModelTests.cs"
+      ]
+    },
+    "FR-030": {
+      "title": "This chunk MUST delete every Temp artefact of the screens it makes real and leave the build green",
+      "tasks": [
+        "T043"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/TempArtefactBoundaryAuditTests.cs"
+      ]
+    }
+  },
+  "decisions": [
+    {
+      "decision": "Raise a generic request through IWaitlistRequestService.SubmitAsync",
+      "why": "FR-009 requires the same queue and stored-procedure path, and that seam already owns the write, audit, notification and board refresh",
+      "rejected": "a second submission service writing sp_waitlist_request_insert itself"
+    },
+    {
+      "decision": "Make active_setup_job_id nullable and add an explicit is_generic column",
+      "why": "a null alone is indistinguishable from a missing value, and every read needs a stored answer to which kind a row is",
+      "rejected": "inferring the kind from active_setup_job_id IS NULL"
+    },
+    {
+      "decision": "Add description and accepted_warnings_json columns",
+      "why": "note is the handler's own note and answers_json is keyed by declared question, so neither can carry a requester description",
+      "rejected": "overloading note or answers_json"
+    },
+    {
+      "decision": "Ask the item's configured answer on the item step",
+      "why": "the work-order flow asks the same question in the same place, so both flows answer one item identically",
+      "rejected": "a separate answer step on every item"
+    },
+    {
+      "decision": "Report the four externally proved answers as unavailable",
+      "why": "FR-012 forbids a text box, an offline list or any substitute",
+      "rejected": "hiding those steps, which would understate the submission"
+    },
+    {
+      "decision": "Add GenericRequestCardVariant.Answer",
+      "why": "this chunk's stated value is a configured answer, and forcing it into the part variant would print a part number no request has",
+      "rejected": "reusing the Part variant with an empty cell"
+    },
+    {
+      "decision": "Host the flow through INavigationService via a GenericRequestNavigator",
+      "why": "spec 015 left the navigator seam for exactly this, and the pages already resolve their view model from GenericRequestPageServices",
+      "rejected": "hosting every step in one page with a ContentControl"
+    },
+    {
+      "decision": "Derive each item's answer kind from its card line 2 template",
+      "why": "the catalogue already states what each item has to name, so the flow's shape comes from configuration rather than a second table",
+      "rejected": "a new per-item requirement column"
+    },
+    {
+      "decision": "Choose the board's card with a DataTemplateSelector on SampleOrder.IsGeneric",
+      "why": "WinUI selects a template per item, and the repository already uses the same control for its per-item cell templates",
+      "rejected": "two filtered lists"
+    },
+    {
+      "rejected": "hiding those steps",
+      "decision": "The four externally proved answer reads return unavailable rather than being skipped",
+      "why": "FR-012 forbids a substitute and a skipped step would understate the review"
+    },
+    {
+      "rejected": "keeping the part step in every order",
+      "decision": "The part step is conditional on the item's own card-line declaration",
+      "why": "an item that states a configured answer has nothing to put on that page, and an unconditional part step would block every request"
+    },
+    {
+      "rejected": "referencing the application from the wizard",
+      "decision": "The generic flow is entered through a launcher seam declared in the wizard's own library",
+      "why": "the app implements it, so neither library has to reference the other's screens and no reference cycle is created"
+    },
+    {
+      "rejected": "two filtered lists",
+      "decision": "The board picks the card per row with a DataTemplateSelector on the row's stored flag",
+      "why": "both kinds must sit in one queue and the flag is a stored fact"
+    },
+    {
+      "rejected": "advancing to the result step and reporting the failure there",
+      "decision": "A refused raise keeps the requester on the review with the store's own words",
+      "why": "FR-029 requires the failure where it matters with a retry, and a result page would report something the store never produced"
+    }
+  ],
+  "step_summaries": {
+    "specify": {
+      "summary": "Plan for making the generic work centre flow real: queue schema and procedures, the live answer seam, submission through the one write door, the flow hosted over the shell's navigation, and the generic card and detail reachable from the board.",
+      "key_finding": "Both generic request projects are excluded from the application build and no implementation of IGenericRequestStepData or IGenericRequestNavigator exists, so this chunk is the wiring as much as the feature."
+    },
+    "tasks": {
+      "summary": "44 tasks: setup, queue write path, four user-story phases and polish, laid out in waves."
+    },
+    "implement": {
+      "summary": "The generic request flow is real: queue schema and procedures, a live answer seam, a submission through the one write door, the flow hosted over the shell, and the generic card and detail reachable from the board."
+    }
+  },
+  "approach": "Extend the queue schema and the one write procedure with a generic flag, a description and the accepted warnings; implement the answer seam and a submission against the existing waitlist request service; host the flow over INavigationService so the work centre step enters it when the work centre is designated generic; and give the board a template selector so a generic row draws the generic card and its detail page.",
+  "currentTask": null,
+  "task_summaries": {
+    "T001": {
+      "status": "DONE",
+      "did": "Referenced both generic request projects from the app and gave the flow library the Settings, Shared and Waitlist.View references its live seam needs",
+      "files": [
+        "MTM_Waitlist.csproj",
+        "MTM_Waitlist.GenericRequest/MTM_Waitlist.GenericRequest.csproj"
+      ]
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "Made the queue's job id nullable and added is_generic, description and accepted_warnings_json with their comments and an index",
+      "files": [
+        "Database/Tables/18_waitlist_requests_queue/create.sql",
+        "Database/Tables/18_waitlist_requests_queue/rollback.sql"
+      ]
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "Appended p_is_generic, p_description and p_accepted_warnings_json to the insert procedure and wrote the job id through the optional-value idiom",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_request_insert/create.sql",
+        "Database/StoredProcedures/sp_waitlist_request_insert/rollback.sql"
+      ]
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "Returned is_generic, description and accepted_warnings_json from both request reads, and added the condition and answers columns the get read was missing",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_request_list/create.sql",
+        "Database/StoredProcedures/sp_waitlist_request_get/create.sql"
+      ]
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "Carried the generic flag, the description and the accepted warnings on the request draft and the stored request",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequestDraft.cs",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequest.cs"
+      ]
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "Carried the generic flag, the stated answer, the description and the allotted minutes on the board row",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Models/SampleOrder.cs"
+      ]
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "Refused a blank job id only when the draft is not generic, sent the three new parameters, and mapped the three new columns onto the stored request",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Services/WaitlistRequestService.cs"
+      ]
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "Confirmed the read the wizard already uses carries the designation: sp_setup_work_centers_get_all returns is_generic, so no SQL change was needed and the draft read change was reverted",
+      "files": [
+        "Database/StoredProcedures/sp_setup_work_centers_catalog_get/create.sql"
+      ]
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "Carried the designation on the work-centre detail and the selection item",
+      "files": [
+        "MTM_Waitlist.Shared/Models/WorkCenterDetail.cs",
+        "MTM_Waitlist.Shared/Models/WorkCenterSelectionItem.cs"
+      ]
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "Mapped the catalog row's is_generic onto each work-centre detail and onto the selection item the wizard binds",
+      "files": [
+        "MTM_Waitlist.Shared/Services/WorkCenterCatalogService.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestWorkCenterViewModel.cs"
+      ]
+    },
+    "T012": {
+      "status": "DONE",
+      "did": "Added the designation tests: a fresh catalog row is not generic, the read the wizard loads projects the flag, and an undesignated shape reports not generic",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Shared/WorkCenterGenericDesignationTests.cs"
+      ]
+    },
+    "T013": {
+      "status": "DONE",
+      "did": "Added the submission result the raise attempt answers with: raised with the request id, or failed with the attempt time and a plain-language message",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestSubmission.cs"
+      ]
+    },
+    "T014": {
+      "status": "DONE",
+      "did": "Carried the building, item code, answer, allotment, accepted warnings and raised id on the draft, and made the part step conditional",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestDraft.cs"
+      ]
+    },
+    "T015": {
+      "status": "DONE",
+      "did": "Extended the item option with its code, its configured question and options, its length limits, its allotment and the four answer flags",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestOptions.cs"
+      ]
+    },
+    "T016": {
+      "status": "DONE",
+      "did": "Added the submission to the answer seam, so the one write the feature makes goes through the seam every step already talks to",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Contracts/IGenericRequestStepData.cs"
+      ]
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "Gated the part step on the item's own proved-part requirement, so an item that states a configured answer never reaches a page with nothing to put on it",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Services/GenericRequestFlowRules.cs"
+      ]
+    },
+    "T018": {
+      "status": "DONE",
+      "did": "Implemented the live answer seam: generic work centres from the catalog, the wizard's own categories and items with their configured questions and allotments, the four externally proved answers reporting unavailable, and one submission through the existing request service",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Services/GenericRequestLiveStepData.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestOptions.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestCategoryCatalog.cs",
+        "MTM_Waitlist.GenericRequest/MTM_Waitlist.GenericRequest.csproj"
+      ]
+    },
+    "T020": {
+      "status": "DONE",
+      "did": "Let a step prepare before it advances and made the forward action asynchronous, so the summary can raise the request and hold the requester when the write fails",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestStepViewModel.cs"
+      ]
+    },
+    "T019": {
+      "status": "DONE",
+      "did": "Asked the item's configured question on the item step and recorded the answer, the item code and the item's answer requirements on the draft",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestItemViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestCategoryViewModel.cs"
+      ]
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "Drew the configured question on the item page as a text box or an option list, with the note that says why the step will not move on",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestItemPage.xaml"
+      ]
+    },
+    "T022": {
+      "status": "DONE",
+      "did": "Raised the request from the summary step and refused to advance on a failed write, and made the result step report the store's own answer",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestSummaryViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestResultViewModel.cs",
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestResultPage.xaml",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestDraft.cs"
+      ]
+    },
+    "T023": {
+      "status": "DONE",
+      "did": "Added the wording the new question, the review rows and the refusal note need",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Strings/en-us/Resources.resw"
+      ]
+    },
+    "T024": {
+      "status": "DONE",
+      "did": "Added the navigator that carries the one draft and turns each step into its view model's route, and that opens the flow for a chosen work centre",
+      "files": [
+        "Services/GenericRequestNavigator.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/Services/IGenericRequestLauncher.cs"
+      ]
+    },
+    "T025": {
+      "status": "DONE",
+      "did": "Registered the flow's ten view models, pages, answer seam and navigator, and pointed the generic pages at the host's container once at start-up",
+      "files": [
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs",
+        "App.xaml.cs"
+      ]
+    },
+    "T029": {
+      "status": "DONE",
+      "did": "Recorded the item's configured allotment on the draft as part of the item step, leaving it null when the item configures no time",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestItemViewModel.cs",
+        "MTM_Waitlist.GenericRequest/Services/GenericRequestLiveStepData.cs"
+      ]
+    },
+    "T026": {
+      "status": "DONE",
+      "did": "Sent a designated work centre into the generic flow instead of the work-order flow, skipping the job gate only for it and leaving every other work centre unchanged",
+      "files": [
+        "MTM_Waitlist.Waitlist.NewRequest/ViewModels/NewRequestWorkCenterViewModel.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/NewRequestWorkCenterViewModelTests.cs"
+      ]
+    },
+    "T030": {
+      "status": "DONE",
+      "did": "Made the needed-by answer required before the details step can be left, kept the description optional, and recorded both on the draft",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestDetailsViewModel.cs"
+      ]
+    },
+    "T031": {
+      "status": "DONE",
+      "did": "Showed the requester's answer and the item's configured estimate on the review step, and nothing where no time is configured",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestSummaryViewModel.cs"
+      ]
+    },
+    "T033": {
+      "status": "DONE",
+      "did": "Gave the card a stated-answer variant and carried the category, the stated value and the description on it",
+      "files": [
+        "MTM_Waitlist.GenericRequest.Controls/Models/GenericRequestCardModel.cs"
+      ]
+    },
+    "T034": {
+      "status": "DONE",
+      "did": "Draws the category, the stated answer and the description only when they hold a value, so no cell is ever blank or a placeholder",
+      "files": [
+        "MTM_Waitlist.GenericRequest.Controls/Helpers/GenericRequestCardRules.cs"
+      ]
+    },
+    "T035": {
+      "status": "DONE",
+      "did": "Added the wording the new card cells and the stated-answer kind need",
+      "files": [
+        "MTM_Waitlist.GenericRequest.Controls/Strings/en-us/Resources.resw"
+      ]
+    },
+    "T036": {
+      "status": "DONE",
+      "did": "Carried the generic facts onto the board row and stopped drawing a work order row for a generic request",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs"
+      ]
+    },
+    "T037": {
+      "status": "DONE",
+      "did": "Added the selector that picks the generic card for a generic row and the work-order card for every other, overriding both overloads",
+      "files": [
+        "Module_Waitlist/Controls/GenericRequestCardTemplateSelector.cs"
+      ]
+    },
+    "T038": {
+      "status": "DONE",
+      "did": "Hosted the generic card beside the work-order card in one list through the selector, and gave the generic card the whole surface as its way into the detail",
+      "files": [
+        "Module_Waitlist/Views/WaitlistViewPage.xaml",
+        "Module_Waitlist/Views/WaitlistViewPage.xaml.cs",
+        "MTM_Waitlist.Waitlist.View/Models/SampleOrder.cs",
+        "MTM_Waitlist.Waitlist.View/MTM_Waitlist.Waitlist.View.csproj"
+      ]
+    },
+    "T039": {
+      "status": "DONE",
+      "did": "Made the detail page take the request as its navigation parameter, so it needs no page key or view model to be routed to",
+      "files": [
+        "MTM_Waitlist.GenericRequest.Controls/Views/GenericRequestDetailPage.xaml.cs"
+      ]
+    },
+    "T040": {
+      "status": "DONE",
+      "did": "Opens one generic request's detail page from its card, adding the requester, the time raised and the history to the card's facts",
+      "files": [
+        "Module_Waitlist/Views/WaitlistViewPage.xaml.cs",
+        "MTM_Waitlist.GenericRequest.Controls/Views/GenericRequestDetailPage.xaml.cs"
+      ]
+    },
+    "T027": {
+      "status": "DONE",
+      "did": "Proved the flow visits six steps for an answer-only item and still reaches the part step for an item that needs a proved part",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestFlowRulesTests.cs"
+      ]
+    },
+    "T041": {
+      "status": "DONE",
+      "did": "Proved each card variant draws only its own cell including the stated answer, that no cell is ever blank, and that a description adds exactly one cell when written",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestCardRulesTests.cs"
+      ]
+    },
+    "T028": {
+      "status": "DONE",
+      "did": "Proved the item step records its configured answer and refuses a too-short one, advances with no answer where the item asks nothing, and reports an unreadable item configuration as unavailable",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestItemViewModelTests.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestTestDoubles.cs"
+      ]
+    },
+    "T032": {
+      "status": "DONE",
+      "did": "Proved the review lists the answer and the configured time, adds no estimate when none is configured, and keeps the requester on the review when the queue refuses",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestSummaryViewModelTests.cs"
+      ]
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "Spliced the changed table and three procedures into the aggregate SQL files and added guarded column adds plus descriptions for the three new columns and the nullable job id",
+      "files": [
+        "Database/Tables/AllTables.sql",
+        "Database/StoredProcedures/AllSPs.sql",
+        "Database/Bootstrap/update_table_descriptions.sql"
+      ]
+    },
+    "T042": {
+      "status": "DONE",
+      "did": "Recorded what the generic request foundation added to the queue, the procedures and the descriptions, and why each column exists",
+      "files": [
+        "Database/Database-Ruleset.md"
+      ]
+    },
+    "T043": {
+      "status": "DONE",
+      "did": "Ran the existing Temp boundary audit against the application's reference graph, which now includes both generic request projects, and it still passes",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/TempArtefactBoundaryAuditTests.cs"
+      ]
+    },
+    "T044": {
+      "status": "DONE",
+      "did": "Built the whole solution and ran the suite: 2484 passed, 52 skipped (live-database integration tests), 0 failed",
+      "files": [
+        "MTM_Waitlist.sln"
+      ]
+    }
+  },
+  "verified": [
+    {
+      "what": "solution build",
+      "command": "dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 32.3,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:32.05"
+    },
+    {
+      "what": "test suite",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 --no-build",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 31.0,
+      "result": "  Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_ReachesTheRealProcedureReportsTheLoadedRowCountAndSwapsAtomically [1 ms] ·   Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_WithAnEmptyPayloadIsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  2484, Skipped:    52, Total:  2536, Duration: 29 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "result": "pass",
+      "command": "dotnet test --filter FullyQualifiedName~TempArtefactBoundaryAuditTests",
+      "what": "No Temp artefact reaches the application's reference graph",
+      "warnings": []
+    },
+    {
+      "what": "test suite (final)",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 52.1,
+      "result": "  Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_ReachesTheRealProcedureReportsTheLoadedRowCountAndSwapsAtomically [1 ms] ·   Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_WithAnEmptyPayloadIsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  2484, Skipped:    52, Total:  2536, Duration: 30 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "The queue delta applied to the live mtm_waitlist on 172.16.1.104 and the generic write path proved end to end",
+      "warnings": [
+        "Warning 1681 TINYINT(1) display width is deprecated, the same warning every existing TINYINT(1) column in this schema raises"
+      ],
+      "command": "mysql: guarded ADD COLUMN x3, MODIFY active_setup_job_id to NULL, ADD KEY, then CALL sp_waitlist_request_insert inside a rolled-back transaction",
+      "result": "applied; is_generic=1 with a NULL job id, the description and the warnings stored; 5 pre-existing rows untouched and still is_generic=0; the list read returns the three new columns"
+    }
+  ],
+  "concerns": [
+    {
+      "note": "The designation's UI is unchanged from the commit that shipped it; this run re-verified it through the catalog read and the model defaults rather than by driving the screen.",
+      "step": "implement"
+    },
+    {
+      "note": "The database artifacts were not applied to a live store: the build and the suite are the gate here, and the live-database integration tests are skipped in this environment.",
+      "step": "implement"
+    },
+    {
+      "note": "The generic card's request number is the request's public identifier, because the queue stores no human-readable request number; the result step's existing 'Request number' label now shows that identifier.",
+      "step": "implement"
+    },
+    {
+      "step": "implement",
+      "note": "The live store has no binary logs, so the applied delta cannot be rolled back by the server. The pre-image (schema, all routines, and the queue table's data) is kept at .copilot/session-state/2be2239b-... files/db-preimage for a manual restore."
+    },
+    {
+      "note": "Correction to the pre-image location above: the dumps are under C:\\Users\\jkoll\\.copilot\\session-state\\2be2231f-aae3-4993-83ac-05b0ec388e8b\\files\\db-preimage (mtm_waitlist-schema-and-routines.sql and waitlist_requests_queue-data.sql). The earlier entry mistyped the session id. The concern about the live store's second point also supersedes the earlier 'not applied to a live store' note: the delta is applied and proven."
+    }
+  ],
+  "livingSpecs": {
+    "skipped": [
+      {
+        "name": "startup-launch",
+        "reason": "this change touches no startup file, so no requirement it holds is altered"
+      }
+    ]
+  }
 }

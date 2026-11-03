@@ -14,6 +14,12 @@ public sealed record WorkCenterDetail
 
     public bool HasActiveJob { get; init; }
 
+    /// <summary>
+    /// Whether this work centre is designated generic, so a request raised here states its own answers instead of
+    /// reading a job (FR-001, FR-005). Read from the catalog row's own `is_generic` column.
+    /// </summary>
+    public bool IsGeneric { get; init; }
+
     public string CurrentWorkOrder { get; init; } = string.Empty;
 
     public string CurrentPartNumber { get; init; } = string.Empty;

@@ -4,6 +4,11 @@
 -- requester chose, and the two legacy columns this procedure used to return no longer exist (FR-004).
 -- Extended for FR-022: the row also carries the material handler's display name, so a reader never has to
 -- print the employee number the queue stores to say who holds the request.
+-- Extended by specs/016-generic-wc-request-foundation: the row now carries `is_generic`, `description` and
+-- `accepted_warnings_json`, and the two columns the list read already returned and this one did not
+-- (`handler_status`, `answers_json`). A detail page that shows a generic request cannot be written against a read
+-- that omits the three new facts, and a page drawing the same request as the list must not disagree with it about
+-- the condition or the answers.
 
 USE mtm_waitlist;
 
@@ -20,6 +25,11 @@ SELECT
     category,
     item,
     input_value,
+    handler_status,
+    answers_json,
+    is_generic,
+    description,
+    accepted_warnings_json,
     active_setup_job_id,
     work_center_name,
     requester_employee_number,

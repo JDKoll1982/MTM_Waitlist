@@ -18,6 +18,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MTM_Waitlist.Core\MTM_Waitlist.Core.csproj" />
+    <ProjectReference Include="..\MTM_Waitlist.Settings\MTM_Waitlist.Settings.csproj" />
+    <ProjectReference Include="..\MTM_Waitlist.Shared\MTM_Waitlist.Shared.csproj" />
+    <ProjectReference Include="..\MTM_Waitlist.Waitlist.View\MTM_Waitlist.Waitlist.View.csproj" />
+    <ProjectReference Include="..\MTM_Waitlist.Waitlist.NewRequest\MTM_Waitlist.Waitlist.NewRequest.csproj" />
   </ItemGroup>
 
   <ItemGroup>

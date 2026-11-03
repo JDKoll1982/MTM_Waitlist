@@ -7,6 +7,9 @@
 -- list it already reads, rather than issuing a second read per row.
 -- Extended for FR-022: every row now also carries the material handler's display name, because the card names
 -- the people on a request and a person is named by name, never by the employee number the queue stores.
+-- Extended by specs/016-generic-wc-request-foundation: every row now also carries `is_generic`, `description` and
+-- `accepted_warnings_json`, so one read gives the board everything a generic card draws and no per-row second read
+-- is needed (research R10).
 
 USE mtm_waitlist;
 
@@ -30,6 +33,9 @@ SELECT
     q.input_value,
     q.handler_status,
     q.answers_json,
+    q.is_generic,
+    q.description,
+    q.accepted_warnings_json,
     q.active_setup_job_id,
     q.work_center_name,
     q.requester_employee_number,

@@ -81,6 +81,21 @@ public static partial class ServiceRegistrationExtensions
             pageService.Configure<NewRequestSkidCountViewModel, NewRequestSkidCountPage>();
             pageService.Configure<NewRequestSummaryViewModel, NewRequestSummaryPage>();
             pageService.Configure<NewRequestResultViewModel, NewRequestResultPage>();
+
+            // The generic request flow's routes (016). Each step's view model name is the page key the flow's
+            // navigator asks for, so a step with no route here fails at navigation rather than silently repeating
+            // the previous screen.
+            pageService.Configure<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestWorkCenterViewModel, MTM_Waitlist.GenericRequest.Views.GenericRequestWorkCenterPage>();
+            pageService.Configure<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestCategoryViewModel, MTM_Waitlist.GenericRequest.Views.GenericRequestCategoryPage>();
+            pageService.Configure<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestItemViewModel, MTM_Waitlist.GenericRequest.Views.GenericRequestItemPage>();
+            pageService.Configure<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestPartViewModel, MTM_Waitlist.GenericRequest.Views.GenericRequestPartPage>();
+            pageService.Configure<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestDunnageViewModel, MTM_Waitlist.GenericRequest.Views.GenericRequestDunnagePage>();
+            pageService.Configure<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestScrapTypeViewModel, MTM_Waitlist.GenericRequest.Views.GenericRequestScrapTypePage>();
+            pageService.Configure<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestDieViewModel, MTM_Waitlist.GenericRequest.Views.GenericRequestDiePage>();
+            pageService.Configure<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestDetailsViewModel, MTM_Waitlist.GenericRequest.Views.GenericRequestDetailsPage>();
+            pageService.Configure<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestSummaryViewModel, MTM_Waitlist.GenericRequest.Views.GenericRequestSummaryPage>();
+            pageService.Configure<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestResultViewModel, MTM_Waitlist.GenericRequest.Views.GenericRequestResultPage>();
+
             pageService.Configure<SettingsViewModel, SettingsPage>();
         pageService.Configure<GeneralSettingsRoute, GeneralSettingsPage>();
         pageService.Configure<OperationsSettingsRoute, OperationsSettingsPage>();
@@ -227,6 +242,37 @@ public static partial class ServiceRegistrationExtensions
         services.AddTransient<NewRequestSummaryPage>();
         services.AddTransient<NewRequestResultViewModel>();
         services.AddTransient<NewRequestResultPage>();
+
+        // The generic request flow (016). The navigator is a singleton because it carries the one draft every step
+        // shares; the step view models are transient because each screen asks for its own. The answer seam is a
+        // singleton because it holds no state and every step talks to the same one.
+        services.AddSingleton<MTM_Waitlist.Services.GenericRequestNavigator>();
+        services.AddSingleton<MTM_Waitlist.GenericRequest.Contracts.IGenericRequestNavigator>(
+            provider => provider.GetRequiredService<MTM_Waitlist.Services.GenericRequestNavigator>());
+        services.AddSingleton<MTM_Waitlist.Module_Waitlist.Services.IGenericRequestLauncher>(
+            provider => provider.GetRequiredService<MTM_Waitlist.Services.GenericRequestNavigator>());
+        services.AddSingleton<MTM_Waitlist.GenericRequest.Contracts.IGenericRequestStepData, MTM_Waitlist.GenericRequest.Services.GenericRequestLiveStepData>();
+
+        services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestWorkCenterViewModel>();
+        services.AddTransient<MTM_Waitlist.GenericRequest.Views.GenericRequestWorkCenterPage>();
+        services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestCategoryViewModel>();
+        services.AddTransient<MTM_Waitlist.GenericRequest.Views.GenericRequestCategoryPage>();
+        services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestItemViewModel>();
+        services.AddTransient<MTM_Waitlist.GenericRequest.Views.GenericRequestItemPage>();
+        services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestPartViewModel>();
+        services.AddTransient<MTM_Waitlist.GenericRequest.Views.GenericRequestPartPage>();
+        services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestDunnageViewModel>();
+        services.AddTransient<MTM_Waitlist.GenericRequest.Views.GenericRequestDunnagePage>();
+        services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestScrapTypeViewModel>();
+        services.AddTransient<MTM_Waitlist.GenericRequest.Views.GenericRequestScrapTypePage>();
+        services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestDieViewModel>();
+        services.AddTransient<MTM_Waitlist.GenericRequest.Views.GenericRequestDiePage>();
+        services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestDetailsViewModel>();
+        services.AddTransient<MTM_Waitlist.GenericRequest.Views.GenericRequestDetailsPage>();
+        services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestSummaryViewModel>();
+        services.AddTransient<MTM_Waitlist.GenericRequest.Views.GenericRequestSummaryPage>();
+        services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestResultViewModel>();
+        services.AddTransient<MTM_Waitlist.GenericRequest.Views.GenericRequestResultPage>();
         services.AddTransient<ControlInspectorDetailViewModel>();
 
         // The inspector's window is opened by the service that watches for the shortcut, through a seam, because

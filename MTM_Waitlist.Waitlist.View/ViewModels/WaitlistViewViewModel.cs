@@ -1239,6 +1239,14 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             // conditions, so a fifth word reads as no condition rather than as a report nobody made.
             HandlerStatus = request.HandlerStatus,
 
+            // A generic request's own facts, read back with the row so its card draws them without a second read
+            // (FR-008, FR-022, FR-023). A work-order request carries the flag false and none of the rest, so the
+            // board's own card is chosen for it and nothing on it changes.
+            IsGeneric = request.IsGeneric,
+            GenericAnswer = request.InputValue ?? string.Empty,
+            Description = request.Description,
+            ConfiguredAllottedMinutes = declaration?.AllottedMinutes,
+
             // The ring's two extra inputs (data-model.md §7, FR-015, FR-017). The allotment is the Item's
             // declared one — the number the urgency deadline service reads from the same configuration row — so
             // the ring's scale and the countdown come from one source, and an Item that declares none keeps the
@@ -1856,7 +1864,14 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         }
 
         Add("Request details", request.InputValue);
-        Add("Work order", request.ActiveSetupJobId);
+
+        // A generic request has no work order anywhere, so this row is not drawn for it rather than drawn blank
+        // (FR-008, FR-025). A work-order request's row keeps its place and its order.
+        if (!request.IsGeneric)
+        {
+            Add("Work order", request.ActiveSetupJobId);
+        }
+
         Add("Work center", request.WorkCenter);
         Add("Requested by", request.RequesterEmployeeName);
         Add("Request ID", request.Id.ToString("N"));

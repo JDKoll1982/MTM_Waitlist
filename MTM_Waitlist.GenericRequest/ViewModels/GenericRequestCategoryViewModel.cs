@@ -43,7 +43,7 @@ public sealed partial class GenericRequestCategoryViewModel : GenericRequestStep
             Options.Add(option);
         }
 
-        Selected = Options.FirstOrDefault(option => option.Name == Draft.Category);
+        Selected = Options.FirstOrDefault(option => string.Equals(option.Code, Draft.Category, StringComparison.OrdinalIgnoreCase));
 
         Apply(result);
     }
@@ -52,7 +52,7 @@ public sealed partial class GenericRequestCategoryViewModel : GenericRequestStep
     {
         if (Selected is { } selected)
         {
-            Draft.Category = selected.Name;
+            Draft.Category = selected.Code;
         }
     }
 }

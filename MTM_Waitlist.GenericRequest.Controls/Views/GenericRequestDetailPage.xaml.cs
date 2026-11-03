@@ -1,6 +1,7 @@
 using System.Globalization;
 
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 
 using MTM_Waitlist.GenericRequest.Controls.Models;
 using MTM_Waitlist.Module_Core.Helpers;
@@ -13,7 +14,8 @@ namespace MTM_Waitlist.GenericRequest.Controls;
 /// <remarks>
 /// The requester, the time raised and the history live here and not on the card, because the card is what a handler
 /// reads in a list and the detail page is what they open. The parameterless constructor exists because a page
-/// activated through its XAML type cannot be handed a constructor argument.
+/// activated through its XAML type cannot be handed a constructor argument, so the request arrives as the navigation
+/// parameter instead.
 /// </remarks>
 public sealed partial class GenericRequestDetailPage : Page
 {
@@ -26,6 +28,20 @@ public sealed partial class GenericRequestDetailPage : Page
         : this()
     {
         Show(model);
+    }
+
+    /// <summary>
+    /// Take the request the board opened this page with.
+    /// </summary>
+    /// <param name="e">The navigation arguments; the parameter is the row's card model.</param>
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+
+        if (e.Parameter is GenericRequestCardModel model)
+        {
+            Show(model);
+        }
     }
 
     /// <summary>The request this page shows.</summary>

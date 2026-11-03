@@ -34,7 +34,7 @@ public static class GenericRequestCategoryCatalog
     ];
 
     private static GenericRequestCategoryOption Option(string name, string description) =>
-        new(ResolveName(name), description);
+        new(name, ResolveName(name), description);
 
     /// <summary>
     /// The category's name as the work-order wizard spells it, or the plain word when that key is not in this host.

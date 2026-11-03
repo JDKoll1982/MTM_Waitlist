@@ -152,6 +152,11 @@ public partial class App : Application
         SharedServiceLocator.TooltipService = Host.Services.GetService<ITooltipService>();
         SharedServiceLocator.ControlInspectorService = Host.Services.GetService<IControlInspectorService>();
 
+        // The generic request screens live in their own project, which may not reach the host's container. Frame
+        // navigation activates a page through its type and cannot pass a constructor argument, so each page asks this
+        // seam for its view model and the seam is pointed at the container once, here.
+        MTM_Waitlist.GenericRequest.Services.GenericRequestPageServices.Configure(Host.Services);
+
         // Replaces the retired app-lifecycle service. The sign-out path lives in a class library that cannot
         // reference this project, and only the host can marshal the exit onto the UI thread.
         MTM_Waitlist.Module_Startup.Services.AppLifecycleHost.Exit = ExitApplication;

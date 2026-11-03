@@ -375,6 +375,8 @@ public sealed class NewRequestWorkCenterViewModelTests
             DisplayName = SignedInEmployeeName,
         };
 
+        var launcher = new RecordingGenericRequestLauncher();
+
         return new NewRequestWorkCenterViewModel(
             navigationService,
             catalogService,
@@ -386,7 +388,19 @@ public sealed class NewRequestWorkCenterViewModelTests
                 EmployeeNumber = SignedInEmployeeNumber,
                 DisplayName = SignedInEmployeeName,
                 IsActive = true,
-            }));
+            }),
+            launcher);
+    }
+
+    /// <summary>
+    /// Records every launch into the generic flow, so a step that sends a generic work centre to the work-order flow
+    /// can be told apart from one that sends it where it belongs.
+    /// </summary>
+    private sealed class RecordingGenericRequestLauncher : IGenericRequestLauncher
+    {
+        public List<(string WorkCenter, string Building)> Launches { get; } = new();
+
+        public void Launch(string workCenter, string building) => Launches.Add((workCenter, building));
     }
 
     private sealed class StubEmployeeDirectoryService : IEmployeeDirectoryService

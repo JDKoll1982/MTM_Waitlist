@@ -5,6 +5,9 @@ namespace MTM_Waitlist.GenericRequest.Controls.Models;
 /// <summary>Which arrangement of cells the generic card draws.</summary>
 public enum GenericRequestCardVariant
 {
+    /// <summary>The request states a configured answer: the one kind this chunk can supply in full.</summary>
+    Answer,
+
     Part,
     Dunnage,
     Scrap,
@@ -38,7 +41,22 @@ public sealed class GenericRequestCardModel
 
     public string WorkCenter { get; init; } = string.Empty;
 
+    /// <summary>The request's category, in the wording a person reads (FR-024).</summary>
+    public string CategoryText { get; init; } = string.Empty;
+
     public string ItemName { get; init; } = string.Empty;
+
+    /// <summary>
+    /// The value the requester stated, which is the request's identity alongside its work center (FR-023). For this
+    /// chunk it is the answer the item's own question asked for.
+    /// </summary>
+    public string StatedValue { get; init; } = string.Empty;
+
+    /// <summary>
+    /// What the requester asked for in their own words, or empty when they wrote none. A request without one draws
+    /// no cell for it rather than an empty one (FR-024, FR-025).
+    /// </summary>
+    public string Description { get; init; } = string.Empty;
 
     public string PartNumber { get; init; } = string.Empty;
 

@@ -195,6 +195,7 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
                 Building = GetValue(row, "building"),
                 LastUpdatedUtc = ParseUtcDateTime(GetValue(row, "updated_utc")),
                 HasActiveJob = activeJobRow is not null,
+                IsGeneric = ParseFlag(GetValue(row, "is_generic")),
                 CurrentWorkOrder = activeJobRow is null ? string.Empty : GetValue(activeJobRow, "work_order"),
                 CurrentPartNumber = activeJobRow is null ? string.Empty : GetValue(activeJobRow, "part_number"),
                 CurrentSequenceNumber = activeJobRow is null ? string.Empty : GetValue(activeJobRow, "sequence_number"),
@@ -409,6 +410,26 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
         }
 
         return Convert.ToString(value)?.Trim() ?? string.Empty;
+    }
+
+    /// <summary>
+    /// A stored flag, read as a boolean. MySQL returns a TINYINT(1), which arrives as a number rather than a bool,
+    /// so anything a caller cannot read as a flag is reported as false rather than throwing.
+    /// </summary>
+    private static bool ParseFlag(string raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return false;
+        }
+
+        if (bool.TryParse(raw, out var parsedBool))
+        {
+            return parsedBool;
+        }
+
+        return int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedNumber)
+            && parsedNumber != 0;
     }
 
     private static DateTime? ParseUtcDateTime(string raw)

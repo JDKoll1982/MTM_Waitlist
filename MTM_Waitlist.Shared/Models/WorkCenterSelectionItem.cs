@@ -24,6 +24,12 @@ public sealed partial class WorkCenterSelectionItem : ObservableObject
 
     public bool HasActiveJob { get; init; }
 
+    /// <summary>
+    /// Whether this work centre is designated generic. The New Request step reads it to choose between the generic
+    /// flow and the work-order flow (FR-005, FR-010).
+    /// </summary>
+    public bool IsGeneric { get; init; }
+
     public string CurrentWorkOrder { get; init; } = string.Empty;
 
     public string CurrentPartNumber { get; init; } = string.Empty;

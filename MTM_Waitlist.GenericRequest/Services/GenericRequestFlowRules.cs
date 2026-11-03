@@ -7,9 +7,9 @@ namespace MTM_Waitlist.GenericRequest.Services;
 /// The order a generic request visits its steps, and the step either side of a given one.
 /// </summary>
 /// <remarks>
-/// The dunnage, scrap and die steps are conditional: the chosen item says which it needs, so a request that needs a
-/// die never shows the dunnage page. Keeping the rule here means every screen asks the same question and no view
-/// model hard-codes a successor.
+/// The dunnage, scrap, die and part steps are conditional: the chosen item says which it needs, so a request that
+/// needs a die never shows the dunnage page and a request whose answer is a configured question never shows the part
+/// page. Keeping the rule here means every screen asks the same question and no view model hard-codes a successor.
 /// </remarks>
 public static class GenericRequestFlowRules
 {
@@ -47,8 +47,14 @@ public static class GenericRequestFlowRules
             GenericRequestStep.WorkCenter,
             GenericRequestStep.Category,
             GenericRequestStep.Item,
-            GenericRequestStep.Part,
         };
+
+        // The part step is visited only by an item that asks for a proved part. An item whose answer is a configured
+        // question states it on the item step, so it never reaches a page it has nothing to put on (FR-007, FR-012).
+        if (draft.RequiresPart)
+        {
+            order.Add(GenericRequestStep.Part);
+        }
 
         if (draft.RequiresDunnage)
         {

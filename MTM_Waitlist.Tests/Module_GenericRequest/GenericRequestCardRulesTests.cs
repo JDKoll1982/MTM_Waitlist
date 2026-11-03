@@ -7,17 +7,21 @@ namespace MTM_Waitlist.Tests.Module_GenericRequest;
 
 /// <summary>
 /// The generic card draws its own variant's cells and nothing else, and never draws a cell it has no value for
-/// (015-generic-wc-ui-shell, FR-015, FR-016, FR-018).
+/// (015-generic-wc-ui-shell FR-015, FR-016, FR-018; 016-generic-wc-request-foundation FR-022 to FR-025).
 /// </summary>
 [TestClass]
 public sealed class GenericRequestCardRulesTests
 {
+    private const string StatedAnswer = "Bring the spare riser table to Press 4";
+
     private static GenericRequestCardModel Model(GenericRequestCardVariant variant) => new()
     {
         RequestNumber = "GR-1001",
         Variant = variant,
         WorkCenter = "Laser 1",
+        CategoryText = "Pickup",
         ItemName = "Stated part",
+        StatedValue = StatedAnswer,
         PartNumber = "5052/AL-1",
         DunnageType = "Aluminum sheet",
         ScrapType = "aluminum chips",
@@ -37,6 +41,7 @@ public sealed class GenericRequestCardRulesTests
     {
         var expected = new Dictionary<GenericRequestCardVariant, string>
         {
+            [GenericRequestCardVariant.Answer] = StatedAnswer,
             [GenericRequestCardVariant.Part] = "5052/AL-1",
             [GenericRequestCardVariant.Dunnage] = "Aluminum sheet",
             [GenericRequestCardVariant.Scrap] = "aluminum chips",
@@ -67,7 +72,9 @@ public sealed class GenericRequestCardRulesTests
         {
             var cells = GenericRequestCardRules.CellsFor(Model(variant));
 
-            Assert.AreEqual(5, cells.Count, $"the {variant} variant drew {cells.Count} cells, expected five");
+            // Work center, category, item, the variant's own cell, quantity and needed-by: the six facts a full
+            // generic request has, whatever it is about.
+            Assert.AreEqual(6, cells.Count, $"the {variant} variant drew {cells.Count} cells, expected six");
 
             foreach (var cell in cells)
             {
@@ -83,14 +90,45 @@ public sealed class GenericRequestCardRulesTests
     {
         var sparse = new GenericRequestCardModel
         {
-            Variant = GenericRequestCardVariant.Part,
+            Variant = GenericRequestCardVariant.Answer,
             WorkCenter = "Laser 1",
             ItemName = "Stated part",
-            PartNumber = "5052/AL-1",
+            StatedValue = StatedAnswer,
         };
 
         var cells = GenericRequestCardRules.CellsFor(sparse);
 
-        Assert.AreEqual(3, cells.Count, "a card with no quantity and no needed-by should draw three cells");
+        Assert.AreEqual(3, cells.Count, "a card with no category, no quantity and no needed-by should draw three cells");
+    }
+
+    [TestMethod]
+    public void Audit_GenericRequestCardRulesTests_ARequestWithNoDescriptionDrawsNoDescriptionCell()
+    {
+        var withoutDescription = Model(GenericRequestCardVariant.Answer);
+
+        var withDescription = new GenericRequestCardModel
+        {
+            RequestNumber = withoutDescription.RequestNumber,
+            Variant = withoutDescription.Variant,
+            WorkCenter = withoutDescription.WorkCenter,
+            CategoryText = withoutDescription.CategoryText,
+            ItemName = withoutDescription.ItemName,
+            StatedValue = withoutDescription.StatedValue,
+            Quantity = withoutDescription.Quantity,
+            NeededBy = withoutDescription.NeededBy,
+            Description = "The one in bay 4 is cracked.",
+        };
+
+        var withoutCells = GenericRequestCardRules.CellsFor(withoutDescription);
+        var withCells = GenericRequestCardRules.CellsFor(withDescription);
+
+        Assert.AreEqual(
+            withoutCells.Count + 1,
+            withCells.Count,
+            "a description should add exactly one cell, and its absence should add none");
+
+        Assert.IsTrue(
+            withCells.Any(cell => cell.Value == "The one in bay 4 is cracked."),
+            "the description should be drawn when the requester wrote one");
     }
 }

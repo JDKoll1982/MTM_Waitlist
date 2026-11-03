@@ -114,6 +114,9 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             InputValue = ReadNullableString(row, "input_value"),
             HandlerStatus = ReadNullableString(row, "handler_status"),
             Answers = ReadAnswers(row, "answers_json"),
+            IsGeneric = ReadBool(row, "is_generic"),
+            Description = ReadNullableString(row, "description"),
+            AcceptedWarnings = ReadWarnings(row, "accepted_warnings_json"),
             ActiveSetupJobId = ReadString(row, "active_setup_job_id"),
             WorkCenterName = ReadString(row, "work_center_name"),
             RequesterEmployeeNumber = ReadString(row, "requester_employee_number"),
@@ -972,6 +975,44 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         => answers is null ? null : JsonSerializer.Serialize(answers);
 
     /// <summary>
+    /// The warnings a requester accepted, read from the stored JSON array, or null when none was recorded.
+    /// </summary>
+    /// <remarks>
+    /// A stored payload that cannot be read is reported as no warnings rather than throwing: the warnings are a
+    /// recollection of what the requester was told, and losing them must not lose the request with them.
+    /// </remarks>
+    private static IReadOnlyList<string>? ReadWarnings(IReadOnlyDictionary<string, object?> row, string key)
+    {
+        var json = ReadNullableString(row, key);
+        if (json is null)
+        {
+            return null;
+        }
+
+        try
+        {
+            var parsed = JsonSerializer.Deserialize<List<string?>>(json);
+            var warnings = parsed?
+                .Where(warning => !string.IsNullOrWhiteSpace(warning))
+                .Select(warning => warning!.Trim())
+                .ToArray();
+
+            return warnings is { Length: > 0 } ? warnings : null;
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+    }
+
+    private static string? SerializeWarnings(IReadOnlyList<string>? warnings)
+    {
+        var present = warnings?.Where(warning => !string.IsNullOrWhiteSpace(warning)).ToArray();
+
+        return present is { Length: > 0 } ? JsonSerializer.Serialize(present) : null;
+    }
+
+    /// <summary>
     /// Stores a handler-action transition, records its audit entry, persists it through the status-update
     /// path, and raises <see cref="RequestsChanged"/>.
     /// <para>
@@ -1054,7 +1095,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             return WaitlistRequestSubmitResult.ValidationFailure("Building, Work Center, and item are required.");
         }
 
-        if (string.IsNullOrWhiteSpace(draft.ActiveSetupJobId))
+        if (string.IsNullOrWhiteSpace(draft.ActiveSetupJobId) && !draft.IsGeneric)
         {
             return WaitlistRequestSubmitResult.ValidationFailure("A valid active setup job is required before submitting a waitlist request.");
         }
@@ -1110,6 +1151,9 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             Item = resolvedItem,
             InputValue = string.IsNullOrWhiteSpace(draft.InputValue) ? null : draft.InputValue.Trim(),
             Answers = capturedAnswers,
+            IsGeneric = draft.IsGeneric,
+            Description = string.IsNullOrWhiteSpace(draft.Description) ? null : draft.Description.Trim(),
+            AcceptedWarnings = draft.AcceptedWarnings,
             ActiveSetupJobId = draft.ActiveSetupJobId.Trim(),
             WorkCenterName = draft.WorkCenterName.Trim(),
             RequesterEmployeeNumber = draft.RequesterEmployeeNumber.Trim(),
@@ -1148,6 +1192,9 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
                     ["p_cancellation_reason"] = request.CancellationReason,
                     ["p_note"] = request.Note,
                     ["p_answers_json"] = SerializeAnswers(capturedAnswers),
+                    ["p_is_generic"] = request.IsGeneric ? 1 : 0,
+                    ["p_description"] = request.Description,
+                    ["p_accepted_warnings_json"] = SerializeWarnings(request.AcceptedWarnings),
                 },
                 MySqlDatabaseTarget.MtmWaitlist,
                 cancellationToken).ConfigureAwait(false);

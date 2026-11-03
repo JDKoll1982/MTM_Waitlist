@@ -127,6 +127,8 @@
     <ProjectReference Include="MTM_Waitlist.Waitlist.NewRequest\MTM_Waitlist.Waitlist.NewRequest.csproj" />
     <ProjectReference Include="MTM_Waitlist.Waitlist.Controls\MTM_Waitlist.Waitlist.Controls.csproj" />
     <ProjectReference Include="MTM_Waitlist.Mock\MTM_Waitlist.Mock.csproj" />
+    <ProjectReference Include="MTM_Waitlist.GenericRequest\MTM_Waitlist.GenericRequest.csproj" />
+    <ProjectReference Include="MTM_Waitlist.GenericRequest.Controls\MTM_Waitlist.GenericRequest.Controls.csproj" />
   </ItemGroup>
 
   <!-- Add this near the bottom of MTM_Waitlist.csproj to block recursive compiling of sibling projects -->

@@ -552,6 +552,89 @@ DEALLOCATE PREPARE stmt;
 
 ALTER TABLE waitlist_requests_queue COMMENT = 'Submitted material-handling requests awaiting pickup, in progress, or resolved.';
 
+-- ============================================================
+-- waitlist_requests_queue - feature 016-generic-wc-request-foundation (FR-008, FR-016, FR-019)
+-- ============================================================
+-- Three columns added to a table that already exists, guarded for the same reason the block above is: `CREATE
+-- TABLE IF NOT EXISTS` cannot add a column to a table that already exists, and a plain MODIFY against a column the
+-- store does not have stops this script on the first run after the change.
+--   Owning artifact: Database/Tables/18_waitlist_requests_queue/create.sql, with its rollback beside it and its
+--     body registered in Database/Tables/AllTables.sql.
+--   `is_generic` says the row was raised at a generic work center. It is a stored fact rather than an inference from
+--     a null `active_setup_job_id`, because a null also looks like a value that went missing (research R2).
+--   `description` is the requester's own words. It is not `note`: that column is the material handler's note, so the
+--     two authors would otherwise overwrite each other (research R3).
+--   `accepted_warnings_json` records every warning the requester accepted, so the row states what they were told.
+
+SET
+    @has_is_generic_column := (
+        SELECT COUNT(*)
+        FROM information_schema.columns
+        WHERE
+            table_schema = DATABASE()
+            AND table_name = 'waitlist_requests_queue'
+            AND column_name = 'is_generic'
+    );
+
+SET
+    @sql_stmt := IF(
+        @has_is_generic_column = 0,
+        'ALTER TABLE waitlist_requests_queue ADD COLUMN is_generic TINYINT(1) NOT NULL DEFAULT 0 COMMENT ''Whether this request was raised at a generic work center, with no work order anywhere (FR-008).'' AFTER answers_json',
+        'SELECT ''waitlist_requests_queue.is_generic already exists'''
+    );
+
+PREPARE stmt FROM @sql_stmt;
+
+EXECUTE stmt;
+
+DEALLOCATE PREPARE stmt;
+
+SET
+    @has_description_column := (
+        SELECT COUNT(*)
+        FROM information_schema.columns
+        WHERE
+            table_schema = DATABASE()
+            AND table_name = 'waitlist_requests_queue'
+            AND column_name = 'description'
+    );
+
+SET
+    @sql_stmt := IF(
+        @has_description_column = 0,
+        'ALTER TABLE waitlist_requests_queue ADD COLUMN description VARCHAR(500) NULL COMMENT ''The requester''''s optional free-text description of what they need (FR-016). Distinct from note, which the material handler writes.'' AFTER is_generic',
+        'SELECT ''waitlist_requests_queue.description already exists'''
+    );
+
+PREPARE stmt FROM @sql_stmt;
+
+EXECUTE stmt;
+
+DEALLOCATE PREPARE stmt;
+
+SET
+    @has_accepted_warnings_column := (
+        SELECT COUNT(*)
+        FROM information_schema.columns
+        WHERE
+            table_schema = DATABASE()
+            AND table_name = 'waitlist_requests_queue'
+            AND column_name = 'accepted_warnings_json'
+    );
+
+SET
+    @sql_stmt := IF(
+        @has_accepted_warnings_column = 0,
+        'ALTER TABLE waitlist_requests_queue ADD COLUMN accepted_warnings_json JSON NULL COMMENT ''Every warning the requester accepted when raising the request, so the stored row states what they were told (FR-019).'' AFTER description',
+        'SELECT ''waitlist_requests_queue.accepted_warnings_json already exists'''
+    );
+
+PREPARE stmt FROM @sql_stmt;
+
+EXECUTE stmt;
+
+DEALLOCATE PREPARE stmt;
+
 ALTER TABLE waitlist_requests_queue
 MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
 MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for the waitlist request.',
@@ -561,7 +644,10 @@ MODIFY COLUMN category VARCHAR(16) NOT NULL COMMENT 'The Category the requester 
 MODIFY COLUMN item VARCHAR(64) NOT NULL COMMENT 'The Item the requester chose: one of the catalogued Item codes.',
 MODIFY COLUMN input_value VARCHAR(255) NULL COMMENT 'The answer captured for an Item whose flow collects one.',
 MODIFY COLUMN answers_json JSON NULL COMMENT 'The answers a request captured beyond input_value, keyed by the label the Item declared; NULL when the request captured none (FR-073, FR-087).',
-MODIFY COLUMN active_setup_job_id VARCHAR(64) NOT NULL COMMENT 'Active setup job associated with the request at submission time.',
+MODIFY COLUMN is_generic TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Whether this request was raised at a generic work center, with no work order anywhere (FR-008).',
+MODIFY COLUMN description VARCHAR(500) NULL COMMENT 'The requester''s optional free-text description of what they need (FR-016). Distinct from note, which the material handler writes.',
+MODIFY COLUMN accepted_warnings_json JSON NULL COMMENT 'Every warning the requester accepted when raising the request, so the stored row states what they were told (FR-019).',
+MODIFY COLUMN active_setup_job_id VARCHAR(64) NULL COMMENT 'Active setup job associated with the request at submission time, or NULL for a generic request, which has no work order (FR-008).',
 MODIFY COLUMN work_center_name VARCHAR(64) NOT NULL COMMENT 'Work center that submitted the request.',
 MODIFY COLUMN requester_employee_number VARCHAR(32) NOT NULL COMMENT 'Employee number of the requester.',
 MODIFY COLUMN requester_employee_name VARCHAR(128) NOT NULL COMMENT 'Display name of the requester.',

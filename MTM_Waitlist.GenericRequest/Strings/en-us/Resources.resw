@@ -255,4 +255,13 @@
   <data name="GenericRequest_Dunnage_Types_Title.Text" xml:space="preserve">
     <value>Dunnage types</value>
   </data>
+  <data name="GenericRequest_Item_Answer_Incomplete.Text" xml:space="preserve">
+    <value>Answer the question above to continue.</value>
+  </data>
+  <data name="GenericRequest_Summary_Answer.Label" xml:space="preserve">
+    <value>Your answer</value>
+  </data>
+  <data name="GenericRequest_Summary_Estimate.Label" xml:space="preserve">
+    <value>Estimated minutes</value>
+  </data>
 </root>

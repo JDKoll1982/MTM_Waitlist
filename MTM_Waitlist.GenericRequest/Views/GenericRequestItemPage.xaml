@@ -19,6 +19,11 @@
         TitleKey="{x:Bind ViewModel.TitleKey}">
         <controls:GenericRequestStepFrame.Body>
             <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
                 <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
                 <GridView
                     AutomationProperties.Name="{x:Bind ViewModel.Title}"
@@ -50,6 +55,35 @@
                         </DataTemplate>
                     </GridView.ItemTemplate>
                 </GridView>
+
+                <!--  The question the chosen item's own configuration declares. An item that asks nothing draws none of this.  -->
+                <StackPanel
+                    Grid.Row="2"
+                    Margin="0,16,0,0"
+                    Spacing="8"
+                    Visibility="{x:Bind ViewModel.QuestionVisibility, Mode=OneWay}">
+                    <TextBlock
+                        Text="{x:Bind ViewModel.PromptText, Mode=OneWay}"
+                        TextWrapping="Wrap"
+                        Style="{StaticResource BodyStrongTextBlockStyle}" />
+                    <TextBox
+                        AutomationProperties.Name="{x:Bind ViewModel.PromptText, Mode=OneWay}"
+                        MaxLength="{x:Bind ViewModel.MaxAnswerLength, Mode=OneWay}"
+                        Text="{x:Bind ViewModel.Answer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Visibility="{x:Bind ViewModel.TextAnswerVisibility, Mode=OneWay}" />
+                    <ComboBox
+                        AutomationProperties.Name="{x:Bind ViewModel.PromptText, Mode=OneWay}"
+                        HorizontalAlignment="Stretch"
+                        ItemsSource="{x:Bind ViewModel.AnswerOptions, Mode=OneWay}"
+                        SelectedItem="{x:Bind ViewModel.Answer, Mode=TwoWay}"
+                        Visibility="{x:Bind ViewModel.ChoiceAnswerVisibility, Mode=OneWay}" />
+                    <TextBlock
+                        Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                        Text="{x:Bind ViewModel.AnswerIncompleteText, Mode=OneWay}"
+                        TextWrapping="Wrap"
+                        Visibility="{x:Bind ViewModel.IncompleteVisibility, Mode=OneWay}"
+                        Style="{StaticResource CaptionTextBlockStyle}" />
+                </StackPanel>
             </Grid>
         </controls:GenericRequestStepFrame.Body>
     </controls:GenericRequestStepFrame>

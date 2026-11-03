@@ -16,6 +16,14 @@
 -- uses for structured declaration data (`detail_fields_json`, `options_json`) (FR-073, FR-087, research R5).
 -- Both are nullable with no default, so a row written before this change reads as NULL for both, which is the
 -- same as "no condition" and "no extra answers" rather than a special case.
+-- Extended by specs/016-generic-wc-request-foundation: a generic request is a real request with no work order, so
+-- `active_setup_job_id` becomes nullable and three columns are added. `is_generic` exists rather than inferring the
+-- kind from a null job id, because a null also looks like a value that went missing and every read would answer the
+-- same question with a different expression (research R2). `description` is the requester's optional words; `note`
+-- is already the handler's own note through UpdateNoteAsync, so the two cannot share a column (research R3).
+-- `accepted_warnings_json` records every warning the requester accepted, which is what makes the stored request
+-- state what the requester was told (FR-019). All three default honestly for a row written before this change:
+-- a work-order request reads as not generic, with no description and no accepted warnings.
 
 USE mtm_waitlist;
 
@@ -32,7 +40,10 @@ CREATE TABLE IF NOT EXISTS waitlist_requests_queue (
     item VARCHAR(64) NOT NULL COMMENT 'The Item the requester chose: one of the catalogued Item codes.',
     input_value VARCHAR(255) NULL,
     answers_json JSON NULL COMMENT 'The answers a request captured beyond input_value, keyed by the label the Item declared; NULL when the request captured none (FR-073, FR-087).',
-    active_setup_job_id VARCHAR(64) NOT NULL,
+    is_generic TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Whether this request was raised at a generic work center, with no work order anywhere (FR-008, research R2).',
+    description VARCHAR(500) NULL COMMENT 'The requester''s optional free-text description (FR-016). Distinct from note, which the material handler writes.',
+    accepted_warnings_json JSON NULL COMMENT 'Every warning the requester accepted when raising the request, so the stored row states what they were told (FR-019).',
+    active_setup_job_id VARCHAR(64) NULL COMMENT 'The work order the request was raised against, or NULL for a generic request (FR-008).',
     work_center_name VARCHAR(64) NOT NULL,
     requester_employee_number VARCHAR(32) NOT NULL,
     requester_employee_name VARCHAR(128) NOT NULL,
@@ -57,7 +68,8 @@ CREATE TABLE IF NOT EXISTS waitlist_requests_queue (
     KEY idx_waitlist_requests_queue_work_center (work_center),
     KEY idx_waitlist_requests_queue_requested_utc (requested_utc),
     KEY idx_waitlist_requests_queue_status (status),
-    KEY idx_waitlist_requests_queue_item_status (item, status)
+    KEY idx_waitlist_requests_queue_item_status (item, status),
+    KEY idx_waitlist_requests_queue_is_generic (is_generic)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;

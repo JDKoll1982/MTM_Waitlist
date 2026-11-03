@@ -23,10 +23,15 @@ public static class GenericRequestCardRules
         var cells = new List<GenericRequestCardCell>();
 
         Add(cells, "GenericRequest_Card_WorkCenter.Label", model.WorkCenter);
+        Add(cells, "GenericRequest_Card_Category.Label", model.CategoryText);
         Add(cells, "GenericRequest_Card_Item.Label", model.ItemName);
 
         switch (model.Variant)
         {
+            case GenericRequestCardVariant.Answer:
+                Add(cells, "GenericRequest_Card_Answer.Label", model.StatedValue);
+                break;
+
             case GenericRequestCardVariant.Part:
                 Add(cells, "GenericRequest_Card_Part.Label", model.PartNumber);
                 break;
@@ -57,12 +62,15 @@ public static class GenericRequestCardRules
             Add(cells, "GenericRequest_Card_NeededBy.Label", neededBy.ToLocalTime().ToString("g", CultureInfo.CurrentCulture));
         }
 
+        Add(cells, "GenericRequest_Card_Description.Label", model.Description);
+
         return cells;
     }
 
     /// <summary>The variant's own name, for the card's header.</summary>
     public static string VariantLabel(GenericRequestCardVariant variant) => variant switch
     {
+        GenericRequestCardVariant.Answer => "GenericRequest_Card_Kind_Answer.Text".GetLocalized(),
         GenericRequestCardVariant.Part => "GenericRequest_Card_Kind_Part.Text".GetLocalized(),
         GenericRequestCardVariant.Dunnage => "GenericRequest_Card_Kind_Dunnage.Text".GetLocalized(),
         GenericRequestCardVariant.Scrap => "GenericRequest_Card_Kind_Scrap.Text".GetLocalized(),

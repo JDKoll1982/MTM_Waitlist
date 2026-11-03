@@ -29,7 +29,7 @@ public abstract partial class GenericRequestStepViewModel : ObservableObject
 
         _navigator = navigator;
         RetryCommand = new AsyncRelayCommand(LoadAsync);
-        ContinueCommand = new RelayCommand(Continue, () => IsPopulated);
+        ContinueCommand = new AsyncRelayCommand(ContinueAsync, () => IsPopulated && CanAnswer);
         BackCommand = new RelayCommand(GoBack);
     }
 
@@ -64,7 +64,7 @@ public abstract partial class GenericRequestStepViewModel : ObservableObject
     public IAsyncRelayCommand RetryCommand { get; }
 
     /// <summary>Answer this step and move to the next one.</summary>
-    public RelayCommand ContinueCommand { get; }
+    public IAsyncRelayCommand ContinueCommand { get; }
 
     /// <summary>Return to the step before this one, keeping every answer already given.</summary>
     public RelayCommand BackCommand { get; }
@@ -74,6 +74,13 @@ public abstract partial class GenericRequestStepViewModel : ObservableObject
     public bool IsEmpty => Presentation == GenericRequestPresentation.Empty;
 
     public bool IsUnavailable => Presentation == GenericRequestPresentation.Unavailable;
+
+    /// <summary>
+    /// Whether this step's own answer is complete enough to leave it. Every step that reads a list is complete once
+    /// the read populated it; a step that also asks a question overrides this to say whether the question is
+    /// answered.
+    /// </summary>
+    protected virtual bool CanAnswer => true;
 
     /// <summary>When the last read was attempted, for the unavailable presentation.</summary>
     public string AttemptedAtDisplay => AttemptedAtUtc is { } at
@@ -122,6 +129,17 @@ public abstract partial class GenericRequestStepViewModel : ObservableObject
     {
     }
 
+    /// <summary>
+    /// Do whatever this step must do before it advances, and say whether to advance at all.
+    /// </summary>
+    /// <remarks>
+    /// The summary step is the one caller: it asks the queue to raise the request and refuses to advance when the
+    /// write did not land, so the requester stays on the review with the failure and a retry rather than being shown
+    /// a result the store never produced (FR-018, FR-029).
+    /// </remarks>
+    /// <returns><see langword="true"/> to advance, <see langword="false"/> to stay on this step.</returns>
+    protected virtual Task<bool> PrepareToAdvanceAsync() => Task.FromResult(true);
+
     partial void OnPresentationChanged(GenericRequestPresentation value)
     {
         OnPropertyChanged(nameof(IsPopulated));
@@ -132,8 +150,16 @@ public abstract partial class GenericRequestStepViewModel : ObservableObject
 
     partial void OnAttemptedAtUtcChanged(DateTimeOffset? value) => OnPropertyChanged(nameof(AttemptedAtDisplay));
 
-    private void Continue()
+    /// <summary>Tell the bound command whether this step's answer is complete enough to leave.</summary>
+    protected void NotifyAnswerChanged() => ContinueCommand.NotifyCanExecuteChanged();
+
+    private async Task ContinueAsync()
     {
+        if (!await PrepareToAdvanceAsync())
+        {
+            return;
+        }
+
         CommitToDraft();
         _navigator.GoTo(GenericRequestFlowRules.NextStep(Draft, Step));
     }

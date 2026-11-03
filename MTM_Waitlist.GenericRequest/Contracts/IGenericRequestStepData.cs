@@ -33,4 +33,14 @@ public interface IGenericRequestStepData
     /// screen reports the same three presentations.
     /// </summary>
     Task<GenericRequestStepAvailability> ReadStepAvailabilityAsync(GenericRequestStep step, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Raise the request the draft describes.
+    /// </summary>
+    /// <remarks>
+    /// The one write this feature makes, and it goes through the same stored-procedure path every other request
+    /// uses (FR-009, FR-018). The result says whether the store accepted it; a failure is reported to the requester
+    /// on the summary step with the attempt time and a retry rather than being swallowed (FR-029).
+    /// </remarks>
+    Task<GenericRequestSubmission> SubmitAsync(GenericRequestDraft draft, CancellationToken cancellationToken = default);
 }

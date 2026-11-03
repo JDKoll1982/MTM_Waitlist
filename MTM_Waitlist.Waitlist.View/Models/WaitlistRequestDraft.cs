@@ -22,6 +22,22 @@ public sealed class WaitlistRequestDraft
     public IReadOnlyDictionary<string, string>? Answers { get; init; }
 
     public string ActiveSetupJobId { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Whether this request is raised at a generic work center, with no work order anywhere (FR-008, FR-009).
+    /// A generic draft carries a blank <see cref="ActiveSetupJobId"/> and this flag is what says so on purpose,
+    /// rather than the blank standing in for a value that went missing.
+    /// </summary>
+    public bool IsGeneric { get; init; }
+
+    /// <summary>The requester's optional free-text description (FR-016). Distinct from <see cref="Note"/>, which
+    /// the material handler writes.</summary>
+    public string? Description { get; init; }
+
+    /// <summary>Every warning the requester accepted when raising the request (FR-019), or null when none was
+    /// shown.</summary>
+    public IReadOnlyList<string>? AcceptedWarnings { get; init; }
+
     public string WorkCenterName { get; init; } = string.Empty;
     public string RequesterEmployeeNumber { get; init; } = string.Empty;
     public string RequesterEmployeeName { get; init; } = string.Empty;

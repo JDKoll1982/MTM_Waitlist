@@ -22,7 +22,10 @@
                     x:Uid="GenericRequest_Result_Success_Title"
                     TextWrapping="Wrap"
                     Style="{StaticResource SubtitleTextBlockStyle}" />
-                <StackPanel Orientation="Horizontal" Spacing="8">
+                <StackPanel
+                    Orientation="Horizontal"
+                    Spacing="8"
+                    Visibility="{x:Bind ViewModel.NumberVisibility, Mode=OneWay}">
                     <TextBlock
                         x:Uid="GenericRequest_Result_Number"
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -32,6 +35,12 @@
                         TextTrimming="CharacterEllipsis"
                         Style="{StaticResource BodyStrongTextBlockStyle}" />
                 </StackPanel>
+                <TextBlock
+                    Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                    Text="{x:Bind ViewModel.ResultMessage, Mode=OneWay}"
+                    TextWrapping="Wrap"
+                    Visibility="{x:Bind ViewModel.FailureVisibility, Mode=OneWay}"
+                    Style="{StaticResource BodyTextBlockStyle}" />
             </StackPanel>
         </controls:GenericRequestStepFrame.Body>
     </controls:GenericRequestStepFrame>

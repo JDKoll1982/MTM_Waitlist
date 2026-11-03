@@ -40,6 +40,12 @@ public sealed partial class GenericRequestDetailsViewModel : GenericRequestStepV
     [ObservableProperty]
     public partial string Description { get; set; } = string.Empty;
 
+    /// <summary>
+    /// A needed-by answer is required, so the step cannot be left without one (FR-015). The description is optional
+    /// and never blocks it (FR-016).
+    /// </summary>
+    protected override bool CanAnswer => NeededByDate is not null && NeededByTime is not null;
+
     protected override async Task LoadCoreAsync()
     {
         var availability = await _data.ReadStepAvailabilityAsync(Step);
@@ -52,12 +58,16 @@ public sealed partial class GenericRequestDetailsViewModel : GenericRequestStepV
         Apply(availability);
     }
 
+    partial void OnNeededByDateChanged(DateTimeOffset? value) => NotifyAnswerChanged();
+
+    partial void OnNeededByTimeChanged(TimeSpan? value) => NotifyAnswerChanged();
+
     protected override void CommitToDraft()
     {
-        Draft.NeededBy = NeededByDate is { } date
-            ? new DateTimeOffset(date.Date.Add(NeededByTime ?? TimeSpan.Zero), date.Offset)
+        Draft.NeededBy = NeededByDate is { } date && NeededByTime is { } time
+            ? new DateTimeOffset(date.Date.Add(time), date.Offset)
             : null;
         Draft.Quantity = Quantity;
-        Draft.Description = Description;
+        Draft.Description = Description.Trim();
     }
 }

@@ -9,6 +9,13 @@
 -- label-to-value shape the row's `answers_json` column holds, and it is written through exactly as it arrives:
 -- a JSON column needs no TRIM, and a caller with no answers passes NULL, which stores NULL rather than an
 -- empty object.
+-- Extended by specs/016-generic-wc-request-foundation: a generic request carries no work order, so
+-- `p_active_setup_job_id` is written through the same optional-value idiom the other nullable columns use, and
+-- three parameters are appended. Appending them rather than interleaving them keeps every existing caller's
+-- dictionary valid: a caller that passes none of the three writes a work-order request, exactly as before.
+-- `p_is_generic` is what the row states, never an inference from a null job id (research R2), and
+-- `p_accepted_warnings_json` is written through as it arrives for the same reason `p_answers_json` is: a JSON
+-- column needs no TRIM, and a caller with none passes NULL.
 
 USE mtm_waitlist;
 
@@ -32,7 +39,10 @@ CREATE PROCEDURE sp_waitlist_request_insert(
     IN p_assigned_material_handler VARCHAR(128),
     IN p_cancellation_reason VARCHAR(255),
     IN p_note VARCHAR(500),
-    IN p_answers_json JSON
+    IN p_answers_json JSON,
+    IN p_is_generic TINYINT,
+    IN p_description VARCHAR(500),
+    IN p_accepted_warnings_json JSON
 )
 INSERT INTO waitlist_requests_queue (
     public_id,
@@ -42,6 +52,9 @@ INSERT INTO waitlist_requests_queue (
     item,
     input_value,
     answers_json,
+    is_generic,
+    description,
+    accepted_warnings_json,
     active_setup_job_id,
     work_center_name,
     requester_employee_number,
@@ -64,7 +77,10 @@ VALUES (
     TRIM(p_item),
     NULLIF(TRIM(COALESCE(p_input_value, '')) COLLATE utf8mb4_unicode_ci, ''),
     p_answers_json,
-    TRIM(p_active_setup_job_id),
+    IF(p_is_generic = 1, 1, 0),
+    NULLIF(TRIM(COALESCE(p_description, '')) COLLATE utf8mb4_unicode_ci, ''),
+    p_accepted_warnings_json,
+    NULLIF(TRIM(COALESCE(p_active_setup_job_id, '')) COLLATE utf8mb4_unicode_ci, ''),
     TRIM(p_work_center_name),
     TRIM(p_requester_employee_number),
     TRIM(p_requester_employee_name),

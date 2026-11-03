@@ -24,13 +24,30 @@ public sealed class GenericRequestFlowRulesTests
                 GenericRequestStep.WorkCenter,
                 GenericRequestStep.Category,
                 GenericRequestStep.Item,
-                GenericRequestStep.Part,
                 GenericRequestStep.Details,
                 GenericRequestStep.Summary,
                 GenericRequestStep.Result,
             },
             order.ToArray(),
-            "a request that needs nothing extra should visit seven steps");
+            "a request that states a configured answer and needs nothing extra should visit six steps");
+    }
+
+    [TestMethod]
+    public void Audit_GenericRequestFlowRulesTests_ARequestThatNeedsAProvedPartVisitsThePartStep()
+    {
+        var draft = new GenericRequestDraft { RequiresPart = true };
+
+        var order = GenericRequestFlowRules.Order(draft);
+
+        Assert.AreEqual(
+            GenericRequestStep.Part,
+            GenericRequestFlowRules.NextStep(draft, GenericRequestStep.Item),
+            "an item that asks for a proved part should reach the part step after the item step");
+
+        Assert.AreEqual(
+            GenericRequestStep.Details,
+            GenericRequestFlowRules.NextStep(draft, GenericRequestStep.Part),
+            "the part step should lead on to the details step");
     }
 
     [TestMethod]
@@ -45,8 +62,8 @@ public sealed class GenericRequestFlowRulesTests
         CollectionAssert.DoesNotContain(order.ToArray(), GenericRequestStep.Scrap, "the scrap step should not be reached");
         Assert.AreEqual(
             GenericRequestStep.Die,
-            GenericRequestFlowRules.NextStep(draft, GenericRequestStep.Part),
-            "the part step does not lead to the die step");
+            GenericRequestFlowRules.NextStep(draft, GenericRequestStep.Item),
+            "the item step does not lead to the die step");
     }
 
     [TestMethod]
@@ -73,7 +90,7 @@ public sealed class GenericRequestFlowRulesTests
     [TestMethod]
     public void Audit_GenericRequestFlowRulesTests_EveryStepInTheOrderIsReachableFromItsPredecessor()
     {
-        var draft = new GenericRequestDraft { RequiresDunnage = true, RequiresScrap = true, RequiresDie = true };
+        var draft = new GenericRequestDraft { RequiresPart = true, RequiresDunnage = true, RequiresScrap = true, RequiresDie = true };
         var order = GenericRequestFlowRules.Order(draft);
 
         for (var index = 0; index < order.Count - 1; index++)

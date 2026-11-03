@@ -313,3 +313,36 @@ only when `waitlist_lugger_locations` is empty, so it lands on an installed stor
 run writes nothing. `seed_permission_role_baselines` gained nine rows for
 `permission.settings.lugger_arrangement`; because `AllSeeds.sql` is the hand-maintained aggregate the installer
 runs, that block was synced into it in the same change — the artifact alone would not have reached a fresh store.
+
+### What the generic request foundation added (016-generic-wc-request-foundation, recorded 2026-11-03)
+
+A generic request is a real request with no work order. **One table was reshaped and four procedures moved**; no
+table was added. Each artifact ships `create.sql` with `rollback.sql` beside it, and `Database/Tables/AllTables.sql`,
+`Database/StoredProcedures/AllSPs.sql` and `Database/Bootstrap/update_table_descriptions.sql` moved in the same
+change.
+
+- **`active_setup_job_id VARCHAR(64) NULL`** — a generic request has no work order, so the column had to accept NULL
+  (FR-008). Writing the value through `NULLIF(TRIM(COALESCE(...)), '')` in the insert makes an absent job id store as
+  NULL rather than as an empty string, which is the same idiom `input_value` and `note` already use.
+- **`is_generic TINYINT(1) NOT NULL DEFAULT 0`** — the row states which kind it is. Inferring it from a null job id
+  was rejected because a null also looks like a value that went missing, and every read, card and export would then
+  answer the same question with its own expression (research R2).
+- **`description VARCHAR(500) NULL`** — the requester's own words (FR-016). It is deliberately not `note`: that
+  column is the material handler's note through `UpdateNoteAsync`, so sharing it would let two authors overwrite one
+  field.
+- **`accepted_warnings_json JSON NULL`** — every warning the requester accepted (FR-019), written through as it
+  arrives for the same reason `answers_json` is.
+- **Index** `idx_waitlist_requests_queue_is_generic` — the board reads both kinds in one list and a surface that
+  narrows to one kind should not scan the queue.
+
+`sp_waitlist_request_insert` gained **three appended parameters** (`p_is_generic`, `p_description`,
+`p_accepted_warnings_json`). Appending rather than interleaving keeps every existing caller's parameter dictionary
+valid: a caller that passes none of the three writes a work-order request exactly as before.
+`sp_waitlist_request_list` and `sp_waitlist_request_get` now return the three columns, and the get read also gained
+`handler_status` and `answers_json`, which the list already returned — a detail page must not disagree with the list
+about the same request. `sp_setup_work_centers_catalog_get` was left alone: the read the New Request wizard actually
+loads is `sp_setup_work_centers_get_all`, which already projects `is_generic`.
+
+**Writing a generic request.** The only write is `sp_waitlist_request_insert`, reached through the one seam every
+request already uses (`IWaitlistRequestService.SubmitAsync`). That seam refuses a blank job id **only** when the draft
+is not generic, so the work-order path keeps its guard and the generic path is not made to invent a job.

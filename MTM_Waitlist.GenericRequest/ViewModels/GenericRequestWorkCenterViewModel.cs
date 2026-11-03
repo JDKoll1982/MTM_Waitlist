@@ -50,9 +50,28 @@ public sealed partial class GenericRequestWorkCenterViewModel : GenericRequestSt
 
     protected override void CommitToDraft()
     {
-        if (Selected is { } selected)
+        if (Selected is not { } selected)
         {
-            Draft.WorkCenter = selected.Name;
+            return;
         }
+
+        if (string.Equals(Draft.WorkCenter, selected.Name, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        // Choosing a different work centre makes every answer below it a statement about a work centre the request no
+        // longer belongs to, so they are cleared rather than carried into a request the person did not describe.
+        Draft.WorkCenter = selected.Name;
+        Draft.Building = selected.Building;
+        Draft.Category = string.Empty;
+        Draft.ItemCode = string.Empty;
+        Draft.ItemName = string.Empty;
+        Draft.Answer = string.Empty;
+        Draft.EstimatedMinutes = null;
+        Draft.RequiresPart = false;
+        Draft.RequiresDunnage = false;
+        Draft.RequiresScrap = false;
+        Draft.RequiresDie = false;
     }
 }
