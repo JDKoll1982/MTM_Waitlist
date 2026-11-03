@@ -1,8 +1,6 @@
-﻿using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
-using MTM_Waitlist.Module_Setup.Contracts.Services;
-using MTM_Waitlist.Module_Shared.Dialogs;
 using MTM_Waitlist.Module_Shared.Helpers;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
@@ -78,27 +76,5 @@ public sealed partial class WaitlistViewPage : Page
             Building = ViewModel.SelectedBuilding,
         };
         navigationService.NavigateTo(typeof(NewRequestWorkCenterViewModel).FullName!, state);
-    }
-
-    /// <summary>
-    /// Opens the generic request preview from the main screen. Temporary: it exists so the flow can be walked before
-    /// it is wired to the plant systems, and it names no work center because nothing is selected here.
-    /// </summary>
-    private async void OnGenericPreviewClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-    {
-        var result = await App.GetService<IGenericRequestPreviewLauncher>().LaunchAsync();
-
-        if (result.Success || App.MainWindow is not { } owner)
-        {
-            return;
-        }
-
-        await MessageDialogHost.AskAsync(owner, new MessageDialogRequest
-        {
-            Kind = MessageKind.Acknowledge,
-            Title = "Generic request preview",
-            Message = result.Message,
-            CancelLabel = "Close",
-        });
     }
 }

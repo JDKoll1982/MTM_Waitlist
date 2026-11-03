@@ -119,3 +119,10 @@ Accepting the offer must not turn the request into a work-order request. It stil
 - **A2**: Reading a job's values after the requester accepts uses the same reads the work-order flow already performs; no new integration is introduced.
 - **A3**: The offer is per request, not per work center and not remembered, so a requester who declined once is asked again on their next request.
 - **A4**: Provenance is a stored field on the request and a rendered line on the detail page; it is not a card cell, because the card must not show a work order.
+
+## Design note (2026-11-03)
+
+The review host that rendered this screen against in-memory values has been deleted, so no approved rendering of it can
+be opened any more; only this specification and the review record remain. **Clarification about design is required when
+this chunk is implemented**, before the screen is built: what the step shows, what it shows when its source is
+unavailable, and the exact wording.

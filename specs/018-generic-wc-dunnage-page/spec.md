@@ -110,3 +110,10 @@ A handler reads the board and sees which dunnage part the requester needs, and o
 - **A1**: The substitute picker's catalogue is reachable as a reusable view rather than only through a dialog, so the page can host it; where it is not, extracting it is part of this chunk and MUST NOT change the dialog's behaviour.
 - **A2**: A dunnage part's picture is found the same way it is found for the substitute dialog today; no new picture source is introduced.
 - **A3**: One dunnage part per request is the agreed scope; several dunnage parts on one request is out of scope.
+
+## Design note (2026-11-03)
+
+The review host that rendered this screen against in-memory values has been deleted, so no approved rendering of it can
+be opened any more; only this specification and the review record remain. **Clarification about design is required when
+this chunk is implemented**, before the screen is built: what the step shows, what it shows when its source is
+unavailable, and the exact wording.

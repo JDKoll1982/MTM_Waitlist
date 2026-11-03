@@ -64,40 +64,6 @@ public interface ISetupWorkCenterService
     Task<IReadOnlyList<SetupWorkCenterHistoryEntry>> GetWorkCenterHistoryAsync(string workCenterName, CancellationToken cancellationToken = default);
 }
 
-/// <summary>
-/// Starts the generic request preview host, the developer tool that walks the generic request flow against
-/// in-memory values (015-generic-wc-ui-shell).
-/// </summary>
-/// <remarks>
-/// <para>
-/// The preview is a separate program on a developer's machine, never part of this application's build, and it
-/// reads nothing — no database, no queue, no file. This contract exists so the setup screen can open it for the work
-/// center the reviewer just marked, which is the only way to look at the flow before the live reads land in 016 to
-/// 021. Nothing else in the application may depend on it.
-/// </para>
-/// <para>
-/// A machine without the preview reports that plainly. There is no fallback to a substitute and no silent failure,
-/// because an operator screen that pretends to preview something would be worse than one that says it cannot.
-/// </para>
-/// </remarks>
-public interface IGenericRequestPreviewLauncher
-{
-    /// <summary>Where the preview host is on this machine, or <see langword="null"/> when it is not present.</summary>
-    string? ResolvePreviewExecutable();
-
-    /// <summary>
-    /// Start the preview, telling it which work center is being reviewed so its window can name it.
-    /// </summary>
-    /// <param name="workCenterName">
-    /// The work center whose generic flow is being previewed, or <see langword="null"/> to open the preview without
-    /// naming one — the shape a launcher on the main screen uses, where nothing is selected.
-    /// </param>
-    /// <param name="cancellationToken">Cancels the wait for the start, not the preview itself.</param>
-    Task<SetupSelectionResult> LaunchAsync(
-        string? workCenterName = null,
-        CancellationToken cancellationToken = default);
-}
-
 public interface IDunnageWorkflowService
 {
     Task<IReadOnlyList<SetupDunnageType>> GetDunnageTypesAsync(string partNumber, string sequenceNumber, CancellationToken cancellationToken = default);

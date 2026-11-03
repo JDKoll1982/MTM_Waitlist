@@ -133,7 +133,15 @@ If chunk 017, 018, 019 or 020 is deferred past this one, its screens still exist
 
 ## Assumptions
 
-- **A1**: The owner's approval of each screen's presentation is recorded from the chunk 015 review, so "the approved presentation" is a fact to compare against rather than a memory.
-- **A2**: The preview project may be kept after conversion for future layout work, provided it stays unreachable from the application and uniformly `Temp`-named; deleting it entirely is equally acceptable and satisfies the same criteria.
+- **A1**: The owner's approval of each screen's presentation is recorded from the chunk 015 review, so "the approved presentation" is a fact to compare against rather than a memory. Since 2026-11-03 that record is the specification and the review material alone: the review host that rendered the screens has been deleted, so each screen's presentation is re-confirmed with the owner when its chunk is implemented.
+- **A2**: The preview project may be kept after conversion for future layout work, provided it stays unreachable from the application and uniformly `Temp`-named; deleting it entirely is equally acceptable and satisfies the same criteria. **Decided 2026-11-03: the second route was taken.** The `TempGenericRequest.Preview` project was deleted, along with the launcher the application used to open it and the button on the main screen, so no `Temp` artefact of this feature survives anywhere and US1's search returns nothing at all rather than the retained project.
 - **A3**: A deferred chunk's screen already has a correct unavailable presentation, because chunk 016 requires it from the day that chunk ships.
 - **A4**: The verification records live with the feature's documentation rather than in the application, since they are evidence for a reviewer and not a runtime concern.
+
+## Design note (2026-11-03)
+
+The preview project this chunk was written to retire has been deleted ahead of schedule, so the comparison this chunk
+describes — live presentation against approved preview presentation — has no runnable reference left. **Clarification
+about design is required when this chunk is implemented**, screen by screen: each screen's approved layout, states and
+wording must be re-confirmed with the owner before it is compared against its live rendering, and the recorded
+disagreements that follow are the evidence this chunk keeps.

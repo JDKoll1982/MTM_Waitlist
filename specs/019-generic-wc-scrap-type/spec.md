@@ -126,3 +126,10 @@ A scrap type is edited or removed from the arrangement after a generic request c
 - **A1**: The plant's shared scrap-type list is the one shipped in `ScrapTypeCatalog`, already read by the Setup picker and the lugger arrangement editor.
 - **A2**: The lugger a type dumps into is a live read of the arrangement, not a value copied onto the request when it is raised — with the stated type being the value the request keeps.
 - **A3**: Scrap types recorded against a lugger but outside the shared list remain valid, as they already are for the arrangement editor.
+
+## Design note (2026-11-03)
+
+The review host that rendered this screen against in-memory values has been deleted, so no approved rendering of it can
+be opened any more; only this specification and the review record remain. **Clarification about design is required when
+this chunk is implemented**, before the screen is built: what the step shows, what it shows when its source is
+unavailable, and the exact wording.

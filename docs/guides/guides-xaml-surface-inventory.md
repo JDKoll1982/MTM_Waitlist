@@ -46,7 +46,6 @@ Paths are relative to the repository root. *Modal* says whether the surface open
 |---|---|---|---|---|
 | App | (root) | App.xaml | `App.xaml` | no |
 | App | MTM_Waitlist.Mock.Service | App.xaml | `MTM_Waitlist.Mock.Service/App.xaml` | no |
-| App | TempGenericRequest.Preview | App.xaml | `TempGenericRequest.Preview/App.xaml` | no |
 | Control | MTM_Waitlist.Shared | MessageDialogContent.xaml | `MTM_Waitlist.Shared/Dialogs/MessageDialogContent.xaml` | no |
 | Control | Module_Mock | ReadStatusIndicator.xaml | `Module_Mock/Views/ReadStatusIndicator.xaml` | no |
 | Control | Module_Settings | DeveloperLogPanelView.xaml | `Module_Settings/Views/DeveloperLogPanelView.xaml` | no |
@@ -59,7 +58,6 @@ Paths are relative to the repository root. *Modal* says whether the surface open
 | Control | Module_Waitlist | WaitlistStatusFlyout.xaml | `Module_Waitlist/Controls/WaitlistStatusFlyout.xaml` | no |
 | Control | MTM_Waitlist.GenericRequest | GenericRequestStepFrame.xaml | `MTM_Waitlist.GenericRequest/Controls/GenericRequestStepFrame.xaml` | no |
 | Control | MTM_Waitlist.GenericRequest.Controls | GenericRequestCard.xaml | `MTM_Waitlist.GenericRequest.Controls/Controls/GenericRequestCard.xaml` | no |
-| Control | TempGenericRequest.Preview | TempPreviewCardPage.xaml | `TempGenericRequest.Preview/Views/TempPreviewCardPage.xaml` | no |
 | Dialog | Module_Settings | ComputerEditDialog.xaml | `Module_Settings/Views/ComputerEditDialog.xaml` | yes |
 | Dialog | Module_Settings | LuggerEditorDialog.xaml | `Module_Settings/Views/LuggerEditorDialog.xaml` | yes |
 | Dialog | Module_Settings | LuggerNameDialog.xaml | `Module_Settings/Views/LuggerNameDialog.xaml` | yes |
@@ -137,7 +135,6 @@ Paths are relative to the repository root. *Modal* says whether the surface open
 | Window | MTM_Waitlist.Mock.Service | ServiceShellWindow.xaml | `MTM_Waitlist.Mock.Service/Views/ServiceShellWindow.xaml` | no |
 | Window | (root) | MainWindow.xaml | `MainWindow.xaml` | no |
 | Window | Module_Shared | ControlInspectorDetailWindow.xaml | `Module_Shared/Views/ControlInspectorDetailWindow.xaml` | no |
-| Window | TempGenericRequest.Preview | MainWindow.xaml | `TempGenericRequest.Preview/MainWindow.xaml` | no |
 
 ## What the audit enforces
 

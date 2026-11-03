@@ -43,6 +43,10 @@ MTM_Waitlist.Tests/Module_GenericRequest/
   TempArtefactBoundaryAuditTests.cs
 ```
 
+> **2026-11-03**: `TempGenericRequest.Preview` was deleted, together with the launcher the application used to open it.
+> The tree above records what this chunk built; that folder no longer exists, and the screens render nowhere until the
+> live reads land. See the design follow-up in [spec.md](./spec.md) and in each of chunks 017 to 022.
+
 **Structure Decision**: three projects, mirroring the arrangement the repository already uses for the
 work-order wizard (a library holding views and view models beside the shipping application). The card and its
 detail page get their own library because they are read by handlers independently of the flow, and the preview

@@ -148,3 +148,10 @@ A handler reads a generic part request's card and sees the part, the sequence, a
 - **A2**: A sequence's stage is taken from the operation states the plant already relies on for disposition: released, unreleased and firmed are open; closed is a finished good; cancelled is excluded.
 - **A3**: WIP is inventoried only in the WIP application, by part number and sequence into a location; Infor Visual holds what is left that is neither work in progress nor outside service; outside-service material is inventoried nowhere.
 - **A4**: A by-sequence floor read is new work: the existing floor reads take only a part number and neither filters nor reports the operation.
+
+## Design note (2026-11-03)
+
+The review host that rendered this screen against in-memory values has been deleted, so no approved rendering of it can
+be opened any more; only this specification and the review record remain. **Clarification about design is required when
+this chunk is implemented**, before the screen is built: what the step shows, what it shows when its source is
+unavailable, and the exact wording.

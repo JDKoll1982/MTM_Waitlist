@@ -126,3 +126,10 @@ The requester picks the die or dies they need. Each becomes its own request, exa
 - **A2**: A die's home location is its primary location where Visual records one, falling back to a stock location, as the existing subordinate-parts read already resolves it.
 - **A3**: Choosing several dies means several requests, matching the existing work-order behaviour.
 - **A4**: The die search is a live Visual read with no cached mirror, as the existing part search is.
+
+## Design note (2026-11-03)
+
+The review host that rendered this screen against in-memory values has been deleted, so no approved rendering of it can
+be opened any more; only this specification and the review record remain. **Clarification about design is required when
+this chunk is implemented**, before the screen is built: what the step shows, what it shows when its source is
+unavailable, and the exact wording.

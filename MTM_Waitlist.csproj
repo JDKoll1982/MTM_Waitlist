@@ -145,12 +145,11 @@
     <Compile Remove="MTM_Waitlist.Mock.Service\**\*.cs" />
     <Compile Remove="MTM_Waitlist.GenericRequest\**\*.cs" />
     <Compile Remove="MTM_Waitlist.GenericRequest.Controls\**\*.cs" />
-    <Compile Remove="TempGenericRequest.Preview\**\*.cs" />
 
     <!--
-      The generic request screens and the preview application are their own projects, so their XAML, PRI
-      resources and content are theirs too. Without these the root project globs them as well and compiles a
-      second copy of every page (PRI175, then CS0436 on the duplicated XAML types).
+      The generic request screens are their own project, so their XAML, PRI resources and content are theirs
+      too. Without these the root project globs them as well and compiles a second copy of every page (PRI175,
+      then CS0436 on the duplicated XAML types).
     -->
     <Page Remove="MTM_Waitlist.GenericRequest\**\*.xaml" />
     <ApplicationDefinition Remove="MTM_Waitlist.GenericRequest\**\*.xaml" />
@@ -163,12 +162,6 @@
     <PRIResource Remove="MTM_Waitlist.GenericRequest.Controls\**\*" />
     <Content Remove="MTM_Waitlist.GenericRequest.Controls\**\*.xaml" />
     <None Remove="MTM_Waitlist.GenericRequest.Controls\**\*.xaml" />
-
-    <Page Remove="TempGenericRequest.Preview\**\*.xaml" />
-    <ApplicationDefinition Remove="TempGenericRequest.Preview\**\*.xaml" />
-    <PRIResource Remove="TempGenericRequest.Preview\**\*" />
-    <Content Remove="TempGenericRequest.Preview\**\*" />
-    <None Remove="TempGenericRequest.Preview\**\*" />
 
     <!--
       Sibling projects own their own XAML too. Only .cs was excluded before, so the on-host service app's

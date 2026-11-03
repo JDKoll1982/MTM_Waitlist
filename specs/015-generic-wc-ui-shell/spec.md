@@ -163,3 +163,20 @@ The owner, or a reviewer, checks that the shipped application can neither reach 
 - **A4**: The seam interfaces are declared in a project both the app and the preview host can reference — the same arrangement `IDunnageSubstitutePicker` already uses in Settings. The interfaces themselves are real, so they carry no `Temp` prefix; only their preview implementations do.
 - **A5**: Layout review happens against the design system the app already ships; this chunk introduces no new visual language.
 - **A6**: "Easy conversion later" is achieved by deletion: the real implementation lands beside a `Temp` artefact, the `Temp` artefact is removed, and no rename is needed. This is why FR-026 forbids anything from outliving it.
+
+## Design follow-up (2026-11-03)
+
+The review host this chunk introduced has been deleted, together with the launcher the application used to open it: the
+`TempGenericRequest.Preview` program, the interface and service that started it, and the button on the main screen.
+A2 and A3 above described keeping it available for review; the owner chose the other route those assumptions allow.
+
+Two consequences are accepted rather than worked around:
+
+- The screens built here render nowhere until the live reads land, because the application does not yet host them.
+- The presentation the owner approved during this chunk's review survives as this specification and the review record,
+  not as a program anyone can run.
+
+**Clarification about design is therefore required when each remaining chunk — 017 to 021 — reaches implementation.**
+Before a screen is built, its layout, its populated, empty and unavailable states, and its exact wording must be
+confirmed with the owner at that point, rather than inferred from a preview that no longer exists.
+
