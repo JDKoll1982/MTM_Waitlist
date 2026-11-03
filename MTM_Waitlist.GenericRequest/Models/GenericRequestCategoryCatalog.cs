@@ -3,7 +3,7 @@ using MTM_Waitlist.Module_Core.Helpers;
 namespace MTM_Waitlist.GenericRequest.Models;
 
 /// <summary>
-/// The categories a generic request is raised under — the same four the work-order wizard offers, in the same order.
+/// The categories a generic request is raised under — the work-order wizard's own list, less the one it does not use.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -12,21 +12,24 @@ namespace MTM_Waitlist.GenericRequest.Models;
 /// than restated here: a change to that vocabulary reaches both screens, and neither can drift into names of its own.
 /// </para>
 /// <para>
+/// <b>Assist is not offered.</b> The generic flow asks for what the requester needs brought or moved; a request for
+/// help with a thing belongs to a job, where the work order says what is being handled.
+/// </para>
+/// <para>
 /// The fallback is the plain word, which is what the work-order flow shows when a key does not resolve. That is also
 /// what a host without those resources renders — the preview host ships its own resource map, and both flows still
-/// read the same four names there.
+/// read the same names there.
 /// </para>
 /// </remarks>
 public static class GenericRequestCategoryCatalog
 {
     /// <summary>
-    /// The four categories in the order the work-order wizard lists them (Pickup, Deliver, Assist, Other).
+    /// The categories in the order the work-order wizard lists them (Pickup, Deliver, Other).
     /// </summary>
     public static IReadOnlyList<GenericRequestCategoryOption> All() =>
     [
         Option("Pickup", "Move a thing from another location to this work center."),
         Option("Deliver", "Deliver a thing to this work center."),
-        Option("Assist", "Assistance with a thing: turn it, place it, or general help."),
         Option("Other", "Anything else, described in your own words."),
     ];
 
