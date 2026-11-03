@@ -1,0 +1,19 @@
+{
+  "workflow": "speckit",
+  "specName": "Generic Work Center — Stated Part, Sequences and Quantity",
+  "branch": "master",
+  "unattended": true,
+  "currentStep": "plan",
+  "status": "planning",
+  "history": [
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-03T20:33:30.092Z"
+    }
+  ],
+  "telemetryInstanceId": "ea7fee4c-6b90-48cd-888d-00fe7bda4acb",
+  "size": "oversized"
+}

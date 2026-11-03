@@ -11,50 +11,46 @@
         The standard message body (014-adopt-lab-design-system, FR-005). Every one of the six message kinds wears this,
         so a person reads the same frame whatever the application is asking them.
 
+        The body sits straight on the dialog's own surface, with no card of its own: every other modal window in the
+        application draws its content that way, and a second surface inside the dialog read as a different palette from
+        the rest of them.
+
         Sizing is applied in code-behind from Styles/Dialogs.xaml rather than written here, because a width written
         here would be a second declaration of the same scale (FR-004).
     -->
-    <Border
-        x:Name="Card"
-        Padding="20"
-        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-        BorderThickness="1"
-        CornerRadius="8">
-        <Grid RowSpacing="12">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+    <Grid RowSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
 
+        <TextBlock
+            x:Name="TitleText"
+            Grid.Row="0"
+            Style="{ThemeResource SubtitleTextBlockStyle}"
+            TextWrapping="WrapWholeWords" />
+
+        <ScrollViewer
+            x:Name="MessageScroller"
+            Grid.Row="1"
+            HorizontalScrollBarVisibility="Disabled"
+            HorizontalScrollMode="Disabled"
+            VerticalScrollBarVisibility="Auto"
+            VerticalScrollMode="Auto">
             <TextBlock
-                x:Name="TitleText"
-                Grid.Row="0"
-                Style="{ThemeResource SubtitleTextBlockStyle}"
+                x:Name="MessageText"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Style="{ThemeResource BodyTextBlockStyle}"
                 TextWrapping="WrapWholeWords" />
+        </ScrollViewer>
 
-            <ScrollViewer
-                x:Name="MessageScroller"
-                Grid.Row="1"
-                HorizontalScrollBarVisibility="Disabled"
-                HorizontalScrollMode="Disabled"
-                VerticalScrollBarVisibility="Auto"
-                VerticalScrollMode="Auto">
-                <TextBlock
-                    x:Name="MessageText"
-                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Style="{ThemeResource BodyTextBlockStyle}"
-                    TextWrapping="WrapWholeWords" />
-            </ScrollViewer>
-
-            <TextBlock
-                x:Name="SubjectText"
-                Grid.Row="2"
-                Foreground="{ThemeResource TextFillColorPrimaryBrush}"
-                Style="{ThemeResource BodyStrongTextBlockStyle}"
-                TextWrapping="WrapWholeWords"
-                Visibility="Collapsed" />
-        </Grid>
-    </Border>
+        <TextBlock
+            x:Name="SubjectText"
+            Grid.Row="2"
+            Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+            Style="{ThemeResource BodyStrongTextBlockStyle}"
+            TextWrapping="WrapWholeWords"
+            Visibility="Collapsed" />
+    </Grid>
 </UserControl>
