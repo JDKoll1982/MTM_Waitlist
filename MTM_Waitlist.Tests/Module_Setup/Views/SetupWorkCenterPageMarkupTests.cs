@@ -40,18 +40,28 @@ public sealed class SetupWorkCenterPageMarkupTests
     }
 
     /// <summary>
-    /// The gesture lands on the cards, not on the buttons beside them: the Continue button keeps its own command,
-    /// so the double-click is an addition to the page rather than a replacement of it.
+    /// The gesture lands on the cards, not on the buttons beside them: the Continue button keeps its own action, so
+    /// the double-click is an addition to the page rather than a replacement of it.
     /// </summary>
+    /// <remarks>
+    /// The button's action is a handler rather than a direct command binding, because a generic work centre has to be
+    /// refused in a dialog before the workflow moves on — a refusal the command cannot state on its own.
+    /// </remarks>
     [TestMethod]
-    public void UI_SetupWorkCenterPageMarkupTests_ContinueButton_KeepsItsOwnCommand()
+    public void UI_SetupWorkCenterPageMarkupTests_ContinueButton_KeepsItsOwnAction()
     {
         var continueButton = LoadPage()
             .Descendants(s_presentation + "Button")
-            .SingleOrDefault(button =>
-                (string?)button.Attribute("Command") == "{x:Bind ViewModel.ContinueCommand}");
+            .SingleOrDefault(button => (string?)button.Attribute("Click") == "OnContinueClick");
 
-        Assert.IsNotNull(continueButton, "The Continue button no longer carries the Continue command (FR-002).");
+        Assert.IsNotNull(
+            continueButton,
+            "The Continue button no longer carries its own action (FR-002), so the workflow cannot be started from it.");
+
+        Assert.AreEqual(
+            "Continue",
+            (string?)continueButton.Attribute("Content"),
+            "The action is wired to a button that is not the Continue button.");
     }
 
     private static XDocument LoadPage()

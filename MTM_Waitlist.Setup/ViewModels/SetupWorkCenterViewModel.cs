@@ -27,7 +27,6 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
     private readonly IWorkCenterCatalogService _workCenterCatalogService;
     private readonly IBuildingSelectionService _buildingSelectionService;
     private readonly IPermissionService _permissionService;
-    private readonly IGenericRequestPreviewLauncher _genericPreviewLauncher;
     private readonly HashSet<string> _hotWorkCenterNames = new(StringComparer.OrdinalIgnoreCase);
     private readonly ObservableCollection<SetupWorkCenter> _displayedHotWorkCenters = new();
     private readonly ObservableCollection<SetupWorkCenter> _displayedOtherWorkCenters = new();
@@ -130,23 +129,6 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
         get; set;
     }
 
-    /// <summary>
-    /// Whether the preview of the generic request flow can be opened for the selected work center.
-    /// </summary>
-    /// <remarks>
-    /// True only when the signed-in person may manage work centers, that work center is marked generic, and the
-    /// preview host is actually on this machine. A machine without it shows nothing rather than a button that cannot
-    /// work.
-    /// </remarks>
-    [ObservableProperty]
-    public partial bool CanOpenGenericPreview
-    {
-        get; set;
-    }
-
-    /// <summary>The preview button's label, read for the automation name as well as drawn as its content.</summary>
-    public string GenericPreviewLabel => "Setup_WorkCenter_GenericPreview.Content".GetLocalized();
-
     public SetupWorkCenterViewModel(
         INavigationService navigationService,
         ISetupWorkflowService workflowService,
@@ -154,8 +136,7 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
         IWorkCenterImageService imageLocationService,
         IWorkCenterCatalogService workCenterCatalogService,
         IBuildingSelectionService buildingSelectionService,
-        IPermissionService permissionService,
-        IGenericRequestPreviewLauncher genericPreviewLauncher)
+        IPermissionService permissionService)
     {
         _navigationService = navigationService;
         _workflowService = workflowService;
@@ -164,7 +145,6 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
         _workCenterCatalogService = workCenterCatalogService;
         _buildingSelectionService = buildingSelectionService;
         _permissionService = permissionService;
-        _genericPreviewLauncher = genericPreviewLauncher;
     }
 
     public void OnNavigatedTo(object parameter)
@@ -206,9 +186,6 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
                 ex,
                 "The work-centre setup permission could not be read, so the management controls stay hidden rather than being offered on a guess.");
         }
-
-        // The preview offer depends on this answer, so it is re-evaluated once the permission read has landed.
-        RefreshGenericPreviewAvailability();
     }
 
     public void OnNavigatedFrom()
@@ -352,7 +329,6 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
 
         if (value is null)
         {
-            RefreshGenericPreviewAvailability();
             return;
         }
 
@@ -360,8 +336,6 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
         BuildingInput = string.IsNullOrWhiteSpace(value.Building)
             ? ResolveBuildingInput()
             : value.Building;
-
-        RefreshGenericPreviewAvailability();
     }
 
     /// <summary>
@@ -383,53 +357,6 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
         {
             workCenter.IsGeneric = isGeneric;
         }
-
-        RefreshGenericPreviewAvailability();
-    }
-
-    /// <summary>
-    /// The selected work center as the loaded list currently holds it.
-    /// </summary>
-    /// <remarks>
-    /// Every save reloads the list, which replaces the instances, so the selected reference goes stale the moment a
-    /// work center is saved. Reading the designation off that stale copy would offer the preview for a mark that has
-    /// just been cleared, or hide it for one that has just been set.
-    /// </remarks>
-    private SetupWorkCenter? SelectedRecord() =>
-        SelectedWorkCenter is not { } selected
-            ? null
-            : State.WorkCenters.FirstOrDefault(item => string.Equals(item.Id, selected.Id, StringComparison.Ordinal))
-                ?? selected;
-
-    /// <summary>
-    /// Offers the preview only when it would actually work: the permission, the mark, and a preview on this machine.
-    /// </summary>
-    private void RefreshGenericPreviewAvailability() =>
-        CanOpenGenericPreview = CanManageWorkCenters
-            && SelectedRecord() is { IsGeneric: true }
-            && _genericPreviewLauncher.ResolvePreviewExecutable() is not null;
-
-    /// <summary>
-    /// Opens the generic request preview for the selected work center, so the flow that mark produces can be walked
-    /// before the live reads exist.
-    /// </summary>
-    [RelayCommand]
-    private async Task OpenGenericPreviewAsync()
-    {
-        if (!CanManageWorkCenters || SelectedRecord() is not { } workCenter)
-        {
-            return;
-        }
-
-        if (!workCenter.IsGeneric)
-        {
-            StatusMessage = "Mark this work center generic first, so the preview opens the flow its requests will use.";
-            return;
-        }
-
-        var result = await _genericPreviewLauncher.LaunchAsync(workCenter.Name).ConfigureAwait(true);
-        StatusMessage = result.Message;
-        RefreshGenericPreviewAvailability();
     }
 
     partial void OnFilterTextChanged(string value)

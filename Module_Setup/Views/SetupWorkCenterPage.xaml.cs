@@ -34,7 +34,7 @@ public sealed partial class SetupWorkCenterPage : Page
     /// A double-click on a card is the Continue button's own gesture: the person has chosen that work centre and
     /// wants to move on, so the second click selects and continues rather than only re-selecting (FR-002).
     /// </summary>
-    private void WorkCenterCard_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+    private async void WorkCenterCard_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
     {
         // A double-click on the card's history button belongs to that button, not to the card.
         if (FindAncestor<Button>(e.OriginalSource as DependencyObject) is not null)
@@ -49,10 +49,62 @@ public sealed partial class SetupWorkCenterPage : Page
 
         ViewModel.SelectedWorkCenter = workCenter;
 
+        if (await RefuseGenericSetupAsync(workCenter))
+        {
+            return;
+        }
+
         if (ViewModel.ContinueCommand.CanExecute(null))
         {
             ViewModel.ContinueCommand.Execute(null);
         }
+    }
+
+    /// <summary>
+    /// The Continue button, held here rather than bound straight to the command so a generic work centre can be
+    /// refused before the workflow moves on.
+    /// </summary>
+    private async void OnContinueClick(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.SelectedWorkCenter is { } workCenter && await RefuseGenericSetupAsync(workCenter))
+        {
+            return;
+        }
+
+        if (ViewModel.ContinueCommand.CanExecute(null))
+        {
+            ViewModel.ContinueCommand.Execute(null);
+        }
+    }
+
+    /// <summary>
+    /// Says why a generic work centre cannot be set up, and answers whether it was one.
+    /// </summary>
+    /// <remarks>
+    /// A generic work centre raises requests without a work order, so there is no job to set up there and the next
+    /// step would have nothing to read. The refusal is stated rather than shown as a disabled card: the person needs
+    /// to know why the work centre they chose will not open.
+    /// </remarks>
+    private static async Task<bool> RefuseGenericSetupAsync(SetupWorkCenter workCenter)
+    {
+        if (!workCenter.IsGeneric)
+        {
+            return false;
+        }
+
+        if (App.MainWindow is { } owner)
+        {
+            await MessageDialogHost.AskAsync(owner, new MessageDialogRequest
+            {
+                Kind = MessageKind.Acknowledge,
+                Title = "Generic work center",
+                Message = $"{workCenter.Name} is a generic work center. Requests raised there do not use a work order, "
+                    + "so there is no setup to perform.",
+                CancelLabel = "Close",
+            });
+        }
+
+        return true;
     }
 
     /// <summary>

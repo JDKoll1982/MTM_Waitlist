@@ -369,9 +369,6 @@
   </data>
   <data name="Setup_WorkCenter_GenericBadge.Text" xml:space="preserve">
     <value>Generic</value>
-  </data>
-  <data name="Setup_WorkCenter_GenericPreview.Content" xml:space="preserve">
-    <value>Preview the generic request flow</value>
   </data>  <data name="Setup_Workstation_Title.Text" xml:space="preserve">
     <value>Select Work Center</value>
   </data>

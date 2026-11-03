@@ -147,6 +147,51 @@ public sealed class SetupWorkCenterGenericMarkupTests
                 + "loading: " + string.Join(", ", offenders));
     }
 
+    [TestMethod]
+    public void Audit_SetupWorkCenterGenericMarkupTests_SetupIsRefusedAtAGenericWorkCenter()
+    {
+        // A generic work centre raises requests without a work order, so the step after this screen has nothing to
+        // read there. Both ways of moving on — the Continue button and a double-click on a card — have to ask the
+        // question, which is why Continue is held in a handler rather than bound straight to the command.
+        var code = Read(PageCodeBehindPath);
+
+        var refusal = Method(code, "RefuseGenericSetupAsync(SetupWorkCenter workCenter)");
+        StringAssert.Contains(refusal, "workCenter.IsGeneric", "the refusal never looks at the designation");
+        StringAssert.Contains(refusal, "MessageKind.Acknowledge", "the refusal is not stated in a dialog window");
+
+        foreach (var handler in new[] { "OnContinueClick(object sender", "WorkCenterCard_DoubleTapped(object sender" })
+        {
+            var body = Method(code, handler);
+            var refusalCall = body.IndexOf("RefuseGenericSetupAsync(", StringComparison.Ordinal);
+            var continuation = body.IndexOf("ContinueCommand.Execute(", StringComparison.Ordinal);
+
+            Assert.IsTrue(refusalCall >= 0, $"{handler} does not refuse a generic work center");
+            Assert.IsTrue(continuation >= 0, $"{handler} no longer moves the workflow on");
+            Assert.IsTrue(
+                refusalCall < continuation,
+                $"{handler} continues before it checks whether the work center is generic");
+        }
+
+        Assert.IsFalse(
+            Read(PagePath).Contains("Command=\"{x:Bind ViewModel.ContinueCommand}", StringComparison.Ordinal),
+            "the Continue button bypasses the refusal by binding straight to the command");
+    }
+
+    [TestMethod]
+    public void Audit_SetupWorkCenterGenericMarkupTests_ThePreviewIsNotOfferedFromTheWorkCenterStep()
+    {
+        // The preview launcher lives on the main screen, so this step carries no button of its own and no property
+        // that would drive one.
+        Assert.IsFalse(
+            Read(PagePath).Contains("CanOpenGenericPreview", StringComparison.Ordinal),
+            "the work center step still offers the preview");
+
+        StringAssert.Contains(
+            Read("Module_Waitlist/Views/WaitlistViewPage.xaml"),
+            "Click=\"OnGenericPreviewClick\"",
+            "no screen opens the generic request preview");
+    }
+
     /// <summary>
     /// One method's source, from its signature to its closing brace, so an assertion can be made about what that
     /// method does without depending on where it sits in the file.

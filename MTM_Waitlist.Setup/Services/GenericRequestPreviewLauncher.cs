@@ -65,7 +65,7 @@ public sealed class GenericRequestPreviewLauncher : IGenericRequestPreviewLaunch
     }
 
     /// <inheritdoc />
-    public Task<SetupSelectionResult> LaunchAsync(string workCenterName, CancellationToken cancellationToken = default)
+    public Task<SetupSelectionResult> LaunchAsync(string? workCenterName = null, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -84,10 +84,14 @@ public sealed class GenericRequestPreviewLauncher : IGenericRequestPreviewLaunch
             });
         }
 
+        var workCenter = workCenterName?.Trim() ?? string.Empty;
+
         Process.Start(new ProcessStartInfo
         {
             FileName = executable,
-            Arguments = $"--work-center \"{workCenterName.Replace("\"", string.Empty)}\"",
+            Arguments = workCenter.Length == 0
+                ? string.Empty
+                : $"--work-center \"{workCenter.Replace("\"", string.Empty)}\"",
             WorkingDirectory = Path.GetDirectoryName(executable) ?? AppContext.BaseDirectory,
             UseShellExecute = true,
         });
@@ -95,7 +99,9 @@ public sealed class GenericRequestPreviewLauncher : IGenericRequestPreviewLaunch
         return Task.FromResult(new SetupSelectionResult
         {
             Success = true,
-            Message = $"Previewing the generic request flow for {workCenterName}.",
+            Message = workCenter.Length == 0
+                ? "Previewing the generic request flow."
+                : $"Previewing the generic request flow for {workCenter}.",
         });
     }
 

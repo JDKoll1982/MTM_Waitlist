@@ -86,11 +86,16 @@ public interface IGenericRequestPreviewLauncher
     string? ResolvePreviewExecutable();
 
     /// <summary>
-    /// Start the preview, telling it which work center the reviewer marked so its window says so.
+    /// Start the preview, telling it which work center is being reviewed so its window can name it.
     /// </summary>
-    /// <param name="workCenterName">The work center whose generic flow is being previewed.</param>
+    /// <param name="workCenterName">
+    /// The work center whose generic flow is being previewed, or <see langword="null"/> to open the preview without
+    /// naming one — the shape a launcher on the main screen uses, where nothing is selected.
+    /// </param>
     /// <param name="cancellationToken">Cancels the wait for the start, not the preview itself.</param>
-    Task<SetupSelectionResult> LaunchAsync(string workCenterName, CancellationToken cancellationToken = default);
+    Task<SetupSelectionResult> LaunchAsync(
+        string? workCenterName = null,
+        CancellationToken cancellationToken = default);
 }
 
 public interface IDunnageWorkflowService

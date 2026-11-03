@@ -44,6 +44,10 @@
                         <Setter Target="WaitlistFab.Height" Value="56" />
                         <Setter Target="WaitlistFab.CornerRadius" Value="28" />
                         <Setter Target="WaitlistFabIcon.FontSize" Value="24" />
+                        <Setter Target="GenericPreviewFab.Width" Value="56" />
+                        <Setter Target="GenericPreviewFab.Height" Value="56" />
+                        <Setter Target="GenericPreviewFab.CornerRadius" Value="28" />
+                        <Setter Target="GenericPreviewFabIcon.FontSize" Value="24" />
                     </VisualState.Setters>
                 </VisualState>
 
@@ -57,6 +61,10 @@
                         <Setter Target="WaitlistFab.Height" Value="72" />
                         <Setter Target="WaitlistFab.CornerRadius" Value="36" />
                         <Setter Target="WaitlistFabIcon.FontSize" Value="30" />
+                        <Setter Target="GenericPreviewFab.Width" Value="72" />
+                        <Setter Target="GenericPreviewFab.Height" Value="72" />
+                        <Setter Target="GenericPreviewFab.CornerRadius" Value="36" />
+                        <Setter Target="GenericPreviewFabIcon.FontSize" Value="30" />
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>
@@ -206,29 +214,53 @@
             </Border>
         </Grid>
 
-        <!--  Floating Green Circular Action Button  -->
-        <Button
-            AutomationProperties.AutomationId="WaitlistViewPage_AddRequestButton"
-            x:Name="WaitlistFab"
+        <!--
+          Floating circular actions. The blue one is temporary: it opens the generic request preview so the flow can be
+          walked before it is wired to the plant systems, and it goes when that flow is live.
+        -->
+        <StackPanel
             Grid.Row="1"
-            Width="56"
-            Height="56"
-            Click="OnAddRequestClick"
             Margin="36"
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom"
-            AutomationProperties.Name="Add Waitlist Item"
-            Background="{ThemeResource SystemFillColorSuccessBrush}"
-            BorderBrush="Black"
-            BorderThickness="4"
-            CornerRadius="28"
-            Style="{ThemeResource DefaultButtonStyle}" shared:TooltipBehavior.ResourceKey="Waitlist_WaitlistFab_Tooltip" shared:TooltipBehavior.AssociatedFiles="Module_Waitlist/Views/WaitlistViewPage.xaml|Module_Waitlist/Views/WaitlistViewPage.xaml.cs|Module_Waitlist/ViewModels/WaitlistViewViewModel.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs|Module_Core/Helpers/ResourceExtensions.cs" shared:TooltipBehavior.FallbackText="Add Waitlist Item.">
-            <FontIcon
-                x:Name="WaitlistFabIcon"
-                FontSize="24"
-                Foreground="White"
-                Glyph="&#xE710;" />
-        </Button>
+            Orientation="Horizontal"
+            Spacing="12">
+            <Button
+                AutomationProperties.AutomationId="WaitlistViewPage_GenericPreviewButton"
+                x:Name="GenericPreviewFab"
+                Width="56"
+                Height="56"
+                Background="#0078D4"
+                BorderBrush="Black"
+                BorderThickness="4"
+                Click="OnGenericPreviewClick"
+                CornerRadius="28"
+                AutomationProperties.Name="Preview the generic request flow"
+                Style="{ThemeResource DefaultButtonStyle}" shared:TooltipBehavior.FallbackText="Preview the generic request flow.">
+                <TextBlock
+                    x:Name="GenericPreviewFabIcon"
+                    FontSize="24"
+                    Text="&#x1F9EA;" />
+            </Button>
+            <Button
+                AutomationProperties.AutomationId="WaitlistViewPage_AddRequestButton"
+                x:Name="WaitlistFab"
+                Width="56"
+                Height="56"
+                Click="OnAddRequestClick"
+                AutomationProperties.Name="Add Waitlist Item"
+                Background="{ThemeResource SystemFillColorSuccessBrush}"
+                BorderBrush="Black"
+                BorderThickness="4"
+                CornerRadius="28"
+                Style="{ThemeResource DefaultButtonStyle}" shared:TooltipBehavior.ResourceKey="Waitlist_WaitlistFab_Tooltip" shared:TooltipBehavior.AssociatedFiles="Module_Waitlist/Views/WaitlistViewPage.xaml|Module_Waitlist/Views/WaitlistViewPage.xaml.cs|Module_Waitlist/ViewModels/WaitlistViewViewModel.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs|Module_Core/Helpers/ResourceExtensions.cs" shared:TooltipBehavior.FallbackText="Add Waitlist Item.">
+                <FontIcon
+                    x:Name="WaitlistFabIcon"
+                    FontSize="24"
+                    Foreground="White"
+                    Glyph="&#xE710;" />
+            </Button>
+        </StackPanel>
     </Grid>
 </Page>
 
