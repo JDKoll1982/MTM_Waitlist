@@ -1,0 +1,10 @@
+{
+  "workflow": "companion",
+  "specName": "022 Generic Work Center — Temp-to-Live Conversion and Verification",
+  "branch": "022-generic-wc-temp-to-live-verification",
+  "selectedAt": "2026-11-03T20:45:21.064Z",
+  "currentStep": "specify",
+  "status": "draft",
+  "history": [],
+  "telemetryInstanceId": "f4c59860-bbec-411c-9ba8-c5b515f59ef3"
+}

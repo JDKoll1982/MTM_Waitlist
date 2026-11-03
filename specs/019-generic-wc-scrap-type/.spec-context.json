@@ -1,0 +1,10 @@
+{
+  "workflow": "companion",
+  "specName": "019 Generic Work Center — Stated Scrap Type and Lugger",
+  "branch": "master",
+  "selectedAt": "2026-11-03T21:00:00.000Z",
+  "currentStep": "specify",
+  "status": "draft",
+  "history": [],
+  "telemetryInstanceId": "5a34df52-a642-4a0e-90b2-af72abe89980"
+}

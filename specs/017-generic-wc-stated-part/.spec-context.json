@@ -1,6 +1,6 @@
 {
   "workflow": "speckit",
-  "specName": "Generic Work Center — Stated Part, Sequences and Quantity",
+  "specName": "017 Generic Work Center — Stated Part, Sequences and Quantity",
   "branch": "master",
   "unattended": true,
   "currentStep": "plan",

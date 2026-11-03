@@ -1,0 +1,10 @@
+{
+  "workflow": "companion",
+  "specName": "021 Generic Work Center — Optional Job Fill",
+  "branch": "021-generic-wc-optional-job-fill",
+  "selectedAt": "2026-11-03T20:45:18.725Z",
+  "currentStep": "specify",
+  "status": "draft",
+  "history": [],
+  "telemetryInstanceId": "c05bcfe5-847a-4ae9-a9bc-2fc04845e8bd"
+}
