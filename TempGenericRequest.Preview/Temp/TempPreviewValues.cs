@@ -29,11 +29,7 @@ internal static class TempPreviewValues
             ];
 
     public static IReadOnlyList<GenericRequestCategoryOption> Categories() =>
-    [
-        new("Raw material", "Sheet, plate and bar stock held for the floor."),
-        new("Weldment", "Parts built up from more than one piece."),
-        new("Hardware", "Fasteners and small bought-in parts."),
-    ];
+        GenericRequestCategoryCatalog.All();
 
     public static IReadOnlyList<GenericRequestItemOption> Items() =>
     [
