@@ -28,7 +28,6 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
     private readonly IBuildingSelectionService _buildingSelectionService;
     private readonly IPermissionService _permissionService;
     private readonly IGenericRequestPreviewLauncher _genericPreviewLauncher;
-    private bool _suppressGenericWrite;
     private readonly HashSet<string> _hotWorkCenterNames = new(StringComparer.OrdinalIgnoreCase);
     private readonly ObservableCollection<SetupWorkCenter> _displayedHotWorkCenters = new();
     private readonly ObservableCollection<SetupWorkCenter> _displayedOtherWorkCenters = new();
@@ -50,6 +49,21 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
     {
         get; set;
     } = string.Empty;
+
+    /// <summary>
+    /// The designation the Add / Edit work center dialog is offering for the work center it is about to save
+    /// (016 FR-001).
+    /// </summary>
+    /// <remarks>
+    /// The dialog is the only place the designation is chosen, so this is a value being staged for a save rather than
+    /// a live switch: the add and update commands write it once, after the row itself has been saved, so a rename
+    /// never carries a designation change as a side effect and vice versa.
+    /// </remarks>
+    [ObservableProperty]
+    public partial bool WorkCenterIsGenericInput
+    {
+        get; set;
+    }
 
     [ObservableProperty]
     public partial string StatusMessage
@@ -117,20 +131,6 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
     }
 
     /// <summary>
-    /// Whether requests raised at the selected work center use the generic request flow (016 FR-001).
-    /// </summary>
-    /// <remarks>
-    /// Two-way with the page's toggle. A change is written only when it disagrees with the selected work center's own
-    /// value, so selecting a different card — which pushes that card's value in — never writes anything, and the only
-    /// write that ever happens is one the person made.
-    /// </remarks>
-    [ObservableProperty]
-    public partial bool SelectedWorkCenterIsGeneric
-    {
-        get; set;
-    }
-
-    /// <summary>
     /// Whether the preview of the generic request flow can be opened for the selected work center.
     /// </summary>
     /// <remarks>
@@ -143,19 +143,6 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
     {
         get; set;
     }
-
-    /// <summary>The toggle's heading, naming the work center it would change.</summary>
-    /// <remarks>
-    /// The key is deliberately not <c>Setup_WorkCenter_GenericToggle.…</c>: <c>x:Uid</c> reads every key under an
-    /// element's uid as a property to set on that element, so a key of that shape is applied at load time and a
-    /// property the control does not have (here a heading for "nothing selected") throws in InitializeComponent.
-    /// </remarks>
-    public string GenericToggleHeader => SelectedWorkCenter is { } workCenter
-        ? string.Format(
-            System.Globalization.CultureInfo.CurrentCulture,
-            "Setup_WorkCenter_GenericToggleHeader.Text".GetLocalized(),
-            workCenter.Name)
-        : "Setup_WorkCenter_GenericNoSelection.Text".GetLocalized();
 
     /// <summary>The preview button's label, read for the automation name as well as drawn as its content.</summary>
     public string GenericPreviewLabel => "Setup_WorkCenter_GenericPreview.Content".GetLocalized();
@@ -277,9 +264,22 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
         StatusMessage = result.Message;
         if (result.Success)
         {
+            var createdName = WorkCenterNameInput;
+            var createdBuilding = BuildingInput;
+            var designateGeneric = WorkCenterIsGenericInput;
             WorkCenterNameInput = string.Empty;
             BuildingInput = ResolveBuildingInput();
             await LoadWorkCentersAsync().ConfigureAwait(true);
+
+            // The row has no identity until the save returns, so the designation is written against the record this
+            // reload produced, once, and only when the dialog asked for it.
+            if (designateGeneric
+                && State.WorkCenters.FirstOrDefault(item =>
+                    string.Equals(item.Name, createdName, StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(item.Building, createdBuilding, StringComparison.OrdinalIgnoreCase)) is { } created)
+            {
+                await ApplyGenericDesignationAsync(created, true).ConfigureAwait(true);
+            }
         }
     }
 
@@ -298,13 +298,24 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
             return;
         }
 
-        var result = await _workCenterService.UpdateWorkCenterAsync(SelectedWorkCenter.Id, WorkCenterNameInput, BuildingInput).ConfigureAwait(true);
+        var target = SelectedWorkCenter;
+        var designateGeneric = WorkCenterIsGenericInput;
+        var designationChanged = target.IsGeneric != designateGeneric;
+
+        var result = await _workCenterService.UpdateWorkCenterAsync(target.Id, WorkCenterNameInput, BuildingInput).ConfigureAwait(true);
         StatusMessage = result.Message;
         if (result.Success)
         {
+            var id = target.Id;
             WorkCenterNameInput = string.Empty;
             BuildingInput = ResolveBuildingInput();
             await LoadWorkCentersAsync().ConfigureAwait(true);
+
+            if (designationChanged
+                && State.WorkCenters.FirstOrDefault(item => string.Equals(item.Id, id, StringComparison.Ordinal)) is { } updated)
+            {
+                await ApplyGenericDesignationAsync(updated, designateGeneric).ConfigureAwait(true);
+            }
         }
     }
 
@@ -341,12 +352,6 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
 
         if (value is null)
         {
-            // Nothing selected means nothing to designate: the toggle goes back to off rather than keeping the value of
-            // the card that has just been cleared, which would offer a write for a work center that is not chosen.
-            _suppressGenericWrite = true;
-            SelectedWorkCenterIsGeneric = false;
-            _suppressGenericWrite = false;
-            OnPropertyChanged(nameof(GenericToggleHeader));
             RefreshGenericPreviewAvailability();
             return;
         }
@@ -356,70 +361,52 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
             ? ResolveBuildingInput()
             : value.Building;
 
-        // The card's own value is pushed into the toggle, so selecting a card never counts as a decision.
-        _suppressGenericWrite = true;
-        SelectedWorkCenterIsGeneric = value.IsGeneric;
-        _suppressGenericWrite = false;
-        OnPropertyChanged(nameof(GenericToggleHeader));
         RefreshGenericPreviewAvailability();
     }
 
     /// <summary>
-    /// Writes the designation the person just chose, and only when the permission and the value both allow it.
+    /// Writes the designation the Add / Edit dialog staged, through its own procedure.
     /// </summary>
     /// <remarks>
-    /// The control is absent for anyone without the permission (FR-002), so this is a second lock rather than the
-    /// lock: a reachable command must still refuse. A refused write puts the toggle back where it was, because a
-    /// toggle that stays flipped while nothing was stored is the screen lying about the plant.
+    /// Deliberately not part of the work-center upsert: routing it through that write would have made every
+    /// designation change carry the row's name and building, so saving a new designation could rename a work center.
     /// </remarks>
-    partial void OnSelectedWorkCenterIsGenericChanged(bool value)
-    {
-        if (_suppressGenericWrite || SelectedWorkCenter is not { } workCenter || workCenter.IsGeneric == value)
-        {
-            return;
-        }
-
-        _ = ApplyGenericDesignationAsync(workCenter, value);
-    }
-
     private async Task ApplyGenericDesignationAsync(SetupWorkCenter workCenter, bool isGeneric)
     {
-        if (!CanManageWorkCenters)
-        {
-            StatusMessage = "You do not have permission to manage workstations.";
-            RevertGenericToggle(workCenter);
-            return;
-        }
-
         var result = await _workCenterService
             .SetWorkCenterGenericAsync(workCenter.Id, isGeneric)
             .ConfigureAwait(true);
 
         StatusMessage = result.Message;
 
-        if (!result.Success)
+        if (result.Success)
         {
-            RevertGenericToggle(workCenter);
-            return;
+            workCenter.IsGeneric = isGeneric;
         }
 
-        workCenter.IsGeneric = isGeneric;
         RefreshGenericPreviewAvailability();
     }
 
-    private void RevertGenericToggle(SetupWorkCenter workCenter)
-    {
-        _suppressGenericWrite = true;
-        SelectedWorkCenterIsGeneric = workCenter.IsGeneric;
-        _suppressGenericWrite = false;
-    }
+    /// <summary>
+    /// The selected work center as the loaded list currently holds it.
+    /// </summary>
+    /// <remarks>
+    /// Every save reloads the list, which replaces the instances, so the selected reference goes stale the moment a
+    /// work center is saved. Reading the designation off that stale copy would offer the preview for a mark that has
+    /// just been cleared, or hide it for one that has just been set.
+    /// </remarks>
+    private SetupWorkCenter? SelectedRecord() =>
+        SelectedWorkCenter is not { } selected
+            ? null
+            : State.WorkCenters.FirstOrDefault(item => string.Equals(item.Id, selected.Id, StringComparison.Ordinal))
+                ?? selected;
 
     /// <summary>
     /// Offers the preview only when it would actually work: the permission, the mark, and a preview on this machine.
     /// </summary>
     private void RefreshGenericPreviewAvailability() =>
         CanOpenGenericPreview = CanManageWorkCenters
-            && SelectedWorkCenter is { IsGeneric: true }
+            && SelectedRecord() is { IsGeneric: true }
             && _genericPreviewLauncher.ResolvePreviewExecutable() is not null;
 
     /// <summary>
@@ -429,7 +416,7 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
     [RelayCommand]
     private async Task OpenGenericPreviewAsync()
     {
-        if (!CanManageWorkCenters || SelectedWorkCenter is not { } workCenter)
+        if (!CanManageWorkCenters || SelectedRecord() is not { } workCenter)
         {
             return;
         }

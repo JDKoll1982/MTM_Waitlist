@@ -230,29 +230,18 @@
             <TextBlock x:Uid="Setup_Workstation_Subtitle" Style="{StaticResource SetupPageSubtitleStyle}" Text="Choose where this setup is being performed." />
             <TextBox AutomationProperties.AutomationId="SetupWorkCenterPage_SearchInput" x:Uid="Setup_Workstation_SearchInput" Header="Search" PlaceholderText="Search by work center, work order, sequence, or part number" Text="{x:Bind ViewModel.FilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             <!--
-                The generic designation control (016 FR-001, FR-002). Absent, not disabled, for anyone without
-                permission.setup.work_centers: a greyed-out control still tells an unauthorised person the setting
-                exists and invites them to ask for it.
+                The designation itself is changed in the work center's own Add / Edit dialog. This page only offers
+                what that mark produces: a walk through the flow the work center's requests will use. It is shown
+                only once the selected work center is generic and the preview host is on this machine.
             -->
-            <StackPanel
-                Spacing="12"
-                Visibility="{x:Bind ViewModel.CanManageWorkCenters, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                <ToggleSwitch
-                    AutomationProperties.AutomationId="SetupWorkCenterPage_GenericToggle"
-                    x:Uid="Setup_WorkCenter_GenericToggle"
-                    Header="{x:Bind ViewModel.GenericToggleHeader, Mode=OneWay}"
-                    IsOn="{x:Bind ViewModel.SelectedWorkCenterIsGeneric, Mode=TwoWay}"
-                    HorizontalAlignment="Left"
-                    MinWidth="360" />
-                <Button
-                    AutomationProperties.AutomationId="SetupWorkCenterPage_GenericPreviewButton"
-                    AutomationProperties.Name="{x:Bind ViewModel.GenericPreviewLabel, Mode=OneWay}"
-                    x:Uid="Setup_WorkCenter_GenericPreview"
-                    HorizontalAlignment="Left"
-                    Command="{x:Bind ViewModel.OpenGenericPreviewCommand}"
-                    Content="Preview the generic request flow"
-                    Visibility="{x:Bind ViewModel.CanOpenGenericPreview, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
-            </StackPanel>
+            <Button
+                AutomationProperties.AutomationId="SetupWorkCenterPage_GenericPreviewButton"
+                AutomationProperties.Name="{x:Bind ViewModel.GenericPreviewLabel, Mode=OneWay}"
+                x:Uid="Setup_WorkCenter_GenericPreview"
+                HorizontalAlignment="Left"
+                Command="{x:Bind ViewModel.OpenGenericPreviewCommand}"
+                Content="Preview the generic request flow"
+                Visibility="{x:Bind ViewModel.CanOpenGenericPreview, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
             <TextBlock Foreground="{ThemeResource SystemFillColorCriticalBrush}" Text="{x:Bind ViewModel.StatusMessage, Mode=OneWay}" TextWrapping="WrapWholeWords" />
         </StackPanel>
 

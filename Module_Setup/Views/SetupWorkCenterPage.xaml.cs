@@ -1,7 +1,8 @@
 ﻿using System.Collections.Specialized;
 
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 
@@ -108,6 +109,7 @@ public sealed partial class SetupWorkCenterPage : Page
         ViewModel.SelectedWorkCenter = null;
         ViewModel.WorkCenterNameInput = string.Empty;
         ViewModel.BuildingInput = ViewModel.Buildings.FirstOrDefault() ?? string.Empty;
+        ViewModel.WorkCenterIsGenericInput = false;
 
         var nameInput = new TextBox
         {
@@ -116,18 +118,20 @@ public sealed partial class SetupWorkCenterPage : Page
             MinWidth = 320,
         };
         var buildingInput = CreateBuildingComboBox(ViewModel.BuildingInput);
+        var genericInput = CreateGenericInput(isGeneric: false);
 
         if (App.MainWindow is not { } owner)
         {
             return;
         }
 
-        var dialog = CreateWorkCenterDialog(owner, "New Workstation", nameInput, buildingInput);
+        var dialog = CreateWorkCenterDialog(owner, "New Workstation", nameInput, buildingInput, genericInput);
         var result = await dialog.ShowAsync();
         if (result == ContentDialogResult.Primary)
         {
             ViewModel.WorkCenterNameInput = nameInput.Text;
             ViewModel.BuildingInput = buildingInput.SelectedItem as string ?? string.Empty;
+            ViewModel.WorkCenterIsGenericInput = genericInput.IsOn;
             if (ViewModel.AddWorkCenterCommand.CanExecute(null))
             {
                 await ViewModel.AddWorkCenterCommand.ExecuteAsync(null);
@@ -143,6 +147,7 @@ public sealed partial class SetupWorkCenterPage : Page
         }
 
         ViewModel.SelectedWorkCenter = workstation;
+        ViewModel.WorkCenterIsGenericInput = workstation.IsGeneric;
 
         var nameInput = new TextBox
         {
@@ -151,18 +156,20 @@ public sealed partial class SetupWorkCenterPage : Page
             MinWidth = 320,
         };
         var buildingInput = CreateBuildingComboBox(workstation.Building);
+        var genericInput = CreateGenericInput(workstation.IsGeneric);
 
         if (App.MainWindow is not { } owner)
         {
             return;
         }
 
-        var dialog = CreateWorkCenterDialog(owner, "Edit Workstation", nameInput, buildingInput);
+        var dialog = CreateWorkCenterDialog(owner, "Edit Workstation", nameInput, buildingInput, genericInput);
         var result = await dialog.ShowAsync();
         if (result == ContentDialogResult.Primary)
         {
             ViewModel.WorkCenterNameInput = nameInput.Text;
             ViewModel.BuildingInput = buildingInput.SelectedItem as string ?? string.Empty;
+            ViewModel.WorkCenterIsGenericInput = genericInput.IsOn;
             if (ViewModel.UpdateWorkCenterCommand.CanExecute(null))
             {
                 await ViewModel.UpdateWorkCenterCommand.ExecuteAsync(null);
@@ -195,11 +202,42 @@ public sealed partial class SetupWorkCenterPage : Page
         };
     }
 
-    private DevWinUI.WindowedContentDialog CreateWorkCenterDialog(Window owner, string title, TextBox nameInput, ComboBox buildingInput)
+    /// <summary>
+    /// The designation control, offered inside the work center form rather than on the page (016 FR-001).
+    /// </summary>
+    /// <remarks>
+    /// It lives here because the mark belongs to the work center being saved: a page-level switch would write the
+    /// moment it was flipped, before the person had finished editing the row it describes. Both callers are already
+    /// behind the <c>CanManageWorkCenters</c> gate, so the control stays absent for anyone without the permission
+    /// rather than greyed out (FR-002).
+    /// </remarks>
+    private static ToggleSwitch CreateGenericInput(bool isGeneric)
+    {
+        var toggle = new ToggleSwitch
+        {
+            Header = "Generic work center",
+            OnContent = "Requests raised here use the generic flow: no work order",
+            OffContent = "Requests raised here follow the work-order flow",
+            IsOn = isGeneric,
+            MinWidth = 320,
+        };
+
+        AutomationProperties.SetAutomationId(toggle, "SetupWorkCenterDialog_GenericToggle");
+
+        return toggle;
+    }
+
+    private DevWinUI.WindowedContentDialog CreateWorkCenterDialog(
+        Window owner,
+        string title,
+        TextBox nameInput,
+        ComboBox buildingInput,
+        ToggleSwitch genericInput)
     {
         var content = new StackPanel { Spacing = 12, MinWidth = DialogSizing.MinWidth };
         content.Children.Add(nameInput);
         content.Children.Add(buildingInput);
+        content.Children.Add(genericInput);
 
         return WindowedDialogHost.Create(owner, title, content, "Save", "Cancel", MessageDialogButton.Act);
     }
