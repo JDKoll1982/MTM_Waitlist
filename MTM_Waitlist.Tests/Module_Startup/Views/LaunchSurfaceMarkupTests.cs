@@ -62,10 +62,18 @@ public sealed class LaunchSurfaceMarkupTests
                 stripElement!.Ancestors(s_presentation + "ScrollViewer").Count(),
                 $"{file}: the message strip is inside the scrolling area that holds what the person is reading, so a fault would cover it (FR-005).");
 
-            Assert.IsTrue(
-                document.Descendants(s_presentation + "ScrollViewer").Any()
-                    || document.Descendants().Any(element => element.Name.LocalName == "ListView"),
-                $"{file}: the surface holds nothing scrollable, so this check would pass without proving the strip sits outside the reading area.");
+            // Where a surface has a reading area at all, prove the strip sits outside it. The launch surface shows a
+            // progress bar rather than a list of rows (owner decision 2026-11-04), so it has none to be inside of, and
+            // its strip is held to being a placed row of the layout by the check below instead.
+            var hasReadingArea = document.Descendants(s_presentation + "ScrollViewer").Any()
+                || document.Descendants().Any(element => element.Name.LocalName == "ListView");
+
+            if (!hasReadingArea)
+            {
+                Assert.IsNotNull(
+                    (string?)stripElement.Attribute("Grid.Row"),
+                    $"{file}: the surface has no reading area and the strip holds no row of its own, so it is not laid out anywhere (FR-005).");
+            }
 
             Assert.IsFalse(
                 stripElement.AncestorsAndSelf().Any(ancestor => ancestor.Name == s_presentation + "Canvas"),
@@ -111,43 +119,47 @@ public sealed class LaunchSurfaceMarkupTests
     }
 
     /// <summary>
-    /// The launch surface draws the operations that are running, each as its own row of a list, rather than one
-    /// "current step" that stands for the rest (FR-047, US6).
+    /// The launch surface states how far the launch has got as a proportion, and names the step under way beside it
+    /// so a stall is still attributable to a named operation.
     /// </summary>
+    /// <remarks>
+    /// Owner decision 2026-11-04 replaced the list of concurrent rows with the progress block the plant's other
+    /// application wears: the status line, a bar, the percentage, and the step count. FR-047's row-per-operation
+    /// shape is superseded by that decision, and what survives of its intent — that a stall names what it is stuck
+    /// on rather than showing an anonymous hang — is what this asserts.
+    /// </remarks>
     [TestMethod]
-    public void UI_LaunchSurfaceMarkupTests_TheLaunchSurface_DrawsEveryOperationAsItsOwnRowRatherThanOneCurrentStep()
+    public void UI_LaunchSurfaceMarkupTests_TheLaunchSurface_ShowsProportionAndNamesTheStepUnderWay()
     {
         var (document, _) = Load("SplashPage.xaml");
 
-        var list = document
-            .Descendants(s_presentation + "ListView")
-            .FirstOrDefault(element => element.Element(s_presentation + "ListView.ItemTemplate") is not null);
+        var bar = document
+            .Descendants(s_presentation + "ProgressBar")
+            .FirstOrDefault(element => ((string?)element.Attribute("Value"))?.Contains("ProgressValue", StringComparison.Ordinal) == true);
 
-        Assert.IsNotNull(
-            list,
-            "The launch surface no longer draws its operations through a list, so there is no row per operation (FR-047).");
-
-        Assert.IsNotNull(
-            (string?)list!.Attribute("ItemsSource"),
-            "The launch surface's operation list is not bound to the feed, so it would render no rows at all.");
-
-        var template = list.Element(s_presentation + "ListView.ItemTemplate")!.Element(s_presentation + "DataTemplate");
-
-        Assert.IsNotNull(template, "The operation list has no item template, so an operation has no row shape.");
+        Assert.IsNotNull(bar, "The launch surface no longer draws a progress bar bound to how far the launch has got.");
 
         Assert.IsTrue(
-            template!.Descendants(s_presentation + "TextBlock").Any(),
-            "The operation row draws no text, so a running operation would be an empty line.");
+            ((string?)bar!.Attribute("Maximum"))?.Contains("ProgressMaximum", StringComparison.Ordinal) == true,
+            "The launch's progress bar is not sized by how many steps there are, so its fill means nothing.");
 
-        // One current step would be a single TextBlock bound to the view model rather than a templated list: the
-        // template is what makes several operations renderable at the same time.
-        var singleCurrentStep = document
+        var stepText = document
             .Descendants(s_presentation + "TextBlock")
-            .FirstOrDefault(text => (string?)text.Attribute("Text") == "{x:Bind ViewModel.CurrentStep, Mode=OneWay}");
+            .FirstOrDefault(element => ((string?)element.Attribute("Text"))?.Contains("CurrentStep", StringComparison.Ordinal) == true);
 
-        Assert.IsNull(
-            singleCurrentStep,
-            "The launch surface is back to one bound current step, which hides every other operation that is running (FR-047).");
+        Assert.IsNotNull(
+            stepText,
+            "The launch surface no longer names the step under way, so a stalled launch would be an anonymous hang (FR-031).");
+
+        var percentText = document
+            .Descendants(s_presentation + "TextBlock")
+            .FirstOrDefault(element => ((string?)element.Attribute("Text"))?.Contains("ProgressPercentText", StringComparison.Ordinal) == true);
+
+        Assert.IsNotNull(percentText, "The launch surface does not state the percentage the bar has reached.");
+
+        Assert.IsFalse(
+            document.Descendants().Any(element => element.Name.LocalName == "ListView"),
+            "The launch surface is drawing rows again; the progress block replaced them (owner decision 2026-11-04).");
     }
 
     /// <summary>

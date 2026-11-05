@@ -418,6 +418,14 @@ from the copies held on the computer, and states that those copies are what it i
 - **FR-047**: The launch window MUST show every operation that is running as its own line, named before its work
   begins, and MUST NOT present a group of operations behind a single line. A line is shown while its work runs,
   not afterwards, so the window states what is happening now.
+
+  > **Amended 2026-11-04 (owner decision).** The window no longer lists a line per operation. It states how far the
+  > launch has got on a progress bar, with the percentage and the step count beneath it, and names the step under
+  > way above it — the same presentation the plant's receiving application's splash wears, which is why the change
+  > was asked for. What survives of this clause is the part that matters to a person watching a stall: the step
+  > under way is named, in the step's own words and before its work begins, so a hang is attributable to a named
+  > operation. The concurrent-operation state itself (`LaunchSurfaceViewModel`) is untouched and still records every
+  > open line; only the surface stopped drawing one row per line.
 - **FR-048**: The list of the last six people who signed in on this computer MUST be shown on the right-hand side
   of the sign-in form, separated from it by a divider, and the sign-in stage MUST be sized so that the whole list
   is visible rather than cut off.

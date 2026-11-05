@@ -1,10 +1,10 @@
 {
-  "workflow": "speckit",
+  "workflow": "companion",
   "specName": "017 Generic Work Center — Stated Part, Sequences and Quantity",
   "branch": "master",
   "unattended": true,
-  "currentStep": "plan",
-  "status": "planning",
+  "currentStep": "implement",
+  "status": "completed",
   "history": [
     {
       "step": "plan",
@@ -12,8 +12,782 @@
       "kind": "start",
       "by": "extension",
       "at": "2026-11-03T20:33:30.092Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:23:37.346Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:23:44.519Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:23:47.747Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-03T22:24:17.557Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:25:21.084Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-03T22:25:24.436Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T001",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:26:35.673Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T002",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:26:39.149Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T003",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:26:39.515Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T004",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:26:39.892Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:26:43.555Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:26:43.938Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:26:44.332Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:33:16.305Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T009",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:33:16.736Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T010",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:33:17.144Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T011",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:33:17.545Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T012",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:33:18.025Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T013",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:33:18.429Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T014",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:33:22.266Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T015",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:33:22.665Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T016",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:33:23.042Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:33:23.437Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T018",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:33:23.801Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T019",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:33:24.157Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T020",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:33:28.616Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T021",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:33:29.110Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T022",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:40:44.559Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T023",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:40:44.936Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T024",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:40:45.328Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T025",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:40:45.727Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T026",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:40:46.109Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T027",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:40:46.493Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T031",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:40:52.779Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T030",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:42:15.284Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T028",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:44:02.873Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T029",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:44:11.804Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-03T22:44:11.889Z"
     }
   ],
   "telemetryInstanceId": "ea7fee4c-6b90-48cd-888d-00fe7bda4acb",
-  "size": "oversized"
+  "size": "oversized",
+  "verified": [
+    {
+      "what": "plan blocks check out",
+      "command": "python3 .specify/extensions/companion/scripts/check_plan.py --feature-dir specs/017-generic-wc-stated-part --strict",
+      "source": "derived",
+      "exitCode": 1,
+      "durationSeconds": 0.0,
+      "result": "  ERROR   plan.md:174  a line that is not `kind: text` (malformed) ·   ERROR   plan.md:175  a line that is not `kind: text` (malformed) ·   47 error(s), 0 warning(s)",
+      "warnings": [
+        "exited 1"
+      ]
+    },
+    {
+      "what": "the three floor scripts run against the live floor",
+      "command": "mysql -e \"<GetWipInventoryPartMatches|GetWipPartOperations|GetWipOperationQuantity>\" mtm_wip_application_winforms",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 16,
+      "result": "matches and operations answered for real parts; Operation 'N/A' yielded no sequence; quantity 515 over 1 location",
+      "warnings": []
+    },
+    {
+      "what": "the two new Visual scripts run against the live plant system",
+      "command": "sqlcmd -S VISUAL -d MTMFG -i GetPartSequences.sql / GetPartSequenceState.sql",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 24,
+      "result": "A0003448372 answered sequences 5,10,19 (own part and requirement),20 with resource descriptions; state re-read gave R for 19, C for 20 and NULL for an unheld sequence",
+      "warnings": [
+        "MTMFG is at compatibility level 100, so TRY_CONVERT is unavailable and the state script guards its own cast"
+      ]
+    },
+    {
+      "what": "GetPartSequences and GetPartSequenceState read the open order's operation",
+      "command": "sqlcmd -S VISUAL -d MTMFG -i GetPartSequences.sql / GetPartSequenceState.sql",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 31,
+      "result": "21-28841-006 seq 90 now R / outside 0 (was outside service from closed orders), seq 95 C / 1, seq 900 R / 1, seq 850 C / 0; A22-77724-100 seq 20 R / 1; 21-28841-Blank returns sequences 5,10,19,20 and state U / 0 at 19; an unheld sequence returns no row",
+      "warnings": []
+    },
+    {
+      "what": "FG/WIP rule from IT applied: outside service is a next-resource name on a WIP tag, not a type; stage is FinishedGood when the operation is the last the work order still has to run, else Wip; no quantity is withheld for outside service. Validated live against VISUAL/MTMFG: GetPartSequences for 21-28841-006 returns seq 90 R/0/\"Outside Service\", seq 900 R/1/(none), seq 95 C/1; GetPartSequenceState for 21-28841-006/90 returns R|0|Outside Service. Build clean, 2512 passed / 0 failed / 52 skipped."
+    },
+    {
+      "what": "Work-order flow: no outside-service disposition. RequestDispositionClassifier drops the OutsideService arm (a subcontracted next op is WorkInProcess); RequestJobClassification.IsOutsideServiceWork carries the routing signal so pickup-outside-service is still offered; WithDisposition suppresses the other three gates when it is set. Live check via GetDispositionInput.sql for job 01-27991-000 at 100-03: U / open qty 6000 / HasOutsideVendorOperation 1 / NextOperationResourceId OUTSIDE_SERVICE / HasRemainingOperation 1 -> derived WorkInProcess, pickup signal true, Item Type cell reads WIP. Suite 2513 passed / 0 failed / 52 skipped."
+    }
+  ],
+  "planBlocks": [
+    "screens"
+  ],
+  "workingBranch": "017-generic-wc-stated-part",
+  "coverage": {
+    "FR-001": {
+      "title": "Completions drawn from Infor Visual and the WIP floor; the accepted number is one of them",
+      "tasks": [
+        "T002",
+        "T005",
+        "T009",
+        "T016",
+        "T020",
+        "T021",
+        "T022"
+      ]
+    },
+    "FR-002": {
+      "title": "A number neither system knows is refused naming both sources and the flow does not advance",
+      "tasks": [
+        "T014",
+        "T023"
+      ]
+    },
+    "FR-003": {
+      "title": "A part with no attributable sequence is refused with a message saying so",
+      "tasks": [
+        "T014",
+        "T023"
+      ]
+    },
+    "FR-004": {
+      "title": "List every attributable sequence once with its number, description where one exists, and source",
+      "tasks": [
+        "T003",
+        "T006",
+        "T009",
+        "T016",
+        "T021",
+        "T022"
+      ]
+    },
+    "FR-005": {
+      "title": "A sequence whose every operation is cancelled is not offered",
+      "tasks": [
+        "T003",
+        "T022"
+      ]
+    },
+    "FR-006": {
+      "title": "A floor operation that is not a usable sequence number is not offered",
+      "tasks": [
+        "T006",
+        "T022"
+      ]
+    },
+    "FR-007": {
+      "title": "One sequence must be chosen before any quantity is read, and it travels with the request",
+      "tasks": [
+        "T020",
+        "T023"
+      ]
+    },
+    "FR-008": {
+      "title": "Changing the part clears the chosen sequence and any quantity read for it",
+      "tasks": [
+        "T013",
+        "T020",
+        "T023"
+      ]
+    },
+    "FR-009": {
+      "title": "The chosen sequence's operation state decides the owner: open reads the floor, closed reads Visual",
+      "tasks": [
+        "T003",
+        "T004",
+        "T016",
+        "T024"
+      ]
+    },
+    "FR-010": {
+      "title": "An outside-service sequence has no quantity read and is reported as not inventoried",
+      "tasks": [
+        "T011",
+        "T024"
+      ]
+    },
+    "FR-011": {
+      "title": "With no Visual state, the floor is read first and Visual only when the floor holds none",
+      "tasks": [
+        "T008",
+        "T011",
+        "T024"
+      ]
+    },
+    "FR-012": {
+      "title": "The requester is never asked which system to use nor asked to type a quantity",
+      "tasks": [
+        "T011",
+        "T017",
+        "T020",
+        "T021"
+      ]
+    },
+    "FR-013": {
+      "title": "The quantity is shown as units on hand, 0 when none, with the system that answered",
+      "tasks": [
+        "T010",
+        "T024",
+        "T027"
+      ]
+    },
+    "FR-014": {
+      "title": "An outside-service sequence is reported as not inventoried rather than as 0",
+      "tasks": [
+        "T010",
+        "T014",
+        "T024"
+      ]
+    },
+    "FR-015": {
+      "title": "Nothing on hand warns and does not block the request",
+      "tasks": [
+        "T020",
+        "T024"
+      ]
+    },
+    "FR-016": {
+      "title": "The request records the part, sequence, sequence source, quantity and answering system",
+      "tasks": [
+        "T013",
+        "T020"
+      ]
+    },
+    "FR-017": {
+      "title": "An unreachable system reports unavailable with the attempt time and a retry, and nothing cached is substituted",
+      "tasks": [
+        "T008",
+        "T012",
+        "T014",
+        "T016",
+        "T019",
+        "T021",
+        "T023",
+        "T024"
+      ]
+    },
+    "FR-018": {
+      "title": "A generic part request's card shows the part, the chosen sequence and the quantity with its source",
+      "tasks": [
+        "T015",
+        "T025",
+        "T026",
+        "T027"
+      ]
+    },
+    "FR-019": {
+      "title": "An outside-service request's card says not inventoried and shows no number",
+      "tasks": [
+        "T015",
+        "T026",
+        "T027"
+      ]
+    },
+    "FR-020": {
+      "title": "A quantity that could not be read leaves the cell absent rather than a placeholder",
+      "tasks": [
+        "T026",
+        "T027"
+      ]
+    },
+    "FR-021": {
+      "title": "The Temp preview source behind the part and sequence screens is deleted and the build stays green",
+      "tasks": [
+        "T028"
+      ]
+    }
+  },
+  "step_summaries": {
+    "tasks": {
+      "summary": "29 tasks across 6 phases: setup, foundational (4 waves), three story phases, polish"
+    }
+  },
+  "currentTask": null,
+  "task_summaries": {
+    "T001": {
+      "status": "DONE",
+      "did": "Created the GenericRequest.Data library, added it to the solution and referenced it from the app",
+      "files": [
+        "MTM_Waitlist.GenericRequest.Data/MTM_Waitlist.GenericRequest.Data.csproj",
+        "MTM_Waitlist.sln",
+        "MTM_Waitlist.csproj"
+      ]
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "Added the part description to the live fuzzy part search",
+      "files": [
+        "Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartMatches.sql"
+      ]
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "Added GetPartSequences.sql returning own-part and requirement sequences with status and outside-service signal",
+      "files": [
+        "Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartSequences.sql"
+      ]
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "Added GetPartSequenceState.sql re-reading one sequence's state at quantity time",
+      "files": [
+        "Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartSequenceState.sql"
+      ]
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "Added GetWipInventoryPartMatches.sql matching the floor's inventory by literal LOCATE",
+      "files": [
+        "Database/MTMWipApp/Queues/Module_Waitlist/Queues/GetWipInventoryPartMatches.sql"
+      ]
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "Added GetWipPartOperations.sql keeping only distinct numeric operations",
+      "files": [
+        "Database/MTMWipApp/Queues/Module_Waitlist/Queues/GetWipPartOperations.sql"
+      ]
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "Added GetWipOperationQuantity.sql returning the sum and the row count behind it",
+      "files": [
+        "Database/MTMWipApp/Queues/Module_Waitlist/Queues/GetWipOperationQuantity.sql"
+      ]
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "Added three floor reads that report whether they succeeded",
+      "files": [
+        "MTM_Waitlist.Core/Services/WipFloorInventoryService.cs"
+      ]
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "Reshaped the part and sequence options around the systems that supplied them",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestOptions.cs"
+      ]
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "Added the quantity reading with its kind, figure, answering system and derived stage",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestQuantityReading.cs"
+      ]
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "Added outside-service and unrecorded stages to the derived part stage",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Contracts/GenericRequestStep.cs"
+      ]
+    },
+    "T012": {
+      "status": "DONE",
+      "did": "Added the part-shaped seam for completions, sequences and quantity",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Contracts/IGenericRequestPartData.cs"
+      ]
+    },
+    "T013": {
+      "status": "DONE",
+      "did": "Recorded the sequence sources, derived stage and reading on the draft",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestDraft.cs"
+      ]
+    },
+    "T014": {
+      "status": "DONE",
+      "did": "Added the part step resource keys for refusals, retries, quantity, stage and sources",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Strings/en-us/Resources.resw"
+      ]
+    },
+    "T015": {
+      "status": "DONE",
+      "did": "Added the card sequence, on-hand and not-inventoried labels",
+      "files": [
+        "MTM_Waitlist.GenericRequest.Controls/Strings/en-us/Resources.resw"
+      ]
+    },
+    "T016": {
+      "status": "DONE",
+      "did": "Implemented the live seam: completions, merged sequences and the state-owned quantity",
+      "files": [
+        "MTM_Waitlist.GenericRequest.Data/Services/GenericRequestPartData.cs"
+      ]
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "Showed all four derived stages on the review",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestSummaryViewModel.cs"
+      ]
+    },
+    "T018": {
+      "status": "DONE",
+      "did": "Registered the part seam and its live implementation",
+      "files": [
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T019": {
+      "status": "DONE",
+      "did": "Forwarded the wide seam sequence read and dropped the part step from the unavailable list",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Services/GenericRequestLiveStepData.cs"
+      ]
+    },
+    "T020": {
+      "status": "DONE",
+      "did": "Rewrote the part step around its three reads and dropped the stage selector",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestPartViewModel.cs"
+      ]
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "Replaced the part page with a completion box, a sourced sequence list and a quantity region",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestPartPage.xaml"
+      ]
+    },
+    "T022": {
+      "status": "DONE",
+      "did": "Proved the completions come from both systems and the sequence union counts a number once",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestPartDataTests.cs"
+      ]
+    },
+    "T023": {
+      "status": "DONE",
+      "did": "Proved the step refusals, the clearing on a part change and the quantity gate",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestPartViewModelTests.cs"
+      ]
+    },
+    "T024": {
+      "status": "DONE",
+      "did": "Proved the owner decision, outside service, the unrecorded fallback and the unreadable state",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestQuantityTests.cs"
+      ]
+    },
+    "T025": {
+      "status": "DONE",
+      "did": "Added the chosen sequence, the on-hand figure and the answering system to the card model",
+      "files": [
+        "MTM_Waitlist.GenericRequest.Controls/Models/GenericRequestCardModel.cs"
+      ]
+    },
+    "T026": {
+      "status": "DONE",
+      "did": "Drew the sequence, on-hand and not-inventoried cells and omitted an unread quantity",
+      "files": [
+        "MTM_Waitlist.GenericRequest.Controls/Helpers/GenericRequestCardRules.cs"
+      ]
+    },
+    "T027": {
+      "status": "DONE",
+      "did": "Proved the card draws a zero, omits an unread quantity and prefers the not-inventoried cell",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestCardRulesTests.cs"
+      ]
+    },
+    "T": {
+      "status": "DONE",
+      "did": "0",
+      "files": [
+        "3"
+      ]
+    },
+    "R": {
+      "status": "DONE",
+      "did": "e",
+      "files": [
+        "c"
+      ]
+    },
+    "M": {
+      "status": "DONE",
+      "did": "T",
+      "files": [
+        "M"
+      ]
+    },
+    "T031": {
+      "status": "DONE",
+      "did": "Proved the part answer survives the round trip and a request with no part reads back as none",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestPartAnswerTests.cs"
+      ]
+    },
+    "T030": {
+      "status": "DONE",
+      "did": "Recorded the part answer on the request and read it back onto the board row as a part card",
+      "files": [
+        "MTM_Waitlist.Core/Models/GenericRequestPartAnswer.cs",
+        "MTM_Waitlist.GenericRequest/Services/GenericRequestLiveStepData.cs",
+        "MTM_Waitlist.Waitlist.View/Models/SampleOrder.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs"
+      ]
+    },
+    "T028": {
+      "status": "DONE",
+      "did": "Built the solution and ran the suite: 2513 passed, 0 failed",
+      "files": [
+        "MTM_Waitlist.sln"
+      ]
+    },
+    "T029": {
+      "status": "DONE",
+      "did": "Recorded the confirmed floor operation column in research R11 and the derived stage in research R9",
+      "files": [
+        "specs/017-generic-wc-stated-part/research.md"
+      ]
+    }
+  }
 }

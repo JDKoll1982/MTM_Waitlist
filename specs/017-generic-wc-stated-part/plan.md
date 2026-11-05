@@ -23,12 +23,11 @@ either.
 
 ## What must land first
 
-The generic flow itself is not built yet. No implementation of `IGenericRequestStepData` exists, no
-`IGenericRequestNavigator` implementation exists, and the shipped application neither references
-`MTM_Waitlist.GenericRequest` nor hosts its pages (spec 016 owns that work and has no plan yet). This
-chunk therefore adds a part-shaped data seam and its live implementation, which can be built and tested
-on its own, and it leaves the wiring of the screens into the shell to 016. Implementation of this chunk
-cannot be verified end to end until 016 lands.
+The generic flow itself landed in spec 016 (completed 2026-11-03): `IGenericRequestStepData` has a
+live implementation in `GenericRequestLiveStepData`, `IGenericRequestNavigator` is implemented by
+`Services/GenericRequestNavigator`, and the shipped application hosts the flow's pages. Spec 016 left
+the four externally proved answers — part, dunnage, scrap type and die — reporting their source as
+unavailable, which is exactly the hole this chunk fills for the part.
 
 ## Project Structure
 
@@ -104,7 +103,6 @@ Sequences: A part is accepted and every attributable sequence is listed once wit
 NoSequence: The part is known and no sequence can be attributed to it; the step says so and refuses to advance. shows part
 SequenceChosen: A sequence is chosen and its quantity is being read. shows part
 OnHand: The owner holds a figure, including zero, and the step names the system that answered. shows part
-NotInventoried: The sequence is outside service, so the step says the part is not inventoried and shows no number. shows part
 QuantityUnavailable: The owning system could not be reached for the quantity; the step carries the attempt time and a retry and the flow does not advance. shows part
 Cleared: The part changed, so the chosen sequence and the reading are gone and the step is back at Sequences. shows part
 ```
@@ -115,8 +113,10 @@ Readable: The card draws the part, the chosen sequence and the on-hand figure wi
 
 ## Screens
 
-```screen part State the part, choose its sequence and read the quantity on hand.```
-```screen card Read one generic part request: its part, its sequence and its quantity on hand with the system that answered.```
+```text
+screen part State the part, choose its sequence and read the quantity on hand.
+screen card Read one generic part request: its part, its sequence and its quantity on hand with the system that answered.
+```
 
 ## Open design decisions — owner confirmation required before the screen is built
 
@@ -134,19 +134,15 @@ design**. They are listed here so the owner can confirm or correct each one befo
 
 ## Open questions that are not screen design
 
-1. **The floor's operation column is unconfirmed, and FR-004, FR-006 and FR-011 depend on it.** The
-   three checked-in floor scripts read `inv_inventory (PartID, Location, Quantity, ItemType)` and
-   `md_locations (Location, Building)`; the confirmed disposition research in
-   `RequestDispositionStatusCodes.cs` states the floor's inventory is *keyed by part, location and
-   operation*, and this spec's edge case says the live operation value is sometimes `N/A`. The exact
-   column name has never been read by this repository. **Recommended resolution:** confirm the column
-   against the live floor schema before the two sequence scripts are written, and write them so an
-   `N/A`, blank or non-numeric operation yields no sequence (FR-006). Until it is confirmed, the floor
-   contributes no sequences, and US1 scenario 3 cannot pass.
-2. **Whether the floor's part records carry a description.** The spec's edge case says a floor record
-   may have none, which implies a part master this repository has never read. **Recommended
-   resolution:** read the description where it exists and render the number and source alone where it
-   does not; do not add a floor table to this chunk.
+1. **The floor's operation column is `inv_inventory.Operation`.** FR-004, FR-006 and FR-011 depend on
+   it. Confirmed against the live schema on 2026-11-03: `varchar(100)`, and the live values are the
+   plant's operation numbers (`20`, `90`, `19`, `30`, …) alongside 32 rows carrying the literal `N/A`.
+   `md_locations` has no operation column, so the floor's key is `(PartID, Location, Operation)` as
+   the disposition research states. The floor therefore does contribute sequences, and a blank, `N/A`
+   or non-numeric value yields none (FR-006). See research R11.
+2. **Whether the floor's part records carry a description.** They do not: `inv_inventory` has no
+   description column, so a floor-supplied completion row renders the number and its source alone. No
+   floor part master is added to this chunk.
 
 ## Constitution Check
 

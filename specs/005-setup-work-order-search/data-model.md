@@ -132,6 +132,14 @@ modal presents the same information as arriving there.
 One row per (addressable work order, part) pair — the same granularity and the same addressable-set rule as the
 existing `visual_work_order_lookup_result`, so a search and a lookup cannot disagree about which orders exist.
 
+> **Narrowed 2026-11-04 (operator requirement).** The search's set is now the addressable orders **that have at
+> least one operation at a production work centre** — `SHOP_RESOURCE.TYPE = 'W'` and a resource id that does not end
+> in `-GRP`. A group resource such as `500-GRP` is a routing grouping rather than a place a job is set up, and the
+> operator does not want those jobs listed under it. The `work_center` column carries the first *production*
+> operation's resource, so a job that starts at a group is still offered, at the first real work centre after it.
+> Measured live the same day: 590 addressable open orders, 562 of them with a production operation. The lookup
+> shape's own set is unchanged — only the search's list was narrowed.
+
 | Column | Type | Notes |
 |---|---|---|
 | `normalized_work_order` | `varchar(64)` | The matched value and the mirror's key. Copied from the live read's key domain: literally `WO-` + six digits. |

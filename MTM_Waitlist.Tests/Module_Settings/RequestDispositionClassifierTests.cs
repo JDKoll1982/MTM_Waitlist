@@ -7,10 +7,10 @@ namespace MTM_Waitlist.Tests.Module_Settings;
 [TestClass]
 public sealed class RequestDispositionClassifierTests
 {
-    // --- Outside Service takes precedence ---
+    // --- Outside service is a next resource, not a type (IT, 2026-11-04) ---
 
     [TestMethod]
-    public void Service_RequestDispositionClassifierTests_Classify_OutsideVendorOperationReturnsOutsideService()
+    public void Service_RequestDispositionClassifierTests_Classify_AnOutsideVendorOperationIsWorkInProcess()
     {
         var input = new RequestDispositionClassifier.DispositionInput(
             WorkOrderStatus: "R",
@@ -19,12 +19,15 @@ public sealed class RequestDispositionClassifierTests
             HasOutsideVendorOperation: true,
             NonConformingQuantity: 0m);
 
-        Assert.AreEqual(RequestDisposition.OutsideService, RequestDispositionClassifier.Classify(input));
+        Assert.AreEqual(RequestDisposition.WorkInProcess, RequestDispositionClassifier.Classify(input));
+        Assert.IsTrue(input.IsOutsideServiceWork, "the pickup signal survives even though the type is work in process");
     }
 
     [TestMethod]
-    public void Service_RequestDispositionClassifierTests_Classify_OutsideVendorOperationEvenWhenNoStockReturnsOutsideService()
+    public void Service_RequestDispositionClassifierTests_Classify_OutsideVendorOperationWithNothingElseReadStaysUnknown()
     {
+        // The vendor fields alone say the work is going out; they say nothing about the type, and nothing else was
+        // read. The pickup still lights from the signal, and the type cell is left out rather than guessed (FR-089).
         var input = new RequestDispositionClassifier.DispositionInput(
             WorkOrderStatus: null,
             FinishedGoodsQuantity: 0m,
@@ -32,16 +35,18 @@ public sealed class RequestDispositionClassifierTests
             HasOutsideVendorOperation: true,
             NonConformingQuantity: 0m);
 
-        Assert.AreEqual(RequestDisposition.OutsideService, RequestDispositionClassifier.Classify(input));
+        Assert.AreEqual(RequestDisposition.Unknown, RequestDispositionClassifier.Classify(input));
+        Assert.IsTrue(input.IsOutsideServiceWork);
     }
 
     // --- The routing decides: the operation that follows the job's own (research 2026-10-23) ---
 
     [TestMethod]
-    public void Service_RequestDispositionClassifierTests_Classify_NextOperationIsTheOutsideServiceResourceReturnsOutsideService()
+    public void Service_RequestDispositionClassifierTests_Classify_NextOperationIsTheOutsideServiceResourceIsWorkInProcess()
     {
         // Outside Service is the plant's OUTSIDE_SERVICE shop resource being the next operation, whether or not
-        // the vendor fields were read: the routing is the signal the tag print itself uses.
+        // the vendor fields were read: the routing is the signal the tag print itself uses, and the tag it produces
+        // is the WIP tag with "Outside Service" on its next-resource line.
         var input = new RequestDispositionClassifier.DispositionInput(
             WorkOrderStatus: "R",
             FinishedGoodsQuantity: 0m,
@@ -51,14 +56,34 @@ public sealed class RequestDispositionClassifierTests
             NextOperationResourceId: " outside_service ",
             HasRemainingOperation: true);
 
-        Assert.AreEqual(RequestDisposition.OutsideService, RequestDispositionClassifier.Classify(input));
+        Assert.AreEqual(RequestDisposition.WorkInProcess, RequestDispositionClassifier.Classify(input));
+        Assert.IsTrue(input.IsOutsideServiceWork, "the subcontracted pickup is still offered");
+    }
+
+    [TestMethod]
+    public void Service_RequestDispositionClassifierTests_Classify_TheLastOperationWithSubcontractedWorkBehindItIsFinishedGoods()
+    {
+        // The routing ends here, so the plant prints the FG tag — the vendor fields left on the order are history
+        // and decide nothing. Only the pickup signal still reads them, and only while the routing is unread.
+        var finishedInput = new RequestDispositionClassifier.DispositionInput(
+            WorkOrderStatus: "R",
+            FinishedGoodsQuantity: 0m,
+            OpenWorkOrderQuantity: 100m,
+            HasOutsideVendorOperation: true,
+            NonConformingQuantity: 0m,
+            NextOperationResourceId: null,
+            HasRemainingOperation: false,
+            HasCustomerDemand: true);
+
+        Assert.AreEqual(RequestDisposition.FinishedGoods, RequestDispositionClassifier.Classify(finishedInput));
+        Assert.IsFalse(finishedInput.IsOutsideServiceWork, "with the routing read, nothing is subcontracted after this op");
     }
 
     [TestMethod]
     public void Service_RequestDispositionClassifierTests_Classify_ACompletedSubcontractedOperationNoLongerReadsAsOutsideService()
     {
         // The vendor fields stay on the order for ever, so a part that has already been out and come back would
-        // read as Outside Service on the legacy signal alone. With the routing read, what follows decides.
+        // read as subcontracted work on the legacy signal alone. With the routing read, what follows decides.
         var wipInput = new RequestDispositionClassifier.DispositionInput(
             WorkOrderStatus: "R",
             FinishedGoodsQuantity: 0m,
@@ -69,6 +94,7 @@ public sealed class RequestDispositionClassifierTests
             HasRemainingOperation: true);
 
         Assert.AreEqual(RequestDisposition.WorkInProcess, RequestDispositionClassifier.Classify(wipInput));
+        Assert.IsFalse(wipInput.IsOutsideServiceWork);
 
         var finishedInput = wipInput with
         {
@@ -352,9 +378,11 @@ public sealed class RequestDispositionClassifierTests
     }
 
     [TestMethod]
-    public void Service_RequestDispositionClassifierTests_Classify_OutsideServiceStillOutranksNcm()
+    public void Service_RequestDispositionClassifierTests_Classify_NcmOutranksTheProductionArms()
     {
-        // The documented priority is unchanged: a subcontracted operation is still decided first (FR-092).
+        // NCM is a location state, never a production type (FR-093), so quarantined stock is never reported as
+        // Finished Goods or WIP — and a subcontracted next operation does not change that. Its pickup signal still
+        // stands, which is how the subcontracted pickup outranks the NCM one on the picker.
         var input = new RequestDispositionClassifier.DispositionInput(
             WorkOrderStatus: "R",
             FinishedGoodsQuantity: 0m,
@@ -362,7 +390,8 @@ public sealed class RequestDispositionClassifierTests
             HasOutsideVendorOperation: true,
             NonConformingQuantity: 40m);
 
-        Assert.AreEqual(RequestDisposition.OutsideService, RequestDispositionClassifier.Classify(input));
+        Assert.AreEqual(RequestDisposition.Ncm, RequestDispositionClassifier.Classify(input));
+        Assert.IsTrue(input.IsOutsideServiceWork);
     }
 
     [TestMethod]

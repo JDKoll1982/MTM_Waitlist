@@ -19,27 +19,23 @@
         RetryCommand="{x:Bind ViewModel.RetryCommand}"
         TitleKey="{x:Bind ViewModel.TitleKey}">
         <controls:GenericRequestStepFrame.Body>
-            <Grid ColumnSpacing="16">
+            <Grid ColumnSpacing="24">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <Grid Grid.Column="0" RowSpacing="8">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <TextBox
+                <StackPanel Grid.Column="0" Spacing="8">
+                    <AutoSuggestBox
                         x:Uid="GenericRequest_Part_Search"
                         AutomationProperties.Name="{x:Bind ViewModel.Title}"
-                        Text="{x:Bind ViewModel.SearchText, Mode=TwoWay}" />
-                    <ListView
-                        Grid.Row="1"
-                        ItemsSource="{x:Bind ViewModel.Parts}"
-                        SelectedItem="{x:Bind ViewModel.SelectedPart, Mode=TwoWay}"
-                        SelectionMode="Single">
-                        <ListView.ItemTemplate>
+                        ItemsSource="{x:Bind ViewModel.Completions}"
+                        QuerySubmitted="OnQuerySubmitted"
+                        SuggestionChosen="OnSuggestionChosen"
+                        Text="{x:Bind ViewModel.SearchText, Mode=TwoWay}"
+                        TextChanged="OnSearchTextChanged"
+                        TextMemberPath="PartNumber">
+                        <AutoSuggestBox.ItemTemplate>
                             <DataTemplate x:DataType="models:GenericRequestPartOption">
                                 <StackPanel Padding="0,6" Spacing="2">
                                     <TextBlock
@@ -51,33 +47,54 @@
                                         Text="{x:Bind Description}"
                                         TextTrimming="CharacterEllipsis"
                                         Style="{StaticResource CaptionTextBlockStyle}" />
+                                    <TextBlock
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="{x:Bind SourceDisplay}"
+                                        TextTrimming="CharacterEllipsis"
+                                        Style="{StaticResource CaptionTextBlockStyle}" />
                                 </StackPanel>
                             </DataTemplate>
-                        </ListView.ItemTemplate>
-                    </ListView>
-                </Grid>
+                        </AutoSuggestBox.ItemTemplate>
+                    </AutoSuggestBox>
+
+                    <TextBlock
+                        x:Uid="GenericRequest_Part_NoMatch"
+                        Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                        TextWrapping="Wrap"
+                        Visibility="{x:Bind ViewModel.NoMatchVisibility, Mode=OneWay}"
+                        Style="{StaticResource BodyTextBlockStyle}" />
+                </StackPanel>
 
                 <Grid Grid.Column="1" RowSpacing="8">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <ComboBox
-                        x:Uid="GenericRequest_Part_Stage"
-                        DisplayMemberPath="Label"
-                        ItemsSource="{x:Bind ViewModel.StageOptions}"
-                        SelectedItem="{x:Bind ViewModel.SelectedStage, Mode=TwoWay}" />
+
                     <TextBlock
-                        Grid.Row="1"
                         x:Uid="GenericRequest_Part_Sequence_Title"
                         Style="{StaticResource BodyStrongTextBlockStyle}" />
+
+                    <TextBlock
+                        Grid.Row="1"
+                        x:Uid="GenericRequest_Part_NoSequence"
+                        Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                        TextWrapping="Wrap"
+                        Visibility="{x:Bind ViewModel.NoSequenceVisibility, Mode=OneWay}"
+                        Style="{StaticResource BodyTextBlockStyle}" />
+
                     <ListView
                         Grid.Row="2"
                         AutomationProperties.Name="{x:Bind ViewModel.Title}"
+                        IsItemClickEnabled="True"
+                        ItemClick="OnSequenceClicked"
                         ItemsSource="{x:Bind ViewModel.Sequences}"
-                        SelectedItem="{x:Bind ViewModel.SelectedSequence, Mode=TwoWay}"
-                        SelectionMode="Single">
+                        SelectedItem="{x:Bind ViewModel.SelectedSequence, Mode=OneWay}"
+                        SelectionMode="Single"
+                        Visibility="{x:Bind ViewModel.SequenceListVisibility, Mode=OneWay}">
                         <ListView.ItemTemplate>
                             <DataTemplate x:DataType="models:GenericRequestSequenceOption">
                                 <StackPanel Padding="0,6" Spacing="2">
@@ -87,10 +104,99 @@
                                         Text="{x:Bind Description}"
                                         TextTrimming="CharacterEllipsis"
                                         Style="{StaticResource CaptionTextBlockStyle}" />
+                                    <TextBlock
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="{x:Bind SourcesDisplay}"
+                                        TextTrimming="CharacterEllipsis"
+                                        Style="{StaticResource CaptionTextBlockStyle}" />
                                 </StackPanel>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
+
+                    <StackPanel
+                        Grid.Row="3"
+                        Spacing="8"
+                        Visibility="{x:Bind ViewModel.SequencesUnavailableVisibility, Mode=OneWay}">
+                        <TextBlock
+                            x:Uid="GenericRequest_Part_Sequences_Unavailable"
+                            Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                            TextWrapping="Wrap"
+                            Style="{StaticResource BodyTextBlockStyle}" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind ViewModel.SequencesAttemptedAtDisplay, Mode=OneWay}"
+                                Style="{StaticResource CaptionTextBlockStyle}" />
+                            <Button
+                                x:Uid="GenericRequest_Part_Sequences_Retry"
+                                AutomationProperties.Name="{x:Bind ViewModel.Title}"
+                                Command="{x:Bind ViewModel.RetrySequencesCommand}" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="4" Spacing="8">
+                        <TextBlock
+                            x:Uid="GenericRequest_Part_Quantity_Title"
+                            Style="{StaticResource BodyStrongTextBlockStyle}" />
+
+                        <StackPanel
+                            Orientation="Horizontal"
+                            Spacing="12"
+                            Visibility="{x:Bind ViewModel.QuantityAnsweredVisibility, Mode=OneWay}">
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind ViewModel.StageLabel, Mode=OneWay}"
+                                Style="{StaticResource BodyTextBlockStyle}" />
+                            <TextBlock
+                                Text="{x:Bind ViewModel.QuantityFigure, Mode=OneWay}"
+                                Style="{StaticResource SubtitleTextBlockStyle}" />
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind ViewModel.QuantityAnsweredBy, Mode=OneWay}"
+                                Style="{StaticResource BodyTextBlockStyle}" />
+                        </StackPanel>
+
+                        <StackPanel
+                            Orientation="Horizontal"
+                            Spacing="8"
+                            Visibility="{x:Bind ViewModel.NextResourceVisibility, Mode=OneWay}">
+                            <TextBlock
+                                x:Uid="GenericRequest_Part_NextResource"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{StaticResource BodyTextBlockStyle}" />
+                            <TextBlock
+                                Text="{x:Bind ViewModel.NextResourceDisplay, Mode=OneWay}"
+                                Style="{StaticResource BodyTextBlockStyle}" />
+                        </StackPanel>
+
+                        <TextBlock
+                            x:Uid="GenericRequest_Part_Quantity_NothingOnHand"
+                            Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                            TextWrapping="Wrap"
+                            Visibility="{x:Bind ViewModel.NothingOnHandVisibility, Mode=OneWay}"
+                            Style="{StaticResource BodyTextBlockStyle}" />
+
+                        <StackPanel
+                            Spacing="8"
+                            Visibility="{x:Bind ViewModel.QuantityUnavailableVisibility, Mode=OneWay}">
+                            <TextBlock
+                                x:Uid="GenericRequest_Part_Quantity_Unavailable"
+                                Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                TextWrapping="Wrap"
+                                Style="{StaticResource BodyTextBlockStyle}" />
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Text="{x:Bind ViewModel.QuantityAttemptedAtDisplay, Mode=OneWay}"
+                                    Style="{StaticResource CaptionTextBlockStyle}" />
+                                <Button
+                                    x:Uid="GenericRequest_Part_Quantity_Retry"
+                                    AutomationProperties.Name="{x:Bind ViewModel.Title}"
+                                    Command="{x:Bind ViewModel.RetryQuantityCommand}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
                 </Grid>
             </Grid>
         </controls:GenericRequestStepFrame.Body>

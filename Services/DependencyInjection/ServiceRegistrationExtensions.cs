@@ -253,6 +253,10 @@ public static partial class ServiceRegistrationExtensions
             provider => provider.GetRequiredService<MTM_Waitlist.Services.GenericRequestNavigator>());
         services.AddSingleton<MTM_Waitlist.GenericRequest.Contracts.IGenericRequestStepData, MTM_Waitlist.GenericRequest.Services.GenericRequestLiveStepData>();
 
+        // The part answer's own seam (017). The part step asks it directly, and the wide seam above forwards its
+        // sequence read to the same instance, so both routes reach one live implementation.
+        services.AddSingleton<MTM_Waitlist.GenericRequest.Contracts.IGenericRequestPartData, MTM_Waitlist.GenericRequest.Data.Services.GenericRequestPartData>();
+
         services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestWorkCenterViewModel>();
         services.AddTransient<MTM_Waitlist.GenericRequest.Views.GenericRequestWorkCenterPage>();
         services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestCategoryViewModel>();

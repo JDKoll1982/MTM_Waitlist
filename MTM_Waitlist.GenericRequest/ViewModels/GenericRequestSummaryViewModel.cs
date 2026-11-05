@@ -89,14 +89,11 @@ public sealed partial class GenericRequestSummaryViewModel : GenericRequestStepV
         Add("GenericRequest_Summary_Item.Label", Draft.ItemName);
         Add("GenericRequest_Summary_Answer.Label", Draft.Answer);
         Add("GenericRequest_Summary_Part.Label", Draft.PartNumber);
-        Add("GenericRequest_Summary_Stage.Label", Draft.PartStage == GenericRequestPartStage.Wip
-            ? "GenericRequest_Part_Stage_Wip.Content".GetLocalized()
-            : "GenericRequest_Part_Stage_FinishedGood.Content".GetLocalized());
+        Add("GenericRequest_Summary_Stage.Label", StageKey(Draft.PartStage).GetLocalized());
         Add("GenericRequest_Summary_Sequence.Label", Draft.Sequence);
         Add("GenericRequest_Summary_Dunnage.Label", Join(Draft.DunnageType, Draft.DunnagePart));
         Add("GenericRequest_Summary_Scrap.Label", Draft.ScrapType);
         Add("GenericRequest_Summary_Die.Label", Draft.DieNumber);
-        Add("GenericRequest_Summary_NeededBy.Label", Draft.NeededBy?.ToLocalTime().ToString("g", CultureInfo.CurrentCulture) ?? string.Empty);
         Add("GenericRequest_Summary_Estimate.Label", Draft.EstimatedMinutes is { } minutes
             ? minutes.ToString("0", CultureInfo.CurrentCulture)
             : string.Empty);
@@ -113,6 +110,14 @@ public sealed partial class GenericRequestSummaryViewModel : GenericRequestStepV
             Rows.Add(new GenericRequestSummaryRow(labelKey.GetLocalized(), value));
         }
     }
+
+    /// <summary>The resource key naming a derived stage, so the review says which of the two types the plant has it is.</summary>
+    private static string StageKey(GenericRequestPartStage stage) => stage switch
+    {
+        GenericRequestPartStage.Wip => "GenericRequest_Part_Stage_Wip.Content",
+        GenericRequestPartStage.FinishedGood => "GenericRequest_Part_Stage_FinishedGood.Content",
+        _ => "GenericRequest_Part_Stage_Unknown.Content",
+    };
 
     private static string Join(string first, string second) =>
         string.IsNullOrWhiteSpace(first) ? second

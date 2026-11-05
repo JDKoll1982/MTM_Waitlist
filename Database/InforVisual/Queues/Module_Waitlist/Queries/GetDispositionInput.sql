@@ -27,9 +27,13 @@
 --   Goods. That figure is now a confirmation, never the discriminator: a job that is still running has no stock
 --   at a shipping location yet, so Finished Goods is read from the routing instead.
 --   NextOperationResourceId / HasRemainingOperation are the routing: the first open operation after the job's own.
---     RESOURCE_ID = 'OUTSIDE_SERVICE'  -> Outside Service (the plant's own tag print reads this)
+--     RESOURCE_ID = 'OUTSIDE_SERVICE'  -> the tag names "Outside Service" as the NEXT RESOURCE; the type stays WIP
 --     any other resource               -> WIP
 --     no operation after the job's own -> HasCustomerDemand decides (see below)
+--   Outside service is deliberately not a disposition of its own (IT, 2026-11-04): the plant's tag application
+--   prints the FG format for the last operation a work order still has to run and the WIP format for every other
+--   one, and the O/S label is still a WIP label carrying a "Next resource" line. This read is what offers the
+--   pickup-outside-service Item, not what types the part.
 --   HasCustomerDemand is the FG/WIP discriminator once nothing follows in the routing: a part the plant sells (it
 --   has customer-order lines) is the end product, and a part nothing buys exists only to feed another work order,
 --   which is what work in process means. Confirmed live 2026-10-23:

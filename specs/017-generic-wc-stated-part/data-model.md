@@ -25,20 +25,18 @@ sequence list and the quantity region each carry their own inline unavailable li
 | `NoSequence` | the part is known, no sequence attributable | refuse to advance, say so | FR-003 |
 | `SequenceChosen` | a sequence is chosen | its quantity is being read | FR-007 |
 | `OnHand` | the owner holds a figure, including zero | show the figure, name the system that answered | FR-013 |
-| `NotInventoried` | the sequence is outside service | show not-inventoried, no number | FR-010, FR-014 |
 | `QuantityUnavailable` | the owning system could not be reached for the quantity | carry attempt time + retry, do not advance | FR-017 |
 | `Cleared` | the part changed | chosen sequence and reading are gone, back at `Sequences` | FR-008 |
 
 **Transitions**: `Idle → Completing →` (`NoMatch` · `Searched` · `PartUnavailable`) ·
-`Searched → Sequences → SequenceChosen →` (`OnHand` · `NotInventoried` · `QuantityUnavailable`) ·
+`Searched → Sequences → SequenceChosen →` (`OnHand` · `QuantityUnavailable`) ·
 `Sequences → NoSequence` · any state after `Sequences` `→ Cleared → Sequences` when the part changes.
 
 **Invariants** — violations are defects:
 
 1. `NoMatch` and `PartUnavailable` never advance; neither caches, fabricates or estimates the part.
 2. `OnHand` shows `0` when the owner holds none, never a blank, a dash or an estimate (FR-013).
-3. `NotInventoried` never reads a system and never shows a number (FR-010).
-4. `QuantityUnavailable` is per value: the sequence list stays visible while the quantity region
+3. `QuantityUnavailable` is per value: the sequence list stays visible while the quantity region
    reports its own attempt time and retry (plan OD-1).
 
 ---
@@ -95,31 +93,39 @@ operation (FR-004, R4).
 
 ### GenericRequestQuantityReading (new)
 
-The answer the quantity read produces. Three outcomes must stay distinguishable — a figure (including
-`0`), not inventoried, and could not be read — so the reading is its own result type rather than a
-reused `GenericRequestStepResult<decimal>` (R8).
+The answer the quantity read produces. Two outcomes must stay distinguishable — a figure (including `0`) and
+could not be read — so the reading is its own result type rather than a reused
+`GenericRequestStepResult<decimal>` (R8).
 
 | Field | Type | Rule | Source |
 | --- | --- | --- | --- |
-| `Kind` | `OnHand` · `NotInventoried` | one of the two success kinds | FR-013, FR-014 |
-| `Figure` | decimal? | units on hand, `0` where none; null when `NotInventoried` | FR-013, FR-014 |
-| `AnsweredBy` | `WipFloor` · `InforVisual` | the system that supplied the figure; null when `NotInventoried` | FR-013, FR-016 |
+| `Kind` | `OnHand` · `Unavailable` | one of the two outcomes | FR-013 |
+| `Figure` | decimal? | units on hand, `0` where none; null when `Unavailable` | FR-013 |
+| `AnsweredBy` | `WipFloor` · `InforVisual` | the system that supplied the figure; null when `Unavailable` | FR-013, FR-016 |
 | `Presentation` | `Populated` · `Empty` · `Unavailable` | inherited from the step result; `Unavailable` carries the attempt time and yields no figure | FR-017 |
 
-Validation: `OnHand` requires a `Figure` and an `AnsweredBy`; `NotInventoried` requires neither.
+Validation: `OnHand` requires a `Figure` and an `AnsweredBy`; `Unavailable` requires neither.
 
 ### GenericRequestPartStage (reshaped meaning)
 
 Spec 015's `Wip` / `FinishedGood` pair is no longer chosen by the requester. It keeps its meaning but
-is derived from the chosen sequence's operation state, read again at quantity time because the state
-may have closed since the list was drawn (FR-009, R4, spec edge case).
+is derived from the chosen sequence, read again at quantity time because the operation may have closed
+since the list was drawn (FR-009, FR-014, R4, spec edge case).
 
-| Value | Operation state | Quantity owner | Source |
+Two types, decided the way the plant's own tagging decides them (IT, 2026-11-04): review the
+operations, and the **last operation the work order still has to run** produces the finished good; every
+other operation is work in progress. Who owns the quantity is a separate question, settled by the
+operation's state.
+
+| Value | Derived from | Quantity owner | Source |
 | --- | --- | --- | --- |
-| `Wip` | open — released (`R`), unreleased (`U`) or firmed (`F`) | read the WIP floor by part and sequence | FR-009, R5 |
-| `FinishedGood` | closed (`C`) | read Infor Visual by part number | FR-009, R5 |
-| `OutsideService` | `OUTSIDE_SERVICE` shop resource or non-empty vendor/service field | read nothing; `NotInventoried` | FR-010, R5 |
+| `Wip` | an operation with something later still to run | the state: open reads the floor by part and sequence, closed reads Infor Visual by part number | FR-009, FR-014, R5 |
+| `FinishedGood` | the last operation the work order still has to run | the state, as above | FR-009, FR-014, R5 |
 | `Unknown` | Visual records no state — including a floor-supplied sequence | floor first, Visual by part only when the floor holds none | FR-011 |
+
+There is no `OutsideService` stage: outside service is the name of a shop resource, and a WIP tag names it
+on its **next resource** line. A part at outside service is work in progress whose material sits at an
+outside-service floor location.
 
 Validation: `Unknown` names the system that answered; when the floor holds none and Visual has none,
 the figure is `0` and `AnsweredBy` is the system that returned the zeros (FR-011, FR-013).
@@ -138,28 +144,28 @@ Spec 015's answer bag gains the values this chunk produces, and loses the reques
 | `ChosenSequence` | string? | must be chosen before any quantity is read | FR-007 |
 | `SequenceSource` | string? | the joined, ordered source string recorded with the sequence | FR-016, plan OD-5 |
 | `PartStage` | `GenericRequestPartStage` | derived by the reading, not set by the requester | FR-009, R9 |
-| `QuantityReading` | `GenericRequestQuantityReading`? | the on-hand reading, or not-inventoried | FR-013, FR-014 |
+| `QuantityReading` | `GenericRequestQuantityReading`? | the on-hand reading | FR-013 |
 | `Quantity` | decimal? | the requested quantity, unchanged from spec 015 and distinct from on-hand | R8 |
 
 Validation: changing the part clears `ChosenSequence`, `SequenceSource`, `PartStage` and
 `QuantityReading` (FR-008). A field set by its step is never cleared by navigation (spec 015 US1 §4).
 
-### GenericRequestCardModel (reshaped)
+### Generic part card cells (reshaped)
 
-Spec 015's card gains the chosen sequence and the on-hand figure beside the requested `Quantity`.
+A generic request is drawn by the board's shared `WaitlistLineCardView`, so it gains no card model of its
+own. The part's facts are added as extra cells on the row's existing cell collection.
 
-| Field | Type | Rule | Source |
-| --- | --- | --- | --- |
-| `ChosenSequence` | string? | the sequence the request carries | FR-018 |
-| `OnHandQuantity` | decimal? | on-hand figure, `0` where none | FR-018 |
-| `QuantitySystem` | `WipFloor` · `InforVisual`? | the system that supplied the figure | FR-018 |
-| `NotInventoried` | bool | true when the part is outside service; then no number and no system | FR-019 |
+| Cell | Value | Source |
+| --- | --- | --- |
+| Part | the part number the request carries | FR-018 |
+| Sequence | the sequence the request carries | FR-018 |
+| On hand (`<system>`) | the figure from the stored answer, `0` where none | FR-018 |
 
-Validation (`GenericRequestCardRules`):
+Validation (`WaitlistViewViewModel.AddGenericPartCells`):
 - A reading of zero draws the cell, because zero is a fact.
 - An unread quantity draws no cell, and the gap is never filled with a placeholder (FR-020).
-- An outside-service request draws one not-inventoried cell instead of a number (FR-019).
-- A cell whose value is absent from the model is not returned (spec 015 FR-018).
+- There is no not-inventoried cell: outside service is a next resource, so an outside-service request
+  carries its figure like any other (FR-019).
 
 ---
 
@@ -173,9 +179,9 @@ column is unconfirmed and must yield no sequence when `N/A`, blank or non-numeri
 | --- | --- | --- | --- |
 | `GetPartMatches.sql` (extended) | Infor Visual | `PartNumber`, `Description` | `GenericRequestPartOption` |
 | `GetWipInventoryPartMatches.sql` (new) | WIP floor | `PartNumber`, `Description?` | `GenericRequestPartOption` |
-| `GetPartSequences.sql` (new) | Infor Visual | `Sequence`, `Description?`, `OperationStatus`, `OutsideService`, `SequenceSource` | `GenericRequestSequenceOption` |
+| `GetPartSequences.sql` (extended) | Infor Visual | `Sequence`, `Description?`, `OperationStatus`, `IsLastOperation`, `NextResource`, `SequenceSource`, `CancelledOnly` | `GenericRequestSequenceOption` |
 | `GetWipPartOperations.sql` (new) | WIP floor | `Sequence` (distinct, usable) | `GenericRequestSequenceOption` |
-| `GetPartSequenceState.sql` (new) | Infor Visual | `OperationStatus`, `OutsideService` | `GenericRequestPartStage` at read time |
+| `GetPartSequenceState.sql` (new) | Infor Visual | `OperationStatus`, `IsLastOperation`, `NextResource` | `GenericRequestPartStage` and the next-resource line at read time |
 | `GetWipOperationQuantity.sql` (new) | WIP floor | quantity by part and sequence, plus success | `GenericRequestQuantityReading` (open) |
 | `GetPartWarehouseQuantities.sql` (reused, live-only) | Infor Visual | `WarehouseQuantity` (part-wide sum) | `GenericRequestQuantityReading` (closed) |
 

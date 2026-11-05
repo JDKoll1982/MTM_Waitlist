@@ -32,10 +32,23 @@ public enum GenericRequestPresentation
 }
 
 /// <summary>
-/// Whether a part is a work in progress or a finished good. The part step is the only place that sets it.
+/// Whether a sequence is the finished good or work in progress, or is in a state Visual does not record. The part
+/// step derives it from the chosen sequence's operation state and never asks the requester for it.
 /// </summary>
+/// <remarks>
+/// There are only two types, and the plant's own rule decides between them: the last operation a work order still
+/// has to run produces the finished good, and every other operation is work in progress (IT, 2026-11-04). There is
+/// deliberately no outside-service member: subcontracted work is a resource a WIP tag names on its next-resource
+/// line, not a type, so a part at outside service is work in progress like any other.
+/// </remarks>
 public enum GenericRequestPartStage
 {
+    /// <summary>An operation the order still has to run, and not its last: the part is work in process.</summary>
     Wip,
+
+    /// <summary>The last operation the work order still has to run, which produces the finished good.</summary>
     FinishedGood,
+
+    /// <summary>Visual records no operation state for the sequence, so the floor is read first.</summary>
+    Unknown,
 }

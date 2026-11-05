@@ -23,7 +23,15 @@ public sealed record VisualWorkOrderSearchRow
     /// </summary>
     public string CustomerName { get; init; } = string.Empty;
 
-    /// <summary>The work centre the first operation runs in.</summary>
+    /// <summary>
+    /// The work centre the job runs in: the resource of its first operation that is a real work centre.
+    /// </summary>
+    /// <remarks>
+    /// A group resource (<c>500-GRP</c>, <c>090-GRP</c>, …) is a routing grouping rather than a place a job is set
+    /// up, so it is skipped: the value here is the first operation whose resource is typed <c>W</c> and does not end
+    /// in <c>-GRP</c>. A work order with no such operation is not a production job and is not returned at all
+    /// (operator requirement, 2026-11-04).
+    /// </remarks>
     public string WorkCenter { get; init; } = string.Empty;
 
     /// <summary>The Visual status code: <c>R</c> released, <c>U</c> unreleased, <c>F</c> firmed.</summary>

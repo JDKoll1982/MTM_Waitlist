@@ -9,7 +9,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Waitlist.Models"
     xmlns:cardControls="using:MTM_Waitlist.Module_Waitlist.Controls"
-    xmlns:genericControls="using:MTM_Waitlist.GenericRequest.Controls"
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
     xmlns:converters="using:MTM_Waitlist.Module_Settings.Converters"
     mc:Ignorable="d">
@@ -17,7 +16,12 @@
     <Page.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
 
-        <!--  One card template for every Item (FR-006): there is nothing left to choose between.  -->
+        <!--
+          One card template for every row, generic requests included (FR-006). A generic request carries the same
+          Item as a work-order request, so the card's title pair and its cells come from the same Item declaration
+          and the same cell machinery; drawing it with a second, differently shaped control was the only thing
+          making it look like a different application (owner decision, 2026-11-04).
+        -->
         <DataTemplate x:Key="WaitlistLineCardTemplate" x:DataType="models:SampleOrder">
             <cardControls:WaitlistLineCardView
                 AutomationProperties.Name="{x:Bind Title}"
@@ -26,23 +30,6 @@
                 Order="{Binding}"
                 StatusConditionChosen="OnCardStatusConditionChosen" />
         </DataTemplate>
-
-        <!--
-          A generic request draws its own card, because the work-order card would state a work order, die, coil,
-          flatstock and component that a generic request does not have (016-generic-wc-request-foundation, FR-022).
-          Both kinds sit in one list and the selector picks per row on the row's own stored flag.
-        -->
-        <DataTemplate x:Key="GenericRequestCardTemplate" x:DataType="models:SampleOrder">
-            <genericControls:GenericRequestCard
-                AutomationProperties.Name="{x:Bind Title}"
-                Model="{x:Bind GenericCard}"
-                Tapped="OnGenericCardTapped" />
-        </DataTemplate>
-
-        <cardControls:GenericRequestCardTemplateSelector
-            x:Key="WaitlistCardTemplateSelector"
-            GenericTemplate="{StaticResource GenericRequestCardTemplate}"
-            WorkOrderTemplate="{StaticResource WaitlistLineCardTemplate}" />
     </Page.Resources>
 
     <!-- The page body sits in a capped, centred column, so a wide monitor gives margins rather than a card that
@@ -113,7 +100,7 @@
             x:Name="WaitlistListView"
             Grid.Row="1"
             Padding="6,12,6,92"
-            ItemTemplateSelector="{StaticResource WaitlistCardTemplateSelector}"
+            ItemTemplate="{StaticResource WaitlistLineCardTemplate}"
             ItemsSource="{x:Bind ViewModel.Source, Mode=OneWay}"
             SelectionMode="Single">
 

@@ -34,14 +34,14 @@ The requester picks the sequence the part is actually standing at, and the app a
 
 **Why this priority**: the quantity is the fact the handler acts on, and attributing it to the wrong system produces a confident wrong number — the exact failure this repository's truthfulness rules exist to prevent.
 
-**Independent Test**: choose an open sequence and a closed sequence for the same part and confirm the two quantities came from different systems; choose an outside-service sequence and confirm the step says not inventoried; choose a sequence Visual has no state for and confirm the floor is tried first.
+**Independent Test**: choose an open sequence and a closed sequence for the same part and confirm the two quantities came from different systems; choose an operation that hands the part to outside service and confirm it reads as work in progress with a quantity; choose a sequence Visual has no state for and confirm the floor is tried first.
 
 **Acceptance Scenarios**:
 
 1. **Given** no sequence chosen yet, **When** the step is shown, **Then** no quantity is read and the flow does not advance.
 2. **Given** a chosen sequence whose operation is open — released, unreleased or firmed — **When** the quantity is read, **Then** it comes from the WIP floor by part and sequence.
 3. **Given** a chosen sequence whose operation is closed, **When** the quantity is read, **Then** it comes from Infor Visual by part number.
-4. **Given** a chosen sequence routed to outside service, **When** the step is shown, **Then** it says the part is not inventoried while it is outside, shows no number rather than `0`, and the requester may still raise the request.
+4. **Given** a chosen sequence whose operation hands the part to outside service, **When** the step is shown, **Then** it is work in progress with a quantity read like any other, and the resource the part goes to next is named.
 5. **Given** a chosen sequence for which Visual records no operation state — including one the floor supplied — **When** the quantity is read, **Then** the floor is read first for that part and sequence, Visual by part number only when the floor holds none, and the step names the system that answered.
 6. **Given** a quantity read, **When** the step is shown, **Then** it states the units on hand — `0` where none — with the system that answered, and never a blank, a dash or an estimate.
 7. **Given** nothing on hand, **When** the requester continues, **Then** they may still raise the request having seen a warning, and the request carries the part, the sequence, the quantity shown and the system that answered.
@@ -51,16 +51,16 @@ The requester picks the sequence the part is actually standing at, and the app a
 
 ### User Story 3 - The part answer reaches the card (Priority: P2)
 
-A handler reads a generic part request's card and sees the part, the sequence, and the quantity with the system that supplied it — or, for outside-service work, that the part is not inventoried. Nothing is blank and nothing is guessed.
+A handler reads a generic part request's card and sees the part, the sequence, and the quantity with the system that supplied it. Nothing is blank and nothing is guessed.
 
 **Why this priority**: the card is the surface the handler trusts; a quantity that never reaches it leaves the request unusable in practice.
 
-**Independent Test**: raise a generic part request, view its card and detail, and confirm the part, sequence, quantity and source all appear, and that an outside-service request says not inventoried.
+**Independent Test**: raise a generic part request, view its card and detail, and confirm the part, sequence, quantity and source all appear, including for an operation that hands the part to outside service.
 
 **Acceptance Scenarios**:
 
 1. **Given** a generic part request, **When** its card is drawn, **Then** the part number, the chosen sequence and the quantity on hand with its source appear.
-2. **Given** an outside-service request, **When** its card is drawn, **Then** it says the part is not inventoried and shows no number.
+2. **Given** a request whose sequence hands the part to outside service, **When** its card is drawn, **Then** the quantity appears with its source, because the part is work in progress rather than inventoried nowhere.
 3. **Given** a generic part request whose quantity could not be read at raise time, **When** its card is drawn, **Then** the quantity cell is absent and the gap is not filled with a placeholder.
 
 ---
@@ -99,30 +99,30 @@ A handler reads a generic part request's card and sees the part, the sequence, a
 **Attributing the quantity**
 
 - **FR-009**: The chosen sequence's operation state in Infor Visual MUST decide the owner: open (released, unreleased or firmed) reads the WIP floor by part and sequence; closed reads Infor Visual by part number.
-- **FR-010**: A sequence routed to outside service MUST NOT have a quantity read, because outside-service material is inventoried nowhere.
+- **FR-010**: Outside service MUST NOT be treated as a type or a reason to skip the read. It is the name of the resource an operation hands the part to next, printed on that operation's WIP tag (see the 2026-11-04 correction below); a sequence that hands the part to outside service is work in progress, and its quantity is read like any other.
 - **FR-011**: Where Infor Visual records no operation state for the chosen sequence — including one the floor supplied — the floor MUST be read first for that part and sequence, and Infor Visual only when the floor holds none.
 - **FR-012**: The requester MUST NOT be asked which system to use, and MUST NOT be asked to type a quantity.
 
 **Reporting the quantity**
 
 - **FR-013**: The quantity MUST be shown as units on hand — `0` when the owner holds none — with the system that answered; it MUST NOT be blank on that ground, a dash, or an estimate.
-- **FR-014**: An outside-service sequence MUST be reported as not inventoried rather than as `0`.
+- **FR-014**: The type shown for a sequence MUST be the plant's own: the last operation the work order still has to run produces the **finished good**, every other operation is **work in progress**. There are exactly two types.
 - **FR-015**: Nothing on hand MUST warn and MUST NOT block the request.
-- **FR-016**: The request MUST record the part, the chosen sequence, which source supplied the sequence, the quantity shown and the system that supplied it — or that the part is not inventoried.
+- **FR-016**: The request MUST record the part, the chosen sequence, which source supplied the sequence, the quantity shown and the system that supplied it.
 - **FR-017**: Where a system cannot be reached, the step MUST report it unavailable with the time of the attempt and a retry, MUST accept no unverified part or sequence, and MUST NOT substitute a cached, mirror, sample or fabricated sequence list or quantity.
 
 **Reaching the card**
 
 - **FR-018**: A generic part request's card MUST show the part, the chosen sequence and the quantity with its source.
-- **FR-019**: An outside-service request's card MUST say the part is not inventoried and show no number.
+- **FR-019**: A generic part request's card MUST show the part, the chosen sequence and the quantity with its source, and MUST NOT claim the part is inventoried nowhere.
 - **FR-020**: A quantity that could not be read MUST leave the cell absent rather than filled with a placeholder.
 - **FR-021**: This chunk MUST delete the `Temp` preview source behind the part and sequence screens, MUST leave the build green afterwards, and MUST NOT rename such an artefact into a permanent-looking name in place of removing it.
 
 ### Key Entities
 
-- **Stated part**: the part number the requester named, the sequence they chose, which source supplied that sequence, which system supplied the quantity, and the quantity on hand — or the fact that the part is not inventoried.
-- **Attributable sequence**: a sequence number the part can stand at, with its description when one exists and the source or sources that supplied it.
-- **Quantity reading**: a number of units on hand together with the system that returned it, or an explicit not-inventoried outcome.
+- **Stated part**: the part number the requester named, the sequence they chose, which source supplied that sequence, which system supplied the quantity, and the quantity on hand.
+- **Attributable sequence**: a sequence number the part can stand at, with its description when one exists, the source or sources that supplied it, whether it is the last operation, and the resource the part goes to next.
+- **Quantity reading**: a number of units on hand together with the system that returned it.
 
 ## Success Criteria
 
@@ -131,7 +131,7 @@ A handler reads a generic part request's card and sees the part, the sequence, a
 - **SC-001**: Zero generic requests are accepted carrying a part number or sequence that neither Infor Visual nor the WIP floor can attribute.
 - **SC-002**: A part number returns every attributable sequence in one search with none omitted, and no cancelled-only sequence is offered.
 - **SC-003**: The quantity shown always comes from the system the chosen sequence's state assigns, verified by choosing an open and a closed sequence for the same part.
-- **SC-004**: Zero part cards show a blank, dash or estimated quantity; nothing on hand reads as `0`, and outside service reads as not inventoried.
+- **SC-004**: Zero part cards show a blank, dash or estimated quantity; nothing on hand reads as `0`, and no card claims a part is inventoried nowhere.
 - **SC-005**: A part with nothing on hand is still raisable, with the warning visible afterwards, in 100% of cases.
 
 ## Scope & Dependencies
@@ -146,7 +146,7 @@ A handler reads a generic part request's card and sees the part, the sequence, a
 
 - **A1**: "Every attributable sequence" is the distinct union of Visual's sequences and the floor's held sequences, because Visual holds sequences per routing rather than per part.
 - **A2**: A sequence's stage is taken from the operation states the plant already relies on for disposition: released, unreleased and firmed are open; closed is a finished good; cancelled is excluded.
-- **A3**: WIP is inventoried only in the WIP application, by part number and sequence into a location; Infor Visual holds what is left that is neither work in progress nor outside service; outside-service material is inventoried nowhere.
+- **A3**: WIP is inventoried only in the WIP application, by part number and sequence into a location; Infor Visual holds what is left that is not work in progress. Outside service is a resource a WIP tag names on its next-resource line, not a third kind of stock, so outside-service material is floor stock like any other.
 - **A4**: A by-sequence floor read is new work: the existing floor reads take only a part number and neither filters nor reports the operation.
 
 ## Design note (2026-11-03)

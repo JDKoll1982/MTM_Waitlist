@@ -1,5 +1,7 @@
 using System.Globalization;
 
+using MTM_Waitlist.Module_Core.Helpers;
+
 namespace MTM_Waitlist.GenericRequest.Models;
 
 /// <summary>A work center the request can belong to.</summary>
@@ -61,13 +63,95 @@ public enum GenericRequestAnswerKind
     Choice,
 }
 
-/// <summary>A part the item's request can name.</summary>
-public sealed record GenericRequestPartOption(string PartNumber, string Description, string QuantityOnHand);
+/// <summary>Which system supplied a part row, or a sequence, to the part step.</summary>
+/// <remarks>
+/// The three values are also the fixed order the sources are listed in, so a sequence two systems agree on
+/// always reads the same way (plan OD-5).
+/// </remarks>
+public enum SequenceSource
+{
+    /// <summary>The part is the work order's own part in Infor Visual.</summary>
+    VisualOwnPart,
 
-/// <summary>A sequence a part can be requested at.</summary>
-public sealed record GenericRequestSequenceOption(string Sequence, string Description);
+    /// <summary>The part appears as a requirement at an operation in Infor Visual.</summary>
+    VisualRequirement,
 
-/// <summary>One dunnage type, with the part that stands in for it.</summary>
+    /// <summary>The WIP floor holds the part at that operation.</summary>
+    WipFloor,
+}
+
+/// <summary>The name a person reads for each source, in the one place that decides it.</summary>
+public static class SequenceSourceNames
+{
+    /// <summary>The source's name, localized.</summary>
+    public static string Of(SequenceSource source) => source switch
+    {
+        SequenceSource.VisualOwnPart => "GenericRequest_Part_Source_VisualOwnPart.Text".GetLocalized(),
+        SequenceSource.VisualRequirement => "GenericRequest_Part_Source_VisualRequirement.Text".GetLocalized(),
+        SequenceSource.WipFloor => "GenericRequest_Part_Source_WipFloor.Text".GetLocalized(),
+        _ => throw new ArgumentOutOfRangeException(nameof(source), source, "That source has no name."),
+    };
+}
+
+/// <summary>
+/// A part the requester can state, with the system that supplied it.
+/// </summary>
+/// <param name="PartNumber">The accepted number.</param>
+/// <param name="Description">Its description, or empty when the supplying system holds none.</param>
+/// <param name="Source">The system that supplied this row.</param>
+/// <remarks>
+/// The quantity on hand is deliberately absent: a quantity belongs to a chosen sequence, not to a part
+/// (FR-007).
+/// </remarks>
+public sealed record GenericRequestPartOption(string PartNumber, string Description, SequenceSource Source)
+{
+    /// <summary>The supplying system's name, ready to draw.</summary>
+    public string SourceDisplay => SequenceSourceNames.Of(Source);
+
+    /// <summary>
+    /// The part number, because a control that fills a text field from an item falls back to this when nothing
+    /// declares a display member. A text box showing a record's own shape is a display bug, not information.
+    /// </summary>
+    public override string ToString() => PartNumber;
+}
+
+/// <summary>
+/// A sequence one or more systems attribute to the accepted part.
+/// </summary>
+/// <param name="Sequence">The sequence number, always a usable one.</param>
+/// <param name="Description">What stands at that sequence, or empty when nothing is recorded.</param>
+/// <param name="Sources">Every system that supplied this number, once each, in the fixed source order.</param>
+/// <param name="OperationStatus">The Infor Visual operation status code, or empty when it records none.</param>
+/// <param name="IsLastOperation">
+/// True when nothing later on the same work order is still to be run, which is the plant's own test for the
+/// finished good: its tag prints the FG format for the last operation and the WIP format for every other one.
+/// </param>
+/// <param name="NextResource">
+/// The resource the part goes to after this operation, which is the line a WIP tag prints. "Outside Service" is
+/// one of those names and not a type of its own, because subcontracted work is routed to the OUTSIDE_SERVICE shop
+/// resource. Empty for the last operation, which has nowhere further to go.
+/// </param>
+/// <param name="HasCancelledOnlyOperations">True when every operation behind the number is cancelled.</param>
+public sealed record GenericRequestSequenceOption(
+    string Sequence,
+    string Description,
+    IReadOnlyList<SequenceSource> Sources,
+    string OperationStatus,
+    bool IsLastOperation,
+    string NextResource,
+    bool HasCancelledOnlyOperations)
+{
+    /// <summary>Every source that supplied this number, joined the way it is drawn (FR-004).</summary>
+    public string SourcesDisplay => string.Join(", ", Sources.Select(SequenceSourceNames.Of));
+
+    /// <summary>
+    /// Every source that supplied this number, joined by its stable name, which is what the request records
+    /// (FR-016). The recorded value does not change with the machine's language; only the drawn one does.
+    /// </summary>
+    public string SourceCodes => string.Join(", ", Sources.Select(source => source.ToString()));
+}
+
+/// <summary>A dunnage type, with the part that stands in for it.</summary>
 public sealed record GenericRequestDunnageOption(string TypeName, string PartNumber);
 
 /// <summary>A scrap type, with how many luggers are free to use.</summary>

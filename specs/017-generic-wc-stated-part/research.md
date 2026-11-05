@@ -52,9 +52,9 @@ over the same table, with the two destined to drift apart; and a shape-based rea
 ## R4 — Two Visual scripts: one for the list, one for the state at choice time
 
 **Decision**: `GetPartSequences.sql` answers every attributable Visual sequence for a part with its
-number, a description, its operation status code, its outside-service signal and which relation named
-it. `GetPartSequenceState.sql` re-reads the status and outside-service signal for one part and one
-sequence, and is what the quantity read consults.
+number, a description, its operation status code, whether it is the last operation the work order still
+has to run, the resource the part goes to next, and which relation named it. `GetPartSequenceState.sql`
+re-reads those same facts for one part and one sequence, and is what the quantity read consults.
 
 **Rationale**: FR-004 wants the union of Visual's own-part sequences and Visual's sequences where the
 part is a requirement at an operation; one script with a `SequenceSource` column answers both in one
@@ -63,6 +63,56 @@ cancelled-only sequence is never offered. But the spec's edge case says a sequen
 close between the list and the reading: the owner must be decided from the state *at read time*, so the
 quantity path cannot reuse the list's status.
 
+**Corrected 2026-11-04 — one operation speaks for a sequence, and it is the open order's.** Both
+scripts originally rolled status and outside-service up across *every* work order the part has ever
+had, taking a max. A part keeps years of orders and its routing changes between them, so one closed
+subcontracted order branded a live in-house sequence as outside service. Part `21-28841-006` runs
+sequence 90 at in-house press `096-03` on the order open today (`21-28841-006` lot 0, status `U`) and ran
+it at `OUTSIDE_SERVICE` on orders closed years ago (`WO-036612`, `WO-036964`, `WO-037245`, …); the WIP
+floor holds **573 units at operation 90**, all `ItemType = WIP`. The app therefore told the requester
+that a part it holds 573 of was not inventoried. Both scripts now take the facts from the operation on
+the part's **open** work order (status `R`, `U` or `F`), and only when the part has no open order at all
+from the most recently created closed one. Verified live: sequence 90 answers `R` / outside-service `0`
+and sequence 95 answers `C` / `1`.
+
+**A sequence number is not a part type.** Measured across `OPERATION`: of 157 distinct sequence numbers,
+49 are *always* routed to `OUTSIDE_SERVICE`, 53 *never*, and **55 are mixed**. Sequence 900 is
+effectively the subcontracted step (21,222 of 21,272 rows); sequence 20 is the busiest mixed one
+(2,470 of 15,959). `A22-77724-100` routes sequence 20 to `OUTSIDE_SERVICE` on its live order while
+`21-28841-006` routes its own sequence 20 in-house. No lookup table from number to part type is
+defensible; the routing on the part's own order is the only answer.
+
+**Where outside-service stock actually is.** `inv_inventory` holds 3,185 units across 21 parts at
+`O/S - VITS`, every row `ItemType = WIP` with a numeric operation, and `md_part_ids` classifies all 21
+as `WIP`. The one `OUTSIDE SERVICE` part in the master (`MCML00360`) is a migrated placeholder with no
+description and no operations. So outside service is a **location state of WIP stock that has a
+quantity**, not the absence of inventory that assumption A3 describes. The row names `WipFloor` as a
+source whenever the floor itself names the sequence — never invented when the floor holds nothing.
+
+**Superseded the same day by the plant's own tagging rule.** IT explained how the tags are produced
+(2026-11-04): *the application reviews the operations; if this is the last operation available of the
+work order it prints the FG format, otherwise the WIP format; the Outside Service label is still the WIP
+label; every WIP tag prints a "Next resource" line, and the resource id for O/S is "Outside Service".*
+So there are exactly two types, decided by position in the routing rather than by a routing target, and
+outside service is a **next-resource name**, never a type. Consequences, all now implemented:
+
+- Both scripts return `IsLastOperation` (nothing later on the work order is still to be run, i.e. no
+  `OPERATION` row with a greater `SEQUENCE_NO` whose status is not `C`) and `NextResource` (the resource
+  the following operation runs at) **in place of** the outside-service column.
+- `GenericRequestPartStage` loses `OutsideService`; the stage is `FinishedGood` when `IsLastOperation`,
+  otherwise `Wip`. Who owns the quantity stays FR-009's question, answered by the status.
+- The "nothing is read for outside service" rule is withdrawn, because it was derived from the same
+  wrong premise and contradicts the floor's own stock. An outside-service sequence is read like any
+  other, and its figure comes from wherever its status says.
+- The step shows the operation's next resource, so a requester who picks a subcontracted step can see
+  that the part goes to Outside Service next — the same line the printed tag carries.
+
+Verified live: `21-28841-006` sequence 90 answers `R` / `IsLastOperation = 0` / `Outside Service`,
+sequence 900 answers `R` / `IsLastOperation = 1` / no next resource, sequence 95 answers `C` / last;
+`A22-77724-100` sequence 5 answers `R` / `Outside Service`, sequence 20 answers `R` / last;
+`21-28841-Blank` sequence 19 answers `U` / last.
+
+
 **Alternatives considered**: one script doing both, refused because it would decide the owner from a
 value read at a different moment than the reading itself; and reading the state inside the quantity
 scripts, refused because the same decision then lives in two places for two systems.
@@ -70,10 +120,11 @@ scripts, refused because the same decision then lives in two places for two syst
 ## R5 — The operation status vocabulary is reused, not restated
 
 **Decision**: open and closed are decided by `RequestDispositionStatusCodes.OpenStatusCodes`
-(`R`, `U`, `F`) and `ClosedStatusCodes` (`C`); outside service is the `OUTSIDE_SERVICE` shop resource
-or a non-empty vendor/service field on the operation; `X` (cancelled) stays in neither set.
+(`R`, `U`, `F`) and `ClosedStatusCodes` (`C`); `X` (cancelled) stays in neither set. Nothing here decides
+the part's *type* any more — that comes from FR-014's last-operation rule — and outside service is not a
+state of its own, so the `OUTSIDE_SERVICE` resource id is not consulted by this chunk.
 
-**Rationale**: spec assumption A2 says the stage is taken from the states the plant already relies on
+**Rationale**: spec assumption A2 says the owner is taken from the states the plant already relies on
 for disposition, and that class is the repository's single editable source for those codes, confirmed
 against live data. Restating the letters in the generic flow would create a second place to edit.
 
@@ -114,28 +165,27 @@ name 016 has not chosen).
 ## R8 — A dedicated quantity reading type, and the card's quantity is not it
 
 **Decision**: add `GenericRequestQuantityReading`, a `GenericRequestStepResult` carrying a kind
-(on hand or not inventoried), a decimal figure, and the system that answered. The card model gains its
-own on-hand fields beside the requested quantity it already carries.
+(on hand or could not be read), a decimal figure, and the system that answered.
 
-**Rationale**: three answers must stay distinguishable — a figure (including `0`), not inventoried, and
-could not be read. Two of them are successes and one is a failure, so `Populated`/`Empty` cannot express
-them; a kind alongside the presentation can. And the card already has a `Quantity` (what the requester
-asked for), so on-hand must be a separate field or the two numbers would overwrite each other.
+**Rationale**: two answers must stay distinguishable — a figure (including `0`) and could not be read —
+and a kind alongside the presentation expresses that without overloading `Empty`. The card already has a
+`Quantity` (what the requester asked for), so on-hand is recorded as its own value or the two numbers
+would overwrite each other.
 
-**Alternatives considered**: reusing `GenericRequestStepResult<decimal>` (rejected: an `Empty` result
-would have to mean "not inventoried", which reads as a failed lookup and contradicts
-`Empty`'s documented meaning), and folding the reading into the sequence option (rejected by FR-007,
+**Alternatives considered**: reusing `GenericRequestStepResult<decimal>` (rejected: a figure of `0` and a
+failed read would look alike), and folding the reading into the sequence option (rejected by FR-007,
 which requires the sequence to be chosen before any quantity is read).
 
 ## R9 — The stage becomes derived, not answered
 
 **Decision**: remove the WIP / finished-good selector from the part screen and derive the stage from
-the chosen sequence's operation state. `GenericRequestPartStage` keeps its meaning but is set by the
-reading, not by the requester.
+the chosen sequence's position in its routing. `GenericRequestPartStage` keeps its meaning but is set by
+the reading, not by the requester.
 
 **Rationale**: FR-012 forbids asking the requester which system to use; choosing WIP or finished good
 is choosing the owning system by another name. FR-009 assigns the owner from the operation state, and
-US2 scenario 4 shows outside service as a third outcome the two-way choice cannot express.
+FR-014 requires the type to follow the plant's own tagging rule, which the requester cannot be expected
+to apply.
 
 **Alternatives considered**: keeping the selector and cross-checking it against the state (rejected:
 two sources for one fact, and the screen would have to explain a disagreement the requester cannot
@@ -154,18 +204,21 @@ filters a list that must already be loaded.
 **Alternatives considered**: keeping `TextBox` plus `ListView` and loading every part up front (the
 Visual read has no "all parts" script, and the floor's is an unfiltered whole-inventory read).
 
-## R11 — Where the floor's operation number comes from is unresolved
+## R11 — The floor's operation number: `inv_inventory.Operation`, confirmed 2026-11-03
 
-**Decision**: treat the floor's operation column as **unconfirmed** and block the two floor sequence
-scripts on confirming it. Write the scripts so a blank, `N/A` or non-numeric operation yields no
-sequence.
+**Decision**: the two floor sequence scripts read `inv_inventory.Operation`, and treat a blank, `N/A`
+or non-numeric value as no sequence. **Resolved**: the column name was read from the live schema
+rather than guessed.
 
 **Rationale**: `RequestDispositionStatusCodes.cs` states the floor's inventory is keyed by part,
-location and operation, and this spec's edge case quotes `N/A` appearing in live data. But every floor
-script in the repository reads `inv_inventory (PartID, Location, Quantity, ItemType)` and
-`md_locations (Location, Building)`, and no schema export for the floor exists under `docs/database`
-(that directory holds the Infor Visual export only). The column name, therefore, is not a fact this
-repository can supply, and guessing it would put a wrong column into a checked-in script.
+location and operation, and this spec's edge case quotes `N/A` appearing in live data. No schema
+export for the floor exists under `docs/database` (that directory holds the Infor Visual export only),
+so the column was read from the store itself: `INFORMATION_SCHEMA.COLUMNS` on
+`mtm_wip_application_winforms` answers `inv_inventory (ID, PartID, Location, Operation, Quantity,
+ItemType, ReceiveDate, LastUpdated, User, BatchNumber, Notes, ColorCode, WorkOrder)` with
+`Operation varchar(100)`, and the live values are the plant's operation numbers (`20`, `90`, `19`,
+`30`, …) alongside 32 rows carrying the literal `N/A`. `md_locations` carries no operation column, so
+the floor's key is `(PartID, Location, Operation)` exactly as the disposition research states.
 
 **Alternatives considered**: deriving a stage from the location name (rejected: the spec requires
 distinct usable sequence numbers, and a location is not a sequence); and omitting the floor from the

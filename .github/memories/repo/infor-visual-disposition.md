@@ -318,3 +318,44 @@ parts carry no `FGT` prefix.
 answers), carried on `RequestJobPartAvailability.PartType` via `WithPartType`. The three columns travel on read shape
 5 (`ProductCode`, `CommodityCode`, `PartDescription`), so the mirror table, both procedures, the catalog and the
 population script moved with them. Read shape 5 now has thirteen columns against 8,895 parts of experience.
+
+## FG vs WIP tag rule — IT's own account (2026-11-04)
+
+Asked directly how the tag application decides between a finished-good tag and a WIP tag, IT answered:
+
+> Within that application it reviews the ops. If it's the last op available of the work order it concludes that
+> and points to a specific print format (FG tag). Otherwise it uses WIP tag file. The Outside Service label is
+> still the WIP label… every WIP tag puts "Next resource" on the tag… resource ID for O/S is "Outside Service."
+
+That settles three things the repo had been guessing at, and they supersede the earlier "outside service is a
+type / outside-service material is inventoried nowhere" notes above:
+
+1. **There are exactly two part types**, and position in the routing decides them: the **last operation the work
+   order still has to run** is the finished good; **every other operation** is work in progress. A closed `C`
+   operation is history and is not "available", so do not read the type off the status letter.
+2. **"Outside Service" is a next-resource name, not a type.** It is the `SHOP_RESOURCE` that subcontracted work is
+   routed to, and it appears on the tag as the WIP tag's next-resource line — so a part at outside service is a
+   **WIP item**, and its stock is floor stock sitting at an outside-service location.
+3. **The quantity owner is unchanged** and is a separate question from the type: open (`R`/`U`/`F`) reads the WIP
+   floor by part + sequence, closed (`C`) reads Infor Visual by part number.
+
+"Last operation" test that matches the live data — no later operation on the *same* work order that is still to
+run: `NOT EXISTS (… OPERATION later WHERE same WO keys AND later.SEQUENCE_NO > this.SEQUENCE_NO AND later.STATUS <> 'C')`.
+The next resource is the `SHOP_RESOURCE.DESCRIPTION` of the first later operation whose status is not `C`.
+
+Live check (2026-11-04) for `21-28841-006`, the part this replaced a wrong "not inventoried" answer for:
+
+| Seq | Resource (description) | Status | Last? | Next resource | Tag |
+| --- | --- | --- | --- | --- | --- |
+| 90 | Lincoln Robotic Welder XHS-CM | `R` | 0 | Outside Service | WIP |
+| 900 | Outside Service | `R` | 1 | — | FG |
+| 95 | Outside Service | `C` | 1 | — | FG |
+
+And `A22-77724-100`: seq 5 `R`, next resource Outside Service (WIP); seq 20 `R`, last (FG).
+`21-28841-Blank`: seq 19 `U`, last (FG).
+
+**Where this now lives:** `Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartSequences.sql` and
+`GetPartSequenceState.sql` return `IsLastOperation` + `NextResource` in place of the old outside-service column;
+`GenericRequestPartStage` (`MTM_Waitlist.GenericRequest/Contracts/GenericRequestStep.cs`) has only
+`Wip`/`FinishedGood`/`Unknown`. Do not reintroduce an outside-service stage or withhold a quantity because the next
+resource is Outside Service.

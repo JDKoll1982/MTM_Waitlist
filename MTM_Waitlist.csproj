@@ -128,7 +128,7 @@
     <ProjectReference Include="MTM_Waitlist.Waitlist.Controls\MTM_Waitlist.Waitlist.Controls.csproj" />
     <ProjectReference Include="MTM_Waitlist.Mock\MTM_Waitlist.Mock.csproj" />
     <ProjectReference Include="MTM_Waitlist.GenericRequest\MTM_Waitlist.GenericRequest.csproj" />
-    <ProjectReference Include="MTM_Waitlist.GenericRequest.Controls\MTM_Waitlist.GenericRequest.Controls.csproj" />
+    <ProjectReference Include="MTM_Waitlist.GenericRequest.Data\MTM_Waitlist.GenericRequest.Data.csproj" />
   </ItemGroup>
 
   <!-- Add this near the bottom of MTM_Waitlist.csproj to block recursive compiling of sibling projects -->
@@ -147,6 +147,7 @@
     <Compile Remove="MTM_Waitlist.Mock.Service\**\*.cs" />
     <Compile Remove="MTM_Waitlist.GenericRequest\**\*.cs" />
     <Compile Remove="MTM_Waitlist.GenericRequest.Controls\**\*.cs" />
+    <Compile Remove="MTM_Waitlist.GenericRequest.Data\**\*.cs" />
 
     <!--
       The generic request screens are their own project, so their XAML, PRI resources and content are theirs

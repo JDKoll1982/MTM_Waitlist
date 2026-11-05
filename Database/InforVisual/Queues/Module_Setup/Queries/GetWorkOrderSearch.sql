@@ -24,6 +24,17 @@
 -- outside it would look selectable and then fail on the next screen, which is why the domain is
 -- narrowed here rather than in the dialog.
 --
+-- Production work centres only (operator requirement, 2026-11-04)
+-- ---------------------------------------------------------------
+-- The Work center column names where the job actually runs, so it is the first operation whose
+-- resource is a real work centre: SHOP_RESOURCE.TYPE = 'W' and an id that does not end in `-GRP`.
+-- A group resource (`500-GRP`, `090-GRP`, …) is a routing grouping, not a place a job is set up, and
+-- the operator does not want those jobs listed under it — `500-GRP` alone carries 4,729 open orders.
+-- `V880-GRP` is typed `W` in Visual but is a group by name, which is why the id is checked as well as
+-- the type. A work order with no operation at a production resource has nowhere to be made, so it is
+-- not offered at all: the production lookup is a CROSS APPLY rather than an OUTER APPLY, and a job
+-- whose first operation is a group is still offered at the first real work centre after it.
+--
 -- Customer
 -- --------
 -- Infor Visual carries no customer on WORK_ORDER. The customer of a customer-driven order is the
@@ -84,17 +95,25 @@ OUTER APPLY
         a.WANT_DATE DESC,
         a.CUST_NAME
 ) AS cust
-OUTER APPLY
+CROSS APPLY
 (
     SELECT TOP (1)
         o.RESOURCE_ID
     FROM OPERATION AS o
+    INNER JOIN SHOP_RESOURCE AS res
+        ON res.ID = o.RESOURCE_ID
     WHERE
         o.WORKORDER_TYPE = wo.TYPE
         AND o.WORKORDER_BASE_ID = wo.BASE_ID
         AND o.WORKORDER_LOT_ID = wo.LOT_ID
         AND o.WORKORDER_SPLIT_ID = wo.SPLIT_ID
         AND o.WORKORDER_SUB_ID = wo.SUB_ID
+        -- A real work centre: typed `W`, and not a `-GRP` grouping resource dressed as one. The comparisons are
+        -- written without LTRIM/RTRIM on purpose: SQL Server ignores the padding columns carry, and wrapping the
+        -- columns stops the index being used — measured 2026-11-04, trimming both sides took this search from about
+        -- 60 ms to 3.7 s.
+        AND res.TYPE = 'W'
+        AND o.RESOURCE_ID NOT LIKE '%-GRP'
     ORDER BY o.SEQUENCE_NO
 ) AS op
 WHERE

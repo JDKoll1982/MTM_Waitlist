@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
-    <RootNamespace>MTM_Waitlist.GenericRequest.Controls</RootNamespace>
+    <RootNamespace>MTM_Waitlist.GenericRequest.Data</RootNamespace>
     <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
     <UseWinUI>true</UseWinUI>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -13,11 +13,13 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.4.0" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MTM_Waitlist.Core\MTM_Waitlist.Core.csproj" />
+    <ProjectReference Include="..\MTM_Waitlist.GenericRequest\MTM_Waitlist.GenericRequest.csproj" />
+    <ProjectReference Include="..\MTM_Waitlist.Mock\MTM_Waitlist.Mock.csproj" />
+    <ProjectReference Include="..\MTM_Waitlist.Settings\MTM_Waitlist.Settings.csproj" />
   </ItemGroup>
 
   <ItemGroup>

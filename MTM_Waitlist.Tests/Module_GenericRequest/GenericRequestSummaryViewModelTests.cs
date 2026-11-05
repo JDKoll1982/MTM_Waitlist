@@ -22,7 +22,6 @@ public sealed class GenericRequestSummaryViewModelTests
         ItemCode = "other",
         Answer = "Bring the spare riser table",
         EstimatedMinutes = allottedMinutes,
-        NeededBy = new DateTimeOffset(2026, 11, 4, 7, 0, 0, TimeSpan.Zero),
         Description = "The one in bay 4 is cracked.",
     };
 
@@ -50,7 +49,6 @@ public sealed class GenericRequestSummaryViewModelTests
         target.ItemCode = source.ItemCode;
         target.Answer = source.Answer;
         target.EstimatedMinutes = source.EstimatedMinutes;
-        target.NeededBy = source.NeededBy;
         target.Description = source.Description;
     }
 

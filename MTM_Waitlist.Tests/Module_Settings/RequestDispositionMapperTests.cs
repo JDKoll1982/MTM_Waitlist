@@ -88,7 +88,7 @@ public sealed class RequestDispositionMapperTests
     }
 
     [TestMethod]
-    public void Service_RequestDispositionMapperTests_BuildDispositionInput_InforOutsideOperationClassifiesOutsideService()
+    public void Service_RequestDispositionMapperTests_BuildDispositionInput_InforOutsideOperationIsWorkInProcessWithThePickupSignal()
     {
         var input = RequestDispositionMapper.BuildDispositionInput(
             new InforDispositionRow
@@ -100,7 +100,8 @@ public sealed class RequestDispositionMapperTests
             },
             floorSnapshot: null);
 
-        Assert.AreEqual(RequestDisposition.OutsideService, RequestDispositionClassifier.Classify(input));
+        Assert.AreEqual(RequestDisposition.WorkInProcess, RequestDispositionClassifier.Classify(input));
+        Assert.IsTrue(input.IsOutsideServiceWork);
     }
 
     [TestMethod]
@@ -156,7 +157,8 @@ public sealed class RequestDispositionMapperTests
 
         Assert.AreEqual("OUTSIDE_SERVICE", input.NextOperationResourceId);
         Assert.AreEqual(true, input.HasRemainingOperation);
-        Assert.AreEqual(RequestDisposition.OutsideService, RequestDispositionClassifier.Classify(input));
+        Assert.AreEqual(RequestDisposition.WorkInProcess, RequestDispositionClassifier.Classify(input));
+        Assert.IsTrue(input.IsOutsideServiceWork);
     }
 
     [TestMethod]

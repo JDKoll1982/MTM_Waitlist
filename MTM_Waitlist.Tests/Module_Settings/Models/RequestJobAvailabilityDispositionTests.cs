@@ -16,28 +16,34 @@ public sealed class RequestJobAvailabilityDispositionTests
     [TestMethod]
     public void Service_RequestJobAvailabilityDispositionTests_WithDisposition_EachStateRecordsItsOwnGate()
     {
-        var cases = new (RequestDisposition Disposition, string ItemId)[]
+        var cases = new (RequestDisposition Disposition, bool OutsideServiceWork, string ItemId)[]
         {
-            (RequestDisposition.FinishedGoods, "pickup-fg"),
-            (RequestDisposition.Ncm, "pickup-ncm"),
-            (RequestDisposition.WorkInProcess, "pickup-wip"),
-            (RequestDisposition.OutsideService, "pickup-outside-service"),
+            (RequestDisposition.FinishedGoods, false, "pickup-fg"),
+            (RequestDisposition.Ncm, false, "pickup-ncm"),
+            (RequestDisposition.WorkInProcess, false, "pickup-wip"),
+
+            // Subcontracted work keeps its own Item even though the part reads as work in process, because outside
+            // service is a next resource a WIP tag names rather than a type (IT, 2026-11-04).
+            (RequestDisposition.WorkInProcess, true, "pickup-outside-service"),
+            (RequestDisposition.Ncm, true, "pickup-outside-service"),
         };
 
-        foreach (var (disposition, itemId) in cases)
+        string[] allItemIds = ["pickup-fg", "pickup-ncm", "pickup-wip", "pickup-outside-service"];
+
+        foreach (var (disposition, outsideServiceWork, itemId) in cases)
         {
-            var availability = RequestJobPartAvailability.None.WithDisposition(disposition);
+            var availability = RequestJobPartAvailability.None.WithDisposition(disposition, outsideServiceWork);
 
             Assert.AreEqual(disposition, availability.Disposition);
             Assert.IsTrue(
                 GateFor(itemId, availability),
-                $"'{itemId}' records no gate for a job the derivation reads as {disposition}.");
+                $"'{itemId}' records no gate for a job the derivation reads as {disposition} (subcontracted: {outsideServiceWork}).");
 
-            foreach (var (_, otherId) in cases.Where(candidate => !string.Equals(candidate.ItemId, itemId, StringComparison.Ordinal)))
+            foreach (var otherId in allItemIds.Where(candidate => !string.Equals(candidate, itemId, StringComparison.Ordinal)))
             {
                 Assert.IsFalse(
                     GateFor(otherId, availability),
-                    $"'{otherId}' records a gate for a job the derivation reads as {disposition}.");
+                    $"'{otherId}' records a gate for a job the derivation reads as {disposition} (subcontracted: {outsideServiceWork}).");
             }
         }
     }

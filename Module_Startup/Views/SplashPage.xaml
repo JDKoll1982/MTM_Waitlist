@@ -1,147 +1,180 @@
-﻿<Page
+<Page
     x:Class="MTM_Waitlist.Module_Startup.Views.SplashPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:models="using:MTM_Waitlist.Module_Startup.Models"
     mc:Ignorable="d">
 
     <!--
         The launch surface, and the stage the one window shows while a launch runs
         (`contracts/launch-concurrency-contract.md` §3; FR-002, FR-004, FR-005, FR-031, FR-039).
 
-        A splash screen reads top to bottom: the mark, then how far along the launch is, then every line whose
-        work is still in flight, then anything the person may act on.
+        A splash screen reads top to bottom, and it wears the same clothes as the plant's other application
+        (MTM Receiving): the mark, the application's own name and version over the company name, then a single
+        status line naming the step under way, the progress bar, the percentage it has reached, and the step count
+        beneath it. The block is centred on the window rather than anchored to its top, because the surface is
+        watched for a handful of seconds while a launch runs and a short stack pinned to the top of an otherwise
+        empty window reads as a window that is still loading rather than as a launch under way.
 
-        Several operations can now run at the same time, so the surface renders each of them as its own row
-        rather than one "current step": an operation announces itself before its work begins, so its row is open
-        until the row that ends it arrives. That is what makes a stalled concurrent launch attributable to a
-        named operation instead of an anonymous hang (FR-031).
+        The status line names the step, never a step number, so a stalled launch is attributable to a named
+        operation instead of an anonymous hang (FR-031). Owner decision 2026-11-04: the progress bar carries how
+        far the launch has got, in place of the list of concurrent rows this surface used to draw.
 
-        The whole stack is centred on the window rather than anchored to its top: the surface is watched for a
-        handful of seconds while a launch runs, and a short stack pinned to the top of an otherwise empty window
-        reads as a window that is still loading rather than as a launch under way.
-
-        The error strip is its own row rather than something laid over the rows above it, so a stated cause never
-        covers what a person is reading (FR-005).
+        The error strip is its own row beneath the progress block rather than something laid over it, so a stated
+        cause never covers what a person is reading (FR-005).
     -->
     <Grid
-        Padding="32,28"
-        RowSpacing="16"
-        VerticalAlignment="Center">
+        Padding="32"
+        Background="{ThemeResource LayerFillColorDefaultBrush}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
+            <!--  The centred block, which takes whatever the button bar leaves  -->
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
+            <!--  The button bar, which keeps its height however tall the block is  -->
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Image
-            x:Name="Logo"
-            AutomationProperties.AutomationId="SplashPage_Logo"
-            AutomationProperties.Name="{x:Bind ViewModel.TitleText}"
-            Grid.Row="0"
-            HorizontalAlignment="Center"
-            MaxHeight="132"
-            Source="ms-appx:///Assets/Brand/mtm-logo-transparent.png"
-            Stretch="Uniform" />
+        <Grid Grid.Row="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="1" Spacing="6">
-            <ProgressBar
-                x:Name="ProgressBar"
-                AutomationProperties.AutomationId="SplashPage_ProgressBar"
-                IsIndeterminate="{x:Bind ViewModel.IsWaitingOnSomethingRemote, Mode=OneWay}"
-                Maximum="{x:Bind ViewModel.ProgressMaximum, Mode=OneWay}"
-                Value="{x:Bind ViewModel.ProgressValue, Mode=OneWay}" />
-            <TextBlock
-                x:Name="ProgressTextBlock"
-                AutomationProperties.AutomationId="SplashPage_Progress"
-                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                Style="{ThemeResource CaptionTextBlockStyle}"
-                Text="{x:Bind ViewModel.ProgressText, Mode=OneWay}" />
-        </StackPanel>
+            <StackPanel
+                Grid.Row="1"
+                HorizontalAlignment="Center"
+                Spacing="12">
+                <Image
+                    x:Name="Logo"
+                    Height="120"
+                    MaxWidth="360"
+                    HorizontalAlignment="Center"
+                    AutomationProperties.AutomationId="SplashPage_Logo"
+                    AutomationProperties.Name="{x:Bind ViewModel.TitleText}"
+                    Source="ms-appx:///Assets/Brand/mtm-logo-transparent.png"
+                    Stretch="Uniform" />
 
-        <!--
-            Every line whose work has not ended, rendered at once. An open row carries its own moving indicator, so
-            a launch with three operations in flight shows three rows and the person can see which one is still
-            going (FR-031).
-        -->
-        <ListView
-            x:Name="LinesList"
-            AutomationProperties.AutomationId="SplashPage_Lines"
-            Grid.Row="2"
-            IsItemClickEnabled="False"
-            ItemsSource="{x:Bind Surface.Lines}"
-            MaxHeight="240"
-            SelectionMode="None">
-            <ListView.ItemTemplate>
-                <DataTemplate x:DataType="models:SplashFeedLine">
-                    <Grid ColumnSpacing="8">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock
-                            Grid.Column="0"
-                            VerticalAlignment="Center"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Style="{ThemeResource CaptionTextBlockStyle}"
-                            Text="{x:Bind TimeText}" />
-                        <ProgressRing
-                            Grid.Column="1"
-                            Width="14"
-                            Height="14"
-                            VerticalAlignment="Center"
-                            IsActive="{x:Bind IsOpen}"
-                            Visibility="{x:Bind IsOpen}" />
-                        <TextBlock
-                            Grid.Column="2"
-                            VerticalAlignment="Center"
-                            Text="{x:Bind Text}"
-                            TextWrapping="Wrap" />
-                    </Grid>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-
-        <Border
-            x:Name="ErrorStrip"
-            AutomationProperties.AutomationId="SplashPage_ErrorStrip"
-            Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}"
-            CornerRadius="4"
-            Grid.Row="3"
-            Padding="12,8"
-            Visibility="Collapsed">
-            <StackPanel Spacing="4">
-                <!--
-                    The picture refresh is best effort, so it does not stop the launch — but it is stated here and
-                    the window waits until the person has read it, because the surface that replaces this one says
-                    nothing about pictures and a machine drawing stale copies would never find out. The strip reads
-                    headline, then why in the failing line beneath it, then what that means for the pictures this
-                    computer holds.
-                -->
                 <TextBlock
-                    x:Name="PictureCopyHoldTextBlock"
-                    AutomationProperties.AutomationId="SplashPage_PictureCopyHoldText"
+                    x:Name="TitleTextBlock"
+                    AutomationProperties.AutomationId="SplashPage_Title"
+                    HorizontalAlignment="Center"
                     FontWeight="SemiBold"
-                    Text="{x:Bind ViewModel.PictureCopyHoldText}"
-                    TextWrapping="Wrap"
-                    Visibility="{x:Bind ViewModel.IsHoldingForPictureCopies, Mode=OneWay}" />
+                    Style="{StaticResource TitleTextBlockStyle}"
+                    Text="{x:Bind ViewModel.TitleText}" />
+
                 <TextBlock
-                    x:Name="ErrorTextBlock"
-                    AutomationProperties.AutomationId="SplashPage_ErrorText"
-                    TextWrapping="Wrap" />
+                    x:Name="VersionTextBlock"
+                    AutomationProperties.AutomationId="SplashPage_Version"
+                    HorizontalAlignment="Center"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="{x:Bind ViewModel.VersionText}" />
+
                 <TextBlock
-                    x:Name="PictureCopyHoldDetailTextBlock"
-                    AutomationProperties.AutomationId="SplashPage_PictureCopyHoldDetail"
-                    Text="{x:Bind ViewModel.PictureCopyHoldDetailText}"
-                    TextWrapping="Wrap"
-                    Visibility="{x:Bind ViewModel.IsHoldingForPictureCopies, Mode=OneWay}" />
+                    x:Name="CompanyTextBlock"
+                    AutomationProperties.AutomationId="SplashPage_Company"
+                    HorizontalAlignment="Center"
+                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                    Style="{StaticResource BodyTextBlockStyle}"
+                    Text="{x:Bind ViewModel.CompanyText}" />
             </StackPanel>
-        </Border>
+
+            <StackPanel
+                Grid.Row="2"
+                Margin="0,40,0,0"
+                Spacing="12">
+                <TextBlock
+                    x:Name="StatusTextBlock"
+                    AutomationProperties.AutomationId="SplashPage_Status"
+                    HorizontalAlignment="Center"
+                    Text="{x:Bind ViewModel.CurrentStep, Mode=OneWay}"
+                    TextAlignment="Center"
+                    TextWrapping="Wrap"
+                    Style="{StaticResource BodyTextBlockStyle}" />
+
+                <ProgressBar
+                    x:Name="ProgressBar"
+                    AutomationProperties.AutomationId="SplashPage_ProgressBar"
+                    Height="4"
+                    HorizontalAlignment="Stretch"
+                    IsIndeterminate="{x:Bind ViewModel.IsWaitingOnSomethingRemote, Mode=OneWay}"
+                    Maximum="{x:Bind ViewModel.ProgressMaximum, Mode=OneWay}"
+                    Minimum="0"
+                    Value="{x:Bind ViewModel.ProgressValue, Mode=OneWay}" />
+
+                <TextBlock
+                    x:Name="ProgressPercentTextBlock"
+                    AutomationProperties.AutomationId="SplashPage_Percent"
+                    HorizontalAlignment="Center"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="{x:Bind ViewModel.ProgressPercentText, Mode=OneWay}" />
+
+                <TextBlock
+                    x:Name="ProgressTextBlock"
+                    AutomationProperties.AutomationId="SplashPage_Progress"
+                    HorizontalAlignment="Center"
+                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="{x:Bind ViewModel.ProgressText, Mode=OneWay}"
+                    TextAlignment="Center"
+                    TextWrapping="Wrap" />
+            </StackPanel>
+
+            <Border
+                x:Name="ErrorStrip"
+                AutomationProperties.AutomationId="SplashPage_ErrorStrip"
+                Background="{ThemeResource SystemFillColorCriticalBackgroundBrush}"
+                CornerRadius="4"
+                Grid.Row="3"
+                Padding="12,8"
+                Visibility="Collapsed">
+                <StackPanel Spacing="4">
+                    <!--
+                        The picture refresh is best effort, so it does not stop the launch — but it is stated here and
+                        the window waits until the person has read it, because the surface that replaces this one says
+                        nothing about pictures and a machine drawing stale copies would never find out. The strip reads
+                        headline, then why in the failing line beneath it, then what that means for the pictures this
+                        computer holds.
+                    -->
+                    <TextBlock
+                        x:Name="PictureCopyHoldTextBlock"
+                        AutomationProperties.AutomationId="SplashPage_PictureCopyHoldText"
+                        FontWeight="SemiBold"
+                        Text="{x:Bind ViewModel.PictureCopyHoldText}"
+                        TextWrapping="Wrap"
+                        Visibility="{x:Bind ViewModel.IsHoldingForPictureCopies, Mode=OneWay}" />
+                    <TextBlock
+                        x:Name="ErrorTextBlock"
+                        AutomationProperties.AutomationId="SplashPage_ErrorText"
+                        TextWrapping="Wrap" />
+                    <TextBlock
+                        x:Name="PictureCopyHoldDetailTextBlock"
+                        AutomationProperties.AutomationId="SplashPage_PictureCopyHoldDetail"
+                        Text="{x:Bind ViewModel.PictureCopyHoldDetailText}"
+                        TextWrapping="Wrap"
+                        Visibility="{x:Bind ViewModel.IsHoldingForPictureCopies, Mode=OneWay}" />
+                </StackPanel>
+            </Border>
+
+            <!--
+                The footer. The plant's other application carries its own here, and this surface says the same thing in
+                the same place so the two windows read as one product family.
+            -->
+            <TextBlock
+                x:Name="CopyrightTextBlock"
+                AutomationProperties.AutomationId="SplashPage_Copyright"
+                Grid.Row="4"
+                Margin="0,28,0,0"
+                HorizontalAlignment="Center"
+                Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Text="{x:Bind ViewModel.CopyrightText}" />
+        </Grid>
 
         <!--
             The button bar. The one window is the only window, so this is a second way out beside the window's own
@@ -149,7 +182,7 @@
             being held, the person is also offered the way on.
         -->
         <StackPanel
-            Grid.Row="4"
+            Grid.Row="1"
             HorizontalAlignment="Right"
             Orientation="Horizontal"
             Spacing="8">

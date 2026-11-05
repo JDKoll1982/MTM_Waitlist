@@ -19,7 +19,6 @@ public static class RequestDispositionLabels
     public static string? Of(RequestDisposition disposition) => disposition switch
     {
         RequestDisposition.FinishedGoods => "Finished Goods",
-        RequestDisposition.OutsideService => "Outside Service",
         RequestDisposition.WorkInProcess => "WIP",
         RequestDisposition.Ncm => "NCM",
         _ => null,

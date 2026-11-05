@@ -18,30 +18,14 @@
         TitleKey="{x:Bind ViewModel.TitleKey}">
         <controls:GenericRequestStepFrame.Body>
             <StackPanel Spacing="16">
-                <Grid ColumnSpacing="16">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <DatePicker
-                        x:Uid="GenericRequest_Details_NeededBy_Date"
-                        AutomationProperties.Name="{x:Bind ViewModel.Title}"
-                        SelectedDate="{x:Bind ViewModel.NeededByDate, Mode=TwoWay}" />
-                    <TimePicker
-                        Grid.Column="1"
-                        x:Uid="GenericRequest_Details_NeededBy_Time"
-                        AutomationProperties.Name="{x:Bind ViewModel.Title}"
-                        SelectedTime="{x:Bind ViewModel.NeededByTime, Mode=TwoWay}" />
-                    <NumberBox
-                        Grid.Column="2"
-                        MinWidth="140"
-                        x:Uid="GenericRequest_Details_Quantity"
-                        AutomationProperties.Name="{x:Bind ViewModel.Title}"
-                        Minimum="1"
-                        SpinButtonPlacementMode="Compact"
-                        Value="{x:Bind ViewModel.Quantity, Mode=TwoWay}" />
-                </Grid>
+                <NumberBox
+                    MinWidth="160"
+                    x:Uid="GenericRequest_Details_Quantity"
+                    AutomationProperties.Name="{x:Bind ViewModel.Title}"
+                    HorizontalAlignment="Left"
+                    Minimum="1"
+                    SpinButtonPlacementMode="Compact"
+                    Value="{x:Bind ViewModel.Quantity, Mode=TwoWay}" />
                 <TextBox
                     Height="160"
                     x:Uid="GenericRequest_Details_Description"

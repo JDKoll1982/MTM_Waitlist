@@ -94,7 +94,7 @@ Four catalogued Items (finished goods, NCM, work in progress, and outside servic
 
 1. **Given** a requesting job with finished-goods work, **When** the picker is shown, **Then** the finished-goods pickup is offered.
 2. **Given** one of the four Items, **When** its card is drawn, **Then** it shows Part Type and # of Skids and no location cell.
-3. **Given** a stock whose work is subcontracted, **When** Part Type is derived, **Then** it reads `Outside Service`.
+3. **Given** a job whose next operation is the subcontracted one, **When** Part Type is derived, **Then** it reads `WIP`, because outside service is the WIP tag's next resource rather than a type of its own — and the outside-service pickup is still the one offered.
 4. **Given** a part sitting at an NCM location, **When** Part Type is derived, **Then** it reads the location-derived NCM state rather than the part's recorded item type.
 5. **Given** a requesting job with none of that work, **When** the picker is shown, **Then** the matching Item is not offered.
 
@@ -255,8 +255,18 @@ Five answers join the New Request workflow, and each appears on the matching car
 - FR-088: The declared job-sourced labels MUST resolve from the requesting job, including the ones the job already carries and the resolver currently ignores: the coil number, the correct coil, the correct flatstock and the scrap type.
 - FR-089: Anything the job cannot carry MUST be read from a source that holds it, and MUST NOT be invented and MUST NOT be left blank.
 - FR-090: `Total Qty In House` MUST be the full sum for the part, not a per-location figure, read from the source that holds it for the item's type. [NEEDS CLARIFICATION: the finished-goods rule the item-type derivation leans on currently counts stock at any location rather than stock at a finished-goods location, so a part with stock anywhere and nothing open reads as Finished Goods; whether that rule is corrected within this work or tracked independently is not settled.]
-- FR-091: Part Type on the four returning pickups MUST be the derived item type, `Finished Goods`, `Outside Service` or `WIP`, and for NCM it MUST be the location-derived state.
-- FR-092: The item type MUST be derived with the priority Outside Service, then Finished Goods, then WIP: Outside Service from the subcontracted operation, WIP from an open step earlier than the routing's last, and Finished Goods only when the part is actually at a finished-goods location. [NEEDS CLARIFICATION: where NCM sits in this order is not stated anywhere. A part that is both at an NCM location and has outside-service work is the case with no answer. This work places NCM after Outside Service and before Finished Goods/WIP — NCM is a statement about where the stock is, and the two production types state what work remains — but that placement is an assumption recorded here rather than a settled rule.]
+- FR-091: Part Type on the four returning pickups MUST be the derived item type, `Finished Goods` or `WIP`, and for NCM it MUST be the location-derived state.
+- FR-092: The item type MUST be derived from the job's routing, the way the plant's own tag print does it: the **last operation the work order still has to run** is Finished Goods and **every other operation** is WIP, with NCM decided first because it is a statement about where the stock is. [Corrected 2026-11-04 — see the note below; the original wording had Outside Service outranking everything.]
+
+> **Corrected 2026-11-04 — Outside Service is not an item type.** IT explained how the tag application decides:
+> it reviews the ops, and if this is the last op available of the work order it prints the FG format, otherwise
+> the WIP format; the Outside Service label is still the WIP label, every WIP tag prints a "Next resource" line,
+> and the resource id for O/S is "Outside Service". So that subcontracted operation is a **WIP tag naming a
+> resource**, which means FR-091's item type has two production values, not three, and the `pickup-outside-service`
+> Item is offered from the routing signal rather than from a fourth type. Owner decision 2026-11-04: the pickup
+> survives unchanged. Implemented in `RequestDispositionClassifier` (no outside-service arm),
+> `RequestJobClassification.IsOutsideServiceWork` and `RequestJobPartAvailability.WithDisposition(…,
+> isOutsideServiceWork)`.
 - FR-093: NCM MUST never be treated as a production type and MUST be derived from the location the stock occupies, never from the part's recorded item type.
 - FR-094: The four returning Items MUST be offered when the requesting job has the work they name, and MUST no longer be hidden by a fixed list.
 - FR-095: `Description` on the dunnage Items is declared in configuration but can never hold a value, since no dunnage record carries one. [NEEDS CLARIFICATION: whether that declaration is removed or left in place with the cell hidden is not settled, so neither is encoded here.]

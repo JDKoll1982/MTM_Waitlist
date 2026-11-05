@@ -43,9 +43,25 @@ public sealed class GenericRequestDraft
 
     public string PartNumber { get; set; } = string.Empty;
 
-    public GenericRequestPartStage PartStage { get; set; } = GenericRequestPartStage.Wip;
+    /// <summary>
+    /// The stage the chosen sequence's operation state gave, derived by the quantity read and never chosen by the
+    /// requester (FR-009, FR-012).
+    /// </summary>
+    public GenericRequestPartStage PartStage { get; set; } = GenericRequestPartStage.Unknown;
 
     public string Sequence { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Which systems supplied the chosen sequence, joined in the order the list showed them. This is what the
+    /// request records (FR-016).
+    /// </summary>
+    public string SequenceSource { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The quantity reading for the chosen sequence: a figure with the system that answered, or not inventoried.
+    /// Null until a sequence is chosen, and cleared whenever the part changes (FR-008).
+    /// </summary>
+    public GenericRequestQuantityReading? QuantityReading { get; set; }
 
     public string DunnageType { get; set; } = string.Empty;
 
@@ -56,8 +72,6 @@ public sealed class GenericRequestDraft
     public string DieNumber { get; set; } = string.Empty;
 
     public double Quantity { get; set; } = 1;
-
-    public DateTimeOffset? NeededBy { get; set; }
 
     public string Description { get; set; } = string.Empty;
 

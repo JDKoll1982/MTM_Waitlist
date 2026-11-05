@@ -45,12 +45,6 @@ public sealed class SampleOrder : INotifyPropertyChanged
     /// </summary>
     public bool IsGeneric { get; set; }
 
-    /// <summary>
-    /// The value the requester stated, for a generic request: the answer the item's own configuration asked for
-    /// (FR-007, FR-023). Empty for a work-order request, which states nothing of its own.
-    /// </summary>
-    public string GenericAnswer { get; set; } = string.Empty;
-
     /// <summary>The requester's optional free-text description, or null when they wrote none (FR-016).</summary>
     public string? Description { get; set; }
 
@@ -60,30 +54,6 @@ public sealed class SampleOrder : INotifyPropertyChanged
     /// scale: a generic request states nothing rather than invent a figure (FR-013, FR-014).
     /// </summary>
     public int? ConfiguredAllottedMinutes { get; set; }
-
-    /// <summary>
-    /// The generic card this row draws, or null for a work-order request.
-    /// </summary>
-    /// <remarks>
-    /// Built from the row rather than from a second read, for the same reason the work-order card's cells are: the
-    /// board has already read everything the card states. The category and item wording are the row's own two lines,
-    /// so a generic card and a work-order card name the same request the same way (FR-024).
-    /// </remarks>
-    public MTM_Waitlist.GenericRequest.Controls.Models.GenericRequestCardModel? GenericCard => IsGeneric
-        ? new MTM_Waitlist.GenericRequest.Controls.Models.GenericRequestCardModel
-        {
-            RequestNumber = RequestId?.ToString() ?? string.Empty,
-            Variant = MTM_Waitlist.GenericRequest.Controls.Models.GenericRequestCardVariant.Answer,
-            WorkCenter = RequestedPressName,
-            CategoryText = Title,
-            ItemName = Subtitle,
-            StatedValue = GenericAnswer,
-            Description = Description ?? string.Empty,
-            NeededBy = TargetTimeUtc,
-            RaisedBy = RequestedByName,
-            RaisedAt = RequestedUtc,
-        }
-        : null;
 
     /// <summary>
     /// Card <b>Line 1</b> — the Item's umbrella phrase: the Category's own word, or the Item's own phrase where
@@ -627,7 +597,7 @@ public sealed class SampleOrder : INotifyPropertyChanged
     /// details would be a row nobody could act on. It is a gate all the same, so the card draws the button by the
     /// same rule as every other button (FR-062).
     /// </remarks>
-    public bool CanOpenDetails => true;
+    public bool CanOpenDetails => !IsGeneric;
 
     /// <summary>
     /// Whether the row offers Print. It never does: printing ships disabled, says it is not available yet when

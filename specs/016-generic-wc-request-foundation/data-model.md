@@ -68,6 +68,7 @@ Validation rules:
 | --- | --- |
 | A field is set by the step that owns it and is never cleared by navigation | US1 of spec 015 |
 | `NeededBy` is required before the request can be raised | FR-015 |
+| **Superseded 2026-11-04:** the details step no longer asks for a needed-by. Every request is due at the end of the allotment its request type configures, resolved by `UrgencyDeadlineService` from the item and the request's creation time, exactly as the work-order flow does. `GenericRequestDraft.NeededBy` is gone; the generic submit leaves `TargetTimeUtc` unset so the store derives it. Owner decision: a hand-picked date let one item wait different lengths of time depending on who raised it. | spec 017, live use |
 | `Description` is optional | FR-016 |
 | `EstimatedMinutes` stays absent rather than defaulting when the item configures no time | FR-014 |
 | `Answer` is required when the chosen item declares a prompt | FR-007, FR-021 |

@@ -1243,7 +1243,6 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             // (FR-008, FR-022, FR-023). A work-order request carries the flag false and none of the rest, so the
             // board's own card is chosen for it and nothing on it changes.
             IsGeneric = request.IsGeneric,
-            GenericAnswer = request.InputValue ?? string.Empty,
             Description = request.Description,
             ConfiguredAllottedMinutes = declaration?.AllottedMinutes,
 
@@ -1266,8 +1265,61 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         // The card's own cells are the fields the Item declares, resolved here where the request and the
         // requesting job are both in hand (FR-025, FR-026, §7).
         AddDeclaredCells(item, request, jobAvailability, declaration);
+
+        // A generic request's part answer is stored under its own names rather than under a declared field, so the
+        // declaration above cannot resolve it. Its three facts are added here, which is what puts a generic card's
+        // cells in the same place and the same shape as a work-order card's (owner decision, 2026-11-04).
+        AddGenericPartCells(item, request);
+
         return item;
     }
+
+    /// <summary>
+    /// The cells a generic part request adds to its card: the part, the sequence it was requested at, and the units
+    /// on hand with the system that answered (FR-018, FR-019).
+    /// </summary>
+    /// <remarks>
+    /// A deadline is deliberately not a cell. The card's ring already carries it for every row, generic or not, and
+    /// a fourth cell only on generic cards is exactly the difference this change exists to remove.
+    /// </remarks>
+    private static void AddGenericPartCells(SampleOrder item, WaitlistRequest request)
+    {
+        if (!request.IsGeneric
+            || MTM_Waitlist.Module_Core.Models.GenericRequestPartAnswer.TryRead(request.Answers) is not { HasPart: true } part)
+        {
+            return;
+        }
+
+        AddCell(item, "Waitlist_Card_Part.Label", part.PartNumber);
+        AddCell(item, "Waitlist_Card_Sequence.Label", part.Sequence);
+
+        if (part.QuantityOnHand is { } figure)
+        {
+            var label = part.AnsweredBy.Length == 0
+                ? "Waitlist_Card_OnHand.Label".GetLocalized()
+                : string.Format(
+                    CultureInfo.CurrentCulture,
+                    "Waitlist_Card_OnHandBy.Label".GetLocalized(),
+                    SystemName(part.AnsweredBy));
+
+            AddCell(item, label, figure.ToString("0.##", CultureInfo.CurrentCulture));
+        }
+    }
+
+    /// <summary>The on-hand cell's label, already resolved, added only when it has a value to carry.</summary>
+    private static void AddCell(SampleOrder item, string label, string value)
+    {
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            item.Cells.Add(new WaitlistLineCardCell { Label = label, Value = value });
+        }
+    }
+
+    /// <summary>The name a person reads for the system that answered a quantity.</summary>
+    private static string SystemName(string answeredBy) =>
+        string.Equals(answeredBy, "WipFloor", StringComparison.OrdinalIgnoreCase)
+            ? "Waitlist_Card_System_WipFloor.Text".GetLocalized()
+            : "Waitlist_Card_System_InforVisual.Text".GetLocalized();
 
     /// <summary>
     /// Reads every Item's declaration once for a load, so a list of N rows costs one read rather than N, and

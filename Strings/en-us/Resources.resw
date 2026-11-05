@@ -289,14 +289,32 @@
   <data name="Setup_Action_AddSelectedToPair.Content" xml:space="preserve">
     <value>Add Selected to Pair</value>
   </data>
-  <data name="Setup_Review_Tab_JobContext.Header" xml:space="preserve">
-    <value>Job Context</value>
+  <data name="Setup_Review_Section_JobContext.Text" xml:space="preserve">
+    <value>Job context</value>
   </data>
-  <data name="Setup_Review_Tab_SubordinateParts.Header" xml:space="preserve">
-    <value>Subordinate Parts</value>
+  <data name="Setup_Review_Section_JobContext_Description.Text" xml:space="preserve">
+    <value>The setup is saved against this work order, part and operation.</value>
   </data>
-  <data name="Setup_Review_Tab_DunnageAssignments.Header" xml:space="preserve">
-    <value>Dunnage &amp; Scrap Assignments</value>
+  <data name="Setup_Review_Section_SubordinateParts_Description.Text" xml:space="preserve">
+    <value>The components, packaging and tooling this operation consumes.</value>
+  </data>
+  <data name="Setup_Review_Section_SubordinateParts_Count.Text" xml:space="preserve">
+    <value>{0} listed</value>
+  </data>
+  <data name="Setup_Review_Section_SubordinateParts_Empty.Text" xml:space="preserve">
+    <value>No subordinate parts are recorded for this operation.</value>
+  </data>
+  <data name="Setup_Review_Section_Dunnage_Description.Text" xml:space="preserve">
+    <value>What this setup is paired with, and the scrap type saved beside it.</value>
+  </data>
+  <data name="Setup_Review_Section_Dunnage_Empty.Text" xml:space="preserve">
+    <value>No dunnage is assigned to this operation.</value>
+  </data>
+  <data name="Setup_Review_Scrap_Label.Text" xml:space="preserve">
+    <value>Scrap type</value>
+  </data>
+  <data name="Setup_Review_Scrap_None.Text" xml:space="preserve">
+    <value>Not recorded</value>
   </data>
   <data name="Setup_DunnagePair_PageLabel.Text" xml:space="preserve">
     <value>Dunnage &amp; Scrap</value>
@@ -1228,6 +1246,24 @@
   <data name="Waitlist_Card_DieShop.LocatedInDieShop" xml:space="preserve">
     <value>Located In Die Shop</value>
   </data>
+  <data name="Waitlist_Card_Part.Label" xml:space="preserve">
+    <value>Part</value>
+  </data>
+  <data name="Waitlist_Card_Sequence.Label" xml:space="preserve">
+    <value>Sequence</value>
+  </data>
+  <data name="Waitlist_Card_OnHand.Label" xml:space="preserve">
+    <value>On hand</value>
+  </data>
+  <data name="Waitlist_Card_OnHandBy.Label" xml:space="preserve">
+    <value>On hand ({0})</value>
+  </data>
+  <data name="Waitlist_Card_System_WipFloor.Text" xml:space="preserve">
+    <value>WIP floor</value>
+  </data>
+  <data name="Waitlist_Card_System_InforVisual.Text" xml:space="preserve">
+    <value>Infor Visual</value>
+  </data>
   <data name="Die Location" xml:space="preserve">
     <value>Die Location</value>
   </data>
@@ -1384,6 +1420,15 @@
   </data>
   <data name="Startup_Launch.Title" xml:space="preserve">
     <value>MTM Waitlist</value>
+  </data>
+  <data name="Startup_Launch.Version" xml:space="preserve">
+    <value>Version {0}</value>
+  </data>
+  <data name="Startup_Launch.Company" xml:space="preserve">
+    <value>MTM Manufacturing</value>
+  </data>
+  <data name="Startup_Launch.Copyright" xml:space="preserve">
+    <value>© 2026 John Koll. All rights reserved.</value>
   </data>
   <data name="Startup_Launch.ProgressCaption" xml:space="preserve">
     <value>Step {0} of {1}</value>

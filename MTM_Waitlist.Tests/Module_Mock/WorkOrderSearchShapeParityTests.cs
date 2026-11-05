@@ -101,6 +101,45 @@ public sealed class WorkOrderSearchShapeParityTests
         StringAssert.Contains(live, "wo.STATUS IN ('R', 'U', 'F')", "closed and cancelled orders are not offered");
     }
 
+    [TestMethod]
+    public void Service_WorkOrderSearchShapeParityTests_TheSearch_OffersOnlyJobsWithAProductionWorkCentre()
+    {
+        // Operator requirement 2026-11-04: a group resource (`500-GRP`, `090-GRP`, …) is a routing grouping, not a
+        // place a job is set up, so it never appears as the work centre and a job with no real work centre is not
+        // offered at all. Both scripts must agree, or a cached answer would list jobs the live answer hides
+        // (FR-004).
+        var scripts = new[]
+        {
+            RepoPath("Database", "InforVisual", "Queues", "Module_Setup", "Queries", "GetWorkOrderSearch.sql"),
+            RepoPath("Database", "InforVisual", "Queues", "Module_Mock", "Populations", "work_order_search_population.sql"),
+        };
+
+        foreach (var path in scripts)
+        {
+            var script = File.ReadAllText(path);
+
+            StringAssert.Contains(
+                script,
+                "res.TYPE = 'W'",
+                $"{Path.GetFileName(path)} does not require a real work centre, so group resources would be listed");
+
+            StringAssert.Contains(
+                script,
+                "NOT LIKE '%-GRP'",
+                $"{Path.GetFileName(path)} would offer a `-GRP` grouping resource, which is not a work centre");
+
+            StringAssert.Contains(
+                script,
+                "CROSS APPLY",
+                $"{Path.GetFileName(path)} still joins its work centre optionally, so a job with no work centre survives");
+
+            Assert.IsFalse(
+                script.Contains("LTRIM(RTRIM(res.ID))", StringComparison.Ordinal),
+                $"{Path.GetFileName(path)} trims the joined column, which stops the index being used: measured "
+                    + "2026-11-04, that took this search from about 60 ms to 3.7 s");
+        }
+    }
+
     // There is deliberately no `..._result_prev` artifact: the `_prev` name is transient inside
     // sp_visual_work_order_search_refresh's single rename, exactly as it is for the other shapes.
     [TestMethod]

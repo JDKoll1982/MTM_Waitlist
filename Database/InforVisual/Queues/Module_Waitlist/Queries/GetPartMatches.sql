@@ -3,7 +3,9 @@
 -- Queue Script: Get Part Matches
 -- Purpose: Return the parts a term matches: the part whose number IS the term, and every part whose
 --          number CONTAINS the term, so the operator correcting an incorrect part can pick the right
---          one instead of typing free text (FR-082, FR-083).
+--          one instead of typing free text (FR-082, FR-083). The part's description travels with each
+--          row, so a completion the requester picks can be drawn as a number and a line of words
+--          (spec 017 FR-001).
 -- Target: Infor Visual SQL Server (VISUAL / MTMFG)
 -- Template: Module_Waitlist GetInventoryLocations.sql (PART table, verbatim/verbatim-contains match)
 -- Parameters:
@@ -34,7 +36,8 @@ DECLARE @ContainsPattern nvarchar(580) =
     '%' + REPLACE(REPLACE(REPLACE(@TermNormalized, '[', '[[]'), '%', '[%]'), '_', '[_]') + '%';
 
 SELECT TOP (200)
-    part.ID AS PartNumber
+    part.ID AS PartNumber,
+    LTRIM(RTRIM(part.DESCRIPTION)) AS Description
 FROM PART AS part
 WHERE
     part.ID IS NOT NULL

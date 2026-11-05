@@ -1,3 +1,6 @@
+using System.Globalization;
+using System.Reflection;
+
 using CommunityToolkit.Mvvm.ComponentModel;
 
 using MTM_Waitlist.Module_Core.Helpers;
@@ -126,6 +129,26 @@ public sealed partial class SplashViewModel : ObservableObject
     public bool HasProgress => ProgressMaximum > 0;
 
     /// <summary>
+    /// How far the launch has got, as a whole percentage of the steps the catalogue holds. It is derived from the
+    /// same two figures the bar draws, so the number and the bar can never disagree.
+    /// </summary>
+    /// <remarks>
+    /// A numeral and a percent sign rather than a localized sentence: there is nothing to translate, and a resource
+    /// whose text lost its placeholder would leave the surface with no number at all.
+    /// </remarks>
+    public string ProgressPercentText
+    {
+        get
+        {
+            var percent = ProgressMaximum <= 0
+                ? 0d
+                : Math.Clamp(ProgressValue / ProgressMaximum, 0d, 1d) * 100d;
+
+            return string.Format(CultureInfo.CurrentCulture, "{0}%", (int)Math.Round(percent));
+        }
+    }
+
+    /// <summary>
     /// The cause of the stop in plain language, or <c>null</c> while nothing has stopped the launch. It is the
     /// failing line's own text, so the strip repeats what the line says rather than summarising it (FR-004).
     /// </summary>
@@ -161,6 +184,34 @@ public sealed partial class SplashViewModel : ObservableObject
     /// <summary>The surface's own name, which is what the mark at the top of it stands for.</summary>
     public string TitleText => "Startup_Launch.Title".GetLocalized();
 
+    /// <summary>
+    /// The application's version, under its name the way the plant's other application states it.
+    /// </summary>
+    /// <remarks>
+    /// It is read from the entry assembly rather than typed anywhere, so a build's own number is what a person
+    /// reads when they are asked which version they are running. A build in which the entry assembly cannot be
+    /// seen says nothing rather than a guess.
+    /// </remarks>
+    public string VersionText
+    {
+        get
+        {
+            var version = Assembly.GetEntryAssembly()?.GetName().Version;
+            return version is null
+                ? string.Empty
+                : string.Format(
+                    CultureInfo.CurrentCulture,
+                    "Startup_Launch.Version".GetLocalized(),
+                    $"{version.Major}.{version.Minor}.{version.Build}");
+        }
+    }
+
+    /// <summary>The company the application belongs to, under its name and version.</summary>
+    public string CompanyText => "Startup_Launch.Company".GetLocalized();
+
+    /// <summary>The footer line this surface carries, as the plant's other application carries its own.</summary>
+    public string CopyrightText => "Startup_Launch.Copyright".GetLocalized();
+
     /// <summary>The one control in the button bar, which is the surface's only visible way out.</summary>
     public string CloseActionText => "Startup_Launch.CloseAction".GetLocalized();
 
@@ -179,9 +230,20 @@ public sealed partial class SplashViewModel : ObservableObject
         UiThreadMarshaller(() => IsHoldingForPictureCopies = _pictureCopyHold.IsHolding);
     }
 
+    /// <summary>
+    /// Keeps the percentage in step with the bar. Both figures it is drawn from announce the derived text, because a
+    /// bar that moved while the number beside it stood still would be two accounts of one launch.
+    /// </summary>
+    partial void OnProgressValueChanged(double value) => OnPropertyChanged(nameof(ProgressPercentText));
+
+    /// <inheritdoc cref="OnProgressValueChanged" />
+    partial void OnProgressMaximumChanged(double value) => OnPropertyChanged(nameof(ProgressPercentText));
+
     /// <summary>Adds the row and refreshes everything the surface reads from it.</summary>
     /// <param name="entry">The line the launch wrote.</param>
     private void Apply(LaunchFeedEntry entry)
+
+
     {
         var line = SplashFeedLine.From(entry);
 

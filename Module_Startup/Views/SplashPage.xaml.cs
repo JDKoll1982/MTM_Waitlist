@@ -11,22 +11,21 @@ namespace MTM_Waitlist.Module_Startup.Views;
 
 /// <summary>
 /// The launch surface, and the stage the one window shows while a launch runs: it states how far the launch has
-/// got, every operation still in flight, and the cause of a stop in a strip along the bottom
+/// got, which operation it is on, and the cause of a stop in a strip along the bottom
 /// (`contracts/launch-step-contract.md` §§3-4, `contracts/launch-concurrency-contract.md` §3; FR-002, FR-004,
 /// FR-005, FR-031, FR-039).
 /// </summary>
 /// <remarks>
 /// <para>
-/// <b>Every open line is rendered, not one current step.</b> The rows come from
-/// <see cref="LaunchSurfaceViewModel"/>, which keeps one row per operation from the moment it announces itself
-/// until the row that ends it arrives, so a launch that runs several operations at once shows several rows
-/// (FR-031). The line that a stop carries is the same row that states the cause, which is why the strip at the
-/// bottom repeats it rather than summarising it (FR-004).
+/// <b>The progress bar carries how far the launch has got, and the step under way is named beside it.</b> The name
+/// is the step's own, so a stall is attributable to a named operation rather than to an anonymous hang (FR-031).
+/// Owner decision 2026-11-04 replaced the list of concurrent rows with this bar, to wear the same clothes as the
+/// plant's other application; the concurrency state itself is untouched and still feeds the surface.
 /// </para>
 /// <para>
-/// <b>The strip is a row of the layout rather than something laid over the rows above it.</b> The rows take
-/// their own row and the strip its own automatic row beneath it, so the two never share any pixels and a message
-/// cannot cover what the person is reading. That is the whole of FR-005.
+/// <b>The strip is a row of the layout rather than something laid over the block above it.</b> The progress block
+/// takes its own row and the strip its own automatic row beneath it, so the two never share any pixels and a
+/// message cannot cover what the person is reading. That is the whole of FR-005.
 /// </para>
 /// <para>
 /// <b>The page owns the thread affinity; the view models stay plain objects.</b> A launch step's continuation
@@ -46,14 +45,12 @@ internal sealed partial class SplashPage : Page, ILaunchStageSurface
 
     public SplashPage()
     {
-        // Both states are resolved from the host rather than taken as constructor arguments, because the host
+        // The state is resolved from the host rather than taken as a constructor argument, because the host
         // builds this page by type.
         ViewModel = App.GetService<SplashViewModel>();
-        Surface = App.GetService<LaunchSurfaceViewModel>();
 
         // Set before anything is drawn, so a line written by a launch that is already running is marshalled too.
         ViewModel.UiThreadMarshaller = SendToThisThread;
-        Surface.UiThreadMarshaller = SendToThisThread;
 
         InitializeComponent();
 
@@ -65,9 +62,6 @@ internal sealed partial class SplashPage : Page, ILaunchStageSurface
 
     /// <summary>The launch's own state: how far it has got and the cause of a stop.</summary>
     internal SplashViewModel ViewModel { get; }
-
-    /// <summary>The state with several operations in flight, which is where the rows come from (FR-031).</summary>
-    internal LaunchSurfaceViewModel Surface { get; }
 
     /// <summary>
     /// Draws the state the page was constructed with, for the case where the launch began before it appeared.

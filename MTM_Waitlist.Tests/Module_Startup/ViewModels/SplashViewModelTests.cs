@@ -75,6 +75,48 @@ public sealed class SplashViewModelTests
     }
 
     [TestMethod]
+    public void ViewModel_SplashViewModelTests_ProgressPercent_ReadsTheSameTwoFiguresTheBarDraws()
+    {
+        // Arrange
+        var catalog = new LaunchStepCatalog();
+        var feed = new LaunchActivityFeed();
+        var viewModel = new SplashViewModel(catalog, feed);
+
+        // Act: two steps ended out of however many the sequence holds.
+        feed.Append(Line("read-local-settings", LaunchFeedEntryKind.StepCompleted, "Read.", null, true));
+        feed.Append(Line("store-reachability", LaunchFeedEntryKind.StepCompleted, "The store answered.", "the store", true));
+
+        // Assert: the number is taken from the bar's own two figures, so a bar that moved without the number would
+        // be the only way for the two to disagree.
+        var expected = (int)Math.Round(viewModel.ProgressValue / viewModel.ProgressMaximum * 100d);
+        Assert.AreEqual(
+            string.Format(System.Globalization.CultureInfo.CurrentCulture, "{0}%", expected),
+            viewModel.ProgressPercentText);
+    }
+
+    [TestMethod]
+    public void ViewModel_SplashViewModelTests_ProgressPercent_IsAnnouncedWhenTheBarMoves()
+    {
+        // Arrange: the surface binds the number, so a bar that moved without announcing it would leave a stale
+        // percentage on screen for the rest of the launch.
+        var catalog = new LaunchStepCatalog();
+        var feed = new LaunchActivityFeed();
+        var viewModel = new SplashViewModel(catalog, feed);
+
+        var announced = new List<string?>();
+        viewModel.PropertyChanged += (_, args) => announced.Add(args.PropertyName);
+
+        // Act
+        feed.Append(Line("read-local-settings", LaunchFeedEntryKind.StepCompleted, "Read.", null, true));
+
+        // Assert
+        CollectionAssert.Contains(
+            announced,
+            nameof(SplashViewModel.ProgressPercentText),
+            "the percentage was not announced when the bar moved.");
+    }
+
+    [TestMethod]
     public void ViewModel_SplashViewModelTests_Progress_CountsEachStepOnceEvenWhenItWasRepeated()
     {
         // Arrange: a retried step writes a second terminal line, and the progress must not run past the total.

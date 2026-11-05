@@ -69,7 +69,9 @@ public sealed class RequestDispositionResolver
     /// <remarks>
     /// One read, because the two answers come from the same Visual row and a second read would be a second chance
     /// to disagree with the first. The part type is read from the plant's own <c>PRODUCT_CODE</c> and
-    /// <c>COMMODITY_CODE</c>; the disposition stays Visual's answer about the job rather than the part.
+    /// <c>COMMODITY_CODE</c>; the disposition stays Visual's answer about the job rather than the part, and a job
+    /// routed to the subcontracted resource reads as work in process with the outside-service pickup's own signal
+    /// beside it (IT, 2026-11-04).
     /// </remarks>
     public async Task<RequestJobClassification> GetClassificationAsync(
         string? workOrder,
@@ -87,7 +89,10 @@ public sealed class RequestDispositionResolver
             partNumber,
             inforRow?.PartDescription));
 
-        return new RequestJobClassification(RequestDispositionClassifier.Classify(input), partType);
+        return new RequestJobClassification(
+            RequestDispositionClassifier.Classify(input),
+            partType,
+            input.IsOutsideServiceWork);
     }
 
     /// <summary>

@@ -92,6 +92,47 @@ public sealed class SetupReviewPageMarkupTests
             "A row that resolved no picture must still name the one shared placeholder (FR-014).");
     }
 
+    /// <summary>
+    /// The review is a single page: no tab strip, one scroll, and the three things it reviews all on it
+    /// (2026-11-04).
+    /// </summary>
+    /// <remarks>
+    /// Windows' own guidance is the reason for the change: tabs are for peer documents, and content that fits on one
+    /// reasonably sized page belongs on one page. What the review holds is a single setup seen from three angles, and
+    /// a person checking their work needs all of it at once rather than three quarters of it behind a header.
+    /// </remarks>
+    [TestMethod]
+    public void UI_SetupReviewPageMarkupTests_TheReview_IsASinglePageWithNoTabs()
+    {
+        var page = LoadPage();
+
+        Assert.AreEqual(
+            0,
+            page.Descendants().Count(element => element.Name.LocalName is "TabView" or "TabViewItem" or "Pivot"),
+            "The review is drawing tabs again, so part of what a person is checking is hidden behind a header.");
+
+        Assert.AreEqual(
+            1,
+            page.Descendants(s_presentation + "ScrollViewer").Count(),
+            "The review should scroll once, as one page; a second scroller means a region that scrolls inside the page.");
+
+        Assert.AreEqual(
+            3,
+            page.Descendants(s_presentation + "Border")
+                .Count(border => (string?)border.Attribute("Style") == "{StaticResource SetupSectionCardStyle}"),
+            "The review should hold exactly three sections: the job, the subordinate parts, and the dunnage and scrap.");
+
+        string[] identifiers = ["SetupReviewPage_SubordinatePartsList", "SetupReviewPage_DunnageAssignmentsList"];
+
+        foreach (var identifier in identifiers)
+        {
+            Assert.IsTrue(
+                page.Descendants().Any(element =>
+                    (string?)element.Attribute("AutomationProperties.AutomationId") == identifier),
+                $"The review no longer carries '{identifier}', so a section the tabs used to hold is missing.");
+        }
+    }
+
     private static XElement SubordinatePartRowImage()
     {
         var page = LoadPage();

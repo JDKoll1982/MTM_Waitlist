@@ -2,6 +2,7 @@ using MTM_Waitlist.GenericRequest.Contracts;
 using MTM_Waitlist.GenericRequest.Models;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Shared.Services;
@@ -20,10 +21,11 @@ namespace MTM_Waitlist.GenericRequest.Services;
 /// store could not be reached, which is what keeps a generic request as truthful as a work-order one (FR-028).
 /// </para>
 /// <para>
-/// <b>The four externally proved answers are not implemented here yet.</b> A part is proved against Infor Visual and
-/// the WIP floor (chunk 017), dunnage comes from the dunnage catalogue (018), a scrap type from the plant's own list
-/// (019) and a die from a Visual search (020). Each read answers <see cref="GenericRequestStepResult{T}.Unavailable"/>
-/// so its step reports the source as not available and offers a retry, and no substitute is offered (FR-012).
+/// <b>The three remaining externally proved answers are not implemented here yet.</b> Dunnage comes from the
+/// dunnage catalogue (018), a scrap type from the plant's own list (019) and a die from a Visual search (020). Each
+/// read answers <see cref="GenericRequestStepResult{T}.Unavailable"/> so its step reports the source as not
+/// available and offers a retry, and no substitute is offered (FR-012). The part answer ships: it lives on
+/// <see cref="IGenericRequestPartData"/>, which the part step asks directly.
 /// </para>
 /// </remarks>
 public sealed class GenericRequestLiveStepData : IGenericRequestStepData
@@ -36,6 +38,7 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
     private readonly IWaitlistRequestService _requestService;
     private readonly IPersonIdentity _personIdentity;
     private readonly IEmployeeDirectoryService _employeeDirectoryService;
+    private readonly IGenericRequestPartData _partData;
 
     public GenericRequestLiveStepData(
         IWorkCenterCatalogService workCenterCatalogService,
@@ -43,7 +46,8 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
         IRequestItemConfigurationService itemConfigurationService,
         IWaitlistRequestService requestService,
         IPersonIdentity personIdentity,
-        IEmployeeDirectoryService employeeDirectoryService)
+        IEmployeeDirectoryService employeeDirectoryService,
+        IGenericRequestPartData partData)
     {
         _workCenterCatalogService = workCenterCatalogService ?? throw new ArgumentNullException(nameof(workCenterCatalogService));
         _pickerService = pickerService ?? throw new ArgumentNullException(nameof(pickerService));
@@ -51,6 +55,7 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
         _requestService = requestService ?? throw new ArgumentNullException(nameof(requestService));
         _personIdentity = personIdentity ?? throw new ArgumentNullException(nameof(personIdentity));
         _employeeDirectoryService = employeeDirectoryService ?? throw new ArgumentNullException(nameof(employeeDirectoryService));
+        _partData = partData ?? throw new ArgumentNullException(nameof(partData));
     }
 
     /// <inheritdoc />
@@ -153,7 +158,11 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
         return GenericRequestStepResult<GenericRequestItemOption>.Populated(options, DateTimeOffset.UtcNow);
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Completing a part is a term search, not an item lookup, so the answer lives on
+    /// <see cref="IGenericRequestPartData"/> and the part step asks it directly (R7). This member stays because the
+    /// wide seam declares it, and it reports the answer as unavailable rather than inventing one.
+    /// </summary>
     public Task<GenericRequestStepResult<GenericRequestPartOption>> ReadPartsAsync(
         string itemCode,
         CancellationToken cancellationToken = default) =>
@@ -163,7 +172,7 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
     public Task<GenericRequestStepResult<GenericRequestSequenceOption>> ReadSequencesAsync(
         string partNumber,
         CancellationToken cancellationToken = default) =>
-        Task.FromResult(GenericRequestStepResult<GenericRequestSequenceOption>.Unavailable(DateTimeOffset.UtcNow));
+        _partData.ReadSequencesAsync(partNumber, cancellationToken);
 
     /// <inheritdoc />
     public Task<GenericRequestStepResult<GenericRequestDunnageOption>> ReadDunnageAsync(
@@ -186,17 +195,16 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
     /// Whether a step that reads no rows can be shown.
     /// </summary>
     /// <remarks>
-    /// The four externally proved answers report unavailable because their source has not shipped. Every other step
-    /// has something to show: its own answer fields. The result step's presentation comes from the raise attempt the
-    /// summary recorded, not from here.
+    /// The part step ships with its live reads, so it is ready. Dunnage, scrap and die report unavailable because
+    /// their source has not shipped (chunks 018 to 020). Every other step has something to show: its own answer
+    /// fields. The result step's presentation comes from the raise attempt the summary recorded, not from here.
     /// </remarks>
     public Task<GenericRequestStepAvailability> ReadStepAvailabilityAsync(
         GenericRequestStep step,
         CancellationToken cancellationToken = default) =>
         Task.FromResult(step switch
             {
-                GenericRequestStep.Part
-                    or GenericRequestStep.Dunnage
+                GenericRequestStep.Dunnage
                     or GenericRequestStep.Scrap
                     or GenericRequestStep.Die => GenericRequestStepAvailability.Unavailable(DateTimeOffset.UtcNow),
                 _ => GenericRequestStepAvailability.Ready(DateTimeOffset.UtcNow),
@@ -240,12 +248,16 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
                         InputValue = string.IsNullOrWhiteSpace(draft.Answer) ? null : draft.Answer,
                         IsGeneric = true,
                         Description = draft.Description,
+                        Answers = PartAnswers(draft),
                         AcceptedWarnings = draft.AcceptedWarnings.Count == 0 ? null : draft.AcceptedWarnings.ToArray(),
                         WorkCenterName = _workCenterCatalogService.GetCurrentComputerName(),
                         RequesterEmployeeNumber = verification.EmployeeNumber,
                         RequesterEmployeeName = verification.EmployeeName,
                         RequestedUtc = attemptedAtUtc,
-                        TargetTimeUtc = draft.NeededBy,
+                        // The due time is deliberately left unset. The store derives it from this request's own
+                        // creation time and the allotment its request type configures, through the same
+                        // UrgencyDeadlineService the work-order flow uses, so one item waits the same length of
+                        // time however the request was raised.
                         IsOverdue = false,
                     },
                     cancellationToken)
@@ -271,6 +283,38 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
                 "The request could not be raised because the queue could not be reached. Try again.",
                 attemptedAtUtc);
         }
+    }
+
+    /// <summary>
+    /// The part answer a generic part request records on itself, or null when the request states no part (FR-016).
+    /// </summary>
+    /// <remarks>
+    /// The figure and the system that answered it travel with the part and the sequence, so the board can draw the
+    /// same four facts the requester saw without asking either plant system again (FR-018).
+    /// </remarks>
+    private static IReadOnlyDictionary<string, string>? PartAnswers(GenericRequestDraft draft)
+    {
+        if (draft.PartNumber.Length == 0)
+        {
+            return null;
+        }
+
+        var reading = draft.QuantityReading;
+
+        return new GenericRequestPartAnswer
+        {
+            PartNumber = draft.PartNumber,
+            Sequence = draft.Sequence,
+            SequenceSource = draft.SequenceSource,
+            QuantityOnHand = reading?.Figure,
+            AnsweredBy = reading?.AnsweredBy switch
+            {
+                SequenceSource.WipFloor => "WipFloor",
+                SequenceSource.VisualOwnPart or SequenceSource.VisualRequirement => "InforVisual",
+                _ => string.Empty,
+            },
+            Stage = draft.PartStage.ToString(),
+        }.ToAnswers();
     }
 
     /// <summary>

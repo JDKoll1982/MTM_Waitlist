@@ -51,8 +51,8 @@ public sealed class RequestJobFieldValuesTests
         var finishedGoods = RequestJobPartAvailability.None
             .WithDisposition(RequestDisposition.FinishedGoods)
             .WithPartType(RequestPartType.StampedPart);
-        var outsideService = RequestJobPartAvailability.None
-            .WithDisposition(RequestDisposition.OutsideService)
+        var subcontracted = RequestJobPartAvailability.None
+            .WithDisposition(RequestDisposition.WorkInProcess, isOutsideServiceWork: true)
             .WithPartType(RequestPartType.Coil);
         var wip = RequestJobPartAvailability.None
             .WithDisposition(RequestDisposition.WorkInProcess)
@@ -63,7 +63,11 @@ public sealed class RequestJobFieldValuesTests
 
         Assert.AreEqual("Stamped Part", RequestJobFieldValues.Resolve("Part Type", finishedGoods));
         Assert.AreEqual("Finished Goods", RequestJobFieldValues.Resolve("Item Type", finishedGoods));
-        Assert.AreEqual("Coil", RequestJobFieldValues.Resolve("Part Type", outsideService));
+        Assert.AreEqual("Coil", RequestJobFieldValues.Resolve("Part Type", subcontracted));
+        Assert.AreEqual(
+            "WIP",
+            RequestJobFieldValues.Resolve("Item Type", subcontracted),
+            "subcontracted work is still work in process, whatever its tag names next");
         Assert.AreEqual("Hardware", RequestJobFieldValues.Resolve("Part Type", wip));
         Assert.AreEqual("Tooling", RequestJobFieldValues.Resolve("Part Type", ncm));
         Assert.AreEqual("NCM", RequestJobFieldValues.Resolve("Item Type", ncm));

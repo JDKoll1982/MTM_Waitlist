@@ -42,24 +42,6 @@ public sealed partial class WaitlistViewPage : Page
     }
 
     /// <summary>
-    /// Open one generic request in full.
-    /// </summary>
-    /// <remarks>
-    /// A generic card carries no actions of its own, so the whole card is the way in. The page takes the request as
-    /// the navigation parameter rather than resolving a view model, so there is no page key to route it by; it is
-    /// reached by type on the shell's own frame, which keeps the back stack and every other navigation behaviour.
-    /// </remarks>
-    private void OnGenericCardTapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
-    {
-        if (sender is not FrameworkElement { DataContext: SampleOrder { GenericCard: { } card } })
-        {
-            return;
-        }
-
-        App.GetService<INavigationService>().Frame?.Navigate(typeof(GenericRequestDetailPage), card);
-    }
-
-    /// <summary>
     /// The condition a row's own material handler chose from its status word: the row's command stores it, so the
     /// one write path and its affected-row reporting are the same as every other action on the list, and a lost
     /// race is told rather than shown as success (FR-070, FR-072, FR-076).

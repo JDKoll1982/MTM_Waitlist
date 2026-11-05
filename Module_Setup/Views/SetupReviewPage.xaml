@@ -1,4 +1,4 @@
-﻿<Page
+<Page
     x:Class="MTM_Waitlist.Module_Setup.Views.SetupReviewPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:converters="using:MTM_Waitlist.Module_Setup.Converters"
@@ -11,6 +11,19 @@
     xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
     mc:Ignorable="d">
 
+    <!--
+        The review is one page, read top to bottom, with no tabs (2026-11-04).
+
+        Windows' own guidance is the reason: tabs are for peer documents, and a set of views that fits comfortably on
+        one page should be a single page rather than a tab strip. What this surface holds is one setup seen from three
+        angles — the job it is for, the parts the operation consumes, and what it is paired with — so a person
+        checking their work needs all of it at once, not three quarters of it hidden behind a header they must click.
+        The step's own breadcrumb already says this is a step in a task, so the tabs were carrying no navigation
+        meaning either.
+
+        Each section is drawn as a card with a header and a line saying what it holds, which is the shape the rest of
+        the flow uses; a section with nothing in it says so instead of drawing an empty box.
+    -->
     <Page.Resources>
         <converters:CategoryAccentBrushConverter x:Key="CategoryAccentBrushConverter" />
         <converters:StockStateBrushConverter x:Key="StockStateBrushConverter" />
@@ -22,52 +35,91 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TabView AutomationProperties.AutomationId="SetupReviewPage_Tabs" Grid.Row="0" IsAddTabButtonVisible="False">
-            <TabViewItem AutomationProperties.AutomationId="SetupReviewPage_JobContextTab" x:Uid="Setup_Review_Tab_JobContext" Header="Job Context">
-                <Border Margin="0,8,0,0" Style="{StaticResource SetupSectionCardStyle}">
-                    <Grid ColumnSpacing="16" RowSpacing="10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Grid.Column="0" x:Uid="Setup_Review_Header_WorkOrder" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Work Order" />
-                        <TextBlock Grid.Row="0" Grid.Column="1" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.NormalizedWorkOrder, Mode=OneWay}" />
-                        <TextBlock Grid.Row="1" Grid.Column="0" x:Uid="Setup_Review_Header_Part" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Part" />
-                        <TextBlock Grid.Row="1" Grid.Column="1" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.SelectedPartNumber, Mode=OneWay}" />
-                        <TextBlock Grid.Row="2" Grid.Column="0" x:Uid="Setup_Review_Header_Sequence" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Sequence" />
-                        <TextBlock Grid.Row="2" Grid.Column="1" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.SelectedSequence, Mode=OneWay}" />
-                    </Grid>
-                </Border>
-            </TabViewItem>
+        <ScrollViewer
+            HorizontalScrollBarVisibility="Disabled"
+            HorizontalScrollMode="Disabled"
+            VerticalScrollBarVisibility="Auto"
+            VerticalScrollMode="Auto">
+            <StackPanel Padding="0,0,8,0" Spacing="20">
 
-            <TabViewItem AutomationProperties.AutomationId="SetupReviewPage_SubordinatePartsTab" x:Uid="Setup_Review_Tab_SubordinateParts" Header="Subordinate Parts">
-                <ScrollViewer Margin="0,8,0,0">
-                    <ItemsControl AutomationProperties.AutomationId="SetupReviewPage_SubordinatePartsList" ItemsSource="{x:Bind ViewModel.SubordinatePartGroups, Mode=OneWay}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="models:SetupSubordinatePartGroup">
-                                <Border AutomationProperties.Name="{x:Bind CategoryDisplayName}" Margin="0,0,0,12" Style="{StaticResource SetupSectionCardStyle}">
-                                    <StackPanel Spacing="10">
+                <!--  The job this setup is for.  -->
+                <Border Style="{StaticResource SetupSectionCardStyle}">
+                    <StackPanel Spacing="14">
+                        <StackPanel Spacing="2">
+                            <TextBlock x:Uid="Setup_Review_Section_JobContext" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Job context" />
+                            <TextBlock x:Uid="Setup_Review_Section_JobContext_Description" Style="{StaticResource SetupPageSubtitleStyle}" Text="The setup is saved against this work order, part and operation." />
+                        </StackPanel>
+                        <Grid ColumnSpacing="40" RowSpacing="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Spacing="2">
+                                <TextBlock x:Uid="Setup_Review_Header_WorkOrder" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{ThemeResource CaptionTextBlockStyle}" Text="Work Order" />
+                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.NormalizedWorkOrder, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Spacing="2">
+                                <TextBlock x:Uid="Setup_Review_Header_Part" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{ThemeResource CaptionTextBlockStyle}" Text="Part" />
+                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.SelectedPartNumber, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Spacing="2">
+                                <TextBlock x:Uid="Setup_Review_Header_Sequence" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{ThemeResource CaptionTextBlockStyle}" Text="Sequence" />
+                                <TextBlock Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.State.SelectedSequence, Mode=OneWay}" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!--  What the operation consumes, grouped by family.  -->
+                <Border Style="{StaticResource SetupSectionCardStyle}">
+                    <StackPanel Spacing="14">
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Spacing="2">
+                                <TextBlock x:Uid="Setup_Review_SubordinatePartsTitle" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Subordinate Parts" />
+                                <TextBlock x:Uid="Setup_Review_Section_SubordinateParts_Description" Style="{StaticResource SetupPageSubtitleStyle}" Text="The components, packaging and tooling this operation consumes." />
+                            </StackPanel>
+                            <TextBlock
+                                Grid.Column="1"
+                                VerticalAlignment="Bottom"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{ThemeResource CaptionTextBlockStyle}"
+                                Text="{x:Bind ViewModel.SubordinatePartsCountLabel, Mode=OneWay}"
+                                Visibility="{x:Bind ViewModel.HasSubordinateParts, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        </Grid>
+
+                        <TextBlock
+                            x:Uid="Setup_Review_Section_SubordinateParts_Empty"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Style="{ThemeResource BodyTextBlockStyle}"
+                            Text="No subordinate parts are recorded for this operation."
+                            TextWrapping="Wrap"
+                            Visibility="{x:Bind ViewModel.HasNoSubordinateParts, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                        <ItemsControl AutomationProperties.AutomationId="SetupReviewPage_SubordinatePartsList" ItemsSource="{x:Bind ViewModel.SubordinatePartGroups, Mode=OneWay}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="models:SetupSubordinatePartGroup">
+                                    <StackPanel Margin="0,0,0,14" Spacing="10">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind CategoryDisplayName}" />
-                                            <TextBlock Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind PartCountLabel}" />
+                                            <TextBlock AutomationProperties.Name="{x:Bind CategoryDisplayName}" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind CategoryDisplayName}" />
+                                            <TextBlock Grid.Column="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Style="{ThemeResource CaptionTextBlockStyle}" Text="{x:Bind PartCountLabel}" />
                                         </Grid>
                                         <ItemsControl ItemsSource="{x:Bind Parts}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate x:DataType="models:SetupSubordinatePart">
                                                     <!--
-                                                        Each row carries the part's own picture beside its number,
-                                                        still grouped by the family the group header names. A part
-                                                        that cannot be pictured draws the one shared placeholder — never
-                                                        the family's artwork (FR-014, FR-015, FR-018).
+                                                        Each row carries the part's own picture beside its number, still grouped
+                                                        by the family the group header names. A part that cannot be pictured
+                                                        draws the one shared placeholder — never the family's artwork
+                                                        (FR-014, FR-015, FR-018).
                                                     -->
                                                     <Grid AutomationProperties.Name="{x:Bind PartNumber}" Margin="0,0,0,8" ColumnSpacing="12">
                                                         <Grid.ColumnDefinitions>
@@ -118,17 +170,28 @@
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
                                     </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-            </TabViewItem>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
 
-            <TabViewItem AutomationProperties.AutomationId="SetupReviewPage_DunnageAssignmentsTab" x:Uid="Setup_Review_Tab_DunnageAssignments" Header="Dunnage &amp; Scrap Assignments">
-                <Border Margin="0,8,0,0" Style="{StaticResource SetupSectionCardStyle}">
-                    <StackPanel Spacing="8">
-                        <TextBlock x:Uid="Setup_Review_SelectedDunnageTitle" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Selected Dunnage Summary" />
+                <!--  What the operation is paired with: the dunnage it takes, and the scrap type recorded with it.  -->
+                <Border Style="{StaticResource SetupSectionCardStyle}">
+                    <StackPanel Spacing="14">
+                        <StackPanel Spacing="2">
+                            <TextBlock x:Uid="Setup_Review_Header_Dunnage" Style="{ThemeResource BodyLargeTextBlockStyle}" Text="Dunnage &amp; Scrap" />
+                            <TextBlock x:Uid="Setup_Review_Section_Dunnage_Description" Style="{StaticResource SetupPageSubtitleStyle}" Text="What this setup is paired with, and the scrap type saved beside it." />
+                        </StackPanel>
+
+                        <TextBlock
+                            x:Uid="Setup_Review_Section_Dunnage_Empty"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Style="{ThemeResource BodyTextBlockStyle}"
+                            Text="No dunnage is assigned to this operation."
+                            TextWrapping="Wrap"
+                            Visibility="{x:Bind ViewModel.HasNoDunnageAssignments, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
                         <ItemsControl AutomationProperties.AutomationId="SetupReviewPage_DunnageAssignmentsList" ItemsSource="{x:Bind ViewModel.DunnageAssignmentDisplays, Mode=OneWay}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="viewmodels:SetupDunnageAssignmentDisplay">
@@ -154,10 +217,23 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
+
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock
+                                x:Uid="Setup_Review_Scrap_Label"
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Style="{ThemeResource BodyTextBlockStyle}"
+                                Text="Scrap type" />
+                            <TextBlock Grid.Column="1" Style="{ThemeResource BodyStrongTextBlockStyle}" Text="{x:Bind ViewModel.ScrapTypeDisplay, Mode=OneWay}" />
+                        </Grid>
                     </StackPanel>
                 </Border>
-            </TabViewItem>
-        </TabView>
+            </StackPanel>
+        </ScrollViewer>
 
         <StackPanel Grid.Row="1" Style="{StaticResource SetupActionBarStyle}">
             <Button AutomationProperties.AutomationId="SetupReviewPage_EditButton" x:Uid="Setup_Action_Edit" Content="Edit" ContentTemplate="{StaticResource ActionBarEditTemplate}" Command="{x:Bind ViewModel.EditCommand}" />

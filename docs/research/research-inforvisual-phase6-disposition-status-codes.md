@@ -29,13 +29,20 @@ Observed in use (`SELECT STATUS, COUNT(*) FROM WORK_ORDER GROUP BY STATUS`; tota
   `ENUM_TEXT` = Closed / Firmed / Released / Unreleased / Cancelled (codes C / F / R / U / X).
 - Both `WORK_ORDER.STATUS` and `OPERATION.STATUS` are `nchar(1)` and share the same code set.
 
-## 3. Outside Service — CONFIRMED
+## 3. Outside Service — CONFIRMED as a RESOURCE, not a type (corrected 2026-11-04)
 
 - Signaled by a non-empty **vendor / service** on an `OPERATION` row, **not** by a status code.
 - Confirmed live: ~26.9k `OPERATION` rows carry `VENDOR_ID` / `SERVICE_ID` / `SERVICE_PART_ID`
   (`RESOURCE_ID = 'OUTSIDE_SERVICE'`), e.g. `W|007979|900|OUTSIDE_SERVICE|C|VID-000248-01|PAINT|A03-29236-000`.
 - These operations span statuses C / R / U / X — status does **not** gate Outside Service.
-- Classifier rule (unchanged): `HasOutsideVendorOperation` → `OutsideService` first.
+- **Classifier rule (superseded 2026-11-04).** The original rule — `HasOutsideVendorOperation` →
+  `OutsideService` first — treated the subcontracted routing target as a fourth production type. IT's own account
+  of the tag application contradicts that: it reviews the ops, prints the FG format when the operation is the last
+  available one of the work order and the WIP format otherwise, the Outside Service label is still the WIP label,
+  and every WIP tag prints a "Next resource" line whose value is "Outside Service" for subcontracted work. The
+  classifier therefore has **no outside-service arm**: such a job is `WorkInProcess`, and the routing signal only
+  decides which product pickup is offered (`pickup-outside-service`). See
+  `RequestDispositionClassifier.DispositionInput.IsOutsideServiceWork`.
 
 ## 4. FG vs WIP — CONFIRMED derivation
 
@@ -50,6 +57,12 @@ Observed in use (`SELECT STATUS, COUNT(*) FROM WORK_ORDER GROUP BY STATUS`; tota
     (WIP 594 / Dunnage 21 / Other 4 / None 1), `WorkOrder` (all `Unknown` today).
   - `md_locations` marks finished-goods areas: `FG`, `DC-FG`, `FLOOR - FINISHED GOODS` (Buildings Expo/Vits).
   - `md_part_ids` `ItemType` can carry `Outside Service` / `Die Shop` / `Dunnage` / `Other`.
+
+  > **Moved on since (2026-10-23, corrected 2026-11-04):** FG vs WIP is now decided from the job's **routing**, the
+  > way the tag print decides it — the last operation the work order still has to run is FG, every other operation
+  > is WIP — with `HasCustomerDemand` separating the two once nothing remains. The stock/status pair above is only the
+  > fallback for a read that did not carry the routing. See
+  > `RequestDispositionClassifier` and `GetDispositionInput.sql`.
 
 ## 5. PROD_ORDER_TYPE — NOT a driver
 

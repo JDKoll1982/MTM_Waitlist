@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Runtime.InteropServices;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -79,6 +80,35 @@ public partial class SetupReviewViewModel : ObservableRecipient, INavigationAwar
 
     public string SelectedDunnageSummary => State.SelectedDunnageSummary;
 
+    /// <summary>
+    /// Whether the operation consumes any subordinate parts, which decides whether the review draws the list or says
+    /// there are none. An empty card reads as a fault; a stated absence does not.
+    /// </summary>
+    public bool HasSubordinateParts => State.SubordinateParts.Count > 0;
+
+    /// <summary>Whether the review has an empty subordinate-parts section to explain instead of a list.</summary>
+    public bool HasNoSubordinateParts => !HasSubordinateParts;
+
+    /// <summary>How many subordinate parts the operation consumes, as the section header states it.</summary>
+    public string SubordinatePartsCountLabel => string.Format(
+        CultureInfo.CurrentCulture,
+        "Setup_Review_Section_SubordinateParts_Count".GetLocalized(),
+        State.SubordinateParts.Count);
+
+    /// <summary>Whether the setup is paired with any dunnage, which decides whether the section draws a list.</summary>
+    public bool HasDunnageAssignments => State.SelectedDunnageParts.Count > 0;
+
+    /// <summary>Whether the review has an empty dunnage section to explain instead of a list.</summary>
+    public bool HasNoDunnageAssignments => !HasDunnageAssignments;
+
+    /// <summary>
+    /// The scrap type saved with this pair, or the words for not having one. The section is named for dunnage and
+    /// scrap, so the scrap type is stated rather than left to be discovered on the edit screen.
+    /// </summary>
+    public string ScrapTypeDisplay => string.IsNullOrWhiteSpace(State.SelectedScrapType)
+        ? "Setup_Review_Scrap_None".GetLocalized()
+        : State.SelectedScrapType;
+
     public SetupReviewViewModel(
         INavigationService navigationService,
         ISetupWorkflowService workflowService,
@@ -105,6 +135,13 @@ public partial class SetupReviewViewModel : ObservableRecipient, INavigationAwar
         OnPropertyChanged(nameof(PageTitle));
         OnPropertyChanged(nameof(ProgressText));
         OnPropertyChanged(nameof(SubordinatePartGroups));
+        OnPropertyChanged(nameof(HasSubordinateParts));
+        OnPropertyChanged(nameof(HasNoSubordinateParts));
+        OnPropertyChanged(nameof(SubordinatePartsCountLabel));
+        OnPropertyChanged(nameof(DunnageAssignmentDisplays));
+        OnPropertyChanged(nameof(HasDunnageAssignments));
+        OnPropertyChanged(nameof(HasNoDunnageAssignments));
+        OnPropertyChanged(nameof(ScrapTypeDisplay));
         OnPropertyChanged(nameof(ReplacementConfirmationVisibility));
         OnPropertyChanged(nameof(ConfirmButtonVisibility));
         OnPropertyChanged(nameof(SelectedDunnageSummary));

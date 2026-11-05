@@ -57,7 +57,6 @@ Paths are relative to the repository root. *Modal* says whether the surface open
 | Control | Module_Waitlist | WaitlistLineCardView.xaml | `Module_Waitlist/Controls/WaitlistLineCardView.xaml` | no |
 | Control | Module_Waitlist | WaitlistStatusFlyout.xaml | `Module_Waitlist/Controls/WaitlistStatusFlyout.xaml` | no |
 | Control | MTM_Waitlist.GenericRequest | GenericRequestStepFrame.xaml | `MTM_Waitlist.GenericRequest/Controls/GenericRequestStepFrame.xaml` | no |
-| Control | MTM_Waitlist.GenericRequest.Controls | GenericRequestCard.xaml | `MTM_Waitlist.GenericRequest.Controls/Controls/GenericRequestCard.xaml` | no |
 | Dialog | Module_Settings | ComputerEditDialog.xaml | `Module_Settings/Views/ComputerEditDialog.xaml` | yes |
 | Dialog | Module_Settings | LuggerEditorDialog.xaml | `Module_Settings/Views/LuggerEditorDialog.xaml` | yes |
 | Dialog | Module_Settings | LuggerNameDialog.xaml | `Module_Settings/Views/LuggerNameDialog.xaml` | yes |
@@ -110,7 +109,6 @@ Paths are relative to the repository root. *Modal* says whether the surface open
 | Page | Module_Waitlist | NewRequestWorkCenterPage.xaml | `Module_Waitlist/Views/NewRequestWorkCenterPage.xaml` | no |
 | Page | Module_Waitlist | WaitlistViewDetailPage.xaml | `Module_Waitlist/Views/WaitlistViewDetailPage.xaml` | no |
 | Page | Module_Waitlist | WaitlistViewPage.xaml | `Module_Waitlist/Views/WaitlistViewPage.xaml` | no |
-| Page | MTM_Waitlist.GenericRequest.Controls | GenericRequestDetailPage.xaml | `MTM_Waitlist.GenericRequest.Controls/Views/GenericRequestDetailPage.xaml` | no |
 | Page | MTM_Waitlist.GenericRequest | GenericRequestCategoryPage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestCategoryPage.xaml` | no |
 | Page | MTM_Waitlist.GenericRequest | GenericRequestDetailsPage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestDetailsPage.xaml` | no |
 | Page | MTM_Waitlist.GenericRequest | GenericRequestDiePage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestDiePage.xaml` | no |

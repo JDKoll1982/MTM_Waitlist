@@ -313,7 +313,7 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
         }
 
         return availability
-            .WithDisposition(classification.Disposition)
+            .WithDisposition(classification.Disposition, classification.IsOutsideServiceWork)
             .WithPartType(classification.PartType);
     }
 

@@ -58,6 +58,12 @@ public sealed record RequestJobPartAvailability(
     /// <summary>
     /// Whether the requesting job has <b>subcontracted work</b> to pick up — an operation an outside vendor
     /// performs. This is the work the <c>pickup-outside-service</c> Item names (FR-094).
+    /// <para>
+    /// It is read from the routing (or, when the routing could not be read, from the operation's vendor fields) and
+    /// not from the derived item type, because outside service is a resource a WIP tag names on its next-resource
+    /// line rather than a type of its own (IT, 2026-11-04). A job with this signal set still reads as work in
+    /// process on the card.
+    /// </para>
     /// </summary>
     public bool HasOutsideServiceWorkToReturn { get; init; }
 
@@ -255,14 +261,20 @@ public sealed record RequestJobPartAvailability(
     /// that failed) and sets none of them, which keeps the four hidden rather than inventing an item type for
     /// them (FR-089).
     /// </para>
+    /// <para>
+    /// <paramref name="isOutsideServiceWork"/> is the routing's own signal, not a disposition: subcontracted work is
+    /// picked up with its own Item, and its part still reads as the type the derivation gave (IT, 2026-11-04). When
+    /// it is set it wins the gate, so the picker's choice is what it was before outside service stopped being a
+    /// type.
+    /// </para>
     /// </summary>
-    public RequestJobPartAvailability WithDisposition(RequestDisposition disposition) => this with
+    public RequestJobPartAvailability WithDisposition(RequestDisposition disposition, bool isOutsideServiceWork = false) => this with
     {
         Disposition = disposition,
-        HasFinishedGoodsToReturn = disposition == RequestDisposition.FinishedGoods,
-        HasNonconformingStockToReturn = disposition == RequestDisposition.Ncm,
-        HasWorkInProgressToReturn = disposition == RequestDisposition.WorkInProcess,
-        HasOutsideServiceWorkToReturn = disposition == RequestDisposition.OutsideService,
+        HasFinishedGoodsToReturn = !isOutsideServiceWork && disposition == RequestDisposition.FinishedGoods,
+        HasNonconformingStockToReturn = !isOutsideServiceWork && disposition == RequestDisposition.Ncm,
+        HasWorkInProgressToReturn = !isOutsideServiceWork && disposition == RequestDisposition.WorkInProcess,
+        HasOutsideServiceWorkToReturn = isOutsideServiceWork,
     };
 
     /// <summary>

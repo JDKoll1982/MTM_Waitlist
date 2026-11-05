@@ -99,7 +99,7 @@
     <value>Luggers</value>
   </data>
   <data name="GenericRequest_Part_Intro.Text" xml:space="preserve">
-    <value>Find the part, choose whether it is a work in progress or a finished good, then choose its sequence.</value>
+    <value>Type the part number, choose the sequence it is standing at, and check how much is on hand.</value>
   </data>
   <data name="GenericRequest_Dunnage_Title.Text" xml:space="preserve">
     <value>Choose dunnage</value>
@@ -108,7 +108,7 @@
     <value>There is nothing to state for this request.</value>
   </data>
   <data name="GenericRequest_Details_Intro.Text" xml:space="preserve">
-    <value>Say when the part is needed, how many, and anything a handler should know.</value>
+    <value>Say how many and anything a handler should know. The request is due at the end of the time its type allots.</value>
   </data>
   <data name="GenericRequest_StepFrame_Continue.Content" xml:space="preserve">
     <value>Continue</value>
@@ -131,9 +131,6 @@
   </data>
   <data name="GenericRequest_Summary_Empty.Text" xml:space="preserve">
     <value>There is nothing to review yet.</value>
-  </data>
-  <data name="GenericRequest_Details_NeededBy_Date.Header" xml:space="preserve">
-    <value>Needed by, date</value>
   </data>
   <data name="GenericRequest_Summary_Quantity.Label" xml:space="preserve">
     <value>Quantity</value>
@@ -210,6 +207,51 @@
   <data name="GenericRequest_Part_Stage.Header" xml:space="preserve">
     <value>Stage</value>
   </data>
+  <data name="GenericRequest_Part_NextResource.Text" xml:space="preserve">
+    <value>Next resource</value>
+  </data>
+  <data name="GenericRequest_Part_Stage_Unknown.Content" xml:space="preserve">
+    <value>Not recorded</value>
+  </data>
+  <data name="GenericRequest_Part_NoMatch.Text" xml:space="preserve">
+    <value>Neither Infor Visual nor the WIP floor knows this part number. Check the number and try again.</value>
+  </data>
+  <data name="GenericRequest_Part_NoSequence.Text" xml:space="preserve">
+    <value>The part is known, but no sequence can be attributed to it, so the request cannot go on.</value>
+  </data>
+  <data name="GenericRequest_Part_Sequences_Unavailable.Text" xml:space="preserve">
+    <value>The sequences could not be read.</value>
+  </data>
+  <data name="GenericRequest_Part_Sequences_Retry.Content" xml:space="preserve">
+    <value>Read the sequences again</value>
+  </data>
+  <data name="GenericRequest_Part_Sequence_Sources.Text" xml:space="preserve">
+    <value>Sources: {0}</value>
+  </data>
+  <data name="GenericRequest_Part_Source_VisualOwnPart.Text" xml:space="preserve">
+    <value>Infor Visual (own part)</value>
+  </data>
+  <data name="GenericRequest_Part_Source_VisualRequirement.Text" xml:space="preserve">
+    <value>Infor Visual (requirement)</value>
+  </data>
+  <data name="GenericRequest_Part_Source_WipFloor.Text" xml:space="preserve">
+    <value>WIP floor</value>
+  </data>
+  <data name="GenericRequest_Part_Quantity_Title.Text" xml:space="preserve">
+    <value>On hand</value>
+  </data>
+  <data name="GenericRequest_Part_Quantity_AnsweredBy.Text" xml:space="preserve">
+    <value>Answered by {0}</value>
+  </data>
+  <data name="GenericRequest_Part_Quantity_Unavailable.Text" xml:space="preserve">
+    <value>The quantity could not be read.</value>
+  </data>
+  <data name="GenericRequest_Part_Quantity_Retry.Content" xml:space="preserve">
+    <value>Read the quantity again</value>
+  </data>
+  <data name="GenericRequest_Part_Quantity_NothingOnHand.Text" xml:space="preserve">
+    <value>Nothing is on hand at this sequence. You can still raise the request.</value>
+  </data>
   <data name="GenericRequest_WorkCenter_Empty.Text" xml:space="preserve">
     <value>No work center runs in this building.</value>
   </data>
@@ -245,12 +287,6 @@
   </data>
   <data name="GenericRequest_StepFrame_Retry.Content" xml:space="preserve">
     <value>Try again</value>
-  </data>
-  <data name="GenericRequest_Details_NeededBy_Time.Header" xml:space="preserve">
-    <value>Needed by, time</value>
-  </data>
-  <data name="GenericRequest_Summary_NeededBy.Label" xml:space="preserve">
-    <value>Needed by</value>
   </data>
   <data name="GenericRequest_Dunnage_Types_Title.Text" xml:space="preserve">
     <value>Dunnage types</value>

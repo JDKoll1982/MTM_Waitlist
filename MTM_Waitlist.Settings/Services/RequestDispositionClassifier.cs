@@ -3,9 +3,8 @@ using MTM_Waitlist.Module_Settings.Models;
 namespace MTM_Waitlist.Module_Settings.Services;
 
 /// <summary>
-/// Pure, config-driven classifier that derives an <see cref="RequestDisposition"/> (FG / WIP /
-/// Outside Service) from the Infor Visual job + part + operation state for a work center's active
-/// setup job.
+/// Pure, config-driven classifier that derives an <see cref="RequestDisposition"/> (FG / WIP / NCM) from the
+/// Infor Visual job + part + operation state for a work center's active setup job.
 ///
 /// Type/Category refactor (2026-09-07). Infor Visual is a job-shop ERP: a Finished-Product part's
 /// disposition is NOT a single user-set field — it is derived. The only Infor-specific knowledge is
@@ -14,20 +13,25 @@ namespace MTM_Waitlist.Module_Settings.Services;
 /// confirmed against live data; this classifier logic stays stable.
 ///
 /// Derivation priority (see file 14 Phase 6 research, and FR-092 for the unchanged production order):
-///   1. OutsideService — the operation that follows the job's own is the subcontracted one
-///      (its <c>RESOURCE_ID</c> is the plant's <c>OUTSIDE_SERVICE</c> shop resource). The legacy vendor fields on
-///      the operation remain the signal when the routing could not be read.
-///   2. Ncm — the stock occupies a non-conforming (NCM) location. It is decided from the <b>location</b> and
+///   1. Ncm — the stock occupies a non-conforming (NCM) location. It is decided from the <b>location</b> and
 ///      from nothing else, because NCM is a location state and not a production type (FR-093). It is checked
-///      before the two production arms so quarantined stock is never reported as Finished Goods or WIP, and
-///      after Outside Service so the documented priority is unchanged.
-///   3. WorkInProcess — an open operation remains after the job's own, so the part is still being made.
-///   4. FinishedGoods — nothing follows the job's own operation and the part is one the plant sells (it has
+///      before the production arms so quarantined stock is never reported as Finished Goods or WIP.
+///   2. WorkInProcess — an open operation remains after the job's own, so the part is still being made.
+///   3. FinishedGoods — nothing follows the job's own operation and the part is one the plant sells (it has
 ///      customer-order lines). A part nothing buys exists only to feed another work order, so it stays work in
 ///      process even when the routing ends here. This is what the plant's tag print reads (research 2026-10-23),
 ///      and it is the only test that can name either type for a job that is still running — in-process stock is
 ///      never sitting at a shipping location yet, so the stock quantity is a confirmation, never the discriminator.
-///   5. Unknown — no rule matched.
+///   4. Unknown — no rule matched.
+/// <para>
+/// <b>There is no outside-service arm (IT, 2026-11-04).</b> The plant's tag application reviews the ops: the last
+/// operation the work order still has to run prints the FG format and every other operation prints the WIP format,
+/// and a WIP tag carries a "Next resource" line whose value is "Outside Service" when the work is subcontracted.
+/// Outside service is therefore a resource name, never a fourth type, and a job routed to it classifies as
+/// <see cref="RequestDisposition.WorkInProcess"/>. The routing signal itself is not lost: it still decides which
+/// product pickup is offered, which is <see cref="DispositionInput.IsOutsideServiceWork"/>'s job and not this
+/// classifier's.
+/// </para>
 /// <para>
 /// The routing arms answer only when the read supplied them; a snapshot without them (the floor-stock half, or a
 /// cached row written before the routing was read) falls through to the stock/quantity/status arms exactly as
@@ -107,33 +111,37 @@ public static class RequestDispositionClassifier
                 NextOperationResourceId?.Trim(),
                 RequestDispositionStatusCodes.OutsideServiceResourceId,
                 StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Whether the job has subcontracted work to collect, which is what offers the
+        /// <c>pickup-outside-service</c> Item (FR-094). It reads the routing when the read supplied it and the
+        /// operation's legacy vendor fields when it did not, and it is deliberately <b>not</b> a disposition: a job
+        /// routed to outside service is work in process whose tag names the resource on its next-resource line
+        /// (IT, 2026-11-04). The pickup is a workflow signal; the type comes from the routing's position.
+        /// </summary>
+        public bool IsOutsideServiceWork =>
+            NextOperationIsOutsideService || (!HasRouting && HasOutsideVendorOperation);
     }
 
     /// <summary>Classifies a single part/job snapshot into a disposition.</summary>
     public static RequestDisposition Classify(DispositionInput input)
     {
-        // 1. Outside service takes precedence: the work that follows the job's own operation is subcontracted.
-        //    The vendor fields on the operation answer the same question while the routing is unread.
-        if (input.NextOperationIsOutsideService
-            || (!input.HasRouting && input.HasOutsideVendorOperation))
-        {
-            return RequestDisposition.OutsideService;
-        }
-
-        // 2. Non-conforming stock: the location it occupies is the whole signal, and such stock is never a
-        // production type — not Finished Goods and not WIP (FR-093).
+        // 1. Non-conforming stock: the location it occupies is the whole signal, and such stock is never a
+        //    production type — not Finished Goods and not WIP (FR-093).
         if (input.HasNonConformingStock)
         {
             return RequestDisposition.Ncm;
         }
 
-        // 3. An operation remains after the job's own, so the part is still being made.
+        // 2. An operation remains after the job's own, so the part is still being made. A job whose next operation
+        //    is the subcontracted one lands here too: its tag is a WIP tag naming "Outside Service" as the next
+        //    resource, not a fourth type (IT, 2026-11-04).
         if (input.HasRemainingWork)
         {
             return RequestDisposition.WorkInProcess;
         }
 
-        // 4. Nothing follows the job's own operation. Whether the product is a finished good or still work in
+        // 3. Nothing follows the job's own operation. Whether the product is a finished good or still work in
         //    process is decided by the part itself: a part the plant sells is the end product, and a part nothing
         //    buys exists only to feed another work order. Neither the operation's own completion nor the stock on
         //    hand settles this — a press still running on a sold part has already produced a finished good, and an
@@ -143,7 +151,7 @@ public static class RequestDispositionClassifier
             return input.IsSoldPart ? RequestDisposition.FinishedGoods : RequestDisposition.WorkInProcess;
         }
 
-        // 5. No routing was read: the stock, open quantity and status are all there is to go on.
+        // 4. No routing was read: the stock, open quantity and status are all there is to go on.
 
         // Finished goods: closed work order + stock on hand at a shipping location.
         if (input.HasFinishedGoodsOnHand && !input.HasOpenWorkOrderQuantity && IsClosedStatus(input.WorkOrderStatus))
