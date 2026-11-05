@@ -288,6 +288,92 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
+    public void Model_WaitlistRequestTitlesTests_ResolveDunnagePartPicturePath_ARequestWithNoJobAnswersItsOwnRecordedPicture()
+    {
+        // A generic dunnage request has no job, so the only place its part's picture can come from is the request
+        // itself. Without this the card drew the shared placeholder even though the part had a picture (FR-008).
+        var request = new WaitlistRequest
+        {
+            Item = "deliver-dunnage",
+            InputValue = "DN-STL-4",
+            Answers = RecordedDunnage("DN-STL-4", @"X:\Dunnage\Parts\Steel Rack.png"),
+        };
+
+        Assert.AreEqual(
+            @"X:\Dunnage\Parts\Steel Rack.png",
+            WaitlistRequestTitles.ResolveDunnagePartPicturePath(
+                WaitlistRequestTitles.ResolveContext(request),
+                jobAvailability: null,
+                request.Answers),
+            "A generic dunnage request draws the picture it recorded for itself.");
+    }
+
+    [TestMethod]
+    public void Model_WaitlistRequestTitlesTests_ResolveDunnagePartPicturePath_AJobSnapshotStillWinsOverTheRecordedPicture()
+    {
+        var request = new WaitlistRequest
+        {
+            Item = "deliver-dunnage",
+            InputValue = "DN-STL-4",
+            Answers = RecordedDunnage("DN-STL-4", @"X:\Elsewhere\other.png"),
+        };
+
+        Assert.AreEqual(
+            @"X:\Dunnage\Parts\Steel Rack.png",
+            WaitlistRequestTitles.ResolveDunnagePartPicturePath(
+                WaitlistRequestTitles.ResolveContext(request, DunnageJob()),
+                DunnageJob(),
+                request.Answers),
+            "The job's own picture is still preferred where there is a job.");
+    }
+
+    [TestMethod]
+    public void Model_WaitlistRequestTitlesTests_ResolveDunnagePartPicturePath_ARequestThatRecordsNoPictureAnswersNothing()
+    {
+        var request = new WaitlistRequest
+        {
+            Item = "deliver-dunnage",
+            InputValue = "DN-BOX-2",
+            Answers = RecordedDunnage("DN-BOX-2", picturePath: string.Empty),
+        };
+
+        Assert.IsNull(
+            WaitlistRequestTitles.ResolveDunnagePartPicturePath(
+                WaitlistRequestTitles.ResolveContext(request),
+                jobAvailability: null,
+                request.Answers),
+            "A part nobody pictured leaves the card on the shared placeholder rather than implying a picture.");
+    }
+
+    [TestMethod]
+    public void Model_WaitlistRequestTitlesTests_ResolveDunnageGoneMarker_IsShownOnlyForAPartTheCatalogueNoLongerOffers()
+    {
+        Assert.IsNotNull(
+            WaitlistRequestTitles.ResolveDunnageGoneMarker(RecordedDunnage("DN-GONE", offered: false)),
+            "A part that has left the catalogue is marked on the request (FR-009).");
+
+        Assert.IsNull(
+            WaitlistRequestTitles.ResolveDunnageGoneMarker(RecordedDunnage("DN-STL-4", offered: true)),
+            "A part the catalogue still offers carries no marker.");
+
+        Assert.IsNull(
+            WaitlistRequestTitles.ResolveDunnageGoneMarker(answers: null),
+            "A request that states no dunnage says nothing about a catalogue it never used.");
+    }
+
+    private static IReadOnlyDictionary<string, string> RecordedDunnage(
+        string partNumber,
+        string picturePath = @"X:\Dunnage\Parts\Steel Rack.png",
+        bool offered = true) =>
+        new MTM_Waitlist.Module_Core.Models.GenericRequestDunnageAnswer
+        {
+            PartNumber = partNumber,
+            TypeName = "Rack",
+            PicturePath = picturePath,
+            Offered = offered,
+        }.ToAnswers();
+
+    [TestMethod]
     public void Model_WaitlistRequestTitlesTests_ResolveLine2_ComponentRequestsShowThePartTheOperatorChose()
     {
         // The component Items ask which component the operator needs, so the request carries the part they chose

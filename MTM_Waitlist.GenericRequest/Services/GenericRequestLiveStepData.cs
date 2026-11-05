@@ -5,6 +5,8 @@ using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
+using MTM_Waitlist.Module_Shared.Helpers;
+using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
 using MTM_Waitlist.Module_Waitlist.Services;
@@ -21,10 +23,12 @@ namespace MTM_Waitlist.GenericRequest.Services;
 /// store could not be reached, which is what keeps a generic request as truthful as a work-order one (FR-028).
 /// </para>
 /// <para>
-/// <b>The three remaining externally proved answers are not implemented here yet.</b> Dunnage comes from the
-/// dunnage catalogue (018), a scrap type from the plant's own list (019) and a die from a Visual search (020). Each
-/// read answers <see cref="GenericRequestStepResult{T}.Unavailable"/> so its step reports the source as not
-/// available and offers a retry, and no substitute is offered (FR-012). The part answer ships: it lives on
+/// <b>The two remaining externally proved answers are not implemented here yet.</b> A scrap type comes from the
+/// plant's own list (019) and a die from a Visual search (020). Each read answers
+/// <see cref="GenericRequestStepResult{T}.Unavailable"/> so its step reports the source as not available and offers
+/// a retry, and no substitute is offered (FR-012). Dunnage shipped with its own seam (018): the dunnage step reads
+/// <see cref="IDunnageCatalogueReader"/> directly, and this class reads it only at raise time to record whether the
+/// chosen part is still offered. The part answer ships too: it lives on
 /// <see cref="IGenericRequestPartData"/>, which the part step asks directly.
 /// </para>
 /// </remarks>
@@ -39,6 +43,7 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
     private readonly IPersonIdentity _personIdentity;
     private readonly IEmployeeDirectoryService _employeeDirectoryService;
     private readonly IGenericRequestPartData _partData;
+    private readonly IDunnageCatalogueReader _catalogueReader;
 
     public GenericRequestLiveStepData(
         IWorkCenterCatalogService workCenterCatalogService,
@@ -47,7 +52,8 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
         IWaitlistRequestService requestService,
         IPersonIdentity personIdentity,
         IEmployeeDirectoryService employeeDirectoryService,
-        IGenericRequestPartData partData)
+        IGenericRequestPartData partData,
+        IDunnageCatalogueReader catalogueReader)
     {
         _workCenterCatalogService = workCenterCatalogService ?? throw new ArgumentNullException(nameof(workCenterCatalogService));
         _pickerService = pickerService ?? throw new ArgumentNullException(nameof(pickerService));
@@ -56,6 +62,7 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
         _personIdentity = personIdentity ?? throw new ArgumentNullException(nameof(personIdentity));
         _employeeDirectoryService = employeeDirectoryService ?? throw new ArgumentNullException(nameof(employeeDirectoryService));
         _partData = partData ?? throw new ArgumentNullException(nameof(partData));
+        _catalogueReader = catalogueReader ?? throw new ArgumentNullException(nameof(catalogueReader));
     }
 
     /// <inheritdoc />
@@ -175,12 +182,6 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
         _partData.ReadSequencesAsync(partNumber, cancellationToken);
 
     /// <inheritdoc />
-    public Task<GenericRequestStepResult<GenericRequestDunnageOption>> ReadDunnageAsync(
-        string itemCode,
-        CancellationToken cancellationToken = default) =>
-        Task.FromResult(GenericRequestStepResult<GenericRequestDunnageOption>.Unavailable(DateTimeOffset.UtcNow));
-
-    /// <inheritdoc />
     public Task<GenericRequestStepResult<GenericRequestScrapOption>> ReadScrapTypesAsync(
         CancellationToken cancellationToken = default) =>
         Task.FromResult(GenericRequestStepResult<GenericRequestScrapOption>.Unavailable(DateTimeOffset.UtcNow));
@@ -195,17 +196,17 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
     /// Whether a step that reads no rows can be shown.
     /// </summary>
     /// <remarks>
-    /// The part step ships with its live reads, so it is ready. Dunnage, scrap and die report unavailable because
-    /// their source has not shipped (chunks 018 to 020). Every other step has something to show: its own answer
-    /// fields. The result step's presentation comes from the raise attempt the summary recorded, not from here.
+    /// The part step ships with its live reads and the dunnage step reads the plant's catalogue through its own
+    /// seam (018), so both are ready. Scrap and die report unavailable because their source has not shipped
+    /// (chunks 019 and 020). Every other step has something to show: its own answer fields. The result step's
+    /// presentation comes from the raise attempt the summary recorded, not from here.
     /// </remarks>
     public Task<GenericRequestStepAvailability> ReadStepAvailabilityAsync(
         GenericRequestStep step,
         CancellationToken cancellationToken = default) =>
         Task.FromResult(step switch
             {
-                GenericRequestStep.Dunnage
-                    or GenericRequestStep.Scrap
+                GenericRequestStep.Scrap
                     or GenericRequestStep.Die => GenericRequestStepAvailability.Unavailable(DateTimeOffset.UtcNow),
                 _ => GenericRequestStepAvailability.Ready(DateTimeOffset.UtcNow),
             });
@@ -237,6 +238,10 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
                 return GenericRequestSubmission.Failed(verification.Message, attemptedAtUtc);
             }
 
+            // The answers a generic request records on itself: the part answer when the request states a proved
+            // part, and the dunnage answer when it asked for one. Both ride the existing answers column.
+            var answers = await AnswersForAsync(draft, cancellationToken).ConfigureAwait(false);
+
             var result = await _requestService
                 .SubmitAsync(
                     new WaitlistRequestDraft
@@ -245,10 +250,10 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
                         WorkCenter = draft.WorkCenter,
                         Category = draft.Category,
                         Item = draft.ItemCode,
-                        InputValue = string.IsNullOrWhiteSpace(draft.Answer) ? null : draft.Answer,
+                        InputValue = CapturedValue(draft),
                         IsGeneric = true,
                         Description = draft.Description,
-                        Answers = PartAnswers(draft),
+                        Answers = answers,
                         AcceptedWarnings = draft.AcceptedWarnings.Count == 0 ? null : draft.AcceptedWarnings.ToArray(),
                         WorkCenterName = _workCenterCatalogService.GetCurrentComputerName(),
                         RequesterEmployeeNumber = verification.EmployeeNumber,
@@ -283,6 +288,97 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
                 "The request could not be raised because the queue could not be reached. Try again.",
                 attemptedAtUtc);
         }
+    }
+
+    /// <summary>
+    /// The one value the request is about, captured in <c>input_value</c>.
+    /// </summary>
+    /// <remarks>
+    /// A dunnage request is about the part the requester picked, and the card's second line reads
+    /// <c>{dunnage_part}</c> straight out of this column. Leaving it empty would raise a dunnage request whose card
+    /// names nothing, so the chosen part wins over the configured answer whenever the item asked for dunnage.
+    /// </remarks>
+    private static string? CapturedValue(GenericRequestDraft draft)
+    {
+        if (draft.RequiresDunnage && draft.DunnagePart.Length > 0)
+        {
+            return draft.DunnagePart;
+        }
+
+        return string.IsNullOrWhiteSpace(draft.Answer) ? null : draft.Answer;
+    }
+
+    /// <summary>
+    /// Everything the raised request records on itself, or null when it records nothing.
+    /// </summary>
+    private async Task<IReadOnlyDictionary<string, string>?> AnswersForAsync(
+        GenericRequestDraft draft,
+        CancellationToken cancellationToken)
+    {
+        var answers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var pair in PartAnswers(draft) ?? new Dictionary<string, string>())
+        {
+            answers[pair.Key] = pair.Value;
+        }
+
+        if (draft.RequiresDunnage && draft.DunnagePart.Length > 0)
+        {
+            foreach (var pair in await DunnageAnswersForAsync(draft, cancellationToken).ConfigureAwait(false))
+            {
+                answers[pair.Key] = pair.Value;
+            }
+        }
+
+        return answers.Count == 0 ? null : answers;
+    }
+
+    /// <summary>
+    /// The dunnage part, its type, its picture and whether the catalogue still offers it (FR-005, FR-008, FR-009).
+    /// </summary>
+    /// <remarks>
+    /// The catalogue is read once more at raise time, which is the only way to know whether the part is still
+    /// offered and what its picture is. A read that fails proves nothing, so the part is kept and recorded as
+    /// offered rather than being marked gone on the strength of an outage.
+    /// </remarks>
+    private async Task<Dictionary<string, string>> DunnageAnswersForAsync(
+        GenericRequestDraft draft,
+        CancellationToken cancellationToken)
+    {
+        var offered = true;
+        var picturePath = string.Empty;
+
+        try
+        {
+            var parts = await _catalogueReader.ReadAllAsync(cancellationToken).ConfigureAwait(false);
+            var chosen = parts.FirstOrDefault(part =>
+                string.Equals(part.PartNumber, draft.DunnagePart, StringComparison.OrdinalIgnoreCase));
+
+            if (chosen is null)
+            {
+                offered = false;
+            }
+            else
+            {
+                picturePath = DunnageImagePathResolver.GetDisplayPath(chosen.ImagePath) ?? string.Empty;
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error(LogCategory, ex, "Could not confirm the chosen dunnage part at raise time; keeping it.");
+        }
+
+        return new GenericRequestDunnageAnswer
+        {
+            PartNumber = draft.DunnagePart,
+            TypeName = draft.DunnageType,
+            PicturePath = picturePath,
+            Offered = offered,
+        }.ToAnswers();
     }
 
     /// <summary>
@@ -324,7 +420,17 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
     {
         var (needsPart, needsDunnage, needsScrap, needsDie) = RequirementsFor(definition);
 
-        var answerKind = configuration.RequiresAnswer
+        // An enumerated answer carrying no options of its own names a list the requesting job supplies — the job's
+        // components by fallback, or the dunnage, die or scrap list the row declares. A generic request has no job to
+        // read that list from, so the item step would draw an empty list the requester cannot answer and could never
+        // leave. Where the item has its own step for that answer — the part page, the dunnage catalogue page, the
+        // scrap and die steps — that step is the answer, and asking it here as well would only be a second,
+        // unanswerable copy of it (FR-007, FR-012, FR-035).
+        var answersComeFromTheJob = configuration.AnswerValueType == RequestItemValueType.Enum
+            && configuration.Options.Count == 0;
+        var answeredOnItsOwnStep = needsPart || needsDunnage || needsScrap || needsDie;
+
+        var answerKind = configuration.RequiresAnswer && !(answersComeFromTheJob && answeredOnItsOwnStep)
             ? configuration.AnswerValueType switch
             {
                 RequestItemValueType.Enum => GenericRequestAnswerKind.Choice,

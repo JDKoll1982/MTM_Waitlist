@@ -3,8 +3,862 @@
   "specName": "018 Generic Work Center — Dunnage Catalogue Page",
   "branch": "master",
   "selectedAt": "2026-11-03T21:00:00.000Z",
-  "currentStep": "specify",
-  "status": "draft",
-  "history": [],
-  "telemetryInstanceId": "288e52ad-307d-4bbf-8d5c-62a711953545"
+  "currentStep": "implement",
+  "status": "completed",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-05T18:37:53.838Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-11-05T18:40:42.083Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-05T18:41:14.489Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T18:49:12.617Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T18:52:06.351Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T18:52:30.280Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-05T18:52:59.834Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T18:56:40.832Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T18:56:44.687Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-05T18:57:18.648Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T001",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:03:17.394Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T002",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:03:57.341Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T003",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:03:57.765Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T004",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:04:23.015Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:04:23.393Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:05:28.224Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:05:28.630Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:08:52.505Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T009",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:08:52.893Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T010",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:08:53.272Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T012",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:18:14.632Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T020",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:18:14.995Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T021",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:18:15.364Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T022",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:18:20.062Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T023",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:18:20.435Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T024",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:18:20.821Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T018",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:18:25.266Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T019",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:18:25.667Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T016",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:18:26.023Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T011",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:18:30.319Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T013",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:20:45.346Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T014",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:20:45.723Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T015",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:20:46.093Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:20:46.468Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T025",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:22:12.802Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T026",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:22:13.177Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T027",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:23:24.240Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T028",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:23:24.605Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T029",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:24:18.103Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T030",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:24:18.466Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T031",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:24:18.851Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T032",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:28:31.500Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T19:28:31.590Z"
+    }
+  ],
+  "telemetryInstanceId": "288e52ad-307d-4bbf-8d5c-62a711953545",
+  "workingBranch": "018-generic-wc-dunnage-page",
+  "unattended": true,
+  "last_action": "all 32 tasks done; solution builds clean and the full suite is green (2567 passed, 0 failed, 52 skipped)",
+  "coverage": {
+    "FR-001": {
+      "title": "For an item that asks for dunnage, the step is the dunnage catalogue rendered as a page of the wizard rather than a dialog.",
+      "tasks": [
+        "T022",
+        "T023",
+        "T024"
+      ]
+    },
+    "FR-002": {
+      "title": "The catalogue page draws its parts, its pictures and its search from the same source the substitute picker uses; it introduces no second dunnage list.",
+      "tasks": [
+        "T004",
+        "T006",
+        "T009",
+        "T011",
+        "T025",
+        "T026"
+      ]
+    },
+    "FR-003": {
+      "title": "The page offers the substitute picker's finding means: one filter matching part number, type or location, and the same picture-visibility choice.",
+      "tasks": [
+        "T007",
+        "T011",
+        "T017",
+        "T022"
+      ]
+    },
+    "FR-004": {
+      "title": "A chosen part becomes the request's dunnage and is shown as chosen when the page is revisited.",
+      "tasks": [
+        "T007",
+        "T014",
+        "T018",
+        "T022"
+      ]
+    },
+    "FR-005": {
+      "title": "A generic dunnage request carries exactly one dunnage part, and the flow says a second part is a second request.",
+      "tasks": [
+        "T003",
+        "T007",
+        "T022"
+      ]
+    },
+    "FR-006": {
+      "title": "Leaving the page without choosing records no dunnage part and does not advance past a step that requires one.",
+      "tasks": [
+        "T018",
+        "T022"
+      ]
+    },
+    "FR-007": {
+      "title": "A catalogue that cannot be read is reported unavailable with the time of the attempt and a retry, never replaced with a shortened or fabricated list.",
+      "tasks": [
+        "T003",
+        "T007",
+        "T021",
+        "T022"
+      ]
+    },
+    "FR-008": {
+      "title": "The chosen part appears on the confirmation step, the card and the detail page, with its picture where one exists.",
+      "tasks": [
+        "T005",
+        "T012",
+        "T027",
+        "T028"
+      ]
+    },
+    "FR-009": {
+      "title": "A part that has left the catalogue since it was chosen is kept on the request and marked as no longer offered, never dropped or replaced.",
+      "tasks": [
+        "T005",
+        "T012",
+        "T027",
+        "T028"
+      ]
+    },
+    "FR-010": {
+      "title": "Loading is distinguishable from a finished read: progress is shown while loading and a still-loading catalogue is never drawn as empty.",
+      "tasks": [
+        "T019",
+        "T020",
+        "T021",
+        "T022"
+      ]
+    },
+    "FR-011": {
+      "title": "This chunk deletes the Temp preview source, leaves the build green, and does not rename such an artefact into a permanent-looking name.",
+      "tasks": [
+        "T031"
+      ]
+    },
+    "FR-012": {
+      "title": "A catalogue that reads successfully and holds no parts is reported as having nothing to offer, never as unavailable.",
+      "tasks": [
+        "T003",
+        "T007",
+        "T008",
+        "T022"
+      ]
+    },
+    "SC-001": {
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDunnageViewModelTests.cs::ViewModel_GenericRequestDunnageViewModelTests_TheForwardButtonIsClosedUntilAPartIsChosen"
+      ]
+    },
+    "SC-002": {
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDunnageSubmissionTests.cs::Service_GenericRequestDunnageSubmissionTests_ADunnageRequestCarriesTheChosenPartAndItsFourAnswers"
+      ]
+    },
+    "SC-003": {
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Shared/DunnageCatalogueParityTests.cs::Service_DunnageCatalogueParityTests_APartAddedToTheSourceAppearsOnBothAndARemovedOneOnNeither",
+        "MTM_Waitlist.Tests/Module_Shared/DunnageCatalogueSourceAuditTests.cs::Audit_DunnageCatalogueSourceAuditTests_BothHostsDrawTheOneControl"
+      ]
+    },
+    "SC-004": {
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Models/WaitlistRequestTitlesTests.cs::Model_WaitlistRequestTitlesTests_ResolveDunnagePartPicturePath_ARequestWithNoJobAnswersItsOwnRecordedPicture"
+      ]
+    }
+  },
+  "size": "oversized",
+  "classification": {
+    "projectedFiles": 18,
+    "projectedTasks": 24,
+    "scopeSignal": "none",
+    "verdict": "oversized"
+  },
+  "expectations": [
+    "The work-order flow's substitute dialog keeps behaving as it does today; this chunk adds a page, it does not replace the dialog.",
+    "The stated part and its quantity (017), the scrap type (019), the die search (020) and the optional job fill (021) stay absent.",
+    "Several dunnage parts on one request stay out of scope; a second part is a second request."
+  ],
+  "context": [
+    "owner-approved draft of 2026-10-29, validated and refined in place rather than reauthored",
+    "area: MTM_Waitlist.GenericRequest (dunnage step, its step data, draft and submission)",
+    "area: Module_Setup/Views/SetupDunnageImageSearchDialog.xaml and its view model (the one image-backed catalogue the page must reuse)",
+    "area: Services/DunnageSubstitutePicker.cs with MTM_Waitlist.Settings/Services/IDunnageSubstitutePicker.cs (the work-order substitute path)",
+    "constraint: living specs were resolved for the touched files and no capability matched"
+  ],
+  "intent": "Make the generic dunnage step the plant's image-backed catalogue as a page of the wizard, shared with the substitute dialog, so a generic request names exactly one dunnage part that carries through to the confirmation, the card and the detail.",
+  "decisions": [
+    {
+      "decision": "Catalogue view model and part row live in MTM_Waitlist.Shared; the control and the step page live in the app project",
+      "why": "Shared is the only assembly the Setup and generic-request libraries both reference and it already owns every dunnage picture helper; the app is where reusable controls and page routes already live",
+      "rejected": "Putting the whole catalogue in MTM_Waitlist.Setup and adding it as a reference of MTM_Waitlist.GenericRequest"
+    },
+    {
+      "decision": "IDunnageCatalogueReader in Shared, implemented in Setup over IDunnageWorkflowService",
+      "why": "The generic flow gets the catalogue shape through a seam and the read keeps the one implementation the substitute dialog already uses",
+      "rejected": "Reading sp_Dunnage_Parts_GetAll directly from Shared, which would put a second implementation of the same read in the tree"
+    },
+    {
+      "decision": "A new DunnageCataloguePart row crosses the boundary and SetupDunnagePart is projected to it",
+      "why": "SetupDunnagePart has about seventy references across four app pages, the Setup library and tests, several in x:DataType",
+      "rejected": "Moving SetupDunnagePart into Shared, which cannot follow a using alias in XAML"
+    },
+    {
+      "decision": "The dunnage step stops using IGenericRequestStepData.ReadDunnageAsync and hosts the shared catalogue view model",
+      "why": "The seam is one question and one answer with rows shaped for one list; the catalogue is a stateful shared surface with a filter, a saved preference and a selection",
+      "rejected": "Adding a catalogue read to the seam, which would mean two loaders and duplicated attempt-time handling"
+    },
+    {
+      "decision": "The raised request records dunnage.part, dunnage.type, dunnage.picture and dunnage.offered into the existing answers_json, and InputValue carries the chosen part",
+      "why": "A generic request has no job snapshot, so the card's picture rule answers nothing and its second line would name nothing",
+      "rejected": "Adding a dunnage column to the request table, or reading the catalogue on the board per card"
+    },
+    {
+      "decision": "The shared step frame gains the loading state",
+      "why": "Its body is collapsed unless the step is populated, so a hand-rolled ProgressRing inside the body would be hidden during exactly the first load it covers",
+      "rejected": "A ProgressRing inside the catalogue control or inside the page body"
+    },
+    {
+      "decision": "The shared catalogue view model returns the load outcome and does not choose surface wording",
+      "why": "The dialog keeps its flat failure sentence while the page shows the attempt time and a retry, and A1 forbids changing the dialog",
+      "rejected": "Letting the dialog inherit the page's unavailable presentation"
+    },
+    {
+      "decision": "No stored procedure and no schema artifact is added",
+      "why": "The read is sp_Dunnage_Parts_GetAll on mtm_receiving_application through the existing service, and the write is the queue's existing submit path",
+      "rejected": "A filtered read procedure, which would be a second read path rather than the one source FR-002 requires"
+    },
+    {
+      "decision": "The shared catalogue view model reports a three-outcome result and keeps the substitute dialog's empty-state wording",
+      "why": "the dialog's sentences are pinned byte-identical, and the page takes its own words from the new resource keys",
+      "rejected": "one wording for both surfaces, which would have changed what the dialog says"
+    },
+    {
+      "decision": "The step frame gained two optional text properties for a step's own loading and unavailable sentences",
+      "why": "the pinned wording names a loading line and a sentence carrying the attempt time, and the frame had no place for either",
+      "rejected": "drawing the sentences in the page body, which is collapsed in exactly those two states"
+    },
+    {
+      "decision": "A failed catalogue read at raise time records the part as still offered",
+      "why": "a read that failed proves nothing, and marking a part gone on the strength of an outage would be a false claim (FR-009)",
+      "rejected": "treating any read that does not hold the part as gone, which would mislabel every request raised during an outage"
+    },
+    {
+      "decision": "The dialog view model projects the shared row back onto the Setup part",
+      "why": "the Setup workflow adds the part by identifier and its add path reads neither Metadata nor IsSelectedForPair",
+      "rejected": "changing ISetupDialogService to hand back the shared row, which would pull the Setup workflow into this chunk"
+    }
+  ],
+  "step_summaries": {
+    "plan": {
+      "summary": "Plan lifts the dunnage catalogue out of the Setup dialog into a shared view model plus a shared control, makes the generic dunnage step a page of that catalogue, gates the step on a chosen part, and carries the part and its picture onto the raised request through answers_json.",
+      "key_finding": "The catalogue markup cannot be shared from the Setup assembly because MTM_Waitlist.GenericRequest does not reference it, and ClickToEnlargeImageView cannot leave the app because its code-behind calls App.GetService, so the reusable view had to land in the app while only its state went to Shared."
+    },
+    "tasks": {
+      "summary": "32 tasks in 6 phases: Setup 1, Foundational 16 across 7 waves, US1 7 across 5 waves, US2 2, US3 2, Polish 4; 24 tasks marked parallel."
+    },
+    "implement": {
+      "summary": "The dunnage step is the plant's catalogue as a page, drawn by one shared control from one read; a chosen part is gated, written to the draft and carried onto the raised request with its picture."
+    }
+  },
+  "approach": "The dunnage catalogue is extracted from the Setup image-search dialog into one shared view model in MTM_Waitlist.Shared and one control in the app, read once through IDunnageCatalogueReader which Setup implements over the existing IDunnageWorkflowService. The generic dunnage step becomes a page that hosts that control, gates its forward button on a chosen part, and writes the chosen part, its type and its picture onto the raised request's answers_json so the confirmation, the card and the detail can name it and draw it.",
+  "concerns": [
+    {
+      "note": "plan-blocks.py cannot render the calls, code or states blocks on this machine: its template folder .specify/extensions/companion/parts is absent, so part_text() raises FileNotFoundError for call-paths.md, code-pins.md and states.md (only screens.md printed). The plan's Calls, Code pins and States and screens sections were therefore written by hand in the shape screens.md showed. Reinstalling the extension's parts folder would let future plans render them."
+    },
+    {
+      "note": "FR-011 names a Temp preview source to delete, but that source is already absent from the tree: it was removed in commit 723cec0f along with Services/GenericRequestPreviewLauncher.cs, and TempArtefactBoundaryAuditTests still guards its absence. FR-011 is satisfied by the tree as it stands; no deletion or rename remains to be done in this chunk."
+    },
+    {
+      "note": "Wording is the unattended default and has not been ratified: the five pinned strings plus the step intro in wording.md are recorded as default, awaiting review.",
+      "step": "implement"
+    },
+    {
+      "note": "The gone marker is exposed by WaitlistRequestTitles.ResolveDunnageGoneMarker but no surface renders it yet; the confirmation and the detail need a row for it, which is outside this chunk's file map.",
+      "step": "implement"
+    },
+    {
+      "note": "T012 could not pass its own build check until the step view model's rewrite landed, so it was closed after T022; its timestamp is later than its work.",
+      "step": "implement"
+    },
+    {
+      "note": "Three files outside the task list's ownership were edited because the change requires them: WaitlistViewViewModel.cs (passes the request's answers so the picture fallback is live), TooltipCoverageTests.cs and ScrollingTextConversionsMarkupTests.cs (both guards named the dialog markup whose binding moved into the shared control), and ScopedPreferenceTests.cs (the dialog view model's constructor changed).",
+      "step": "implement"
+    },
+    {
+      "note": "The step introduction sentence was replaced through a new key because the old one describes the retired two-list step; the new sentence is part of the same unratified wording default.",
+      "step": "implement"
+    }
+  ],
+  "currentTask": null,
+  "task_summaries": {
+    "T001": {
+      "status": "DONE",
+      "did": "Recorded the five pinned strings with keys, states and surfaces, plus the step intro, all flagged awaiting review",
+      "files": [
+        "specs/018-generic-wc-dunnage-page/wording.md"
+      ]
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "Added the shared DunnageCataloguePart row mirroring the Setup part without Metadata or IsSelectedForPair; Shared builds clean",
+      "files": [
+        "MTM_Waitlist.Shared/Models/DunnageCataloguePart.cs"
+      ]
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "Added ten keys to the app resw: the five pinned strings, the step intro and the control's four words, all byte-identical to the dialog markup; no existing value changed",
+      "files": [
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "Declared the one-method read seam IDunnageCatalogueReader; Shared builds clean",
+      "files": [
+        "MTM_Waitlist.Shared/Services/IDunnageCatalogueReader.cs"
+      ]
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "Added GenericRequestDunnageAnswer with the four const keys, case-insensitive ToAnswers and a TryRead that answers nothing on a missing or malformed record; Core builds clean",
+      "files": [
+        "MTM_Waitlist.Core/Models/GenericRequestDunnageAnswer.cs"
+      ]
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "Implemented the seam over IDunnageWorkflowService.GetAllDunnagePartsAsync with a field-for-field projection; no SQL and no second read; Setup builds clean",
+      "files": [
+        "MTM_Waitlist.Setup/Services/DunnageCatalogueReader.cs"
+      ]
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "Added DunnageCatalogueViewModel: one-box filter, ordinal part-number sort, persisted pictures choice, nothing pre-selected, and a three-outcome load reporting the attempt time",
+      "files": [
+        "MTM_Waitlist.Shared/ViewModels/DunnageCatalogueViewModel.cs"
+      ]
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "Added the shared view model's tests: three outcomes, failed read never Empty, in-flight read claims nothing, one-box filter over three fields, ordinal sort, picture choice before filter, nothing pre-selected; 14/14 green",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Shared/ViewModels/DunnageCatalogueViewModelTests.cs"
+      ]
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "Bound IDunnageCatalogueReader to the Setup DunnageCatalogueReader and registered the shared view model in its own partial file; declared and called both new partials from AddAppServices and removed the retired library page's route and registration; app builds clean",
+      "files": [
+        "Services/DependencyInjection/ServiceRegistrationExtensions.DunnageCatalogue.cs;Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ]
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "Added the recorded-answer tests: four keys round-trip, keys compare case-insensitively, offered false reads back false, and a missing or malformed record answers nothing",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDunnageAnswerTests.cs"
+      ]
+    },
+    "T012": {
+      "status": "DONE",
+      "did": "Deleted ReadDunnageAsync and GenericRequestDunnageOption, stopped reporting the dunnage step unavailable, and made the raise carry the chosen part as InputValue plus the four dunnage answers; verified clean once the step rewrite landed",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Contracts/IGenericRequestStepData.cs;MTM_Waitlist.GenericRequest/Models/GenericRequestOptions.cs;MTM_Waitlist.GenericRequest/Services/GenericRequestLiveStepData.cs"
+      ]
+    },
+    "T020": {
+      "status": "DONE",
+      "did": "Added Loading ahead of the three settled presentations; GenericRequest builds clean",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Contracts/GenericRequestStep.cs"
+      ]
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "Gave the step frame a progress ring driven by the loading presentation, collapsing body, empty text and unavailable panel while it shows, plus optional per-step loading and unavailable sentences; T019 green",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Controls/GenericRequestStepFrame.xaml;MTM_Waitlist.GenericRequest/Controls/GenericRequestStepFrame.xaml.cs"
+      ]
+    },
+    "T022": {
+      "status": "DONE",
+      "did": "Rewrote the dunnage step onto the shared catalogue: loads on entry, maps Ready/Empty/Unavailable to the frame, gates CanAnswer on a real choice, commits type and part to the draft, and keeps a gone part's draft value; T018 green",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestDunnageViewModel.cs"
+      ]
+    },
+    "T023": {
+      "status": "DONE",
+      "did": "Created the step page in the app project hosting the frame, the shared catalogue control, the chosen part line and the one-part note; app builds with no NETSDK1022 and no masked WMC9999",
+      "files": [
+        "Module_GenericRequest/Views/GenericRequestDunnagePage.xaml;Module_GenericRequest/Views/GenericRequestDunnagePage.xaml.cs"
+      ]
+    },
+    "T024": {
+      "status": "DONE",
+      "did": "Routed the page from its own partial registration and deleted the library's copy; no GenericRequestDunnagePage remains under MTM_Waitlist.GenericRequest/Views",
+      "files": [
+        "Services/DependencyInjection/ServiceRegistrationExtensions.DunnageCataloguePage.cs"
+      ]
+    },
+    "T018": {
+      "status": "DONE",
+      "did": "Added the step's tests: three outcomes, forward gate closed until a part is chosen, draft commit, revisit shows the chosen part, nothing pre-selects, a gone part keeps the draft value",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDunnageViewModelTests.cs"
+      ]
+    },
+    "T019": {
+      "status": "DONE",
+      "did": "Added the frame's loading-state audit: ring drawn from the loading presentation, body/empty/unavailable collapsed while it shows, empty text never shown mid-read; green against T021",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestStepFrameLoadingTests.cs"
+      ]
+    },
+    "T016": {
+      "status": "DONE",
+      "did": "Added the catalogue-reader fake and the doubles the raise path needs, and tested the raise: part only when dunnage is asked for, four answers recorded, gone part kept and marked, a failed read claiming nothing; green",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestTestDoubles.cs;MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDunnageSubmissionTests.cs"
+      ]
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "Extracted the catalogue markup and gestures into DunnageCatalogueView over the shared view model, keeping the four AutomationIds, the one-box filter, the sort and the pictures choice; app builds clean with no NETSDK1022",
+      "files": [
+        "Module_Shared/Controls/DunnageCatalogueView.xaml;Module_Shared/Controls/DunnageCatalogueView.xaml.cs"
+      ]
+    },
+    "T013": {
+      "status": "DONE",
+      "did": "Pointed the dialog's view model at the shared catalogue, keeping its own surface and its flat failure sentence, and projecting the chosen row back onto the Setup part the workflow adds; Setup builds and the preference guard is green",
+      "files": [
+        "MTM_Waitlist.Setup/ViewModels/SetupDunnageImageSearchDialogViewModel.cs"
+      ]
+    },
+    "T014": {
+      "status": "DONE",
+      "did": "Rehosted the dialog on DunnageCatalogueView, leaving only the window, its size and the accept gate; the four AutomationIds still resolve inside the control and the app builds clean",
+      "files": [
+        "Module_Setup/Views/SetupDunnageImageSearchDialog.xaml;Module_Setup/Views/SetupDunnageImageSearchDialog.xaml.cs"
+      ]
+    },
+    "T015": {
+      "status": "DONE",
+      "did": "Tested the reader: every shared field projected, HomeLocation kept, the Setup-only fields dropped, and one call per read",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Setup/DunnageCatalogueReaderTests.cs"
+      ]
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "Pinned the extraction: four automation ids, case-insensitive part-number sort, one box over three fields, picture choice default and key, the accept gate, and the dialog's flat failure sentence",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Shared/SetupDunnageImageSearchDialogRegressionTests.cs"
+      ]
+    },
+    "T025": {
+      "status": "DONE",
+      "did": "Proved both surfaces read one source: the seam resolves to the Setup reader over IDunnageWorkflowService, both surfaces hold the shared view model, and an added or removed part appears on both or neither",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Shared/DunnageCatalogueParityTests.cs"
+      ]
+    },
+    "T026": {
+      "status": "DONE",
+      "did": "Audited the tree for a second dunnage list: both hosts reference the control, no other XAML declares its automation ids, only the shared view model loads the catalogue, and the seam projects one type; failures name the path",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Shared/DunnageCatalogueSourceAuditTests.cs"
+      ]
+    },
+    "T027": {
+      "status": "DONE",
+      "did": "Extended the titles tests: a request with no job answers its own recorded picture, a job snapshot still wins, no recorded picture answers nothing, and the gone marker appears only for a part no longer offered",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Models/WaitlistRequestTitlesTests.cs"
+      ]
+    },
+    "T028": {
+      "status": "DONE",
+      "did": "Added the request-side picture fallback and exposed the gone marker from its pinned key; also passed the request's answers from the card so the fallback is live; Waitlist.View builds clean and the titles suite is green",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequestTitles.cs"
+      ]
+    },
+    "T029": {
+      "status": "DONE",
+      "did": "Recorded the change for readers: the dunnage step is the catalogue page, the catalogue is one shared control, and the raise carries the part and its picture with no schema change",
+      "files": [
+        "CHANGELOG.md"
+      ]
+    },
+    "T030": {
+      "status": "DONE",
+      "did": "Moved the page row to Module_GenericRequest and added the row for DunnageCatalogueView; SurfaceInventoryAuditTests green",
+      "files": [
+        "docs/guides/guides-xaml-surface-inventory.md"
+      ]
+    },
+    "T031": {
+      "status": "DONE",
+      "did": "Ran the temp-artefact boundary audit rather than redoing FR-011; it is green, so the preview source stays out",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/TempArtefactBoundaryAuditTests.cs"
+      ]
+    },
+    "T032": {
+      "status": "DONE",
+      "did": "Validated against the success criteria: solution build 0 errors, full suite 2567 passed / 0 failed / 52 skipped, no WMC9999, no NETSDK1022, no RelayCommand name loss; SC-001..SC-004 recorded",
+      "files": [
+        "MTM_Waitlist.sln"
+      ]
+    }
+  },
+  "verified": [
+    {
+      "what": "solution build",
+      "command": "dotnet build MTM_Waitlist.sln -v q --nologo",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 38.5,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:38.26"
+    },
+    {
+      "what": "full test suite",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj --nologo",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 70.5,
+      "result": "  Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_ReachesTheRealProcedureReportsTheLoadedRowCountAndSwapsAtomically [1 ms] ·   Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_WithAnEmptyPayloadIsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  2567, Skipped:    52, Total:  2619, Duration: 32 s - MTM_Waitlist.Tests.dll (net10.0)"
+    },
+    {
+      "what": "no masked WMC9999 in either build output",
+      "command": "read the build output",
+      "result": "none: every project reported Build succeeded with 0 errors",
+      "warnings": [
+        "WIN2D0001 AnyCPU warning, pre-existing on every project"
+      ]
+    },
+    {
+      "what": "no NETSDK1022 from adding the page and the control",
+      "command": "read the build output",
+      "result": "none: no explicit Page items were added and the app project's default globbing picked both files up"
+    },
+    {
+      "what": "no [RelayCommand] lost its name to Async stripping",
+      "command": "grep for [RelayCommand] in the changed view models",
+      "result": "none present: the shared view model builds its one command by hand and the step view model inherits the base's commands"
+    }
+  ],
+  "livingSpecs": {
+    "synced": [
+      "dunnage-catalogue"
+    ]
+  }
 }

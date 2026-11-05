@@ -19,6 +19,11 @@ namespace MTM_Waitlist.Module_Setup.Views;
 /// so it is centred on that window and stays in front of it (014-adopt-lab-design-system, FR-001, FR-002).
 /// </para>
 /// <para>
+/// The catalogue is drawn by <c>DunnageCatalogueView</c>, the same control the generic request's dunnage page
+/// hosts, so the two surfaces cannot offer different parts (018, FR-002). What is left here is the host's own job:
+/// the window, its size, and the rule that nothing is accepted until a card is chosen.
+/// </para>
+/// <para>
 /// The host reports a button press after it has already closed, and offers no way to cancel one, so the accept button
 /// is disabled until a card is chosen rather than the window refusing to close. The window sizes itself from the shared
 /// dialog scale instead of the height and width it used to declare (FR-004).
@@ -78,21 +83,5 @@ public sealed partial class SetupDunnageImageSearchDialog : UserControl
     {
         var localized = key.GetLocalized();
         return string.Equals(localized, key, StringComparison.Ordinal) ? fallback : localized;
-    }
-
-    private void OnPartClick(object sender, ItemClickEventArgs e)
-    {
-        if (e.ClickedItem is SetupDunnagePart part)
-        {
-            ViewModel.SelectPart(part);
-        }
-    }
-
-    private async void OnShowPartsWithoutImagesToggled(object sender, RoutedEventArgs e)
-    {
-        if (sender is ToggleSwitch toggleSwitch)
-        {
-            await ViewModel.HandleShowPartsWithoutImagesChangedAsync(toggleSwitch.IsOn);
-        }
     }
 }

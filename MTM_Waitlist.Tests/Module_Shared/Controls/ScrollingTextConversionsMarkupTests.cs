@@ -38,7 +38,7 @@ public sealed class ScrollingTextConversionsMarkupTests
         ("Module_Setup/Views/SetupReviewPage.xaml", ["{x:Bind Description}", "{x:Bind DisplayName}"]),
         ("Module_Setup/Views/SetupPartSelectionPage.xaml", ["{x:Bind Description}"]),
         ("Module_Setup/Views/SetupSequenceSelectionPage.xaml", ["{x:Bind Description}"]),
-        ("Module_Setup/Views/SetupDunnageImageSearchDialog.xaml", ["{x:Bind DunnageTypeName}"]),
+        ("Module_Shared/Controls/DunnageCatalogueView.xaml", ["{x:Bind DunnageTypeName}"]),
         (
             "Module_Waitlist/Views/NewRequestWorkCenterPage.xaml",
             [

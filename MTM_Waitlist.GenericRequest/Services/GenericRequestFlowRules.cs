@@ -9,7 +9,9 @@ namespace MTM_Waitlist.GenericRequest.Services;
 /// <remarks>
 /// The dunnage, scrap, die and part steps are conditional: the chosen item says which it needs, so a request that
 /// needs a die never shows the dunnage page and a request whose answer is a configured question never shows the part
-/// page. Keeping the rule here means every screen asks the same question and no view model hard-codes a successor.
+/// page. The details step is conditional too, in the other direction: a request answered on one of those steps has
+/// nothing for it to ask, so it goes straight on to the confirmation. Keeping the rules here means every screen asks
+/// the same question and no view model hard-codes a successor.
 /// </remarks>
 public static class GenericRequestFlowRules
 {
@@ -71,7 +73,17 @@ public static class GenericRequestFlowRules
             order.Add(GenericRequestStep.Die);
         }
 
-        order.Add(GenericRequestStep.Details);
+        // A request whose answer is one thing picked on its own step — a dunnage part, a scrap type, a die — has
+        // nothing for the details step to ask. Its quantity is never stored, and the description is collected on that
+        // page alone, so asking for it would only stand between the answer step and the confirmation. Those requests
+        // go straight on; every other request still answers the details page (016 FR-031).
+        var answeredOnItsOwnStep = draft.RequiresDunnage || draft.RequiresScrap || draft.RequiresDie;
+
+        if (!answeredOnItsOwnStep)
+        {
+            order.Add(GenericRequestStep.Details);
+        }
+
         order.Add(GenericRequestStep.Summary);
         order.Add(GenericRequestStep.Result);
 

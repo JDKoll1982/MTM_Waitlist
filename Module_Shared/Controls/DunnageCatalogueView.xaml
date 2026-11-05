@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="MTM_Waitlist.Module_Shared.Controls.DunnageCatalogueView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:MTM_Waitlist.Module_Setup.Converters"
+    xmlns:dev="using:DevWinUI"
+    xmlns:models="using:MTM_Waitlist.Module_Shared.Models"
+    xmlns:shared="using:MTM_Waitlist.Module_Shared.Services"
+    xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
+    HorizontalAlignment="Stretch"
+    VerticalAlignment="Stretch">
+    <UserControl.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <converters:SetupImagePathToImageSourceConverter x:Key="SetupImagePathToImageSourceConverter" />
+    </UserControl.Resources>
+
+    <Grid HorizontalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border
+            Padding="16"
+            Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox
+                    x:Uid="DunnageCatalogue_Filter"
+                    AutomationProperties.AutomationId="SetupDunnageImageSearchDialog_FilterInput"
+                    Grid.Column="0"
+                    HorizontalAlignment="Stretch"
+                    Text="{x:Bind ViewModel.FilterText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <Button
+                    x:Uid="DunnageCatalogue_Refresh"
+                    AutomationProperties.AutomationId="SetupDunnageImageSearchDialog_RefreshButton"
+                    Grid.Column="1"
+                    Margin="8,0,0,0"
+                    Command="{x:Bind ViewModel.RefreshCommand}" />
+                <ToggleSwitch
+                    x:Uid="DunnageCatalogue_ShowAll"
+                    AutomationProperties.AutomationId="SetupDunnageImageSearchDialog_ShowAllToggle"
+                    Grid.Column="2"
+                    Margin="12,0,0,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    IsOn="{x:Bind ViewModel.ShowPartsWithoutImages, Mode=TwoWay}"
+                    shared:TooltipBehavior.AssociatedFiles="Module_Shared/Controls/DunnageCatalogueView.xaml|Module_Shared/Controls/DunnageCatalogueView.xaml.cs|Module_Shared/Services/TooltipBehavior.cs|Module_Shared/Services/TooltipService.cs|Module_Shared/Services/ControlInspectorService.cs|Module_Core/Helpers/ResourceExtensions.cs"
+                    shared:TooltipBehavior.FallbackText="Include parts that do not have an image."
+                    shared:TooltipBehavior.ResourceKey="Setup_DunnageShowAll.Tooltip"
+                    Toggled="OnShowPartsWithoutImagesToggled" />
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="0,16,0,0">
+            <GridView
+                AutomationProperties.AutomationId="SetupDunnageImageSearchDialog_PartTiles"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Center"
+                IsItemClickEnabled="True"
+                ItemClick="OnPartClick"
+                ItemsSource="{x:Bind ViewModel.DisplayedParts, Mode=OneWay}"
+                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                ScrollViewer.HorizontalScrollMode="Disabled"
+                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                ScrollViewer.VerticalScrollMode="Auto"
+                SelectionMode="None">
+                <GridView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <ItemsWrapGrid HorizontalAlignment="Center" Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </GridView.ItemsPanel>
+                <GridView.ItemContainerStyle>
+                    <Style TargetType="GridViewItem">
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                    </Style>
+                </GridView.ItemContainerStyle>
+                <GridView.ItemTemplate>
+                    <DataTemplate x:DataType="models:DunnageCataloguePart">
+                        <Border
+                            AutomationProperties.Name="{x:Bind PartNumber}"
+                            Margin="4"
+                            Padding="12"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <Border
+                                    Grid.Row="0"
+                                    Width="96"
+                                    Height="96"
+                                    Margin="0,0,0,10"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="8">
+                                    <Grid>
+                                        <sharedControls:ClickToEnlargeImageView
+                                            AutomationProperties.Name="{x:Bind PartNumber}"
+                                            Source="{x:Bind ImagePath, Converter={StaticResource SetupImagePathToImageSourceConverter}}"
+                                            Stretch="Uniform"
+                                            Visibility="{x:Bind HasImage, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                        <FontIcon
+                                            AutomationProperties.Name="{x:Bind ImageFallbackText}"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            FontSize="32"
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Glyph="&#xE710;"
+                                            Visibility="{x:Bind ShowNoImagePlaceholder, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                    </Grid>
+                                </Border>
+
+                                <TextBlock
+                                    Grid.Row="1"
+                                    HorizontalAlignment="Center"
+                                    MaxLines="1"
+                                    Style="{StaticResource BodyStrongTextBlockStyle}"
+                                    Text="{x:Bind PartNumber}"
+                                    shared:TooltipBehavior.FallbackText="{x:Bind PartNumber}" />
+                                <dev:AutoScrollView
+                                    Grid.Row="2"
+                                    Margin="0,4,0,0"
+                                    IsPlaying="True"
+                                    shared:TooltipBehavior.FallbackText="{x:Bind DunnageTypeName}">
+                                    <TextBlock
+                                        FontSize="12"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Text="{x:Bind DunnageTypeName}"
+                                        TextAlignment="Center"
+                                        TextTrimming="CharacterEllipsis" />
+                                </dev:AutoScrollView>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </GridView.ItemTemplate>
+            </GridView>
+
+            <Grid
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Visibility="{x:Bind ViewModel.HasNoResults, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Border
+                    MaxWidth="420"
+                    Padding="16,10"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8">
+                    <TextBlock
+                        TextAlignment="Center"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Style="{StaticResource BodyTextBlockStyle}"
+                        Text="{x:Bind ViewModel.EmptyStateMessage, Mode=OneWay}"
+                        TextWrapping="Wrap" />
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

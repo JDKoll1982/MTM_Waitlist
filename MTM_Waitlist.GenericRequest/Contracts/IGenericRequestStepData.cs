@@ -22,8 +22,6 @@ public interface IGenericRequestStepData
 
     Task<GenericRequestStepResult<GenericRequestSequenceOption>> ReadSequencesAsync(string partNumber, CancellationToken cancellationToken = default);
 
-    Task<GenericRequestStepResult<GenericRequestDunnageOption>> ReadDunnageAsync(string itemCode, CancellationToken cancellationToken = default);
-
     Task<GenericRequestStepResult<GenericRequestScrapOption>> ReadScrapTypesAsync(CancellationToken cancellationToken = default);
 
     Task<GenericRequestStepResult<GenericRequestDieOption>> ReadDiesAsync(string searchText, CancellationToken cancellationToken = default);

@@ -1178,7 +1178,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         // the dunnage part, which is the part its second line names. Its picture is carried here for the same
         // reason the material part's is resolved where the job is in hand — neither surface's picture resolver can
         // see the dunnage catalogue, so a dunnage card would otherwise always draw the placeholder.
-        var dunnagePartPicturePath = WaitlistRequestTitles.ResolveDunnagePartPicturePath(context, jobAvailability);
+        var dunnagePartPicturePath = WaitlistRequestTitles.ResolveDunnagePartPicturePath(context, jobAvailability, request?.Answers);
 
         // A hopper request names no material part either, but it too is about one thing the operator picked: the
         // size they chose, and its word is the key that size's hopper picture is filed under. The size is handed to

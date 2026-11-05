@@ -22,10 +22,18 @@ public enum GenericRequestStep
 }
 
 /// <summary>
-/// The three presentations one screen can show. Exactly one is in force at a time.
+/// What one screen is showing. Exactly one is in force at a time.
 /// </summary>
+/// <remarks>
+/// <see cref="Loading"/> is ahead of the three settled values because it is the state before any of them can be
+/// known: a step whose read is in flight says that it is reading, rather than presenting an unfinished read as an
+/// empty one (FR-010).
+/// </remarks>
 public enum GenericRequestPresentation
 {
+    /// <summary>The read is in flight. Nothing is claimed about what the source holds.</summary>
+    Loading,
+
     Populated,
     Empty,
     Unavailable,

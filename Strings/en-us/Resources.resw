@@ -2851,4 +2851,34 @@
   <data name="Lugger_Notice.Fallback" xml:space="preserve">
     <value>The lugger arrangement changed.</value>
   </data>
+  <data name="DunnageCatalogue_Filter.PlaceholderText" xml:space="preserve">
+    <value>Filter by part, type, or location</value>
+  </data>
+  <data name="DunnageCatalogue_Refresh.Content" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="DunnageCatalogue_ShowAll.OnContent" xml:space="preserve">
+    <value>Show all</value>
+  </data>
+  <data name="DunnageCatalogue_ShowAll.OffContent" xml:space="preserve">
+    <value>Images only</value>
+  </data>
+  <data name="GenericRequest_Dunnage_Loading.Text" xml:space="preserve">
+    <value>Loading the dunnage catalogue…</value>
+  </data>
+  <data name="GenericRequest_Dunnage_NoParts.Text" xml:space="preserve">
+    <value>No dunnage parts to offer.</value>
+  </data>
+  <data name="GenericRequest_Dunnage_Unavailable.Text" xml:space="preserve">
+    <value>The dunnage catalogue could not be read at {0}. Check the connection and retry.</value>
+  </data>
+  <data name="GenericRequest_Dunnage_OnePartOnly.Text" xml:space="preserve">
+    <value>One dunnage part per request. Raise a second request for another part.</value>
+  </data>
+  <data name="GenericRequest_Dunnage_CatalogueIntro.Text" xml:space="preserve">
+    <value>Pick the dunnage part this request needs from the plant's catalogue.</value>
+  </data>
+  <data name="WaitlistRequest_Dunnage_Gone.Text" xml:space="preserve">
+    <value>No longer in the catalogue.</value>
+  </data>
 </root>

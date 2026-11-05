@@ -5,6 +5,7 @@ using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Setup.Models;
+using MTM_Waitlist.Module_Setup.Services;
 using MTM_Waitlist.Module_Setup.ViewModels;
 using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Tests.Module_Settings;
@@ -93,7 +94,9 @@ public sealed class ScopedPreferenceTests
     {
         var preferences = new InMemoryScopedPreferenceStore();
 
-        var onThisComputer = new SetupDunnageImageSearchDialogViewModel(new EmptyDunnageWorkflowService(), preferences);
+        var onThisComputer = new SetupDunnageImageSearchDialogViewModel(
+            new DunnageCatalogueReader(new EmptyDunnageWorkflowService()),
+            preferences);
         await onThisComputer.InitializeAsync();
         await onThisComputer.HandleShowPartsWithoutImagesChangedAsync(false);
 
@@ -102,7 +105,9 @@ public sealed class ScopedPreferenceTests
             preferences.FlagFor(SetupDunnageImageSearchDialogViewModel.SettingsKey, PreferenceScope.Person),
             "Narrowing the list to parts with pictures is stored against the person.");
 
-        var onTheOtherComputer = new SetupDunnageImageSearchDialogViewModel(new EmptyDunnageWorkflowService(), preferences);
+        var onTheOtherComputer = new SetupDunnageImageSearchDialogViewModel(
+            new DunnageCatalogueReader(new EmptyDunnageWorkflowService()),
+            preferences);
         await onTheOtherComputer.InitializeAsync();
 
         Assert.IsFalse(onTheOtherComputer.ShowPartsWithoutImages, "The choice travels with the person.");

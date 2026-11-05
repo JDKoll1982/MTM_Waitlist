@@ -151,9 +151,6 @@ public sealed record GenericRequestSequenceOption(
     public string SourceCodes => string.Join(", ", Sources.Select(source => source.ToString()));
 }
 
-/// <summary>A dunnage type, with the part that stands in for it.</summary>
-public sealed record GenericRequestDunnageOption(string TypeName, string PartNumber);
-
 /// <summary>A scrap type, with how many luggers are free to use.</summary>
 public sealed record GenericRequestScrapOption(string ScrapType, int AvailableLuggerCount)
 {

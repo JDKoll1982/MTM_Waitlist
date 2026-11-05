@@ -1,87 +1,135 @@
-using System.Collections.ObjectModel;
-
-using CommunityToolkit.Mvvm.ComponentModel;
+using System.ComponentModel;
+using System.Globalization;
 
 using MTM_Waitlist.GenericRequest.Contracts;
-using MTM_Waitlist.GenericRequest.Models;
+using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Shared.ViewModels;
 
 namespace MTM_Waitlist.GenericRequest.ViewModels;
 
 /// <summary>
-/// The dunnage step: choose a dunnage type from the catalogue, then the part that stands in for it.
+/// The dunnage step: the plant's dunnage catalogue, drawn as a page of the wizard.
 /// </summary>
+/// <remarks>
+/// <para>
+/// The catalogue itself belongs to <see cref="DunnageCatalogueViewModel"/>, which the substitute dialog draws too,
+/// so the page and the dialog can never offer different parts (FR-001, FR-002). This view model owns only what is
+/// the step's: which of the frame's presentations the read produced, the forward gate, and the draft.
+/// </para>
+/// <para>
+/// Nothing is chosen until the requester chooses it. The old step pre-selected the first type and the first part,
+/// which is how a part nobody picked could reach a request; <see cref="GenericRequestStepViewModel.CanAnswer"/> is
+/// false until a part is actually chosen (FR-004, FR-006).
+/// </para>
+/// </remarks>
 public sealed partial class GenericRequestDunnageViewModel : GenericRequestStepViewModel
 {
-    private readonly IGenericRequestStepData _data;
-    private IReadOnlyList<GenericRequestDunnageOption> _all = Array.Empty<GenericRequestDunnageOption>();
+    private const string LoadingKey = "GenericRequest_Dunnage_Loading.Text";
+    private const string UnavailableKey = "GenericRequest_Dunnage_Unavailable.Text";
+    private const string OnePartOnlyKey = "GenericRequest_Dunnage_OnePartOnly.Text";
+    private const string SelectedKey = "GenericRequest_Dunnage_Selected.Text";
 
-    public GenericRequestDunnageViewModel(IGenericRequestStepData data, IGenericRequestNavigator navigator)
+    public GenericRequestDunnageViewModel(DunnageCatalogueViewModel catalogue, IGenericRequestNavigator navigator)
         : base(navigator)
     {
-        ArgumentNullException.ThrowIfNull(data);
-
-        _data = data;
+        Catalogue = catalogue ?? throw new ArgumentNullException(nameof(catalogue));
+        Catalogue.PropertyChanged += OnCataloguePropertyChanged;
     }
 
     public override GenericRequestStep Step => GenericRequestStep.Dunnage;
 
     public override string TitleKey => "GenericRequest_Dunnage_Title.Text";
 
-    public override string IntroKey => "GenericRequest_Dunnage_Intro.Text";
+    public override string IntroKey => "GenericRequest_Dunnage_CatalogueIntro.Text";
 
-    public override string EmptyKey => "GenericRequest_Dunnage_Empty.Text";
+    public override string EmptyKey => "GenericRequest_Dunnage_NoParts.Text";
 
-    public ObservableCollection<string> Types { get; } = new();
+    /// <summary>The shared catalogue this step draws and reads through.</summary>
+    public DunnageCatalogueViewModel Catalogue { get; }
 
-    public ObservableCollection<GenericRequestDunnageOption> Parts { get; } = new();
+    /// <summary>What the frame says while the catalogue is loading.</summary>
+    public string LoadingText => LoadingKey.GetLocalized();
 
-    [ObservableProperty]
-    public partial string? SelectedType { get; set; }
+    /// <summary>
+    /// The step's own sentence for a catalogue that could not be read, carrying the time of the attempt.
+    /// </summary>
+    /// <remarks>
+    /// The frame draws this instead of its generic heading and its separate attempt line, so the same moment is
+    /// named once. Every other step leaves the frame's own unavailable wording in place.
+    /// </remarks>
+    public string UnavailableText
+    {
+        get
+        {
+            var template = UnavailableKey.GetLocalized();
+            if (AttemptedAtUtc is not { } attemptedAt)
+            {
+                return template;
+            }
 
-    [ObservableProperty]
-    public partial GenericRequestDunnageOption? SelectedPart { get; set; }
+            var when = attemptedAt.ToLocalTime().ToString("g", CultureInfo.CurrentCulture);
+            return string.Format(CultureInfo.CurrentCulture, template, when);
+        }
+    }
 
-    /// <summary>What is chosen right now, shown under the two lists.</summary>
-    public string SelectionSummary => SelectedPart is { } part
-        ? $"{part.TypeName} / {part.PartNumber}"
+    /// <summary>The one-part rule, shown once below the catalogue (FR-005).</summary>
+    public string SecondPartNote => OnePartOnlyKey.GetLocalized();
+
+    /// <summary>The part currently chosen, ready to draw, or empty when nothing is chosen.</summary>
+    public string SelectedPartDisplay => Catalogue.SelectedPart is { } part
+        ? $"{SelectedKey.GetLocalized()} {part.PartNumber}"
         : string.Empty;
+
+    /// <summary>
+    /// A part has to be chosen before the step can be left, because a dunnage request with no part names nothing.
+    /// </summary>
+    protected override bool CanAnswer => Catalogue.SelectedPart is not null;
 
     protected override async Task LoadCoreAsync()
     {
-        var result = await _data.ReadDunnageAsync(Draft.ItemName);
+        // The frame says it is reading rather than reporting a finished read: an empty catalogue is an answer, and
+        // a read still in flight has not given one (FR-010).
+        Presentation = GenericRequestPresentation.Loading;
 
-        _all = result.Items;
+        var result = await Catalogue.LoadAsync();
 
-        Types.Clear();
-        foreach (var type in _all.Select(option => option.TypeName).Distinct(StringComparer.OrdinalIgnoreCase))
+        AttemptedAtUtc = result.AttemptedAtUtc;
+        Presentation = result.Outcome switch
         {
-            Types.Add(type);
+            DunnageCatalogueLoadOutcome.Ready => GenericRequestPresentation.Populated,
+            DunnageCatalogueLoadOutcome.Empty => GenericRequestPresentation.Empty,
+            _ => GenericRequestPresentation.Unavailable,
+        };
+
+        if (Presentation == GenericRequestPresentation.Populated)
+        {
+            // A revisit shows the part the draft remembers. A part that has left the catalogue is not chosen and
+            // the draft keeps the value it had, which is what records it as no longer offered at raise time.
+            Catalogue.SelectPartNumber(Draft.DunnagePart);
         }
 
-        SelectedType = Types.FirstOrDefault(type => type == Draft.DunnageType) ?? Types.FirstOrDefault();
-
-        Apply(result);
+        OnPropertyChanged(nameof(UnavailableText));
+        OnPropertyChanged(nameof(SelectedPartDisplay));
     }
 
     protected override void CommitToDraft()
     {
-        Draft.DunnageType = SelectedType ?? string.Empty;
-        Draft.DunnagePart = SelectedPart?.PartNumber ?? string.Empty;
-    }
-
-    partial void OnSelectedTypeChanged(string? value) => ApplyTypeFilter();
-
-    partial void OnSelectedPartChanged(GenericRequestDunnageOption? value) => OnPropertyChanged(nameof(SelectionSummary));
-
-    private void ApplyTypeFilter()
-    {
-        Parts.Clear();
-
-        foreach (var part in _all.Where(part => string.Equals(part.TypeName, SelectedType, StringComparison.OrdinalIgnoreCase)))
+        // Leaving without a part records nothing at all (FR-006).
+        if (Catalogue.SelectedPart is not { } part)
         {
-            Parts.Add(part);
+            return;
         }
 
-        SelectedPart = Parts.FirstOrDefault(part => part.PartNumber == Draft.DunnagePart) ?? Parts.FirstOrDefault();
+        Draft.DunnageType = part.DunnageTypeName;
+        Draft.DunnagePart = part.PartNumber;
+    }
+
+    private void OnCataloguePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(DunnageCatalogueViewModel.SelectedPart))
+        {
+            OnPropertyChanged(nameof(SelectedPartDisplay));
+            NotifyAnswerChanged();
+        }
     }
 }

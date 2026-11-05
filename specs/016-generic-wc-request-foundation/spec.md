@@ -119,8 +119,13 @@ A handler reads the board. The generic card identifies the request by its stated
 
 - **FR-013**: A generic request's time MUST be the allotted time configured for its item, identical to the value the work-order flow uses.
 - **FR-014**: An item with no allotted time MUST produce no estimate rather than a default.
-- **FR-015**: The flow MUST require a needed-by answer and MUST carry it on the card, the detail page and the stored record.
-- **FR-016**: The flow MUST allow an optional free-text description and MUST carry it wherever the needed-by answer is carried.
+- **FR-015**: The flow MUST NOT ask for a needed-by answer. Every request is due at the end of the allotment its item configures, which the store resolves from the request's own creation time and the item — the same rule the work-order flow uses — and the confirmation MUST state the resulting figure.
+- **FR-016**: The flow MUST allow an optional free-text description on the details step and MUST carry it on the confirmation, the card, the detail page and the stored record.
+
+**Step order**
+
+- **FR-031**: A request whose answer is one thing picked on its own step — a dunnage part, a scrap type or a die — MUST go from that step straight to the confirmation and MUST NOT visit the details step. Such a request records no description, because the page that collects one is never shown.
+- **FR-032**: Every other request MUST answer the details step, and going back from the confirmation MUST return to whichever step the request answered last.
 
 **Confirmation and record**
 

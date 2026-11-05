@@ -40,7 +40,7 @@ public sealed class TooltipCoverageTests
         Path.Combine("Module_Waitlist", "Controls", "WaitlistLineCardView.xaml"),
         Path.Combine("Module_Settings", "Views", "UserManagementPage.xaml"),
         Path.Combine("Module_Settings", "Views", "ImageOverrideEditorControl.xaml"),
-        Path.Combine("Module_Setup", "Views", "SetupDunnageImageSearchDialog.xaml"),
+        Path.Combine("Module_Shared", "Controls", "DunnageCatalogueView.xaml"),
     ];
 
     /// <summary>Every XAML file in the tree, excluding build output.</summary>

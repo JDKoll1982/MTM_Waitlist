@@ -89,7 +89,8 @@ public static partial class ServiceRegistrationExtensions
             pageService.Configure<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestCategoryViewModel, MTM_Waitlist.GenericRequest.Views.GenericRequestCategoryPage>();
             pageService.Configure<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestItemViewModel, MTM_Waitlist.GenericRequest.Views.GenericRequestItemPage>();
             pageService.Configure<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestPartViewModel, MTM_Waitlist.GenericRequest.Views.GenericRequestPartPage>();
-            pageService.Configure<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestDunnageViewModel, MTM_Waitlist.GenericRequest.Views.GenericRequestDunnagePage>();
+            // The dunnage step's page is not in this list any more: it moved to the application project, and its
+            // route is contributed by ServiceRegistrationExtensions.DunnageCataloguePage.cs (018, FR-001).
             pageService.Configure<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestScrapTypeViewModel, MTM_Waitlist.GenericRequest.Views.GenericRequestScrapTypePage>();
             pageService.Configure<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestDieViewModel, MTM_Waitlist.GenericRequest.Views.GenericRequestDiePage>();
             pageService.Configure<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestDetailsViewModel, MTM_Waitlist.GenericRequest.Views.GenericRequestDetailsPage>();
@@ -266,7 +267,6 @@ public static partial class ServiceRegistrationExtensions
         services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestPartViewModel>();
         services.AddTransient<MTM_Waitlist.GenericRequest.Views.GenericRequestPartPage>();
         services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestDunnageViewModel>();
-        services.AddTransient<MTM_Waitlist.GenericRequest.Views.GenericRequestDunnagePage>();
         services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestScrapTypeViewModel>();
         services.AddTransient<MTM_Waitlist.GenericRequest.Views.GenericRequestScrapTypePage>();
         services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestDieViewModel>();
@@ -336,6 +336,12 @@ public static partial class ServiceRegistrationExtensions
         // lands. The two declarations are separate so the page's file can be added without a second edit here.
         RegisterLuggerArrangementServices(services);
         RegisterLuggerArrangementPage(services);
+
+        // The dunnage catalogue (feature 018): the one read both surfaces share, and the page route its story
+        // phase contributes. The two declarations are separate so the page's file can be added without a second
+        // edit here.
+        RegisterDunnageCatalogue(services);
+        RegisterDunnageCataloguePage(services);
 
         // Configuration
         services.Configure<WaitlistDatabaseOptions>(context.Configuration.GetSection(nameof(WaitlistDatabaseOptions)));
@@ -479,4 +485,14 @@ public static partial class ServiceRegistrationExtensions
     /// The lugger arrangement's Settings page and its route, contributed by the story phase that builds them.
     /// </summary>
     static partial void RegisterLuggerArrangementPage(IServiceCollection services);
+
+    /// <summary>
+    /// Feature 018's dunnage catalogue: the one read both surfaces draw, and the view model in front of it.
+    /// </summary>
+    static partial void RegisterDunnageCatalogue(IServiceCollection services);
+
+    /// <summary>
+    /// Feature 018's dunnage page and its route, contributed by the story phase that builds the page.
+    /// </summary>
+    static partial void RegisterDunnageCataloguePage(IServiceCollection services);
 }

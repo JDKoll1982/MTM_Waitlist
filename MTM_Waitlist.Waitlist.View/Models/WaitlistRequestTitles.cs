@@ -1,3 +1,5 @@
+using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
 
@@ -175,19 +177,52 @@ public static class WaitlistRequestTitles
     /// </remarks>
     public static string? ResolveDunnagePartPicturePath(
         RequestItemLine2Context? context,
-        RequestJobPartAvailability? jobAvailability)
+        RequestJobPartAvailability? jobAvailability,
+        IReadOnlyDictionary<string, string>? answers = null)
     {
         var dunnagePartNumber = Trimmed(context?.DunnagePart);
-        if (dunnagePartNumber is null || jobAvailability is null)
+        if (dunnagePartNumber is null)
         {
             return null;
         }
 
-        var part = jobAvailability.DunnageParts.FirstOrDefault(candidate =>
-            string.Equals(candidate?.PartNumber?.Trim(), dunnagePartNumber, StringComparison.OrdinalIgnoreCase));
+        if (jobAvailability is not null)
+        {
+            var part = jobAvailability.DunnageParts.FirstOrDefault(candidate =>
+                string.Equals(candidate?.PartNumber?.Trim(), dunnagePartNumber, StringComparison.OrdinalIgnoreCase));
 
-        return Trimmed(part?.ImagePath);
+            var fromTheJob = Trimmed(part?.ImagePath);
+            if (fromTheJob is not null)
+            {
+                return fromTheJob;
+            }
+        }
+
+        // A generic request has no job, so the picture it recorded for itself is the only one there is. A job
+        // snapshot that carries the part but no picture is not improved by this: the record answers nothing for it
+        // either, and the card stays on the shared placeholder.
+        return Trimmed(GenericRequestDunnageAnswer.TryRead(answers)?.PicturePath);
     }
+
+    /// <summary>
+    /// The sentence a request carries when the dunnage part it names has left the catalogue, or <c>null</c> when
+    /// the part is still offered or the request states no dunnage.
+    /// </summary>
+    /// <param name="answers">The request's stored answers.</param>
+    /// <returns>The marker's words, or <see langword="null"/>.</returns>
+    /// <remarks>
+    /// The part is kept on the request rather than dropped or replaced, so the confirmation, the card and the
+    /// detail go on naming it and say that the catalogue no longer offers it (FR-009). One sentence, with no part
+    /// number in it: the part number is the line above on every surface that shows this, and repeating it would
+    /// let the two readings disagree.
+    /// </remarks>
+    public static string? ResolveDunnageGoneMarker(IReadOnlyDictionary<string, string>? answers) =>
+        GenericRequestDunnageAnswer.TryRead(answers) is { Offered: false }
+            ? DunnageGoneMarkerKey.GetLocalized()
+            : null;
+
+    /// <summary>The resource key the gone marker's words come from.</summary>
+    public const string DunnageGoneMarkerKey = "WaitlistRequest_Dunnage_Gone.Text";
 
     /// <summary>
     /// The same rule for the Items whose part comes from the job alone, so a surface that has no request in hand

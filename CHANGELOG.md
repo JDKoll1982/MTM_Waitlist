@@ -10,6 +10,45 @@
 
 ---
 
+## 2026-11-05 — the dunnage step is now the real dunnage catalogue, as a full page
+
+**What changed:** a generic work-center request that asks for dunnage used to open a two-list step — pick a dunnage
+type, then pick a part from a plain list, with no pictures. The step is now the plant's own **image-backed dunnage
+catalogue**, drawn as a full page of the wizard. It is the same catalogue, with the same pictures and the same
+search, that the substitute picker already shows on a work-order request.
+
+**Why it matters:** a dunnage part is chosen by looking at it. A plain list of part numbers is the wrong shape for
+that, and it also meant nobody could tell whether the two screens were offering the same parts.
+
+**What to expect:**
+
+- **One filter box** matches a part by its part number, its type or its location, and the **Show all / Images only**
+  switch works exactly as it does in the substitute picker. Both are remembered per person, so they follow you to
+  another computer.
+- **Nothing is chosen for you.** The forward button stays closed until you pick a part, so a request can no longer
+  be raised naming dunnage nobody chose.
+- **One part per request.** The page says so, and a second part is a second request.
+- **Coming back to the page shows the part you chose**, and the request keeps it even if the catalogue has since
+  stopped offering it — the request then says the part is no longer in the catalogue rather than quietly dropping it.
+- **While the catalogue loads you see progress,** never an empty list. If the catalogue cannot be read, the page says
+  so with the time it tried and a **Retry**; if the plant genuinely offers no dunnage parts, it says that instead.
+- **The substitute picker on a work-order request is unchanged** — same parts, same pictures, same search, same
+  wording. It now draws the same catalogue component the page does, which is what keeps the two from drifting apart.
+- **The dunnage question is asked on the dunnage page and nowhere else.** Choosing *Dunnage* on the item step used to
+  also show a "Which dunnage do you need…" list on that same screen. A generic request has no job to fill that list
+  from, so it stayed empty and the forward button never opened. That list is gone: the catalogue page is now the only
+  place the part is chosen, and choosing *Dunnage* takes you straight to it.
+- **Dunnage, scrap and die requests no longer stop at the details page.** Picking the dunnage part, the scrap type or
+  the die now goes straight to the confirmation. That page only asked *how many* and *anything else the handler should
+  know*; the quantity is never stored for any request, and these three are about one thing the operator picked, so the
+  page only stood between the answer and the confirmation. They are raised with no description, because the page that
+  collects one never opens. Every other request type still answers the details page as before.
+
+**IT Department:** no database change. The read is the existing `sp_Dunnage_Parts_GetAll` on
+`mtm_receiving_application`, and the chosen part is recorded on the request's existing answers column.
+
+---
+
 ## 2026-10-27 — the dunnage types on the visibility screen show their pictures again
 
 **What changed:** the **Dunnage Type Visibility** list on the Operations settings page drew the no-picture

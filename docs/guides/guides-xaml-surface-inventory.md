@@ -52,6 +52,7 @@ Paths are relative to the repository root. *Modal* says whether the surface open
 | Control | Module_Settings | ImageOverrideEditorControl.xaml | `Module_Settings/Views/ImageOverrideEditorControl.xaml` | no |
 | Control | Module_Settings | PermissionHoldersView.xaml | `Module_Settings/Views/PermissionHoldersView.xaml` | no |
 | Control | Module_Shared | ClickToEnlargeImageView.xaml | `Module_Shared/Controls/ClickToEnlargeImageView.xaml` | no |
+| Control | Module_Shared | DunnageCatalogueView.xaml | `Module_Shared/Controls/DunnageCatalogueView.xaml` | no |
 | Control | Module_Shared | RotatingTextView.xaml | `Module_Shared/Controls/RotatingTextView.xaml` | no |
 | Control | Module_Startup | SetUpPanel.xaml | `Module_Startup/Views/SetUpPanel.xaml` | no |
 | Control | Module_Waitlist | WaitlistLineCardView.xaml | `Module_Waitlist/Controls/WaitlistLineCardView.xaml` | no |
@@ -112,7 +113,7 @@ Paths are relative to the repository root. *Modal* says whether the surface open
 | Page | MTM_Waitlist.GenericRequest | GenericRequestCategoryPage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestCategoryPage.xaml` | no |
 | Page | MTM_Waitlist.GenericRequest | GenericRequestDetailsPage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestDetailsPage.xaml` | no |
 | Page | MTM_Waitlist.GenericRequest | GenericRequestDiePage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestDiePage.xaml` | no |
-| Page | MTM_Waitlist.GenericRequest | GenericRequestDunnagePage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestDunnagePage.xaml` | no |
+| Page | Module_GenericRequest | GenericRequestDunnagePage.xaml | `Module_GenericRequest/Views/GenericRequestDunnagePage.xaml` | no |
 | Page | MTM_Waitlist.GenericRequest | GenericRequestItemPage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestItemPage.xaml` | no |
 | Page | MTM_Waitlist.GenericRequest | GenericRequestPartPage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestPartPage.xaml` | no |
 | Page | MTM_Waitlist.GenericRequest | GenericRequestResultPage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestResultPage.xaml` | no |

@@ -57,6 +57,12 @@ public sealed partial class GenericRequestStepFrame : UserControl
     public static readonly DependencyProperty ContinueVisibleProperty = DependencyProperty.Register(
         nameof(ContinueVisible), typeof(bool), typeof(GenericRequestStepFrame), new PropertyMetadata(true, OnTextChanged));
 
+    public static readonly DependencyProperty LoadingTextProperty = DependencyProperty.Register(
+        nameof(LoadingText), typeof(string), typeof(GenericRequestStepFrame), new PropertyMetadata(string.Empty, OnTextChanged));
+
+    public static readonly DependencyProperty UnavailableTextProperty = DependencyProperty.Register(
+        nameof(UnavailableText), typeof(string), typeof(GenericRequestStepFrame), new PropertyMetadata(string.Empty, OnTextChanged));
+
     public GenericRequestStepFrame()
     {
         InitializeComponent();
@@ -83,6 +89,27 @@ public sealed partial class GenericRequestStepFrame : UserControl
     {
         get => (bool)GetValue(ContinueVisibleProperty);
         set => SetValue(ContinueVisibleProperty, value);
+    }
+
+    /// <summary>
+    /// What the frame says while the read is in flight, when a step has its own words for it. Empty keeps the ring
+    /// on its own, which is what the steps that have no such line show.
+    /// </summary>
+    public string LoadingText
+    {
+        get => (string)GetValue(LoadingTextProperty);
+        set => SetValue(LoadingTextProperty, value);
+    }
+
+    /// <summary>
+    /// The step's own sentence for a failed read, already carrying its attempt time. When it is set the frame draws
+    /// it in place of its generic heading and its separate attempt line, so the same moment is not named twice;
+    /// when it is empty every other step keeps the heading and attempt line it has always had.
+    /// </summary>
+    public string UnavailableText
+    {
+        get => (string)GetValue(UnavailableTextProperty);
+        set => SetValue(UnavailableTextProperty, value);
     }
 
     /// <summary>The resource key of this step's heading.</summary>
@@ -149,17 +176,53 @@ public sealed partial class GenericRequestStepFrame : UserControl
 
     public string EmptyText => Resolve(EmptyKey);
 
-    public Visibility BodyVisibility => Presentation == GenericRequestPresentation.Populated
+    /// <summary>Whether the read is in flight, which is what keeps the progress ring turning.</summary>
+    public bool IsLoading => Presentation == GenericRequestPresentation.Loading;
+
+    public Visibility LoadingVisibility => Presentation == GenericRequestPresentation.Loading
         ? Visibility.Visible
         : Visibility.Collapsed;
 
-    public Visibility EmptyVisibility => Presentation == GenericRequestPresentation.Empty
+    /// <summary>The loading line is drawn only when a step has one of its own.</summary>
+    public Visibility LoadingTextVisibility => IsLoading && string.IsNullOrWhiteSpace(LoadingText) is false
         ? Visibility.Visible
         : Visibility.Collapsed;
 
-    public Visibility UnavailableVisibility => Presentation == GenericRequestPresentation.Unavailable
-        ? Visibility.Visible
-        : Visibility.Collapsed;
+    public Visibility BodyVisibility => Presentation is GenericRequestPresentation.Loading
+        ? Visibility.Collapsed
+        : Presentation == GenericRequestPresentation.Populated
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+
+    public Visibility EmptyVisibility => Presentation is GenericRequestPresentation.Loading
+        ? Visibility.Collapsed
+        : Presentation == GenericRequestPresentation.Empty
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+
+    public Visibility UnavailableVisibility => Presentation is GenericRequestPresentation.Loading
+        ? Visibility.Collapsed
+        : Presentation == GenericRequestPresentation.Unavailable
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+
+    /// <summary>The frame's own heading, drawn when the step supplied no sentence of its own.</summary>
+    public Visibility UnavailableHeadingVisibility => Presentation == GenericRequestPresentation.Unavailable
+        && string.IsNullOrWhiteSpace(UnavailableText)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+
+    /// <summary>The step's own sentence for a failed read, when it has one.</summary>
+    public Visibility UnavailableMessageVisibility => Presentation == GenericRequestPresentation.Unavailable
+        && string.IsNullOrWhiteSpace(UnavailableText) is false
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+
+    /// <summary>The attempt time, drawn beneath the frame's own heading and folded into a step's own sentence.</summary>
+    public Visibility UnavailableAttemptedVisibility => Presentation == GenericRequestPresentation.Unavailable
+        && string.IsNullOrWhiteSpace(UnavailableText)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
 
     /// <summary>The button labels, read for the automation name as well as drawn as the content.</summary>
     public string BackName => "GenericRequest_StepFrame_Back.Content".GetLocalized();

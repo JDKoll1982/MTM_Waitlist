@@ -66,6 +66,50 @@ public sealed class GenericRequestFlowRulesTests
             "the item step does not lead to the die step");
     }
 
+    [DataTestMethod]
+    [DataRow(GenericRequestStep.Dunnage, DisplayName = "a dunnage request")]
+    [DataRow(GenericRequestStep.Scrap, DisplayName = "a scrap request")]
+    [DataRow(GenericRequestStep.Die, DisplayName = "a die request")]
+    public void Audit_GenericRequestFlowRulesTests_ARequestAnsweredOnItsOwnStepSkipsTheDetailsPage(GenericRequestStep answerStep)
+    {
+        var draft = new GenericRequestDraft
+        {
+            RequiresDunnage = answerStep == GenericRequestStep.Dunnage,
+            RequiresScrap = answerStep == GenericRequestStep.Scrap,
+            RequiresDie = answerStep == GenericRequestStep.Die,
+        };
+
+        var order = GenericRequestFlowRules.Order(draft);
+
+        CollectionAssert.DoesNotContain(
+            order.ToArray(),
+            GenericRequestStep.Details,
+            "these requests answer one thing on their own step, so the details page has nothing to ask them");
+        Assert.AreEqual(
+            answerStep,
+            GenericRequestFlowRules.NextStep(draft, GenericRequestStep.Item),
+            "the item step should lead straight to the step that answers it");
+        Assert.AreEqual(
+            GenericRequestStep.Summary,
+            GenericRequestFlowRules.NextStep(draft, answerStep),
+            "the answer step should lead on to the confirmation");
+        Assert.AreEqual(
+            answerStep,
+            GenericRequestFlowRules.PreviousStep(draft, GenericRequestStep.Summary),
+            "going back from the confirmation should return to the answer step, not to a page that was never shown");
+    }
+
+    [TestMethod]
+    public void Audit_GenericRequestFlowRulesTests_AProvedPartRequestKeepsTheDetailsPage()
+    {
+        var draft = new GenericRequestDraft { RequiresPart = true };
+
+        CollectionAssert.Contains(
+            GenericRequestFlowRules.Order(draft).ToArray(),
+            GenericRequestStep.Details,
+            "a proved-part request is not one of the three answered on their own step, so it still answers details");
+    }
+
     [TestMethod]
     public void Audit_GenericRequestFlowRulesTests_TheEndsOfTheFlowAreClamped()
     {

@@ -1,11 +1,10 @@
-enabled: true
-exempt: ["*.config.*", "*.test.*", "**/migrations/**"]
 # --------------------------------------------------------------------------------------------
-# THE REGISTRY IS NOT THE REPOSITORY. One capability is declared below; everything else in the
+# THE REGISTRY IS NOT THE REPOSITORY. Two capabilities are declared below; everything else in the
 # tree has NO living spec, so drift across it is invisible by construction -- and a green
 # `drift.py` run means "the registry is complete with respect to itself", not "the repo is in
 # sync". Unwatched today: MTM_Waitlist.Waitlist.View/**, Module_Waitlist/**, MTM_Waitlist.Core/**,
-# MTM_Waitlist.Setup/**, Module_Setup/**, Database/**, Strings/**, Views/**, ViewModels/**.
+# MTM_Waitlist.Setup/** (except the dunnage catalogue reader), Module_Setup/**, Module_Shared/**
+# (except the dunnage catalogue control), Database/**, Strings/**, Views/**, ViewModels/**.
 # Adopting an area is opt-in via /speckit.companion.living-adopt.
 # The standing record -- what is watched, what was found, and this blind spot -- is
 # `docs/living-specs/living-specs-drift-ledger.md`. Read it before trusting a green run.
@@ -14,10 +13,17 @@ exempt: ["*.config.*", "*.test.*", "**/migrations/**"]
 # and `startup-diagnostics`, were retired with the code they matched. The rebuilt surface is one
 # capability, `startup-launch`, and it is the whole of both areas the old pair split between them:
 # the old split existed because the file-based log path was its own concern, and that path is gone.
+#
+# 2026-11-05 (feature 018): `dunnage-catalogue` adopted, because the substitute dialog and the
+# generic request's dunnage page now draw one catalogue from one read, and the rule that keeps
+# them from drifting is what the two surfaces rely on.
 # --------------------------------------------------------------------------------------------
+enabled: true
+exempt: ["*.config.*", "*.test.*", "**/migrations/**"]
 capabilities:
   - name: startup-launch
     match: ["MTM_Waitlist.Startup/**", "Module_Startup/**"]
-    # Declared explicitly: the spec lives with the rest of the documentation under docs/,
-    # not at the default `capabilities/<name>/<name>.spec.md` path.
     spec: docs/living-specs/living-specs-capability-startup-launch.spec.md
+  - name: dunnage-catalogue
+    match: ["Module_Shared/Controls/DunnageCatalogueView.*", "MTM_Waitlist.Shared/ViewModels/DunnageCatalogueViewModel.cs", "MTM_Waitlist.Shared/Models/DunnageCataloguePart.cs", "MTM_Waitlist.Shared/Services/IDunnageCatalogueReader.cs", "MTM_Waitlist.Setup/Services/DunnageCatalogueReader.cs"]
+

@@ -26,6 +26,21 @@
         </StackPanel>
 
         <Grid Grid.Row="1">
+            <StackPanel
+                Spacing="8"
+                VerticalAlignment="Top"
+                Visibility="{x:Bind LoadingVisibility}">
+                <ProgressRing
+                    HorizontalAlignment="Left"
+                    IsActive="{x:Bind IsLoading}"
+                    Visibility="{x:Bind LoadingVisibility}" />
+                <TextBlock
+                    Text="{x:Bind LoadingText}"
+                    TextWrapping="Wrap"
+                    Visibility="{x:Bind LoadingTextVisibility}"
+                    Style="{StaticResource BodyTextBlockStyle}" />
+            </StackPanel>
+
             <ContentPresenter
                 Content="{x:Bind Body}"
                 Visibility="{x:Bind BodyVisibility}" />
@@ -44,8 +59,17 @@
                 <TextBlock
                     x:Uid="GenericRequest_StepFrame_Unavailable_Title"
                     TextWrapping="Wrap"
+                    Visibility="{x:Bind UnavailableHeadingVisibility}"
                     Style="{StaticResource SubtitleTextBlockStyle}" />
-                <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock
+                    Text="{x:Bind UnavailableText}"
+                    TextWrapping="Wrap"
+                    Visibility="{x:Bind UnavailableMessageVisibility}"
+                    Style="{StaticResource SubtitleTextBlockStyle}" />
+                <StackPanel
+                    Orientation="Horizontal"
+                    Spacing="8"
+                    Visibility="{x:Bind UnavailableAttemptedVisibility}">
                     <TextBlock
                         x:Uid="GenericRequest_StepFrame_Unavailable_Attempted"
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
