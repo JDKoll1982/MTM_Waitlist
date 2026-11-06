@@ -1,0 +1,13 @@
+{
+  // Extensions this workspace's build, test, and agent workflows actually depend on.
+  "recommendations": [
+    "ms-dotnettools.csdevkit",
+    "ms-dotnettools.csharp",
+    "ms-dotnettools.vscode-dotnet-runtime",
+    "ms-vscode.powershell",
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "alfredoperez.speckit-companion"
+  ],
+  "unwantedRecommendations": []
+}

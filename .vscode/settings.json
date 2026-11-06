@@ -40,7 +40,8 @@
         "XXX",
         "[ ]"
     ],
-    // The built-in GitHub MCP server adds 18 tools; disabling it keeps the chat tool
-    // count under the 128-tool BYOK model limit. Use the `gh` CLI instead.
+    // The built-in GitHub MCP server adds ~18 tools and duplicates the `gh` CLI, which is the
+    // approved path for GitHub operations in this repo. Disabled by choice — not because of the old
+    // 128-tool BYOK cap, which deepseek-v4-for-copilot removed in 0.9.4.
     "chat.agentHost.githubMcpServer.enabled": false
 }
