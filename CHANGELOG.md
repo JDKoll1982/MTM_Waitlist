@@ -35,7 +35,33 @@ smallest thing on the page.
 
 **IT Department:** no data change. The thread is the request's existing audit trail filtered to entries that carry
 words; nothing is hidden from the store, and the automation ids (`WaitlistViewDetailPage_NoteInput`,
-`WaitlistViewDetailPage_SaveNoteButton`) are unchanged.
+`WaitlistViewDetailPage_SaveNoteButton`) are unchanged. The audit view is that same trail, unfiltered, behind the
+card's toggle (`WaitlistViewDetailPage_ShowAuditButton`, `WaitlistViewDetailPage_ShowMessagesButton`).
+
+---
+
+## 2026-11-06 — the thread shows who is speaking, and the audit trail moves behind a button
+
+**What changed:** the messages on a request now sit on the side of whoever sent them — your own on the right, everyone
+else's on the left — with the sender's name in small print under each bubble. The card's header row now carries a
+single icon button that swaps the conversation for the request's audit trail and back.
+
+**Why it matters:** a conversation is read by who is speaking, so the side a message sits on carries as much as the
+words do. The changes that happen without anyone typing — a request accepted, completed or cancelled — had nowhere to
+show once the timeline became a conversation, so they moved behind the button instead of being lost.
+
+**What to expect:**
+
+- **Your messages are on the right, in the accent colour; everyone else's are on the left, in grey.** The sender is
+  named beneath each bubble in small print.
+- **One card, one header.** The header names whichever view is showing — *Message* or *Audit* — and the icon button at
+  its right switches between them. The icon is a list mark for the audit trail and a speech mark for the conversation,
+  so the button always shows what you will get, not what you are looking at.
+- **The audit trail lists every change**, with when it happened, who caused it, and what it was. A change nobody made
+  by hand reads as the event it was, such as *Created* or *Accepted*.
+- **The composer is unchanged** and stays in place in both views.
+
+**IT Department:** no data change and no new stored procedure. Both views read the same audit trail in one call.
 
 ---
 

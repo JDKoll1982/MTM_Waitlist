@@ -6,10 +6,71 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Waitlist.Models"
+    xmlns:converters="using:MTM_Waitlist.Module_Waitlist.Converters"
     xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
     xmlns:shared="using:MTM_Waitlist.Module_Shared.Services"
     xmlns:dev="using:DevWinUI"
     mc:Ignorable="d">
+
+    <Page.Resources>
+        <!-- One bubble template per side, because the two sides differ in more than alignment: their bubble and
+             text colours are different theme brushes, and a theme brush can only be named statically. -->
+        <DataTemplate x:Key="MineMessageTemplate" x:DataType="models:WaitlistMessageRow">
+            <StackPanel
+                Margin="0,0,0,10"
+                HorizontalAlignment="Right">
+                <Border
+                    Padding="14,10"
+                    HorizontalAlignment="Right"
+                    Background="{ThemeResource AccentFillColorDefaultBrush}"
+                    CornerRadius="12"
+                    MaxWidth="560">
+                    <TextBlock
+                        Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                        IsTextSelectionEnabled="True"
+                        Text="{x:Bind Text}"
+                        TextWrapping="WrapWholeWords" />
+                </Border>
+                <TextBlock
+                    Margin="6,4,6,0"
+                    HorizontalAlignment="Right"
+                    FontSize="11"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="{x:Bind SenderDisplayName}"
+                    TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="TheirMessageTemplate" x:DataType="models:WaitlistMessageRow">
+            <StackPanel
+                Margin="0,0,0,10"
+                HorizontalAlignment="Left">
+                <Border
+                    Padding="14,10"
+                    HorizontalAlignment="Left"
+                    Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                    CornerRadius="12"
+                    MaxWidth="560">
+                    <TextBlock
+                        IsTextSelectionEnabled="True"
+                        Text="{x:Bind Text}"
+                        TextWrapping="WrapWholeWords" />
+                </Border>
+                <TextBlock
+                    Margin="6,4,6,0"
+                    HorizontalAlignment="Left"
+                    FontSize="11"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="{x:Bind SenderDisplayName}"
+                    TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+        </DataTemplate>
+
+        <converters:WaitlistMessageTemplateSelector
+            x:Key="MessageTemplateSelector"
+            MineTemplate="{StaticResource MineMessageTemplate}"
+            TheirTemplate="{StaticResource TheirMessageTemplate}" />
+    </Page.Resources>
 
     <Grid
         x:Name="ContentArea"
@@ -328,13 +389,14 @@
                      which is where a handler works through the queue. This page reads the request, takes a note
                      and shows what has happened to it. -->
 
-                <!-- One card, read as a conversation: what has been said above, the composer beneath it, and one
-                     header over both. The author and the time are deliberately not drawn — this is a scrolling
-                     stream of what the floor has said about the request, not an audit table — so a row is only ever
-                     words. Anyone signed in may send one; it is not gated on the handler role. Text is pushed to the
-                     view model as it is typed: x:Bind defaults TextBox.Text to LostFocus, which meant the first
-                     click read an empty draft and saved nothing. The box grows to a ceiling and then scrolls,
-                     because a TextBox with AcceptsReturn grows without one. -->
+                <!-- One card, read as a conversation: the thread above, the composer beneath it, and one header over
+                     both carrying the toggle that swaps the thread for the audit trail. The audit trail is where the
+                     changes that carry no words live — a request accepted, completed or cancelled — so they stay
+                     reachable without putting an empty bubble in the conversation. Anyone signed in may send a
+                     message; it is not gated on the handler role. Text is pushed to the view model as it is typed:
+                     x:Bind defaults TextBox.Text to LostFocus, which meant the first click read an empty draft and
+                     saved nothing. The box grows to a ceiling and then scrolls, because a TextBox with AcceptsReturn
+                     grows without one. -->
                 <Border
                     Grid.Row="4"
                     Margin="0,0,0,16"
@@ -345,40 +407,103 @@
                     CornerRadius="12"
                     Visibility="{x:Bind ViewModel.IsItemPresent, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                     <StackPanel Spacing="12">
-                        <TextBlock
-                            Style="{ThemeResource SubtitleTextBlockStyle}"
-                            Text="{x:Bind ViewModel.NoteLabel, Mode=OneWay}" />
 
-                        <ScrollViewer
-                            MaxHeight="280"
-                            AutomationProperties.AutomationId="WaitlistViewDetailPage_MessageStream"
-                            VerticalScrollBarVisibility="Auto"
-                            Visibility="{x:Bind ViewModel.HasMessageStream, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <ItemsControl ItemsSource="{x:Bind ViewModel.MessageStream, Mode=OneWay}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="models:WaitlistRequestAuditEntry">
-                                        <Border
-                                            Margin="0,0,0,8"
-                                            Padding="14,10"
-                                            HorizontalAlignment="Left"
-                                            MaxWidth="680"
-                                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
-                                            CornerRadius="12">
-                                            <TextBlock
-                                                IsTextSelectionEnabled="True"
-                                                Text="{x:Bind Details}"
-                                                TextWrapping="WrapWholeWords" />
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
+                        <Grid>
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Style="{ThemeResource SubtitleTextBlockStyle}"
+                                Text="{x:Bind ViewModel.StreamTitle, Mode=OneWay}" />
 
-                        <TextBlock
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{x:Bind ViewModel.MessageStreamEmptyText, Mode=OneWay}"
-                            TextWrapping="WrapWholeWords"
-                            Visibility="{x:Bind ViewModel.IsMessageStreamEmpty, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            <StackPanel
+                                HorizontalAlignment="Right"
+                                Orientation="Horizontal"
+                                Spacing="4">
+                                <Button
+                                    Padding="8"
+                                    AutomationProperties.AutomationId="WaitlistViewDetailPage_ShowMessagesButton"
+                                    AutomationProperties.Name="{x:Bind ViewModel.ShowMessagesText, Mode=OneWay}"
+                                    Command="{x:Bind ViewModel.ShowMessagesCommand}"
+                                    Visibility="{x:Bind ViewModel.CanShowMessages, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                                    shared:TooltipBehavior.AssociatedFiles="Module_Waitlist/Views/WaitlistViewDetailPage.xaml|MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs"
+                                    shared:TooltipBehavior.FallbackText="Show the messages."
+                                    shared:TooltipBehavior.ResourceKey="Waitlist_Note_Toggle_Messages_Tooltip">
+                                    <FontIcon FontSize="16" Glyph="&#xE8BD;" />
+                                </Button>
+                                <Button
+                                    Padding="8"
+                                    AutomationProperties.AutomationId="WaitlistViewDetailPage_ShowAuditButton"
+                                    AutomationProperties.Name="{x:Bind ViewModel.ShowAuditText, Mode=OneWay}"
+                                    Command="{x:Bind ViewModel.ShowAuditCommand}"
+                                    Visibility="{x:Bind ViewModel.CanShowAudit, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                                    shared:TooltipBehavior.AssociatedFiles="Module_Waitlist/Views/WaitlistViewDetailPage.xaml|MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs"
+                                    shared:TooltipBehavior.FallbackText="Show the audit trail."
+                                    shared:TooltipBehavior.ResourceKey="Waitlist_Note_Toggle_Audit_Tooltip">
+                                    <FontIcon FontSize="16" Glyph="&#xE81C;" />
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- The message thread. A message the signed-in person sent sits on the right and everyone
+                             else's on the left, with the sender in small print beneath the bubble. -->
+                        <StackPanel Spacing="0" Visibility="{x:Bind ViewModel.CanShowAudit, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <ScrollViewer
+                                MaxHeight="280"
+                                AutomationProperties.AutomationId="WaitlistViewDetailPage_MessageStream"
+                                VerticalScrollBarVisibility="Auto"
+                                Visibility="{x:Bind ViewModel.HasMessageStream, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <ItemsControl
+                                    ItemTemplateSelector="{StaticResource MessageTemplateSelector}"
+                                    ItemsSource="{x:Bind ViewModel.MessageStream, Mode=OneWay}" />
+                            </ScrollViewer>
+
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind ViewModel.MessageStreamEmptyText, Mode=OneWay}"
+                                TextWrapping="WrapWholeWords"
+                                Visibility="{x:Bind ViewModel.IsMessageStreamEmpty, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        </StackPanel>
+
+                        <!-- The audit trail behind the toggle: every change, with who made it and when. -->
+                        <StackPanel Spacing="0" Visibility="{x:Bind ViewModel.IsAuditVisible, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <ScrollViewer
+                                MaxHeight="280"
+                                AutomationProperties.AutomationId="WaitlistViewDetailPage_AuditTrail"
+                                VerticalScrollBarVisibility="Auto">
+                                <ItemsControl ItemsSource="{x:Bind ViewModel.AuditRows, Mode=OneWay}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="models:WaitlistMessageRow">
+                                            <Grid
+                                                Padding="0,5"
+                                                ColumnSpacing="12">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" MinWidth="140" />
+                                                    <ColumnDefinition Width="Auto" MinWidth="140" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock
+                                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                    Text="{x:Bind OccurredLocalText}" />
+                                                <TextBlock
+                                                    Grid.Column="1"
+                                                    FontWeight="SemiBold"
+                                                    Text="{x:Bind SenderDisplayName}"
+                                                    TextTrimming="CharacterEllipsis" />
+                                                <TextBlock
+                                                    Grid.Column="2"
+                                                    Text="{x:Bind Text}"
+                                                    TextWrapping="WrapWholeWords" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+
+                            <TextBlock
+                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                Text="{x:Bind ViewModel.AuditEmptyText, Mode=OneWay}"
+                                TextWrapping="WrapWholeWords"
+                                Visibility="{x:Bind ViewModel.HasAuditRows, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Invert}" />
+                        </StackPanel>
 
                         <Grid ColumnSpacing="8">
                             <Grid.ColumnDefinitions>

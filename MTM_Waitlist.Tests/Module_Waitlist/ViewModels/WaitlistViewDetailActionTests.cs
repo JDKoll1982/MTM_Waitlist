@@ -1,5 +1,5 @@
 using System.Xml.Linq;
-
+using Microsoft.UI.Xaml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Helpers;
@@ -215,31 +215,71 @@ public sealed class WaitlistViewDetailActionTests
         Assert.AreEqual("Sent message", viewModel.NoteDraft, "The sent message stays in the box after a refresh.");
     }
 
-    // ── The stream shows what was said, and nothing about who or when ────────────────────────────────
+    // ── The stream is a conversation: sides, a small-print sender, and no log columns ────────────────
 
     [TestMethod]
-    public void ViewModel_WaitlistViewDetailActionTests_RequestPage_TheMessageStreamShowsTheWordsAndNoAttribution()
+    public void ViewModel_WaitlistViewDetailActionTests_RequestPage_AMessageIsDrawnOnItsSendersSide()
     {
-        // The owner asked for a chat-style thread on the request page: the words, and nothing beside them. A sender
-        // name and a timestamp on every row turned the conversation into an audit table, so this replaces the
-        // earlier rule that a history row must name its sender.
-        var page = LoadPage();
-        var streamTemplate = page
-            .Descendants(s_presentation + "DataTemplate")
-            .First(template => template.Descendants().Any(element => element.Attribute("Text")?.Value.Contains("Details", StringComparison.Ordinal) == true));
+        var mine = WaitlistMessageRow.From(
+            new WaitlistRequestAuditEntry { EventType = "NoteUpdated", Details = "mine", EmployeeNumber = "1234", EmployeeName = "J. Koll" },
+            "1234");
+        var theirs = WaitlistMessageRow.From(
+            new WaitlistRequestAuditEntry { EventType = "NoteUpdated", Details = "theirs", EmployeeNumber = "9999", EmployeeName = "Hana Handler" },
+            "1234");
 
-        Assert.IsFalse(
-            streamTemplate.Descendants().Any(element => element.Attribute("Text")?.Value.Contains("ActorDisplayName", StringComparison.Ordinal) == true),
-            "A chat row does not name its sender.");
-
-        Assert.IsFalse(
-            streamTemplate.Descendants().Any(element => element.Attribute("Text")?.Value.Contains("OccurredLocalText", StringComparison.Ordinal) == true),
-            "A chat row does not carry a timestamp: the stream reads as a conversation, not a log.");
-
-        Assert.IsFalse(
-            streamTemplate.Descendants().Any(element => element.Attribute("Text")?.Value.Contains("EventType", StringComparison.Ordinal) == true),
-            "The message type must not be shown to the user.");
+        Assert.AreEqual(HorizontalAlignment.Right, mine.Alignment, "The signed-in person's own message sits on the right.");
+        Assert.AreEqual(HorizontalAlignment.Left, theirs.Alignment, "Everyone else's message sits on the left.");
+        Assert.IsTrue(mine.IsMine);
+        Assert.IsFalse(theirs.IsMine);
     }
+
+    [TestMethod]
+    public void ViewModel_WaitlistViewDetailActionTests_RequestPage_TheSenderIsNamedInSmallPrintUnderTheBubble()
+    {
+        var bubbles = BubbleTemplates().ToArray();
+
+        Assert.AreEqual(2, bubbles.Length, "Each side draws the sender beneath its bubble, so both bubble templates carry the name.");
+
+        foreach (var template in bubbles)
+        {
+            var name = template
+                .Descendants()
+                .First(element => element.Attribute("Text")?.Value.Contains("SenderDisplayName", StringComparison.Ordinal) == true);
+
+            Assert.AreEqual("11", name.Attribute("FontSize")?.Value, "The sender is small print, not a second heading.");
+        }
+    }
+
+    [TestMethod]
+    public void ViewModel_WaitlistViewDetailActionTests_RequestPage_ABubbleCarriesNeitherATimeNorAnEventType()
+    {
+        // The thread reads as a conversation. The time and the event type belong to the audit view behind the card's
+        // own toggle, so a bubble showing either would turn the conversation back into a log.
+        var bubbles = BubbleTemplates().ToArray();
+
+        Assert.AreEqual(2, bubbles.Length, "The bubble templates were not found.");
+
+        foreach (var template in bubbles)
+        {
+            Assert.IsFalse(
+                template.Descendants().Any(element => element.Attribute("Text")?.Value.Contains("OccurredLocalText", StringComparison.Ordinal) == true),
+                "A bubble does not carry a timestamp.");
+            Assert.IsFalse(
+                template.Descendants().Any(element => element.Attribute("Text")?.Value.Contains("EventType", StringComparison.Ordinal) == true),
+                "A bubble does not name the event that recorded it.");
+        }
+    }
+
+    /// <summary>
+    /// The two bubble templates, told apart from the audit row by the small print that names the sender. The audit
+    /// view names its sender as a bold column, so it is not one of these.
+    /// </summary>
+    private static IEnumerable<XElement> BubbleTemplates() =>
+        LoadPage()
+            .Descendants(s_presentation + "DataTemplate")
+            .Where(template => template.Descendants().Any(element =>
+                element.Attribute("Text")?.Value.Contains("SenderDisplayName", StringComparison.Ordinal) == true
+                && element.Attribute("FontSize")?.Value == "11"));
 
     [TestMethod]
     public async Task ViewModel_WaitlistViewDetailActionTests_RequestPage_TheStreamCarriesOnlyEntriesThatHaveWords()
@@ -262,11 +302,74 @@ public sealed class WaitlistViewDetailActionTests
 
         CollectionAssert.AreEqual(
             new[] { "first", "second" },
-            viewModel.MessageStream.Select(entry => entry.Details ?? string.Empty).ToArray(),
+            viewModel.MessageStream.Select(row => row.Text).ToArray(),
             "The stream carries the words, oldest first, and nothing else.");
         Assert.AreEqual(4, viewModel.HistoryRows.Count, "The audit trail itself still holds every event.");
         Assert.IsTrue(viewModel.HasMessageStream);
         Assert.IsFalse(viewModel.IsMessageStreamEmpty);
+    }
+
+    [TestMethod]
+    public async Task ViewModel_WaitlistViewDetailActionTests_RequestPage_TheAuditViewKeepsTheEventsThatCarryNoWords()
+    {
+        // Accepting, completing and cancelling a request happen without the message box, so they never appear in the
+        // thread. They must still be readable, which is what the card's toggle is for.
+        var service = new StubRequestService(BuildRequest())
+        {
+            AuditTrail =
+            [
+                new WaitlistRequestAuditEntry { EventType = "Created" },
+                new WaitlistRequestAuditEntry { EventType = "NoteUpdated", Details = "first", EmployeeNumber = "1234", EmployeeName = "J. Koll" },
+                new WaitlistRequestAuditEntry { EventType = "Accepted" },
+            ],
+        };
+        var viewModel = BuildViewModel(service);
+
+        await viewModel.LoadHistoryAsync().ConfigureAwait(false);
+
+        Assert.AreEqual(1, viewModel.MessageStream.Count, "Only the entry with words is a message.");
+        Assert.AreEqual(3, viewModel.AuditRows.Count, "Every change is in the audit view, with or without words.");
+        Assert.AreEqual("Created", viewModel.AuditRows[0].Text, "An event with no words is named, never left blank.");
+        Assert.IsTrue(viewModel.AuditRows[0].IsSystem, "A change nobody made by hand is marked as the system's.");
+        Assert.AreEqual("first", viewModel.AuditRows[1].Text, "A note keeps its own words in the audit view too.");
+        Assert.IsFalse(viewModel.AuditRows[1].IsSystem);
+    }
+
+    [TestMethod]
+    public async Task ViewModel_WaitlistViewDetailActionTests_RequestPage_TheToggleSwapsTheThreadForTheAuditAndBack()
+    {
+        var service = new StubRequestService(BuildRequest())
+        {
+            AuditTrail = [new WaitlistRequestAuditEntry { EventType = "Created" }],
+        };
+        var viewModel = BuildViewModel(service);
+        await viewModel.LoadHistoryAsync().ConfigureAwait(false);
+
+        Assert.IsFalse(viewModel.IsAuditVisible, "The card opens on the conversation.");
+        Assert.IsTrue(viewModel.CanShowAudit, "The toggle offers the audit view.");
+        Assert.IsFalse(viewModel.CanShowMessages, "The toggle back is not drawn while the conversation is showing.");
+        Assert.AreEqual("Waitlist_Note.Label".GetLocalized(), viewModel.StreamTitle, "The header names the conversation.");
+
+        viewModel.ShowAuditCommand.Execute(null);
+
+        Assert.IsTrue(viewModel.IsAuditVisible);
+        Assert.IsTrue(viewModel.CanShowMessages, "The toggle now offers the conversation.");
+        Assert.IsFalse(viewModel.CanShowAudit);
+        Assert.AreEqual("Waitlist_Note.AuditLabel".GetLocalized(), viewModel.StreamTitle, "The header names the audit view.");
+        Assert.IsTrue(viewModel.HasAuditRows, "The audit view has the event to show.");
+
+        viewModel.ShowMessagesCommand.Execute(null);
+
+        Assert.IsFalse(viewModel.IsAuditVisible, "The toggle returns to the conversation.");
+    }
+
+    [TestMethod]
+    public void ViewModel_WaitlistViewDetailActionTests_WaitlistMessageRow_DescribesAnEventInPlainWords()
+    {
+        Assert.AreEqual("Note updated", WaitlistMessageRow.DescribeEvent("NoteUpdated"));
+        Assert.AreEqual("Created", WaitlistMessageRow.DescribeEvent("Created"));
+        Assert.AreEqual(string.Empty, WaitlistMessageRow.DescribeEvent(null));
+        Assert.AreEqual(string.Empty, WaitlistMessageRow.DescribeEvent("   "));
     }
 
     [TestMethod]

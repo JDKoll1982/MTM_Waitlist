@@ -249,4 +249,10 @@
   <data name="Waitlist_Note_Send_Tooltip" xml:space="preserve">
     <value>Send this message to whoever picks the request up.</value>
   </data>
+  <data name="Waitlist_Note_Toggle_Audit_Tooltip" xml:space="preserve">
+    <value>Show who changed this request and when.</value>
+  </data>
+  <data name="Waitlist_Note_Toggle_Messages_Tooltip" xml:space="preserve">
+    <value>Back to the messages.</value>
+  </data>
 </root>

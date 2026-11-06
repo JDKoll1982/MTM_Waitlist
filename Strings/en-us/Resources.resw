@@ -765,6 +765,15 @@
   <data name="Waitlist_Note.StreamEmpty" xml:space="preserve">
     <value>No messages yet. Anything you send appears here.</value>
   </data>
+  <data name="Waitlist_Note.AuditLabel" xml:space="preserve">
+    <value>Audit</value>
+  </data>
+  <data name="Waitlist_Note.ToggleMessages" xml:space="preserve">
+    <value>Show the messages</value>
+  </data>
+  <data name="Waitlist_Note.ToggleAudit" xml:space="preserve">
+    <value>Show the audit trail</value>
+  </data>
   <data name="Waitlist_Note.Unchanged" xml:space="preserve">
     <value>That message is already on the request.</value>
   </data>

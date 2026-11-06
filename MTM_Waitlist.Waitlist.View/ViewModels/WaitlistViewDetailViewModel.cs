@@ -356,20 +356,32 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     partial void OnNoteMessageChanged(string value) => OnPropertyChanged(nameof(HasNoteMessage));
 
     /// <summary>
-    /// The request's audit trail, newest last, read straight from the service. A request with no readable
-    /// history produces no rows, and the history block hides itself rather than drawing an empty shell.
+    /// The request's whole audit trail, newest last, read straight from the service. The thread the card normally
+    /// shows is built from it, and so is the audit view the card switches to — one read feeds both, so the two can
+    /// never disagree about what happened.
     /// </summary>
     public ObservableCollection<WaitlistRequestAuditEntry> HistoryRows { get; } = new();
 
     /// <summary>
-    /// What has been said on the request, oldest first, drawn as one stream above the composer.
+    /// What has been said on the request, oldest first, drawn as one stream above the composer. Each row knows which
+    /// side it is drawn on: the signed-in person's own messages right, everyone else's left.
     /// </summary>
     /// <remarks>
     /// Only entries that carry words are here. Creating, accepting, completing and cancelling a request are events
-    /// with nothing to say, so they never become a row a reader has to skip over — and with the author and the time
-    /// deliberately not drawn, a row with no words would be an empty box.
+    /// with nothing to say, so they never become a bubble; they are reachable through the audit view instead, which
+    /// is what the card's own toggle is for.
     /// </remarks>
-    public ObservableCollection<WaitlistRequestAuditEntry> MessageStream { get; } = new();
+    public ObservableCollection<WaitlistMessageRow> MessageStream { get; } = new();
+
+    /// <summary>
+    /// Every change recorded against the request, including the ones with no words, drawn as the audit view.
+    /// </summary>
+    /// <remarks>
+    /// This is the same trail the card used to draw beneath the composer before it became one chat surface. It moved
+    /// behind the toggle rather than away, because a handler still has to be able to see that a request was accepted
+    /// or completed and by whom.
+    /// </remarks>
+    public ObservableCollection<WaitlistMessageRow> AuditRows { get; } = new();
 
     /// <summary>Whether anyone has said anything on this request yet.</summary>
     public bool HasMessageStream => MessageStream.Count > 0;
@@ -379,6 +391,48 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
 
     /// <summary>What the stream says when nobody has written anything yet.</summary>
     public string MessageStreamEmptyText => "Waitlist_Note.StreamEmpty".GetLocalized();
+
+    /// <summary>Whether the card is showing the audit view rather than the message thread.</summary>
+    [ObservableProperty]
+    public partial bool IsAuditVisible { get; private set; }
+
+    /// <summary>The card's one header, which names whichever of the two views is in force.</summary>
+    public string StreamTitle => IsAuditVisible
+        ? "Waitlist_Note.AuditLabel".GetLocalized()
+        : "Waitlist_Note.Label".GetLocalized();
+
+    /// <summary>Whether the toggle that switches to the message thread is drawn, which it is only in the audit view.</summary>
+    public bool CanShowMessages => IsAuditVisible;
+
+    /// <summary>Whether the toggle that switches to the audit view is drawn, which it is only in the thread.</summary>
+    public bool CanShowAudit => !IsAuditVisible;
+
+    /// <summary>The accessible name of the toggle that returns to the message thread.</summary>
+    public string ShowMessagesText => "Waitlist_Note.ToggleMessages".GetLocalized();
+
+    /// <summary>The accessible name of the toggle that opens the audit view.</summary>
+    public string ShowAuditText => "Waitlist_Note.ToggleAudit".GetLocalized();
+
+    /// <summary>Whether the audit view has anything to list.</summary>
+    public bool HasAuditRows => AuditRows.Count > 0;
+
+    /// <summary>What the audit view says when nothing has been recorded at all.</summary>
+    public string AuditEmptyText => "Waitlist_History.Empty".GetLocalized();
+
+    partial void OnIsAuditVisibleChanged(bool value)
+    {
+        OnPropertyChanged(nameof(StreamTitle));
+        OnPropertyChanged(nameof(CanShowMessages));
+        OnPropertyChanged(nameof(CanShowAudit));
+    }
+
+    /// <summary>Switches the card to the audit view.</summary>
+    [RelayCommand]
+    private void ShowAudit() => IsAuditVisible = true;
+
+    /// <summary>Switches the card back to the message thread.</summary>
+    [RelayCommand]
+    private void ShowMessages() => IsAuditVisible = false;
 
     /// <summary>Heading for the history block.</summary>
     public string HistoryTitle => "Waitlist_History.Title".GetLocalized();
@@ -496,6 +550,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     {
         HistoryRows.Clear();
         MessageStream.Clear();
+        AuditRows.Clear();
 
         if (Item is not { RequestId: Guid requestId } || _requestService is null)
         {
@@ -511,8 +566,15 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
 
             if (!string.IsNullOrWhiteSpace(entry.Details))
             {
-                MessageStream.Add(entry);
+                MessageStream.Add(WaitlistMessageRow.From(entry, _currentEmployeeNumber));
             }
+
+            // An event with no words of its own is named in the audit view rather than drawn as an empty line: a
+            // handler reading the audit wants to know a request was accepted, not to see a gap where words would be.
+            AuditRows.Add(WaitlistMessageRow.From(
+                entry,
+                _currentEmployeeNumber,
+                WaitlistMessageRow.DescribeEvent(entry.EventType)));
         }
 
         if (_messageSeenStore is not null)
@@ -539,6 +601,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         OnPropertyChanged(nameof(IsHistoryEmpty));
         OnPropertyChanged(nameof(HasMessageStream));
         OnPropertyChanged(nameof(IsMessageStreamEmpty));
+        OnPropertyChanged(nameof(HasAuditRows));
     }
 
     public async void OnNavigatedTo(object parameter)
