@@ -2,6 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Shared.Helpers;
@@ -598,11 +599,287 @@ public sealed class WaitlistViewViewModelFieldTests
             "The cell's value is the answer the request itself carries, never a value the screen made up.");
     }
 
+    /// <summary>
+    /// A generic scrap card names the type the requester stated and the lugger the arrangement assigns to it now,
+    /// resolved through the same routine the work-order scrap card uses (FR-006, FR-007).
+    /// </summary>
+    /// <remarks>
+    /// The board's own load is what is driven, not <c>CreateSessionOrder</c> alone, because the merge that supplies a
+    /// generic card's scrap facts happens in the load loop and nowhere else.
+    /// </remarks>
+    [TestMethod]
+    public async Task ViewModel_WaitlistViewViewModelFieldTests_RefreshAsync_AGenericScrapCardNamesTheStatedTypeAndTheLuggerAssignedNow()
+    {
+        var provider = new FakeStatedScrapLuggerProvider(_ => new StatedScrapLugger("Door 6 Lugger", "C:\\pics\\door6.png", ArrangementRead: true));
+        var viewModel = BuildViewModel(
+            new RecordingRequestService(rowsAffected: 0, GenericScrap("Steel")),
+            itemConfigurationService: new StubItemConfigurationService(ScrapDeclaration()),
+            jobAvailabilityProvider: provider);
+
+        await viewModel.RefreshAsync().ConfigureAwait(false);
+
+        var row = viewModel.Source.Single();
+
+        Assert.AreEqual("Steel", Cell(row, "Scrap Type").Value, "The card names the type the requester stated.");
+        Assert.AreEqual(
+            "Steel",
+            row.Subtitle,
+            "The card's identifier line is the Item's `{scrap_type}` template, so it names the stated type.");
+        Assert.AreEqual("Door 6 Lugger", Cell(row, "Lugger Location").Value, "The card names the lugger assigned now.");
+        Assert.AreEqual(
+            "C:\\pics\\door6.png",
+            Cell(row, "Lugger Location").ResolvedReferenceImagePath,
+            "The lugger's own picture is what the card's left spot draws.");
+        CollectionAssert.AreEqual(
+            new[] { "Steel" },
+            provider.StatedReads,
+            "The stated type is resolved once for this request, through the one stated entry point.");
+    }
+
+    /// <summary>
+    /// A type whose luggers are all blocked draws the first lugger in the arrangement's order with its status beside
+    /// the name, never blank (FR-008). The arrangement builds that string, so the card shows it unchanged.
+    /// </summary>
+    [TestMethod]
+    public async Task ViewModel_WaitlistViewViewModelFieldTests_RefreshAsync_AnAllBlockedTypeShowsTheFirstLuggerWithItsStatus()
+    {
+        var provider = new FakeStatedScrapLuggerProvider(_ => new StatedScrapLugger("Door 9 Lugger (Full)", string.Empty, ArrangementRead: true));
+        var viewModel = BuildViewModel(
+            new RecordingRequestService(rowsAffected: 0, GenericScrap("Copper")),
+            itemConfigurationService: new StubItemConfigurationService(ScrapDeclaration()),
+            jobAvailabilityProvider: provider);
+
+        await viewModel.RefreshAsync().ConfigureAwait(false);
+
+        Assert.AreEqual(
+            "Door 9 Lugger (Full)",
+            Cell(viewModel.Source.Single(), "Lugger Location").Value,
+            "The card names the lugger and its status rather than drawing nothing.");
+    }
+
+    /// <summary>
+    /// A type no lugger is assigned to is a configuration gap, and the card says so in words instead of inventing a
+    /// lugger (FR-009).
+    /// </summary>
+    [TestMethod]
+    public async Task ViewModel_WaitlistViewViewModelFieldTests_RefreshAsync_AGapIsWordedRatherThanDrawnBlank()
+    {
+        var provider = new FakeStatedScrapLuggerProvider(_ => new StatedScrapLugger(null, string.Empty, ArrangementRead: true));
+        var viewModel = BuildViewModel(
+            new RecordingRequestService(rowsAffected: 0, GenericScrap("Copper")),
+            itemConfigurationService: new StubItemConfigurationService(ScrapDeclaration()),
+            jobAvailabilityProvider: provider);
+
+        await viewModel.RefreshAsync().ConfigureAwait(false);
+
+        var lugger = Cell(viewModel.Source.Single(), "Lugger Location");
+
+        AssertWording("WaitlistRequest_Scrap_LuggerNotAssigned.Text", lugger.Value);
+        Assert.AreEqual(string.Empty, lugger.ResolvedReferenceImagePath, "A gap names no lugger, so it draws no lugger's artwork.");
+        Assert.IsTrue(
+            lugger.DrawsPicture,
+            "Today's behaviour for a lugger cell with no picture is a placeholder behind the words, and a work-order lugger with no picture must keep drawing that way, so this is pinned rather than fixed.");
+    }
+
+    /// <summary>
+    /// An arrangement the read could not see is an outage, which the card words differently from a gap: the two states
+    /// are never interchanged (FR-010).
+    /// </summary>
+    [TestMethod]
+    public async Task ViewModel_WaitlistViewViewModelFieldTests_RefreshAsync_AnOutageIsWordedDifferentlyFromAGap()
+    {
+        var provider = new FakeStatedScrapLuggerProvider(_ => new StatedScrapLugger(null, string.Empty, ArrangementRead: false));
+        var viewModel = BuildViewModel(
+            new RecordingRequestService(rowsAffected: 0, GenericScrap("Copper")),
+            itemConfigurationService: new StubItemConfigurationService(ScrapDeclaration()),
+            jobAvailabilityProvider: provider);
+
+        await viewModel.RefreshAsync().ConfigureAwait(false);
+
+        var lugger = Cell(viewModel.Source.Single(), "Lugger Location");
+
+        AssertWording("WaitlistRequest_Scrap_LuggerUnavailable.Text", lugger.Value);
+        Assert.AreNotEqual(
+            "WaitlistRequest_Scrap_LuggerNotAssigned.Text".GetLocalized(),
+            lugger.Value,
+            "An outage is not a configuration gap: an arrangement nobody could read proves nothing about what is assigned.");
+        Assert.AreEqual(string.Empty, lugger.ResolvedReferenceImagePath, "An outage names no lugger, so it draws no artwork.");
+        Assert.IsTrue(
+            lugger.DrawsPicture,
+            "The placeholder behind the words is today's behaviour for this cell and is pinned, not changed.");
+    }
+
+    /// <summary>
+    /// A work-order scrap card is untouched: the merge is guarded on the generic flag, so its card draws exactly what
+    /// the availability read produced and the stated entry point is never called for it.
+    /// </summary>
+    [TestMethod]
+    public async Task ViewModel_WaitlistViewViewModelFieldTests_RefreshAsync_AWorkOrderScrapCardIsUnchangedAndNeverReadsAStatedType()
+    {
+        var job = RequestJobPartAvailability.None with
+        {
+            HasActiveJob = true,
+            WorkOrder = "WO-4471",
+            ScrapType = "Steel",
+            LuggerLocation = "Door 7 Lugger",
+        };
+
+        var request = Shape("pickup-scrap", inputValue: null);
+        var declaration = ScrapDeclaration();
+        var today = WaitlistViewViewModel.CreateSessionOrder(request, job, declaration);
+
+        var provider = new FakeStatedScrapLuggerProvider(_ => throw new InvalidOperationException("A work-order card must not ask for a stated type."))
+        {
+            Job = job,
+        };
+        var viewModel = BuildViewModel(
+            new RecordingRequestService(rowsAffected: 0, request),
+            itemConfigurationService: new StubItemConfigurationService(declaration),
+            jobAvailabilityProvider: provider);
+
+        await viewModel.RefreshAsync().ConfigureAwait(false);
+
+        var row = viewModel.Source.Single();
+
+        CollectionAssert.AreEqual(
+            CellsOf(today),
+            CellsOf(row),
+            "A work-order scrap card renders exactly what it renders today (FR-007).");
+        Assert.AreEqual(0, provider.StatedReads.Count, "A work-order card has no stated type to resolve.");
+    }
+
+    /// <summary>
+    /// A generic request that is not the scrap item is untouched: the merge is guarded on the Item as well as on the
+    /// generic flag, so no other card gains a scrap cell or a lugger read.
+    /// </summary>
+    [TestMethod]
+    public async Task ViewModel_WaitlistViewViewModelFieldTests_RefreshAsync_AGenericNonScrapRequestIsUntouched()
+    {
+        var request = Shape("pickup-ncm", inputValue: null, isGeneric: true);
+        var declaration = Declaration("pickup-ncm", ("Lugger Location", RequestItemFieldDefinition.Sources.Job, 1, false));
+        var today = WaitlistViewViewModel.CreateSessionOrder(request, RequestJobPartAvailability.None, declaration);
+
+        var provider = new FakeStatedScrapLuggerProvider(_ => new StatedScrapLugger("Door 6 Lugger", string.Empty, ArrangementRead: true));
+        var viewModel = BuildViewModel(
+            new RecordingRequestService(rowsAffected: 0, request),
+            itemConfigurationService: new StubItemConfigurationService(declaration),
+            jobAvailabilityProvider: provider);
+
+        await viewModel.RefreshAsync().ConfigureAwait(false);
+
+        var row = viewModel.Source.Single();
+
+        Assert.AreEqual(0, provider.StatedReads.Count, "Only the scrap Item has a stated type to resolve.");
+        CollectionAssert.AreEqual(CellsOf(today), CellsOf(row), "A generic request that is not the scrap Item renders as it did.");
+    }
+
+    /// <summary>
+    /// A stated read that throws leaves the card exactly as it was: a failure proves nothing, so no lugger is invented
+    /// and no wording is written over what the availability read produced.
+    /// </summary>
+    [TestMethod]
+    public async Task ViewModel_WaitlistViewViewModelFieldTests_RefreshAsync_AStatedReadThatThrowsLeavesTheCardAsItWas()
+    {
+        var request = GenericScrap("Copper");
+        var declaration = ScrapDeclaration();
+        var today = WaitlistViewViewModel.CreateSessionOrder(request, RequestJobPartAvailability.None, declaration);
+
+        var provider = new FakeStatedScrapLuggerProvider(_ => throw new InvalidOperationException("the arrangement is down"));
+        var viewModel = BuildViewModel(
+            new RecordingRequestService(rowsAffected: 0, request),
+            itemConfigurationService: new StubItemConfigurationService(declaration),
+            jobAvailabilityProvider: provider);
+
+        await viewModel.RefreshAsync().ConfigureAwait(false);
+
+        var row = viewModel.Source.Single();
+
+        Assert.AreEqual(1, provider.StatedReads.Count, "The read was attempted.");
+        Assert.IsFalse(
+            row.Cells.Any(cell => string.Equals(cell.Label, "Lugger Location", StringComparison.OrdinalIgnoreCase)),
+            "A read that failed says nothing about where the scrap goes, so no cell is filled in.");
+        CollectionAssert.AreEqual(CellsOf(today), CellsOf(row), "The card is what it was before the merge was attempted.");
+    }
+
     /// <summary>A navigation service that goes nowhere and a building selection that never changes, so the command can be driven headless.</summary>
-    private static WaitlistViewViewModel BuildViewModel(IWaitlistRequestService requestService) => new(
+    private static WaitlistViewViewModel BuildViewModel(
+        IWaitlistRequestService requestService,
+        IRequestItemConfigurationService? itemConfigurationService = null,
+        IRequestJobPartAvailabilityProvider? jobAvailabilityProvider = null) => new(
         new WaitlistTestNavigationService(),
         new WaitlistTestBuildingSelectionService(),
-        requestService);
+        requestService,
+        jobAvailabilityProvider: jobAvailabilityProvider,
+        itemConfigurationService: itemConfigurationService);
+
+    /// <summary>
+    /// Asserts a card value is the wording a resource key carries. The test host has no resource index, so the key
+    /// resolves to itself there; the resw is therefore also checked for the key, which is what makes a missing
+    /// resource fail instead of passing vacuously.
+    /// </summary>
+    private static void AssertWording(string key, string value)
+    {
+        Assert.AreEqual(key.GetLocalized(), value, $"The cell reads '{key}', so what it draws is that key's wording.");
+
+        var resources = File.ReadAllText(Path.Combine(
+            RepositoryPatternScan.FindRepositoryRoot(),
+            "Strings", "en-us", "Resources.resw"));
+
+        StringAssert.Contains(
+            resources,
+            $"name=\"{key}\"",
+            $"The application's resources declare no '{key}', so the card would draw a bare key.");
+    }
+
+    /// <summary>The scrap Item's two declared cells, as its configuration declares them.</summary>
+    private static RequestItemConfiguration ScrapDeclaration() => Declaration(
+        "pickup-scrap",
+        ("Scrap Type", RequestItemFieldDefinition.Sources.Job, 1, false),
+        ("Lugger Location", RequestItemFieldDefinition.Sources.Job, 2, false));
+
+    /// <summary>A generic scrap request carrying a stated type in its own answers, as a raise records it.</summary>
+    private static WaitlistRequest GenericScrap(string statedType) => Shape(
+        "pickup-scrap",
+        answers: new GenericRequestScrapAnswer(statedType).ToAnswers(),
+        inputValue: null,
+        isGeneric: true);
+
+    /// <summary>One labelled cell of a built row.</summary>
+    private static WaitlistLineCardCell Cell(SampleOrder row, string label) =>
+        row.Cells.Single(cell => string.Equals(cell.Label, label, StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>The cells a row draws, as the comparable shape a card is asserted on.</summary>
+    private static string[] CellsOf(SampleOrder row) =>
+        row.Cells
+            .Select(cell => $"{cell.Label}|{cell.Value}|{cell.DrawsPicture}|{cell.ResolvedReferenceImagePath}")
+            .ToArray();
+
+    /// <summary>
+    /// A provider that answers the stated read per type and never reads a job, so a test can tell the two entry
+    /// points apart and count which one the board used.
+    /// </summary>
+    private sealed class FakeStatedScrapLuggerProvider : IRequestJobPartAvailabilityProvider
+    {
+        private readonly Func<string, StatedScrapLugger> _answer;
+
+        public FakeStatedScrapLuggerProvider(Func<string, StatedScrapLugger> answer) => _answer = answer;
+
+        /// <summary>What the job read answers, so a work-order card can be compared with the same job in hand.</summary>
+        public RequestJobPartAvailability Job { get; set; } = RequestJobPartAvailability.None;
+
+        public List<string> StatedReads { get; } = [];
+
+        public Task<RequestJobPartAvailability> GetAvailabilityAsync(string workCenter, CancellationToken cancellationToken = default) =>
+            Task.FromResult(Job);
+
+        public Task<StatedScrapLugger> GetStatedScrapLuggerAsync(string scrapType, CancellationToken cancellationToken = default)
+        {
+            StatedReads.Add(scrapType);
+
+            return Task.FromResult(_answer(scrapType));
+        }
+    }
+
 
     /// <summary>An Item declaration carrying the fields under test, with nothing else claimed about the Item.</summary>
     /// <param name="item">The Item code the declaration belongs to.</param>
@@ -760,12 +1037,14 @@ public sealed class WaitlistViewViewModelFieldTests
     /// <param name="answers">The answers the request captured beyond its one answer, or null for none.</param>
     /// <param name="inputValue">The request's one captured answer, or null for a request that captured none.</param>
     /// <param name="completedUtc">The instant the request was completed, or null while it is still open.</param>
+    /// <param name="isGeneric">Whether the request was raised from a generic work center.</param>
     /// <returns>The request.</returns>
     private static WaitlistRequest Shape(
         string itemCode,
         IReadOnlyDictionary<string, string>? answers = null,
         string? inputValue = DefaultInput,
-        DateTimeOffset? completedUtc = null) => new()
+        DateTimeOffset? completedUtc = null,
+        bool isGeneric = false) => new()
     {
         Building = "Expo Drive",
         WorkCenter = "Expo Line 7",
@@ -773,6 +1052,7 @@ public sealed class WaitlistViewViewModelFieldTests
         Item = itemCode,
         InputValue = inputValue,
         Answers = answers,
+        IsGeneric = isGeneric,
         CompletedUtc = completedUtc,
         ActiveSetupJobId = "JOB-9001",
         WorkCenterName = "Expo Line 7",

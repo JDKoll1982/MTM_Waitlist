@@ -1,5 +1,3 @@
-using System.Globalization;
-
 using MTM_Waitlist.Module_Core.Helpers;
 
 namespace MTM_Waitlist.GenericRequest.Models;
@@ -151,12 +149,8 @@ public sealed record GenericRequestSequenceOption(
     public string SourceCodes => string.Join(", ", Sources.Select(source => source.ToString()));
 }
 
-/// <summary>A scrap type, with how many luggers are free to use.</summary>
-public sealed record GenericRequestScrapOption(string ScrapType, int AvailableLuggerCount)
-{
-    /// <summary>The lugger count, ready to draw.</summary>
-    public string AvailableLuggerDisplay => AvailableLuggerCount.ToString(CultureInfo.CurrentCulture);
-}
+/// <summary>A scrap type the requester can state.</summary>
+public sealed record GenericRequestScrapOption(string ScrapType);
 
 /// <summary>A die the search matched.</summary>
 public sealed record GenericRequestDieOption(string DieNumber, string Description, string Location);

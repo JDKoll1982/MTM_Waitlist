@@ -302,6 +302,10 @@ Five answers join the New Request workflow, and each appears on the matching car
 
 - FR-111: Every card cell whose value is a **description** MUST be drawn in full by the one-line scrolling control rather than clipped with an ellipsis, and the rule MUST follow the value rather than the Item: the request description on `other`, the part description on `deliver-component`, and the coil description on both coil Items. It MUST NOT be pinned per panel slot, because a description sits in the third slot on a coil card and the first on a component card, and it moves as soon as a value ahead of it is missing. This broadens FR-053 from `other` alone. [Added 2026-10-22, owner direction, after a component card clipped its part description.]
 
+**Added by the owner's review of the hopper size step**
+
+- FR-112: The hopper size step MUST open on **Medium** when the request has no size chosen yet, drawing that size's reference picture and turning that size's radio on, so the operator answers only when they want a different size. A size already chosen MUST win over the default when the step is revisited. This replaces the earlier rule that nothing was chosen on the operator's behalf. [Added 2026-11-06, owner direction.]
+
 ### Key Entities
 
 - **Request row**: one waiting request as it appears in the list. Holds its Item, its lifecycle state, its requesting work centre, the requester, the material handler, and when it was raised and closed.

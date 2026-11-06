@@ -848,7 +848,7 @@ public partial class LuggerArrangementViewModel : ObservableRecipient, INavigati
         var chosenScrapType = ScrapTypeInput;
 
         ScrapTypeOptions.Clear();
-        foreach (var option in BuildScrapTypeOptions(snapshot))
+        foreach (var option in ScrapTypeCatalog.Compose(snapshot.ScrapTypes))
         {
             ScrapTypeOptions.Add(option);
         }
@@ -875,35 +875,6 @@ public partial class LuggerArrangementViewModel : ObservableRecipient, INavigati
             .Select(row => row.ScrapType!)
             .Distinct(StringComparer.Ordinal)
             .ToArray();
-
-    /// <summary>
-    /// The picker's choices: the shipped catalogue in its own order, then every assigned type it does not name. The
-    /// two values that answer whether there is scrap at all are left out, because neither is a place to put it.
-    /// </summary>
-    private static IEnumerable<string> BuildScrapTypeOptions(LuggerArrangementSnapshot snapshot)
-    {
-        var options = new List<string>();
-
-        foreach (var shipped in ScrapTypeCatalog.All)
-        {
-            options.Add(shipped);
-        }
-
-        foreach (var assigned in snapshot.ScrapTypes)
-        {
-            if (string.IsNullOrWhiteSpace(assigned)
-                || ScrapDecisionRules.IsRequiredPlaceholder(assigned)
-                || ScrapDecisionRules.IsNoScrap(assigned)
-                || options.Contains(assigned, StringComparer.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            options.Add(assigned);
-        }
-
-        return options;
-    }
 
     /// <summary>The store's matching key: the spelling trimmed and lower-cased, and nothing else (FR-009).</summary>
     private static string Normalise(string? scrapType) =>

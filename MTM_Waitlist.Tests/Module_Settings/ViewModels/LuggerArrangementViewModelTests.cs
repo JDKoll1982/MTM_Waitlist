@@ -247,6 +247,77 @@ public sealed class LuggerArrangementViewModelTests
         Assert.AreEqual(5, viewModel.Luggers.Count, "The retry draws the arrangement the store now answers.");
     }
 
+    /// <summary>
+    /// The editor's picker is the promoted composition rule, driven through the view model so a private copy that
+    /// drifts from it fails here: the shipped catalogue in its own order, then the types the arrangement records that
+    /// it does not hold (FR-002).
+    /// </summary>
+    [TestMethod]
+    public async Task ViewModel_LuggerArrangementViewModelTests_InitializeAsync_OffersTheCatalogueThenTheArrangementsOutsideTypes()
+    {
+        var (_, viewModel) = await ArrangeAsync();
+
+        CollectionAssert.AreEqual(
+            ScrapTypeCatalog.All.Append("Copper").ToArray(),
+            viewModel.ScrapTypeOptions.ToArray(),
+            "The picker offers the shared list in its own order, then the types the arrangement adds outside it.");
+    }
+
+    /// <summary>
+    /// Two spellings that differ only in letter case or surrounding spaces are one scrap type, so the picker offers
+    /// it once (FR-002). The two rows deliberately carry keys the store would normalise to the same one, which is
+    /// the only way two arrangement rows can name one type.
+    /// </summary>
+    [TestMethod]
+    public async Task ViewModel_LuggerArrangementViewModelTests_InitializeAsync_OffersACaseVariantOnce()
+    {
+        var service = new FakeArrangementService();
+        service.Rows.Clear();
+        service.Rows.Add(Assignment(Door6, "Door 6 Lugger", LuggerStatus.Available, "3003 Aluminum", "3003 aluminum"));
+        service.Rows.Add(Assignment(Extra, "Extra Lugger", LuggerStatus.Backup, " 3003 ALUMINUM ", "3003 aluminum "));
+
+        var viewModel = BuildViewModel(service);
+        await viewModel.InitializeAsync();
+
+        Assert.AreEqual(
+            1,
+            viewModel.ScrapTypeOptions.Count(option => string.Equals(option.Trim(), "3003 Aluminum", StringComparison.OrdinalIgnoreCase)),
+            "The picker offers a scrap type once however its assignment rows spell it.");
+    }
+
+    /// <summary>
+    /// Neither decision word is a place to put scrap, so the picker never offers one even when an assignment carries
+    /// it (FR-003).
+    /// </summary>
+    [TestMethod]
+    public async Task ViewModel_LuggerArrangementViewModelTests_InitializeAsync_NeverOffersEitherDecisionWord()
+    {
+        var service = new FakeArrangementService();
+        service.Rows.Clear();
+        service.Rows.Add(Assignment(
+            Door6,
+            "Door 6 Lugger",
+            LuggerStatus.Available,
+            ScrapDecisionRules.NoScrap,
+            ScrapDecisionRules.NoScrap.ToLowerInvariant()));
+        service.Rows.Add(Assignment(
+            Extra,
+            "Extra Lugger",
+            LuggerStatus.Backup,
+            ScrapDecisionRules.RequiredPlaceholder,
+            ScrapDecisionRules.RequiredPlaceholder.ToLowerInvariant()));
+
+        var viewModel = BuildViewModel(service);
+        await viewModel.InitializeAsync();
+
+        foreach (var decisionWord in new[] { ScrapDecisionRules.NoScrap, ScrapDecisionRules.RequiredPlaceholder })
+        {
+            Assert.IsFalse(
+                viewModel.ScrapTypeOptions.Contains(decisionWord, StringComparer.OrdinalIgnoreCase),
+                $"'{decisionWord}' answers whether there is scrap, so the picker never offers it as a destination.");
+        }
+    }
+
     [TestMethod]
     public async Task ViewModel_LuggerArrangementViewModelTests_WithoutThePermission_RefusesTheRouteAndReadsNothing()
     {
@@ -275,6 +346,24 @@ public sealed class LuggerArrangementViewModelTests
         await viewModel.InitializeAsync();
         return (service, viewModel);
     }
+
+    /// <summary>One arrangement row, as the arrangement list read returns it.</summary>
+    private static ScrapAssignment Assignment(
+        string publicId,
+        string luggerName,
+        string status,
+        string scrapType,
+        string scrapTypeKey) => new()
+    {
+        LuggerPublicId = publicId,
+        LuggerName = luggerName,
+        LuggerStatus = status,
+        LuggerDisplayPosition = 1,
+        ScrapType = scrapType,
+        ScrapTypeKey = scrapTypeKey,
+        IsDumpPoint = true,
+        SortPosition = 1,
+    };
 
     private static LuggerArrangementViewModel BuildViewModel(
         FakeArrangementService service,

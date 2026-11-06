@@ -215,24 +215,83 @@ public sealed class WaitlistViewDetailActionTests
         Assert.AreEqual("Sent message", viewModel.NoteDraft, "The sent message stays in the box after a refresh.");
     }
 
-    // ── The history attributes every row ─────────────────────────────────────────────────────────────
+    // ── The stream shows what was said, and nothing about who or when ────────────────────────────────
 
     [TestMethod]
-    public async Task ViewModel_WaitlistViewDetailActionTests_RequestPage_HistoryNamesTheSenderAndNotTheMessageType()
+    public void ViewModel_WaitlistViewDetailActionTests_RequestPage_TheMessageStreamShowsTheWordsAndNoAttribution()
     {
-        // The user asked for who sent it, and explicitly not the event type.
+        // The owner asked for a chat-style thread on the request page: the words, and nothing beside them. A sender
+        // name and a timestamp on every row turned the conversation into an audit table, so this replaces the
+        // earlier rule that a history row must name its sender.
         var page = LoadPage();
-        var historyDataTemplate = page
+        var streamTemplate = page
             .Descendants(s_presentation + "DataTemplate")
-            .First(template => template.Descendants().Any(element => element.Attribute("Text")?.Value.Contains("OccurredLocalText", StringComparison.Ordinal) == true));
-
-        Assert.IsTrue(
-            historyDataTemplate.Descendants().Any(element => element.Attribute("Text")?.Value.Contains("ActorDisplayName", StringComparison.Ordinal) == true),
-            "A history row must show who sent the message, by name.");
+            .First(template => template.Descendants().Any(element => element.Attribute("Text")?.Value.Contains("Details", StringComparison.Ordinal) == true));
 
         Assert.IsFalse(
-            historyDataTemplate.Descendants().Any(element => element.Attribute("Text")?.Value.Contains("EventType", StringComparison.Ordinal) == true),
+            streamTemplate.Descendants().Any(element => element.Attribute("Text")?.Value.Contains("ActorDisplayName", StringComparison.Ordinal) == true),
+            "A chat row does not name its sender.");
+
+        Assert.IsFalse(
+            streamTemplate.Descendants().Any(element => element.Attribute("Text")?.Value.Contains("OccurredLocalText", StringComparison.Ordinal) == true),
+            "A chat row does not carry a timestamp: the stream reads as a conversation, not a log.");
+
+        Assert.IsFalse(
+            streamTemplate.Descendants().Any(element => element.Attribute("Text")?.Value.Contains("EventType", StringComparison.Ordinal) == true),
             "The message type must not be shown to the user.");
+    }
+
+    [TestMethod]
+    public async Task ViewModel_WaitlistViewDetailActionTests_RequestPage_TheStreamCarriesOnlyEntriesThatHaveWords()
+    {
+        // Creating, accepting, completing and cancelling a request are events with nothing to say. With no author or
+        // time drawn, such an entry would be an empty box in the thread, so it never joins the stream.
+        var service = new StubRequestService(BuildRequest())
+        {
+            AuditTrail =
+            [
+                new WaitlistRequestAuditEntry { EventType = "Created" },
+                new WaitlistRequestAuditEntry { EventType = "NoteUpdated", Details = "first", EmployeeName = "Hana Handler" },
+                new WaitlistRequestAuditEntry { EventType = "Accepted" },
+                new WaitlistRequestAuditEntry { EventType = "NoteUpdated", Details = "second", EmployeeName = "Hana Handler" },
+            ],
+        };
+        var viewModel = BuildViewModel(service);
+
+        await viewModel.LoadHistoryAsync().ConfigureAwait(false);
+
+        CollectionAssert.AreEqual(
+            new[] { "first", "second" },
+            viewModel.MessageStream.Select(entry => entry.Details ?? string.Empty).ToArray(),
+            "The stream carries the words, oldest first, and nothing else.");
+        Assert.AreEqual(4, viewModel.HistoryRows.Count, "The audit trail itself still holds every event.");
+        Assert.IsTrue(viewModel.HasMessageStream);
+        Assert.IsFalse(viewModel.IsMessageStreamEmpty);
+    }
+
+    [TestMethod]
+    public async Task ViewModel_WaitlistViewDetailActionTests_RequestPage_ARequestNobodyHasWrittenOnSaysSo()
+    {
+        var service = new StubRequestService(BuildRequest())
+        {
+            AuditTrail = [new WaitlistRequestAuditEntry { EventType = "Created" }],
+        };
+        var viewModel = BuildViewModel(service);
+
+        await viewModel.LoadHistoryAsync().ConfigureAwait(false);
+
+        Assert.AreEqual(0, viewModel.MessageStream.Count, "An event with no words is not a message.");
+        Assert.IsTrue(viewModel.IsMessageStreamEmpty, "The stream draws its quiet line rather than an empty thread.");
+        Assert.IsFalse(viewModel.HasMessageStream);
+
+        // The test host has no PRI index, so GetLocalized answers the key itself. The wording is proved by the
+        // resource declaring it: a key with no entry behind it would show as bare text on the page.
+        var resources = File.ReadAllText(Path.Combine(
+            RepositoryPatternScan.FindRepositoryRoot(), "Strings", "en-us", "Resources.resw"));
+        StringAssert.Contains(
+            resources,
+            "Waitlist_Note.StreamEmpty",
+            "The quiet line is a real resource, not a key with no entry behind it.");
     }
 
     [TestMethod]

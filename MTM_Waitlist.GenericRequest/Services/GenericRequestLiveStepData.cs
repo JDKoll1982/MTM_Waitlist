@@ -3,6 +3,7 @@ using MTM_Waitlist.GenericRequest.Models;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Shared.Helpers;
@@ -23,12 +24,12 @@ namespace MTM_Waitlist.GenericRequest.Services;
 /// store could not be reached, which is what keeps a generic request as truthful as a work-order one (FR-028).
 /// </para>
 /// <para>
-/// <b>The two remaining externally proved answers are not implemented here yet.</b> A scrap type comes from the
-/// plant's own list (019) and a die from a Visual search (020). Each read answers
-/// <see cref="GenericRequestStepResult{T}.Unavailable"/> so its step reports the source as not available and offers
-/// a retry, and no substitute is offered (FR-012). Dunnage shipped with its own seam (018): the dunnage step reads
-/// <see cref="IDunnageCatalogueReader"/> directly, and this class reads it only at raise time to record whether the
-/// chosen part is still offered. The part answer ships too: it lives on
+/// <b>The one remaining externally proved answer is not implemented here yet.</b> A die comes from a Visual search
+/// (020) and answers <see cref="GenericRequestStepResult{T}.Unavailable"/> so its step reports the source as not
+/// available and offers a retry, and no substitute is offered (FR-012). The scrap read ships too (019): it reads the
+/// lugger arrangement and composes the plant's one scrap-type list. Dunnage shipped with its own seam (018): the
+/// dunnage step reads <see cref="IDunnageCatalogueReader"/> directly, and this class reads it only at raise time to
+/// record whether the chosen part is still offered. The part answer ships too: it lives on
 /// <see cref="IGenericRequestPartData"/>, which the part step asks directly.
 /// </para>
 /// </remarks>
@@ -44,6 +45,7 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
     private readonly IEmployeeDirectoryService _employeeDirectoryService;
     private readonly IGenericRequestPartData _partData;
     private readonly IDunnageCatalogueReader _catalogueReader;
+    private readonly ILuggerArrangementService _luggerArrangementService;
 
     public GenericRequestLiveStepData(
         IWorkCenterCatalogService workCenterCatalogService,
@@ -53,7 +55,8 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
         IPersonIdentity personIdentity,
         IEmployeeDirectoryService employeeDirectoryService,
         IGenericRequestPartData partData,
-        IDunnageCatalogueReader catalogueReader)
+        IDunnageCatalogueReader catalogueReader,
+        ILuggerArrangementService luggerArrangementService)
     {
         _workCenterCatalogService = workCenterCatalogService ?? throw new ArgumentNullException(nameof(workCenterCatalogService));
         _pickerService = pickerService ?? throw new ArgumentNullException(nameof(pickerService));
@@ -63,6 +66,7 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
         _employeeDirectoryService = employeeDirectoryService ?? throw new ArgumentNullException(nameof(employeeDirectoryService));
         _partData = partData ?? throw new ArgumentNullException(nameof(partData));
         _catalogueReader = catalogueReader ?? throw new ArgumentNullException(nameof(catalogueReader));
+        _luggerArrangementService = luggerArrangementService ?? throw new ArgumentNullException(nameof(luggerArrangementService));
     }
 
     /// <inheritdoc />
@@ -182,9 +186,40 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
         _partData.ReadSequencesAsync(partNumber, cancellationToken);
 
     /// <inheritdoc />
-    public Task<GenericRequestStepResult<GenericRequestScrapOption>> ReadScrapTypesAsync(
-        CancellationToken cancellationToken = default) =>
-        Task.FromResult(GenericRequestStepResult<GenericRequestScrapOption>.Unavailable(DateTimeOffset.UtcNow));
+    public async Task<GenericRequestStepResult<GenericRequestScrapOption>> ReadScrapTypesAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var attemptedAtUtc = DateTimeOffset.UtcNow;
+
+        try
+        {
+            var snapshot = await _luggerArrangementService
+                .GetSnapshotAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            if (!snapshot.WasRead)
+            {
+                // An arrangement the read never answered is an outage, not an empty plant: the composed catalogue
+                // always ships with types, so an empty read is the unavailable state (spec A5).
+                return GenericRequestStepResult<GenericRequestScrapOption>.Unavailable(attemptedAtUtc);
+            }
+
+            var options = ScrapTypeCatalog.Compose(snapshot.ScrapTypes)
+                .Select(type => new GenericRequestScrapOption(type))
+                .ToArray();
+
+            return GenericRequestStepResult<GenericRequestScrapOption>.Populated(options, attemptedAtUtc);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error(LogCategory, ex, "Reading the scrap types failed.");
+            return GenericRequestStepResult<GenericRequestScrapOption>.Unavailable(attemptedAtUtc);
+        }
+    }
 
     /// <inheritdoc />
     public Task<GenericRequestStepResult<GenericRequestDieOption>> ReadDiesAsync(
@@ -196,18 +231,17 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
     /// Whether a step that reads no rows can be shown.
     /// </summary>
     /// <remarks>
-    /// The part step ships with its live reads and the dunnage step reads the plant's catalogue through its own
-    /// seam (018), so both are ready. Scrap and die report unavailable because their source has not shipped
-    /// (chunks 019 and 020). Every other step has something to show: its own answer fields. The result step's
-    /// presentation comes from the raise attempt the summary recorded, not from here.
+    /// The part step ships with its live reads, the dunnage step reads the plant's catalogue through its own seam
+    /// (018) and the scrap step reads the lugger arrangement (019), so all three are ready. Die reports unavailable
+    /// because its source has not shipped (chunk 020). Every other step has something to show: its own answer
+    /// fields. The result step's presentation comes from the raise attempt the summary recorded, not from here.
     /// </remarks>
     public Task<GenericRequestStepAvailability> ReadStepAvailabilityAsync(
         GenericRequestStep step,
         CancellationToken cancellationToken = default) =>
         Task.FromResult(step switch
             {
-                GenericRequestStep.Scrap
-                    or GenericRequestStep.Die => GenericRequestStepAvailability.Unavailable(DateTimeOffset.UtcNow),
+                GenericRequestStep.Die => GenericRequestStepAvailability.Unavailable(DateTimeOffset.UtcNow),
                 _ => GenericRequestStepAvailability.Ready(DateTimeOffset.UtcNow),
             });
 
@@ -325,6 +359,14 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
         if (draft.RequiresDunnage && draft.DunnagePart.Length > 0)
         {
             foreach (var pair in await DunnageAnswersForAsync(draft, cancellationToken).ConfigureAwait(false))
+            {
+                answers[pair.Key] = pair.Value;
+            }
+        }
+
+        if (draft.RequiresScrap && draft.ScrapType.Length > 0)
+        {
+            foreach (var pair in new GenericRequestScrapAnswer(draft.ScrapType).ToAnswers())
             {
                 answers[pair.Key] = pair.Value;
             }

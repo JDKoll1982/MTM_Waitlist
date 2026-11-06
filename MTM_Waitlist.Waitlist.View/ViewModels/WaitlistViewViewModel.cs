@@ -991,6 +991,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         foreach (var request in activeRequests)
         {
             var jobAvailability = await ResolveJobAvailabilityAsync(request.WorkCenter).ConfigureAwait(false);
+            jobAvailability = await MergeStatedScrapAsync(request, jobAvailability).ConfigureAwait(false);
             var sessionOrder = CreateSessionOrder(request, jobAvailability, itemDeclarations?.Get(request.Item));
             sessionOrder.Urgency = await ResolveUrgencyAsync(request, now).ConfigureAwait(false);
             await ApplyResolvedImagesAsync(sessionOrder, request, workCenterImageLookup).ConfigureAwait(false);
@@ -1640,6 +1641,63 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
         _jobAvailabilityCache[key] = availability;
         return availability;
+    }
+
+    /// <summary>
+    /// The scrap facts a generic scrap request's card carries, merged onto the requesting job's availability: the type
+    /// the requester stated, and the lugger the arrangement assigns to it now.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The merge is guarded on the scrap Item <b>and</b> on the generic flag, so a work-order scrap card keeps reading
+    /// the job's own scrap decision and nothing on it changes (FR-007). A request with no stated type, no provider, or
+    /// a stated read that threw keeps the availability it already had, and its card draws as it does today.
+    /// </para>
+    /// <para>
+    /// The record built here is per request and is never put in <see cref="_jobAvailabilityCache"/>: a stated type
+    /// belongs to the request, not to the work centre. Nothing is resolved a second time — the stated type goes
+    /// through the provider's stated entry point, which is the routine the work-order card already uses.
+    /// </para>
+    /// </remarks>
+    private async Task<RequestJobPartAvailability> MergeStatedScrapAsync(
+        WaitlistRequest request,
+        RequestJobPartAvailability availability)
+    {
+        if (!request.IsGeneric
+            || !WaitlistCardCellRules.IsScrapItem(request.Item)
+            || _jobAvailabilityProvider is null
+            || MTM_Waitlist.Module_Core.Models.GenericRequestScrapAnswer.TryRead(request.Answers) is not { } stated)
+        {
+            return availability;
+        }
+
+        try
+        {
+            var lugger = await _jobAvailabilityProvider.GetStatedScrapLuggerAsync(stated.ScrapType).ConfigureAwait(false);
+
+            return availability with
+            {
+                ScrapType = stated.ScrapType,
+
+                // A configuration gap and an outage are different states and are worded apart; neither invents a
+                // lugger, and neither shows a lugger that no longer applies (FR-009, FR-010).
+                LuggerLocation = lugger.LuggerLocation
+                    ?? (lugger.ArrangementRead
+                        ? "WaitlistRequest_Scrap_LuggerNotAssigned.Text".GetLocalized()
+                        : "WaitlistRequest_Scrap_LuggerUnavailable.Text".GetLocalized()),
+                LuggerLocationImagePath = lugger.LuggerLocation is null ? string.Empty : lugger.LuggerImagePath,
+            };
+        }
+        catch (Exception ex)
+        {
+            // A read that failed proves nothing about where the scrap goes, so the card keeps what it had rather than
+            // naming an outage as a missing assignment.
+            AppLog.Error(
+                "Waitlist",
+                ex,
+                $"The lugger for the stated scrap type '{stated.ScrapType}' on request {request.Id:D} could not be read, so its card keeps the scrap facts it already had.");
+            return availability;
+        }
     }
 
     /// <summary>

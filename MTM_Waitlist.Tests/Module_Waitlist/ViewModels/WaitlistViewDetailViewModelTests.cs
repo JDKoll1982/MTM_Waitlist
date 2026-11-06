@@ -186,6 +186,13 @@ public sealed class WaitlistViewDetailViewModelTests
     {
         public Task<RequestJobPartAvailability> GetAvailabilityAsync(string workCenter, CancellationToken cancellationToken = default) =>
             Task.FromResult(RequestJobPartAvailability.None with { HasActiveJob = true, WorkOrder = workOrder });
+
+        /// <summary>
+        /// This page reads a job, never a stated scrap type, so the stub answers an arrangement it never read rather
+        /// than inventing a lugger. The member exists because the interface carries both entry points.
+        /// </summary>
+        public Task<StatedScrapLugger> GetStatedScrapLuggerAsync(string scrapType, CancellationToken cancellationToken = default) =>
+            Task.FromResult(new StatedScrapLugger(null, string.Empty, ArrangementRead: false));
     }
 
     [TestMethod]

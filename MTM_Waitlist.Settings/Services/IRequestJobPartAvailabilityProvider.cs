@@ -24,4 +24,16 @@ public interface IRequestJobPartAvailabilityProvider
     /// "no job" and the job-independent Items stay offerable.
     /// </summary>
     Task<RequestJobPartAvailability> GetAvailabilityAsync(string workCenter, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// The lugger a stated scrap type resolves to, through the same arrangement routine the work-order scrap card
+    /// uses, so the two cannot disagree for the same type.
+    /// <para>
+    /// The stated path reads no job and knows no work centre: a generic request has neither. A type the arrangement
+    /// assigns a lugger to answers the name and its picture; a type with no lugger assigned answers a configuration
+    /// gap; an arrangement that could not be read answers <c>ArrangementRead: false</c> and raises no configuration
+    /// warning, because configuration that was never seen proves nothing.
+    /// </para>
+    /// </summary>
+    Task<StatedScrapLugger> GetStatedScrapLuggerAsync(string scrapType, CancellationToken cancellationToken = default);
 }

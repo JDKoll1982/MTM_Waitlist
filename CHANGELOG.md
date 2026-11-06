@@ -10,6 +10,95 @@
 
 ---
 
+## 2026-11-06 — the message area on a request reads as one chat thread
+
+**What changed:** the request page used to show two blocks — a **Message** card with a full-width box above a "Send
+message" button, and a separate **Request history** card listing every event with its time and the person's name.
+Those are now one card: a single header, the messages as a running thread, and a composer beneath them with the text
+filling the card and a send icon at its right-hand end.
+
+**Why it matters:** this card is how the floor tells whoever picks the request up what is happening, and a person
+reads that as a conversation. Two blocks with timestamps and names read as a form and a log; the words were the
+smallest thing on the page.
+
+**What to expect:**
+
+- **One card, one header.** The thread sits above the composer and scrolls within the card rather than pushing the
+  rest of the page down.
+- **The messages are just the words.** The sender's name and the time are no longer drawn beside each message, so a
+  row is never an empty box where a name or a time used to be.
+- **Status changes no longer appear in the thread.** Creating, accepting, completing and cancelling a request carry
+  no words, so they are not shown as messages — the thread holds what people actually said.
+- **A request nobody has written on says so**, with a quiet line above the composer instead of an empty area.
+- **The composer works exactly as before.** Type, and the send icon at the right sends it; the box grows to about
+  three lines and then scrolls. The icon is announced as "Send message" and shows the same words on hover.
+
+**IT Department:** no data change. The thread is the request's existing audit trail filtered to entries that carry
+words; nothing is hidden from the store, and the automation ids (`WaitlistViewDetailPage_NoteInput`,
+`WaitlistViewDetailPage_SaveNoteButton`) are unchanged.
+
+---
+
+## 2026-11-06 — the hopper size step opens on Medium
+
+**What changed:** the New Request step that asks which size hopper you need used to open with nothing picked, so the
+forward button refused you until you answered. It now opens on **Medium**, with that size's reference picture already
+showing.
+
+**Why it matters:** most hopper requests are for the middle size, so the step was asking a question whose answer was
+nearly always the same and then refusing to move until it was given.
+
+**What to expect:**
+
+- **Medium is chosen when the step opens**, and its radio is already on.
+- **Picking another size works exactly as before**, and the picture beneath the choices changes with it.
+- **Coming back to the step shows the size you picked**, not Medium: your answer always wins over the default.
+- **Small and Large are unchanged**, and nothing on the card or in the stored request changes.
+
+**IT Department:** no database change. The default is the step's own opening choice; what is stored on the request is
+still whatever the operator confirms.
+
+---
+
+## 2026-11-05 — a generic scrap request now asks for the scrap type and the card says where it goes
+
+**What changed:** a request for scrap from a generic work center used to stop at a scrap step that could not be
+read: no list, just an unavailable message and a retry. The step now offers the plant's one scrap-type list, and the
+card for that request names the type and the lugger the scrap is dumped into.
+
+**Why it matters:** a work-order scrap request reads the scrap decision off its job. A generic work center has no
+job, so the person raising the request has to state the type — and until now there was no way to. Without it the
+handler had a card that named neither the material nor where to walk with it.
+
+**What to expect:**
+
+- **The scrap step asks for the type**, offering the same list the Setup scrap picker and the lugger arrangement
+  editor already use, in that list's own order, plus any type the arrangement records that the list does not hold.
+- **Nothing is chosen for you.** The forward button stays closed until you pick a type, so a scrap request can no
+  longer be raised without one.
+- **Coming back to the step shows the type you chose**, matched the same way regardless of letter case or spacing.
+- **The card names the type and the lugger assigned to it now**, following the same blocking and backup rules the
+  work-order scrap card follows. A lugger that is full, or has been swapped out, shows on the next refresh.
+- **A type no lugger is assigned to says "Not assigned"**, and an arrangement that cannot be read says
+  "Temporarily unavailable". Those two are different problems and are never mixed up.
+- **A work-order scrap card is unchanged**, including a card for a lugger with no picture.
+- **The old lugger count is gone.** The step never filled it in, and the wording that promised it is replaced.
+- **A type the list does not carry can be added from the step.** If the scrap type you need is not offered, an
+  **Add scrap type…** control opens a small panel: type the name, choose the lugger it dumps into, and press **Add**.
+  It writes the same lugger-arrangement assignment the arrangement editor writes, so the type is offered on every
+  later scrap request rather than only this one. A name the list already holds is simply selected, never written
+  twice.
+- **That control is only shown to people who maintain the lugger arrangement.** Assigning a type decides where every
+  scrap request for that type goes, work-order cards included, so anyone without
+  `permission.settings.lugger_arrangement` does not see it at all.
+
+**IT Department:** no database change. The type list is the compiled scrap-type catalogue, the lugger comes from the
+existing arrangement read, and the stated type is recorded on the request's existing answers column as `scrap.type`.
+Adding a type writes through `sp_waitlist_lugger_scrap_assignments_set`, the same procedure the lugger arrangement
+editor already calls, and needs `permission.settings.lugger_arrangement`.
+
+---
+
 ## 2026-11-05 — the dunnage step is now the real dunnage catalogue, as a full page
 
 **What changed:** a generic work-center request that asks for dunnage used to open a two-list step — pick a dunnage

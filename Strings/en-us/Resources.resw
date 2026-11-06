@@ -677,6 +677,16 @@
     <value>No requests are waiting at this computer's Local Work Centers. Turn the filter off to see every work center.</value>
   </data>
 
+  <!-- A generic scrap card's `Lugger Location` cell. The two values stand where a lugger name stands, so each is a
+       short phrase rather than a sentence: a configuration gap is a type no lugger is assigned to, and an outage is
+       an arrangement the read could not see. They are different states and are never interchanged. -->
+  <data name="WaitlistRequest_Scrap_LuggerNotAssigned.Text" xml:space="preserve">
+    <value>Not assigned</value>
+  </data>
+  <data name="WaitlistRequest_Scrap_LuggerUnavailable.Text" xml:space="preserve">
+    <value>Temporarily unavailable</value>
+  </data>
+
   <!-- Details page: a section whose read threw reports the failure in place with a retry, rather than
        rendering as absence or as the page-level store outage (data-model.md §1 invariants 1–3). -->
   <data name="Waitlist_Detail_BlockFailed.Message" xml:space="preserve">
@@ -751,6 +761,9 @@
   </data>
   <data name="Waitlist_Note.Empty" xml:space="preserve">
     <value>There is nothing to send yet.</value>
+  </data>
+  <data name="Waitlist_Note.StreamEmpty" xml:space="preserve">
+    <value>No messages yet. Anything you send appears here.</value>
   </data>
   <data name="Waitlist_Note.Unchanged" xml:space="preserve">
     <value>That message is already on the request.</value>

@@ -361,6 +361,25 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     /// </summary>
     public ObservableCollection<WaitlistRequestAuditEntry> HistoryRows { get; } = new();
 
+    /// <summary>
+    /// What has been said on the request, oldest first, drawn as one stream above the composer.
+    /// </summary>
+    /// <remarks>
+    /// Only entries that carry words are here. Creating, accepting, completing and cancelling a request are events
+    /// with nothing to say, so they never become a row a reader has to skip over — and with the author and the time
+    /// deliberately not drawn, a row with no words would be an empty box.
+    /// </remarks>
+    public ObservableCollection<WaitlistRequestAuditEntry> MessageStream { get; } = new();
+
+    /// <summary>Whether anyone has said anything on this request yet.</summary>
+    public bool HasMessageStream => MessageStream.Count > 0;
+
+    /// <summary>Whether the stream's own quiet line is drawn instead of a thread.</summary>
+    public bool IsMessageStreamEmpty => MessageStream.Count == 0;
+
+    /// <summary>What the stream says when nobody has written anything yet.</summary>
+    public string MessageStreamEmptyText => "Waitlist_Note.StreamEmpty".GetLocalized();
+
     /// <summary>Heading for the history block.</summary>
     public string HistoryTitle => "Waitlist_History.Title".GetLocalized();
 
@@ -476,6 +495,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     public async Task LoadHistoryAsync(CancellationToken cancellationToken = default)
     {
         HistoryRows.Clear();
+        MessageStream.Clear();
 
         if (Item is not { RequestId: Guid requestId } || _requestService is null)
         {
@@ -488,6 +508,11 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
         foreach (var entry in entries)
         {
             HistoryRows.Add(entry);
+
+            if (!string.IsNullOrWhiteSpace(entry.Details))
+            {
+                MessageStream.Add(entry);
+            }
         }
 
         if (_messageSeenStore is not null)
@@ -512,6 +537,8 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
     {
         OnPropertyChanged(nameof(HasHistory));
         OnPropertyChanged(nameof(IsHistoryEmpty));
+        OnPropertyChanged(nameof(HasMessageStream));
+        OnPropertyChanged(nameof(IsMessageStreamEmpty));
     }
 
     public async void OnNavigatedTo(object parameter)

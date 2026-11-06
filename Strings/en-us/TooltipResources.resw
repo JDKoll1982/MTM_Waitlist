@@ -246,4 +246,7 @@
   <data name="Waitlist_Card_PartStockLink.Tooltip" xml:space="preserve">
     <value>See where this part is stored and how much is on hand.</value>
   </data>
+  <data name="Waitlist_Note_Send_Tooltip" xml:space="preserve">
+    <value>Send this message to whoever picks the request up.</value>
+  </data>
 </root>

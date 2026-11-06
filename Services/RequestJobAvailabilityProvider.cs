@@ -172,9 +172,13 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
     /// nothing, so the cell is simply left out (FR-025). A real scrap type with no lugger assigned is a
     /// configuration gap: it is recorded once through <see cref="AppLog.Warn"/>, naming the scrap type and the work
     /// centre so the arrangement can be corrected, and the value stays null so no substitute reaches the card
-    /// (FR-026). An arrangement that could not be read at all arrives as an empty snapshot, which is an outage
-    /// rather than a gap — the list keeps working with no value and no warning is raised about configuration that
-    /// was never seen.
+    /// (FR-026). An arrangement that could not be read is an outage rather than a gap
+    /// (<see cref="LuggerArrangementSnapshot.WasRead"/>), so the list keeps working with no value and no warning is
+    /// raised about configuration that was never seen.
+    /// </para>
+    /// <para>
+    /// The resolution itself lives in <see cref="ResolveStatedScrapLuggerAsync"/>, which the stated scrap type on a
+    /// generic request also goes through, so a work-order card and a generic card cannot disagree for one type.
     /// </para>
     /// </summary>
     private async Task<RequestJobPartAvailability> ApplyLuggerLocationAsync(
@@ -187,6 +191,49 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
             return availability;
         }
 
+        var stated = await ResolveStatedScrapLuggerAsync(availability.ScrapType, workCenter, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (stated.LuggerLocation is null)
+        {
+            return availability;
+        }
+
+        return availability with
+        {
+            LuggerLocation = stated.LuggerLocation,
+            LuggerLocationImagePath = stated.LuggerImagePath,
+        };
+    }
+
+    /// <inheritdoc />
+    public Task<StatedScrapLugger> GetStatedScrapLuggerAsync(string scrapType, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(scrapType))
+        {
+            return Task.FromResult(new StatedScrapLugger(null, string.Empty, ArrangementRead: false));
+        }
+
+        return ResolveStatedScrapLuggerAsync(scrapType, workCenter: null, cancellationToken);
+    }
+
+    /// <summary>
+    /// The one resolution both entry points share: the arrangement read, the type matched to the lugger that receives
+    /// it, the gap warning, and the lugger's picture.
+    /// </summary>
+    /// <param name="scrapType">The scrap type as it is spelled where it was stated or stored.</param>
+    /// <param name="workCenter">The work centre the job belongs to, or null when the type was stated on a request.</param>
+    /// <param name="cancellationToken">A token that cancels the arrangement read.</param>
+    /// <remarks>
+    /// An arrangement that could not be read answers <c>ArrangementRead: false</c> with no name: that is an outage,
+    /// which the caller reports as unavailable rather than as a missing assignment, so nothing is warned about
+    /// configuration that was never seen.
+    /// </remarks>
+    private async Task<StatedScrapLugger> ResolveStatedScrapLuggerAsync(
+        string scrapType,
+        string? workCenter,
+        CancellationToken cancellationToken)
+    {
         LuggerArrangementSnapshot arrangement;
         try
         {
@@ -194,25 +241,27 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
         }
         catch (Exception ex)
         {
+            var where = string.IsNullOrWhiteSpace(workCenter) ? string.Empty : $" at work center '{workCenter}'";
             AppLog.Error(
                 "Waitlist",
                 ex,
-                $"The scrap lugger arrangement could not be read, so the `Lugger Location` cell for scrap type '{availability.ScrapType}' at work center '{workCenter}' is left out.");
-            return availability;
+                $"The scrap lugger arrangement could not be read, so the `Lugger Location` cell for scrap type '{scrapType}'{where} is left out.");
+            return new StatedScrapLugger(null, string.Empty, ArrangementRead: false);
         }
 
-        var resolution = arrangement.Resolve(availability.ScrapType);
+        var resolution = arrangement.Resolve(scrapType);
 
-        if (resolution.IsConfigurationGap && arrangement.Rows.Count > 0)
+        if (resolution.IsConfigurationGap && arrangement.WasRead)
         {
+            var where = string.IsNullOrWhiteSpace(workCenter) ? string.Empty : $" at work center '{workCenter}'";
             AppLog.Warn(
                 "Waitlist",
-                $"The scrap type '{availability.ScrapType}' has no lugger assigned, so the `Lugger Location` cell at work center '{workCenter}' is left out. Assign the type to a lugger in the lugger arrangement so handlers know where to walk.");
+                $"The scrap type '{scrapType}' has no lugger assigned, so the `Lugger Location` cell{where} is left out. Assign the type to a lugger in the lugger arrangement so handlers know where to walk.");
         }
 
         if (resolution.LuggerLocation is null)
         {
-            return availability;
+            return new StatedScrapLugger(null, string.Empty, arrangement.WasRead);
         }
 
         // The lugger's picture is filed under its place in the arrangement, so only the snapshot just read can say
@@ -222,11 +271,7 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
         var image = await ResolveLuggerPictureAsync(arrangement, resolution.LuggerLocation, cancellationToken)
             .ConfigureAwait(false);
 
-        return availability with
-        {
-            LuggerLocation = resolution.LuggerLocation,
-            LuggerLocationImagePath = image ?? string.Empty,
-        };
+        return new StatedScrapLugger(resolution.LuggerLocation, image ?? string.Empty, arrangement.WasRead);
     }
 
     /// <summary>

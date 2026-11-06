@@ -35,9 +35,10 @@ public sealed class NewRequestHopperViewModelTests
     public void TestCleanup() => ImageHeaderFixtures.DeleteTemporaryDirectory(_directory);
 
     [TestMethod]
-    public void ViewModel_NewRequestHopperViewModelTests_OnNavigatedTo_OffersTheThreeSizesWithNothingChosen()
+    public void ViewModel_NewRequestHopperViewModelTests_OnNavigatedTo_OffersTheThreeSizesAndOpensOnTheMediumOne()
     {
-        var viewModel = CreateViewModel();
+        var medium = Picture("medium.png", 512, 512);
+        var viewModel = CreateViewModel(new StubPartPictureResolver { ["Medium"] = medium });
 
         viewModel.OnNavigatedTo(HopperState());
 
@@ -45,11 +46,17 @@ public sealed class NewRequestHopperViewModelTests
             new[] { "Small", "Medium", "Large" },
             viewModel.Sizes.ToArray(),
             "The size is asked as three choices (FR-077).");
-        Assert.AreEqual(string.Empty, viewModel.SelectedSize, "Nothing is chosen on the operator's behalf.");
         Assert.AreEqual(
-            ImagePicturePolicy.NoImagePath,
+            NewRequestHopperViewModel.DefaultSize,
+            viewModel.SelectedSize,
+            "The step opens on the middle size (owner decision, 2026-11-06), replacing the earlier rule that nothing was chosen on the operator's behalf.");
+        Assert.IsTrue(viewModel.IsMediumSelected, "The radio for the size the step opens on is the one turned on.");
+        Assert.IsFalse(viewModel.IsSmallSelected, "Only one size is chosen at a time.");
+        Assert.IsFalse(viewModel.IsLargeSelected, "Only one size is chosen at a time.");
+        Assert.AreEqual(
+            medium,
             viewModel.SelectedImagePath,
-            "With nothing chosen there is no reference image yet, so the step draws the shared placeholder (FR-080).");
+            "The size the step opens on draws its own reference picture without the operator choosing it first (FR-077, FR-080).");
         Assert.IsFalse(viewModel.IsUnavailableVisible, "A job-independent Item has nothing to report.");
     }
 
@@ -125,12 +132,29 @@ public sealed class NewRequestHopperViewModelTests
     }
 
     [TestMethod]
-    public void ViewModel_NewRequestHopperViewModelTests_Continue_WithNothingChosenRefusesAndStaysOnTheStep()
+    public void ViewModel_NewRequestHopperViewModelTests_OnNavigatedTo_ComingBackWithASizeChosenWinsOverTheDefault()
+    {
+        var state = HopperState();
+        state.RecordAnswer(NewRequestFlowRules.HopperSizeLabel, "Small");
+        var viewModel = CreateViewModel();
+
+        viewModel.OnNavigatedTo(state);
+
+        Assert.AreEqual("Small", viewModel.SelectedSize, "A size already chosen is shown instead of the default.");
+        Assert.IsFalse(viewModel.IsMediumSelected, "The default does not override a choice the person already made.");
+    }
+
+    [TestMethod]
+    public void ViewModel_NewRequestHopperViewModelTests_Continue_WithTheChoiceClearedRefusesAndStaysOnTheStep()
     {
         var navigation = new RecordingNavigationService();
         var state = HopperState();
         var viewModel = CreateViewModel(navigation: navigation);
         viewModel.OnNavigatedTo(state);
+
+        // The step opens on the default, so this guard is reached only when a size is cleared rather than by
+        // arriving with nothing chosen.
+        viewModel.SelectedSize = string.Empty;
 
         viewModel.ContinueCommand.Execute(null);
 

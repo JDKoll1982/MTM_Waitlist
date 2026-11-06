@@ -18,39 +18,91 @@
         RetryCommand="{x:Bind ViewModel.RetryCommand}"
         TitleKey="{x:Bind ViewModel.TitleKey}">
         <controls:GenericRequestStepFrame.Body>
-            <ListView
-                AutomationProperties.Name="{x:Bind ViewModel.Title}"
-                ItemsSource="{x:Bind ViewModel.Options}"
-                SelectedItem="{x:Bind ViewModel.Selected, Mode=TwoWay}"
-                SelectionMode="Single">
-                <ListView.ItemTemplate>
-                    <DataTemplate x:DataType="models:GenericRequestScrapOption">
-                        <Grid Padding="0,8" ColumnSpacing="12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
+            <Grid RowSpacing="12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <ListView
+                    Grid.Row="0"
+                    AutomationProperties.Name="{x:Bind ViewModel.Title}"
+                    ItemsSource="{x:Bind ViewModel.Options}"
+                    SelectedItem="{x:Bind ViewModel.Selected, Mode=TwoWay}"
+                    SelectionMode="Single">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="models:GenericRequestScrapOption">
+                            <Grid Padding="0,8">
+                                <TextBlock
+                                    Text="{x:Bind ScrapType}"
+                                    TextTrimming="CharacterEllipsis"
+                                    Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <StackPanel Grid.Row="1" Spacing="12">
+                    <Button
+                        x:Uid="GenericRequest_Scrap_AddButton"
+                        AutomationProperties.AutomationId="GenericRequestScrapTypePage_AddScrapTypeButton"
+                        Command="{x:Bind ViewModel.ShowAddCommand}"
+                        Content="Add scrap type…"
+                        Visibility="{x:Bind ViewModel.AddVisibility, Mode=OneWay}" />
+
+                    <Border
+                        Padding="16"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Visibility="{x:Bind ViewModel.AddPanelVisibility, Mode=OneWay}">
+                        <StackPanel Spacing="12">
                             <TextBlock
-                                Text="{x:Bind ScrapType}"
-                                TextTrimming="CharacterEllipsis"
-                                Style="{StaticResource BodyStrongTextBlockStyle}" />
+                                x:Uid="GenericRequest_Scrap_AddTitle"
+                                Style="{StaticResource BodyStrongTextBlockStyle}"
+                                Text="Add a scrap type the list does not carry" />
+
+                            <TextBox
+                                x:Uid="GenericRequest_Scrap_AddTypeBox"
+                                AutomationProperties.AutomationId="GenericRequestScrapTypePage_AddScrapTypeInput"
+                                Header="Scrap type"
+                                PlaceholderText="Enter scrap type"
+                                Text="{x:Bind ViewModel.NewScrapType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                            <ComboBox
+                                x:Uid="GenericRequest_Scrap_AddLuggerBox"
+                                AutomationProperties.AutomationId="GenericRequestScrapTypePage_AddScrapTypeLugger"
+                                DisplayMemberPath="Name"
+                                Header="Lugger it dumps into"
+                                ItemsSource="{x:Bind ViewModel.Luggers, Mode=OneWay}"
+                                SelectedItem="{x:Bind ViewModel.SelectedLugger, Mode=TwoWay}" />
+
                             <TextBlock
-                                Grid.Column="1"
-                                VerticalAlignment="Center"
-                                x:Uid="GenericRequest_Scrap_Luggers"
-                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Style="{StaticResource CaptionTextBlockStyle}" />
-                            <TextBlock
-                                Grid.Column="2"
-                                VerticalAlignment="Center"
-                                Text="{x:Bind AvailableLuggerDisplay}"
-                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Style="{StaticResource CaptionTextBlockStyle}" />
-                        </Grid>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                                AutomationProperties.AutomationId="GenericRequestScrapTypePage_AddScrapTypeMessage"
+                                FontSize="12"
+                                Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                Text="{x:Bind ViewModel.AddMessage, Mode=OneWay}"
+                                TextWrapping="WrapWholeWords"
+                                Visibility="{x:Bind ViewModel.AddMessageVisibility, Mode=OneWay}" />
+
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button
+                                    x:Uid="GenericRequest_Scrap_AddSaveButton"
+                                    AutomationProperties.AutomationId="GenericRequestScrapTypePage_AddScrapTypeSave"
+                                    Command="{x:Bind ViewModel.AddScrapTypeCommand}"
+                                    Content="Add"
+                                    Style="{StaticResource AccentButtonStyle}" />
+                                <Button
+                                    x:Uid="GenericRequest_Scrap_AddCancelButton"
+                                    AutomationProperties.AutomationId="GenericRequestScrapTypePage_AddScrapTypeCancel"
+                                    Command="{x:Bind ViewModel.CancelAddCommand}"
+                                    Content="Cancel" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
         </controls:GenericRequestStepFrame.Body>
     </controls:GenericRequestStepFrame>
 </Page>

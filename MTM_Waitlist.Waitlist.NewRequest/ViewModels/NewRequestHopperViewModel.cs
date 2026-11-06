@@ -49,6 +49,12 @@ public partial class NewRequestHopperViewModel : ObservableRecipient, INavigatio
     public const string LargeSize = "Large";
 
     /// <summary>
+    /// The size the step opens on when nothing has been chosen yet. Most hopper requests are for the middle size, so
+    /// the step starts there rather than with nothing picked and a refusal waiting on the forward button.
+    /// </summary>
+    public const string DefaultSize = MediumSize;
+
+    /// <summary>
     /// The rules a hopper's reference image is held to, which are the application's existing picture rules rather
     /// than a second set written for this step (FR-079).
     /// </summary>
@@ -83,7 +89,7 @@ public partial class NewRequestHopperViewModel : ObservableRecipient, INavigatio
         get; set;
     } = LocalizeOrDefault("NewRequest_Hopper.Prompt", "Which size hopper do you need?");
 
-    /// <summary>The chosen size, or empty when nothing has been chosen.</summary>
+    /// <summary>The chosen size, which is <see cref="DefaultSize"/> until the person picks another.</summary>
     [ObservableProperty]
     public partial string SelectedSize
     {
@@ -163,7 +169,7 @@ public partial class NewRequestHopperViewModel : ObservableRecipient, INavigatio
         SelectedSize = state.AnswerFor(NewRequestFlowRules.HopperSizeLabel) is { } captured
             && Sizes.Contains(captured, StringComparer.OrdinalIgnoreCase)
                 ? Sizes.First(size => string.Equals(size, captured, StringComparison.OrdinalIgnoreCase))
-                : string.Empty;
+                : DefaultSize;
         SyncChoices();
 
         await LoadPicturesAsync().ConfigureAwait(true);

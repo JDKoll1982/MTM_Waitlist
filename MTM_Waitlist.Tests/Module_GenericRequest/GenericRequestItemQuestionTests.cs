@@ -127,7 +127,8 @@ public sealed class GenericRequestItemQuestionTests
             new StubPersonIdentity(),
             new StubEmployeeDirectoryService(),
             new StubGenericRequestPartData(),
-            new FakeDunnageCatalogueReader());
+            new FakeDunnageCatalogueReader(),
+            new FakeLuggerArrangementService());
 
         var result = await data.ReadItemsAsync(definition.Category.ToString());
 

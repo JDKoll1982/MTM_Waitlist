@@ -34,6 +34,45 @@ public static class ScrapTypeCatalog
     public static IReadOnlyList<string> All => s_types;
 
     /// <summary>
+    /// The choices a scrap-type picker offers: this catalogue first in its own order, then every assigned type the
+    /// catalogue does not already hold. This is the one home of the composition rule, so the arrangement editor and
+    /// the request step cannot drift on the ordering or on the de-duplication.
+    /// </summary>
+    /// <param name="assignedTypes">The type names the lugger arrangement records, or <c>null</c>.</param>
+    /// <returns>The ordered choices; the catalogue alone when nothing is assigned.</returns>
+    /// <remarks>
+    /// De-duplication compares the trimmed name without regard to case, so <c>5052 ALUMINUM </c> and
+    /// <c>5052 aluminum</c> are one choice (FR-002). <see cref="ScrapDecisionRules.RequiredPlaceholder"/> and
+    /// <see cref="ScrapDecisionRules.NoScrap"/> are dropped even when assigned: they answer whether there is scrap,
+    /// not where it goes (FR-003).
+    /// </remarks>
+    public static IReadOnlyList<string> Compose(IEnumerable<string>? assignedTypes)
+    {
+        var options = new List<string>(s_types);
+
+        if (assignedTypes is null)
+        {
+            return options;
+        }
+
+        foreach (var assigned in assignedTypes)
+        {
+            var name = assigned?.Trim();
+            if (string.IsNullOrEmpty(name)
+                || ScrapDecisionRules.IsRequiredPlaceholder(name)
+                || ScrapDecisionRules.IsNoScrap(name)
+                || options.Contains(name, StringComparer.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            options.Add(name);
+        }
+
+        return options;
+    }
+
+    /// <summary>
     /// Whether the value names one of the shipped scrap types, ignoring case and surrounding spaces. A type outside
     /// the list may still be recorded against a lugger (FR-011), so this answers what the list recognises, never
     /// what is allowed.

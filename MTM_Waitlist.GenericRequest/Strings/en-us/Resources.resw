@@ -95,9 +95,6 @@
   <data name="GenericRequest_Dunnage_Selected.Text" xml:space="preserve">
     <value>Selected</value>
   </data>
-  <data name="GenericRequest_Scrap_Luggers.Text" xml:space="preserve">
-    <value>Luggers</value>
-  </data>
   <data name="GenericRequest_Part_Intro.Text" xml:space="preserve">
     <value>Type the part number, choose the sequence it is standing at, and check how much is on hand.</value>
   </data>
@@ -199,7 +196,37 @@
     <value>Die number or description</value>
   </data>
   <data name="GenericRequest_Scrap_Intro.Text" xml:space="preserve">
-    <value>Pick the scrap type the request needs. The lugger count is how many are free to use.</value>
+    <value>Pick the scrap type this request is carrying. The card will name the lugger it goes to.</value>
+  </data>
+  <data name="GenericRequest_Scrap_AddButton.Content" xml:space="preserve">
+    <value>Add scrap type…</value>
+  </data>
+  <data name="GenericRequest_Scrap_AddTitle.Text" xml:space="preserve">
+    <value>Add a scrap type the list does not carry</value>
+  </data>
+  <data name="GenericRequest_Scrap_AddTypeBox.Header" xml:space="preserve">
+    <value>Scrap type</value>
+  </data>
+  <data name="GenericRequest_Scrap_AddTypeBox.PlaceholderText" xml:space="preserve">
+    <value>Enter scrap type</value>
+  </data>
+  <data name="GenericRequest_Scrap_AddLuggerBox.Header" xml:space="preserve">
+    <value>Lugger it dumps into</value>
+  </data>
+  <data name="GenericRequest_Scrap_AddSaveButton.Content" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="GenericRequest_Scrap_AddCancelButton.Content" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="GenericRequest_Scrap_Add_Blank.Text" xml:space="preserve">
+    <value>Enter the scrap type before adding it.</value>
+  </data>
+  <data name="GenericRequest_Scrap_Add_NoLugger.Text" xml:space="preserve">
+    <value>Choose the lugger this scrap type dumps into.</value>
+  </data>
+  <data name="GenericRequest_Scrap_Add_Failed.Text" xml:space="preserve">
+    <value>The scrap type could not be added. Try again.</value>
   </data>
   <data name="GenericRequest_Item_Intro.Text" xml:space="preserve">
     <value>Pick the item this request is about.</value>

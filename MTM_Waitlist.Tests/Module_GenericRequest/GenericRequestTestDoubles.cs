@@ -30,6 +30,9 @@ internal sealed class StubGenericRequestStepData : IGenericRequestStepData
     public GenericRequestStepResult<GenericRequestItemOption> Items { get; set; } =
         GenericRequestStepResult<GenericRequestItemOption>.Empty(DateTimeOffset.UtcNow);
 
+    public GenericRequestStepResult<GenericRequestScrapOption> ScrapTypes { get; set; } =
+        GenericRequestStepResult<GenericRequestScrapOption>.Unavailable(DateTimeOffset.UtcNow);
+
     public GenericRequestStepAvailability Availability { get; set; } =
         GenericRequestStepAvailability.Ready(DateTimeOffset.UtcNow);
 
@@ -57,7 +60,7 @@ internal sealed class StubGenericRequestStepData : IGenericRequestStepData
         Task.FromResult(GenericRequestStepResult<GenericRequestSequenceOption>.Unavailable(DateTimeOffset.UtcNow));
 
     public Task<GenericRequestStepResult<GenericRequestScrapOption>> ReadScrapTypesAsync(CancellationToken cancellationToken = default) =>
-        Task.FromResult(GenericRequestStepResult<GenericRequestScrapOption>.Unavailable(DateTimeOffset.UtcNow));
+        Task.FromResult(ScrapTypes);
 
     public Task<GenericRequestStepResult<GenericRequestDieOption>> ReadDiesAsync(string searchText, CancellationToken cancellationToken = default) =>
         Task.FromResult(GenericRequestStepResult<GenericRequestDieOption>.Unavailable(DateTimeOffset.UtcNow));
@@ -331,4 +334,127 @@ internal sealed class RecordingWaitlistRequestService : IWaitlistRequestService
         string? handlerStatus,
         string expectedMaterialHandler,
         CancellationToken cancellationToken = default) => Task.FromResult(0);
+}
+
+/// <summary>
+/// The lugger arrangement, held in memory, so a test can say what the scrap read would answer without a store.
+/// </summary>
+/// <remarks>
+/// Three shapes, because they are the three the flow must tell apart: a snapshot in hand, a read that never
+/// answered (<see cref="LuggerArrangementSnapshot.Empty"/>), and a read that failed. <see cref="Failure"/> makes
+/// the third, and a snapshot is in hand when <see cref="Snapshot"/> is set to a
+/// <see cref="LuggerArrangementSnapshot.Create"/> result rather than the unread <c>Empty</c>.
+/// </remarks>
+internal sealed class FakeLuggerArrangementService : ILuggerArrangementService
+{
+    public LuggerArrangementSnapshot Snapshot { get; set; } = LuggerArrangementSnapshot.Empty;
+
+    public Exception? Failure { get; set; }
+
+    /// <summary>The luggers the arrangement offers to whoever is adding a scrap type, in display order.</summary>
+    public IReadOnlyList<Lugger> Luggers { get; set; } = Array.Empty<Lugger>();
+
+    /// <summary>Every assignment this fake was asked to write, in the order it was asked.</summary>
+    public List<(string ScrapType, string LuggerPublicId, int SortPosition, string ActorEmployeeNumber, string ActorEmployeeName)> Assignments { get; } = new();
+
+    /// <summary>What a write raises instead of succeeding, or null.</summary>
+    public Exception? AssignFailure { get; set; }
+
+    /// <summary>Runs after a write is recorded, so a test can make the next read answer what the store now holds.</summary>
+    public Action? OnAssign { get; set; }
+
+    public Task<LuggerArrangementSnapshot> GetSnapshotAsync(CancellationToken cancellationToken = default) =>
+        Failure is null
+            ? Task.FromResult(Snapshot)
+            : Task.FromException<LuggerArrangementSnapshot>(Failure);
+
+    public Task<IReadOnlyList<Lugger>> GetLuggersAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult(Luggers);
+
+    public Task<IReadOnlyList<ScrapAssignment>> GetAssignmentsAsync(
+        string scrapTypeKey,
+        CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException();
+
+    public Task<long> GetChangeWatermarkAsync(CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException();
+
+    public Task<IReadOnlyList<ArrangementChange>> GetChangesAfterAsync(
+        long afterId,
+        CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException();
+
+    public Task<int> AddLuggerAsync(
+        string luggerName,
+        int displayPosition,
+        string actorEmployeeNumber,
+        string actorEmployeeName,
+        CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException();
+
+    public Task<int> RenameLuggerAsync(
+        string luggerPublicId,
+        string luggerName,
+        string actorEmployeeNumber,
+        string actorEmployeeName,
+        CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException();
+
+    public Task<int> SetLuggerPositionAsync(
+        string luggerPublicId,
+        int displayPosition,
+        string actorEmployeeNumber,
+        string actorEmployeeName,
+        CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException();
+
+    public Task<int> RemoveLuggerAsync(
+        string luggerPublicId,
+        string actorEmployeeNumber,
+        string actorEmployeeName,
+        CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException();
+
+    public Task<int> SetStatusAsync(
+        string luggerPublicId,
+        string status,
+        string? reason,
+        string actorEmployeeNumber,
+        string actorEmployeeName,
+        CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException();
+
+    public Task<int> PromoteLuggerAsync(
+        string luggerPublicId,
+        string scrapTypeKey,
+        string actorEmployeeNumber,
+        string actorEmployeeName,
+        CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException();
+
+    public Task<int> AssignScrapTypeAsync(
+        string scrapType,
+        string luggerPublicId,
+        int sortPosition,
+        string actorEmployeeNumber,
+        string actorEmployeeName,
+        CancellationToken cancellationToken = default)
+    {
+        if (AssignFailure is { } failure)
+        {
+            return Task.FromException<int>(failure);
+        }
+
+        Assignments.Add((scrapType, luggerPublicId, sortPosition, actorEmployeeNumber, actorEmployeeName));
+        OnAssign?.Invoke();
+        return Task.FromResult(1);
+    }
+
+    public Task<int> UnassignScrapTypeAsync(
+        string scrapTypeKey,
+        string luggerPublicId,
+        string actorEmployeeNumber,
+        string actorEmployeeName,
+        CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException();
 }

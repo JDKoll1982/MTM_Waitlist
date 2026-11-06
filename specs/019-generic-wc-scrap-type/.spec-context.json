@@ -3,8 +3,851 @@
   "specName": "019 Generic Work Center — Stated Scrap Type and Lugger",
   "branch": "master",
   "selectedAt": "2026-11-03T21:00:00.000Z",
-  "currentStep": "specify",
-  "status": "draft",
-  "history": [],
-  "telemetryInstanceId": "5a34df52-a642-4a0e-90b2-af72abe89980"
+  "currentStep": "implement",
+  "status": "completed",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-05T21:00:08.636Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-11-05T21:03:02.229Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-05T21:03:52.185Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:09:39.665Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:14:46.689Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:15:11.292Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-05T21:15:41.756Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:22:15.017Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:22:21.830Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T001",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:27:35.944Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T002",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:28:18.610Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T004",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:28:23.443Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:28:28.643Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T003",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:32:53.214Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:32:58.605Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:33:04.656Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:33:10.021Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T009",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:33:15.470Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T010",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:33:21.152Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T011",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:33:26.416Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T012",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:33:31.560Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T019",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:41:29.312Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:41:29.352Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T015",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:41:29.391Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T013",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:43:26.562Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T014",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:43:31.864Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T016",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:43:37.225Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T018",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:43:42.866Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T020",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:46:44.718Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T021",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:46:50.031Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T022",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:46:55.790Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T023",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:48:17.001Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T024",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:48:37.822Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T025",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:48:48.773Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T026",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:48:54.206Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T027",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:48:59.906Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T028",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:53:47.231Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-05T21:53:47.322Z"
+    }
+  ],
+  "telemetryInstanceId": "5a34df52-a642-4a0e-90b2-af72abe89980",
+  "workingBranch": "019-generic-wc-scrap-type",
+  "unattended": true,
+  "last_action": "All 28 tasks done; solution build 0 errors, full suite 2622 passed / 0 failed / 52 skipped",
+  "coverage": {
+    "FR-001": {
+      "title": "For the scrap item, the step asks the requester to state the scrap type and reads no job.",
+      "tasks": [
+        "T013",
+        "T016",
+        "T018"
+      ],
+      "tests": [
+        "GenericRequestScrapTypeViewModelTests.cs::APopulatedReadMapsToPopulated",
+        "GenericRequestScrapSubmissionTests.cs::AScrapRequestRecordsTheStatedTypeInItsOwnWording"
+      ]
+    },
+    "FR-002": {
+      "title": "The choices come from the plant single shared scrap-type list in its own order, plus any type the arrangement records outside it; no second list.",
+      "tasks": [
+        "T004",
+        "T006",
+        "T009",
+        "T016"
+      ],
+      "tests": [
+        "ScrapTypeCatalogTests.cs::Compose_KeepsTheCataloguesOwnOrder",
+        "ScrapTypeCatalogTests.cs::Compose_AppendsAnAssignedTypeTheCatalogueDoesNotHold",
+        "LuggerArrangementViewModelTests.cs::InitializeAsync_OffersTheCatalogueThenTheArrangementsOutsideTypes"
+      ]
+    },
+    "FR-003": {
+      "title": "The choices never include the required placeholder or the no-scrap value.",
+      "tasks": [
+        "T004",
+        "T009",
+        "T016"
+      ],
+      "tests": [
+        "ScrapTypeCatalogTests.cs::Compose_NeverOffersEitherDecisionWordEvenWhenAssigned",
+        "LuggerArrangementViewModelTests.cs::InitializeAsync_NeverOffersEitherDecisionWord"
+      ]
+    },
+    "FR-004": {
+      "title": "The flow does not advance without a chosen scrap type.",
+      "tasks": [
+        "T013",
+        "T018"
+      ],
+      "tests": [
+        "GenericRequestScrapTypeViewModelTests.cs::TheForwardButtonIsClosedUntilATypeIsChosen"
+      ]
+    },
+    "FR-005": {
+      "title": "A chosen type is carried on the confirmation, on the card and in the stored request, in the requester wording.",
+      "tasks": [
+        "T002",
+        "T010",
+        "T013",
+        "T014",
+        "T016"
+      ],
+      "tests": [
+        "GenericRequestScrapTypeViewModelTests.cs::ChoosingATypeWritesItIntoTheDraft",
+        "GenericRequestScrapAnswerTests.cs::ToAnswers_RecordsTheStatedTypeUnderTheOneKey",
+        "GenericRequestScrapSubmissionTests.cs::AScrapRequestRecordsTheStatedTypeInItsOwnWording"
+      ]
+    },
+    "FR-006": {
+      "title": "A generic scrap card names the lugger the arrangement assigns to the stated type, following blocking and backup rules, and reads no job.",
+      "tasks": [
+        "T005",
+        "T007",
+        "T012",
+        "T020",
+        "T022"
+      ],
+      "tests": [
+        "WaitlistViewViewModelFieldTests.cs::RefreshAsync_AGenericScrapCardNamesTheStatedTypeAndTheLuggerAssignedNow"
+      ]
+    },
+    "FR-007": {
+      "title": "The lugger resolution is the same one the work-order scrap card uses, so the two cannot disagree for a type.",
+      "tasks": [
+        "T007",
+        "T012",
+        "T020"
+      ],
+      "tests": [
+        "StatedScrapLuggerReadTests.cs::BothEntryPoints_CallTheSamePrivateRoutine",
+        "StatedScrapLuggerReadTests.cs::Provider_ReadsTheArrangementInOnePlace",
+        "WaitlistViewViewModelFieldTests.cs::RefreshAsync_AWorkOrderScrapCardIsUnchangedAndNeverReadsAStatedType"
+      ]
+    },
+    "FR-008": {
+      "title": "A type whose luggers are all blocked draws the type and the first lugger in the arrangement order with its status beside it, never blank.",
+      "tasks": [
+        "T020",
+        "T022"
+      ],
+      "tests": [
+        "WaitlistViewViewModelFieldTests.cs::RefreshAsync_AnAllBlockedTypeShowsTheFirstLuggerWithItsStatus"
+      ]
+    },
+    "FR-009": {
+      "title": "A type with no lugger assigned draws the type and records the missing assignment as a configuration gap, never an invented lugger.",
+      "tasks": [
+        "T007",
+        "T020",
+        "T022"
+      ],
+      "tests": [
+        "WaitlistViewViewModelFieldTests.cs::RefreshAsync_AGapIsWordedRatherThanDrawnBlank"
+      ]
+    },
+    "FR-010": {
+      "title": "Where the arrangement cannot be read, the card names the type and reports the lugger as temporarily unavailable.",
+      "tasks": [
+        "T003",
+        "T008",
+        "T020",
+        "T022"
+      ],
+      "tests": [
+        "WaitlistViewViewModelFieldTests.cs::RefreshAsync_AnOutageIsWordedDifferentlyFromAGap",
+        "LuggerArrangementSnapshotTests.cs::Empty_AnswersItWasNotRead"
+      ]
+    },
+    "FR-011": {
+      "title": "A type removed from or renamed in the arrangement leaves an existing request stated wording intact.",
+      "tasks": [
+        "T002",
+        "T014",
+        "T023"
+      ],
+      "tests": [
+        "WaitlistViewViewModelGenericScrapTests.cs::ATypeRemovedFromTheArrangementKeepsItsWordingAndReportsNotAssigned",
+        "WaitlistViewViewModelGenericScrapTests.cs::AnOldSpellingStillShowsAfterTheArrangementRenamesTheType",
+        "GenericRequestScrapAnswerTests.cs::TryRead_ReturnsTheRequestersOwnWording"
+      ]
+    },
+    "FR-012": {
+      "title": "A type reassigned to a different lugger shows the lugger assigned now, because the dump point is a live fact.",
+      "tasks": [
+        "T022",
+        "T023"
+      ],
+      "tests": [
+        "WaitlistViewViewModelGenericScrapTests.cs::AReassignedTypeDrawsTheLuggerAssignedNowNotTheOneBefore"
+      ]
+    },
+    "FR-013": {
+      "title": "A stored request carrying a type outside the shared list still draws with that type named.",
+      "tasks": [
+        "T023"
+      ],
+      "tests": [
+        "WaitlistViewViewModelGenericScrapTests.cs::ATypeOutsideTheSharedListStillDrawsWithItsTypeNamed"
+      ]
+    },
+    "FR-014": {
+      "title": "The Temp preview source and the scrap card variant are deleted, the build stays green, and nothing is renamed in place of removing it.",
+      "tasks": [
+        "T026"
+      ],
+      "tests": [
+        "TempArtefactBoundaryAuditTests.cs::TheShippedApplicationCarriesNoTempArtefact"
+      ]
+    },
+    "FR-015": {
+      "title": "A scrap request goes from the scrap step straight to the confirmation, never the details step, and records no description.",
+      "tasks": [
+        "T027"
+      ],
+      "tests": [
+        "GenericRequestFlowRulesTests.cs::a scrap request"
+      ]
+    },
+    "FR-016": {
+      "title": "Going back from the confirmation returns to the scrap step with the chosen type still selected.",
+      "tasks": [
+        "T013",
+        "T018",
+        "T027"
+      ],
+      "tests": [
+        "GenericRequestFlowRulesTests.cs::a scrap request"
+      ]
+    }
+  },
+  "size": "oversized",
+  "classification": {
+    "projectedFiles": 14,
+    "projectedTasks": 20,
+    "scopeSignal": "none",
+    "verdict": "oversized"
+  },
+  "expectations": [
+    "The stated part and its quantity (chunk 017) are not built here.",
+    "The dunnage page (chunk 018) is not changed here.",
+    "The die search (chunk 020) is not built here.",
+    "The optional job fill (chunk 021) is not built here.",
+    "The work-order scrap card keeps behaving as it does today; only the generic card joins its resolution."
+  ],
+  "context": [
+    "living specs: no capability matched the touched area (recorded by record-living-specs.py)",
+    "area: MTM_Waitlist.GenericRequest scrap step, live step data, step availability and option shape",
+    "area: MTM_Waitlist.Waitlist.View card cells, request titles and lugger change notices",
+    "area: MTM_Waitlist.Settings lugger arrangement rows and dump-point resolution",
+    "area: MTM_Waitlist.Core shared scrap-type catalog and scrap decision rules",
+    "constraint: constitution III - stored procedure reads, no mock or demo mode, a failed read is unavailable with the attempt time and a retry",
+    "constraint: spec 016 FR-031 and FR-032 - an answer-only request goes straight to the confirmation and records no description",
+    "constraint: spec 013 owns the lugger arrangement, its blocking and backup rules"
+  ],
+  "intent": "At a generic work center the requester states the scrap type, and the generic scrap card resolves its lugger from the arrangement.",
+  "verified": [
+    {
+      "what": "plan blocks check out",
+      "command": "python3 .specify/extensions/companion/scripts/check_plan.py --feature-dir specs/019-generic-wc-scrap-type --strict",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 0.2,
+      "result": "[plan-check] plan.md: 2 call paths, 12 lines, 2 screens, 21 parts, 1 code block, 1 state block (8 states). Every cited file and line checks out."
+    },
+    {
+      "what": "solution build",
+      "command": "dotnet build MTM_Waitlist.sln",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 32.5,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:32.24"
+    },
+    {
+      "what": "full test suite",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj --no-build",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 33.7,
+      "result": "  Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_ReachesTheRealProcedureReportsTheLoadedRowCountAndSwapsAtomically [1 ms] ·   Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_WithAnEmptyPayloadIsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  2622, Skipped:    52, Total:  2674, Duration: 32 s - MTM_Waitlist.Tests.dll (net10.0)"
+    }
+  ],
+  "planBlocks": [
+    "calls",
+    "code",
+    "states",
+    "screens"
+  ],
+  "decisions": [
+    {
+      "decision": "The choices are ScrapTypeCatalog.All followed by the arrangement's own types, composed by one ScrapTypeCatalog.Compose rule that the arrangement editor also calls.",
+      "why": "FR-002 forbids a second scrap-type list, and the ordering and de-duplication rule existed only as a private static in the Settings editor, so a second caller would have duplicated it.",
+      "rejected": "A scrap-type table with its own stored procedure, or a third private copy of the ordering rule in the generic flow."
+    },
+    {
+      "decision": "LuggerArrangementSnapshot gains WasRead, set true by Create and false by Empty.",
+      "why": "The service returns Empty both for a failed read and for an arrangement with no rows, so no caller could tell an outage from an empty arrangement, which FR-010 and the spec's edge case both require.",
+      "rejected": "Making GetSnapshotAsync throw, which would leave GetLuggersAsync beside it still swallowing, or adding a second throwing read to the same interface."
+    },
+    {
+      "decision": "GenericRequestScrapOption loses AvailableLuggerCount and AvailableLuggerDisplay, and the page loses its two count columns and the GenericRequest_Scrap_Luggers label.",
+      "why": "Nothing populates the count, because the read behind it has always been the stub, so it is a leftover of the Temp preview that FR-014 deletes. Every lugger fact in the spec belongs to the card, and a count taken at load would be stale by the time a handler read the card.",
+      "rejected": "Populating the count from the snapshot the step already reads, which puts a non-spec'd number on a 30-second screen and tells a different story from a card that deliberately draws a blocked lugger with its status."
+    },
+    {
+      "decision": "The stated type is recorded as GenericRequestScrapAnswer under the key scrap.type in the existing answers_json column.",
+      "why": "It is the column the generic flow already uses for a per-answer record, and storing the requester's wording is what makes FR-011 and FR-013 hold when the arrangement changes.",
+      "rejected": "Writing the type into input_value, which is documented as the one value the request is about and would give the same fact two authorities, or adding a column and its schema artifacts."
+    },
+    {
+      "decision": "The lugger is resolved by one routine in RequestJobAvailabilityProvider, reached by the existing work-order path and by a new GetStatedScrapLuggerAsync for a stated type.",
+      "why": "FR-007 and SC-003 require the two card kinds to name the identical lugger in every case, and only one routine guarantees that. The provider already holds the arrangement and picture services.",
+      "rejected": "Resolving in WaitlistViewViewModel, which would duplicate the picture lookup, or storing the lugger on the request, which assumption A2 forbids."
+    },
+    {
+      "decision": "The board merges the stated type and resolved lugger into the RequestJobPartAvailability it already passes to CreateSessionOrder and ResolveDeclaredCell.",
+      "why": "It is the record that already carries ScrapType, LuggerLocation and LuggerLocationImagePath to the two places that draw them, so no title, cell rule or template needs a second branch and the work-order card is untouched.",
+      "rejected": "Reading the answer inside WaitlistRequestTitles.ResolveContext, which would fix the type token only and leave the lugger arriving by a second mechanism."
+    },
+    {
+      "decision": "The scrap step injects the existing ILuggerArrangementService instead of introducing a reader seam in MTM_Waitlist.Shared.",
+      "why": "018 needed a seam because the implementation belonged to Setup; here the contract is in Core, which has no project references and is already referenced by GenericRequest, so a new interface would be an interface with one implementation for nothing.",
+      "rejected": "An IScrapTypesReader in Shared mirroring IDunnageCatalogueReader."
+    },
+    {
+      "decision": "The scrap step gates Continue on a chosen type and re-selects the draft value with a trim and OrdinalIgnoreCase comparison.",
+      "why": "CanAnswer is true in the base class, so FR-004 is currently unimplemented and the forward button is enabled with nothing chosen; the stored draft can differ from the option only in case or surrounding spaces, which the arrangement already treats as one type.",
+      "rejected": "Leaving the gate inherited and relying on CommitToDraft to keep the previous value."
+    },
+    {
+      "decision": "Promoted the composition rule into ScrapTypeCatalog.Compose and made the editor call it, trimming each name before the case-insensitive compare",
+      "why": "The editor's private copy compared untrimmed, so \"5052 ALUMINUM \" would have been offered beside \"5052 aluminum\"; one home also stops the step and the editor drifting on order",
+      "rejected": "Leaving the editor's private copy and writing a second composition rule in the generic step"
+    },
+    {
+      "decision": "StatedScrapLugger carries ArrangementRead rather than letting the caller read Rows.Count",
+      "why": "An outage and an arrangement with no rows were indistinguishable before WasRead existed, and the card has to word them differently",
+      "rejected": "Having the caller test Rows.Count, which cannot tell the two apart"
+    },
+    {
+      "decision": "The board merges the stated scrap facts into a per-request copy of the availability after ResolveJobAvailabilityAsync",
+      "why": "The merge is per request while the cache is per work centre, and CreateSessionOrder and ResolveDeclaredCell stay byte-identical for the work-order path",
+      "rejected": "Merging inside CreateSessionOrder, which the work-order path and the existing card tests also call"
+    },
+    {
+      "decision": "The configuration-gap warning keys off WasRead instead of Rows.Count > 0",
+      "why": "WasRead is the exact question the old proxy was approximating; an arrangement that was read and holds no rows is a real configuration gap worth recording",
+      "rejected": "Keeping Rows.Count > 0, which also stays silent for a genuinely empty arrangement"
+    },
+    {
+      "decision": "The gap and outage card phrases are proven by resolving the key and by the resw declaring it, not by asserting the value differs from its key",
+      "why": "The test host has no resource index, so GetLocalized returns the key there; asserting inequality fails for a reason unrelated to the feature",
+      "rejected": "Asserting the value differs from its key, which cannot pass in this test host"
+    },
+    {
+      "decision": "The stated scrap type is asserted on the card's identifier line (Subtitle) rather than Title",
+      "why": "pickup-scrap's line 1 is its category word and its line-2 template is {scrap_type}, so the identifier is where the stated type actually lands",
+      "rejected": "Asserting on Title, which carries the category prefix and fails"
+    }
+  ],
+  "step_summaries": {
+    "specify": {
+      "summary": "Planned the generic scrap step's live read, its recorded answer and the card's lugger, reusing the shipped Core resolution and removing the Temp preview's lugger count.",
+      "key_finding": "The scrap step, its route past the details step and the Temp-preview deletion are all already in the tree; the real work is the read behind the step, the answer that survives the raise, and one shared lugger routine the board can reach without a job."
+    },
+    "tasks": {
+      "summary": "28 tasks: Setup (1) -> Foundational (3 waves, 11) -> US1 (4 waves, 7) -> US2 (2 waves, 3) -> US3 (1 wave, 1) -> Polish (5); 20 marked [P]; one owner per file."
+    },
+    "implement": {
+      "summary": "A generic scrap request now states its type from the plant's one list, records it as scrap.type, and its card names the type and the lugger the arrangement assigns now, through the same resolution the work-order scrap card uses."
+    }
+  },
+  "approach": "The scrap step reads the compiled ScrapTypeCatalog plus the live lugger arrangement and offers their union, gating Continue on a chosen type. The chosen type is recorded on the request in answers_json as scrap.type, and the board merges the stated type with the lugger one shared routine resolves into the availability record every card already draws from.",
+  "concerns": [
+    {
+      "note": "plan-blocks.py cannot print its block grammars in this checkout: .specify/extensions/companion/workflows/presets has only brownfield.yml and classic.yml, with no _parts directory, so the script fails on call-paths.md before it records planBlocks. The four blocks were written to the grammar check_plan.py enforces instead, and check_plan.py now reports zero errors and zero warnings."
+    },
+    {
+      "note": "wording.md is STATUS: default, awaiting review. The step intro and the card's two phrases are unratified defaults adopted because this run is unattended; a reviewer must ratify or replace them in wording.md and the two resw files together.",
+      "step": "implement"
+    },
+    {
+      "note": "The file-ownership map missed two test files: GenericRequestDunnageSubmissionTests.cs and GenericRequestItemQuestionTests.cs both construct GenericRequestLiveStepData, so T016's added constructor dependency broke them. No task owned either; the main agent updated both call sites.",
+      "step": "implement"
+    },
+    {
+      "note": "T020 asked the gap and outage values to be asserted to differ from their resource keys, which cannot hold in a test host with no PRI resources. The assertion is the key's own GetLocalized() plus a check that the resw declares it.",
+      "step": "implement"
+    },
+    {
+      "note": "Pinned, not fixed, as the spec requires: the lugger cell still draws the shared placeholder behind the gap and outage words because its value is non-empty. A test pins DrawsPicture true with an empty picture path.",
+      "step": "implement"
+    }
+  ],
+  "currentTask": null,
+  "task_summaries": {
+    "T001": {
+      "status": "DONE",
+      "did": "Recorded the step intro, the deleted lugger key, and the card's gap and outage sentences as the unattended default, flagged for review",
+      "files": [
+        "specs/019-generic-wc-scrap-type/wording.md"
+      ]
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "Added GenericRequestScrapAnswer: the scrap.type key, ToAnswers and a null-answering TryRead, mirroring the dunnage answer",
+      "files": [
+        "MTM_Waitlist.Core/Models/GenericRequestScrapAnswer.cs"
+      ]
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "Promoted the composition rule into ScrapTypeCatalog.Compose: catalogue order, then unheld assigned names, trimmed case-insensitive de-duplication, decision words dropped",
+      "files": [
+        "MTM_Waitlist.Core/Services/ScrapTypeCatalog.cs"
+      ]
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "Added StatedScrapLugger: name, picture and whether the arrangement read answered, so a gap and an outage are different outcomes",
+      "files": [
+        "MTM_Waitlist.Settings/Models/StatedScrapLugger.cs"
+      ]
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "Added LuggerArrangementSnapshot.WasRead so an outage stops looking like an arrangement with no rows; the service needed no behavioural change, only its remark",
+      "files": [
+        "MTM_Waitlist.Core/Models/Lugger/LuggerArrangementSnapshot.cs",
+        "MTM_Waitlist.Core/Services/LuggerArrangementService.cs"
+      ]
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "The arrangement editor now builds its scrap-type picker from ScrapTypeCatalog.Compose; the private copy is deleted, so the editor and the step share one ordering rule",
+      "files": [
+        "MTM_Waitlist.Settings/Administration/ViewModels/LuggerArrangementViewModel.cs"
+      ]
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "Split the lugger resolution: GetStatedScrapLuggerAsync and ApplyLuggerLocationAsync now share one private routine holding the only arrangement read, resolve and picture lookup; the detail view model's stub satisfies the grown interface",
+      "files": [
+        "MTM_Waitlist.Settings/Services/IRequestJobPartAvailabilityProvider.cs",
+        "Services/RequestJobAvailabilityProvider.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewDetailViewModelTests.cs"
+      ]
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "Five cases pin WasRead: rows true, zero rows true, Empty false, an absent read false, and the outage reporting unread with no rows or types",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Models/LuggerArrangementSnapshotTests.cs"
+      ]
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "Six Compose cases: catalogue order kept, an outside type appended, a case and space variant offered once, both decision words dropped, null and empty yield the catalogue alone, and a different spelling stays a second type",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Core/Services/ScrapTypeCatalogTests.cs"
+      ]
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "Seven cases pin the recorded answer: one key, wording kept, key case ignored, and null answers for a missing key, an empty or whitespace value and no dictionary",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestScrapAnswerTests.cs"
+      ]
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "Three view-model cases drive the editor's picker: the catalogue then the arrangement's outside types, a case variant once, and neither decision word offered",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/ViewModels/LuggerArrangementViewModelTests.cs"
+      ]
+    },
+    "T012": {
+      "status": "DONE",
+      "did": "Four source-audit cases on the provider: the stated entry point exists, takes only the type and a token, both entry points call one private routine, and the file reads the arrangement once",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Settings/Services/StatedScrapLuggerReadTests.cs"
+      ]
+    },
+    "T019": {
+      "status": "DONE",
+      "did": "Applied the intro wording and deleted GenericRequest_Scrap_Luggers.Text.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Strings/en-us/Resources.resw"
+      ]
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "Trimmed the scrap item template to the scrap type alone, removing the lugger count columns.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestScrapTypePage.xaml"
+      ]
+    },
+    "T015": {
+      "status": "DONE",
+      "did": "Reduced GenericRequestScrapOption to the scrap type alone and dropped the System.Globalization import.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestOptions.cs"
+      ]
+    },
+    "T013": {
+      "status": "DONE",
+      "did": "Six step cases: populated and unavailable map through with the attempt time, Continue is closed until a type is chosen, choosing writes the draft, a revisit re-selects trimmed and case-insensitively, and a fresh visit selects nothing",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestScrapTypeViewModelTests.cs"
+      ]
+    },
+    "T014": {
+      "status": "DONE",
+      "did": "Added the fake arrangement seam in three shapes and a settable scrap read to the doubles, plus four raise cases proving scrap.type is recorded in the requester's wording and never in input_value",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestTestDoubles.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestScrapSubmissionTests.cs"
+      ]
+    },
+    "T016": {
+      "status": "DONE",
+      "did": "The scrap read is real: one arrangement read composed through ScrapTypeCatalog.Compose, an unread snapshot answers Unavailable with no list, Scrap leaves the unimplemented set, and the raise merges the stated type",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Services/GenericRequestLiveStepData.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDunnageSubmissionTests.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestItemQuestionTests.cs"
+      ]
+    },
+    "T018": {
+      "status": "DONE",
+      "did": "The step is now gated on its own answer and re-selects the stored type on a trimmed, case-insensitive match, leaving nothing selected when the draft holds none",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestScrapTypeViewModel.cs"
+      ]
+    },
+    "T020": {
+      "status": "DONE",
+      "did": "Seven board cases: the stated type and the lugger assigned now, an all-blocked type named with its status, a gap and an outage worded apart with the placeholder pinned, a work-order card byte-identical and never reading a stated type, a non-scrap generic card untouched, and a throwing read leaving the card as it was",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelFieldTests.cs"
+      ]
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "Added the card's two sentences as WaitlistRequest_Scrap_LuggerNotAssigned.Text and WaitlistRequest_Scrap_LuggerUnavailable.Text, changing no existing key; a card data row is asserted to differ from the gap's",
+      "files": [
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T022": {
+      "status": "DONE",
+      "did": "The load loop merges the stated type and the lugger the arrangement assigns now into a per-request availability, guarded on IsScrapItem && IsGeneric, with a gap and an outage worded apart and a failed read leaving the card alone; CreateSessionOrder and ResolveDeclaredCell are untouched",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs"
+      ]
+    },
+    "T023": {
+      "status": "DONE",
+      "did": "Four survival cases through the board's own load: a removed type keeps its wording and reports not assigned, an old spelling survives a rename, a reassigned type draws the lugger assigned now on the next load, and an outside type still draws named",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/ViewModels/WaitlistViewViewModelGenericScrapTests.cs"
+      ]
+    },
+    "T024": {
+      "status": "DONE",
+      "did": "Recorded the user-visible change for readers: the scrap step now asks for the type and the card names the lugger, with no schema change",
+      "files": [
+        "CHANGELOG.md"
+      ]
+    },
+    "T025": {
+      "status": "DONE",
+      "did": "Ran SurfaceInventoryAuditTests: 5 passed, every XAML file listed once, so the scrap page keeps its row and no inventory edit was needed"
+    },
+    "T026": {
+      "status": "DONE",
+      "did": "Ran TempArtefactBoundaryAuditTests: 3 passed, so the Temp preview source and the scrap card variant stay removed and no deletion work was invented"
+    },
+    "T027": {
+      "status": "DONE",
+      "did": "Ran GenericRequestFlowRulesTests: 9 passed including the scrap data row, so the order is Scrap then Summary with no details stop and back returns to Scrap; nothing was authored"
+    },
+    "T028": {
+      "status": "DONE",
+      "did": "Validated against the Success Criteria: clean solution build with 0 errors and no WMC9999 or NETSDK1022, and the full suite green at 2622 passed, 0 failed, 52 skipped",
+      "files": [
+        "MTM_Waitlist.sln"
+      ]
+    }
+  }
 }

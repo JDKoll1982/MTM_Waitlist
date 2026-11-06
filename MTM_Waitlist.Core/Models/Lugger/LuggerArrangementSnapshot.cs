@@ -12,6 +12,10 @@ using MTM_Waitlist.Module_Core.Services;
 /// and no request stores anything about the lugger (FR-023).
 /// </para>
 /// <para>
+/// <see cref="WasRead"/> is the one thing that separates an outage from an arrangement with no rows: both leave
+/// <see cref="Rows"/> empty, but only a read that answered sets it.
+/// </para>
+/// <para>
 /// The matching rule ignores letter case and surrounding spaces and nothing else, so <c>5052 aluminum</c>,
 /// <c>5052 Aluminum</c> and <c> 5052 ALUMINUM </c> are one scrap type while a difference inside the spelling is
 /// two (FR-009, research D5). The stored key is the lower-cased, trimmed spelling, so this type never derives a
@@ -22,9 +26,10 @@ public sealed class LuggerArrangementSnapshot
 {
     private readonly IReadOnlyDictionary<string, IReadOnlyList<ScrapAssignment>> _byScrapTypeKey;
 
-    private LuggerArrangementSnapshot(IReadOnlyList<ScrapAssignment> rows)
+    private LuggerArrangementSnapshot(IReadOnlyList<ScrapAssignment> rows, bool wasRead)
     {
         Rows = rows;
+        WasRead = wasRead;
 
         _byScrapTypeKey = rows
             .Where(row => !string.IsNullOrWhiteSpace(row.ScrapTypeKey))
@@ -44,7 +49,7 @@ public sealed class LuggerArrangementSnapshot
     }
 
     /// <summary>An arrangement with nothing in it, so a failed or absent read answers no lugger rather than a guess.</summary>
-    public static LuggerArrangementSnapshot Empty { get; } = new(Array.Empty<ScrapAssignment>());
+    public static LuggerArrangementSnapshot Empty { get; } = new(Array.Empty<ScrapAssignment>(), wasRead: false);
 
     /// <summary>
     /// Every row the arrangement read returned, in its own order: one per lugger and scrap type pairing, and one
@@ -55,9 +60,15 @@ public sealed class LuggerArrangementSnapshot
     /// <summary>The scrap types the arrangement currently knows, as they are spelled, in a stable order.</summary>
     public IReadOnlyList<string> ScrapTypes { get; }
 
+    /// <summary>
+    /// Whether the arrangement read answered. False means the read failed or never happened, so an empty
+    /// <see cref="Rows"/> is an outage rather than an arrangement with no rows.
+    /// </summary>
+    public bool WasRead { get; }
+
     /// <summary>Builds a snapshot over the rows of <c>sp_waitlist_lugger_arrangement_list</c>.</summary>
     public static LuggerArrangementSnapshot Create(IEnumerable<ScrapAssignment>? rows) =>
-        rows is null ? Empty : new LuggerArrangementSnapshot(rows.ToArray());
+        rows is null ? Empty : new LuggerArrangementSnapshot(rows.ToArray(), wasRead: true);
 
     /// <summary>
     /// Resolves the job's stored scrap type to the lugger the handler walks to.

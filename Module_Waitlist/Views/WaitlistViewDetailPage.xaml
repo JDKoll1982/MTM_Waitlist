@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:MTM_Waitlist.Module_Waitlist.Models"
     xmlns:sharedControls="using:MTM_Waitlist.Module_Shared.Controls"
+    xmlns:shared="using:MTM_Waitlist.Module_Shared.Services"
     xmlns:dev="using:DevWinUI"
     mc:Ignorable="d">
 
@@ -327,10 +328,13 @@
                      which is where a handler works through the queue. This page reads the request, takes a note
                      and shows what has happened to it. -->
 
-                <!-- The request's message box. Anyone signed in may send one — this is how the floor tells whoever
-                     picks the request up what is happening — so it is not gated on the handler role. Text is pushed
-                     to the view model as it is typed: x:Bind defaults TextBox.Text to LostFocus, which meant the
-                     first click read an empty draft and saved nothing. -->
+                <!-- One card, read as a conversation: what has been said above, the composer beneath it, and one
+                     header over both. The author and the time are deliberately not drawn — this is a scrolling
+                     stream of what the floor has said about the request, not an audit table — so a row is only ever
+                     words. Anyone signed in may send one; it is not gated on the handler role. Text is pushed to the
+                     view model as it is typed: x:Bind defaults TextBox.Text to LostFocus, which meant the first
+                     click read an empty draft and saved nothing. The box grows to a ceiling and then scrolls,
+                     because a TextBox with AcceptsReturn grows without one. -->
                 <Border
                     Grid.Row="4"
                     Margin="0,0,0,16"
@@ -340,96 +344,81 @@
                     BorderThickness="1"
                     CornerRadius="12"
                     Visibility="{x:Bind ViewModel.IsItemPresent, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <StackPanel Spacing="8">
+                    <StackPanel Spacing="12">
                         <TextBlock
                             Style="{ThemeResource SubtitleTextBlockStyle}"
                             Text="{x:Bind ViewModel.NoteLabel, Mode=OneWay}" />
-                        <TextBox
-                            AcceptsReturn="True"
-                            AutomationProperties.AutomationId="WaitlistViewDetailPage_NoteInput"
-                            AutomationProperties.Name="{x:Bind ViewModel.NoteLabel, Mode=OneWay}"
-                            PlaceholderText="{x:Bind ViewModel.NotePlaceholder, Mode=OneWay}"
-                            Text="{x:Bind ViewModel.NoteDraft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                            TextWrapping="Wrap" />
-                        <StackPanel
-                            Orientation="Horizontal"
-                            Spacing="12"
-                            Visibility="{x:Bind ViewModel.HasNoteMessage, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <TextBlock
-                                VerticalAlignment="Center"
-                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="{x:Bind ViewModel.NoteMessage, Mode=OneWay}"
-                                TextWrapping="WrapWholeWords" />
-                        </StackPanel>
-                        <Button
-                            AutomationProperties.AutomationId="WaitlistViewDetailPage_SaveNoteButton"
-                            HorizontalAlignment="Left"
-                            Command="{x:Bind ViewModel.SaveNoteCommand}"
-                            Content="{x:Bind ViewModel.NoteSaveText, Mode=OneWay}" />
-                    </StackPanel>
-                </Border>
 
-                <!-- The request's audit trail, read from the store so it covers what happened before this
-                     session, and refreshed every 30 seconds while the page is open. A request with nothing
-                     recorded says so rather than hiding the block, so an empty history stays distinguishable
-                     from one that could not be read. -->
-                <Border
-                    Grid.Row="5"
-                    Margin="0,0,0,16"
-                    Padding="18"
-                    Background="{ThemeResource LayerFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1"
-                    CornerRadius="12"
-                    Visibility="{x:Bind ViewModel.IsItemPresent, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
-                    <StackPanel Spacing="8">
-                        <TextBlock
-                            Style="{ThemeResource SubtitleTextBlockStyle}"
-                            Text="{x:Bind ViewModel.HistoryTitle, Mode=OneWay}" />
-                        <TextBlock
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Style="{ThemeResource BodyTextBlockStyle}"
-                            Text="{x:Bind ViewModel.HistorySummary, Mode=OneWay}"
-                            TextWrapping="WrapWholeWords" />
-                        <ItemsControl ItemsSource="{x:Bind ViewModel.HistoryRows, Mode=OneWay}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="models:WaitlistRequestAuditEntry">
-                                    <Grid
-                                        Padding="0,4"
-                                        ColumnSpacing="12">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" MinWidth="140" />
-                                            <ColumnDefinition Width="Auto" MinWidth="140" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock
-                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                            Text="{x:Bind OccurredLocalText}" />
-                                        <!-- Who sent it, by name. The message type (created / accepted / completed /
-                                             canceled / note updated) is deliberately not shown: the user needs to
-                                             know who said something, not which audit event carried it. -->
-                                        <dev:AutoScrollView IsPlaying="True"
-                                            Grid.Column="1"
-                                            VerticalAlignment="Center">
+                        <ScrollViewer
+                            MaxHeight="280"
+                            AutomationProperties.AutomationId="WaitlistViewDetailPage_MessageStream"
+                            VerticalScrollBarVisibility="Auto"
+                            Visibility="{x:Bind ViewModel.HasMessageStream, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <ItemsControl ItemsSource="{x:Bind ViewModel.MessageStream, Mode=OneWay}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="models:WaitlistRequestAuditEntry">
+                                        <Border
+                                            Margin="0,0,0,8"
+                                            Padding="14,10"
+                                            HorizontalAlignment="Left"
+                                            MaxWidth="680"
+                                            Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                            CornerRadius="12">
                                             <TextBlock
-                                                FontWeight="SemiBold"
-                                                Text="{x:Bind ActorDisplayName}"
-                                                TextTrimming="CharacterEllipsis" />
-                                        </dev:AutoScrollView>
-                                        <!-- What was said, in the entry's own words. -->
-                                        <TextBlock
-                                            Grid.Column="2"
-                                            Text="{x:Bind Details}"
-                                            TextWrapping="WrapWholeWords" />
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                                                IsTextSelectionEnabled="True"
+                                                Text="{x:Bind Details}"
+                                                TextWrapping="WrapWholeWords" />
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+
                         <TextBlock
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            Text="{x:Bind ViewModel.HistoryEmptyText, Mode=OneWay}"
+                            Text="{x:Bind ViewModel.MessageStreamEmptyText, Mode=OneWay}"
                             TextWrapping="WrapWholeWords"
-                            Visibility="{x:Bind ViewModel.IsHistoryEmpty, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            Visibility="{x:Bind ViewModel.IsMessageStreamEmpty, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox
+                                Grid.Column="0"
+                                AcceptsReturn="True"
+                                AutomationProperties.AutomationId="WaitlistViewDetailPage_NoteInput"
+                                AutomationProperties.Name="{x:Bind ViewModel.NoteLabel, Mode=OneWay}"
+                                MaxHeight="120"
+                                MinHeight="44"
+                                PlaceholderText="{x:Bind ViewModel.NotePlaceholder, Mode=OneWay}"
+                                ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                Text="{x:Bind ViewModel.NoteDraft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                TextWrapping="Wrap"
+                                VerticalAlignment="Bottom" />
+
+                            <Button
+                                Grid.Column="1"
+                                Padding="10"
+                                AutomationProperties.AutomationId="WaitlistViewDetailPage_SaveNoteButton"
+                                AutomationProperties.Name="{x:Bind ViewModel.NoteSaveText, Mode=OneWay}"
+                                Command="{x:Bind ViewModel.SaveNoteCommand}"
+                                Style="{StaticResource AccentButtonStyle}"
+                                VerticalAlignment="Bottom"
+                                shared:TooltipBehavior.AssociatedFiles="Module_Waitlist/Views/WaitlistViewDetailPage.xaml|MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs"
+                                shared:TooltipBehavior.FallbackText="Send this message."
+                                shared:TooltipBehavior.ResourceKey="Waitlist_Note_Send_Tooltip">
+                                <FontIcon FontSize="16" Glyph="&#xE724;" />
+                            </Button>
+                        </Grid>
+
+                        <TextBlock
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind ViewModel.NoteMessage, Mode=OneWay}"
+                            TextWrapping="WrapWholeWords"
+                            Visibility="{x:Bind ViewModel.HasNoteMessage, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                     </StackPanel>
                 </Border>
 

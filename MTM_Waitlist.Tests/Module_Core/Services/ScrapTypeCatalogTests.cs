@@ -65,4 +65,66 @@ public sealed class ScrapTypeCatalogTests
             Assert.IsFalse(ScrapTypeCatalog.Contains(value));
         }
     }
+
+    [TestMethod]
+    public void Service_ScrapTypeCatalogTests_Compose_KeepsTheCataloguesOwnOrder()
+    {
+        CollectionAssert.AreEqual(ScrapTypeCatalog.All.ToArray(), ScrapTypeCatalog.Compose(null).ToArray());
+    }
+
+    [TestMethod]
+    public void Service_ScrapTypeCatalogTests_Compose_AppendsAnAssignedTypeTheCatalogueDoesNotHold()
+    {
+        var composed = ScrapTypeCatalog.Compose(["Copper"]);
+
+        CollectionAssert.AreEqual(
+            ScrapTypeCatalog.All.Append("Copper").ToArray(),
+            composed.ToArray(),
+            "A type the arrangement records outside the list is offered after it, at the end of its own order (FR-002).");
+    }
+
+    [TestMethod]
+    public void Service_ScrapTypeCatalogTests_Compose_OffersACaseAndSpaceVariantOnce()
+    {
+        var composed = ScrapTypeCatalog.Compose(["5052 ALUMINUM ", "5052 aluminum"]);
+
+        Assert.AreEqual(
+            1,
+            composed.Count(type => string.Equals(type.Trim(), "5052 aluminum", StringComparison.OrdinalIgnoreCase)),
+            "Two spellings that differ only in letter case or surrounding spaces are one scrap type (FR-002).");
+    }
+
+    [TestMethod]
+    public void Service_ScrapTypeCatalogTests_Compose_NeverOffersEitherDecisionWordEvenWhenAssigned()
+    {
+        var composed = ScrapTypeCatalog.Compose(
+            [ScrapDecisionRules.RequiredPlaceholder, ScrapDecisionRules.NoScrap, "Copper"]);
+
+        foreach (var value in new[] { ScrapDecisionRules.RequiredPlaceholder, ScrapDecisionRules.NoScrap })
+        {
+            Assert.IsFalse(
+                composed.Contains(value, StringComparer.OrdinalIgnoreCase),
+                $"'{value}' answers whether there is scrap, so it is never a destination for it (FR-003).");
+        }
+
+        Assert.IsTrue(composed.Contains("Copper", StringComparer.Ordinal), "A real outside type is still offered.");
+    }
+
+    [TestMethod]
+    public void Service_ScrapTypeCatalogTests_Compose_YieldsTheCatalogueAloneForNullOrEmpty()
+    {
+        CollectionAssert.AreEqual(ScrapTypeCatalog.All.ToArray(), ScrapTypeCatalog.Compose(null).ToArray());
+        CollectionAssert.AreEqual(ScrapTypeCatalog.All.ToArray(), ScrapTypeCatalog.Compose([]).ToArray());
+    }
+
+    [TestMethod]
+    public void Service_ScrapTypeCatalogTests_Compose_TreatsADifferenceInsideTheSpellingAsASecondType()
+    {
+        var composed = ScrapTypeCatalog.Compose(["5052 Aluminium"]);
+
+        CollectionAssert.AreEqual(
+            ScrapTypeCatalog.All.Append("5052 Aluminium").ToArray(),
+            composed.ToArray(),
+            "Matching ignores letter case and surrounding spaces only, so a different spelling is a different type.");
+    }
 }
