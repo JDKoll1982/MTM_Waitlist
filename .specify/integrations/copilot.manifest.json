@@ -22,6 +22,12 @@
     ".github/prompts/speckit.checklist.prompt.md": "c3aea7526c5cbfd8665acc9508ad5a9a3f71e91a63c36be7bed13a834c3a683c",
     ".github/prompts/speckit.specify.prompt.md": "7b2cc4dc6462da1c96df46bac4f60e53baba3097f4b24ac3f9b684194458aa98",
     ".github/prompts/speckit.tasks.prompt.md": "88fc57c289f99d5e9d35c255f3e2683f73ecb0a5155dcb4d886f82f52b11841f",
-    ".github/prompts/speckit.taskstoissues.prompt.md": "2f9636d4f312a1470f000747cb62677fec0655d8b4e2357fa4fbf238965fa66d"
+    ".github/prompts/speckit.taskstoissues.prompt.md": "2f9636d4f312a1470f000747cb62677fec0655d8b4e2357fa4fbf238965fa66d",
+    ".specify/events.py": "af8e5daa02a87c4d49118ebcf45e76a5a6094e968074ded52aac7c475fa7c3e6",
+    ".github/hooks/speckit.json": "00dd8f64f750c2a9fbd2bd1ac5fcc0aa8f2a5aa96e6372367f0a8afd6dbf1e08"
+  },
+  "ownership_modes": {
+    ".specify/events.py": "shared",
+    ".github/hooks/speckit.json": "partial"
   }
 }

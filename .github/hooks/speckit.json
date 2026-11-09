@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "hooks": {
+    "userPromptSubmitted": [
+      {
+        "type": "command",
+        "bash": "python3 .specify/events.py speckit.companion.on-prompt user_prompt_submit 10 additionalContext",
+        "powershell": "& 'python' '.specify/events.py' 'speckit.companion.on-prompt' 'user_prompt_submit' '10' 'additionalContext'",
+        "timeoutSec": 15,
+        "__speckit_event__": true
+      }
+    ],
+    "agentStop": [
+      {
+        "type": "command",
+        "bash": "python3 .specify/events.py speckit.companion.on-stop stop 10",
+        "powershell": "& 'python' '.specify/events.py' 'speckit.companion.on-stop' 'stop' '10'",
+        "timeoutSec": 15,
+        "__speckit_event__": true
+      }
+    ]
+  }
+}
