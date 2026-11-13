@@ -151,12 +151,13 @@ public sealed record GenericRequestSequenceOption(
     public string SourceCodes => string.Join(", ", Sources.Select(source => source.ToString()));
 }
 
-/// <summary>A scrap type, with how many luggers are free to use.</summary>
-public sealed record GenericRequestScrapOption(string ScrapType, int AvailableLuggerCount)
-{
-    /// <summary>The lugger count, ready to draw.</summary>
-    public string AvailableLuggerDisplay => AvailableLuggerCount.ToString(CultureInfo.CurrentCulture);
-}
+/// <summary>One scrap type the request can be for.</summary>
+/// <param name="ScrapType">
+/// The type's name, in the wording the plant's list or the arrangement holds it. It is the whole of the choice:
+/// the requester is picking what is being collected, and the lugger it goes to is the card's to name, not the
+/// picker's (FR-002, FR-006).
+/// </param>
+public sealed record GenericRequestScrapOption(string ScrapType);
 
 /// <summary>A die the search matched.</summary>
 public sealed record GenericRequestDieOption(string DieNumber, string Description, string Location);

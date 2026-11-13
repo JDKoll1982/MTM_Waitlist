@@ -65,6 +65,26 @@ public sealed class GenericRequestNavigator : IGenericRequestNavigator, IGeneric
         _navigationService.NavigateTo(pageKey, Draft);
     }
 
+    /// <inheritdoc />
+    public void LeaveToWaitlist()
+    {
+        // The draft is left where it is: the result step is still on screen behind the waitlist, and a person who
+        // comes back to it must find the request number the store gave them.
+        _navigationService.NavigateTo(typeof(MTM_Waitlist.Module_Waitlist.ViewModels.WaitlistViewViewModel).FullName!, null, true);
+    }
+
+    /// <inheritdoc />
+    public void StartAnother()
+    {
+        // A fresh draft, for the same reason Launch takes one: nothing said about the last request may reach the
+        // next. The building is kept because a person on one drive almost always raises their next request there.
+        var building = Draft.Building;
+
+        Draft = new GenericRequestDraft { Building = building };
+
+        GoTo(GenericRequestStep.WorkCenter);
+    }
+
     /// <summary>
     /// The view model whose page draws <paramref name="step"/>, or null when the step has no screen.
     /// </summary>

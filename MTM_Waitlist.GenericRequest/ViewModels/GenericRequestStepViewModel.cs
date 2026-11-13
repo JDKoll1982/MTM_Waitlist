@@ -60,6 +60,12 @@ public abstract partial class GenericRequestStepViewModel : ObservableObject
     /// <summary>The answers given so far, shared by every step.</summary>
     protected GenericRequestDraft Draft => _navigator.Draft;
 
+    /// <summary>
+    /// The flow this step belongs to, for the few steps that move it themselves rather than advancing one question
+    /// at a time. The result step is the only one: its buttons leave the flow or start another.
+    /// </summary>
+    protected IGenericRequestNavigator Navigator => _navigator;
+
     /// <summary>Reload this step. Bound to the retry control, which only the unavailable state shows.</summary>
     public IAsyncRelayCommand RetryCommand { get; }
 

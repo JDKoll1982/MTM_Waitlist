@@ -20,4 +20,10 @@ public interface IGenericRequestNavigator
 
     /// <summary>Show <paramref name="step"/>.</summary>
     void GoTo(GenericRequestStep step);
+
+    /// <summary>Leave the flow and show the waitlist, so the person sees what has just been raised.</summary>
+    void LeaveToWaitlist();
+
+    /// <summary>Begin another request from the first question, keeping only the building the last one belonged to.</summary>
+    void StartAnother();
 }

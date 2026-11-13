@@ -63,9 +63,11 @@ public static class WaitlistRequestTitles
     /// </para>
     /// <para>
     /// A template naming <c>{part_number}</c> is filled with the <b>part the request is about</b> — see
-    /// <see cref="PartNumberFor"/> — and a template naming <c>{scrap_type}</c> with the scrap type the job has
-    /// already decided (FR-030). Both are job values the request never stored, so both come from the job snapshot
-    /// the composition root hands in. Each one is filled only when the Item's templates actually name it, so an
+    /// <see cref="PartNumberFor"/> — and a template naming <c>{scrap_type}</c> with the scrap type the request is
+    /// about: the type the requester stated on a generic request, and otherwise the one the job has already decided
+    /// (FR-030). Both are job values the request never stored, so both come from the job snapshot
+    /// the composition root hands in, except the stated scrap type, which the request is the only record of. Each one
+    /// is filled only when the Item's templates actually name it, so an
     /// Item that asks for none of them is handed none of them and its card is unchanged (FR-053). Every token left
     /// unfilled stays unresolved, with the Item's own display name shown — never a substituted value, never a blank
     /// (<c>contracts/card-and-identifier.md</c> §3).
@@ -105,12 +107,26 @@ public static class WaitlistRequestTitles
             // thing it is (FR-035).
             Component: NamesToken(item, "component") ? answer : null,
             PartNumber: NamesToken(item, "part_number") ? PartNumberFor(item, job) : null,
-            ScrapType: NamesToken(item, "scrap_type") ? job?.ScrapType : null,
+            ScrapType: NamesToken(item, "scrap_type") ? StatedScrapType(request) ?? job?.ScrapType : null,
             DunnagePart: NamesToken(item, "dunnage_part") ? answer : null,
             JobPartNumber: NamesToken(item, "job_part_number") ? job?.JobPartNumber : null,
             DieNumber: namesDie ? (choseADie ? chosen?.PartNumber ?? storedDie : job?.DieNumber) : null,
             DieLocation: namesDie ? (choseADie ? chosen?.Location : job?.DieLocation) : null);
     }
+
+    /// <summary>
+    /// The scrap type a generic request states on itself, or <see langword="null"/> when it states none or is a
+    /// work-order request.
+    /// </summary>
+    /// <remarks>
+    /// A work-order request reads the type its job decided, which is the value the job snapshot carries. A generic
+    /// request has no job at all, so its own answer is the only place the type can come from, and a card whose
+    /// identifier names the type would otherwise fall back to the Item's display name (FR-005).
+    /// </remarks>
+    private static string? StatedScrapType(WaitlistRequest? request) =>
+        request is { IsGeneric: true }
+            ? GenericRequestScrapAnswer.TryRead(request.Answers)?.ScrapType
+            : null;
 
     /// <summary>
     /// The <b>material part</b> the request is about, or <see langword="null"/> when the request names no

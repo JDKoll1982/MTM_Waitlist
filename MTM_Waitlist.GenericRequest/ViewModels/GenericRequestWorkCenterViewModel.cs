@@ -73,5 +73,9 @@ public sealed partial class GenericRequestWorkCenterViewModel : GenericRequestSt
         Draft.RequiresDunnage = false;
         Draft.RequiresScrap = false;
         Draft.RequiresDie = false;
+
+        // The stated scrap type says where one work centre's scrap goes, so it says nothing about another work
+        // centre and is cleared with the rest rather than riding into a request nobody described.
+        Draft.ScrapType = string.Empty;
     }
 }

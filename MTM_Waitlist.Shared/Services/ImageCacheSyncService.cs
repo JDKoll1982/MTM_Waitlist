@@ -292,7 +292,13 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
         var copied = 0;
         var notCopied = 0;
 
-        foreach (var sharedPath in Directory.EnumerateFiles(source.SourceRoot, "*", SearchOption.AllDirectories))
+        // The listing is asked for entries rather than names, because an entry carries the size and the last-written
+        // time the copy decision needs. A name would have to be turned back into a file — one extra request to the
+        // server per picture — and the cache exists to keep this machine off the share, not to hammer it at every
+        // launch (FR-002, FR-026).
+        var share = new DirectoryInfo(source.SourceRoot);
+
+        foreach (var shared in share.EnumerateFiles("*", SearchOption.AllDirectories))
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -307,6 +313,8 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
 
                 return (copied, 0, 0, notCopied);
             }
+
+            var sharedPath = shared.FullName;
 
             if (ImageCachePaths.IsSupportedPicture(sharedPath) is false)
             {
@@ -328,7 +336,7 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
                 Directory.CreateDirectory(cacheDirectory);
             }
 
-            if (ImageCachePaths.ShouldCopyToCache(sharedPath, cachePath) is false)
+            if (ImageCachePaths.ShouldCopyToCache(shared, cachePath) is false)
             {
                 continue;
             }
@@ -339,7 +347,7 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
 
                 // The copy carries the share's own last-written time. Without that stamp every cached picture would
                 // differ from its original on the next run and be copied again for ever.
-                File.SetLastWriteTimeUtc(cachePath, File.GetLastWriteTimeUtc(sharedPath));
+                File.SetLastWriteTimeUtc(cachePath, shared.LastWriteTimeUtc);
                 copied++;
             }
             catch (Exception exception)
@@ -418,11 +426,21 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
     /// <param name="cancellationToken">Cancellation token for the operation.</param>
     /// <returns>How many archived files were removed.</returns>
     /// <remarks>
+    /// <para>
     /// Only files whose own name carries the day they were archived are considered, because that is the only date
     /// the writer records: the file itself is <em>copied</em> when it is replaced, so its last-written time is the
     /// replaced picture's, not the archiving's. A file this cannot date is left where it is, which is the safe
     /// direction: an archive kept too long costs disk, an archive removed too early costs a picture nobody can get
     /// back. A source with no period set keeps its archives for ever.
+    /// </para>
+    /// <para>
+    /// <b>It runs at most once a day per machine.</b> Finding the archive folders walks the share a second time, and
+    /// that walk costs the launch exactly what the first one does. The period is counted in whole days, so a sweep
+    /// once a day removes every file the sweep would have removed on any launch in between: nothing can expire
+    /// between two launches of the same day. The day the last sweep ran is kept beside the copies, so a machine that
+    /// starts forty times a day walks the share once, and one that has not started since yesterday sweeps on its
+    /// first launch.
+    /// </para>
     /// </remarks>
     private static int RemoveExpiredArchives(ImageCacheSource source, CancellationToken cancellationToken)
     {
@@ -431,9 +449,24 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
             return 0;
         }
 
+        var sweptOn = Path.Combine(source.CacheRoot, ArchiveSweepStampName);
+        var today = DateTime.Today;
+
+        if (File.Exists(sweptOn)
+            && DateTime.TryParseExact(
+                ReadStampText(sweptOn),
+                ArchiveSweepStampFormat,
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out var lastSweep)
+            && lastSweep.Date >= today)
+        {
+            return 0;
+        }
+
         // Whole days, because a whole day is all an archive's name carries: the period is inclusive, so a picture
         // archived on the day the period names is still inside it.
-        var cutoff = DateTime.Today.AddDays(-source.ArchiveKeepDays);
+        var cutoff = today.AddDays(-source.ArchiveKeepDays);
         var removed = 0;
 
         // The archive folders are found by name and read on their own, rather than by reading every file under the
@@ -472,7 +505,48 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
             }
         }
 
+        // Stamped only for a sweep that ran to the end: a cancelled one has not seen the whole share, and claiming
+        // otherwise would leave the archives it never reached for another day.
+        if (cancellationToken.IsCancellationRequested is false)
+        {
+            WriteStamp(sweptOn, today.ToString(ArchiveSweepStampFormat, CultureInfo.InvariantCulture));
+        }
+
         return removed;
+    }
+
+    /// <summary>The file, beside the copies, that records the day the archive sweep last ran.</summary>
+    private const string ArchiveSweepStampName = "archive-sweep.stamp";
+
+    /// <summary>The stamp's own date format.</summary>
+    private const string ArchiveSweepStampFormat = "yyyy-MM-dd";
+
+    /// <summary>The stamp's text, or empty when it cannot be read.</summary>
+    private static string ReadStampText(string path)
+    {
+        try
+        {
+            return File.ReadAllText(path).Trim();
+        }
+        catch (Exception)
+        {
+            return string.Empty;
+        }
+    }
+
+    /// <summary>
+    /// Records the day a sweep ran. A stamp that cannot be written costs a second sweep, never a picture.
+    /// </summary>
+    private static void WriteStamp(string path, string text)
+    {
+        try
+        {
+            File.WriteAllText(path, text);
+        }
+        catch (Exception)
+        {
+            // Nothing to report: the next launch sweeps again, which is what would have happened anyway.
+        }
     }
 
     /// <summary>

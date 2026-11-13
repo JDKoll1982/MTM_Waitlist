@@ -30,6 +30,10 @@ internal sealed class StubGenericRequestStepData : IGenericRequestStepData
     public GenericRequestStepResult<GenericRequestItemOption> Items { get; set; } =
         GenericRequestStepResult<GenericRequestItemOption>.Empty(DateTimeOffset.UtcNow);
 
+    /// <summary>What the scrap step's own read answers.</summary>
+    public GenericRequestStepResult<GenericRequestScrapOption> ScrapTypes { get; set; } =
+        GenericRequestStepResult<GenericRequestScrapOption>.Unavailable(DateTimeOffset.UtcNow);
+
     public GenericRequestStepAvailability Availability { get; set; } =
         GenericRequestStepAvailability.Ready(DateTimeOffset.UtcNow);
 
@@ -57,7 +61,7 @@ internal sealed class StubGenericRequestStepData : IGenericRequestStepData
         Task.FromResult(GenericRequestStepResult<GenericRequestSequenceOption>.Unavailable(DateTimeOffset.UtcNow));
 
     public Task<GenericRequestStepResult<GenericRequestScrapOption>> ReadScrapTypesAsync(CancellationToken cancellationToken = default) =>
-        Task.FromResult(GenericRequestStepResult<GenericRequestScrapOption>.Unavailable(DateTimeOffset.UtcNow));
+        Task.FromResult(ScrapTypes);
 
     public Task<GenericRequestStepResult<GenericRequestDieOption>> ReadDiesAsync(string searchText, CancellationToken cancellationToken = default) =>
         Task.FromResult(GenericRequestStepResult<GenericRequestDieOption>.Unavailable(DateTimeOffset.UtcNow));
@@ -84,11 +88,21 @@ internal sealed class StubGenericRequestNavigator : IGenericRequestNavigator
 
     public List<GenericRequestStep> Visited { get; } = new();
 
+    /// <summary>How many times the flow was asked to start over, so a test can prove the button did it once.</summary>
+    public int StartAnotherCount { get; private set; }
+
+    /// <summary>How many times the flow was asked to show the waitlist.</summary>
+    public int LeaveToWaitlistCount { get; private set; }
+
     public void GoTo(GenericRequestStep step)
     {
         CurrentStep = step;
         Visited.Add(step);
     }
+
+    public void LeaveToWaitlist() => LeaveToWaitlistCount++;
+
+    public void StartAnother() => StartAnotherCount++;
 }
 
 /// <summary>
@@ -240,10 +254,130 @@ internal sealed class StubEmployeeDirectoryService : IEmployeeDirectoryService
         Task.FromResult(Found);
 }
 
+/// <summary>The arrangement, held in memory, answering the snapshot both cards resolve against.</summary>
+/// <remarks>
+/// A snapshot is built from ordinary assignment rows, so a test states the luggers, their statuses and their order
+/// exactly as the store would return them, and can say that the read failed by handing over the empty snapshot the
+/// service itself answers on an outage.
+/// </remarks>
+internal sealed class FakeLuggerArrangementService : ILuggerArrangementService
+{
+    public LuggerArrangementSnapshot Snapshot { get; set; } = LuggerArrangementSnapshot.Empty;
+
+    public int SnapshotReadCount { get; private set; }
+
+    public Task<LuggerArrangementSnapshot> GetSnapshotAsync(CancellationToken cancellationToken = default)
+    {
+        SnapshotReadCount++;
+        return Task.FromResult(Snapshot);
+    }
+
+    public Task<IReadOnlyList<Lugger>> GetLuggersAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<Lugger>>(Array.Empty<Lugger>());
+
+    public Task<IReadOnlyList<ScrapAssignment>> GetAssignmentsAsync(
+        string scrapTypeKey,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<ScrapAssignment>>(Array.Empty<ScrapAssignment>());
+
+    public Task<long> GetChangeWatermarkAsync(CancellationToken cancellationToken = default) => Task.FromResult(0L);
+
+    public Task<IReadOnlyList<ArrangementChange>> GetChangesAfterAsync(
+        long afterId,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<ArrangementChange>>(Array.Empty<ArrangementChange>());
+
+    public Task<int> AddLuggerAsync(
+        string luggerName,
+        int displayPosition,
+        string actorEmployeeNumber,
+        string actorEmployeeName,
+        CancellationToken cancellationToken = default) => Task.FromResult(1);
+
+    public Task<int> RenameLuggerAsync(
+        string luggerPublicId,
+        string luggerName,
+        string actorEmployeeNumber,
+        string actorEmployeeName,
+        CancellationToken cancellationToken = default) => Task.FromResult(1);
+
+    public Task<int> SetLuggerPositionAsync(
+        string luggerPublicId,
+        int displayPosition,
+        string actorEmployeeNumber,
+        string actorEmployeeName,
+        CancellationToken cancellationToken = default) => Task.FromResult(1);
+
+    public Task<int> RemoveLuggerAsync(
+        string luggerPublicId,
+        string actorEmployeeNumber,
+        string actorEmployeeName,
+        CancellationToken cancellationToken = default) => Task.FromResult(1);
+
+    public Task<int> SetStatusAsync(
+        string luggerPublicId,
+        string status,
+        string? reason,
+        string actorEmployeeNumber,
+        string actorEmployeeName,
+        CancellationToken cancellationToken = default) => Task.FromResult(1);
+
+    public Task<int> PromoteLuggerAsync(
+        string luggerPublicId,
+        string scrapTypeKey,
+        string actorEmployeeNumber,
+        string actorEmployeeName,
+        CancellationToken cancellationToken = default) => Task.FromResult(1);
+
+    public Task<int> AssignScrapTypeAsync(
+        string scrapType,
+        string luggerPublicId,
+        int sortPosition,
+        string actorEmployeeNumber,
+        string actorEmployeeName,
+        CancellationToken cancellationToken = default) => Task.FromResult(1);
+
+    public Task<int> UnassignScrapTypeAsync(
+        string scrapTypeKey,
+        string luggerPublicId,
+        string actorEmployeeNumber,
+        string actorEmployeeName,
+        CancellationToken cancellationToken = default) => Task.FromResult(1);
+}
+
+/// <summary>One arrangement row, as the arrangement read returns it, for the fakes above to return.</summary>
+internal static class FakeScrapAssignment
+{
+    public static ScrapAssignment Of(
+        string scrapType,
+        string luggerName,
+        string luggerStatus = LuggerStatus.Available,
+        bool isDumpPoint = true,
+        int sortPosition = 1,
+        int displayPosition = 1) =>
+        new()
+        {
+            LuggerPublicId = $"LUG-{luggerName}",
+            LuggerName = luggerName,
+            LuggerStatus = luggerStatus,
+            LuggerDisplayPosition = displayPosition,
+            ScrapType = scrapType,
+            ScrapTypeKey = scrapType.Trim().ToLowerInvariant(),
+            IsDumpPoint = isDumpPoint,
+            SortPosition = sortPosition,
+        };
+}
+
 /// <summary>The queue's write door, recording every draft it is handed.</summary>
 internal sealed class RecordingWaitlistRequestService : IWaitlistRequestService
 {
     public List<WaitlistRequestDraft> Submitted { get; } = new();
+
+    /// <summary>
+    /// What the queue answers, when a test needs something other than "raised". The default raises the request, so a
+    /// test that says nothing about the outcome still gets the ordinary one.
+    /// </summary>
+    public Func<WaitlistRequestDraft, WaitlistRequestSubmitResult>? SubmitResult { get; set; }
 
     public event EventHandler? RequestsChanged
     {
@@ -276,6 +410,11 @@ internal sealed class RecordingWaitlistRequestService : IWaitlistRequestService
         CancellationToken cancellationToken = default)
     {
         Submitted.Add(draft);
+
+        if (SubmitResult is not null)
+        {
+            return Task.FromResult(SubmitResult(draft));
+        }
 
         return Task.FromResult(WaitlistRequestSubmitResult.Success(new WaitlistRequest
         {

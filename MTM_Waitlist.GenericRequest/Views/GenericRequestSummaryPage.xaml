@@ -17,7 +17,8 @@
         IntroKey="{x:Bind ViewModel.IntroKey}"
         Presentation="{x:Bind ViewModel.Presentation, Mode=OneWay}"
         RetryCommand="{x:Bind ViewModel.RetryCommand}"
-        TitleKey="{x:Bind ViewModel.TitleKey}">
+        TitleKey="{x:Bind ViewModel.TitleKey}"
+        UnavailableText="{x:Bind ViewModel.UnavailableText, Mode=OneWay}">
         <controls:GenericRequestStepFrame.Body>
             <ListView
                 AutomationProperties.Name="{x:Bind ViewModel.Title}"

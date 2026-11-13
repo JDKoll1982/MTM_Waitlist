@@ -25,12 +25,38 @@ public sealed class GenericRequestSummaryViewModelTests
         Description = "The one in bay 4 is cracked.",
     };
 
+    /// <summary>A scrap request: no part, so no stage exists for it to review.</summary>
+    private static GenericRequestDraft ScrapDraft() => new()
+    {
+        WorkCenter = "Die Shop",
+        Building = "Expo Drive",
+        Category = "Pickup",
+        ItemName = "Scrap",
+        ItemCode = "pickup-scrap",
+        RequiresScrap = true,
+        ScrapType = "3003 Aluminum",
+        EstimatedMinutes = 30,
+    };
+
+    /// <summary>A proved part's request, which is the only kind that has a stage to review.</summary>
+    private static GenericRequestDraft PartDraft() => new()
+    {
+        WorkCenter = "Press 4",
+        Building = "Expo Drive",
+        Category = "Pickup",
+        ItemName = "Coil",
+        ItemCode = "pickup-coil",
+        RequiresPart = true,
+        PartNumber = "MMC0001000",
+        PartStage = GenericRequestPartStage.Wip,
+        Sequence = "10",
+    };
+
     private static (GenericRequestSummaryViewModel ViewModel, StubGenericRequestNavigator Navigator) Create(
         StubGenericRequestStepData data,
-        int? allottedMinutes)
+        GenericRequestDraft draft)
     {
         var navigator = new StubGenericRequestNavigator();
-        var draft = Draft(allottedMinutes);
 
         navigator.GoTo(GenericRequestStep.Summary);
 
@@ -50,12 +76,21 @@ public sealed class GenericRequestSummaryViewModelTests
         target.Answer = source.Answer;
         target.EstimatedMinutes = source.EstimatedMinutes;
         target.Description = source.Description;
+        target.RequiresPart = source.RequiresPart;
+        target.RequiresScrap = source.RequiresScrap;
+        target.ScrapType = source.ScrapType;
+        target.PartNumber = source.PartNumber;
+        target.PartStage = source.PartStage;
+        target.Sequence = source.Sequence;
     }
 
+    private static IReadOnlyList<string> Labels(GenericRequestSummaryViewModel viewModel) =>
+        viewModel.Rows.Select(row => row.Label).ToList();
+
     [TestMethod]
-    public async Task Unit_GenericRequestSummaryViewModelTests_TheReviewListsTheAnswerAndTheConfiguredTime()
+    public async Task ViewModel_GenericRequestSummaryViewModelTests_LoadAsync_TheReviewListsTheAnswerAndTheConfiguredTime()
     {
-        var (viewModel, _) = Create(new StubGenericRequestStepData(), allottedMinutes: 15);
+        var (viewModel, _) = Create(new StubGenericRequestStepData(), Draft(allottedMinutes: 15));
 
         await viewModel.LoadAsync();
 
@@ -66,9 +101,9 @@ public sealed class GenericRequestSummaryViewModelTests
     }
 
     [TestMethod]
-    public async Task Unit_GenericRequestSummaryViewModelTests_AnItemWithNoConfiguredTimeAddsNoEstimate()
+    public async Task ViewModel_GenericRequestSummaryViewModelTests_LoadAsync_AnItemWithNoConfiguredTimeAddsNoEstimate()
     {
-        var (viewModel, _) = Create(new StubGenericRequestStepData(), allottedMinutes: null);
+        var (viewModel, _) = Create(new StubGenericRequestStepData(), Draft(allottedMinutes: null));
 
         await viewModel.LoadAsync();
 
@@ -78,10 +113,39 @@ public sealed class GenericRequestSummaryViewModelTests
     }
 
     [TestMethod]
-    public async Task Unit_GenericRequestSummaryViewModelTests_AnAcceptedRequestRecordsItsIdentifierAndAdvances()
+    public async Task ViewModel_GenericRequestSummaryViewModelTests_LoadAsync_AScrapRequestReviewsNoStage()
+    {
+        var (viewModel, _) = Create(new StubGenericRequestStepData(), ScrapDraft());
+
+        await viewModel.LoadAsync();
+
+        StringAssert.Contains(
+            string.Join("|", viewModel.Rows.Select(row => row.Value)),
+            "3003 Aluminum",
+            "the review still names the scrap type the requester chose");
+
+        Assert.IsFalse(
+            Labels(viewModel).Any(label => label.Contains("Stage", StringComparison.OrdinalIgnoreCase)),
+            "a scrap request has no stage, so the review must not report one as 'Not recorded'.");
+    }
+
+    [TestMethod]
+    public async Task ViewModel_GenericRequestSummaryViewModelTests_LoadAsync_AProvedPartRequestStillReviewsItsStage()
+    {
+        var (viewModel, _) = Create(new StubGenericRequestStepData(), PartDraft());
+
+        await viewModel.LoadAsync();
+
+        Assert.IsTrue(
+            Labels(viewModel).Any(label => label.Contains("Stage", StringComparison.OrdinalIgnoreCase)),
+            "a proved part's stage is derived and is exactly what the review is for.");
+    }
+
+    [TestMethod]
+    public async Task ViewModel_GenericRequestSummaryViewModelTests_ContinueCommand_AnAcceptedRequestRecordsItsIdentifierAndAdvances()
     {
         var data = new StubGenericRequestStepData();
-        var (viewModel, navigator) = Create(data, allottedMinutes: 15);
+        var (viewModel, navigator) = Create(data, Draft(allottedMinutes: 15));
         await viewModel.LoadAsync();
 
         await viewModel.ContinueCommand.ExecuteAsync(null);
@@ -93,7 +157,7 @@ public sealed class GenericRequestSummaryViewModelTests
     }
 
     [TestMethod]
-    public async Task Unit_GenericRequestSummaryViewModelTests_ARefusedRequestStaysOnTheReviewAndSaysWhy()
+    public async Task ViewModel_GenericRequestSummaryViewModelTests_ContinueCommand_ARefusedRequestStaysOnTheReviewAndSaysWhy()
     {
         var data = new StubGenericRequestStepData
         {
@@ -101,7 +165,7 @@ public sealed class GenericRequestSummaryViewModelTests
                 "An active matching request already exists.",
                 DateTimeOffset.UtcNow),
         };
-        var (viewModel, navigator) = Create(data, allottedMinutes: 15);
+        var (viewModel, navigator) = Create(data, Draft(allottedMinutes: 15));
         await viewModel.LoadAsync();
 
         await viewModel.ContinueCommand.ExecuteAsync(null);
@@ -114,6 +178,10 @@ public sealed class GenericRequestSummaryViewModelTests
             "An active matching request already exists.",
             navigator.Draft.ResultMessage,
             "the store's own words should be recorded for the result step");
+        Assert.AreEqual(
+            "An active matching request already exists.",
+            viewModel.UnavailableText,
+            "the review itself says why, so the requester is not told the step 'could not be read' by a read that worked.");
         Assert.AreNotEqual(GenericRequestStep.Result, navigator.CurrentStep, "a refused request must not advance");
     }
 }

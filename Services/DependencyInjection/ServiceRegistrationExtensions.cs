@@ -309,7 +309,11 @@ public static partial class ServiceRegistrationExtensions
             luggerChangeNoticeService: provider.GetRequiredService<MTM_Waitlist.Module_Waitlist.Services.ILuggerChangeNoticeService>(),
             // A null seam here leaves the Local Work Centers filter matching nothing at all, so the header
             // switch would look wired and always empty the list.
-            workCenterCatalogService: provider.GetRequiredService<MTM_Waitlist.Module_Shared.Services.IWorkCenterCatalogService>()));
+            workCenterCatalogService: provider.GetRequiredService<MTM_Waitlist.Module_Shared.Services.IWorkCenterCatalogService>(),
+            // A generic scrap request has no job, so this is the only place its card can learn which lugger its
+            // stated scrap type dumps into. A null seam here would leave that card naming the type and no lugger
+            // (FR-006).
+            luggerArrangementService: provider.GetRequiredService<MTM_Waitlist.Module_Core.Contracts.Services.ILuggerArrangementService>()));
         services.AddTransient<WaitlistViewPage>();
         services.AddTransient<ShellPage>();
         services.AddTransient<ShellViewModel>();

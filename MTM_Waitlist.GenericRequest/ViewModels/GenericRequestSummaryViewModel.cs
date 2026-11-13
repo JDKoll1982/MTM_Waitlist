@@ -42,6 +42,16 @@ public sealed partial class GenericRequestSummaryViewModel : GenericRequestStepV
     public partial bool IsSubmitting { get; set; }
 
     /// <summary>
+    /// The queue's own reason for refusing the raise, or empty when there is nothing to explain.
+    /// </summary>
+    /// <remarks>
+    /// A refusal is not a failed read, so the frame's own "this step could not be read" would be a lie about a
+    /// review that read perfectly well. The store's sentence is what the requester needs, and it is the one thing
+    /// that says whether to try again or change the request (FR-018).
+    /// </remarks>
+    public string UnavailableText => Draft.ResultMessage;
+
+    /// <summary>
     /// Raise the request, then let the flow continue only when the queue accepted it.
     /// </summary>
     /// <remarks>
@@ -62,11 +72,13 @@ public sealed partial class GenericRequestSummaryViewModel : GenericRequestStepV
                 : GenericRequestPresentation.Unavailable;
             Draft.ResultAttemptedAtUtc = submission.AttemptedAtUtc;
             Draft.ResultMessage = submission.FailureMessage;
+            Draft.ResultWasDuplicate = submission.IsDuplicate;
             Draft.RaisedRequestNumber = submission.RequestId;
 
             if (!submission.IsRaised)
             {
                 AttemptedAtUtc = submission.AttemptedAtUtc;
+                OnPropertyChanged(nameof(UnavailableText));
                 Presentation = GenericRequestPresentation.Unavailable;
             }
 
@@ -89,7 +101,15 @@ public sealed partial class GenericRequestSummaryViewModel : GenericRequestStepV
         Add("GenericRequest_Summary_Item.Label", Draft.ItemName);
         Add("GenericRequest_Summary_Answer.Label", Draft.Answer);
         Add("GenericRequest_Summary_Part.Label", Draft.PartNumber);
-        Add("GenericRequest_Summary_Stage.Label", StageKey(Draft.PartStage).GetLocalized());
+
+        // Stage is derived from a proved part's operation state, so only a request type that visits the part step
+        // has one to review. A scrap, dunnage or die request has no stage at all, and a "Not recorded" row on it
+        // would be reporting the absence of something the request never had (FR-009).
+        if (Draft.RequiresPart)
+        {
+            Add("GenericRequest_Summary_Stage.Label", StageKey(Draft.PartStage).GetLocalized());
+        }
+
         Add("GenericRequest_Summary_Sequence.Label", Draft.Sequence);
         Add("GenericRequest_Summary_Dunnage.Label", Join(Draft.DunnageType, Draft.DunnagePart));
         Add("GenericRequest_Summary_Scrap.Label", Draft.ScrapType);
@@ -100,6 +120,7 @@ public sealed partial class GenericRequestSummaryViewModel : GenericRequestStepV
         Add("GenericRequest_Summary_Quantity.Label", Draft.PartNumber.Length == 0 ? string.Empty : Draft.Quantity.ToString("0.##", CultureInfo.CurrentCulture));
         Add("GenericRequest_Summary_Description.Label", Draft.Description);
 
+        OnPropertyChanged(nameof(UnavailableText));
         Apply(availability);
     }
 

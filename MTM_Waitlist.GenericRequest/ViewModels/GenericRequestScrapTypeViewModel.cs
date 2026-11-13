@@ -33,6 +33,12 @@ public sealed partial class GenericRequestScrapTypeViewModel : GenericRequestSte
     [ObservableProperty]
     public partial GenericRequestScrapOption? Selected { get; set; }
 
+    /// <summary>
+    /// A type has to be chosen before the step can be left. A generic work center has no job to read a scrap
+    /// decision from, so the requester's choice is the whole of the answer (FR-001, FR-004).
+    /// </summary>
+    protected override bool CanAnswer => Selected is not null;
+
     protected override async Task LoadCoreAsync()
     {
         var result = await _data.ReadScrapTypesAsync();
@@ -43,7 +49,9 @@ public sealed partial class GenericRequestScrapTypeViewModel : GenericRequestSte
             Options.Add(option);
         }
 
-        Selected = Options.FirstOrDefault(option => option.ScrapType == Draft.ScrapType);
+        // A revisit shows the type the draft remembers. The match ignores surrounding spaces and letter case, the
+        // way the arrangement matches an entered type (FR-002, research A3).
+        Selected = Options.FirstOrDefault(option => IsSameType(option.ScrapType, Draft.ScrapType));
 
         Apply(result);
     }
@@ -55,4 +63,9 @@ public sealed partial class GenericRequestScrapTypeViewModel : GenericRequestSte
             Draft.ScrapType = selected.ScrapType;
         }
     }
+
+    partial void OnSelectedChanged(GenericRequestScrapOption? value) => NotifyAnswerChanged();
+
+    private static bool IsSameType(string? left, string? right) =>
+        string.Equals(left?.Trim(), right?.Trim(), StringComparison.OrdinalIgnoreCase);
 }

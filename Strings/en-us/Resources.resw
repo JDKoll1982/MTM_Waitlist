@@ -1264,6 +1264,9 @@
   <data name="Waitlist_Card_System_InforVisual.Text" xml:space="preserve">
     <value>Infor Visual</value>
   </data>
+  <data name="Waitlist_Card_LuggerUnavailable.Text" xml:space="preserve">
+    <value>Unavailable</value>
+  </data>
   <data name="Die Location" xml:space="preserve">
     <value>Die Location</value>
   </data>

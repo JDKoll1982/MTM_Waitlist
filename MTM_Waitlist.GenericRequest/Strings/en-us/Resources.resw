@@ -95,9 +95,6 @@
   <data name="GenericRequest_Dunnage_Selected.Text" xml:space="preserve">
     <value>Selected</value>
   </data>
-  <data name="GenericRequest_Scrap_Luggers.Text" xml:space="preserve">
-    <value>Luggers</value>
-  </data>
   <data name="GenericRequest_Part_Intro.Text" xml:space="preserve">
     <value>Type the part number, choose the sequence it is standing at, and check how much is on hand.</value>
   </data>
@@ -126,8 +123,6 @@
   </data>
   <data name="GenericRequest_Result_Intro.Text" xml:space="preserve">
     <value>What happened when the request was raised.</value>
-  </data>  <data name="GenericRequest_Result_Success_Title.Text" xml:space="preserve">
-    <value>The request was raised</value>
   </data>
   <data name="GenericRequest_Summary_Empty.Text" xml:space="preserve">
     <value>There is nothing to review yet.</value>
@@ -152,9 +147,6 @@
   </data>
   <data name="GenericRequest_Scrap_Empty.Text" xml:space="preserve">
     <value>No scrap type is recorded.</value>
-  </data>
-  <data name="GenericRequest_Result_Number.Text" xml:space="preserve">
-    <value>Request number</value>
   </data>
   <data name="GenericRequest_Details_Quantity.Header" xml:space="preserve">
     <value>Quantity</value>
@@ -199,7 +191,7 @@
     <value>Die number or description</value>
   </data>
   <data name="GenericRequest_Scrap_Intro.Text" xml:space="preserve">
-    <value>Pick the scrap type the request needs. The lugger count is how many are free to use.</value>
+    <value>Pick the scrap type the request needs.</value>
   </data>
   <data name="GenericRequest_Item_Intro.Text" xml:space="preserve">
     <value>Pick the item this request is about.</value>
@@ -299,5 +291,38 @@
   </data>
   <data name="GenericRequest_Summary_Estimate.Label" xml:space="preserve">
     <value>Estimated minutes</value>
+  </data>
+  <data name="GenericRequest_Result_Heading_Success.Text" xml:space="preserve">
+    <value>Request completed</value>
+  </data>
+  <data name="GenericRequest_Result_Heading_Duplicate.Text" xml:space="preserve">
+    <value>Matching request already active</value>
+  </data>
+  <data name="GenericRequest_Result_Heading_Failure.Text" xml:space="preserve">
+    <value>Request not submitted</value>
+  </data>
+  <data name="GenericRequest_Result_Raised_Message.Text" xml:space="preserve">
+    <value>Request {0} was raised and is now on the waitlist.</value>
+  </data>
+  <data name="GenericRequest_Result_Raised_NoNumber.Text" xml:space="preserve">
+    <value>The request was raised and is now on the waitlist.</value>
+  </data>
+  <data name="GenericRequest_Result_RetryFailed.Text" xml:space="preserve">
+    <value>The request could not be submitted. Please try again.</value>
+  </data>
+  <data name="GenericRequest_Result_AddAnother.Content" xml:space="preserve">
+    <value>Add Another Request</value>
+  </data>
+  <data name="GenericRequest_Result_ReturnToWaitlist.Content" xml:space="preserve">
+    <value>Return to Waitlist</value>
+  </data>
+  <data name="GenericRequest_Result_DuplicateReturnToWaitlist.Content" xml:space="preserve">
+    <value>Return to Waitlist</value>
+  </data>
+  <data name="GenericRequest_Result_Close.Content" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="GenericRequest_Result_Retry.Content" xml:space="preserve">
+    <value>Retry</value>
   </data>
 </root>

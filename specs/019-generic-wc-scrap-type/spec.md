@@ -93,7 +93,15 @@ A scrap type is edited or removed from the arrangement after a generic request c
 - **FR-011**: A type removed from, or renamed in, the arrangement MUST leave an existing request's stated wording intact.
 - **FR-012**: A type reassigned to a different lugger MUST show the lugger assigned now, because the dump point is a live fact.
 - **FR-013**: A stored request carrying a type outside the shared list MUST still draw with that type named.
-- **FR-014**: This chunk MUST delete the `Temp` preview source behind the scrap screen and the scrap card variant, MUST leave the build green afterwards, and MUST NOT rename such an artefact into a permanent-looking name in place of removing it.
+- **FR-014**: No `Temp` preview source behind the scrap screen, and no `Temp` scrap card variant, MAY exist or be reintroduced. The preview host and the scrap card variant were already deleted; this chunk keeps them gone, leaves the build green, and MUST NOT rename such an artefact into a permanent-looking name in place of removing it.
+
+**Stating it on screen (owner direction, 2026-11-13)**
+
+- **FR-015**: The step MUST offer each scrap type as a card naming that type, and MUST NOT show how many luggers the type has. The count is a fact about the plant's capacity that the requester never acts on; the lugger they walk to is the waitlist card's to name (FR-006).
+- **FR-016**: The stated type MUST be what the stored request is about, so two scrap types raised at one work center are two requests. A second request MUST NOT be refused as a duplicate of the first on the strength of an empty detail.
+- **FR-017**: Where the queue refuses to raise the request, the review step MUST say so in the queue's own words. It MUST NOT report the review as unreadable, because reading it succeeded and only the raise failed.
+- **FR-018**: The review MUST NOT list a stage for a request type that derives none. A stage comes from a proved part's operation state, so a scrap, dunnage or die request shows no stage row at all rather than a "Not recorded" one.
+- **FR-019**: The step after the review MUST be the same result screen the work-order request flow ends on, offering the same actions for the same outcomes: an add-another and a return-to-waitlist for a raised request, a return-to-waitlist for one the queue refused, and a close and a retry for one the store would not take. A second ending for the same kind of request is what a person would have to learn twice.
 
 ### Key Entities
 
@@ -126,10 +134,10 @@ A scrap type is edited or removed from the arrangement after a generic request c
 - **A1**: The plant's shared scrap-type list is the one shipped in `ScrapTypeCatalog`, already read by the Setup picker and the lugger arrangement editor.
 - **A2**: The lugger a type dumps into is a live read of the arrangement, not a value copied onto the request when it is raised — with the stated type being the value the request keeps.
 - **A3**: Scrap types recorded against a lugger but outside the shared list remain valid, as they already are for the arrangement editor.
+- **A4**: The scrap step uses the same step frame as every other step of this flow, so its layout, its loading state, its unavailable state with a retry, and its empty state need no new design. The scrap page that already exists is the rendering guide; the review host that once rendered it is gone, and nothing is built to replicate it.
 
-## Design note (2026-11-03)
+## Verbatim Constraints
 
-The review host that rendered this screen against in-memory values has been deleted, so no approved rendering of it can
-be opened any more; only this specification and the review record remain. **Clarification about design is required when
-this chunk is implemented**, before the screen is built: what the step shows, what it shows when its source is
-unavailable, and the exact wording.
+- `No Scrap` — the answer meaning there is no scrap. Never offered as a destination.
+- `Scrap Type Required` — the placeholder meaning no decision was made. Never offered as a destination.
+- An outside type is matched to an arrangement entry ignoring surrounding spaces and letter case, as the arrangement editor already matches it.

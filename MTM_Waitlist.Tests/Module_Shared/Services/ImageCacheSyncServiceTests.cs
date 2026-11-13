@@ -430,4 +430,70 @@ public sealed class ImageCacheSyncServiceTests
             result.Copied,
             "Only a source that names a folder as excluded leaves it alone, so the Dunnage tree is untouched by this rule.");
     }
+
+    // ── The archive sweep runs once a day, because finding the archives walks the share again ──────────────────
+
+    /// <summary>
+    /// An archived picture past its retention period is removed from the share — the housekeeping the same visit
+    /// does, so a replaced picture stops taking up space without anybody having to remember to tidy up.
+    /// </summary>
+    [TestMethod]
+    public void Service_ImageCacheSyncServiceTests_AnArchivedPicturePastItsRetentionIsRemovedFromTheShare()
+    {
+        var sharePicture = WriteSharedPicture(@"request_item\pickup-coil.png");
+        var archived = Path.Combine(
+            Path.GetDirectoryName(sharePicture)!,
+            AppStoragePaths.ArchiveFolderName,
+            $"pickup-coil-01-01-2020-01{Path.GetExtension(sharePicture)}");
+        Directory.CreateDirectory(Path.GetDirectoryName(archived)!);
+        File.WriteAllBytes(archived, [9, 9, 9]);
+
+        var result = ImageCacheSyncService.Synchronize([SourceKeepingArchives(_shareRoot, _cacheRoot, days: 30)]);
+
+        Assert.AreEqual(1, result.ArchivesRemoved, "an archive older than the period is removed from the share");
+        Assert.IsFalse(File.Exists(archived));
+    }
+
+    /// <summary>
+    /// The second launch of the same day does not walk the share again to look for archives.
+    /// </summary>
+    /// <remarks>
+    /// Finding the archive folders is a second full walk, and it is the only part of the refresh that is not paid
+    /// for by the copy comparison. The retention period is counted in whole days, so a sweep that already ran today
+    /// would find nothing new: the work is skipped, and an archive that appears afterwards waits for tomorrow's
+    /// first launch rather than making every launch of the day walk the share twice.
+    /// </remarks>
+    [TestMethod]
+    public void Service_ImageCacheSyncServiceTests_TheArchiveSweepRunsOnceADayAndNotOnEveryLaunch()
+    {
+        var source = SourceKeepingArchives(_shareRoot, _cacheRoot, days: 30);
+
+        ImageCacheSyncService.Synchronize([source]);
+
+        // Planted after today's sweep has run: an expired archive that only a second sweep could find.
+        var sharePicture = WriteSharedPicture(@"request_item\pickup-coil.png");
+        var archived = Path.Combine(
+            Path.GetDirectoryName(sharePicture)!,
+            AppStoragePaths.ArchiveFolderName,
+            $"pickup-coil-01-01-2020-01{Path.GetExtension(sharePicture)}");
+        Directory.CreateDirectory(Path.GetDirectoryName(archived)!);
+        File.WriteAllBytes(archived, [9, 9, 9]);
+
+        var second = ImageCacheSyncService.Synchronize([source]);
+
+        Assert.AreEqual(0, second.ArchivesRemoved, "today's sweep has already run, so this launch does not repeat it");
+        Assert.IsTrue(File.Exists(archived), "the archive is left for tomorrow's first launch");
+
+        // Tomorrow's launch is what this file is for: with the stamp gone, the sweep runs and the archive goes.
+        File.Delete(Path.Combine(_cacheRoot, "archive-sweep.stamp"));
+
+        var third = ImageCacheSyncService.Synchronize([source]);
+
+        Assert.AreEqual(1, third.ArchivesRemoved, "the next sweep that runs still removes what has expired");
+        Assert.IsFalse(File.Exists(archived));
+    }
+
+    /// <summary>A source whose archive sweep is switched on, with the period stated in days.</summary>
+    private static ImageCacheSource SourceKeepingArchives(string shareRoot, string cacheRoot, int days) =>
+        new("test pictures", shareRoot, cacheRoot, ArchiveKeepDays: days);
 }

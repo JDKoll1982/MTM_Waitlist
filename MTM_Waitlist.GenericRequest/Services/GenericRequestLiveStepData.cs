@@ -3,6 +3,7 @@ using MTM_Waitlist.GenericRequest.Models;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Models;
+using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Shared.Helpers;
@@ -23,12 +24,12 @@ namespace MTM_Waitlist.GenericRequest.Services;
 /// store could not be reached, which is what keeps a generic request as truthful as a work-order one (FR-028).
 /// </para>
 /// <para>
-/// <b>The two remaining externally proved answers are not implemented here yet.</b> A scrap type comes from the
-/// plant's own list (019) and a die from a Visual search (020). Each read answers
-/// <see cref="GenericRequestStepResult{T}.Unavailable"/> so its step reports the source as not available and offers
-/// a retry, and no substitute is offered (FR-012). Dunnage shipped with its own seam (018): the dunnage step reads
-/// <see cref="IDunnageCatalogueReader"/> directly, and this class reads it only at raise time to record whether the
-/// chosen part is still offered. The part answer ships too: it lives on
+/// <b>The die answer is not implemented here yet.</b> A die comes from a Visual search (020), so that read answers
+/// <see cref="GenericRequestStepResult{T}.Unavailable"/> and its step reports the source as not available and offers
+/// a retry, with no substitute offered (FR-012). The scrap type is read here (019): the plant's one shared list, with
+/// any type the arrangement records appended, and no job consulted. Dunnage shipped with its own seam (018): the
+/// dunnage step reads <see cref="IDunnageCatalogueReader"/> directly, and this class reads it only at raise time to
+/// record whether the chosen part is still offered. The part answer ships too: it lives on
 /// <see cref="IGenericRequestPartData"/>, which the part step asks directly.
 /// </para>
 /// </remarks>
@@ -44,6 +45,7 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
     private readonly IEmployeeDirectoryService _employeeDirectoryService;
     private readonly IGenericRequestPartData _partData;
     private readonly IDunnageCatalogueReader _catalogueReader;
+    private readonly ILuggerArrangementService _luggerArrangement;
 
     public GenericRequestLiveStepData(
         IWorkCenterCatalogService workCenterCatalogService,
@@ -53,7 +55,8 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
         IPersonIdentity personIdentity,
         IEmployeeDirectoryService employeeDirectoryService,
         IGenericRequestPartData partData,
-        IDunnageCatalogueReader catalogueReader)
+        IDunnageCatalogueReader catalogueReader,
+        ILuggerArrangementService luggerArrangement)
     {
         _workCenterCatalogService = workCenterCatalogService ?? throw new ArgumentNullException(nameof(workCenterCatalogService));
         _pickerService = pickerService ?? throw new ArgumentNullException(nameof(pickerService));
@@ -63,6 +66,7 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
         _employeeDirectoryService = employeeDirectoryService ?? throw new ArgumentNullException(nameof(employeeDirectoryService));
         _partData = partData ?? throw new ArgumentNullException(nameof(partData));
         _catalogueReader = catalogueReader ?? throw new ArgumentNullException(nameof(catalogueReader));
+        _luggerArrangement = luggerArrangement ?? throw new ArgumentNullException(nameof(luggerArrangement));
     }
 
     /// <inheritdoc />
@@ -182,9 +186,55 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
         _partData.ReadSequencesAsync(partNumber, cancellationToken);
 
     /// <inheritdoc />
-    public Task<GenericRequestStepResult<GenericRequestScrapOption>> ReadScrapTypesAsync(
-        CancellationToken cancellationToken = default) =>
-        Task.FromResult(GenericRequestStepResult<GenericRequestScrapOption>.Unavailable(DateTimeOffset.UtcNow));
+    public async Task<GenericRequestStepResult<GenericRequestScrapOption>> ReadScrapTypesAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var attemptedAtUtc = DateTimeOffset.UtcNow;
+
+        try
+        {
+            // The plant's one scrap-type list, in the order that list holds, then whatever else the arrangement
+            // records. The list is in memory, so it cannot fail; the arrangement only extends it (FR-002, research D1).
+            var arrangement = await _luggerArrangement.GetSnapshotAsync(cancellationToken).ConfigureAwait(false);
+
+            var choices = new List<GenericRequestScrapOption>(ScrapTypeCatalog.All.Count);
+
+            foreach (var scrapType in ScrapTypeCatalog.All)
+            {
+                choices.Add(new GenericRequestScrapOption(scrapType));
+            }
+
+            foreach (var scrapType in arrangement.ScrapTypes)
+            {
+                if (IsOfferable(scrapType) && !ScrapTypeCatalog.Contains(scrapType))
+                {
+                    choices.Add(new GenericRequestScrapOption(scrapType));
+                }
+            }
+
+            return choices.Count == 0
+                ? GenericRequestStepResult<GenericRequestScrapOption>.Empty(attemptedAtUtc)
+                : GenericRequestStepResult<GenericRequestScrapOption>.Populated(choices, attemptedAtUtc);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error(LogCategory, ex, "The scrap types could not be read for the scrap step.");
+            return GenericRequestStepResult<GenericRequestScrapOption>.Unavailable(attemptedAtUtc);
+        }
+    }
+
+    /// <summary>
+    /// Whether a type the arrangement records may be offered: the two answers that say <i>whether</i> there is scrap
+    /// are not destinations (FR-003).
+    /// </summary>
+    private static bool IsOfferable(string? scrapType) =>
+        !string.IsNullOrWhiteSpace(scrapType)
+        && !ScrapDecisionRules.IsNoScrap(scrapType)
+        && !ScrapDecisionRules.IsRequiredPlaceholder(scrapType);
 
     /// <inheritdoc />
     public Task<GenericRequestStepResult<GenericRequestDieOption>> ReadDiesAsync(
@@ -196,18 +246,18 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
     /// Whether a step that reads no rows can be shown.
     /// </summary>
     /// <remarks>
-    /// The part step ships with its live reads and the dunnage step reads the plant's catalogue through its own
-    /// seam (018), so both are ready. Scrap and die report unavailable because their source has not shipped
-    /// (chunks 019 and 020). Every other step has something to show: its own answer fields. The result step's
-    /// presentation comes from the raise attempt the summary recorded, not from here.
+    /// The part step ships with its live reads and the dunnage step reads the plant's catalogue through its own seam
+    /// (018), so both are ready. The scrap step's source is the plant's own in-memory list, so it is ready too (019).
+    /// The die step reports unavailable because its source has not shipped (020). Every other step has something to
+    /// show: its own answer fields. The result step's presentation comes from the raise attempt the summary recorded,
+    /// not from here.
     /// </remarks>
     public Task<GenericRequestStepAvailability> ReadStepAvailabilityAsync(
         GenericRequestStep step,
         CancellationToken cancellationToken = default) =>
         Task.FromResult(step switch
             {
-                GenericRequestStep.Scrap
-                    or GenericRequestStep.Die => GenericRequestStepAvailability.Unavailable(DateTimeOffset.UtcNow),
+                GenericRequestStep.Die => GenericRequestStepAvailability.Unavailable(DateTimeOffset.UtcNow),
                 _ => GenericRequestStepAvailability.Ready(DateTimeOffset.UtcNow),
             });
 
@@ -239,7 +289,8 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
             }
 
             // The answers a generic request records on itself: the part answer when the request states a proved
-            // part, and the dunnage answer when it asked for one. Both ride the existing answers column.
+            // part, the dunnage answer when it asked for one, and the scrap type when the requester stated it. All
+            // three ride the existing answers column.
             var answers = await AnswersForAsync(draft, cancellationToken).ConfigureAwait(false);
 
             var result = await _requestService
@@ -275,7 +326,12 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
             }
 
             AppLog.Info(LogCategory, $"The generic request was not raised: {result.Status} - {result.Message}");
-            return GenericRequestSubmission.Failed(result.Message, attemptedAtUtc);
+
+            // A duplicate is the queue saying the need is already covered, which is an answer rather than a fault,
+            // and the result step shows it with the one action that fits: back to the list (FR-019).
+            return result.Status == WaitlistRequestSubmitStatus.DuplicateWarningRequired
+                ? GenericRequestSubmission.Duplicate(result.Message, attemptedAtUtc)
+                : GenericRequestSubmission.Failed(result.Message, attemptedAtUtc);
         }
         catch (OperationCanceledException)
         {
@@ -296,13 +352,23 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
     /// <remarks>
     /// A dunnage request is about the part the requester picked, and the card's second line reads
     /// <c>{dunnage_part}</c> straight out of this column. Leaving it empty would raise a dunnage request whose card
-    /// names nothing, so the chosen part wins over the configured answer whenever the item asked for dunnage.
+    /// names nothing, so the chosen part wins over the configured answer whenever the item asked for dunnage. A
+    /// scrap request is about the type the requester stated for the same two reasons, and that type is also the
+    /// detail the queue tells one request from another by.
     /// </remarks>
     private static string? CapturedValue(GenericRequestDraft draft)
     {
         if (draft.RequiresDunnage && draft.DunnagePart.Length > 0)
         {
             return draft.DunnagePart;
+        }
+
+        // A scrap request is about the type the requester stated, and that type is the detail the queue tells one
+        // request from another by. Leaving it empty made every scrap request at a work center a duplicate of the
+        // first one, which the requester met as a refused raise (FR-005, FR-013).
+        if (draft.RequiresScrap && draft.ScrapType.Length > 0)
+        {
+            return draft.ScrapType;
         }
 
         return string.IsNullOrWhiteSpace(draft.Answer) ? null : draft.Answer;
@@ -325,6 +391,16 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
         if (draft.RequiresDunnage && draft.DunnagePart.Length > 0)
         {
             foreach (var pair in await DunnageAnswersForAsync(draft, cancellationToken).ConfigureAwait(false))
+            {
+                answers[pair.Key] = pair.Value;
+            }
+        }
+
+        // The scrap type the requester stated. Only the type is kept: the lugger it dumps into is resolved live from
+        // the arrangement whenever the card is drawn, so a reassignment is followed (FR-005, FR-012, A2).
+        if (draft.RequiresScrap)
+        {
+            foreach (var pair in new GenericRequestScrapAnswer { ScrapType = draft.ScrapType }.ToAnswers())
             {
                 answers[pair.Key] = pair.Value;
             }

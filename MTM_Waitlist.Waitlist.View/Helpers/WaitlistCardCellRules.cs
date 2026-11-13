@@ -146,6 +146,9 @@ public static class WaitlistCardCellRules
     /// </summary>
     private const string LuggerLocationLabel = "Lugger Location";
 
+    /// <summary>The declared label the scrap Item's material cell carries.</summary>
+    private const string ScrapTypeLabel = "Scrap Type";
+
     /// <summary>The Item code of the one request whose card names and pictures the lugger its scrap goes into.</summary>
     private const string ScrapItemCode = "pickup-scrap";
 
@@ -275,6 +278,15 @@ public static class WaitlistCardCellRules
     public static bool IsLuggerLocationField(string? label) =>
         !string.IsNullOrWhiteSpace(label)
         && string.Equals(label.Trim(), LuggerLocationLabel, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Whether a declared field is the scrap Item's <c>Scrap Type</c>: the material being collected, and the other
+    /// half of the pair the card reads as one statement.
+    /// </summary>
+    /// <param name="label">The label the field was declared under.</param>
+    public static bool IsScrapTypeField(string? label) =>
+        !string.IsNullOrWhiteSpace(label)
+        && string.Equals(label.Trim(), ScrapTypeLabel, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Whether a declared field is the die Items' die-shop direction, whose answer decides whether the card

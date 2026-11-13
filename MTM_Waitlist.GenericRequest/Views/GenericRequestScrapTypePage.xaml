@@ -18,39 +18,50 @@
         RetryCommand="{x:Bind ViewModel.RetryCommand}"
         TitleKey="{x:Bind ViewModel.TitleKey}">
         <controls:GenericRequestStepFrame.Body>
-            <ListView
-                AutomationProperties.Name="{x:Bind ViewModel.Title}"
-                ItemsSource="{x:Bind ViewModel.Options}"
-                SelectedItem="{x:Bind ViewModel.Selected, Mode=TwoWay}"
-                SelectionMode="Single">
-                <ListView.ItemTemplate>
-                    <DataTemplate x:DataType="models:GenericRequestScrapOption">
-                        <Grid Padding="0,8" ColumnSpacing="12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock
-                                Text="{x:Bind ScrapType}"
-                                TextTrimming="CharacterEllipsis"
-                                Style="{StaticResource BodyStrongTextBlockStyle}" />
-                            <TextBlock
-                                Grid.Column="1"
-                                VerticalAlignment="Center"
-                                x:Uid="GenericRequest_Scrap_Luggers"
-                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Style="{StaticResource CaptionTextBlockStyle}" />
-                            <TextBlock
-                                Grid.Column="2"
-                                VerticalAlignment="Center"
-                                Text="{x:Bind AvailableLuggerDisplay}"
-                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Style="{StaticResource CaptionTextBlockStyle}" />
-                        </Grid>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <GridView
+                    AutomationProperties.Name="{x:Bind ViewModel.Title}"
+                    ItemsSource="{x:Bind ViewModel.Options}"
+                    SelectedItem="{x:Bind ViewModel.Selected, Mode=TwoWay}"
+                    SelectionMode="Single">
+                    <GridView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <ItemsWrapGrid
+                                Orientation="Horizontal"
+                                MaximumRowsOrColumns="3" />
+                        </ItemsPanelTemplate>
+                    </GridView.ItemsPanel>
+                    <GridView.ItemTemplate>
+                        <DataTemplate x:DataType="models:GenericRequestScrapOption">
+
+                            <!-- One card per scrap type, naming it and nothing else. The lugger it dumps into is
+                                 the waitlist card's to say, and a count here would be a number the requester never
+                                 acts on (FR-002, FR-006). -->
+                            <Border
+                                AutomationProperties.Name="{x:Bind ScrapType}"
+                                Width="180"
+                                Height="120"
+                                Margin="4"
+                                Padding="16"
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    FontSize="14"
+                                    FontWeight="SemiBold"
+                                    Foreground="{ThemeResource TextFillColorPrimaryBrush}"
+                                    Text="{x:Bind ScrapType}"
+                                    TextAlignment="Center"
+                                    TextTrimming="CharacterEllipsis"
+                                    TextWrapping="WrapWholeWords" />
+                            </Border>
+                        </DataTemplate>
+                    </GridView.ItemTemplate>
+                </GridView>
+            </ScrollViewer>
         </controls:GenericRequestStepFrame.Body>
     </controls:GenericRequestStepFrame>
 </Page>

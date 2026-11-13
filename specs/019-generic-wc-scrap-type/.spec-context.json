@@ -3,8 +3,866 @@
   "specName": "019 Generic Work Center — Stated Scrap Type and Lugger",
   "branch": "master",
   "selectedAt": "2026-11-03T21:00:00.000Z",
-  "currentStep": "specify",
-  "status": "draft",
-  "history": [],
-  "telemetryInstanceId": "5a34df52-a642-4a0e-90b2-af72abe89980"
+  "currentStep": "implement",
+  "status": "completed",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-13T19:19:30.499Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-11-13T19:22:43.793Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-13T19:22:47.484Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-11-13T19:25:21.360Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:25:39.289Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:25:39.628Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-13T19:26:49.690Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:27:08.571Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-13T19:27:12.088Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T001",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:27:18.193Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T002",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:27:42.761Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T003",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:27:42.762Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T004",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:31:52.912Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:31:52.912Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:31:52.913Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:31:53.303Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:31:53.304Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T009",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:31:53.675Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T010",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:31:54.043Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T011",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:39:32.963Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T012",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:39:32.964Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T013",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:39:32.965Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T014",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:39:32.966Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T015",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:39:33.341Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T016",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:39:33.342Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:39:33.746Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T018",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:39:33.747Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T019",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:39:33.747Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T020",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:39:34.139Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T021",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:39:38.264Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T022",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:39:38.703Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-13T19:39:38.814Z"
+    }
+  ],
+  "telemetryInstanceId": "5a34df52-a642-4a0e-90b2-af72abe89980",
+  "workingBranch": "019-generic-wc-scrap-type",
+  "unattended": true,
+  "request": "019-Generic Work Center Stated Scrap Type and Lugger",
+  "expectations": [
+    "the stated part and its quantity (017), the dunnage page (018), the die search (020) and the optional job fill (021)",
+    "the work-order scrap card keeps behaving as it does today"
+  ],
+  "context": [
+    "area: MTM_Waitlist.GenericRequest/ViewModels/GenericRequestScrapTypeViewModel.cs - the scrap step; needs CanAnswer and NotifyAnswerChanged",
+    "area: MTM_Waitlist.GenericRequest/Services/GenericRequestLiveStepData.cs - ReadScrapTypesAsync returns Unavailable, ReadStepAvailabilityAsync marks Scrap unavailable, AnswersForAsync never stores the scrap answer",
+    "area: MTM_Waitlist.Core/Services/ScrapTypeCatalog.cs - static All list in picker order; ScrapDecisionRules holds the No Scrap and Scrap Type Required sentinels",
+    "area: MTM_Waitlist.Core/Models/Lugger/LuggerArrangementSnapshot.cs - Resolve(scrapType) is the one blocking/backup rule set, shared with the work-order card",
+    "area: MTM_Waitlist.Core/Models/GenericRequestPartAnswer.cs - the answers_json pattern a scrap answer must copy",
+    "area: MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs - AddGenericPartCells is the card-cell precedent for a generic request",
+    "constraint: every read goes through a stored procedure; no inline statement text (InlineSqlAuditTests)",
+    "constraint: no Temp preview artefact may return (TempArtefactBoundaryAuditTests)",
+    "Owner follow-up after walking the app: the page shown after the review must be a duplicate of the work-order result page, buttons included."
+  ],
+  "coverage": {
+    "FR-001": {
+      "title": "For the scrap item, the step asks the requester to state the scrap type and reads no job.",
+      "tasks": [
+        "T006",
+        "T009"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestScrapSubmissionTests.cs::Service_GenericRequestScrapSubmissionTests_TheScrapStepIsAnswerableWithNoJobAnywhere"
+      ]
+    },
+    "FR-002": {
+      "title": "The choices are the shared scrap-type list in its order plus outside types the arrangement records.",
+      "tasks": [
+        "T004",
+        "T009"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestScrapOptionsTests.cs::Service_GenericRequestScrapOptionsTests_TheChoicesAreTheSharedListInItsOrderWithArrangementTypesAfterIt"
+      ]
+    },
+    "FR-003": {
+      "title": "The choices exclude the required placeholder and No Scrap.",
+      "tasks": [
+        "T004",
+        "T009"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestScrapOptionsTests.cs::Service_GenericRequestScrapOptionsTests_TheTwoNamesThatMeanNoScrapAreNeverOffered"
+      ]
+    },
+    "FR-004": {
+      "title": "The flow does not advance without a chosen type.",
+      "tasks": [
+        "T005",
+        "T007"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestScrapTypeViewModelTests.cs::ViewModel_GenericRequestScrapTypeViewModelTests_ContinueStaysDisabledUntilATypeIsChosen"
+      ]
+    },
+    "FR-005": {
+      "title": "A chosen type is carried on the confirmation step, the card and the stored request.",
+      "tasks": [
+        "T006",
+        "T010",
+        "T014",
+        "T016"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestScrapSubmissionTests.cs::Service_GenericRequestScrapSubmissionTests_AScrapRequestRecordsTheStatedType; MTM_Waitlist.Tests/Module_Waitlist/WaitlistRequestTitlesScrapTests.cs::Model_WaitlistRequestTitlesScrapTests_AGenericScrapRequestNamesTheStatedTypeOnItsCard"
+      ]
+    },
+    "FR-006": {
+      "title": "A generic scrap card names the lugger the arrangement assigns, without reading a job.",
+      "tasks": [
+        "T011",
+        "T015"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Waitlist/WaitlistViewViewModelScrapCardTests.cs::ViewModel_WaitlistViewViewModelScrapCardTests_AGenericScrapCardNamesTheStatedTypeAndItsLuggerWithNoJob"
+      ]
+    },
+    "FR-007": {
+      "title": "The lugger resolution is the same one the work-order scrap card uses.",
+      "tasks": [
+        "T011",
+        "T015"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Waitlist/WaitlistViewViewModelScrapCardTests.cs::ViewModel_WaitlistViewViewModelScrapCardTests_TheLuggerAGenericCardNamesIsTheOneAWorkOrderCardNames"
+      ]
+    },
+    "FR-008": {
+      "title": "A type whose luggers are all blocked draws the type and the first lugger with its status.",
+      "tasks": [
+        "T012",
+        "T015"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Waitlist/WaitlistViewViewModelScrapCardTests.cs::ViewModel_WaitlistViewViewModelScrapCardTests_ATypeWhoseLuggersAreAllBlockedNamesTheFirstWithItsStatus"
+      ]
+    },
+    "FR-009": {
+      "title": "A type with no lugger assigned draws the type and records a configuration gap.",
+      "tasks": [
+        "T013",
+        "T015"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Waitlist/WaitlistViewViewModelScrapCardTests.cs::ViewModel_WaitlistViewViewModelScrapCardTests_ATypeWithNoLuggerAssignedNamesTheTypeAndDrawsNoLugger"
+      ]
+    },
+    "FR-010": {
+      "title": "Where the arrangement cannot be read, the card names the type and reports the lugger unavailable.",
+      "tasks": [
+        "T013",
+        "T015",
+        "T001"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Waitlist/WaitlistViewViewModelScrapCardTests.cs::ViewModel_WaitlistViewViewModelScrapCardTests_AnUnreadableArrangementStillNamesTheTypeAndReportsNoLugger"
+      ]
+    },
+    "FR-011": {
+      "title": "A type removed or renamed leaves an existing request's stated wording intact.",
+      "tasks": [
+        "T017"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Waitlist/WaitlistViewViewModelScrapChangeTests.cs::ViewModel_WaitlistViewViewModelScrapChangeTests_ATypeRemovedFromTheArrangementLeavesTheStatedWordingAlone; ..._ATypeRenamedInTheArrangementKeepsTheStatedWording"
+      ]
+    },
+    "FR-012": {
+      "title": "A type reassigned shows the lugger assigned now.",
+      "tasks": [
+        "T018"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Waitlist/WaitlistViewViewModelScrapChangeTests.cs::ViewModel_WaitlistViewViewModelScrapChangeTests_ATypeReassignedToAnotherLuggerFollowsTheArrangement"
+      ]
+    },
+    "FR-013": {
+      "title": "A stored request carrying a type outside the shared list still draws with that type named.",
+      "tasks": [
+        "T019"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Waitlist/WaitlistViewViewModelScrapChangeTests.cs::ViewModel_WaitlistViewViewModelScrapChangeTests_AStoredTypeOutsideTheSharedListIsStillNamed"
+      ]
+    },
+    "FR-014": {
+      "title": "No Temp preview source or Temp scrap card variant may exist or return.",
+      "tasks": [
+        "T022"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/TempArtefactBoundaryAuditTests.cs (passes; no Temp artefact exists)"
+      ]
+    }
+  },
+  "classification": {
+    "projectedFiles": 12,
+    "projectedTasks": 18,
+    "scopeSignal": "none",
+    "verdict": "normal"
+  },
+  "intent": "Let a generic work-center requester state the scrap type and have the card name that type and the lugger the shared arrangement assigns to it.",
+  "size": "normal",
+  "verified": [
+    {
+      "what": "plan blocks check out",
+      "command": "python3 .specify/extensions/companion/scripts/check_plan.py --feature-dir specs/019-generic-wc-scrap-type --strict",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 0.0,
+      "result": "[plan-check] plan.md: 1 screen, 6 parts. Every screen holds to its grammar."
+    },
+    {
+      "what": "The three card outcomes a generic scrap request can draw",
+      "result": "named lugger, blocked lugger with its status, gap with no lugger, and unavailable all asserted through the card's drawn cells"
+    },
+    {
+      "what": "Generic and work-order cards name the same lugger for one type",
+      "result": "asserted by comparing the two cards' drawn cells"
+    },
+    {
+      "what": "No job is read to state a scrap type",
+      "result": "the scrap step's seam has no job dependency and its availability is ready without one"
+    },
+    {
+      "what": "solution build",
+      "command": "dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false -v:q",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 55.3,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:54.87",
+      "commit": "6c9548bb",
+      "tree": "e941d801f7d8c185f9176bc1b5809b2a718fcbbe"
+    },
+    {
+      "what": "affected areas test run",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 --no-build --filter FullyQualifiedName~Module_GenericRequest|FullyQualifiedName~Module_Waitlist|FullyQualifiedName~Module_Settings",
+      "source": "derived",
+      "exitCode": 255,
+      "durationSeconds": 0.0,
+      "result": "'FullyQualifiedName~Module_Waitlist' is not recognized as an internal or external command, · operable program or batch file.",
+      "warnings": [
+        "exited 255"
+      ],
+      "commit": "6c9548bb",
+      "tree": "4980c1c5ba795c1eb0aef7fd9a4147f047b8b5d0"
+    },
+    {
+      "what": "Independent review at high depth: production diff",
+      "result": "two real defects found and fixed; the other six checks clean"
+    },
+    {
+      "what": "Independent review at high depth: tests",
+      "result": "two false-confidence tests strengthened, the rendered line now asserted, the gap recording asserted, the screen's own load path covered, and 29 test names brought onto the naming rule"
+    },
+    {
+      "what": "solution build after review fixes",
+      "command": "dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false -v:q",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 50.2,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:49.80",
+      "commit": "6c9548bb",
+      "tree": "5f26e9cd8997924430074ce9dd285a2aa0e71e45"
+    },
+    {
+      "what": "The five RunHistoryStore failures",
+      "result": "resolved: the class no longer contains a literal instant; every record is derived from the test's own clock and the store is built on that same clock, so nothing it writes can fall outside retention"
+    },
+    {
+      "what": "full suite after the run-history fix",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 --no-build",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 29.6,
+      "result": "  Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_ReachesTheRealProcedureReportsTheLoadedRowCountAndSwapsAtomically [2 ms] ·   Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_WithAnEmptyPayloadIsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  2608, Skipped:    52, Total:  2660, Duration: 28 s - MTM_Waitlist.Tests.dll (net10.0)",
+      "commit": "6c9548bb",
+      "tree": "be61a22020918fe6474da99207957bb8fd64820b"
+    },
+    {
+      "what": "The page-after-review failure the owner reported",
+      "result": "reproduced against the live store: pending generic scrap request id 12 at Die Shop has a null detail, so a second scrap request there is refused as a duplicate; fixed by storing the stated type as the request's detail"
+    },
+    {
+      "what": "The scrap step's cards",
+      "result": "grid of cards naming only the type, capped at three columns to satisfy the application's card-grid ceiling"
+    },
+    {
+      "what": "full suite after the owner's follow-up",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 --no-build",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 30.3,
+      "result": "  Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_ReachesTheRealProcedureReportsTheLoadedRowCountAndSwapsAtomically [1 ms] ·   Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_WithAnEmptyPayloadIsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  2610, Skipped:    52, Total:  2662, Duration: 28 s - MTM_Waitlist.Tests.dll (net10.0)",
+      "commit": "6c9548bb",
+      "tree": "5c857220c8029c54f04634e95c87cf9de2405fe4"
+    },
+    {
+      "what": "full test suite",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj --no-build",
+      "result": "2628 passed, 0 failed, 52 skipped"
+    },
+    {
+      "what": "the generic result page matches the work-order result page",
+      "result": "markup test compares the button content templates in order, the accent emphasis, the three phase panels, the shell styles and the automation ids"
+    }
+  ],
+  "planBlocks": [
+    "screens"
+  ],
+  "decisions": [
+    {
+      "decision": "Build the choices from ScrapTypeCatalog.All in its own order, then append arrangement-only types",
+      "why": "FR-002 names the shared list and forbids a second one, and the arrangement exposes its types alphabetised",
+      "rejected": "using LuggerArrangementSnapshot.ScrapTypes alone, which would reorder the plant list and vanish when the arrangement cannot be read",
+      "by": "agent",
+      "at": "2026-11-13T19:25:45.500Z"
+    },
+    {
+      "decision": "Filter both sources through ScrapDecisionRules before they reach the options",
+      "why": "the arrangement holds whatever an operator typed, so an entry spelled No Scrap would otherwise be offered",
+      "rejected": "trusting the catalog to be the only source",
+      "by": "agent",
+      "at": "2026-11-13T19:25:45.500Z"
+    },
+    {
+      "decision": "Resolve the card's lugger from a snapshot read once per list load, through LuggerArrangementSnapshot.Resolve",
+      "why": "Resolve is the rule set the work-order card already uses, so the two cannot disagree (FR-007)",
+      "rejected": "copying the rule set into the board, or reusing the work-order availability provider, which answers per work centre from the active job",
+      "by": "agent",
+      "at": "2026-11-13T19:25:45.500Z"
+    },
+    {
+      "decision": "Tell the three card outcomes apart by the snapshot's row count",
+      "why": "an empty snapshot and an unassigned type both report NotConfigured, so only the row count separates an outage from a gap",
+      "rejected": "dropping the lugger cell when the arrangement cannot be read, as the work-order card does, because FR-010 requires the type to still be named",
+      "by": "agent",
+      "at": "2026-11-13T19:25:45.500Z"
+    },
+    {
+      "decision": "Store the stated type on answers_json under the key scrap.type and never store the lugger",
+      "why": "A2 keeps the type and makes the dump point a live fact, and the answers column needs no schema change",
+      "rejected": "a new column and procedure pair, or storing the resolved lugger beside the type",
+      "by": "agent",
+      "at": "2026-11-13T19:25:45.500Z"
+    },
+    {
+      "decision": "AvailableLuggerCount became nullable",
+      "why": "an arrangement that could not be read yields no count, and drawing a confident zero would be a lie",
+      "rejected": "showing zero for every type when the read failed",
+      "by": "agent",
+      "at": "2026-11-13T19:40:22.321Z"
+    },
+    {
+      "decision": "A generic card draws no lugger artwork",
+      "why": "the job's artwork belongs to the job and this chunk asks only for the name; borrowing it would show another job's lugger",
+      "rejected": "resolving lugger pictures through a second resolver for generic cards",
+      "by": "agent",
+      "at": "2026-11-13T19:40:22.321Z"
+    },
+    {
+      "decision": "The stated scrap type is cleared when the work center changes",
+      "why": "a type stated for one work center says nothing about another",
+      "rejected": "carrying it, which would raise a request nobody described",
+      "by": "agent",
+      "at": "2026-11-13T19:40:22.321Z"
+    },
+    {
+      "decision": "The stated scrap type outranks the work center's job scrap type on the card line",
+      "why": "a card that named the job's type while its own cell named the requester's would show two types, which is the disagreement FR-007 exists to prevent",
+      "rejected": "reading the job first",
+      "found_by": "independent review",
+      "by": "agent",
+      "at": "2026-11-13T19:53:40.731Z"
+    },
+    {
+      "decision": "A generic scrap card never borrows the job's lugger artwork",
+      "why": "that picture belongs to the job's scrap type, so it would send a handler to a lugger the card does not name",
+      "rejected": "gating only the cell and leaving the card's left spot",
+      "found_by": "independent review",
+      "by": "agent",
+      "at": "2026-11-13T19:53:40.731Z"
+    },
+    {
+      "decision": "A scrap choice is the type's name and nothing else",
+      "why": "owner direction: the lugger count is a capacity fact the requester never acts on, and the lugger they walk to is the waitlist card's to name",
+      "rejected": "keeping the count but hiding the column",
+      "by": "agent",
+      "at": "2026-11-13T20:32:09.797Z"
+    },
+    {
+      "decision": "The stated scrap type became the request's stored detail",
+      "why": "the queue refuses a second active request when building, work center, item and detail all match, so an empty detail made every scrap request at a work center a duplicate of the first",
+      "rejected": "relaxing the duplicate rule itself, which is correct for a genuine double-tap",
+      "by": "agent",
+      "at": "2026-11-13T20:32:09.797Z"
+    },
+    {
+      "decision": "The review shows the queue's own refusal sentence",
+      "why": "the review read perfectly well and only the raise failed, so 'this step could not be read' told the requester nothing they could act on",
+      "rejected": "leaving the frame's generic unavailable text",
+      "by": "agent",
+      "at": "2026-11-13T20:32:09.797Z"
+    },
+    {
+      "decision": "The stage row is drawn only for a request type that derives one",
+      "why": "a stage comes from a proved part's operation state, so a scrap, dunnage or die request was reporting 'Not recorded' about something it never had",
+      "rejected": "hiding the row only when its value is blank, which would keep the row for every non-part request",
+      "by": "agent",
+      "at": "2026-11-13T20:32:09.797Z"
+    },
+    {
+      "decision": "The generic result page is a copy of NewRequestResultPage: glyph, heading, sentence, progress ring, and the same buttons per outcome (Add Another Request + Return to Waitlist on success, Return to Waitlist on a duplicate, Close + Retry on a failure).",
+      "by": "agent",
+      "at": "2026-11-13T21:07:07.742Z"
+    },
+    {
+      "decision": "A queue refusal now travels as GenericRequestSubmission.IsDuplicate and GenericRequestDraft.ResultWasDuplicate, so the result step can draw it as its own outcome rather than as a fault.",
+      "by": "agent",
+      "at": "2026-11-13T21:07:07.742Z"
+    },
+    {
+      "decision": "Retry on the result page resubmits through the data seam instead of rebinding the inherited reload command, which would only redraw the same failure.",
+      "by": "agent",
+      "at": "2026-11-13T21:07:07.742Z"
+    },
+    {
+      "decision": "Duplicates still stop on the review step, as FR-018 says; the result page's duplicate outcome covers a retry that the queue refuses.",
+      "by": "agent",
+      "at": "2026-11-13T21:07:07.742Z"
+    }
+  ],
+  "step_summaries": {
+    "plan": {
+      "summary": "Plan, research, data model and contracts written; five decisions recorded.",
+      "key_finding": "The scrap step and its page already exist and are wired; only the source, the gate, the stored answer and the card cells are missing."
+    },
+    "tasks": {
+      "summary": "6 phases, 22 tasks, 8 waves; setup then the answer record, then the step, the card and the survival tests."
+    },
+    "implement": {
+      "summary": "Scrap type stated, gated, stored and drawn; the run-history test rot that predated this feature is fixed by removing every literal instant."
+    },
+    "specify": {
+      "summary": "Scrap picker shows cards of type names only; a scrap request's detail is its type so two types raise separately; the review says why a raise was refused and shows no stage row where none exists."
+    }
+  },
+  "approach": "Fill the scrap step's real source from the shared list plus arrangement-only types, gate Continue on a choice, record the choice on answers_json, and make the card name the type and the lugger the shared arrangement resolves for it.",
+  "currentTask": null,
+  "task_summaries": {
+    "T001": {
+      "status": "DONE",
+      "did": "Added the card's lugger-unavailable wording key",
+      "files": [
+        "Strings/en-us/Resources.resw"
+      ]
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "Added the stored scrap answer record and its tests",
+      "files": [
+        "MTM_Waitlist.Core/Models/GenericRequestScrapAnswer.cs;MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestScrapAnswerTests.cs"
+      ],
+      "wave": "T002-T003"
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "Added the stored scrap answer record and its tests",
+      "files": [
+        "MTM_Waitlist.Core/Models/GenericRequestScrapAnswer.cs;MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestScrapAnswerTests.cs"
+      ],
+      "wave": "T002-T003"
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "Wrote the scrap step's failing-first tests for the choices, the gate and the stored answer",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestScrapOptionsTests.cs;MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestScrapTypeViewModelTests.cs;MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestScrapSubmissionTests.cs"
+      ],
+      "wave": "T004-T006"
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "Wrote the scrap step's failing-first tests for the choices, the gate and the stored answer",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestScrapOptionsTests.cs;MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestScrapTypeViewModelTests.cs;MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestScrapSubmissionTests.cs"
+      ],
+      "wave": "T004-T006"
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "Wrote the scrap step's failing-first tests for the choices, the gate and the stored answer",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestScrapOptionsTests.cs;MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestScrapTypeViewModelTests.cs;MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestScrapSubmissionTests.cs"
+      ],
+      "wave": "T004-T006"
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "Gated Continue on a chosen type and cleared the stated type when the work center changes",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestScrapTypeViewModel.cs;MTM_Waitlist.GenericRequest/ViewModels/GenericRequestWorkCenterViewModel.cs;MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestWorkCenterViewModelTests.cs"
+      ],
+      "wave": "T007-T008"
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "Gated Continue on a chosen type and cleared the stated type when the work center changes",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestScrapTypeViewModel.cs;MTM_Waitlist.GenericRequest/ViewModels/GenericRequestWorkCenterViewModel.cs;MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestWorkCenterViewModelTests.cs"
+      ],
+      "wave": "T007-T008"
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "Built the real scrap choices from the shared list and the arrangement, and made the scrap step answerable",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Services/GenericRequestLiveStepData.cs;MTM_Waitlist.GenericRequest/Models/GenericRequestOptions.cs;MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestTestDoubles.cs"
+      ]
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "Recorded the stated scrap type on the raised request",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Services/GenericRequestLiveStepData.cs"
+      ]
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "Wrote the card's failing-first tests for the lugger outcomes and the named type",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/WaitlistViewViewModelScrapCardTests.cs;MTM_Waitlist.Tests/Module_Waitlist/WaitlistRequestTitlesScrapTests.cs"
+      ],
+      "wave": "T011-T014"
+    },
+    "T012": {
+      "status": "DONE",
+      "did": "Wrote the card's failing-first tests for the lugger outcomes and the named type",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/WaitlistViewViewModelScrapCardTests.cs;MTM_Waitlist.Tests/Module_Waitlist/WaitlistRequestTitlesScrapTests.cs"
+      ],
+      "wave": "T011-T014"
+    },
+    "T013": {
+      "status": "DONE",
+      "did": "Wrote the card's failing-first tests for the lugger outcomes and the named type",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/WaitlistViewViewModelScrapCardTests.cs;MTM_Waitlist.Tests/Module_Waitlist/WaitlistRequestTitlesScrapTests.cs"
+      ],
+      "wave": "T011-T014"
+    },
+    "T014": {
+      "status": "DONE",
+      "did": "Wrote the card's failing-first tests for the lugger outcomes and the named type",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/WaitlistViewViewModelScrapCardTests.cs;MTM_Waitlist.Tests/Module_Waitlist/WaitlistRequestTitlesScrapTests.cs"
+      ],
+      "wave": "T011-T014"
+    },
+    "T015": {
+      "status": "DONE",
+      "did": "Resolved a generic scrap card's type and lugger from the stored answer and the arrangement, and filled the card's type token",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs;MTM_Waitlist.Waitlist.View/Models/WaitlistRequestTitles.cs;MTM_Waitlist.Waitlist.View/Helpers/WaitlistCardCellRules.cs;Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ],
+      "wave": "T015-T016"
+    },
+    "T016": {
+      "status": "DONE",
+      "did": "Resolved a generic scrap card's type and lugger from the stored answer and the arrangement, and filled the card's type token",
+      "files": [
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs;MTM_Waitlist.Waitlist.View/Models/WaitlistRequestTitles.cs;MTM_Waitlist.Waitlist.View/Helpers/WaitlistCardCellRules.cs;Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ],
+      "wave": "T015-T016"
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "Wrote the survival tests for a removed, renamed and reassigned type",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/WaitlistViewViewModelScrapChangeTests.cs"
+      ],
+      "wave": "T017-T019"
+    },
+    "T018": {
+      "status": "DONE",
+      "did": "Wrote the survival tests for a removed, renamed and reassigned type",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/WaitlistViewViewModelScrapChangeTests.cs"
+      ],
+      "wave": "T017-T019"
+    },
+    "T019": {
+      "status": "DONE",
+      "did": "Wrote the survival tests for a removed, renamed and reassigned type",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/WaitlistViewViewModelScrapChangeTests.cs"
+      ],
+      "wave": "T017-T019"
+    },
+    "T020": {
+      "status": "DONE",
+      "did": "Confirmed the survival tests pass with no further production change",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/WaitlistViewViewModelScrapChangeTests.cs"
+      ]
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "Built the solution clean and ran the suite: 2600 passed, 5 failed, all in the pre-existing RunHistoryStore date-rot tests",
+      "files": [
+        "MTM_Waitlist.sln"
+      ]
+    },
+    "T022": {
+      "status": "DONE",
+      "did": "Confirmed no Temp artefact exists and the boundary audit passes",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/TempArtefactBoundaryAuditTests.cs"
+      ]
+    }
+  },
+  "concerns": [
+    {
+      "note": "Five tests in MTM_Waitlist.Tests/Module_Mock_Service/RunHistoryStoreTests fail before and after this change: they hardcode a 2026-09-12 cycle instant while RunHistoryStore prunes records older than HistoryRetentionDays (60 days) against the real clock, so those records are deleted as they are written. They crossed the boundary on 2026-11-11. Not caused by this feature and not fixed here.",
+      "step": "implement"
+    },
+    {
+      "note": "Resolved after the run: RunHistoryStoreTests now derives every instant from a per-test clock and always hands that clock to the store. The earlier five failures were hardcoded 2026-09-12 records pruned by a 60-day retention window measured against the real clock.",
+      "step": "implement"
+    },
+    {
+      "note": "Owner direction on 2026-11-13 added FR-015 to FR-018 after this spec shipped. They are implemented and tested, and recorded here rather than as tasks.md boxes because the writer refuses to append tasks to a shipped spec.",
+      "step": "implement"
+    },
+    {
+      "note": "The same duplicate collision can affect a generic PART request (chunk 017), whose stored detail is also empty because the part step answers through its own seam. Not changed here: doing so would alter 017's stored shape and card semantics without a verified need.",
+      "step": "implement"
+    }
+  ],
+  "last_action": "Rebuilt the generic request result as a duplicate of the work-order result page, with the same three outcomes and the same buttons.",
+  "risk": {
+    "tier": "high",
+    "computed": "high",
+    "reasons": [
+      "42 files changed"
+    ]
+  }
 }

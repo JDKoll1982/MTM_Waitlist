@@ -107,4 +107,11 @@ public sealed class GenericRequestDraft
 
     /// <summary>When the raise attempt was made, in UTC, so the result step can show it beside a retry.</summary>
     public DateTimeOffset? ResultAttemptedAtUtc { get; set; }
+
+    /// <summary>
+    /// Whether the last raise attempt was refused because the queue already holds an active request for the same
+    /// thing. It is what tells the result step's duplicate outcome from a write that failed, and only the attempt
+    /// that just ran can set it.
+    /// </summary>
+    public bool ResultWasDuplicate { get; set; }
 }

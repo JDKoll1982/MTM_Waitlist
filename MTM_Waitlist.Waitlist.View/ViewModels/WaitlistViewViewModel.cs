@@ -42,6 +42,19 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     /// </summary>
     private readonly IWorkCenterCatalogService? _workCenterCatalogService;
 
+    private readonly ILuggerArrangementService? _luggerArrangementService;
+
+    /// <summary>
+    /// The arrangement as it stood when this load's read was made, or null before one has arrived.
+    /// </summary>
+    /// <remarks>
+    /// Read once per load rather than once per row, because it is one fact about the plant and a list of sixty rows
+    /// would otherwise pay for sixty reads of it. A generic scrap request has no job, so this is where its lugger
+    /// comes from: the same <see cref="LuggerArrangementSnapshot.Resolve"/> the work-order card's lugger came from,
+    /// which is what keeps the two cards from ever naming different luggers for one type (FR-007).
+    /// </remarks>
+    private LuggerArrangementSnapshot? _luggerArrangementSnapshot;
+
     /// <summary>
     /// The Local Work Centers (hot work centers) assigned to this computer, read on each cold load. Empty until the
     /// first read completes, and empty on a host whose machine configuration assigns none.
@@ -188,7 +201,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         IPartPictureResolver? partPictureResolver = null,
         IRequestItemConfigurationService? itemConfigurationService = null,
         MTM_Waitlist.Module_Waitlist.Services.ILuggerChangeNoticeService? luggerChangeNoticeService = null,
-        IWorkCenterCatalogService? workCenterCatalogService = null)
+        IWorkCenterCatalogService? workCenterCatalogService = null,
+        ILuggerArrangementService? luggerArrangementService = null)
     {
         ArgumentNullException.ThrowIfNull(navigationService);
         ArgumentNullException.ThrowIfNull(buildingSelectionService);
@@ -211,6 +225,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         _itemConfigurationService = itemConfigurationService;
         _luggerChangeNoticeService = luggerChangeNoticeService;
         _workCenterCatalogService = workCenterCatalogService;
+        _luggerArrangementService = luggerArrangementService;
 
         // This screen's own internal-store unavailable state (FR-021): the waitlist list reads
         // mtm_waitlist live, so a failure is reported here, with a retry that re-runs this screen's load.
@@ -978,6 +993,10 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             _jobAvailabilityCache.Clear();
             _resolvedPictureCache.Clear();
 
+            // One read of the arrangement for the whole list: it is one fact about the plant, and it is what a
+            // generic scrap card resolves its lugger from (FR-006, FR-007).
+            _luggerArrangementSnapshot = await ReadLuggerArrangementAsync().ConfigureAwait(false);
+
             // Its own read, and only while the filter is on: a list that is not narrowing to this computer's work
             // centers has no use for the assignment, and every live read this screen pays for is felt on a card.
             if (ShowLocalWorkCentersOnly)
@@ -991,7 +1010,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         foreach (var request in activeRequests)
         {
             var jobAvailability = await ResolveJobAvailabilityAsync(request.WorkCenter).ConfigureAwait(false);
-            var sessionOrder = CreateSessionOrder(request, jobAvailability, itemDeclarations?.Get(request.Item));
+            var sessionOrder = CreateSessionOrder(request, jobAvailability, itemDeclarations?.Get(request.Item), _luggerArrangementSnapshot);
             sessionOrder.Urgency = await ResolveUrgencyAsync(request, now).ConfigureAwait(false);
             await ApplyResolvedImagesAsync(sessionOrder, request, workCenterImageLookup).ConfigureAwait(false);
             newItems.Add(sessionOrder);
@@ -1158,7 +1177,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     public static SampleOrder CreateSessionOrder(
         WaitlistRequest request,
         RequestJobPartAvailability? jobAvailability = null,
-        RequestItemConfiguration? declaration = null)
+        RequestItemConfiguration? declaration = null,
+        LuggerArrangementSnapshot? arrangement = null)
     {
         // The request's identity is its Item code. Everything the card shows about *what* was asked for —
         // both lines, the picture, the detail slots — resolves from that one code through the Item catalog,
@@ -1192,7 +1212,10 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         // lugger is what its card is about, and its picture is what the card's left spot draws. It is carried here
         // for the same reason the hopper size is: the lugger's picture is filed under the lugger's place in the
         // arrangement, which only the availability snapshot in hand can name (owner decision, 2026-10-26).
-        var luggerImagePath = WaitlistCardCellRules.IsScrapItem(request.Item)
+        // A generic request has no job, so the snapshot's lugger belongs to the job's scrap type and never to the
+        // type the requester stated: its card draws the shared placeholder rather than another job's artwork
+        // (FR-006, FR-010).
+        var luggerImagePath = WaitlistCardCellRules.IsScrapItem(request.Item) && !request.IsGeneric
             ? jobAvailability?.LuggerLocationImagePath ?? string.Empty
             : string.Empty;
 
@@ -1264,7 +1287,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
         // The card's own cells are the fields the Item declares, resolved here where the request and the
         // requesting job are both in hand (FR-025, FR-026, §7).
-        AddDeclaredCells(item, request, jobAvailability, declaration);
+        AddDeclaredCells(item, request, jobAvailability, declaration, arrangement);
 
         // A generic request's part answer is stored under its own names rather than under a declared field, so the
         // declaration above cannot resolve it. Its three facts are added here, which is what puts a generic card's
@@ -1322,6 +1345,35 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             : "Waitlist_Card_System_InforVisual.Text".GetLocalized();
 
     /// <summary>
+    /// Reads the lugger arrangement once per load, or answers nothing when there is no reader or the read failed.
+    /// </summary>
+    /// <remarks>
+    /// A failed read answers nothing rather than failing the list: the cards that need it then report their lugger as
+    /// unavailable, which is the truthful thing to say, while every other card on the board is unaffected (FR-010).
+    /// </remarks>
+    private async Task<LuggerArrangementSnapshot?> ReadLuggerArrangementAsync()
+    {
+        if (_luggerArrangementService is null)
+        {
+            return null;
+        }
+
+        try
+        {
+            return await _luggerArrangementService.GetSnapshotAsync().ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error("Waitlist", ex, "The lugger arrangement could not be read, so no card on this load names a lugger.");
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Reads every Item's declaration once for a load, so a list of N rows costs one read rather than N, and
     /// reports the Items whose declaration cannot be read: their cards draw no cells at all and the gap is
     /// recorded, rather than a cell being invented or a reason being drawn on the card (FR-058, FR-101, D41).
@@ -1375,9 +1427,10 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
         SampleOrder item,
         WaitlistRequest request,
         RequestJobPartAvailability? jobAvailability,
-        RequestItemConfiguration? declaration)
+        RequestItemConfiguration? declaration,
+        LuggerArrangementSnapshot? arrangement)
     {
-        foreach (var cell in ResolveDeclaredCells(declaration, request, jobAvailability))
+        foreach (var cell in ResolveDeclaredCells(declaration, request, jobAvailability, arrangement))
         {
             item.Cells.Add(cell);
         }
@@ -1409,7 +1462,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     public static IReadOnlyList<WaitlistLineCardCell> ResolveDeclaredCells(
         RequestItemConfiguration? declaration,
         WaitlistRequest request,
-        RequestJobPartAvailability? jobAvailability)
+        RequestJobPartAvailability? jobAvailability,
+        LuggerArrangementSnapshot? arrangement = null)
     {
         ArgumentNullException.ThrowIfNull(request);
 
@@ -1426,7 +1480,7 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
                 continue;
             }
 
-            candidates.Add(ResolveDeclaredCell(field, request, jobAvailability));
+            candidates.Add(ResolveDeclaredCell(field, request, jobAvailability, arrangement));
         }
 
         return WaitlistCardCellRules.OrderForPanel(request.Item, WaitlistLineCardCell.CellsToDraw(candidates));
@@ -1440,7 +1494,8 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     private static WaitlistLineCardCell ResolveDeclaredCell(
         RequestItemFieldDefinition? field,
         WaitlistRequest request,
-        RequestJobPartAvailability? jobAvailability)
+        RequestJobPartAvailability? jobAvailability,
+        LuggerArrangementSnapshot? arrangement)
     {
         if (field is null)
         {
@@ -1496,16 +1551,24 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
 
         if (string.Equals(source, RequestItemFieldDefinition.Sources.Job, StringComparison.OrdinalIgnoreCase))
         {
+            // A generic work center has no job, so a generic scrap request's two facts come from the request's own
+            // answer and from the arrangement read for this load, resolved by the same rule the work-order card's
+            // lugger came from (FR-006, FR-007). Every other job-sourced cell still reads the job.
+            var isGenericScrap = WaitlistCardCellRules.IsScrapItem(request.Item) && request.IsGeneric;
+
             // A label the requesting job does not carry is the designed absence, not a fault: a job with no die
             // draws no Die cell and nothing is logged for it (FR-057, RequestJobFieldValues). The label that
             // resolves is the declared one, and an answer captured under it outranks the job's own (FR-082).
-            var jobValue = RequestJobFieldValues.Resolve(label, jobAvailability, AnswersWithComponent(request));
+            var jobValue = isGenericScrap
+                ? ResolveStatedScrapCell(label, request, arrangement)
+                : RequestJobFieldValues.Resolve(label, jobAvailability, AnswersWithComponent(request));
 
             // The scrap Item's lugger cell is pictured with the lugger's own artwork, beside the name the card
             // already spells out — the same shape the hopper card's size cell has. The picture is resolved where
             // the arrangement is in hand, so this cell carries it rather than looking one up (owner decision,
             // 2026-10-26). A lugger with no picture draws the application's one shared placeholder, exactly as a
             // size with no picture does, because a cell that names a lugger and shows nothing reads as broken.
+            // A generic request's lugger picture is not the job's, so none of the job's artwork is borrowed for it.
             var isLuggerLocation = WaitlistCardCellRules.IsLuggerLocationField(label);
 
             return new WaitlistLineCardCell
@@ -1514,7 +1577,9 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
                 Value = jobValue ?? string.Empty,
                 Order = field.Order,
                 DrawsPicture = isLuggerLocation && !string.IsNullOrWhiteSpace(jobValue),
-                ResolvedReferenceImagePath = isLuggerLocation ? jobAvailability?.LuggerLocationImagePath ?? string.Empty : string.Empty,
+                ResolvedReferenceImagePath = isLuggerLocation && !isGenericScrap
+                    ? jobAvailability?.LuggerLocationImagePath ?? string.Empty
+                    : string.Empty,
             };
         }
 
@@ -1535,6 +1600,63 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             $"its declared source '{source}' is not one this build can read");
 
         return new WaitlistLineCardCell { Label = label, Order = field.Order };
+    }
+
+    /// <summary>
+    /// The value a generic scrap request's card names for one of its two cells: the type the requester stated, or
+    /// the lugger the arrangement assigns to that type right now (FR-006, FR-008, FR-009, FR-010).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A generic work center has no job, so neither fact can be read from one. The type is the wording the requester
+    /// chose, kept on the request; the lugger is resolved live through the same rule set the work-order card uses,
+    /// so the two cards cannot name different luggers for one type (FR-007, FR-011, FR-012).
+    /// </para>
+    /// <para>
+    /// An empty arrangement is what a failed read looks like at this seam, and it means the lugger is unknown rather
+    /// than absent, so the card says so instead of drawing nothing (FR-010). A type the arrangement knows but has no
+    /// lugger for is a configuration gap: the gap is recorded and no lugger is invented (FR-009).
+    /// </para>
+    /// </remarks>
+    /// <returns>The value to draw, or <see langword="null"/> when there is nothing true to say.</returns>
+    private static string? ResolveStatedScrapCell(
+        string label,
+        WaitlistRequest request,
+        LuggerArrangementSnapshot? arrangement)
+    {
+        var stated = GenericRequestScrapAnswer.TryRead(request.Answers);
+        if (stated is null)
+        {
+            return null;
+        }
+
+        if (WaitlistCardCellRules.IsScrapTypeField(label))
+        {
+            return stated.ScrapType;
+        }
+
+        if (arrangement is null || arrangement.Rows.Count == 0)
+        {
+            return "Waitlist_Card_LuggerUnavailable.Text".GetLocalized();
+        }
+
+        var resolution = arrangement.Resolve(stated.ScrapType);
+
+        // The all-blocked case resolves to a lugger whose name carries its status, which is the true answer to
+        // "where does this material go" and is drawn as it stands (FR-008).
+        if (resolution.LuggerLocation is { } lugger)
+        {
+            return lugger;
+        }
+
+        if (resolution.IsConfigurationGap)
+        {
+            AppLog.Warn(
+                "Waitlist",
+                $"The scrap type '{stated.ScrapType}' stated on request {request.Id:D} has no lugger assigned, so its `Lugger Location` cell is left out. Assign the type to a lugger in the lugger arrangement so handlers know where to walk.");
+        }
+
+        return null;
     }
 
     /// <summary>

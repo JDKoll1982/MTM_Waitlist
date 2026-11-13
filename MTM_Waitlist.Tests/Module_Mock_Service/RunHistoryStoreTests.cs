@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -11,20 +12,50 @@ namespace MTM_Waitlist.Tests.Module_Mock_Service;
 /// Verifies the service's append-only run history — the file SC-007 and SC-008 are measured against (T230).
 /// </summary>
 /// <remarks>
+/// <para>
 /// The assertions that matter most are the ones about the file's <b>shape</b>, not about the store's API. The
 /// history exists to be read by <c>scripts/service/measure-reliability-window.ps1</c>, in another language that cannot
 /// reference these types, so a renamed property or a reworded outcome silently turns a measured criterion back
 /// into an unmeasured one. These tests pin the contract.
+/// </para>
+/// <para>
+/// <b>No instant in this class is a literal.</b> The store drops anything older than
+/// <see cref="RunHistoryStore.RetentionDays"/> against the clock it is handed, so a test that wrote a fixed
+/// calendar date would pass only until that date fell out of the window, then fail with an empty file. Every
+/// instant here is derived from <see cref="_nowUtc"/>, which is this test's own clock <i>and</i> the clock the
+/// store is built with, so what a test writes is always inside the window by construction.
+/// </para>
 /// </remarks>
 [TestClass]
 public sealed class RunHistoryStoreTests
 {
+    /// <summary>The credential-shaped text the redaction test plants, so no real secret is ever in a test.</summary>
+    private const string SecretPlaceholder = "placeholder-not-a-secret";
+
+    /// <summary>The plant host the shared connection string names, the other half of the planted leak.</summary>
+    private const string PlantHost = "172.16.1.104";
+
     private string _root = string.Empty;
+
+    /// <summary>This test's clock, and the clock its store is built with.</summary>
+    private DateTime _nowUtc;
+
+    /// <summary>The cycle instant a refresh is recorded against: inside the window, never a literal.</summary>
+    private DateTime _cycleUtc;
+
+    /// <summary>The window instant a backup is recorded against: inside the window, never a literal.</summary>
+    private DateTime _windowUtc;
 
     [TestInitialize]
     public void Initialize()
     {
         _root = Path.Combine(Path.GetTempPath(), "mtm-run-history-tests", Guid.NewGuid().ToString("N"));
+
+        // Whole seconds, because the file round-trips through ISO 8601 and every assertion here compares an
+        // instant against what was read back.
+        _nowUtc = TruncateToSecond(DateTime.UtcNow);
+        _cycleUtc = _nowUtc.AddHours(-1);
+        _windowUtc = _nowUtc.AddHours(-2);
     }
 
     [TestCleanup]
@@ -48,14 +79,14 @@ public sealed class RunHistoryStoreTests
     {
         var store = CreateStore();
 
-        await store.AppendRefreshAsync(SucceededRefresh("work_order_lookup", new DateTime(2026, 9, 12, 0, 0, 0, DateTimeKind.Utc), rows: 701));
+        await store.AppendRefreshAsync(SucceededRefresh("work_order_lookup", _cycleUtc, rows: 701));
 
         var line = (await ReadLinesAsync(store)).Single();
         using var document = JsonDocument.Parse(line);
         var root = document.RootElement;
 
         Assert.AreEqual("refresh", root.GetProperty("record").GetString());
-        Assert.AreEqual("2026-09-12T00:00:00Z", root.GetProperty("cycleUtc").GetString());
+        Assert.AreEqual(Written(_cycleUtc), root.GetProperty("cycleUtc").GetString());
         Assert.AreEqual("work_order_lookup", root.GetProperty("shape").GetString());
         Assert.AreEqual("Succeeded", root.GetProperty("outcome").GetString());
         Assert.AreEqual(701, root.GetProperty("rows").GetInt32());
@@ -67,7 +98,7 @@ public sealed class RunHistoryStoreTests
     {
         var store = CreateStore();
 
-        await store.AppendRefreshAsync(SucceededRefresh("operation_sequences", DateTime.UtcNow));
+        await store.AppendRefreshAsync(SucceededRefresh("operation_sequences", _cycleUtc));
 
         using var document = JsonDocument.Parse((await ReadLinesAsync(store)).Single());
         var root = document.RootElement;
@@ -91,7 +122,7 @@ public sealed class RunHistoryStoreTests
         string? expectedReason)
     {
         var store = CreateStore();
-        var record = SucceededRefresh("subordinate_parts", DateTime.UtcNow) with { Outcome = outcome };
+        var record = SucceededRefresh("subordinate_parts", _cycleUtc) with { Outcome = outcome };
 
         await store.AppendRefreshAsync(record);
 
@@ -105,9 +136,9 @@ public sealed class RunHistoryStoreTests
     {
         var store = CreateStore();
 
-        await store.AppendRefreshAsync(SucceededRefresh("inventory_locations", DateTime.UtcNow, rows: 42));
+        await store.AppendRefreshAsync(SucceededRefresh("inventory_locations", _cycleUtc, rows: 42));
         await store.AppendRefreshAsync(
-            SucceededRefresh("inventory_locations", DateTime.UtcNow) with
+            SucceededRefresh("inventory_locations", _cycleUtc) with
             {
                 Outcome = RefreshRunOutcome.FailedLoad,
                 RowCount = 42
@@ -122,17 +153,16 @@ public sealed class RunHistoryStoreTests
     public async Task Service_RunHistoryStoreTests_AppendRefreshAsync_GivesEveryShapeOfOneCycleTheSameCycleInstant()
     {
         var store = CreateStore();
-        var cycle = new DateTime(2026, 9, 12, 3, 0, 0, DateTimeKind.Utc);
 
         foreach (var shape in new[] { "work_order_lookup", "operation_sequences", "subordinate_parts" })
         {
-            await store.AppendRefreshAsync(SucceededRefresh(shape, cycle));
+            await store.AppendRefreshAsync(SucceededRefresh(shape, _cycleUtc));
         }
 
         var entries = await store.ReadAsync();
         Assert.AreEqual(3, entries.Count);
         Assert.AreEqual(1, entries.Select(e => e.CycleUtc).Distinct().Count(), "one cycle must group as one cycle");
-        Assert.AreEqual(cycle, entries[0].CycleUtc);
+        Assert.AreEqual(_cycleUtc, entries[0].CycleUtc);
     }
 
     [TestMethod]
@@ -140,9 +170,9 @@ public sealed class RunHistoryStoreTests
     {
         var store = CreateStore();
 
-        await store.AppendRefreshAsync(SucceededRefresh("disposition_input", DateTime.UtcNow));
+        await store.AppendRefreshAsync(SucceededRefresh("disposition_input", _cycleUtc));
         await store.AppendRefreshAsync(
-            SucceededRefresh("disposition_input", DateTime.UtcNow) with { Trigger = RefreshRunTrigger.OnDemand });
+            SucceededRefresh("disposition_input", _cycleUtc) with { Trigger = RefreshRunTrigger.OnDemand });
 
         var entries = await store.ReadAsync();
         Assert.AreEqual(RunHistoryStore.ScheduledTrigger, entries[0].Trigger);
@@ -156,7 +186,7 @@ public sealed class RunHistoryStoreTests
 
         for (var i = 0; i < 3; i++)
         {
-            await store.AppendRefreshAsync(SucceededRefresh("work_order_lookup", DateTime.UtcNow, rows: i));
+            await store.AppendRefreshAsync(SucceededRefresh("work_order_lookup", _cycleUtc, rows: i));
         }
 
         Assert.AreEqual(3, (await ReadLinesAsync(store)).Count);
@@ -166,7 +196,7 @@ public sealed class RunHistoryStoreTests
     public async Task Service_RunHistoryStoreTests_AppendRefreshAsync_WhenTheInstantIsLocalWritesTheUtcDesignator()
     {
         var store = CreateStore();
-        var local = new DateTime(2026, 9, 12, 5, 0, 0, DateTimeKind.Local);
+        var local = _cycleUtc.ToLocalTime();
 
         await store.AppendRefreshAsync(SucceededRefresh("work_order_lookup", local));
 
@@ -183,7 +213,7 @@ public sealed class RunHistoryStoreTests
     public async Task Service_RunHistoryStoreTests_AppendRefreshAsync_WhenTheInstantCarriesNoKindTreatsItAsUtc()
     {
         var store = CreateStore();
-        var unspecified = new DateTime(2026, 9, 12, 5, 0, 0, DateTimeKind.Unspecified);
+        var unspecified = DateTime.SpecifyKind(_cycleUtc, DateTimeKind.Unspecified);
 
         await store.AppendRefreshAsync(SucceededRefresh("work_order_lookup", unspecified));
 
@@ -195,31 +225,33 @@ public sealed class RunHistoryStoreTests
     public async Task Service_RunHistoryStoreTests_AppendRefreshAsync_RedactsCredentialShapedTextFromTheDetail()
     {
         var store = CreateStore();
-        var record = SucceededRefresh("work_order_lookup", DateTime.UtcNow) with
+        var record = SucceededRefresh("work_order_lookup", _cycleUtc) with
         {
             Outcome = RefreshRunOutcome.FailedLoad,
-            ErrorMessage = "connect failed: Password=hunter2;Server=172.16.1.104"
+            ErrorMessage = $"connect failed: Password={SecretPlaceholder};Server={PlantHost}"
         };
 
         await store.AppendRefreshAsync(record);
 
         var line = (await ReadLinesAsync(store)).Single();
-        Assert.IsFalse(line.Contains("hunter2", StringComparison.Ordinal), $"a credential must never reach the history: {line}");
+        Assert.IsFalse(
+            line.Contains(SecretPlaceholder, StringComparison.Ordinal),
+            $"a credential must never reach the history: {line}");
     }
 
     [TestMethod]
     public async Task Service_RunHistoryStoreTests_AppendBackupAsync_WritesTheArtifactOfASuccessfulRun()
     {
         var store = CreateStore();
-        var window = new DateTime(2026, 9, 12, 2, 0, 0, DateTimeKind.Utc);
+        var artifactPath = ArtifactPathFor("mtm_waitlist", _windowUtc);
 
         await store.AppendBackupAsync(
-            SucceededBackup(BackupStore.MtmWaitlist, window),
+            SucceededBackup(BackupStore.MtmWaitlist, _windowUtc),
             new BackupArtifact
             {
                 Store = BackupStore.MtmWaitlist,
-                CreatedUtc = window,
-                FilePath = @"C:\Backups\mtm_waitlist\20260912.sql",
+                CreatedUtc = _windowUtc,
+                FilePath = artifactPath,
                 SizeBytes = 184320
             });
 
@@ -228,10 +260,10 @@ public sealed class RunHistoryStoreTests
         var root = document.RootElement;
 
         Assert.AreEqual("backup", root.GetProperty("record").GetString());
-        Assert.AreEqual("2026-09-12T02:00:00Z", root.GetProperty("windowUtc").GetString());
+        Assert.AreEqual(Written(_windowUtc), root.GetProperty("windowUtc").GetString());
         Assert.AreEqual("mtm_waitlist", root.GetProperty("store").GetString());
         Assert.AreEqual("Succeeded", root.GetProperty("outcome").GetString());
-        Assert.AreEqual(@"C:\Backups\mtm_waitlist\20260912.sql", root.GetProperty("artifactPath").GetString());
+        Assert.AreEqual(artifactPath, root.GetProperty("artifactPath").GetString());
         Assert.AreEqual(184320, root.GetProperty("artifactBytes").GetInt64());
     }
 
@@ -239,13 +271,14 @@ public sealed class RunHistoryStoreTests
     public async Task Service_RunHistoryStoreTests_AppendBackupAsync_WhenTheArtifactObjectIsAbsentFallsBackToTheRecordsOwnPath()
     {
         var store = CreateStore();
+        var recordedPath = ArtifactPathFor("mtm_mock", _windowUtc);
 
         await store.AppendBackupAsync(
-            SucceededBackup(BackupStore.MtmMock, DateTime.UtcNow) with { ArtifactPath = @"C:\Backups\mtm_mock\20260912.sql" },
+            SucceededBackup(BackupStore.MtmMock, _windowUtc) with { ArtifactPath = recordedPath },
             artifact: null);
 
         var entry = (await store.ReadAsync()).Single();
-        Assert.AreEqual(@"C:\Backups\mtm_mock\20260912.sql", entry.ArtifactPath);
+        Assert.AreEqual(recordedPath, entry.ArtifactPath);
         Assert.IsNull(entry.ArtifactBytes, "no artifact means no size to claim");
     }
 
@@ -262,7 +295,7 @@ public sealed class RunHistoryStoreTests
         var store = CreateStore();
 
         await store.AppendBackupAsync(
-            SucceededBackup(BackupStore.MtmReceivingApplication, DateTime.UtcNow) with { Outcome = outcome },
+            SucceededBackup(BackupStore.MtmReceivingApplication, _windowUtc) with { Outcome = outcome },
             artifact: null);
 
         var entry = (await store.ReadAsync()).Single();
@@ -277,7 +310,7 @@ public sealed class RunHistoryStoreTests
 
         foreach (var target in Enum.GetValues<BackupStore>())
         {
-            await store.AppendBackupAsync(SucceededBackup(target, DateTime.UtcNow), artifact: null);
+            await store.AppendBackupAsync(SucceededBackup(target, _windowUtc), artifact: null);
         }
 
         var names = (await store.ReadAsync()).Select(e => e.Store).ToList();
@@ -291,9 +324,9 @@ public sealed class RunHistoryStoreTests
     {
         var store = CreateStore();
 
-        await store.AppendRefreshAsync(SucceededRefresh("work_order_lookup", DateTime.UtcNow, rows: 1));
-        await store.AppendBackupAsync(SucceededBackup(BackupStore.MtmMock, DateTime.UtcNow), artifact: null);
-        await store.AppendRefreshAsync(SucceededRefresh("operation_sequences", DateTime.UtcNow, rows: 2));
+        await store.AppendRefreshAsync(SucceededRefresh("work_order_lookup", _cycleUtc, rows: 1));
+        await store.AppendBackupAsync(SucceededBackup(BackupStore.MtmMock, _windowUtc), artifact: null);
+        await store.AppendRefreshAsync(SucceededRefresh("operation_sequences", _cycleUtc, rows: 2));
 
         var entries = await store.ReadAsync();
         Assert.AreEqual(3, entries.Count);
@@ -312,8 +345,8 @@ public sealed class RunHistoryStoreTests
     public async Task Service_RunHistoryStoreTests_ReadAsync_WhenOneLineIsCorruptKeepsTheRest()
     {
         var store = CreateStore();
-        await store.AppendRefreshAsync(SucceededRefresh("work_order_lookup", DateTime.UtcNow));
-        await store.AppendRefreshAsync(SucceededRefresh("operation_sequences", DateTime.UtcNow));
+        await store.AppendRefreshAsync(SucceededRefresh("work_order_lookup", _cycleUtc));
+        await store.AppendRefreshAsync(SucceededRefresh("operation_sequences", _cycleUtc));
 
         var lines = (await ReadLinesAsync(store)).ToList();
         lines.Insert(1, "{ this is not json");
@@ -326,11 +359,11 @@ public sealed class RunHistoryStoreTests
     [TestMethod]
     public async Task Service_RunHistoryStoreTests_AppendAsync_DropsEntriesOlderThanTheRetentionWindow()
     {
-        var now = new DateTime(2026, 9, 20, 6, 0, 0, DateTimeKind.Utc);
-        var store = CreateStore(now);
+        var store = CreateStore();
 
-        await store.AppendRefreshAsync(SucceededRefresh("work_order_lookup", now.AddDays(-(RunHistoryStore.RetentionDays + 1))));
-        await store.AppendRefreshAsync(SucceededRefresh("operation_sequences", now.AddDays(-1)));
+        await store.AppendRefreshAsync(
+            SucceededRefresh("work_order_lookup", _nowUtc.AddDays(-(RunHistoryStore.RetentionDays + 1))));
+        await store.AppendRefreshAsync(SucceededRefresh("operation_sequences", _nowUtc.AddDays(-1)));
 
         var entries = await store.ReadAsync();
         Assert.AreEqual(1, entries.Count, "the expired record is gone, the fresh one is not");
@@ -340,10 +373,10 @@ public sealed class RunHistoryStoreTests
     [TestMethod]
     public async Task Service_RunHistoryStoreTests_AppendAsync_WhenAnEntryIsExactlyAtTheCutoffKeepsIt()
     {
-        var now = new DateTime(2026, 9, 20, 6, 0, 0, DateTimeKind.Utc);
-        var store = CreateStore(now);
+        var store = CreateStore();
 
-        await store.AppendRefreshAsync(SucceededRefresh("work_order_lookup", now.AddDays(-RunHistoryStore.RetentionDays)));
+        await store.AppendRefreshAsync(
+            SucceededRefresh("work_order_lookup", _nowUtc.AddDays(-RunHistoryStore.RetentionDays)));
 
         Assert.AreEqual(
             1,
@@ -354,12 +387,13 @@ public sealed class RunHistoryStoreTests
     [TestMethod]
     public async Task Service_RunHistoryStoreTests_AppendAsync_WhenALineCannotBeDatedKeepsIt()
     {
-        var now = new DateTime(2026, 9, 20, 6, 0, 0, DateTimeKind.Utc);
-        var store = CreateStore(now);
+        var store = CreateStore();
         Directory.CreateDirectory(_root);
-        await File.WriteAllLinesAsync(store.FilePath, new[] { "{\"record\":\"refresh\",\"shape\":\"work_order_lookup\",\"outcome\":\"Succeeded\"}" });
+        await File.WriteAllLinesAsync(
+            store.FilePath,
+            new[] { "{\"record\":\"refresh\",\"shape\":\"work_order_lookup\",\"outcome\":\"Succeeded\"}" });
 
-        await store.AppendRefreshAsync(SucceededRefresh("operation_sequences", now.AddDays(-1)));
+        await store.AppendRefreshAsync(SucceededRefresh("operation_sequences", _nowUtc.AddDays(-1)));
 
         Assert.AreEqual(
             2,
@@ -395,11 +429,27 @@ public sealed class RunHistoryStoreTests
             "a log that expires before the measured period cannot explain a failure inside it");
     }
 
-    private RunHistoryStore CreateStore(DateTime? nowUtc = null) =>
-        new(_root, NullLogger<RunHistoryStore>.Instance, nowUtc is null ? null : new FixedTimeProvider(nowUtc.Value));
+    /// <summary>
+    /// The store under test, always on this test's own clock. Nothing here falls back to the system clock: a store
+    /// reading the real clock while the test writes an instant of its own is exactly how a record gets pruned as it
+    /// is written.
+    /// </summary>
+    private RunHistoryStore CreateStore() =>
+        new(_root, NullLogger<RunHistoryStore>.Instance, new FixedTimeProvider(_nowUtc));
 
     private static async Task<IReadOnlyList<string>> ReadLinesAsync(RunHistoryStore store) =>
         await File.ReadAllLinesAsync(store.FilePath);
+
+    /// <summary>The instant as the file spells it, so no assertion restates a date.</summary>
+    private static string Written(DateTime utc) =>
+        utc.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", CultureInfo.InvariantCulture);
+
+    /// <summary>The artifact path a backup of that window produces, named the way the backup engine names it.</summary>
+    private static string ArtifactPathFor(string database, DateTime windowUtc) =>
+        $@"C:\Backups\{database}\{windowUtc.ToString("yyyyMMdd", CultureInfo.InvariantCulture)}.sql";
+
+    private static DateTime TruncateToSecond(DateTime value) =>
+        new(value.Ticks - (value.Ticks % TimeSpan.TicksPerSecond), DateTimeKind.Utc);
 
     private static RefreshRunRecord SucceededRefresh(string shapeKey, DateTime cycleUtc, int rows = 0) => new()
     {

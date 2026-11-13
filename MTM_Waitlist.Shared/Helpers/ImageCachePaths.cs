@@ -382,16 +382,50 @@ public static class ImageCachePaths
             return false;
         }
 
-        var cached = new FileInfo(cachePath);
-        if (cached.Exists is false)
+        // The copy is looked for first, and deliberately: with nothing cached the answer is "copy", whatever the
+        // share says. A caller that then finds the original gone fails its own copy and reports that it copied
+        // nothing, which is how a part drawn from a picture that has been removed ends at the placeholder rather
+        // than at a cached path that holds no file (FR-044).
+        if (new FileInfo(cachePath).Exists is false)
         {
             return true;
         }
 
         var shared = new FileInfo(sharedPath);
-        if (shared.Exists is false)
+        return shared.Exists && ShouldCopyToCache(shared, cachePath);
+    }
+
+    /// <summary>
+    /// Whether a picture has to be copied into the cache again, given the entry the share's own listing already
+    /// produced.
+    /// </summary>
+    /// <param name="shared">The picture on the share, as the directory listing returned it.</param>
+    /// <param name="cachePath">Where its cached copy is, or would be.</param>
+    /// <returns>
+    /// <see langword="true"/> when there is no cached copy, or when the copy's size or last-written time differs
+    /// from the share's.
+    /// </returns>
+    /// <remarks>
+    /// <b>Why this overload exists.</b> The comparison needs the share's size and last-written time, and asking a
+    /// <see cref="FileInfo"/> built from a path pays a separate request to the server for each picture. An entry the
+    /// directory listing already returned carries both figures with it, so a run over a share of a few hundred
+    /// pictures costs one listing per folder instead of one extra round trip per file. On a fast network the
+    /// difference is invisible; over a slow link it is the difference between a refresh that finishes and one that
+    /// looks hung on the splash screen.
+    /// </remarks>
+    public static bool ShouldCopyToCache(FileInfo shared, string? cachePath)
+    {
+        ArgumentNullException.ThrowIfNull(shared);
+
+        if (string.IsNullOrWhiteSpace(cachePath))
         {
             return false;
+        }
+
+        var cached = new FileInfo(cachePath);
+        if (cached.Exists is false)
+        {
+            return true;
         }
 
         return shared.Length != cached.Length || shared.LastWriteTimeUtc != cached.LastWriteTimeUtc;
