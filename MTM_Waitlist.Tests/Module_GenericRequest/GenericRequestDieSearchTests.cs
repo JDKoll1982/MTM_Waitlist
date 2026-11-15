@@ -98,7 +98,7 @@ public sealed class GenericRequestDieSearchTests
         params Dictionary<string, object?>[] rows)
     {
         var executor = new FakeVisualQueryExecutor(VisualQueryOutcome.Ok(rows));
-        var data = new StubDieStepData(new GenericRequestDieData(executor));
+        var data = new StubDieStepData(GenericRequestReadShapes.DieData(executor));
         var navigator = new StubGenericRequestNavigator();
         navigator.Draft.RequiresDie = true;
 

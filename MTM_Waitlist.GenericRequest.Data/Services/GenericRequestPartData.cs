@@ -12,63 +12,64 @@ namespace MTM_Waitlist.GenericRequest.Data.Services;
 
 /// <inheritdoc cref="IGenericRequestPartData" />
 /// <summary>
-/// The live part answer: a typed term completed from Infor Visual and the WIP floor, the sequences those systems
-/// can attribute to the accepted part, and the quantity owned by the chosen sequence's operation state.
+/// The part answer: a typed term completed from Infor Visual and the WIP floor, the sequences those systems can
+/// attribute to the accepted part, and the quantity owned by the chosen sequence's operation state.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Every read is live twice over. Infor Visual is asked through the same executor every other plant read uses and
-/// the WIP floor through the same floor service, and neither path consults the <c>mtm_mock</c> mirror: FR-017
-/// forbids substituting a cached sequence list or quantity, so no shape exists for these values and none may be
-/// added.
+/// <b>Every Infor Visual read travels a read shape, exactly as the work-order flow's do.</b> The completion list,
+/// the sequence list, the operation state and the part-wide quantity are shapes 9, 10, 11 and 7, so each one is
+/// answered by the live plant system while it answers and from the <c>mtm_mock</c> mirror while it does not
+/// (FR-002/FR-004). That is what makes the generic request usable on a workstation off the plant network, and
+/// what the die request alongside it does too.
 /// </para>
 /// <para>
-/// A source that could not be asked makes the read <see cref="GenericRequestPresentation.Unavailable"/> even when
-/// the other source answered, because a part list missing everything one system knows would let the requester
-/// accept a number that is not the one they meant. "Neither system knows this number" is only sayable once both
-/// have answered (FR-002).
+/// <b>The floor is live, always.</b> <c>WipFloorInventoryService</c> reads an internal store, and internal stores
+/// are never served from the mirror (FR-027). A source that could not be asked still makes the read
+/// <see cref="GenericRequestPresentation.Unavailable"/> even when the other answered, because a part list missing
+/// everything one system knows would let the requester accept a number that is not the one they meant. "Neither
+/// system knows this number" is only sayable once both have answered (FR-002).
+/// </para>
+/// <para>
+/// <b>A failed read is not a verdict about the part.</b> When a shape cannot be answered — the plant system
+/// failed rather than being unreachable, or there is no mirror to fall back to — the read reports unavailable
+/// rather than an empty list, so nothing claims a part has no sequences when the question was never answered.
 /// </para>
 /// </remarks>
 public sealed class GenericRequestPartData : IGenericRequestPartData
 {
     private const string LogCategory = "GenericRequestPart";
 
-    /// <summary>The checked-in Visual script that completes a typed term into part numbers.</summary>
-    public const string PartMatchesScript = "Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartMatches.sql";
-
-    /// <summary>The checked-in Visual script that lists a part's sequences from both relations.</summary>
-    public const string PartSequencesScript = "Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartSequences.sql";
-
-    /// <summary>The checked-in Visual script that re-reads one sequence's operation state.</summary>
-    public const string PartSequenceStateScript = "Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartSequenceState.sql";
-
-    /// <summary>The checked-in Visual script that answers a part's on-hand figure when Visual owns the quantity.</summary>
-    public const string PartWarehouseQuantitiesScript =
-        "Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartWarehouseQuantities.sql";
-
-    private readonly IVisualQueryExecutor _executor;
+    private readonly IVisualReadFallback<VisualPartMatchesRequest, VisualPartMatchesRow> _partMatches;
+    private readonly IVisualReadFallback<VisualPartSequencesRequest, VisualPartSequencesRow> _partSequences;
+    private readonly IVisualReadFallback<VisualPartSequenceStateRequest, VisualPartSequenceStateRow> _sequenceState;
+    private readonly IVisualReadFallback<VisualPartWarehouseQuantitiesRequest, VisualPartWarehouseQuantitiesRow> _quantities;
     private readonly WipFloorInventoryService _floor;
-    private readonly IVisualReachabilityDetector? _reachability;
 
-    /// <summary>Creates the live part answer.</summary>
-    /// <param name="executor">Runs the live Infor Visual reads.</param>
+    /// <summary>Creates the part answer.</summary>
+    /// <param name="partMatches">Shape 9: the parts a typed term matches.</param>
+    /// <param name="partSequences">Shape 10: every sequence the plant attributes to one part.</param>
+    /// <param name="sequenceState">Shape 11: one part's operation state at one sequence.</param>
+    /// <param name="quantities">Shape 7: the part's part-wide on-hand total.</param>
     /// <param name="floor">Runs the live WIP floor reads.</param>
-    /// <param name="reachability">
-    /// The reachability probe's settled verdict, or <see langword="null"/> on a host that runs no probe. When it says
-    /// Infor Visual is unreachable, a read answers unavailable at once instead of spending a connect attempt on
-    /// rediscovering that.
-    /// </param>
     public GenericRequestPartData(
-        IVisualQueryExecutor executor,
-        WipFloorInventoryService floor,
-        IVisualReachabilityDetector? reachability = null)
+        IVisualReadFallback<VisualPartMatchesRequest, VisualPartMatchesRow> partMatches,
+        IVisualReadFallback<VisualPartSequencesRequest, VisualPartSequencesRow> partSequences,
+        IVisualReadFallback<VisualPartSequenceStateRequest, VisualPartSequenceStateRow> sequenceState,
+        IVisualReadFallback<VisualPartWarehouseQuantitiesRequest, VisualPartWarehouseQuantitiesRow> quantities,
+        WipFloorInventoryService floor)
     {
-        ArgumentNullException.ThrowIfNull(executor);
+        ArgumentNullException.ThrowIfNull(partMatches);
+        ArgumentNullException.ThrowIfNull(partSequences);
+        ArgumentNullException.ThrowIfNull(sequenceState);
+        ArgumentNullException.ThrowIfNull(quantities);
         ArgumentNullException.ThrowIfNull(floor);
 
-        _executor = executor;
+        _partMatches = partMatches;
+        _partSequences = partSequences;
+        _sequenceState = sequenceState;
+        _quantities = quantities;
         _floor = floor;
-        _reachability = reachability;
     }
 
     /// <inheritdoc />
@@ -83,33 +84,34 @@ public sealed class GenericRequestPartData : IGenericRequestPartData
             return GenericRequestStepResult<GenericRequestPartOption>.Empty(attemptedAtUtc);
         }
 
-        var visual = await ReadVisualAsync(
-            PartMatchesScript,
-            new Dictionary<string, object?> { ["Term"] = normalized },
+        var visual = await TryReadAsync(
+            _partMatches,
+            new VisualPartMatchesRequest(normalized),
+            "the completions for '" + normalized + "'",
             cancellationToken).ConfigureAwait(false);
 
         var floor = await _floor.FindPartMatchesAsync(normalized, cancellationToken).ConfigureAwait(false);
 
-        if (visual.Status != VisualQueryStatus.Ok || !floor.Succeeded)
+        if (visual is null || !floor.Succeeded)
         {
             AppLog.Info(
                 LogCategory,
-                $"The completions for '{normalized}' reported unavailable: Visual {visual.Status}, floor "
-                + $"{(floor.Succeeded ? "answered" : "unavailable")}.");
+                $"The completions for '{normalized}' reported unavailable: Visual "
+                + $"{(visual is null ? "unavailable" : "answered")}, floor {(floor.Succeeded ? "answered" : "unavailable")}.");
             return GenericRequestStepResult<GenericRequestPartOption>.Unavailable(attemptedAtUtc);
         }
 
         var options = new List<GenericRequestPartOption>();
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var row in visual.Rows)
+        foreach (var row in visual)
         {
-            var partNumber = GetString(row, "PartNumber");
+            var partNumber = row.PartNumber;
             if (partNumber.Length > 0 && seen.Add(partNumber))
             {
                 options.Add(new GenericRequestPartOption(
                     partNumber,
-                    GetString(row, "Description"),
+                    row.Description,
                     SequenceSource.VisualOwnPart));
             }
         }
@@ -141,38 +143,39 @@ public sealed class GenericRequestPartData : IGenericRequestPartData
             return GenericRequestStepResult<GenericRequestSequenceOption>.Empty(attemptedAtUtc);
         }
 
-        var visual = await ReadVisualAsync(
-            PartSequencesScript,
-            new Dictionary<string, object?> { ["PartNumber"] = normalizedPart },
+        var visual = await TryReadAsync(
+            _partSequences,
+            new VisualPartSequencesRequest(normalizedPart),
+            "the sequences for '" + normalizedPart + "'",
             cancellationToken).ConfigureAwait(false);
 
         var floor = await _floor.GetPartOperationsAsync(normalizedPart, cancellationToken).ConfigureAwait(false);
 
-        if (visual.Status != VisualQueryStatus.Ok || !floor.Succeeded)
+        if (visual is null || !floor.Succeeded)
         {
             AppLog.Info(
                 LogCategory,
-                $"The sequences for '{normalizedPart}' reported unavailable: Visual {visual.Status}, floor "
-                + $"{(floor.Succeeded ? "answered" : "unavailable")}.");
+                $"The sequences for '{normalizedPart}' reported unavailable: Visual "
+                + $"{(visual is null ? "unavailable" : "answered")}, floor {(floor.Succeeded ? "answered" : "unavailable")}.");
             return GenericRequestStepResult<GenericRequestSequenceOption>.Unavailable(attemptedAtUtc);
         }
 
         var merged = new Dictionary<string, SequenceAccumulator>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var row in visual.Rows)
+        foreach (var row in visual)
         {
-            var sequence = NormalizeSequence(GetString(row, "Sequence"));
+            var sequence = NormalizeSequence(row.Sequence);
             if (sequence.Length == 0)
             {
                 continue;
             }
 
-            var cancelledOnly = GetFlag(row, "CancelledOnly");
-            var source = ReadSource(GetString(row, "SequenceSource"));
+            var cancelledOnly = row.CancelledOnly != 0;
+            var source = ReadSource(row.SequenceSource);
 
             var accumulator = Accumulator(merged, sequence);
-            accumulator.AddStatus(GetString(row, "OperationStatus"));
-            accumulator.AddNature(GetFlag(row, "IsLastOperation"), GetString(row, "NextResource"));
+            accumulator.AddStatus(row.OperationStatus);
+            accumulator.AddNature(row.IsLastOperation != 0, row.NextResource);
 
             if (cancelledOnly)
             {
@@ -183,7 +186,7 @@ public sealed class GenericRequestPartData : IGenericRequestPartData
             }
 
             accumulator.AddSource(source);
-            accumulator.AddDescription(GetString(row, "Description"));
+            accumulator.AddDescription(row.Description);
         }
 
         foreach (var sequence in floor.Rows)
@@ -227,28 +230,25 @@ public sealed class GenericRequestPartData : IGenericRequestPartData
             return GenericRequestQuantityReading.Unavailable(DateTimeOffset.UtcNow);
         }
 
-        var state = await ReadVisualAsync(
-            PartSequenceStateScript,
-            new Dictionary<string, object?>
-            {
-                ["PartNumber"] = normalizedPart,
-                ["Sequence"] = normalizedSequence,
-            },
+        var state = await TryReadAsync(
+            _sequenceState,
+            new VisualPartSequenceStateRequest(normalizedPart, normalizedSequence),
+            "the state of " + normalizedPart + "/" + normalizedSequence,
             cancellationToken).ConfigureAwait(false);
 
-        if (state.Status != VisualQueryStatus.Ok)
+        if (state is null)
         {
-            AppLog.Info(LogCategory, $"The state of {normalizedPart}/{normalizedSequence} was not readable: {state.Status}.");
+            AppLog.Info(LogCategory, $"The state of {normalizedPart}/{normalizedSequence} was not readable.");
             return GenericRequestQuantityReading.Unavailable(DateTimeOffset.UtcNow);
         }
 
-        var stateRow = state.Rows.FirstOrDefault();
-        var status = stateRow is null ? string.Empty : GetString(stateRow, "OperationStatus");
+        var stateRow = state.FirstOrDefault();
+        var status = stateRow?.OperationStatus ?? string.Empty;
 
         // The plant's own typing rule (IT, 2026-11-04): the last operation the work order still has to run
         // produces the finished good, and every other operation is work in progress. "Outside Service" is a
         // next-resource name a WIP tag prints, never a type of its own, so it decides nothing here.
-        var stage = stateRow is not null && GetFlag(stateRow, "IsLastOperation")
+        var stage = stateRow is not null && stateRow.IsLastOperation != 0
             ? GenericRequestPartStage.FinishedGood
             : GenericRequestPartStage.Wip;
 
@@ -314,69 +314,59 @@ public sealed class GenericRequestPartData : IGenericRequestPartData
         GenericRequestPartStage stage,
         CancellationToken cancellationToken)
     {
-        var quantities = await ReadVisualAsync(
-            PartWarehouseQuantitiesScript,
-            new Dictionary<string, object?> { ["PartNumber"] = partNumber },
+        var quantities = await TryReadAsync(
+            _quantities,
+            new VisualPartWarehouseQuantitiesRequest(partNumber),
+            "the Visual quantity for '" + partNumber + "'",
             cancellationToken).ConfigureAwait(false);
 
-        // The script answers one row of zeros for a part the plant knows and stocks nowhere, and no row at all for
-        // a part it does not know. Only the first is an answer; the second is reported as unread rather than as a
-        // confident zero.
-        if (quantities.Status != VisualQueryStatus.Ok || quantities.Rows.Count == 0)
+        // The shape answers one row for a part the plant knows, and no row at all for a part it does not know.
+        // Only the first is an answer; the second is reported as unread rather than as a confident zero.
+        if (quantities is null || quantities.Count == 0)
         {
             AppLog.Info(
                 LogCategory,
-                $"The Visual quantity for '{partNumber}' was not answered: {quantities.Status}, {quantities.Rows.Count} row(s).");
+                $"The Visual quantity for '{partNumber}' was not answered: {(quantities is null ? 0 : quantities.Count)} row(s).");
             return GenericRequestQuantityReading.Unavailable(DateTimeOffset.UtcNow);
         }
 
-        var figure = GetDecimal(quantities.Rows[0], "WarehouseQuantity");
-        return GenericRequestQuantityReading.OnHand(figure, SequenceSource.VisualOwnPart, stage, DateTimeOffset.UtcNow);
+        return GenericRequestQuantityReading.OnHand(
+            quantities[0].WarehouseQuantity,
+            SequenceSource.VisualOwnPart,
+            stage,
+            DateTimeOffset.UtcNow);
     }
 
     /// <summary>
-    /// Run one checked-in Visual script off the calling thread, so a plant-system connection never stalls the screen
-    /// that asked for it.
+    /// Runs one read shape, answering its rows or <see langword="null"/> when the shape could not be answered.
     /// </summary>
     /// <remarks>
-    /// <b>A settled "unreachable" verdict is honoured rather than re-established.</b> When the reachability probe
-    /// has already worked out that Infor Visual cannot be reached, a live attempt here could only rediscover that,
-    /// at the cost of a full connect attempt and the failure it logs — on every part read the requester asks for.
-    /// The read answers <see cref="VisualQueryStatus.Unreachable"/> at once instead, which is the same answer the
-    /// attempt would have produced, and the probe loop is what keeps asking and therefore what notices recovery.
-    /// The read path never decides unreachability from its own failure; it only honours a verdict the probe reached.
+    /// <b>The shape owns the live-then-cached decision, not this caller.</b> It attempts the plant system, serves
+    /// the mirror when the probe has settled on unreachability or the attempt finds the source unreachable, and
+    /// returns a successful live answer exactly as it stands — including an empty one. A shape that could not be
+    /// answered at all throws, and that is reported here as "not answered" rather than as an empty answer, so a
+    /// failed read never claims the part has nothing.
     /// </remarks>
-    private async Task<VisualQueryOutcome> ReadVisualAsync(
-        string scriptRelativePath,
-        IReadOnlyDictionary<string, object?> parameters,
+    private static async Task<IReadOnlyList<TRow>?> TryReadAsync<TRequest, TRow>(
+        IVisualReadFallback<TRequest, TRow> shape,
+        TRequest request,
+        string what,
         CancellationToken cancellationToken)
     {
-        if (_reachability?.Current == VisualReadStatus.Cached)
-        {
-            AppLog.Info(
-                LogCategory,
-                $"The read of '{scriptRelativePath}' answered unavailable without a live attempt: the reachability probe has settled on Infor Visual being unreachable.");
-
-            return VisualQueryOutcome.Unreachable(
-                "The reachability probe has settled on Infor Visual being unreachable.");
-        }
-
         try
         {
             return await Task
-                .Run(
-                    async () => await _executor.ExecuteAsync(scriptRelativePath, parameters, cancellationToken).ConfigureAwait(false),
-                    cancellationToken)
+                .Run(async () => await shape.ReadAsync(request, cancellationToken).ConfigureAwait(false), cancellationToken)
                 .ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
             throw;
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            AppLog.Error(LogCategory, ex, $"The live read of '{scriptRelativePath}' threw before answering.");
-            return VisualQueryOutcome.Failed(ex.Message);
+            AppLog.Error(LogCategory, exception, $"The read of {what} could not be answered.");
+            return null;
         }
     }
 
@@ -429,37 +419,6 @@ public sealed class GenericRequestPartData : IGenericRequestPartData
             ? leftNumber.CompareTo(rightNumber)
             : string.Compare(left, right, StringComparison.OrdinalIgnoreCase);
     });
-
-    private static string GetString(IReadOnlyDictionary<string, object?> row, string key) =>
-        row.TryGetValue(key, out var value) && value is not null
-            ? Convert.ToString(value, CultureInfo.InvariantCulture)?.Trim() ?? string.Empty
-            : string.Empty;
-
-    private static bool GetFlag(IReadOnlyDictionary<string, object?> row, string key) =>
-        row.TryGetValue(key, out var value) && value is not null && GetDecimal(row, key) != 0m;
-
-    private static decimal GetDecimal(IReadOnlyDictionary<string, object?> row, string key)
-    {
-        if (!row.TryGetValue(key, out var value) || value is null)
-        {
-            return 0m;
-        }
-
-        return value switch
-        {
-            decimal decimalValue => decimalValue,
-            double doubleValue => Convert.ToDecimal(doubleValue),
-            float floatValue => Convert.ToDecimal(floatValue),
-            int intValue => intValue,
-            long longValue => longValue,
-            bool boolValue => boolValue ? 1m : 0m,
-            _ => decimal.TryParse(
-                Convert.ToString(value, CultureInfo.InvariantCulture),
-                NumberStyles.Any,
-                CultureInfo.InvariantCulture,
-                out var parsed) ? parsed : 0m,
-        };
-    }
 
     /// <summary>One sequence number while the Visual and floor answers are still being merged.</summary>
     private sealed class SequenceAccumulator

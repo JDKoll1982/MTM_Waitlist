@@ -13,6 +13,99 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ============================================================
+-- Artifact: visual_die_search_result
+-- ============================================================
+
+-- ============================================================
+-- Object:      visual_die_search_result
+-- Database:    mtm_mock
+-- Engine:      MySQL 5.7
+-- Kind:        Table / create (mirror, shape 12 of 12)
+-- Created:     2026-11-15
+-- Feature:     001-module-mock-visual-fallback (read shape 12, playbook step 2)
+-- Shape key:   die_search
+-- Source read: Database/InforVisual/Queues/Module_Waitlist/Queries/GetDieSearch.sql
+-- Caller:      GenericRequestDieData.ReadDiesAsync
+-- ============================================================
+--
+-- Stores the flattened result of the generic die request's search, so a die request keeps answering while
+-- Infor Visual is unreachable (FR-002, FR-004).
+--
+-- One row per (term, die, association). The term is the shape's declared INPUT and is what a die can be
+-- found BY: a die's own number for a direct match, or a part's number for a die the plant ties to that
+-- part. Holding the association rows — rather than only the dies — is what lets a part number still find
+-- every die it owns offline, which is the association search 020 described as three relations.
+--
+-- ssociation is the precedence the live read ranks by: Die, then Explicit (PART_ALTERNATE), then
+-- History (the dies the part's work orders required). The read procedure derives the rank from that name
+-- and reports each die once, under its strongest association, so it can project exactly the live read's
+-- four columns.
+--
+-- A die's location is the part's PRIMARY location on PART_SITE, falling back to its stock rows, exactly as
+-- the live read answers it.
+--
+-- No baseline seed rows ship for this shape; an empty mirror before the service's first refresh answers
+-- "no die matches", which the die page already treats as a miss rather than a failure.
+-- ============================================================
+
+USE mtm_mock;
+
+SET NAMES utf8mb4;
+
+CREATE TABLE IF NOT EXISTS visual_die_search_result (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    term VARCHAR(190) NOT NULL,
+    die_number VARCHAR(64) NOT NULL,
+    description VARCHAR(255) NULL,
+    association VARCHAR(16) NOT NULL,
+    location VARCHAR(64) NULL,
+    refreshed_utc DATETIME NOT NULL,
+    is_seed_content TINYINT(1) NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_visual_die_search_result_key (term, die_number, association),
+    KEY idx_visual_die_search_result_die_number (die_number)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ============================================================
+-- Artifact: visual_die_search_result_stage
+-- ============================================================
+
+-- ============================================================
+-- Object:      visual_die_search_result_stage
+-- Database:    mtm_mock
+-- Engine:      MySQL 5.7
+-- Kind:        Table / create (stage twin of shape 12)
+-- Created:     2026-11-15
+-- Feature:     001-module-mock-visual-fallback (read shape 12, playbook step 2)
+-- ============================================================
+--
+-- Identical-structure staging twin. Written ONLY by sp_visual_die_search_refresh and never read by the
+-- application. The refresh procedure truncates it, loads the complete new result, then performs an atomic
+-- multi-table RENAME TABLE swap with the live mirror.
+--
+-- The index names are intentionally identical to the live mirror's so the swap does not change the
+-- live table's key names (the keys travel with the table). See data-model.md §3.6.
+-- ============================================================
+
+USE mtm_mock;
+
+SET NAMES utf8mb4;
+
+CREATE TABLE IF NOT EXISTS visual_die_search_result_stage (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    term VARCHAR(190) NOT NULL,
+    die_number VARCHAR(64) NOT NULL,
+    description VARCHAR(255) NULL,
+    association VARCHAR(16) NOT NULL,
+    location VARCHAR(64) NULL,
+    refreshed_utc DATETIME NOT NULL,
+    is_seed_content TINYINT(1) NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_visual_die_search_result_key (term, die_number, association),
+    KEY idx_visual_die_search_result_die_number (die_number)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ============================================================
 -- Artifact: visual_disposition_input_result
 -- ============================================================
 
@@ -325,6 +418,274 @@ CREATE TABLE IF NOT EXISTS visual_operation_sequences_result_stage (
     PRIMARY KEY (id),
     UNIQUE KEY uq_visual_operation_sequences_result_lookup_key
         (normalized_work_order, part_number, sequence_number)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ============================================================
+-- Artifact: visual_part_matches_result
+-- ============================================================
+
+-- ============================================================
+-- Object:      visual_part_matches_result
+-- Database:    mtm_mock
+-- Engine:      MySQL 5.7
+-- Kind:        Table / create (mirror, shape 9 of 12)
+-- Created:     2026-11-15
+-- Feature:     001-module-mock-visual-fallback (read shape 9, playbook step 2)
+-- Shape key:   part_matches
+-- Source read: Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartMatches.sql
+-- Caller:      GenericRequestPartData.ReadCompletionsAsync
+-- ============================================================
+--
+-- Stores the flattened result of the generic work centre request's part search, so the part page keeps
+-- answering while Infor Visual is unreachable (FR-002, FR-004). Read from a snapshot: the live table
+-- always resolves to a complete result because refreshes swap it atomically with its _stage twin
+-- (FR-006).
+--
+-- One row per part. `term` is the shape's declared INPUT and `description` is its second declared
+-- output, so the physical layout is the one every mirror keeps: id, the input keys, the output columns,
+-- then refreshed_utc and is_seed_content.
+--
+-- No baseline seed rows ship for this shape. The part master is refreshed by the on-host service, and
+-- an empty mirror before its first refresh answers an empty completion list, which the part page
+-- already treats as "nothing typed matches yet".
+-- ============================================================
+
+USE mtm_mock;
+
+SET NAMES utf8mb4;
+
+CREATE TABLE IF NOT EXISTS visual_part_matches_result (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    term VARCHAR(190) NOT NULL,
+    part_number VARCHAR(64) NOT NULL,
+    description VARCHAR(255) NULL,
+    refreshed_utc DATETIME NOT NULL,
+    is_seed_content TINYINT(1) NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_visual_part_matches_result_part_number (part_number),
+    KEY idx_visual_part_matches_result_term (term)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ============================================================
+-- Artifact: visual_part_matches_result_stage
+-- ============================================================
+
+-- ============================================================
+-- Object:      visual_part_matches_result_stage
+-- Database:    mtm_mock
+-- Engine:      MySQL 5.7
+-- Kind:        Table / create (stage twin of shape 9)
+-- Created:     2026-11-15
+-- Feature:     001-module-mock-visual-fallback (read shape 9, playbook step 2)
+-- ============================================================
+--
+-- Identical-structure staging twin. Written ONLY by sp_visual_part_matches_refresh and never read by
+-- the application. The refresh procedure truncates it, loads the complete new result, then performs an
+-- atomic multi-table RENAME TABLE swap with the live mirror.
+--
+-- The index names are intentionally identical to the live mirror's so the swap does not change the
+-- live table's key names (the keys travel with the table). See data-model.md section 3.6.
+-- ============================================================
+
+USE mtm_mock;
+
+SET NAMES utf8mb4;
+
+CREATE TABLE IF NOT EXISTS visual_part_matches_result_stage (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    term VARCHAR(190) NOT NULL,
+    part_number VARCHAR(64) NOT NULL,
+    description VARCHAR(255) NULL,
+    refreshed_utc DATETIME NOT NULL,
+    is_seed_content TINYINT(1) NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_visual_part_matches_result_part_number (part_number),
+    KEY idx_visual_part_matches_result_term (term)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ============================================================
+-- Artifact: visual_part_sequence_state_result
+-- ============================================================
+
+-- ============================================================
+-- Object:      visual_part_sequence_state_result
+-- Database:    mtm_mock
+-- Engine:      MySQL 5.7
+-- Kind:        Table / create (mirror, shape 11 of 12)
+-- Created:     2026-11-15
+-- Feature:     001-module-mock-visual-fallback (read shape 11, playbook step 2)
+-- Shape key:   part_sequence_state
+-- Source read: Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartSequenceState.sql
+-- Caller:      GenericRequestPartData.ReadQuantityAsync
+-- ============================================================
+--
+-- Stores one part's operation state at one sequence, so the quantity step keeps deciding who owns the
+-- quantity while Infor Visual is unreachable (FR-002, FR-004).
+--
+-- At most one row per (part, sequence). No row means the part has no operation at that sequence, which
+-- the caller reads as "no state recorded" and answers by asking the floor first — deliberately not the
+-- same as an operation that exists with a null status.
+--
+-- part_number and sequence are the shape's declared INPUTS, held because the refresh procedure reads
+-- every declared parameter and column out of the payload. The state the row carries is the operation that
+-- speaks for the sequence: the open order's, exactly as the per-key read picks it.
+--
+-- The mirror holds the state of open work orders, the same addressable domain as shape 10. No baseline
+-- seed rows ship; an empty mirror before the service's first refresh reads as "no state recorded", which
+-- sends the caller to the floor — the answer it already gives for a part whose routing it cannot read.
+-- ============================================================
+
+USE mtm_mock;
+
+SET NAMES utf8mb4;
+
+CREATE TABLE IF NOT EXISTS visual_part_sequence_state_result (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    part_number VARCHAR(64) NOT NULL,
+    sequence VARCHAR(20) NOT NULL,
+    operation_status VARCHAR(1) NULL,
+    is_last_operation TINYINT NOT NULL DEFAULT 0,
+    next_resource VARCHAR(255) NULL,
+    refreshed_utc DATETIME NOT NULL,
+    is_seed_content TINYINT(1) NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_visual_part_sequence_state_result_key (part_number, sequence)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ============================================================
+-- Artifact: visual_part_sequence_state_result_stage
+-- ============================================================
+
+-- ============================================================
+-- Object:      visual_part_sequence_state_result_stage
+-- Database:    mtm_mock
+-- Engine:      MySQL 5.7
+-- Kind:        Table / create (stage twin of shape 11)
+-- Created:     2026-11-15
+-- Feature:     001-module-mock-visual-fallback (read shape 11, playbook step 2)
+-- ============================================================
+--
+-- Identical-structure staging twin. Written ONLY by sp_visual_part_sequence_state_refresh and never read
+-- by the application. The refresh procedure truncates it, loads the complete new result, then performs an
+-- atomic multi-table RENAME TABLE swap with the live mirror.
+--
+-- The index names are intentionally identical to the live mirror's so the swap does not change the
+-- live table's key names (the keys travel with the table). See data-model.md §3.6.
+-- ============================================================
+
+USE mtm_mock;
+
+SET NAMES utf8mb4;
+
+CREATE TABLE IF NOT EXISTS visual_part_sequence_state_result_stage (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    part_number VARCHAR(64) NOT NULL,
+    sequence VARCHAR(20) NOT NULL,
+    operation_status VARCHAR(1) NULL,
+    is_last_operation TINYINT NOT NULL DEFAULT 0,
+    next_resource VARCHAR(255) NULL,
+    refreshed_utc DATETIME NOT NULL,
+    is_seed_content TINYINT(1) NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_visual_part_sequence_state_result_key (part_number, sequence)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ============================================================
+-- Artifact: visual_part_sequences_result
+-- ============================================================
+
+-- ============================================================
+-- Object:      visual_part_sequences_result
+-- Database:    mtm_mock
+-- Engine:      MySQL 5.7
+-- Kind:        Table / create (mirror, shape 10 of 12)
+-- Created:     2026-11-15
+-- Feature:     001-module-mock-visual-fallback (read shape 10, playbook step 2)
+-- Shape key:   part_sequences
+-- Source read: Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartSequences.sql
+-- Caller:      GenericRequestPartData.ReadSequencesAsync
+-- ============================================================
+--
+-- Stores the flattened result of the generic work centre request's sequence list, so the sequence step
+-- keeps answering while Infor Visual is unreachable (FR-002, FR-004).
+--
+-- One row per (part, sequence, relation). `part_number` is the shape's declared INPUT; the rest are its
+-- declared outputs, in their declared order, so the physical layout is the one every mirror keeps:
+-- id, the input keys, the output columns, then refreshed_utc and is_seed_content.
+--
+-- The relation is kept in `sequence_source` because the caller merges the rows a number is named by into
+-- one option, and it can only do that if a row still says which relation named it.
+--
+-- The mirror holds the sequences of OPEN work orders, which is the domain the read offers: it ranks an
+-- open order's operation ahead of a closed one, and a sequence the part only ever ran on orders the plant
+-- has finished is not something a requester raises a request against. This is the same addressable
+-- population rule work_order_search uses.
+--
+-- No baseline seed rows ship for this shape; an empty mirror before the service's first refresh answers
+-- an empty list, which the sequence step already treats as nothing recorded yet.
+-- ============================================================
+
+USE mtm_mock;
+
+SET NAMES utf8mb4;
+
+CREATE TABLE IF NOT EXISTS visual_part_sequences_result (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    part_number VARCHAR(64) NOT NULL,
+    sequence VARCHAR(10) NOT NULL,
+    description VARCHAR(255) NULL,
+    operation_status VARCHAR(1) NULL,
+    is_last_operation TINYINT NOT NULL DEFAULT 0,
+    next_resource VARCHAR(255) NULL,
+    cancelled_only TINYINT NOT NULL DEFAULT 0,
+    sequence_source VARCHAR(20) NOT NULL,
+    refreshed_utc DATETIME NOT NULL,
+    is_seed_content TINYINT(1) NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_visual_part_sequences_result_key (part_number, sequence, sequence_source),
+    KEY idx_visual_part_sequences_result_sequence (sequence)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- ============================================================
+-- Artifact: visual_part_sequences_result_stage
+-- ============================================================
+
+-- ============================================================
+-- Object:      visual_part_sequences_result_stage
+-- Database:    mtm_mock
+-- Engine:      MySQL 5.7
+-- Kind:        Table / create (stage twin of shape 10)
+-- Created:     2026-11-15
+-- Feature:     001-module-mock-visual-fallback (read shape 10, playbook step 2)
+-- ============================================================
+--
+-- Identical-structure staging twin. Written ONLY by sp_visual_part_sequences_refresh and never read by
+-- the application. The refresh procedure truncates it, loads the complete new result, then performs an
+-- atomic multi-table RENAME TABLE swap with the live mirror.
+--
+-- The index names are intentionally identical to the live mirror's so the swap does not change the
+-- live table's key names (the keys travel with the table). See data-model.md section 3.6.
+-- ============================================================
+
+USE mtm_mock;
+
+SET NAMES utf8mb4;
+
+CREATE TABLE IF NOT EXISTS visual_part_sequences_result_stage (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    part_number VARCHAR(64) NOT NULL,
+    sequence VARCHAR(10) NOT NULL,
+    description VARCHAR(255) NULL,
+    operation_status VARCHAR(1) NULL,
+    is_last_operation TINYINT NOT NULL DEFAULT 0,
+    next_resource VARCHAR(255) NULL,
+    cancelled_only TINYINT NOT NULL DEFAULT 0,
+    sequence_source VARCHAR(20) NOT NULL,
+    refreshed_utc DATETIME NOT NULL,
+    is_seed_content TINYINT(1) NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_visual_part_sequences_result_key (part_number, sequence, sequence_source),
+    KEY idx_visual_part_sequences_result_sequence (sequence)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- ============================================================

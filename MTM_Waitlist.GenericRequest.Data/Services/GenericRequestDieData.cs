@@ -1,5 +1,3 @@
-using System.Globalization;
-
 using MTM_Waitlist.GenericRequest.Contracts;
 using MTM_Waitlist.GenericRequest.Models;
 using MTM_Waitlist.Mock.Contracts;
@@ -12,8 +10,9 @@ namespace MTM_Waitlist.GenericRequest.Data.Services;
 
 /// <inheritdoc cref="IGenericRequestDieData" />
 /// <summary>
-/// The live die search: one Infor Visual read over the die itself, the part's recorded alternates and the part's
-/// work-order history, with no mirror declaration and no cached shape.
+/// The die answer: one Infor Visual read over the die itself, the part's recorded alternates and the part's
+/// work-order history, served live while the plant system answers and from the <c>mtm_mock</c> mirror while it
+/// does not.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -22,43 +21,29 @@ namespace MTM_Waitlist.GenericRequest.Data.Services;
 /// prefix or in lower case still matches (FR-004).
 /// </para>
 /// <para>
-/// Nothing is cached and nothing is substituted. An unreachable plant system answers
-/// <see cref="GenericRequestPresentation.Unavailable"/> rather than reaching for the mirror, and a read that failed
-/// answers the same thing, because a failed read proves nothing about the die (FR-005).
+/// <b>The search travels read shape 12, exactly as the work-order flow's searches travel their shapes.</b> A live
+/// answer is returned as it stands, including an empty one; a plant system that cannot be reached is answered from
+/// the mirror, which holds the die itself and every (part, die) association the plant records; and a read that
+/// fails outright answers <see cref="GenericRequestPresentation.Unavailable"/>, because a failed read proves
+/// nothing about the die (FR-005).
 /// </para>
 /// </remarks>
 public sealed class GenericRequestDieData : IGenericRequestDieData
 {
     private const string LogCategory = "GenericRequestDie";
 
-    /// <summary>
-    /// The checked-in queue script this search runs, loaded from disk through the same executor every other Infor
-    /// Visual read uses.
-    /// </summary>
-    public const string ScriptRelativePath = "Database/InforVisual/Queues/Module_Waitlist/Queries/GetDieSearch.sql";
-
-    /// <summary>The read's own name for the term it matches dies against.</summary>
-    public const string TermParameterName = "Term";
-
     /// <summary>The prefix every die's part number carries.</summary>
     public const string DiePrefix = "FGT";
 
-    private readonly IVisualQueryExecutor _executor;
-    private readonly IVisualReachabilityDetector? _reachability;
+    private readonly IVisualReadFallback<VisualDieSearchRequest, VisualDieSearchRow> _dies;
 
     /// <summary>Creates the search.</summary>
-    /// <param name="executor">Runs the live read against Infor Visual.</param>
-    /// <param name="reachability">
-    /// The reachability probe's settled verdict, or <see langword="null"/> on a host that runs no probe. When it says
-    /// Infor Visual is unreachable, the search answers unavailable at once instead of spending a connect attempt on
-    /// rediscovering that.
-    /// </param>
-    public GenericRequestDieData(IVisualQueryExecutor executor, IVisualReachabilityDetector? reachability = null)
+    /// <param name="dies">Shape 12: the dies a die number or a part number matches.</param>
+    public GenericRequestDieData(IVisualReadFallback<VisualDieSearchRequest, VisualDieSearchRow> dies)
     {
-        ArgumentNullException.ThrowIfNull(executor);
+        ArgumentNullException.ThrowIfNull(dies);
 
-        _executor = executor;
-        _reachability = reachability;
+        _dies = dies;
     }
 
     /// <inheritdoc />
@@ -74,38 +59,22 @@ public sealed class GenericRequestDieData : IGenericRequestDieData
             return GenericRequestStepResult<GenericRequestDieOption>.Empty(attemptedAtUtc);
         }
 
-        // A settled "unreachable" verdict is honoured rather than re-established: the probe already knows the source
-        // cannot be reached, so an attempt here could only rediscover that at the cost of a full connect attempt, on
-        // every search. The answer is the same unavailable the attempt would have produced (020 FR-005).
-        if (_reachability?.Current == VisualReadStatus.Cached)
+        var rows = await TryReadAsync(normalized, cancellationToken).ConfigureAwait(false);
+        if (rows is null)
         {
-            AppLog.Info(
-                LogCategory,
-                $"The die search for '{normalized}' answered unavailable without a live attempt: the reachability probe has settled on Infor Visual being unreachable.");
-
             return GenericRequestStepResult<GenericRequestDieOption>.Unavailable(attemptedAtUtc);
         }
-
-        var outcome = await ExecuteAsync(normalized, cancellationToken).ConfigureAwait(false);
-        if (outcome.Status != VisualQueryStatus.Ok)
-        {
-            return NotAnswered(outcome, normalized);
-        }
-
-        var rows = outcome.Rows;
 
         // A bare number could be a die whose prefix was left off. The search asks once more as a die number rather
         // than refusing a die the plant records, and it asks with the part's own answer already exhausted above, so
         // a part number never loses its dies to the retry (research R2).
         if (rows.Count == 0 && DieNumberCandidate(normalized) is { } candidate)
         {
-            var retry = await ExecuteAsync(candidate, cancellationToken).ConfigureAwait(false);
-            if (retry.Status != VisualQueryStatus.Ok)
+            rows = await TryReadAsync(candidate, cancellationToken).ConfigureAwait(false);
+            if (rows is null)
             {
-                return NotAnswered(retry, candidate);
+                return GenericRequestStepResult<GenericRequestDieOption>.Unavailable(attemptedAtUtc);
             }
-
-            rows = retry.Rows;
         }
 
         var options = new List<GenericRequestDieOption>();
@@ -113,59 +82,43 @@ public sealed class GenericRequestDieData : IGenericRequestDieData
 
         foreach (var row in rows)
         {
-            var dieNumber = GetString(row, "DieNumber");
-            if (dieNumber.Length > 0 && seen.Add(dieNumber))
+            if (row.DieNumber.Length > 0 && seen.Add(row.DieNumber))
             {
-                options.Add(new GenericRequestDieOption(
-                    dieNumber,
-                    GetString(row, "Description"),
-                    GetString(row, "Location")));
+                options.Add(new GenericRequestDieOption(row.DieNumber, row.Description, row.Location));
             }
         }
 
-        AppLog.Info(LogCategory, $"The live die search for '{normalized}' answered {options.Count} die(s).");
+        AppLog.Info(LogCategory, $"The die search for '{normalized}' answered {options.Count} die(s).");
 
         return options.Count == 0
             ? GenericRequestStepResult<GenericRequestDieOption>.Empty(attemptedAtUtc)
             : GenericRequestStepResult<GenericRequestDieOption>.Populated(options, attemptedAtUtc);
     }
 
-    private async Task<VisualQueryOutcome> ExecuteAsync(string term, CancellationToken cancellationToken)
+    /// <summary>
+    /// Runs the die search's read shape, answering its rows or <see langword="null"/> when it could not be answered.
+    /// </summary>
+    /// <remarks>
+    /// <b>The shape owns the live-then-cached decision.</b> It attempts the plant system, serves the mirror when the
+    /// probe has settled on unreachability or the attempt finds the source unreachable, and returns a successful
+    /// live answer including an empty one. A shape that could not be answered at all throws, which is reported here
+    /// as unavailable rather than as "no die matches" — a failed read is not a verdict about the die (FR-005).
+    /// </remarks>
+    private async Task<IReadOnlyList<VisualDieSearchRow>?> TryReadAsync(string term, CancellationToken cancellationToken)
     {
-        var parameters = new Dictionary<string, object?> { [TermParameterName] = term };
-
         try
         {
-            return await _executor.ExecuteAsync(ScriptRelativePath, parameters, cancellationToken).ConfigureAwait(false);
+            return await _dies.ReadAsync(new VisualDieSearchRequest(term), cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
             throw;
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            AppLog.Error(LogCategory, ex, $"The live die search for '{term}' threw before answering.");
-
-            return VisualQueryOutcome.Failed(ex.Message);
+            AppLog.Error(LogCategory, exception, $"The die search for '{term}' could not be answered.");
+            return null;
         }
-    }
-
-    private static GenericRequestStepResult<GenericRequestDieOption> NotAnswered(VisualQueryOutcome outcome, string term)
-    {
-        if (outcome.Status == VisualQueryStatus.Unreachable)
-        {
-            AppLog.Info(
-                LogCategory,
-                $"The plant system could not be reached for the die search '{term}': {outcome.Reason ?? "no reason reported"}.");
-        }
-        else
-        {
-            AppLog.Warn(
-                LogCategory,
-                $"The live die search for '{term}' failed: {outcome.Reason ?? "no reason reported"}.");
-        }
-
-        return GenericRequestStepResult<GenericRequestDieOption>.Unavailable(DateTimeOffset.UtcNow);
     }
 
     /// <summary>
@@ -186,9 +139,4 @@ public sealed class GenericRequestDieData : IGenericRequestDieData
             ? DiePrefix + normalized.PadLeft(PartMatchSearchInput.PartNumberWidth - DiePrefix.Length, '0')
             : null;
     }
-
-    private static string GetString(IReadOnlyDictionary<string, object?> row, string column) =>
-        row.TryGetValue(column, out var value)
-            ? Convert.ToString(value, CultureInfo.InvariantCulture)?.Trim() ?? string.Empty
-            : string.Empty;
 }

@@ -9,8 +9,13 @@
 --   @PartNumber - the part number, matched verbatim against WORK_ORDER.PART_ID / REQUIREMENT.PART_ID
 --   @Sequence   - the sequence number the requester chose
 --
--- LIVE ONLY. Deliberately NOT a read shape: FR-017 forbids substituting a cached or mirrored quantity, and
--- the state that decides who owns the quantity must be read at the same moment as the quantity.
+-- READ SHAPE 11 (part_sequence_state). This script is the live half of the mirror declaration in
+-- VisualReadShapeCatalog: the caller (GenericRequestPartData.ReadQuantityAsync) asks the shape, which
+-- attempts this read and serves the mtm_mock mirror when the plant system cannot be reached, exactly as
+-- the work-order flow's reads do. The mirror's population read is
+-- Database/InforVisual/Queues/Module_Mock/Populations/part_sequence_state_population.sql; it holds one row
+-- per (part, sequence) for the OPEN work orders, and no row at all means the same thing here as it does
+-- live: the part has no operation at that sequence.
 --
 -- IsLastOperation carries the plant's own typing rule, given by IT on 2026-11-04: the last operation the work
 -- order still has to run produces the finished good, and every other operation is work in progress. A WIP tag

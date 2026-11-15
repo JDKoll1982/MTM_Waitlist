@@ -19,7 +19,7 @@ public sealed class GenericRequestDieDataTests
     public async Task Audit_GenericRequestDieDataTests_ADieNumberAnswersThatDieAndIsMatchedAsTyped()
     {
         var executor = Executor(_ => VisualQueryOutcome.Ok([DieRow("FGT0602-01", "BASE DIE", "U-B0-01")]));
-        var dies = new GenericRequestDieData(executor);
+        var dies = GenericRequestReadShapes.DieData(executor);
 
         var result = await dies.ReadDiesAsync("FGT0602-01");
 
@@ -36,7 +36,7 @@ public sealed class GenericRequestDieDataTests
     [TestMethod]
     public async Task Audit_GenericRequestDieDataTests_ATermNoDieMatchesAnswersEmptyRatherThanUnavailable()
     {
-        var dies = new GenericRequestDieData(Executor(_ => VisualQueryOutcome.Ok([])));
+        var dies = GenericRequestReadShapes.DieData(Executor(_ => VisualQueryOutcome.Ok([])));
 
         var result = await dies.ReadDiesAsync("FGT9999-99");
 
@@ -47,7 +47,7 @@ public sealed class GenericRequestDieDataTests
     [TestMethod]
     public async Task Audit_GenericRequestDieDataTests_APartNumberReturnsEveryDieItOwnsWithItsLocation()
     {
-        var dies = new GenericRequestDieData(Executor(_ => VisualQueryOutcome.Ok(
+        var dies = GenericRequestReadShapes.DieData(Executor(_ => VisualQueryOutcome.Ok(
         [
             DieRow("FGT0602-01", "DIE ONE", "U-B0-01"),
             DieRow("FGT0602-02", "DIE TWO", "U-B0-02"),
@@ -66,7 +66,7 @@ public sealed class GenericRequestDieDataTests
     public async Task Audit_GenericRequestDieDataTests_TheTermReachesTheReadNormalised()
     {
         var executor = Executor(_ => VisualQueryOutcome.Ok([]));
-        var dies = new GenericRequestDieData(executor);
+        var dies = GenericRequestReadShapes.DieData(executor);
 
         await dies.ReadDiesAsync("fgt1000");
 
@@ -84,7 +84,7 @@ public sealed class GenericRequestDieDataTests
                 ? VisualQueryOutcome.Ok([DieRow("FGT0001000", "DIE", "U-B0-01")])
                 : VisualQueryOutcome.Ok([]));
 
-        var result = await new GenericRequestDieData(executor).ReadDiesAsync("1000");
+        var result = await GenericRequestReadShapes.DieData(executor).ReadDiesAsync("1000");
 
         Assert.AreEqual(GenericRequestPresentation.Populated, result.Presentation);
         Assert.AreEqual("FGT0001000", result.Items[0].DieNumber);
@@ -92,23 +92,65 @@ public sealed class GenericRequestDieDataTests
     }
 
     [TestMethod]
-    public async Task Audit_GenericRequestDieDataTests_AnUnreachableSourceAnswersUnavailable()
+    public async Task Audit_GenericRequestDieDataTests_AnUnreachableSourceAnswersUnavailableWhenThereIsNoMirror()
     {
-        var dies = new GenericRequestDieData(Executor(_ => VisualQueryOutcome.Unreachable("the plant system is down")));
+        var dies = GenericRequestReadShapes.DieData(Executor(_ => VisualQueryOutcome.Unreachable("the plant system is down")));
 
         var result = await dies.ReadDiesAsync("PART-9003");
 
         Assert.AreEqual(
             GenericRequestPresentation.Unavailable,
             result.Presentation,
-            "An unreachable source is reported, never filled from cache (FR-005).");
+            "A host with no mtm_mock mirror has nothing to answer from, so an unreachable source is reported rather "
+            + "than filled with an invented empty answer (FR-005).");
         Assert.AreEqual(0, result.Count);
+    }
+
+    [TestMethod]
+    public async Task Audit_GenericRequestDieDataTests_AnUnreachableSourceIsAnsweredFromTheMirrorInsteadOfRefused()
+    {
+        var executor = Executor(_ => VisualQueryOutcome.Unreachable("the plant system is down"));
+        var mirror = new StubMirrorStore(
+            ("sp_visual_die_search_get", [DieRow("FGT0602-01", "BASE DIE", "U-B0-01")]));
+
+        var result = await GenericRequestReadShapes.DieData(executor, mirror: mirror).ReadDiesAsync("PART-9003");
+
+        Assert.AreEqual(
+            GenericRequestPresentation.Populated,
+            result.Presentation,
+            "the mirror answers when the plant system cannot be reached, exactly as the work-order flow's reads do");
+        Assert.AreEqual(1, result.Count);
+        Assert.AreEqual("FGT0602-01", result.Items[0].DieNumber);
+        Assert.AreEqual("U-B0-01", result.Items[0].Location);
+        CollectionAssert.AreEqual(
+            new[] { "sp_visual_die_search_get" },
+            mirror.Reads,
+            "the shape reads its own procedure, so the cached answer is the same answer (FR-004)");
+    }
+
+    [TestMethod]
+    public async Task Audit_GenericRequestDieDataTests_ASettledUnreachableVerdictIsAnsweredFromTheMirrorWithoutAskingVisual()
+    {
+        var executor = Executor(_ => VisualQueryOutcome.Ok([DieRow("FGT0602-01", "BASE DIE", "U-B0-01")]));
+        var mirror = new StubMirrorStore(
+            ("sp_visual_die_search_get", [DieRow("FGT7777-01", "CACHED DIE", "U-B9-09")]));
+
+        var dies = GenericRequestReadShapes.DieData(
+            executor,
+            new StubVisualReachability(VisualReadStatus.Cached),
+            mirror);
+
+        var result = await dies.ReadDiesAsync("FGT7777-01");
+
+        Assert.AreEqual(GenericRequestPresentation.Populated, result.Presentation);
+        Assert.AreEqual("FGT7777-01", result.Items[0].DieNumber, "the cached die is the answer the probe's verdict allows");
+        Assert.AreEqual(0, executor.ExecuteCount, "the verdict is the probe's, so no connect attempt is spent rediscovering it");
     }
 
     [TestMethod]
     public async Task Audit_GenericRequestDieDataTests_AFailedReadAnswersUnavailable()
     {
-        var dies = new GenericRequestDieData(Executor(_ => VisualQueryOutcome.Failed("bad column")));
+        var dies = GenericRequestReadShapes.DieData(Executor(_ => VisualQueryOutcome.Failed("bad column")));
 
         var result = await dies.ReadDiesAsync("PART-9003");
 
@@ -121,7 +163,7 @@ public sealed class GenericRequestDieDataTests
     [TestMethod]
     public async Task Audit_GenericRequestDieDataTests_ADieWithNoLocationSaysSoInsteadOfDrawingBlank()
     {
-        var dies = new GenericRequestDieData(Executor(_ => VisualQueryOutcome.Ok(
+        var dies = GenericRequestReadShapes.DieData(Executor(_ => VisualQueryOutcome.Ok(
         [
             DieRow("FGT0602-01", "BASE DIE", null),
         ])));
@@ -137,7 +179,7 @@ public sealed class GenericRequestDieDataTests
     [TestMethod]
     public async Task Audit_GenericRequestDieDataTests_APlaceholderDescriptionIsKeptAsTheDescription()
     {
-        var dies = new GenericRequestDieData(Executor(_ => VisualQueryOutcome.Ok(
+        var dies = GenericRequestReadShapes.DieData(Executor(_ => VisualQueryOutcome.Ok(
         [
             DieRow("FGT0602-01", "Die still needs location", "U-B0-01"),
         ])));
@@ -156,7 +198,7 @@ public sealed class GenericRequestDieDataTests
     {
         var executor = Executor(_ => VisualQueryOutcome.Ok([DieRow("FGT0602-01", "BASE DIE", "U-B0-01")]));
 
-        var result = await new GenericRequestDieData(executor).ReadDiesAsync("   ");
+        var result = await GenericRequestReadShapes.DieData(executor).ReadDiesAsync("   ");
 
         Assert.AreEqual(GenericRequestPresentation.Empty, result.Presentation);
         Assert.AreEqual(0, executor.ExecuteCount, "Nothing is asked of the plant for a term nobody typed.");
@@ -166,14 +208,14 @@ public sealed class GenericRequestDieDataTests
     public async Task Audit_GenericRequestDieDataTests_ASettledUnreachableVerdictAnswersWithoutTouchingVisual()
     {
         var executor = Executor(_ => VisualQueryOutcome.Ok([DieRow("FGT0602-01", "BASE DIE", "U-B0-01")]));
-        var dies = new GenericRequestDieData(executor, new StubVisualReachability(VisualReadStatus.Cached));
+        var dies = GenericRequestReadShapes.DieData(executor, new StubVisualReachability(VisualReadStatus.Cached));
 
         var result = await dies.ReadDiesAsync("FGT0602-01");
 
         Assert.AreEqual(
             GenericRequestPresentation.Unavailable,
             result.Presentation,
-            "the probe already knows the source cannot be reached, so the search says so (FR-005)");
+            "the probe already knows the source cannot be reached and there is no mirror, so the search says so");
         Assert.AreEqual(
             0,
             executor.ExecuteCount,
@@ -184,7 +226,7 @@ public sealed class GenericRequestDieDataTests
     public async Task Audit_GenericRequestDieDataTests_ALiveVerdictStillAsksVisual()
     {
         var executor = Executor(_ => VisualQueryOutcome.Ok([DieRow("FGT0602-01", "BASE DIE", "U-B0-01")]));
-        var dies = new GenericRequestDieData(executor, new StubVisualReachability(VisualReadStatus.Live));
+        var dies = GenericRequestReadShapes.DieData(executor, new StubVisualReachability(VisualReadStatus.Live));
 
         var result = await dies.ReadDiesAsync("FGT0602-01");
 

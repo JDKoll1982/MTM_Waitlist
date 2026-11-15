@@ -127,6 +127,11 @@ The requester picks the die or dies they need. Each becomes its own request, exa
 - **A3**: Choosing several dies means several requests, matching the existing work-order behaviour.
 - **A4**: The die search is a live Visual read with no cached mirror, as the existing part search is.
 
+  > **Amended 2026-11-15 (owner decision).** Superseded: the die search is read shape 12 (`die_search`), so it
+  > attempts the live read and answers from the `mtm_mock` mirror when Infor Visual cannot be reached. The mirror
+  > holds the (term, die, association) pairings rather than only the dies, which is what keeps a part number
+  > finding every die it owns offline.
+
 ## Design note (2026-11-03)
 
 The review host that rendered this screen against in-memory values has been deleted, so no approved rendering of it can

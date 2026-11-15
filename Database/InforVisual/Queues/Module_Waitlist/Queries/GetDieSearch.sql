@@ -17,6 +17,10 @@
 -- research R8). Its caller is GenericRequestDieData, which reads it through the same live executor every other
 -- Infor Visual read uses and never reaches for cached rows.
 --
+-- The generic die request itself does NOT use this script through that caller any more: it asks read shape 12
+-- (die_search), whose live half is this script and whose mirror holds the same (term, die, association)
+-- pairings, so a die request keeps working while Infor Visual is unreachable.
+--
 -- Association precedence, which is what keeps a part's list complete (FR-003): the term's own die number first,
 -- then the dies PART_ALTERNATE records against the term's part, then the FGT parts that part's work orders
 -- required. A die named by more than one of them appears once, under the strongest association.

@@ -9,6 +9,187 @@
 USE mtm_mock;
 
 -- ============================================================
+-- Artifact: sp_visual_die_search_get
+-- ============================================================
+
+-- ============================================================
+-- Stored Procedure: sp_visual_die_search_get
+-- Database:   mtm_mock
+-- Engine:     MySQL 5.7 (verified on 9.6)
+-- Kind:       StoredProcedure / create  (read, shape 12 of 12)
+-- Created:    2026-11-15
+-- Feature:    001-module-mock-visual-fallback (read shape 12, playbook step 3)
+-- Shape key:  die_search
+-- ============================================================
+--
+-- Parameterized read of the LIVE mirror. Returns exactly the column shape the live Infor Visual read
+-- returns, so a caller cannot distinguish cached from live (FR-004):
+--   live : DieNumber, Description, Association, Location
+--   here : same names and order, with the same association precedence and the same cap.
+--
+-- The term matches either the die's own number or the part the die is tied to, which is what the live
+-- read's three relations between them cover. A die named more than once is reported once, under the
+-- strongest association: Die before Explicit before History.
+-- ============================================================
+
+USE mtm_mock;
+
+DROP PROCEDURE IF EXISTS sp_visual_die_search_get;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_visual_die_search_get(
+    IN p_term VARCHAR(190)
+)
+BEGIN
+    DECLARE v_term VARCHAR(190);
+
+    SET v_term = TRIM(COALESCE(p_term, ''));
+
+    SELECT
+        matched.die_number AS DieNumber,
+        COALESCE(matched.description, '') AS Description,
+        matched.association AS Association,
+        COALESCE(matched.location, '') AS Location
+    FROM visual_die_search_result AS matched
+    INNER JOIN
+    (
+        SELECT
+            candidates.die_number AS die_number,
+            MIN(CASE candidates.association
+                    WHEN 'Die' THEN 0
+                    WHEN 'Explicit' THEN 1
+                    ELSE 2
+                END) AS strongest_rank
+        FROM visual_die_search_result AS candidates
+        WHERE
+            v_term <> ''
+            AND (candidates.term = v_term OR candidates.die_number = v_term)
+        GROUP BY candidates.die_number
+    ) AS strongest
+        ON strongest.die_number = matched.die_number
+        AND strongest.strongest_rank = CASE matched.association
+                WHEN 'Die' THEN 0
+                WHEN 'Explicit' THEN 1
+                ELSE 2
+            END
+    WHERE
+        v_term <> ''
+        AND (matched.term = v_term OR matched.die_number = v_term)
+    ORDER BY
+        strongest.strongest_rank,
+        matched.die_number
+    LIMIT 200;
+END $$
+
+DELIMITER ;
+
+-- ============================================================
+-- Artifact: sp_visual_die_search_refresh
+-- ============================================================
+
+-- ============================================================
+-- Stored Procedure: sp_visual_die_search_refresh
+-- Database:   mtm_mock
+-- Engine:     MySQL 5.7 (verified on 9.6)
+-- Kind:       StoredProcedure / create  (refresh, shape 12 of 12)
+-- Created:    2026-11-15
+-- Feature:    001-module-mock-visual-fallback (read shape 12, playbook step 3)
+-- Shape key:  die_search
+-- ============================================================
+--
+-- Purpose
+-- -------
+-- Replace the live mirror `visual_die_search_result` with a complete new result set, atomically. Readers
+-- address only the live table name, so they always observe either the complete previous snapshot or the
+-- complete new one — never a partial set (FR-006, SC-005).
+--
+-- Contract
+-- --------
+--   p_rows : JSON array of result objects. Keys are the shape's declared inputs followed by its output
+--            columns: "Term", "DieNumber", "Description", "Association", "Location".
+--            A NULL or empty array produces an empty snapshot, which is a legitimate result for a search.
+--
+-- Steps
+-- -----
+--   1. TRUNCATE the stage twin.
+--   2. Expand p_rows into the stage twin (refreshed_utc = UTC_TIMESTAMP(), is_seed_content = 0).
+--   3. Validate: the loaded row count must equal JSON_LENGTH(p_rows); otherwise SIGNAL and abort.
+--   4. Atomic swap in ONE statement:
+--          result -> result_prev, result_stage -> result, result_prev -> result_stage
+--
+-- Any error before step 4 leaves the live table untouched. That covers a payload carrying the same
+-- (term, die, association) twice, which the mirror's unique key refuses.
+-- ============================================================
+
+USE mtm_mock;
+
+DROP PROCEDURE IF EXISTS sp_visual_die_search_refresh;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_visual_die_search_refresh(
+    IN p_rows JSON
+)
+BEGIN
+    DECLARE v_expected INT DEFAULT 0;
+    DECLARE v_loaded   INT DEFAULT 0;
+
+    -- 1. Clear the stage twin (also discards any partially loaded previous attempt).
+    TRUNCATE TABLE visual_die_search_result_stage;
+
+    -- 2. Load the complete new result set into the stage twin.
+    SET v_expected = IFNULL(JSON_LENGTH(p_rows), 0);
+
+    INSERT INTO visual_die_search_result_stage (
+        term,
+        die_number,
+        description,
+        association,
+        location,
+        refreshed_utc,
+        is_seed_content
+    )
+    SELECT
+        COALESCE(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].Term'))), ''),
+        COALESCE(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].DieNumber'))), ''),
+        JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].Description'))),
+        COALESCE(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].Association'))), ''),
+        COALESCE(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].Location'))), ''),
+        UTC_TIMESTAMP(),
+        0
+    FROM (
+        SELECT (ones.n + tens.n * 10 + hundreds.n * 100 + thousands.n * 1000 + ten_thousands.n * 10000) AS i
+        FROM (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS ones
+        CROSS JOIN (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS tens
+        CROSS JOIN (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS hundreds
+        CROSS JOIN (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS thousands
+        CROSS JOIN (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS ten_thousands
+    ) AS n
+    WHERE n.i < v_expected;
+
+    -- 3. Validate the load before it can become visible.
+    SELECT COUNT(*) INTO v_loaded FROM visual_die_search_result_stage;
+
+    IF v_loaded <> v_expected THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'sp_visual_die_search_refresh: staged row count does not match payload length; live snapshot left untouched.';
+    END IF;
+
+    -- 4. Atomic swap — the live name always resolves to a complete snapshot.
+    RENAME TABLE visual_die_search_result       TO visual_die_search_result_prev,
+                 visual_die_search_result_stage TO visual_die_search_result,
+                 visual_die_search_result_prev  TO visual_die_search_result_stage;
+END $$
+
+DELIMITER ;
+
+-- ============================================================
 -- Artifact: sp_visual_disposition_input_get
 -- ============================================================
 
@@ -537,6 +718,506 @@ END $$
 DELIMITER ;
 
 -- ============================================================
+-- Artifact: sp_visual_part_matches_get
+-- ============================================================
+
+-- ============================================================
+-- Stored Procedure: sp_visual_part_matches_get
+-- Database:   mtm_mock
+-- Engine:     MySQL 5.7 (verified on 9.6)
+-- Kind:       StoredProcedure / create  (read, shape 9 of 12)
+-- Created:    2026-11-15
+-- Feature:    001-module-mock-visual-fallback (read shape 9, playbook step 3)
+-- Shape key:  part_matches
+-- ============================================================
+--
+-- Parameterized read of the LIVE mirror. Returns exactly the column shape the live Infor Visual read
+-- returns, so a caller cannot distinguish cached from live (FR-004):
+--   live : PartNumber, Description
+--   here : same names and order, with the same matching and ordering rules.
+--
+-- The matching is copied from GetPartMatches.sql, not re-invented: the part whose number IS the term
+-- first, then every part whose number CONTAINS it, capped at 200. The live script escapes the LIKE
+-- metacharacters so a typed '%' or '_' is matched literally, and this procedure escapes them the same
+-- way, using MySQL's own escape character, so the backslash is doubled in the literal.
+-- ============================================================
+
+USE mtm_mock;
+
+DROP PROCEDURE IF EXISTS sp_visual_part_matches_get;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_visual_part_matches_get(
+    IN p_term VARCHAR(190)
+)
+BEGIN
+    DECLARE v_term VARCHAR(190);
+    DECLARE v_pattern VARCHAR(580);
+
+    SET v_term = TRIM(COALESCE(p_term, ''));
+    SET v_pattern = CONCAT(
+        '%',
+        REPLACE(REPLACE(REPLACE(v_term, '\\', '\\\\'), '%', '\\%'), '_', '\\_'),
+        '%');
+
+    SELECT
+        matches.part_number AS PartNumber,
+        COALESCE(matches.description, '') AS Description
+    FROM visual_part_matches_result AS matches
+    WHERE
+        v_term <> ''
+        AND (matches.part_number = v_term OR matches.part_number LIKE v_pattern)
+    ORDER BY
+        CASE WHEN matches.part_number = v_term THEN 0 ELSE 1 END,
+        matches.part_number
+    LIMIT 200;
+END $$
+
+DELIMITER ;
+
+-- ============================================================
+-- Artifact: sp_visual_part_matches_refresh
+-- ============================================================
+
+-- ============================================================
+-- Stored Procedure: sp_visual_part_matches_refresh
+-- Database:   mtm_mock
+-- Engine:     MySQL 5.7 (verified on 9.6)
+-- Kind:       StoredProcedure / create  (refresh, shape 9 of 12)
+-- Created:    2026-11-15
+-- Feature:    001-module-mock-visual-fallback (read shape 9, playbook step 3)
+-- Shape key:  part_matches
+-- ============================================================
+--
+-- Purpose
+-- -------
+-- Replace the live mirror `visual_part_matches_result` with a complete new result set, atomically.
+-- Readers address only the live table name, so they always observe either the complete previous
+-- snapshot or the complete new one — never a partial set (FR-006, SC-005).
+--
+-- Contract
+-- --------
+--   p_rows : JSON array of result objects. Keys are the shape's declared inputs followed by its output
+--            columns: "Term", "PartNumber", "Description".
+--            A NULL or empty array produces an empty snapshot, which is a legitimate result for a
+--            search (an empty live read is a valid answer — FR-024).
+--
+-- Steps
+-- -----
+--   1. TRUNCATE the stage twin.
+--   2. Expand p_rows into the stage twin (refreshed_utc = UTC_TIMESTAMP(), is_seed_content = 0).
+--   3. Validate: the loaded row count must equal JSON_LENGTH(p_rows); otherwise SIGNAL and abort.
+--   4. Atomic swap in ONE statement:
+--          result -> result_prev, result_stage -> result, result_prev -> result_stage
+--
+-- Any error before step 4 leaves the live table untouched.
+--
+-- Row cap
+-- -------
+-- The inline tally covers 0..99999 rows. The driver population is the plant's part master, which is
+-- the widest of the twelve shapes; a population above the cap fails the validation in step 3 and
+-- leaves the previous snapshot in place rather than loading a partial one.
+-- ============================================================
+
+USE mtm_mock;
+
+DROP PROCEDURE IF EXISTS sp_visual_part_matches_refresh;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_visual_part_matches_refresh(
+    IN p_rows JSON
+)
+BEGIN
+    DECLARE v_expected INT DEFAULT 0;
+    DECLARE v_loaded   INT DEFAULT 0;
+
+    -- 1. Clear the stage twin (also discards any partially loaded previous attempt).
+    TRUNCATE TABLE visual_part_matches_result_stage;
+
+    -- 2. Load the complete new result set into the stage twin.
+    SET v_expected = IFNULL(JSON_LENGTH(p_rows), 0);
+
+    INSERT INTO visual_part_matches_result_stage (
+        term,
+        part_number,
+        description,
+        refreshed_utc,
+        is_seed_content
+    )
+    SELECT
+        COALESCE(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].Term'))), ''),
+        COALESCE(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].PartNumber'))), ''),
+        JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].Description'))),
+        UTC_TIMESTAMP(),
+        0
+    FROM (
+        SELECT (ones.n + tens.n * 10 + hundreds.n * 100 + thousands.n * 1000 + ten_thousands.n * 10000) AS i
+        FROM (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS ones
+        CROSS JOIN (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS tens
+        CROSS JOIN (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS hundreds
+        CROSS JOIN (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS thousands
+        CROSS JOIN (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS ten_thousands
+    ) AS n
+    WHERE n.i < v_expected;
+
+    -- 3. Validate the load before it can become visible.
+    SELECT COUNT(*) INTO v_loaded FROM visual_part_matches_result_stage;
+
+    IF v_loaded <> v_expected THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'sp_visual_part_matches_refresh: staged row count does not match payload length; live snapshot left untouched.';
+    END IF;
+
+    -- 4. Atomic swap — the live name always resolves to a complete snapshot.
+    RENAME TABLE visual_part_matches_result       TO visual_part_matches_result_prev,
+                 visual_part_matches_result_stage TO visual_part_matches_result,
+                 visual_part_matches_result_prev  TO visual_part_matches_result_stage;
+END $$
+
+DELIMITER ;
+
+-- ============================================================
+-- Artifact: sp_visual_part_sequence_state_get
+-- ============================================================
+
+-- ============================================================
+-- Stored Procedure: sp_visual_part_sequence_state_get
+-- Database:   mtm_mock
+-- Engine:     MySQL 5.7 (verified on 9.6)
+-- Kind:       StoredProcedure / create  (read, shape 11 of 12)
+-- Created:    2026-11-15
+-- Feature:    001-module-mock-visual-fallback (read shape 11, playbook step 3)
+-- Shape key:  part_sequence_state
+-- ============================================================
+--
+-- Parameterized read of the LIVE mirror. Returns exactly the column shape the live Infor Visual read
+-- returns, so a caller cannot distinguish cached from live (FR-004):
+--   live : OperationStatus, IsLastOperation, NextResource
+--   here : same names and order, at most one row.
+--
+-- The sequence is compared as text, exactly as it is stored. The live read converts a non-numeric
+-- sequence to "no operation", so a value that names no sequence here returns no row, which is the same
+-- answer.
+-- ============================================================
+
+USE mtm_mock;
+
+DROP PROCEDURE IF EXISTS sp_visual_part_sequence_state_get;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_visual_part_sequence_state_get(
+    IN p_part_number VARCHAR(60),
+    IN p_sequence VARCHAR(20)
+)
+BEGIN
+    DECLARE v_part_number VARCHAR(60);
+    DECLARE v_sequence VARCHAR(20);
+
+    SET v_part_number = TRIM(COALESCE(p_part_number, ''));
+    SET v_sequence = TRIM(COALESCE(p_sequence, ''));
+
+    SELECT
+        COALESCE(state.operation_status, '') AS OperationStatus,
+        state.is_last_operation AS IsLastOperation,
+        COALESCE(state.next_resource, '') AS NextResource
+    FROM visual_part_sequence_state_result AS state
+    WHERE
+        v_part_number <> ''
+        AND v_sequence <> ''
+        AND state.part_number = v_part_number
+        AND state.sequence = v_sequence
+    LIMIT 1;
+END $$
+
+DELIMITER ;
+
+-- ============================================================
+-- Artifact: sp_visual_part_sequence_state_refresh
+-- ============================================================
+
+-- ============================================================
+-- Stored Procedure: sp_visual_part_sequence_state_refresh
+-- Database:   mtm_mock
+-- Engine:     MySQL 5.7 (verified on 9.6)
+-- Kind:       StoredProcedure / create  (refresh, shape 11 of 12)
+-- Created:    2026-11-15
+-- Feature:    001-module-mock-visual-fallback (read shape 11, playbook step 3)
+-- Shape key:  part_sequence_state
+-- ============================================================
+--
+-- Purpose
+-- -------
+-- Replace the live mirror `visual_part_sequence_state_result` with a complete new result set, atomically.
+-- Readers address only the live table name, so they always observe either the complete previous
+-- snapshot or the complete new one — never a partial set (FR-006, SC-005).
+--
+-- Contract
+-- --------
+--   p_rows : JSON array of result objects. Keys are the shape's declared inputs followed by its output
+--            columns: "PartNumber", "Sequence", "OperationStatus", "IsLastOperation", "NextResource".
+--            A NULL or empty array produces an empty snapshot.
+--
+-- Steps
+-- -----
+--   1. TRUNCATE the stage twin.
+--   2. Expand p_rows into the stage twin (refreshed_utc = UTC_TIMESTAMP(), is_seed_content = 0).
+--   3. Validate: the loaded row count must equal JSON_LENGTH(p_rows); otherwise SIGNAL and abort.
+--   4. Atomic swap in ONE statement:
+--          result -> result_prev, result_stage -> result, result_prev -> result_stage
+--
+-- Any error before step 4 leaves the live table untouched. That covers a payload with two rows for the
+-- same (part, sequence), which the mirror's unique key refuses.
+-- ============================================================
+
+USE mtm_mock;
+
+DROP PROCEDURE IF EXISTS sp_visual_part_sequence_state_refresh;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_visual_part_sequence_state_refresh(
+    IN p_rows JSON
+)
+BEGIN
+    DECLARE v_expected INT DEFAULT 0;
+    DECLARE v_loaded   INT DEFAULT 0;
+
+    -- 1. Clear the stage twin (also discards any partially loaded previous attempt).
+    TRUNCATE TABLE visual_part_sequence_state_result_stage;
+
+    -- 2. Load the complete new result set into the stage twin.
+    SET v_expected = IFNULL(JSON_LENGTH(p_rows), 0);
+
+    INSERT INTO visual_part_sequence_state_result_stage (
+        part_number,
+        sequence,
+        operation_status,
+        is_last_operation,
+        next_resource,
+        refreshed_utc,
+        is_seed_content
+    )
+    SELECT
+        COALESCE(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].PartNumber'))), ''),
+        COALESCE(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].Sequence'))), ''),
+        JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].OperationStatus'))),
+        IFNULL(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].IsLastOperation')), 0),
+        JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].NextResource'))),
+        UTC_TIMESTAMP(),
+        0
+    FROM (
+        SELECT (ones.n + tens.n * 10 + hundreds.n * 100 + thousands.n * 1000 + ten_thousands.n * 10000) AS i
+        FROM (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS ones
+        CROSS JOIN (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS tens
+        CROSS JOIN (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS hundreds
+        CROSS JOIN (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS thousands
+        CROSS JOIN (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS ten_thousands
+    ) AS n
+    WHERE n.i < v_expected;
+
+    -- 3. Validate the load before it can become visible.
+    SELECT COUNT(*) INTO v_loaded FROM visual_part_sequence_state_result_stage;
+
+    IF v_loaded <> v_expected THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'sp_visual_part_sequence_state_refresh: staged row count does not match payload length; live snapshot left untouched.';
+    END IF;
+
+    -- 4. Atomic swap — the live name always resolves to a complete snapshot.
+    RENAME TABLE visual_part_sequence_state_result       TO visual_part_sequence_state_result_prev,
+                 visual_part_sequence_state_result_stage TO visual_part_sequence_state_result,
+                 visual_part_sequence_state_result_prev  TO visual_part_sequence_state_result_stage;
+END $$
+
+DELIMITER ;
+
+-- ============================================================
+-- Artifact: sp_visual_part_sequences_get
+-- ============================================================
+
+-- ============================================================
+-- Stored Procedure: sp_visual_part_sequences_get
+-- Database:   mtm_mock
+-- Engine:     MySQL 5.7 (verified on 9.6)
+-- Kind:       StoredProcedure / create  (read, shape 10 of 12)
+-- Created:    2026-11-15
+-- Feature:    001-module-mock-visual-fallback (read shape 10, playbook step 3)
+-- Shape key:  part_sequences
+-- ============================================================
+--
+-- Parameterized read of the LIVE mirror. Returns exactly the column shape the live Infor Visual read
+-- returns, so a caller cannot distinguish cached from live (FR-004):
+--   live : Sequence, Description, OperationStatus, IsLastOperation, NextResource, CancelledOnly,
+--          SequenceSource
+--   here : same names and order, with the same ordering rule.
+--
+-- The ordering is copied from GetPartSequences.sql: sequence number first, then the relation, because
+-- OwnPart sorts before Requirement and the caller takes the first row it sees for a number. A sequence
+-- is numeric in the plant's data, but the column is text, so the guard keeps a non-numeric value from
+-- sorting ahead of every real sequence.
+-- ============================================================
+
+USE mtm_mock;
+
+DROP PROCEDURE IF EXISTS sp_visual_part_sequences_get;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_visual_part_sequences_get(
+    IN p_part_number VARCHAR(60)
+)
+BEGIN
+    DECLARE v_part_number VARCHAR(60);
+
+    SET v_part_number = TRIM(COALESCE(p_part_number, ''));
+
+    SELECT
+        sequences.sequence AS Sequence,
+        COALESCE(sequences.description, '') AS Description,
+        COALESCE(sequences.operation_status, '') AS OperationStatus,
+        sequences.is_last_operation AS IsLastOperation,
+        COALESCE(sequences.next_resource, '') AS NextResource,
+        sequences.cancelled_only AS CancelledOnly,
+        sequences.sequence_source AS SequenceSource
+    FROM visual_part_sequences_result AS sequences
+    WHERE v_part_number <> '' AND sequences.part_number = v_part_number
+    ORDER BY
+        CASE
+            WHEN sequences.sequence REGEXP '^[0-9]+$' THEN CAST(sequences.sequence AS UNSIGNED)
+            ELSE 4294967295
+        END,
+        sequences.sequence,
+        sequences.sequence_source;
+END $$
+
+DELIMITER ;
+
+-- ============================================================
+-- Artifact: sp_visual_part_sequences_refresh
+-- ============================================================
+
+-- ============================================================
+-- Stored Procedure: sp_visual_part_sequences_refresh
+-- Database:   mtm_mock
+-- Engine:     MySQL 5.7 (verified on 9.6)
+-- Kind:       StoredProcedure / create  (refresh, shape 10 of 12)
+-- Created:    2026-11-15
+-- Feature:    001-module-mock-visual-fallback (read shape 10, playbook step 3)
+-- Shape key:  part_sequences
+-- ============================================================
+--
+-- Purpose
+-- -------
+-- Replace the live mirror `visual_part_sequences_result` with a complete new result set, atomically.
+-- Readers address only the live table name, so they always observe either the complete previous
+-- snapshot or the complete new one — never a partial set (FR-006, SC-005).
+--
+-- Contract
+-- --------
+--   p_rows : JSON array of result objects. Keys are the shape's declared inputs followed by its output
+--            columns: "PartNumber", "Sequence", "Description", "OperationStatus", "IsLastOperation",
+--            "NextResource", "CancelledOnly", "SequenceSource".
+--            A NULL or empty array produces an empty snapshot.
+--
+-- Steps
+-- -----
+--   1. TRUNCATE the stage twin.
+--   2. Expand p_rows into the stage twin (refreshed_utc = UTC_TIMESTAMP(), is_seed_content = 0).
+--   3. Validate: the loaded row count must equal JSON_LENGTH(p_rows); otherwise SIGNAL and abort.
+--   4. Atomic swap in ONE statement:
+--          result -> result_prev, result_stage -> result, result_prev -> result_stage
+--
+-- Any error before step 4 leaves the live table untouched. That covers a payload with two rows for the
+-- same (part, sequence, relation), which the mirror's unique key refuses.
+-- ============================================================
+
+USE mtm_mock;
+
+DROP PROCEDURE IF EXISTS sp_visual_part_sequences_refresh;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_visual_part_sequences_refresh(
+    IN p_rows JSON
+)
+BEGIN
+    DECLARE v_expected INT DEFAULT 0;
+    DECLARE v_loaded   INT DEFAULT 0;
+
+    -- 1. Clear the stage twin (also discards any partially loaded previous attempt).
+    TRUNCATE TABLE visual_part_sequences_result_stage;
+
+    -- 2. Load the complete new result set into the stage twin.
+    SET v_expected = IFNULL(JSON_LENGTH(p_rows), 0);
+
+    INSERT INTO visual_part_sequences_result_stage (
+        part_number,
+        sequence,
+        description,
+        operation_status,
+        is_last_operation,
+        next_resource,
+        cancelled_only,
+        sequence_source,
+        refreshed_utc,
+        is_seed_content
+    )
+    SELECT
+        COALESCE(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].PartNumber'))), ''),
+        COALESCE(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].Sequence'))), ''),
+        JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].Description'))),
+        JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].OperationStatus'))),
+        IFNULL(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].IsLastOperation')), 0),
+        JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].NextResource'))),
+        IFNULL(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].CancelledOnly')), 0),
+        COALESCE(JSON_UNQUOTE(JSON_EXTRACT(p_rows, CONCAT('$[', n.i, '].SequenceSource'))), ''),
+        UTC_TIMESTAMP(),
+        0
+    FROM (
+        SELECT (ones.n + tens.n * 10 + hundreds.n * 100 + thousands.n * 1000 + ten_thousands.n * 10000) AS i
+        FROM (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS ones
+        CROSS JOIN (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS tens
+        CROSS JOIN (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS hundreds
+        CROSS JOIN (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS thousands
+        CROSS JOIN (SELECT 0 AS n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+              UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS ten_thousands
+    ) AS n
+    WHERE n.i < v_expected;
+
+    -- 3. Validate the load before it can become visible.
+    SELECT COUNT(*) INTO v_loaded FROM visual_part_sequences_result_stage;
+
+    IF v_loaded <> v_expected THEN
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'sp_visual_part_sequences_refresh: staged row count does not match payload length; live snapshot left untouched.';
+    END IF;
+
+    -- 4. Atomic swap — the live name always resolves to a complete snapshot.
+    RENAME TABLE visual_part_sequences_result       TO visual_part_sequences_result_prev,
+                 visual_part_sequences_result_stage TO visual_part_sequences_result,
+                 visual_part_sequences_result_prev  TO visual_part_sequences_result_stage;
+END $$
+
+DELIMITER ;
+
+-- ============================================================
 -- Artifact: sp_visual_part_warehouse_quantities_get
 -- ============================================================
 
@@ -795,6 +1476,42 @@ FROM (
         CASE WHEN COUNT(*) = 0 OR SUM(is_seed_content) = COUNT(*) THEN 1 ELSE 0 END AS is_seed_content,
         COUNT(*) AS row_count
     FROM visual_work_order_search_result
+
+    UNION ALL
+
+    SELECT
+        'part_matches' AS shape_key,
+        MAX(refreshed_utc) AS refreshed_utc,
+        CASE WHEN COUNT(*) = 0 OR SUM(is_seed_content) = COUNT(*) THEN 1 ELSE 0 END AS is_seed_content,
+        COUNT(*) AS row_count
+    FROM visual_part_matches_result
+
+    UNION ALL
+
+    SELECT
+        'part_sequences' AS shape_key,
+        MAX(refreshed_utc) AS refreshed_utc,
+        CASE WHEN COUNT(*) = 0 OR SUM(is_seed_content) = COUNT(*) THEN 1 ELSE 0 END AS is_seed_content,
+        COUNT(*) AS row_count
+    FROM visual_part_sequences_result
+
+    UNION ALL
+
+    SELECT
+        'part_sequence_state' AS shape_key,
+        MAX(refreshed_utc) AS refreshed_utc,
+        CASE WHEN COUNT(*) = 0 OR SUM(is_seed_content) = COUNT(*) THEN 1 ELSE 0 END AS is_seed_content,
+        COUNT(*) AS row_count
+    FROM visual_part_sequence_state_result
+
+    UNION ALL
+
+    SELECT
+        'die_search' AS shape_key,
+        MAX(refreshed_utc) AS refreshed_utc,
+        CASE WHEN COUNT(*) = 0 OR SUM(is_seed_content) = COUNT(*) THEN 1 ELSE 0 END AS is_seed_content,
+        COUNT(*) AS row_count
+    FROM visual_die_search_result
 ) AS f
 WHERE p_shape_key IS NULL OR f.shape_key = p_shape_key
 ORDER BY f.shape_key;

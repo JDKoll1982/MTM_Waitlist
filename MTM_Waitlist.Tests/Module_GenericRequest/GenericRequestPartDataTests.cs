@@ -50,7 +50,7 @@ public sealed class GenericRequestPartDataTests
     }
 
     [TestMethod]
-    public async Task Audit_GenericRequestPartDataTests_AnUnreachableSourceMakesTheCompletionsUnavailable()
+    public async Task Audit_GenericRequestPartDataTests_AnUnreachableSourceMakesTheCompletionsUnavailableWhenThereIsNoMirror()
     {
         var partData = Create(
             _ => VisualQueryOutcome.Unreachable("the plant system is down"),
@@ -60,6 +60,60 @@ public sealed class GenericRequestPartDataTests
 
         Assert.AreEqual(GenericRequestPresentation.Unavailable, result.Presentation);
         Assert.AreEqual(0, result.Count);
+    }
+
+    [TestMethod]
+    public async Task Audit_GenericRequestPartDataTests_AnUnreachableSourceIsAnsweredFromTheMirrorInsteadOfRefused()
+    {
+        var executor = new FakeVisualQueryExecutor((_, _) => VisualQueryOutcome.Unreachable("the plant system is down"));
+        var mirror = new StubMirrorStore(
+            ("sp_visual_part_matches_get", [Row(("PartNumber", "100-AAA"), ("Description", "Bracket"))]));
+
+        var partData = GenericRequestReadShapes.PartData(
+            executor,
+            new WipFloorInventoryService(new StubMySqlHelperServer([Row(("PartNumber", "200-BBB"))])),
+            mirror: mirror);
+
+        var result = await partData.ReadCompletionsAsync("100");
+
+        Assert.AreEqual(
+            GenericRequestPresentation.Populated,
+            result.Presentation,
+            "the mirror answers the completions when the plant system cannot be reached, as the work-order flow does");
+        Assert.AreEqual("100-AAA", result.Items[0].PartNumber);
+        Assert.AreEqual("Bracket", result.Items[0].Description);
+        CollectionAssert.AreEqual(new[] { "sp_visual_part_matches_get" }, mirror.Reads);
+    }
+
+    [TestMethod]
+    public async Task Audit_GenericRequestPartDataTests_TheSequencesAreAnsweredFromTheMirrorWhenThePlantSystemIsDown()
+    {
+        var executor = new FakeVisualQueryExecutor((_, _) => VisualQueryOutcome.Unreachable("the plant system is down"));
+        var mirror = new StubMirrorStore(
+            ("sp_visual_part_sequences_get",
+            [
+                Row(
+                    ("Sequence", "020"),
+                    ("Description", "CNC LATHE"),
+                    ("OperationStatus", "R"),
+                    ("IsLastOperation", 0),
+                    ("NextResource", "GRIND"),
+                    ("CancelledOnly", 0),
+                    ("SequenceSource", "OwnPart")),
+            ]));
+
+        var partData = GenericRequestReadShapes.PartData(
+            executor,
+            new WipFloorInventoryService(new StubMySqlHelperServer([])),
+            mirror: mirror);
+
+        var result = await partData.ReadSequencesAsync("100-AAA");
+
+        Assert.AreEqual(GenericRequestPresentation.Populated, result.Presentation);
+        Assert.AreEqual(1, result.Count);
+        Assert.AreEqual("20", result.Items[0].Sequence, "a cached 020 is the same sequence as the floor's 20");
+        Assert.AreEqual("GRIND", result.Items[0].NextResource, "the cached row still carries what the WIP tag prints");
+        CollectionAssert.AreEqual(new[] { "sp_visual_part_sequences_get" }, mirror.Reads);
     }
 
     [TestMethod]
@@ -177,7 +231,7 @@ public sealed class GenericRequestPartDataTests
     public async Task Audit_GenericRequestPartDataTests_ASettledUnreachableVerdictAnswersWithoutTouchingVisual()
     {
         var executor = new FakeVisualQueryExecutor(VisualQueryOutcome.Ok([]));
-        var partData = new GenericRequestPartData(
+        var partData = GenericRequestReadShapes.PartData(
             executor,
             new WipFloorInventoryService(new StubMySqlHelperServer([])),
             new StubVisualReachability(VisualReadStatus.Cached));
@@ -200,7 +254,7 @@ public sealed class GenericRequestPartDataTests
     {
         var executor = new FakeVisualQueryExecutor((script, _) => visual(script));
         var floor = new WipFloorInventoryService(new StubMySqlHelperServer(floorRows));
-        return new GenericRequestPartData(executor, floor);
+        return GenericRequestReadShapes.PartData(executor, floor);
     }
 
     internal static Dictionary<string, object?> Row(params (string Key, object? Value)[] values)

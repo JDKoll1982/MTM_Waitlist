@@ -240,23 +240,31 @@ public sealed class NewRequestPartSearchViewModelTests
     }
 
     [TestMethod]
-    public void ViewModel_NewRequestPartSearchViewModelTests_TheSearch_IsLiveOnlyWithNoMirrorDeclarationAndNoCachedShape()
+    public void ViewModel_NewRequestPartSearchViewModelTests_TheSearch_IsLiveOnlyEvenThoughAShapeNowServesTheGenericRequest()
     {
-        // FR-084: a contains-search over every part is not a mirrorable shape, so this read must never gain a
-        // catalog entry — and the service must never be given the fallback that would serve cached rows.
+        // FR-084 wrote this read off as "not a mirrorable shape", and the generic work centre request has since
+        // needed exactly that mirror: shape 9 (part_matches) answers the same script for that flow, because a
+        // requester cannot complete a part number at all while Infor Visual is unreachable. What FR-084 protects is
+        // this screen's behaviour, so the rule is stated here against the service rather than against the catalog:
+        // the fuzzy part search still reads live only, and it is never handed the fallback that would serve cached
+        // rows into the operator's part list.
         Assert.IsTrue(
             File.Exists(Path.Combine(RepositoryPatternScan.FindRepositoryRoot(), PartMatchSearchService.ScriptRelativePath)),
             "The live read's checked-in script must exist, because a missing script reads to the operator as an outage.");
 
         var catalogued = VisualReadShapeCatalog.Create()
-            .Any(shape => string.Equals(
+            .Where(shape => string.Equals(
                 shape.SourceScriptRelativePath,
                 PartMatchSearchService.ScriptRelativePath,
-                StringComparison.OrdinalIgnoreCase));
+                StringComparison.OrdinalIgnoreCase))
+            .Select(shape => shape.Key)
+            .ToArray();
 
-        Assert.IsFalse(
+        CollectionAssert.AreEquivalent(
+            new[] { "part_matches" },
             catalogued,
-            "The fuzzy part search must have no mirror declaration and no cached read shape (FR-084).");
+            "Exactly one shape serves this script, and it is the generic request's: a second declaration would mean "
+            + "two mirrors of one read.");
 
         var dependencies = typeof(PartMatchSearchService)
             .GetConstructors()

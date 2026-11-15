@@ -111,6 +111,13 @@ A handler reads a generic part request's card and sees the part, the sequence, a
 - **FR-016**: The request MUST record the part, the chosen sequence, which source supplied the sequence, the quantity shown and the system that supplied it.
 - **FR-017**: Where a system cannot be reached, the step MUST report it unavailable with the time of the attempt and a retry, MUST accept no unverified part or sequence, and MUST NOT substitute a cached, mirror, sample or fabricated sequence list or quantity.
 
+  > **Amended 2026-11-15 (owner decision).** The Infor Visual half of this requirement is superseded: the sequence
+  > list, the operation state and the quantity now travel read shapes 10, 11 and 7, so a plant system that cannot be
+  > reached is answered from the `mtm_mock` mirror exactly as the work-order flow's reads are, and the generic
+  > request keeps working off the plant network. What survives unchanged is the part about *not inventing*: a read
+  > that fails, or a mirror that holds nothing, still reports unavailable (or empty) rather than a substituted or
+  > sample value, and the WIP floor half is still read live because it is an internal store.
+
 **Reaching the card**
 
 - **FR-018**: A generic part request's card MUST show the part, the chosen sequence and the quantity with its source.

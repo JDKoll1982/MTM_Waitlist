@@ -9,8 +9,13 @@
 -- Parameters:
 --   @PartNumber - the part number, matched verbatim against WORK_ORDER.PART_ID / REQUIREMENT.PART_ID
 --
--- LIVE ONLY. Deliberately NOT a read shape: spec 017 FR-017 forbids substituting a cached or mirrored
--- sequence list, so this script has no entry in VisualReadShapeCatalog and no mtm_mock mirror.
+-- READ SHAPE 10 (part_sequences). This script is the live half of the mirror declaration in
+-- VisualReadShapeCatalog: the caller (GenericRequestPartData.ReadSequencesAsync) asks the shape, which
+-- attempts this read and serves the mtm_mock mirror when the plant system cannot be reached, exactly as
+-- the work-order flow's reads do. The mirror's population read is
+-- Database/InforVisual/Queues/Module_Mock/Populations/part_sequences_population.sql, and it must keep the
+-- projection and the ordering below identical or the cached answer stops being the same answer (FR-004).
+-- The domain it holds is the OPEN work orders, which is what the ranking below offers.
 --
 -- HOW A SEQUENCE IS TYPED — the plant's own rule, given by IT on 2026-11-04 and matching the tag print:
 --   "It reviews the ops. If it's the last op available of the work order it concludes that and points to a

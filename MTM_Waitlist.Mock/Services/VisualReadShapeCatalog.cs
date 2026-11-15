@@ -3,7 +3,7 @@ using MTM_Waitlist.Mock.Models;
 namespace MTM_Waitlist.Mock.Services;
 
 /// <summary>
-/// The shipped read-shape catalog — the eight shapes the service refreshes.
+/// The shipped read-shape catalog — the twelve shapes the service refreshes.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -22,7 +22,7 @@ namespace MTM_Waitlist.Mock.Services;
 /// </remarks>
 public static class VisualReadShapeCatalog
 {
-    /// <summary>Creates the eight shipped read-shape definitions.</summary>
+    /// <summary>Creates the twelve shipped read-shape definitions.</summary>
     public static IReadOnlyList<VisualReadShape> Create() =>
     [
         new VisualReadShape
@@ -189,6 +189,89 @@ public static class VisualReadShapeCatalog
                 new VisualShapeColumn("WorkCenter", "nvarchar(32)"),
                 new VisualShapeColumn("Status", "nvarchar(4)"),
                 new VisualShapeColumn("WantDate", "date")
+            ]
+        },
+        new VisualReadShape
+        {
+            Key = "part_matches",
+            Module = VisualReadShapeModule.ModuleWaitlist,
+            SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartMatches.sql",
+            PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/part_matches_population.sql",
+            InputParameters =
+            [
+                // The typed term is what an operator searches BY, so each mirror row carries its own part number
+                // in it and the read procedure filters on the output columns.
+                new VisualShapeParameter("Term", "nvarchar(190)", IsRequired: true)
+            ],
+            OutputColumns =
+            [
+                new VisualShapeColumn("PartNumber", "nvarchar(60)"),
+                new VisualShapeColumn("Description", "nvarchar(255)")
+            ]
+        },
+        new VisualReadShape
+        {
+            Key = "part_sequences",
+            Module = VisualReadShapeModule.ModuleWaitlist,
+            SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartSequences.sql",
+            PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/part_sequences_population.sql",
+            InputParameters =
+            [
+                new VisualShapeParameter("PartNumber", "nvarchar(60)", IsRequired: true)
+            ],
+            OutputColumns =
+            [
+                // One row per (sequence, relation). SequenceSource is kept because the caller merges the rows a
+                // number is named by into one option, and IsLastOperation/NextResource carry the plant's typing
+                // rule; CancelledOnly marks a sequence none of whose operations is still live.
+                new VisualShapeColumn("Sequence", "nvarchar(10)"),
+                new VisualShapeColumn("Description", "nvarchar(255)"),
+                new VisualShapeColumn("OperationStatus", "nvarchar(1)"),
+                new VisualShapeColumn("IsLastOperation", "int"),
+                new VisualShapeColumn("NextResource", "nvarchar(255)"),
+                new VisualShapeColumn("CancelledOnly", "int"),
+                new VisualShapeColumn("SequenceSource", "nvarchar(20)")
+            ]
+        },
+        new VisualReadShape
+        {
+            Key = "part_sequence_state",
+            Module = VisualReadShapeModule.ModuleWaitlist,
+            SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartSequenceState.sql",
+            PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/part_sequence_state_population.sql",
+            InputParameters =
+            [
+                new VisualShapeParameter("PartNumber", "nvarchar(60)", IsRequired: true),
+                new VisualShapeParameter("Sequence", "nvarchar(20)", IsRequired: true)
+            ],
+            OutputColumns =
+            [
+                new VisualShapeColumn("OperationStatus", "nvarchar(1)"),
+                new VisualShapeColumn("IsLastOperation", "int"),
+                new VisualShapeColumn("NextResource", "nvarchar(255)")
+            ]
+        },
+        new VisualReadShape
+        {
+            Key = "die_search",
+            Module = VisualReadShapeModule.ModuleWaitlist,
+            SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Waitlist/Queries/GetDieSearch.sql",
+            PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/die_search_population.sql",
+            InputParameters =
+            [
+                // The term is a die number or a part number, so each mirror row carries the term that named the
+                // die: the die's own number for a direct match, the part's number for an alternate or a history.
+                new VisualShapeParameter("Term", "nvarchar(190)", IsRequired: true)
+            ],
+            OutputColumns =
+            [
+                // Exactly the live read's projection. The association rank is not carried: the read procedure
+                // derives it from Association, so a die under two associations is still reported once, under the
+                // strongest — which is what keeps the projection identical to the live answer.
+                new VisualShapeColumn("DieNumber", "nvarchar(60)"),
+                new VisualShapeColumn("Description", "nvarchar(255)"),
+                new VisualShapeColumn("Association", "nvarchar(16)"),
+                new VisualShapeColumn("Location", "nvarchar(64)")
             ]
         }
     ];

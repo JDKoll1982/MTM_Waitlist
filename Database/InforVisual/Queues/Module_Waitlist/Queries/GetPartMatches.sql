@@ -13,10 +13,13 @@
 --           with a known part-number prefix (MMC coil, MMF flatstock, FGT die). The application's input
 --           rule is PartMatchSearchInput.Normalize; this script matches what it is handed.
 --
--- LIVE ONLY. This script is deliberately NOT a read shape: it has no entry in VisualReadShapeCatalog and
--- no mtm_mock mirror, because a contains-search over every part is not a mirrorable shape (FR-084,
--- research R7). Its caller is PartMatchSearchService, which reads it through the same live executor every
--- other Infor Visual read uses and never reaches for cached rows.
+-- TWO CALLERS, TWO RULES. PartMatchSearchService (the incorrect-part screen) reads this script live only and
+-- never reaches for cached rows, which is what FR-084 protects for that screen: a stale part list must not
+-- decide a correction. The generic work centre request's part page reads the same question through read shape
+-- 9 (part_matches), which attempts this read and serves the mtm_mock mirror when the plant system cannot be
+-- reached, so a requester can still complete a part number off the plant network. The mirror's population read
+-- is Database/InforVisual/Queues/Module_Mock/Populations/part_matches_population.sql, and it must keep this
+-- projection and this ordering identical or the cached answer stops being the same answer (FR-004).
 --
 -- The exact match is returned FIRST when it exists. The caller resolves it at once in that case rather
 -- than offering a list, which is the rule FR-083 asks for; ordering it first means the same answer is

@@ -24,9 +24,10 @@ namespace MTM_Waitlist.GenericRequest.Services;
 /// store could not be reached, which is what keeps a generic request as truthful as a work-order one (FR-028).
 /// </para>
 /// <para>
-/// The die answer is read here (020) through <see cref="IGenericRequestDieData"/>: a live Infor Visual search that
-/// answers a die number or a part number, lists every die the match owns, and reports an unreachable source rather
-/// than substituting one (FR-002, FR-005, FR-015). The scrap type is read here (019): the plant's one shared list,
+/// The die answer is read here (020) through <see cref="IGenericRequestDieData"/>: an Infor Visual search that
+/// answers a die number or a part number, lists every die the match owns, and reports a failed read rather than
+/// substituting one (FR-002, FR-005). Its read travels read shape 12, so an unreachable plant system is answered
+/// from the mtm_mock mirror. The scrap type is read here (019): the plant's one shared list,
 /// with any type the arrangement records appended, and no job consulted. Dunnage shipped with its own seam (018):
 /// the dunnage step reads <see cref="IDunnageCatalogueReader"/> directly, and this class reads it only at raise time
 /// to record whether the chosen part is still offered. The part answer ships too: it lives on

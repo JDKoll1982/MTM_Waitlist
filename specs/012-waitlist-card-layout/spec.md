@@ -246,6 +246,12 @@ Five answers join the New Request workflow, and each appears on the matching car
 - FR-082: On the two wrong-part Items the incorrect part MUST be typed through a fuzzy search rather than free text, with the term upper-cased and zero-padded to ten characters when it starts with a known prefix.
 - FR-083: A term matching a part exactly MUST resolve at once, and a term that matches none exactly MUST offer a list of every part whose number contains the term.
 - FR-084: The fuzzy search MUST read the plant system live and MUST NOT be cached.
+
+  > **Amended 2026-11-15 (owner decision).** Still true of this screen: `PartMatchSearchService` takes the live
+  > executor alone and never resolves the cached fallback. What changed is the mirror's existence: the generic work
+  > centre request needs the same question answered off the plant network, so `GetPartMatches.sql` is read shape 9
+  > (`part_matches`) for that flow. Two callers, two rules — a stale list must not decide a correction here, while a
+  > requester who cannot reach the plant at all is better served than by an unusable page.
 - FR-085: When the plant system cannot be reached the operator MUST be told the search is unavailable and the value they typed MUST be used as entered.
 - FR-086: An assist coil turn MUST ask for the weight of the coil as a required numeric answer.
 - FR-087: The four returning Items MUST ask how many skids must be picked up, as a numeric answer defaulting to one.

@@ -95,7 +95,7 @@ For this repository, prioritize MCP-backed validation for:
   `mtm_receiving_application` are the operational stores: every read and write goes to MySQL, and a failure is
   reported as a per-screen unavailable state (`Store`/`LastAttemptUtc`/`RetryCount`/`NextRetryUtc` + a manual
   retry), never substituted with sample rows and never turned into a persistent banner (FR-001, FR-021).
-- **External reads fall back automatically, never on request.** Only Infor Visual reads use the cache: the five
+- **External reads fall back automatically, never on request.** Only Infor Visual reads use the cache: the twelve
   read shapes are resolved through `MTM_Waitlist.Mock` (`IVisualReadFallback<TRequest,TRow>`), which serves
   `sp_visual_<shape>_get` from the `mtm_mock` mirror with an identical result shape (FR-002/FR-004) when the
   reachability probe's **settled verdict** is `Cached` (it skips the live attempt entirely, and the verdict is
@@ -103,6 +103,11 @@ For this repository, prioritize MCP-backed validation for:
   **unreachable**. The verdict is the probe's, never the read's own failure; one successful probe returns it to
   `Live` and the next read goes live again. A **reachable-but-empty** live result is a real answer and is never
   replaced by cached data. The cache is never consulted for an internal-store read (FR-027).
+- **The generic request's reads travel shapes like every other Visual read.** Its part completions, sequence list,
+  operation state and part-wide quantity are shapes 9, 10, 11 and 7, and its die search is shape 12, so the whole
+  generic flow keeps working off the plant network. Do not reach `IVisualQueryExecutor` directly from a generic
+  request read: that is what left those screens answering "unavailable" while the work-order flow kept working
+  (`VisualReadRouteAuditTests`).
 - **The application never refreshes the cache.** Keeping the mirror warm is the on-host
   `MTM_Waitlist.Mock.Service`'s job (3-hour default cadence on the local-midnight grid). The app only *probes*
   reachability and reports cached-data age (FR-025).

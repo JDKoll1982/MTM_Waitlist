@@ -255,11 +255,13 @@ public static partial class ServiceRegistrationExtensions
         services.AddSingleton<MTM_Waitlist.GenericRequest.Contracts.IGenericRequestStepData, MTM_Waitlist.GenericRequest.Services.GenericRequestLiveStepData>();
 
         // The part answer's own seam (017). The part step asks it directly, and the wide seam above forwards its
-        // sequence read to the same instance, so both routes reach one live implementation.
+        // sequence read to the same instance, so both routes reach one live implementation. Its four Infor Visual
+        // reads are read shapes 9, 10, 11 and 7, so each one falls back to the mtm_mock mirror when the plant
+        // system cannot be reached.
         services.AddSingleton<MTM_Waitlist.GenericRequest.Contracts.IGenericRequestPartData, MTM_Waitlist.GenericRequest.Data.Services.GenericRequestPartData>();
 
         // The die answer's own seam (020). The die step asks the wide seam above, which forwards to this instance,
-        // so one live Infor Visual search answers every route.
+        // so one die search answers every route. It travels read shape 12 for the same reason.
         services.AddSingleton<MTM_Waitlist.GenericRequest.Contracts.IGenericRequestDieData, MTM_Waitlist.GenericRequest.Data.Services.GenericRequestDieData>();
 
         services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestWorkCenterViewModel>();

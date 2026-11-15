@@ -343,6 +343,121 @@ public sealed class VisualReadFallbackParityTests
                 + string.Join(Environment.NewLine, violations));
     }
 
+    // ---- Shapes 9 to 12: the generic request's reads --------------------------------------------
+
+    [TestMethod]
+    public async Task Service_VisualReadFallbackParityTests_PartMatches_UnreachableServesMirrorThroughShapeProcedure()
+    {
+        var cache = new RecordingMirrorCache([Row(("PartNumber", "100-AAA"), ("Description", "Bracket"))]);
+        var fallback = new VisualPartMatchesFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Unreachable("down")), cache);
+
+        var rows = await fallback.ReadAsync(new VisualPartMatchesRequest("100-AAA"));
+
+        Assert.AreEqual(1, rows.Count);
+        Assert.AreEqual("100-AAA", rows[0].PartNumber);
+        Assert.AreEqual("Bracket", rows[0].Description);
+        Assert.AreEqual("sp_visual_part_matches_get", cache.LastProcedureName);
+        Assert.AreEqual(MySqlDatabaseTarget.MtmMock, cache.LastTarget);
+        Assert.AreEqual("100-AAA", cache.LastParameters?["p_term"]);
+    }
+
+    [TestMethod]
+    public async Task Service_VisualReadFallbackParityTests_PartMatches_EmptyLiveAnswerIsNotReplacedByCache()
+    {
+        var cache = new RecordingMirrorCache([Row(("PartNumber", "SHOULD-NOT-APPEAR"))]);
+        var fallback = new VisualPartMatchesFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Ok([])), cache);
+
+        var result = await fallback.ReadWithProvenanceAsync(new VisualPartMatchesRequest("100-AAA"));
+
+        Assert.AreEqual(0, result.Value.Count);
+        Assert.AreEqual(VisualReadSource.ServedFromLive, result.Source);
+        Assert.AreEqual(0, cache.ReadCount, "An empty live result is a real answer and must not consult the cache.");
+    }
+
+    [TestMethod]
+    public async Task Service_VisualReadFallbackParityTests_PartSequences_UnreachableServesMirrorThroughShapeProcedure()
+    {
+        var cache = new RecordingMirrorCache(
+        [
+            Row(
+                ("Sequence", "020"),
+                ("Description", "CNC LATHE"),
+                ("OperationStatus", "R"),
+                ("IsLastOperation", 0),
+                ("NextResource", "GRIND"),
+                ("CancelledOnly", 0),
+                ("SequenceSource", "OwnPart")),
+        ]);
+        var fallback = new VisualPartSequencesFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Unreachable("down")), cache);
+
+        var rows = await fallback.ReadAsync(new VisualPartSequencesRequest("100-AAA"));
+
+        Assert.AreEqual(1, rows.Count);
+        Assert.AreEqual("020", rows[0].Sequence);
+        Assert.AreEqual("CNC LATHE", rows[0].Description);
+        Assert.AreEqual("GRIND", rows[0].NextResource);
+        Assert.AreEqual("OwnPart", rows[0].SequenceSource);
+        Assert.AreEqual("sp_visual_part_sequences_get", cache.LastProcedureName);
+        Assert.AreEqual("100-AAA", cache.LastParameters?["p_part_number"]);
+    }
+
+    [TestMethod]
+    public async Task Service_VisualReadFallbackParityTests_PartSequenceState_UnreachableServesMirrorThroughShapeProcedure()
+    {
+        var cache = new RecordingMirrorCache(
+        [
+            Row(("OperationStatus", "R"), ("IsLastOperation", 1), ("NextResource", "GRIND")),
+        ]);
+        var fallback = new VisualPartSequenceStateFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Unreachable("down")), cache);
+
+        var rows = await fallback.ReadAsync(new VisualPartSequenceStateRequest("100-AAA", "020"));
+
+        Assert.AreEqual(1, rows.Count);
+        Assert.AreEqual("R", rows[0].OperationStatus);
+        Assert.AreEqual(1, rows[0].IsLastOperation);
+        Assert.AreEqual("GRIND", rows[0].NextResource);
+        Assert.AreEqual("sp_visual_part_sequence_state_get", cache.LastProcedureName);
+        Assert.AreEqual("100-AAA", cache.LastParameters?["p_part_number"]);
+        Assert.AreEqual("020", cache.LastParameters?["p_sequence"]);
+    }
+
+    [TestMethod]
+    public async Task Service_VisualReadFallbackParityTests_DieSearch_UnreachableServesMirrorThroughShapeProcedure()
+    {
+        var cache = new RecordingMirrorCache(
+        [
+            Row(
+                ("DieNumber", "FGT0602-01"),
+                ("Description", "BASE DIE"),
+                ("Association", "Explicit"),
+                ("Location", "U-B0-01")),
+        ]);
+        var fallback = new VisualDieSearchFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Unreachable("down")), cache);
+
+        var rows = await fallback.ReadAsync(new VisualDieSearchRequest("PART-9003"));
+
+        Assert.AreEqual(1, rows.Count);
+        Assert.AreEqual("FGT0602-01", rows[0].DieNumber);
+        Assert.AreEqual("BASE DIE", rows[0].Description);
+        Assert.AreEqual("Explicit", rows[0].Association);
+        Assert.AreEqual("U-B0-01", rows[0].Location);
+        Assert.AreEqual("sp_visual_die_search_get", cache.LastProcedureName);
+        Assert.AreEqual("PART-9003", cache.LastParameters?["p_term"]);
+    }
+
+    [TestMethod]
+    public async Task Service_VisualReadFallbackParityTests_DieSearch_EmptyLiveAnswerIsNotReplacedByCache()
+    {
+        var cache = new RecordingMirrorCache([Row(("DieNumber", "SHOULD-NOT-APPEAR"))]);
+        var fallback = new VisualDieSearchFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Ok([])), cache);
+
+        var result = await fallback.ReadWithProvenanceAsync(new VisualDieSearchRequest("PART-9003"));
+
+        Assert.AreEqual(0, result.Value.Count);
+        Assert.AreEqual(VisualReadSource.ServedFromLive, result.Source);
+        Assert.AreEqual(0, cache.ReadCount, "An empty live result is a real answer and must not consult the cache.");
+    }
+
     /// <summary>
     /// A live script receives its inputs by name, so a name the script does not declare is not a build
     /// error: the server rejects the batch with SQL error 137 ("Must declare the scalar variable @X")
@@ -364,6 +479,10 @@ public sealed class VisualReadFallbackParityTests
             ("inventory_locations", executor => new VisualInventoryLocationsFallback(executor).ReadAsync(new VisualInventoryLocationRequest("P-1"))),
             ("disposition_input", executor => new VisualDispositionInputFallback(executor).ReadAsync(new VisualDispositionInputRequest("WO-1", "P-1", "100-12"))),
             ("employee_by_number", executor => new VisualEmployeeByNumberFallback(executor).ReadAsync(new VisualEmployeeByNumberRequest("6229"))),
+            ("part_matches", executor => new VisualPartMatchesFallback(executor).ReadAsync(new VisualPartMatchesRequest("100"))),
+            ("part_sequences", executor => new VisualPartSequencesFallback(executor).ReadAsync(new VisualPartSequencesRequest("P-1"))),
+            ("part_sequence_state", executor => new VisualPartSequenceStateFallback(executor).ReadAsync(new VisualPartSequenceStateRequest("P-1", "020"))),
+            ("die_search", executor => new VisualDieSearchFallback(executor).ReadAsync(new VisualDieSearchRequest("FGT0602-01"))),
         };
 
         var violations = new List<string>();

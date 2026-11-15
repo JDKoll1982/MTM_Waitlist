@@ -11,7 +11,7 @@ namespace MTM_Waitlist.Mock.DependencyInjection;
 /// Registers the in-app Infor Visual read fallback.
 /// </summary>
 /// <remarks>
-/// The detector, the read-status surface, its probe driver, the freshness read, and the five shape fallbacks
+/// The detector, the read-status surface, its probe driver, the freshness read, and the twelve shape fallbacks
 /// are registered here rather than in the application so the library owns its own composition, and so a host
 /// that only needs the cache read can opt in. The fallbacks resolve the mirror through whatever
 /// <c>IMySqlHelperServer</c> the host has already registered, so this package never constructs database
@@ -25,7 +25,7 @@ namespace MTM_Waitlist.Mock.DependencyInjection;
 public static class MockServiceRegistrationExtensions
 {
     /// <summary>
-    /// Adds the reachability detector, the read-status surface, the probe driver, and the five
+    /// Adds the reachability detector, the read-status surface, the probe driver, and the twelve
     /// <c>IVisualReadFallback</c> implementations.
     /// </summary>
     /// <param name="services">The service collection to add to.</param>
@@ -60,7 +60,7 @@ public static class MockServiceRegistrationExtensions
         services.AddSingleton<IVisualVerdictPrimer>(provider =>
             (VisualReachabilityProbeHost)provider.GetRequiredService<IVisualReachabilityProbeHost>());
 
-        // One fallback per read shape. An eighth shape adds one line here and changes nothing else.
+        // One fallback per read shape. A thirteenth shape adds one line here and changes nothing else.
         services.AddSingleton<IVisualReadFallback<VisualWorkOrderLookupRequest, VisualWorkOrderLookupRow>, VisualWorkOrderLookupFallback>();
         services.AddSingleton<IVisualReadFallback<VisualOperationSequenceRequest, VisualOperationSequenceRow>, VisualOperationSequencesFallback>();
         services.AddSingleton<IVisualReadFallback<VisualSubordinatePartRequest, VisualSubordinatePartRow>, VisualSubordinatePartsFallback>();
@@ -69,6 +69,10 @@ public static class MockServiceRegistrationExtensions
         services.AddSingleton<IVisualReadFallback<VisualEmployeeByNumberRequest, VisualEmployeeByNumberRow>, VisualEmployeeByNumberFallback>();
         services.AddSingleton<IVisualReadFallback<VisualPartWarehouseQuantitiesRequest, VisualPartWarehouseQuantitiesRow>, VisualPartWarehouseQuantitiesFallback>();
         services.AddSingleton<IVisualReadFallback<VisualWorkOrderSearchRequest, VisualWorkOrderSearchRow>, VisualWorkOrderSearchFallback>();
+        services.AddSingleton<IVisualReadFallback<VisualPartMatchesRequest, VisualPartMatchesRow>, VisualPartMatchesFallback>();
+        services.AddSingleton<IVisualReadFallback<VisualPartSequencesRequest, VisualPartSequencesRow>, VisualPartSequencesFallback>();
+        services.AddSingleton<IVisualReadFallback<VisualPartSequenceStateRequest, VisualPartSequenceStateRow>, VisualPartSequenceStateFallback>();
+        services.AddSingleton<IVisualReadFallback<VisualDieSearchRequest, VisualDieSearchRow>, VisualDieSearchFallback>();
 
         // On-demand refresh client (T119). It resolves its endpoint and the user name it presents from the
         // environment first and the MockServiceClient section second; with neither installed it reports

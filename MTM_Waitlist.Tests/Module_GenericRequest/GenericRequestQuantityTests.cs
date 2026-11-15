@@ -124,7 +124,7 @@ public sealed class GenericRequestQuantityTests
                 ? VisualQueryOutcome.Unreachable("the plant system is down")
                 : VisualQueryOutcome.Ok([Row(("WarehouseQuantity", 30))]));
 
-        var partData = new GenericRequestPartData(executor, new WipFloorInventoryService(floor));
+        var partData = GenericRequestReadShapes.PartData(executor, new WipFloorInventoryService(floor));
 
         var reading = await partData.ReadQuantityAsync("100-AAA", "20");
 
@@ -154,7 +154,7 @@ public sealed class GenericRequestQuantityTests
                 ? visual(script, parameters)
                 : VisualQueryOutcome.Ok([Row(("WarehouseQuantity", visualFigure))]));
 
-        return new GenericRequestPartData(executor, new WipFloorInventoryService(floor));
+        return GenericRequestReadShapes.PartData(executor, new WipFloorInventoryService(floor));
     }
 
     private static Dictionary<string, object?> Row(params (string Key, object? Value)[] values)

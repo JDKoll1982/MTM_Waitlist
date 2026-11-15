@@ -37,7 +37,7 @@ public sealed class WorkOrderSearchShapeParityTests
     {
         var shapes = VisualReadShapeCatalog.Create();
 
-        Assert.AreEqual(8, shapes.Count, "the count moved from seven to eight deliberately");
+        Assert.AreEqual(12, shapes.Count, "the count moved from seven to eight deliberately, and to twelve with the four generic-request reads");
         Assert.AreEqual(
             1,
             shapes.Count(shape => string.Equals(shape.Key, ShapeKey, StringComparison.Ordinal)),
