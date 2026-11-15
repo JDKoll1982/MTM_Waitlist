@@ -28,6 +28,21 @@ public static class PictureCopyHoldPolicy
 {
     /// <summary>Whether the launch window stays on screen for <paramref name="outcome"/>.</summary>
     /// <param name="outcome">Where the launch ended.</param>
-    /// <returns><see langword="true"/> only for the hand-over to the main screens.</returns>
-    public static bool HoldsFor(LaunchOutcome outcome) => outcome is LaunchOutcome.MainScreens;
+    /// <param name="launchWindowIsStillTheSurface">
+    /// Whether the launch window is still what the one window shows, which is the only time the statement has a
+    /// surface to be read on.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> only for the hand-over to the main screens while the launch window is still showing.
+    /// </returns>
+    /// <remarks>
+    /// <b>Hold only while the launch window is showing.</b> The statement is drawn by the launch window itself, and
+    /// the window is what carries the acknowledgement that releases the hold. Once another stage has taken that
+    /// window's place — sign-in, machine setup, a stated stop — the statement is not on screen and nothing can press
+    /// it, so arming the hold waits for an acknowledgement that can never arrive and the surface it was holding never
+    /// appears. That is what left the sign-in form sitting there after an accepted sign-in: the launch handed over to
+    /// sign-in first, the sign-in resumed it, and the hold armed on a window that was already showing the form.
+    /// </remarks>
+    public static bool HoldsFor(LaunchOutcome outcome, bool launchWindowIsStillTheSurface)
+        => launchWindowIsStillTheSurface && outcome is LaunchOutcome.MainScreens;
 }

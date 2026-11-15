@@ -26,6 +26,9 @@ public partial class App : Application
     /// <summary>The stage's own surface, when it is one that answers the window's close (FR-008).</summary>
     private static ILaunchStageSurface? _launchStageSurface;
 
+    /// <summary>The stage the one window is showing, or <c>null</c> before any stage has been shown.</summary>
+    private static LaunchStage? s_launchStage;
+
     /// <summary>Whether the launch has handed over to the shell, after which the window closes normally.</summary>
     private static bool s_launchHandedOver;
 
@@ -234,10 +237,21 @@ public partial class App : Application
         where T : UIElement, ILaunchStageSurface
     {
         _launchStageSurface = surface;
+        s_launchStage = stage;
 
         MainWindow.ShowStage(stage, surface);
         MainWindow.Activate();
     }
+
+    /// <summary>
+    /// Whether the launch window is still what the one window shows.
+    /// </summary>
+    /// <remarks>
+    /// The picture-copy statement is drawn by the launch window and acknowledged there, so it may only hold while
+    /// that window is the surface. Once sign-in, machine setup or a stated stop has taken its place there is no
+    /// statement on screen to press, and holding would be waiting for an acknowledgement that has no button.
+    /// </remarks>
+    private static bool LaunchWindowIsStillTheSurface => s_launchStage is null or LaunchStage.Splash;
 
     /// <summary>
     /// Shows the stage the launch ended at, as the whole content of the one window
@@ -418,7 +432,7 @@ public partial class App : Application
 
         try
         {
-            if (PictureCopyHoldPolicy.HoldsFor(outcome))
+            if (PictureCopyHoldPolicy.HoldsFor(outcome, LaunchWindowIsStillTheSurface))
             {
                 var hold = GetService<IPictureCopyHold>();
 
