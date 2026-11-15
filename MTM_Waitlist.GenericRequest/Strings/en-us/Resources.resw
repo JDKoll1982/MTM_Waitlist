@@ -110,6 +110,9 @@
   <data name="GenericRequest_StepFrame_Continue.Content" xml:space="preserve">
     <value>Continue</value>
   </data>
+  <data name="GenericRequest_Die_SearchPlaceholder.Text" xml:space="preserve">
+    <value>Die number or part number</value>
+  </data>
   <data name="GenericRequest_Die_SearchButton.Content" xml:space="preserve">
     <value>Search</value>
   </data>
@@ -313,9 +316,6 @@
   </data>
   <data name="GenericRequest_Result_Heading_Failure.Text" xml:space="preserve">
     <value>Request not submitted</value>
-  </data>
-  <data name="GenericRequest_Result_Raised_Message.Text" xml:space="preserve">
-    <value>Request {0} was raised and is now on the waitlist.</value>
   </data>
   <data name="GenericRequest_Result_Raised_NoNumber.Text" xml:space="preserve">
     <value>The request was raised and is now on the waitlist.</value>

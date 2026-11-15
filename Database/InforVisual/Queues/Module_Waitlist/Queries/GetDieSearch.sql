@@ -37,6 +37,11 @@ SET NOCOUNT ON;
 
 DECLARE @TermNormalized nvarchar(190) = LTRIM(RTRIM(@Term));
 
+-- A contains pattern, escaped the way GetPartMatches.sql escapes it, so a term holding '%', '_' or '[' matches
+-- those characters rather than being read as a wildcard.
+DECLARE @ContainsPattern nvarchar(580) =
+    '%' + REPLACE(REPLACE(REPLACE(@TermNormalized, '[', '[[]'), '%', '[%]'), '_', '[_]') + '%';
+
 IF @TermNormalized = ''
 BEGIN
     RETURN;
@@ -51,7 +56,7 @@ WITH DieMatches AS
         0 AS AssociationRank
     FROM PART AS part
     WHERE
-        part.ID = @TermNormalized
+        (part.ID = @TermNormalized OR part.ID LIKE @ContainsPattern)
         AND part.ID LIKE 'FGT%'
 
     UNION ALL
@@ -65,7 +70,7 @@ WITH DieMatches AS
     INNER JOIN PART AS die
         ON die.ID = alternate.ALTERNATE_PART_ID
     WHERE
-        alternate.PART_ID = @TermNormalized
+        (alternate.PART_ID = @TermNormalized OR alternate.PART_ID LIKE @ContainsPattern)
         AND die.ID LIKE 'FGT%'
 
     UNION ALL
@@ -85,7 +90,7 @@ WITH DieMatches AS
     INNER JOIN PART AS die
         ON die.ID = req.PART_ID
     WHERE
-        wo.PART_ID = @TermNormalized
+        (wo.PART_ID = @TermNormalized OR wo.PART_ID LIKE @ContainsPattern)
         AND req.PART_ID LIKE 'FGT%'
 ),
 OnePerDie AS

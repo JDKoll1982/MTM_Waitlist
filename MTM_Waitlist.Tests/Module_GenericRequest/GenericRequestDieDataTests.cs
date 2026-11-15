@@ -63,17 +63,18 @@ public sealed class GenericRequestDieDataTests
     }
 
     [TestMethod]
-    public async Task Audit_GenericRequestDieDataTests_TheTermReachesTheReadNormalised()
+    public async Task Audit_GenericRequestDieDataTests_TheTermReachesTheReadUpperCasedAndAsTyped()
     {
         var executor = Executor(_ => VisualQueryOutcome.Ok([]));
         var dies = GenericRequestReadShapes.DieData(executor);
 
-        await dies.ReadDiesAsync("fgt1000");
+        await dies.ReadDiesAsync(" fgt1000 ");
 
         Assert.AreEqual(
-            "FGT0001000",
+            "FGT1000",
             Convert.ToString(executor.LastParameters!["Term"]),
-            "The same normalisation the part search applies: upper case, and padded for a known prefix (FR-004).");
+            "The term is trimmed and upper-cased, and deliberately NOT zero-padded: the read matches by substring, "
+            + "so padding a half-typed number would turn a term that does match into one nothing contains (FR-004).");
     }
 
     [TestMethod]

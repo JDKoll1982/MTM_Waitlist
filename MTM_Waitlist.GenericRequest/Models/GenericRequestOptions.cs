@@ -206,6 +206,14 @@ public sealed partial class GenericRequestDieOption(string dieNumber, string des
         : Location.Trim();
 
     /// <summary>
+    /// The whole card as one accessible name, because a card is one choice: a screen reader should read the die and
+    /// its details together rather than announcing three loose pieces of text inside it.
+    /// </summary>
+    public string CardName => Description.Length == 0
+        ? $"{DieNumber}. {LocationText}"
+        : $"{DieNumber}. {Description}. {LocationText}";
+
+    /// <summary>
     /// Whether this die is one of the requester's choices. A die request may be for several dies, so a row is a
     /// choice that is marked and unmarked rather than the step's single selection (FR-010).
     /// </summary>

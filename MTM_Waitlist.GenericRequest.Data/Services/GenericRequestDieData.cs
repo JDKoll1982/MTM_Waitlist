@@ -52,23 +52,28 @@ public sealed class GenericRequestDieData : IGenericRequestDieData
         CancellationToken cancellationToken = default)
     {
         var attemptedAtUtc = DateTimeOffset.UtcNow;
-        var normalized = PartMatchSearchInput.Normalize(searchText);
+        var typed = (searchText ?? string.Empty).Trim();
 
-        if (normalized.Length == 0)
+        if (typed.Length == 0)
         {
             return GenericRequestStepResult<GenericRequestDieOption>.Empty(attemptedAtUtc);
         }
 
-        var rows = await TryReadAsync(normalized, cancellationToken).ConfigureAwait(false);
+        // A half-typed term is answered as typed, upper-cased but not padded: the read matches by substring, so
+        // zero-padding a number the person is still typing would turn a term that does match into one that does
+        // not ("602" would become a die number nothing contains).
+        var term = typed.ToUpperInvariant();
+
+        var rows = await TryReadAsync(term, cancellationToken).ConfigureAwait(false);
         if (rows is null)
         {
             return GenericRequestStepResult<GenericRequestDieOption>.Unavailable(attemptedAtUtc);
         }
 
         // A bare number could be a die whose prefix was left off. The search asks once more as a die number rather
-        // than refusing a die the plant records, and it asks with the part's own answer already exhausted above, so
-        // a part number never loses its dies to the retry (research R2).
-        if (rows.Count == 0 && DieNumberCandidate(normalized) is { } candidate)
+        // than refusing a die the plant records, and it asks with the typed term's own answer already exhausted
+        // above, so a part number never loses its dies to the retry (research R2).
+        if (rows.Count == 0 && DieNumberCandidate(term) is { } candidate)
         {
             rows = await TryReadAsync(candidate, cancellationToken).ConfigureAwait(false);
             if (rows is null)
@@ -88,7 +93,7 @@ public sealed class GenericRequestDieData : IGenericRequestDieData
             }
         }
 
-        AppLog.Info(LogCategory, $"The die search for '{normalized}' answered {options.Count} die(s).");
+        AppLog.Info(LogCategory, $"The die search for '{term}' answered {options.Count} die(s).");
 
         return options.Count == 0
             ? GenericRequestStepResult<GenericRequestDieOption>.Empty(attemptedAtUtc)
@@ -125,18 +130,18 @@ public sealed class GenericRequestDieData : IGenericRequestDieData
     /// The die number a bare term could be, or <see langword="null"/> when the term already names a family or is not
     /// a number the plant's die numbering could produce.
     /// </summary>
-    private static string? DieNumberCandidate(string normalized)
+    private static string? DieNumberCandidate(string term)
     {
         foreach (var prefix in PartPictureLayout.KnownPartNumberPrefixes)
         {
-            if (normalized.StartsWith(prefix, StringComparison.Ordinal))
+            if (term.StartsWith(prefix, StringComparison.Ordinal))
             {
                 return null;
             }
         }
 
-        return normalized.All(char.IsAsciiDigit)
-            ? DiePrefix + normalized.PadLeft(PartMatchSearchInput.PartNumberWidth - DiePrefix.Length, '0')
+        return term.All(char.IsAsciiDigit)
+            ? DiePrefix + term.PadLeft(PartMatchSearchInput.PartNumberWidth - DiePrefix.Length, '0')
             : null;
     }
 }

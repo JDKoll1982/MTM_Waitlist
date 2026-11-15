@@ -11,11 +11,15 @@
 -- Parameterized read of the LIVE mirror. Returns exactly the column shape the live Infor Visual read
 -- returns, so a caller cannot distinguish cached from live (FR-004):
 --   live : DieNumber, Description, Association, Location
---   here : same names and order, with the same association precedence and the same cap.
+--   here : same names and order, with the same matching, association precedence and cap.
 --
--- The term matches either the die's own number or the part the die is tied to, which is what the live
--- read's three relations between them cover. A die named more than once is reported once, under the
--- strongest association: Die before Explicit before History.
+-- The matching is copied from GetDieSearch.sql: the term matches the die's own number or the part the die is
+-- tied to, exactly or as a substring, which is what lets a half-typed term answer instead of claiming there
+-- is no such die. The LIKE metacharacters are escaped the way the live script escapes them, so a typed '%'
+-- or '_' is matched literally.
+--
+-- A die named more than once is reported once, under the strongest association: Die before Explicit before
+-- History.
 -- ============================================================
 
 USE mtm_mock;
@@ -29,8 +33,13 @@ CREATE PROCEDURE sp_visual_die_search_get(
 )
 BEGIN
     DECLARE v_term VARCHAR(190);
+    DECLARE v_pattern VARCHAR(580);
 
     SET v_term = TRIM(COALESCE(p_term, ''));
+    SET v_pattern = CONCAT(
+        '%',
+        REPLACE(REPLACE(REPLACE(v_term, '\\', '\\\\'), '%', '\\%'), '_', '\\_'),
+        '%');
 
     SELECT
         matched.die_number AS DieNumber,
@@ -50,7 +59,10 @@ BEGIN
         FROM visual_die_search_result AS candidates
         WHERE
             v_term <> ''
-            AND (candidates.term = v_term OR candidates.die_number = v_term)
+            AND (candidates.term = v_term
+                 OR candidates.term LIKE v_pattern
+                 OR candidates.die_number = v_term
+                 OR candidates.die_number LIKE v_pattern)
         GROUP BY candidates.die_number
     ) AS strongest
         ON strongest.die_number = matched.die_number
@@ -61,7 +73,10 @@ BEGIN
             END
     WHERE
         v_term <> ''
-        AND (matched.term = v_term OR matched.die_number = v_term)
+        AND (matched.term = v_term
+             OR matched.term LIKE v_pattern
+             OR matched.die_number = v_term
+             OR matched.die_number LIKE v_pattern)
     ORDER BY
         strongest.strongest_rank,
         matched.die_number

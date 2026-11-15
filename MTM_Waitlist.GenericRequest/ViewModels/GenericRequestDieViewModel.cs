@@ -33,6 +33,12 @@ public sealed partial class GenericRequestDieViewModel : GenericRequestStepViewM
     /// <summary>Every die the requester has marked, in the order they marked them.</summary>
     private readonly List<GenericRequestDieOption> _chosen = new();
 
+    /// <summary>
+    /// Which search is the current one. Typing fires a read per keystroke, and a read that lands after a later one
+    /// describes a term the person has already typed past, so its answer is dropped rather than drawn.
+    /// </summary>
+    private int _searchGeneration;
+
     public GenericRequestDieViewModel(IGenericRequestStepData data, IGenericRequestNavigator navigator)
         : base(navigator)
     {
@@ -40,6 +46,13 @@ public sealed partial class GenericRequestDieViewModel : GenericRequestStepViewM
 
         _data = data;
         SearchCommand = new AsyncRelayCommand(LoadAsync);
+
+        // Nothing has been asked yet, so nothing may be claimed. A step starts in the loading state, and the frame
+        // hides a step's body behind any settled presentation that is not populated — which is what left this
+        // screen showing "No die in Infor Visual matches that search" before anybody had searched, with the search
+        // box hidden along with the body and no way to ask anything at all. Starting settled and populated keeps
+        // the box on screen, and the list simply holds nothing until the first search.
+        Presentation = GenericRequestPresentation.Populated;
     }
 
     public override GenericRequestStep Step => GenericRequestStep.Die;
@@ -53,16 +66,69 @@ public sealed partial class GenericRequestDieViewModel : GenericRequestStepViewM
     /// <summary>Run the search again with the text as typed.</summary>
     public IAsyncRelayCommand SearchCommand { get; }
 
+    /// <summary>
+    /// Mark or unmark one die, which is what clicking its card does. A request may need several dies, so the card is
+    /// a mark rather than the step's single selection (FR-010).
+    /// </summary>
+    [RelayCommand]
+    private void ToggleDie(GenericRequestDieOption? option)
+    {
+        if (option is null)
+        {
+            return;
+        }
+
+        // Flipping the flag raises the option's own change notification, which is what records the choice; the same
+        // path a checkbox used to take, kept so the choice is recorded in exactly one place.
+        option.IsSelected = !option.IsSelected;
+    }
+
     /// <summary>The dies this search matched, each one a choice.</summary>
     public ObservableCollection<GenericRequestDieOption> Options { get; } = new();
 
     /// <summary>What the requester typed, which a failed read keeps so the retry asks the same question.</summary>
+    /// <remarks>
+    /// The search runs as this changes, which is how the other search fields in this application answer: a person
+    /// typing a die or part number sees the dies appear as they narrow it, instead of having to type the whole
+    /// number and press a button.
+    /// </remarks>
     [ObservableProperty]
     public partial string SearchText { get; set; } = string.Empty;
 
     /// <summary>How many dies this search matched, drawn above the list so a partial list cannot pass for a full one.</summary>
     [ObservableProperty]
     public partial int MatchCount { get; set; }
+
+    /// <summary>Whether a search has been run at all, which is what makes a "nothing matched" line meaningful.</summary>
+    [ObservableProperty]
+    public partial bool HasSearched { get; set; }
+
+    /// <summary>Whether the search that just ran matched no die, drawn in the step rather than in place of it.</summary>
+    [ObservableProperty]
+    public partial bool HasNoMatch { get; set; }
+
+    /// <summary>
+    /// What the step says when a search matched nothing, drawn beside the box that can ask again rather than in
+    /// place of it: the frame's own empty state takes the body away, and the body is where the box is.
+    /// </summary>
+    public string NoMatchText => "GenericRequest_Die_Empty.Text".GetLocalized();
+
+    /// <summary>What the box asks for, so the field says what to type before anything is typed in it.</summary>
+    public string SearchPlaceholderText => "GenericRequest_Die_SearchPlaceholder.Text".GetLocalized();
+
+    /// <summary>A search having run is what makes the hint worth drawing, so both follow it.</summary>
+    partial void OnHasSearchedChanged(bool value)
+    {
+        OnPropertyChanged(nameof(HintText));
+        OnPropertyChanged(nameof(HasHint));
+    }
+
+    /// <summary>A miss takes the hint away with it, because there is nothing left to choose from.</summary>
+    partial void OnHasNoMatchChanged(bool value)
+    {
+        OnPropertyChanged(nameof(HintText));
+        OnPropertyChanged(nameof(HasHint));
+    }
 
     /// <summary>The match count as the step draws it, or empty when there is nothing to count.</summary>
     public string CountText => MatchCount switch
@@ -82,7 +148,12 @@ public sealed partial class GenericRequestDieViewModel : GenericRequestStepViewM
     /// The line the step shows while nothing is marked, so a Continue that cannot be pressed has its reason beside
     /// it rather than looking broken.
     /// </summary>
-    public string HintText => IsPopulated && _chosen.Count == 0
+    /// <remarks>
+    /// Only when there is something to choose from: before the first search there is no list, and after a search
+    /// that matched nothing there is still no list — telling somebody to choose a die from an empty list is the kind
+    /// of instruction that reads as a broken screen.
+    /// </remarks>
+    public string HintText => HasSearched && IsPopulated && !HasNoMatch && Options.Count > 0 && _chosen.Count == 0
         ? "GenericRequest_Die_NothingChosen.Text".GetLocalized()
         : string.Empty;
 
@@ -93,7 +164,29 @@ public sealed partial class GenericRequestDieViewModel : GenericRequestStepViewM
 
     protected override async Task LoadCoreAsync()
     {
-        var result = await _data.ReadDiesAsync(SearchText);
+        var term = SearchText.Trim();
+        var generation = ++_searchGeneration;
+
+        if (term.Length == 0)
+        {
+            // A blank box is not a question, so nothing is asked and nothing is claimed: the step stays settled
+            // and populated with no dies and no line about them.
+            ClearMatches();
+            HasSearched = false;
+            HasNoMatch = false;
+            Presentation = GenericRequestPresentation.Populated;
+            AttemptedAtUtc = null;
+            return;
+        }
+
+        var result = await _data.ReadDiesAsync(term);
+
+        // A read that lands after a later one describes a term the person has already typed past. Applying it would
+        // put another term's dies on screen, so it is dropped.
+        if (generation != _searchGeneration)
+        {
+            return;
+        }
 
         foreach (var previous in Options)
         {
@@ -115,8 +208,31 @@ public sealed partial class GenericRequestDieViewModel : GenericRequestStepViewM
         OnPropertyChanged(nameof(CountText));
         OnPropertyChanged(nameof(HasCount));
 
-        Apply(result);
+        HasSearched = true;
+
+        // A miss is drawn inside the step, beside the box that can ask again, and the step stays populated so that
+        // box is still on screen. Only a read that failed takes the body away, and then with the attempt time and a
+        // retry (FR-005).
+        var failed = result.Presentation == GenericRequestPresentation.Unavailable;
+
+        HasNoMatch = result.Presentation == GenericRequestPresentation.Empty;
+        Presentation = failed ? GenericRequestPresentation.Unavailable : GenericRequestPresentation.Populated;
+        AttemptedAtUtc = failed ? result.AttemptedAtUtc : null;
+
         NotifyChoiceChanged();
+    }
+    /// <summary>Drop everything the previous search matched, without asking anything.</summary>
+    private void ClearMatches()
+    {
+        foreach (var previous in Options)
+        {
+            previous.PropertyChanged -= OnOptionChanged;
+        }
+
+        Options.Clear();
+        MatchCount = 0;
+        OnPropertyChanged(nameof(CountText));
+        OnPropertyChanged(nameof(HasCount));
     }
 
     protected override void CommitToDraft()

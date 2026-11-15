@@ -20,8 +20,8 @@ namespace MTM_Waitlist.GenericRequest.ViewModels;
 /// </para>
 /// <para>
 /// Which one is drawn comes from the raise attempt the review recorded on the draft, so the screen reports what the
-/// store answered rather than what the flow hoped for: a raised request shows the number the store gave it, a refusal
-/// shows the queue's own words, and a failure offers a retry that asks again rather than one that only redraws.
+/// store answered rather than what the flow hoped for: a raised request says how many landed, a refusal shows the
+/// queue's own words, and a failure offers a retry that asks again rather than one that only redraws.
 /// </para>
 /// </remarks>
 public sealed partial class GenericRequestResultViewModel : GenericRequestStepViewModel
@@ -164,7 +164,7 @@ public sealed partial class GenericRequestResultViewModel : GenericRequestStepVi
                 : Draft.ResultWasDuplicate
                     ? GenericRequestResultOutcome.Duplicate
                     : GenericRequestResultOutcome.Failure,
-            raised ? RaisedMessage(Draft.RaisedRequestCount, Draft.RaisedRequestNumber) : FailureMessage(Draft.ResultMessage));
+            raised ? RaisedMessage(Draft.RaisedRequestCount) : FailureMessage(Draft.ResultMessage));
 
         return Task.CompletedTask;
     }
@@ -188,13 +188,21 @@ public sealed partial class GenericRequestResultViewModel : GenericRequestStepVi
     }
 
     /// <summary>
-    /// The sentence the raised outcome shows: how many requests landed, or the one request's number.
+    /// The sentence the raised outcome shows: how many requests landed.
     /// </summary>
     /// <remarks>
-    /// A die request raises one request per chosen die, so naming a single number for several would understate what
-    /// was raised (FR-011).
+    /// <para>
+    /// A die request raises one request per chosen die, so naming a single request would understate what was raised
+    /// (FR-011) — the count is what the sentence carries when there is more than one.
+    /// </para>
+    /// <para>
+    /// <b>The request's identifier is deliberately not shown.</b> It is a GUID, and a person reading a shop-floor
+    /// screen cannot do anything with thirty-six characters of hexadecimal: it is not the number printed on the tag,
+    /// it is not something they can read back to a handler, and a wall of it under "Request completed" reads as an
+    /// error rather than as success. The request is on the waitlist, which is where it is found again.
+    /// </para>
     /// </remarks>
-    private static string RaisedMessage(int raisedCount, string requestNumber)
+    private static string RaisedMessage(int raisedCount)
     {
         if (raisedCount > 1)
         {
@@ -204,12 +212,7 @@ public sealed partial class GenericRequestResultViewModel : GenericRequestStepVi
                 raisedCount);
         }
 
-        return string.IsNullOrWhiteSpace(requestNumber)
-            ? "GenericRequest_Result_Raised_NoNumber.Text".GetLocalized()
-            : string.Format(
-                CultureInfo.CurrentCulture,
-                "GenericRequest_Result_Raised_Message.Text".GetLocalized(),
-                requestNumber);
+        return "GenericRequest_Result_Raised_NoNumber.Text".GetLocalized();
     }
 
     /// <summary>

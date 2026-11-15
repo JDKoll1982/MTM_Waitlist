@@ -6,11 +6,41 @@
     xmlns:controls="using:MTM_Waitlist.GenericRequest.Controls"
     xmlns:converters="using:MTM_Waitlist.Module_Settings.Converters"
     xmlns:models="using:MTM_Waitlist.GenericRequest.Models"
+    xmlns:shared="using:MTM_Waitlist.Module_Shared.Services"
     HorizontalAlignment="Stretch"
     VerticalAlignment="Stretch">
 
     <Page.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+
+        <!--
+            The card is the clickable thing, so the item container draws nothing of its own: the border, the accent
+            outline and the tick all live in the item template, exactly as the category and work center cards carry
+            their own look.
+        -->
+        <Style x:Key="DieCardItemContainerStyle" TargetType="GridViewItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GridViewItem">
+                        <ListViewItemPresenter
+                            ContentMargin="0"
+                            ContentTransitions="{TemplateBinding ContentTransitions}"
+                            PointerOverBackground="Transparent"
+                            PressedBackground="Transparent"
+                            SelectedBackground="Transparent"
+                            SelectedPointerOverBackground="Transparent"
+                            SelectedPressedBackground="Transparent"
+                            SelectedBorderThickness="0"
+                            RevealBorderThickness="0"
+                            SelectionCheckMarkVisualEnabled="False" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Page.Resources>
 
     <controls:GenericRequestStepFrame
@@ -35,61 +65,112 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBox
+                    <AutoSuggestBox
                         x:Uid="GenericRequest_Die_Search"
-                        AutomationProperties.Name="{x:Bind ViewModel.Title}"
-                        Text="{x:Bind ViewModel.SearchText, Mode=TwoWay}" />
-                    <Button
-                        Grid.Column="1"
-                        x:Uid="GenericRequest_Die_SearchButton"
-                        AutomationProperties.Name="{x:Bind ViewModel.Title}"
-                        Command="{x:Bind ViewModel.SearchCommand}" />
+                        AutomationProperties.Name="{x:Bind ViewModel.SearchPlaceholderText}"
+                        PlaceholderText="{x:Bind ViewModel.SearchPlaceholderText}"
+                        QueryIcon="Find"
+                        Text="{x:Bind ViewModel.SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        TextChanged="OnSearchTextChanged" />
                 </Grid>
 
                 <!-- The count is drawn before the list, so a list too long to read at once can never be mistaken
-                     for everything the search found (FR-007). -->
+                     for everything the search found (FR-007). A search that matched nothing says so here, in the
+                     step, rather than in place of the step: the box above is how the person tries again. -->
                 <TextBlock
                     Grid.Row="1"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Style="{StaticResource CaptionTextBlockStyle}"
                     Text="{x:Bind ViewModel.CountText, Mode=OneWay}"
                     Visibility="{x:Bind ViewModel.HasCount, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                <TextBlock
+                    Grid.Row="1"
+                    Text="{x:Bind ViewModel.NoMatchText}"
+                    TextWrapping="Wrap"
+                    Style="{StaticResource BodyTextBlockStyle}"
+                    Visibility="{x:Bind ViewModel.HasNoMatch, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
 
-                <!-- Every match is a row in one scrolling list, so nothing is clipped away however many there are
-                     (FR-008), and a die with no recorded location says so in words (FR-006). -->
-                <ListView
+                <!--
+                    Every match is a card, drawn the way the work center and category cards are: a bordered surface,
+                    a title, a divider and the details beneath it, with an accent outline and a tick on the chosen
+                    card. The click is the choice, so the grid keeps no selection of its own and the outline follows
+                    the card's own flag (FR-008, FR-010).
+                -->
+                <GridView
                     Grid.Row="2"
                     AutomationProperties.Name="{x:Bind ViewModel.Title}"
+                    IsItemClickEnabled="True"
+                    ItemClick="DieGridView_ItemClick"
+                    ItemContainerStyle="{StaticResource DieCardItemContainerStyle}"
                     ItemsSource="{x:Bind ViewModel.Options}"
-                    SelectionMode="None">
-                    <ListView.ItemTemplate>
+                    SelectionMode="None"
+                    shared:CardGridSizing.MaximumColumns="3"
+                    shared:CardGridSizing.MinimumCardWidth="240">
+                    <GridView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <ItemsWrapGrid HorizontalAlignment="Stretch" Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </GridView.ItemsPanel>
+                    <GridView.ItemTemplate>
                         <DataTemplate x:DataType="models:GenericRequestDieOption">
-                            <CheckBox
-                                Padding="0,8"
-                                AutomationProperties.Name="{x:Bind DieNumber}"
-                                HorizontalAlignment="Stretch"
-                                HorizontalContentAlignment="Left"
-                                IsChecked="{x:Bind IsSelected, Mode=TwoWay}">
-                                <StackPanel Spacing="2">
-                                    <TextBlock
-                                        Text="{x:Bind DieNumber}"
-                                        TextTrimming="CharacterEllipsis"
-                                        Style="{StaticResource BodyStrongTextBlockStyle}" />
-                                    <TextBlock
-                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                        Text="{x:Bind Description}"
-                                        TextTrimming="CharacterEllipsis"
-                                        Style="{StaticResource CaptionTextBlockStyle}" />
-                                    <TextBlock
-                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                        Text="{x:Bind LocationText}"
-                                        TextTrimming="CharacterEllipsis"
-                                        Style="{StaticResource CaptionTextBlockStyle}" />
-                                </StackPanel>
-                            </CheckBox>
+                            <Grid Margin="8" AutomationProperties.Name="{x:Bind CardName}">
+                                <Border
+                                    MinHeight="132"
+                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="12">
+                                    <StackPanel Padding="16" Spacing="10">
+                                        <Grid ColumnSpacing="8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock
+                                                FontSize="18"
+                                                FontWeight="SemiBold"
+                                                Text="{x:Bind DieNumber}"
+                                                TextTrimming="CharacterEllipsis" />
+                                            <SymbolIcon
+                                                Grid.Column="1"
+                                                VerticalAlignment="Top"
+                                                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                                Symbol="Accept"
+                                                Visibility="{x:Bind IsSelected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                        </Grid>
+                                        <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
+                                        <TextBlock
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            MaxLines="2"
+                                            Text="{x:Bind Description}"
+                                            TextTrimming="CharacterEllipsis"
+                                            TextWrapping="Wrap"
+                                            Style="{StaticResource BodyTextBlockStyle}" />
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <SymbolIcon
+                                                VerticalAlignment="Center"
+                                                Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                                Symbol="MapPin" />
+                                            <TextBlock
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                Text="{x:Bind LocationText}"
+                                                TextTrimming="CharacterEllipsis"
+                                                Style="{StaticResource CaptionTextBlockStyle}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- The chosen card's outline, drawn on the card border like the other steps'. -->
+                                <Border
+                                    BorderBrush="{ThemeResource SystemControlHighlightAccentBrush}"
+                                    BorderThickness="2"
+                                    CornerRadius="12"
+                                    IsHitTestVisible="False"
+                                    Visibility="{x:Bind IsSelected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            </Grid>
                         </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
+                    </GridView.ItemTemplate>
+                </GridView>
 
                 <TextBlock
                     Grid.Row="3"

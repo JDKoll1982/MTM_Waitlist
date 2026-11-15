@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MTM_Waitlist.GenericRequest.Contracts;
 using MTM_Waitlist.GenericRequest.Models;
 using MTM_Waitlist.GenericRequest.ViewModels;
+using MTM_Waitlist.Module_Core.Helpers;
 
 namespace MTM_Waitlist.Tests.Module_GenericRequest;
 
@@ -26,7 +27,7 @@ public sealed class GenericRequestResultViewModelTests
     }
 
     [TestMethod]
-    public async Task ViewModel_GenericRequestResultViewModelTests_LoadAsync_ARaisedRequestShowsItsNumberAsSuccess()
+    public async Task ViewModel_GenericRequestResultViewModelTests_LoadAsync_ARaisedRequestIsSuccessAndNeverNamesItsIdentifier()
     {
         var (viewModel, navigator, _) = Create();
         navigator.Draft.ResultPresentation = GenericRequestPresentation.Populated;
@@ -40,6 +41,14 @@ public sealed class GenericRequestResultViewModelTests
         Assert.IsFalse(viewModel.IsFailure, "a raised request is not a failure");
         Assert.AreNotEqual(string.Empty, viewModel.Message, "the success outcome states what was raised");
         Assert.AreNotEqual(string.Empty, viewModel.Heading, "the outcome needs a heading");
+        Assert.IsFalse(
+            viewModel.Message.Contains(RequestNumber, StringComparison.Ordinal),
+            "the request's identifier is a GUID, which a shop-floor screen cannot act on: the sentence says the "
+            + "request was raised, and the waitlist is where it is found again");
+        Assert.AreEqual(
+            "GenericRequest_Result_Raised_NoNumber.Text".GetLocalized(),
+            viewModel.Message,
+            "one raised request is stated in words alone, with no identifier in it");
     }
 
     [TestMethod]
@@ -162,7 +171,10 @@ public sealed class GenericRequestResultViewModelTests
         Assert.AreEqual(
             RequestNumber,
             navigator.Draft.RaisedRequestNumber,
-            "the number the retry produced must be the one the screen reports");
+            "the number the retry produced is still recorded on the draft, even though the screen no longer prints it");
+        Assert.IsFalse(
+            viewModel.Message.Contains(RequestNumber, StringComparison.Ordinal),
+            "a retry that lands says the request was raised without printing its identifier either");
     }
 
     [TestMethod]
