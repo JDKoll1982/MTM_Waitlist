@@ -126,6 +126,8 @@ targetDescription = DescribeHost(targetHost)
 
 Dim proceed
 proceed = MsgBox("This will DROP and RECREATE database '" & dbName & "' on " & targetHost & "." & vbCrLf & vbCrLf & _
+    "That removes every record in it, this computer's own registration included, so the" & vbCrLf & _
+    "application will ask you to set this computer up again the next time it starts." & vbCrLf & vbCrLf & _
     "It will also create/update the '" & mockDbName & "' cache database in place." & vbCrLf & _
     "Existing cached rows in '" & mockDbName & "' are kept." & vbCrLf & _
     "That cache's baseline seed is re-recorded from '" & targetHost & "' first, where the" & vbCrLf & _

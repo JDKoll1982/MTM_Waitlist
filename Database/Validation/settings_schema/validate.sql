@@ -212,6 +212,14 @@ FROM (
         FROM (
             SELECT 'Feature.IgnoredLocations' AS setting_key, 'text' AS expected_value_type
             UNION ALL SELECT 'auth.session_length_minutes', 'int'
+            -- The picture storage overrides (spec 007, FR-040). They are seeded after the settings baseline
+            -- because that baseline TRUNCATEs this table, and a run that put them first left a freshly
+            -- installed store with none of them (fixed 2026-11-15); this check is what notices if that
+            -- ordering is ever broken again.
+            UNION ALL SELECT 'image_storage.shared_folder_path', 'text'
+            UNION ALL SELECT 'image_storage.max_file_size_bytes', 'int'
+            UNION ALL SELECT 'image_storage.enable_archive_versioning', 'bool'
+            UNION ALL SELECT 'image_storage.archive_keep_days', 'int'
         ) AS p
         LEFT JOIN config_settings_values AS v
             ON v.setting_key = p.setting_key

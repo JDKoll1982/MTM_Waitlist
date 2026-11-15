@@ -179,6 +179,23 @@ next validation run.
 - A schema that validates needs no seed data to be judged, so nothing is lost by the default. A store that is
   installed and wants data is the case the switch exists for.
 
+### Review note — a seed must run after the seed that truncates its table (2026-11-15)
+
+`AllSeeds.sql` is one file and its statements run in order, so **a seed that writes into a table another seed
+truncates must come after that truncating seed**. A seed that ran first was silently undone, which is how a freshly
+installed store came up with no `image_storage.*` rows at all:
+
+- `seed_config_image_storage_settings` wrote its four picture-storage overrides, and `seed_dev_masked_baseline`
+  then truncated `config_settings_values` and wrote its own baseline over the top. The overrides were gone by the
+  end of the seed phase, and every consumer fell back to the shipped defaults without saying so.
+- The four rows now sit **after** the baseline in `AllSeeds.sql`, and the seed **upserts** rather than truncating,
+  so re-running it can never remove a setting another seed owns.
+- `Validation/settings_schema/validate.sql` now reports each of the four as a missing plant preference, so the
+  installer's validation step fails loudly if the ordering is ever broken again.
+- The seeded folder path is the plant share (`AppStoragePaths.ImagesRootDefault`), not the retired `X:` mapping: a
+  drive letter means nothing on a machine that has no mapping, and the settings value overrides the shipped default
+  wherever it is written.
+
 ### Review note — validation never migrates a store either (2026-10-16)
 
 `.github/scripts/validate-database-schema.ps1` had the same defect one step worse. When its schema check found a

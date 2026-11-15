@@ -1,79 +1,4 @@
--- Seed: Image Storage Configuration Overrides
--- Description: Populates config_settings_values with default image storage settings
---              that can be overridden by admins in-app.
--- Table: config_settings_values
--- Scope: global (all_users)
-
-USE mtm_waitlist;
-
--- Guarded: config_settings_history holds a foreign key back to this table, and MySQL refuses TRUNCATE on a
--- referenced table even when the child is empty. Without the guard the whole seed phase stops here on a fresh
--- store, and every seed after this one in AllSeeds.sql never runs.
-SET FOREIGN_KEY_CHECKS = 0;
-
-TRUNCATE TABLE config_settings_values;
-
-SET FOREIGN_KEY_CHECKS = 1;
-
-INSERT INTO
-    config_settings_values (
-        public_id,
-        setting_key,
-        scope_type,
-        scope_key,
-        setting_value,
-        value_type,
-        updated_by_user_id,
-        updated_utc
-    )
-VALUES (
-        UUID(),
-        'image_storage.shared_folder_path',
-        'all_users',
-        'all_users',
-        'X:\\Software Development\\Live Applications\\MTM_Waitlist\\Images',
-        'text',
-        NULL,
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        'image_storage.max_file_size_bytes',
-        'all_users',
-        'all_users',
-        NULL,
-        'int',
-        NULL,
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        'image_storage.enable_archive_versioning',
-        'all_users',
-        'all_users',
-        NULL,
-        'bool',
-        NULL,
-        UTC_TIMESTAMP()
-    ),
-    (
-        UUID(),
-        'image_storage.archive_keep_days',
-        'all_users',
-        'all_users',
-        NULL,
-        'int',
-        NULL,
-        UTC_TIMESTAMP()
-    )
-ON DUPLICATE KEY UPDATE
-    scope_type = VALUES(scope_type),
-    scope_key = VALUES(scope_key),
-    setting_value = VALUES(setting_value),
-    setting_value_int = VALUES(setting_value_int),
-    setting_value_bool = VALUES(setting_value_bool),
-    value_type = VALUES(value_type),
-    updated_utc = VALUES(updated_utc);
+-- Deployed from Seeds\seed_dev_masked_baseline, in the order this file runs its seeds.
 
 -- Dev/test masked baseline seed
 -- Do not use real production identity/session data in non-production.
@@ -240,6 +165,76 @@ ON DUPLICATE KEY UPDATE
     scope_type = VALUES(scope_type),
     scope_key = VALUES(scope_key),
     setting_value_int = VALUES(setting_value_int),
+    value_type = VALUES(value_type),
+    updated_utc = VALUES(updated_utc);
+
+-- Seed: Image Storage Configuration Overrides (Seeds\seed_config_image_storage_settings)
+-- Description: Populates config_settings_values with default image storage settings
+--              that can be overridden by admins in-app.
+-- Table: config_settings_values
+-- Scope: global (all_users)
+--
+-- It runs AFTER the settings baseline above, and on purpose: that seed TRUNCATEs
+-- config_settings_values, so rows written before it are thrown away. Running the image-storage rows first is
+-- how a freshly installed store ended up with none of them. It upserts rather than truncating for the same
+-- reason, so re-running it never removes a setting another seed owns.
+INSERT INTO
+    config_settings_values (
+        public_id,
+        setting_key,
+        scope_type,
+        scope_key,
+        setting_value,
+        value_type,
+        updated_by_user_id,
+        updated_utc
+    )
+VALUES (
+        UUID(),
+        'image_storage.shared_folder_path',
+        'all_users',
+        'all_users',
+        '\\\\mtmanu-fs01\\Expo Drive\\MH_RESOURCE\\Material_Handler\\MTM Applications\\MTM Waitlist Application\\Images',
+        'text',
+        NULL,
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        'image_storage.max_file_size_bytes',
+        'all_users',
+        'all_users',
+        NULL,
+        'int',
+        NULL,
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        'image_storage.enable_archive_versioning',
+        'all_users',
+        'all_users',
+        NULL,
+        'bool',
+        NULL,
+        UTC_TIMESTAMP()
+    ),
+    (
+        UUID(),
+        'image_storage.archive_keep_days',
+        'all_users',
+        'all_users',
+        NULL,
+        'int',
+        NULL,
+        UTC_TIMESTAMP()
+    )
+ON DUPLICATE KEY UPDATE
+    scope_type = VALUES(scope_type),
+    scope_key = VALUES(scope_key),
+    setting_value = VALUES(setting_value),
+    setting_value_int = VALUES(setting_value_int),
+    setting_value_bool = VALUES(setting_value_bool),
     value_type = VALUES(value_type),
     updated_utc = VALUES(updated_utc);
 

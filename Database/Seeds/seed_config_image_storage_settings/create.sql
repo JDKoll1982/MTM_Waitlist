@@ -3,17 +3,13 @@
 --              that can be overridden by admins in-app.
 -- Table: config_settings_values
 -- Scope: global (all_users)
+--
+-- It UPSERTS and never truncates, and AllSeeds.sql places it after the settings baseline on purpose: that
+-- baseline TRUNCATEs config_settings_values, so these rows written any earlier are thrown away. That is how a
+-- freshly installed store ended up with none of them (defect fixed 2026-11-15). Upserting rather than
+-- truncating keeps it re-runnable without removing a setting another seed owns.
 
 USE mtm_waitlist;
-
--- Guarded: config_settings_history holds a foreign key back to this table, and MySQL refuses TRUNCATE on a
--- referenced table even when the child is empty. Without the guard the whole seed phase stops here on a fresh
--- store, and every seed after this one in AllSeeds.sql never runs.
-SET FOREIGN_KEY_CHECKS = 0;
-
-TRUNCATE TABLE config_settings_values;
-
-SET FOREIGN_KEY_CHECKS = 1;
 
 INSERT INTO
     config_settings_values (
@@ -31,7 +27,7 @@ VALUES (
         'image_storage.shared_folder_path',
         'all_users',
         'all_users',
-        'X:\\Software Development\\Live Applications\\MTM_Waitlist\\Images',
+        '\\\\mtmanu-fs01\\Expo Drive\\MH_RESOURCE\\Material_Handler\\MTM Applications\\MTM Waitlist Application\\Images',
         'text',
         NULL,
         UTC_TIMESTAMP()
