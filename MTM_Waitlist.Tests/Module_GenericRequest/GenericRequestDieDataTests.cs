@@ -162,6 +162,36 @@ public sealed class GenericRequestDieDataTests
         Assert.AreEqual(0, executor.ExecuteCount, "Nothing is asked of the plant for a term nobody typed.");
     }
 
+    [TestMethod]
+    public async Task Audit_GenericRequestDieDataTests_ASettledUnreachableVerdictAnswersWithoutTouchingVisual()
+    {
+        var executor = Executor(_ => VisualQueryOutcome.Ok([DieRow("FGT0602-01", "BASE DIE", "U-B0-01")]));
+        var dies = new GenericRequestDieData(executor, new StubVisualReachability(VisualReadStatus.Cached));
+
+        var result = await dies.ReadDiesAsync("FGT0602-01");
+
+        Assert.AreEqual(
+            GenericRequestPresentation.Unavailable,
+            result.Presentation,
+            "the probe already knows the source cannot be reached, so the search says so (FR-005)");
+        Assert.AreEqual(
+            0,
+            executor.ExecuteCount,
+            "the answer is the probe's, so no connect attempt is spent rediscovering it");
+    }
+
+    [TestMethod]
+    public async Task Audit_GenericRequestDieDataTests_ALiveVerdictStillAsksVisual()
+    {
+        var executor = Executor(_ => VisualQueryOutcome.Ok([DieRow("FGT0602-01", "BASE DIE", "U-B0-01")]));
+        var dies = new GenericRequestDieData(executor, new StubVisualReachability(VisualReadStatus.Live));
+
+        var result = await dies.ReadDiesAsync("FGT0602-01");
+
+        Assert.AreEqual(GenericRequestPresentation.Populated, result.Presentation);
+        Assert.AreEqual(1, executor.ExecuteCount, "a reachable source is still asked");
+    }
+
     private static FakeVisualQueryExecutor Executor(Func<string, VisualQueryOutcome> outcome) =>
         new((script, _) => outcome(script));
 

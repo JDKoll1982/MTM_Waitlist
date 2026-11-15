@@ -44,14 +44,21 @@ public sealed class GenericRequestDieData : IGenericRequestDieData
     public const string DiePrefix = "FGT";
 
     private readonly IVisualQueryExecutor _executor;
+    private readonly IVisualReachabilityDetector? _reachability;
 
     /// <summary>Creates the search.</summary>
     /// <param name="executor">Runs the live read against Infor Visual.</param>
-    public GenericRequestDieData(IVisualQueryExecutor executor)
+    /// <param name="reachability">
+    /// The reachability probe's settled verdict, or <see langword="null"/> on a host that runs no probe. When it says
+    /// Infor Visual is unreachable, the search answers unavailable at once instead of spending a connect attempt on
+    /// rediscovering that.
+    /// </param>
+    public GenericRequestDieData(IVisualQueryExecutor executor, IVisualReachabilityDetector? reachability = null)
     {
         ArgumentNullException.ThrowIfNull(executor);
 
         _executor = executor;
+        _reachability = reachability;
     }
 
     /// <inheritdoc />
@@ -65,6 +72,18 @@ public sealed class GenericRequestDieData : IGenericRequestDieData
         if (normalized.Length == 0)
         {
             return GenericRequestStepResult<GenericRequestDieOption>.Empty(attemptedAtUtc);
+        }
+
+        // A settled "unreachable" verdict is honoured rather than re-established: the probe already knows the source
+        // cannot be reached, so an attempt here could only rediscover that at the cost of a full connect attempt, on
+        // every search. The answer is the same unavailable the attempt would have produced (020 FR-005).
+        if (_reachability?.Current == VisualReadStatus.Cached)
+        {
+            AppLog.Info(
+                LogCategory,
+                $"The die search for '{normalized}' answered unavailable without a live attempt: the reachability probe has settled on Infor Visual being unreachable.");
+
+            return GenericRequestStepResult<GenericRequestDieOption>.Unavailable(attemptedAtUtc);
         }
 
         var outcome = await ExecuteAsync(normalized, cancellationToken).ConfigureAwait(false);

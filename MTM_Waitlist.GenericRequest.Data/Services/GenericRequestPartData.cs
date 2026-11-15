@@ -48,17 +48,27 @@ public sealed class GenericRequestPartData : IGenericRequestPartData
 
     private readonly IVisualQueryExecutor _executor;
     private readonly WipFloorInventoryService _floor;
+    private readonly IVisualReachabilityDetector? _reachability;
 
     /// <summary>Creates the live part answer.</summary>
     /// <param name="executor">Runs the live Infor Visual reads.</param>
     /// <param name="floor">Runs the live WIP floor reads.</param>
-    public GenericRequestPartData(IVisualQueryExecutor executor, WipFloorInventoryService floor)
+    /// <param name="reachability">
+    /// The reachability probe's settled verdict, or <see langword="null"/> on a host that runs no probe. When it says
+    /// Infor Visual is unreachable, a read answers unavailable at once instead of spending a connect attempt on
+    /// rediscovering that.
+    /// </param>
+    public GenericRequestPartData(
+        IVisualQueryExecutor executor,
+        WipFloorInventoryService floor,
+        IVisualReachabilityDetector? reachability = null)
     {
         ArgumentNullException.ThrowIfNull(executor);
         ArgumentNullException.ThrowIfNull(floor);
 
         _executor = executor;
         _floor = floor;
+        _reachability = reachability;
     }
 
     /// <inheritdoc />
@@ -328,11 +338,29 @@ public sealed class GenericRequestPartData : IGenericRequestPartData
     /// Run one checked-in Visual script off the calling thread, so a plant-system connection never stalls the screen
     /// that asked for it.
     /// </summary>
+    /// <remarks>
+    /// <b>A settled "unreachable" verdict is honoured rather than re-established.</b> When the reachability probe
+    /// has already worked out that Infor Visual cannot be reached, a live attempt here could only rediscover that,
+    /// at the cost of a full connect attempt and the failure it logs — on every part read the requester asks for.
+    /// The read answers <see cref="VisualQueryStatus.Unreachable"/> at once instead, which is the same answer the
+    /// attempt would have produced, and the probe loop is what keeps asking and therefore what notices recovery.
+    /// The read path never decides unreachability from its own failure; it only honours a verdict the probe reached.
+    /// </remarks>
     private async Task<VisualQueryOutcome> ReadVisualAsync(
         string scriptRelativePath,
         IReadOnlyDictionary<string, object?> parameters,
         CancellationToken cancellationToken)
     {
+        if (_reachability?.Current == VisualReadStatus.Cached)
+        {
+            AppLog.Info(
+                LogCategory,
+                $"The read of '{scriptRelativePath}' answered unavailable without a live attempt: the reachability probe has settled on Infor Visual being unreachable.");
+
+            return VisualQueryOutcome.Unreachable(
+                "The reachability probe has settled on Infor Visual being unreachable.");
+        }
+
         try
         {
             return await Task

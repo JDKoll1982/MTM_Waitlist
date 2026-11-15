@@ -173,6 +173,27 @@ public sealed class GenericRequestPartDataTests
             result.Items[0].Sources.ToArray());
     }
 
+    [TestMethod]
+    public async Task Audit_GenericRequestPartDataTests_ASettledUnreachableVerdictAnswersWithoutTouchingVisual()
+    {
+        var executor = new FakeVisualQueryExecutor(VisualQueryOutcome.Ok([]));
+        var partData = new GenericRequestPartData(
+            executor,
+            new WipFloorInventoryService(new StubMySqlHelperServer([])),
+            new StubVisualReachability(VisualReadStatus.Cached));
+
+        var result = await partData.ReadCompletionsAsync("100");
+
+        Assert.AreEqual(
+            GenericRequestPresentation.Unavailable,
+            result.Presentation,
+            "the probe already knows the source cannot be reached, so the read says so (FR-017)");
+        Assert.AreEqual(
+            0,
+            executor.ExecuteCount,
+            "the answer is the probe's, so no connect attempt is spent rediscovering it");
+    }
+
     private static GenericRequestPartData Create(
         Func<string, VisualQueryOutcome> visual,
         IReadOnlyList<Dictionary<string, object?>> floorRows)
