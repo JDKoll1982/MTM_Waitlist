@@ -127,6 +127,7 @@ public sealed class GenericRequestItemQuestionTests
             new StubPersonIdentity(),
             new StubEmployeeDirectoryService(),
             new StubGenericRequestPartData(),
+            new StubGenericRequestDieData(),
             new FakeDunnageCatalogueReader(),
             new FakeLuggerArrangementService());
 

@@ -1561,7 +1561,9 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
             // resolves is the declared one, and an answer captured under it outranks the job's own (FR-082).
             var jobValue = isGenericScrap
                 ? ResolveStatedScrapCell(label, request, arrangement)
-                : RequestJobFieldValues.Resolve(label, jobAvailability, AnswersWithComponent(request));
+                : ResolveStatedDieCell(label, request) is { } statedDieValue
+                    ? statedDieValue
+                    : RequestJobFieldValues.Resolve(label, jobAvailability, AnswersWithComponent(request));
 
             // The scrap Item's lugger cell is pictured with the lugger's own artwork, beside the name the card
             // already spells out — the same shape the hopper card's size cell has. The picture is resolved where
@@ -1619,12 +1621,45 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
     /// </para>
     /// </remarks>
     /// <returns>The value to draw, or <see langword="null"/> when there is nothing true to say.</returns>
+    /// <summary>
+    /// The die-sourced cell of a generic die request, answered from the request's own stored answer.
+    /// </summary>
+    /// <param name="label">The cell's declared label.</param>
+    /// <param name="request">The request, whose stored die answer is read.</param>
+    /// <returns>The cell's value, or <see langword="null"/> for a label this request's answer does not own.</returns>
+    /// <remarks>
+    /// A generic request has no job, so a die cell that asked the job would draw nothing. The die's own answer is the
+    /// only record of it, and a die whose location Visual never recorded says so rather than leaving the cell blank
+    /// (020 FR-006, FR-012, SC-005).
+    /// </remarks>
+    private static string? ResolveStatedDieCell(string label, WaitlistRequest request)
+    {
+        if (!request.IsGeneric)
+        {
+            return null;
+        }
+
+        var stated = GenericRequestDieAnswer.TryRead(request.Answers);
+        if (stated is null)
+        {
+            return null;
+        }
+
+        return label.Trim().ToLowerInvariant() switch
+        {
+            "die" => stated.DieNumber,
+            "pickup location" or "die location" => stated.HasLocation
+                ? stated.DieLocation
+                : "Waitlist_Card_DieLocationMissing.Text".GetLocalized(),
+            _ => null,
+        };
+    }
+
     private static string? ResolveStatedScrapCell(
         string label,
         WaitlistRequest request,
         LuggerArrangementSnapshot? arrangement)
-    {
-        var stated = GenericRequestScrapAnswer.TryRead(request.Answers);
+    {        var stated = GenericRequestScrapAnswer.TryRead(request.Answers);
         if (stated is null)
         {
             return null;

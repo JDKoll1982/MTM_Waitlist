@@ -3,8 +3,992 @@
   "specName": "020 Generic Work Center — Die Search",
   "branch": "master",
   "selectedAt": "2026-11-03T21:00:00.000Z",
-  "currentStep": "specify",
-  "status": "draft",
-  "history": [],
-  "telemetryInstanceId": "62a768c9-3f45-420a-92db-6454f1a4b85e"
+  "currentStep": "implement",
+  "status": "completed",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-14T21:44:30.292Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-11-14T21:46:49.730Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-14T21:47:04.256Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T21:50:23.360Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-14T21:50:43.027Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T21:52:02.915Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-14T21:52:06.087Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T001",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T21:52:32.106Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T002",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T21:53:11.978Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T003",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T21:53:11.979Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T004",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T21:53:11.979Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T21:53:11.980Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T21:53:11.980Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T21:53:11.980Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T21:53:37.037Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T009",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T21:53:37.037Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T012",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T22:01:50.276Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T013",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T22:04:37.808Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T014",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T22:04:37.808Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T015",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T22:04:37.809Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T016",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T22:04:37.809Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T22:04:41.661Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T018",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T22:04:41.662Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T019",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T22:04:41.662Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T020",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T22:04:41.662Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T021",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T22:04:41.663Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T022",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T22:04:45.129Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T023",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T22:04:45.129Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T024",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T22:04:45.130Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T025",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T22:04:45.131Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T026",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T22:04:45.131Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T027",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T22:04:45.132Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T028",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T22:04:45.133Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T029",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T22:04:45.133Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T030",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T22:05:37.253Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T031",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T22:05:37.253Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T010",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T22:10:12.007Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T011",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T22:10:12.008Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-14T22:10:12.079Z"
+    }
+  ],
+  "telemetryInstanceId": "62a768c9-3f45-420a-92db-6454f1a4b85e",
+  "request": "020-generic-wc-die-search",
+  "workingBranch": "020-generic-wc-die-search",
+  "unattended": true,
+  "expectations": [
+    "the stated part and its quantity (017)",
+    "the dunnage page (018)",
+    "the scrap type (019)",
+    "the optional job fill (021)",
+    "the work-order flow's die step keeps reading the job's dies"
+  ],
+  "context": [
+    "area: MTM_Waitlist.GenericRequest (Views/GenericRequestDiePage.xaml, ViewModels/GenericRequestDieViewModel.cs, Controls/GenericRequestStepFrame.xaml)",
+    "area: MTM_Waitlist.GenericRequest/Services/GenericRequestLiveStepData.cs â€” ReadDiesAsync returns Unavailable today (stub for 020), ReadStepAvailabilityAsync marks Die unavailable",
+    "area: MTM_Waitlist.GenericRequest.Data/Services/GenericRequestPartData.cs â€” the pattern a new die read follows, through IVisualQueryExecutor and a checked-in queue script",
+    "area: Database/InforVisual/Queues/Module_Waitlist/Queries â€” GetPartMatches.sql (normalisation, Term parameter) and Module_Setup GetSubordinateParts.sql (FGT die classification, PART_SITE.PRIMARY_LOC_ID location, 'Die still needs location' description)",
+    "area: MTM_Waitlist.Tests/Module_GenericRequest â€” test doubles and the per-step test shape this chunk extends",
+    "constraint: every data operation goes through a stored procedure or a checked-in queue script; InlineSqlAuditTests fails the build on inline statement text",
+    "constraint: the plant's SQL Server (VISUAL/MTMFG) is unreachable from this workstation, so the unavailable path is the one that can be exercised here",
+    "constraint: no Temp preview artefact may survive; TempArtefactBoundaryAuditTests enforces it"
+  ],
+  "coverage": {
+    "FR-001": {
+      "title": "The die step is a search page accepting a die (FGT) number or a part number and reads no job.",
+      "tasks": [
+        "T012",
+        "T013"
+      ],
+      "tests": [
+        "GenericRequestDieViewModelTests::EnteringTheStepSearchesOnceWithWhatIsTyped",
+        "GenericRequestScrapSubmissionTests::ReadStepAvailabilityAsync_TheScrapStepIsAnswerableWithNoJobAnywhere"
+      ]
+    },
+    "FR-002": {
+      "title": "A die number is accepted only when Infor Visual records it; a miss is refused naming Infor Visual and the flow does not advance.",
+      "tasks": [
+        "T011",
+        "T014"
+      ],
+      "tests": [
+        "GenericRequestDieDataTests::ATermNoDieMatchesAnswersEmptyRatherThanUnavailable",
+        "GenericRequestDieViewModelTests::ATermMatchingNothingLeavesTheStepEmptyAndCannotAdvance"
+      ]
+    },
+    "FR-003": {
+      "title": "A part-number search returns every die Visual associates with that part, explicit association first and work-order history completing the list.",
+      "tasks": [
+        "T011",
+        "T017"
+      ],
+      "tests": [
+        "GenericRequestDieSearchTests::APartOwningSeveralDiesListsEveryOneWithItsLocation"
+      ]
+    },
+    "FR-004": {
+      "title": "A typed die number is normalised the way the existing part search normalises a term.",
+      "tasks": [
+        "T011",
+        "T013"
+      ],
+      "tests": [
+        "GenericRequestDieDataTests::TheTermReachesTheReadNormalised"
+      ]
+    },
+    "FR-005": {
+      "title": "An unreachable Infor Visual is reported with the attempt time and a retry, keeping the requester's term.",
+      "tasks": [
+        "T012",
+        "T015"
+      ],
+      "tests": [
+        "GenericRequestDieDataTests::AnUnreachableSourceAnswersUnavailable",
+        "GenericRequestDieViewModelTests::AnUnreachableSourceKeepsTheTermAndOffersRetry"
+      ]
+    },
+    "FR-006": {
+      "title": "Each die is listed with its own location, and a die with none says so instead of drawing an empty cell.",
+      "tasks": [
+        "T011",
+        "T017",
+        "T018"
+      ],
+      "tests": [
+        "GenericRequestDieSearchTests::ADieWithNoLocationDrawsWordsAndNotABlankCell"
+      ]
+    },
+    "FR-007": {
+      "title": "The number of matches is visible so a partial list cannot pass for a complete one.",
+      "tasks": [
+        "T017",
+        "T021"
+      ],
+      "tests": [
+        "GenericRequestDieViewModelTests::TheCountIsWhatTheReadAnswered",
+        "GenericRequestDiePageMarkupTests::Count_IsDrawnAboveTheList"
+      ]
+    },
+    "FR-008": {
+      "title": "Every match is reachable however many there are.",
+      "tasks": [
+        "T021"
+      ],
+      "tests": [
+        "GenericRequestDiePageMarkupTests::TheList_ScrollsRatherThanClipping"
+      ]
+    },
+    "FR-009": {
+      "title": "A die whose description is the plant's placeholder shows that text as its description, never as a location.",
+      "tasks": [
+        "T011",
+        "T018"
+      ],
+      "tests": [
+        "GenericRequestDieSearchTests::APlaceholderDescriptionIsShownAsTheDescription"
+      ]
+    },
+    "FR-010": {
+      "title": "The requester can choose one die or several, and the chosen dies stay marked when results are revisited.",
+      "tasks": [
+        "T019"
+      ],
+      "tests": [
+        "GenericRequestDieViewModelTests::AChosenDieStaysMarkedWhenALaterSearchReturnsIt",
+        "GenericRequestDieViewModelTests::ChoosingSeveralDiesRecordsEveryOneInOrder"
+      ]
+    },
+    "FR-011": {
+      "title": "Each chosen die becomes its own request and the confirmation step lists every one of them.",
+      "tasks": [
+        "T010",
+        "T012",
+        "T022",
+        "T023"
+      ],
+      "tests": [
+        "GenericRequestDieSubmissionTests::ThreeChosenDiesRaiseThreeRequests",
+        "GenericRequestDieSubmissionTests::OneChosenDieStillRaisesOneRequest"
+      ]
+    },
+    "FR-012": {
+      "title": "Each resulting card names its own die and that die's location.",
+      "tasks": [
+        "T012",
+        "T024",
+        "T028"
+      ],
+      "tests": [
+        "GenericRequestDieSubmissionTests::EachRequestRecordsItsOwnDieAndLocation",
+        "WaitlistRequestTitlesDieTests::AChosenDieIsNamedWithItsLocation"
+      ]
+    },
+    "FR-013": {
+      "title": "Choosing no die does not advance the flow.",
+      "tasks": [
+        "T014"
+      ],
+      "tests": [
+        "GenericRequestDieViewModelTests::ContinueNeedsADieMarked"
+      ]
+    },
+    "FR-014": {
+      "title": "The Temp preview source behind the die search page and the die card variant are deleted and the build stays green.",
+      "tasks": [
+        "T031"
+      ],
+      "tests": [
+        "TempArtefactBoundaryAuditTests::Audit_TempArtefactBoundaryAuditTests_TheShippedApplicationCarriesNoTempArtefact"
+      ]
+    }
+  },
+  "classification": {
+    "projectedFiles": 15,
+    "projectedTasks": 22,
+    "scopeSignal": "none",
+    "verdict": "oversized"
+  },
+  "intent": "Give the generic request flow a live Infor Visual die search that lists every die a part owns with locations and raises one request per chosen die.",
+  "size": "oversized",
+  "extends": "specs/016-generic-wc-request-foundation",
+  "concerns": [
+    {
+      "step": "plan",
+      "kind": "environment",
+      "note": "The four dispatch-briefs readers could not run: the DeepSeek provider returned 402 monthly quota exceeded. The plan was grounded by reading the same files inline instead."
+    },
+    {
+      "note": "The plant SQL Server (VISUAL/MTMFG) is unreachable from this workstation, so GetDieSearch.sql was never executed against live data; it is written to the exported schema in docs/database only.",
+      "step": "implement",
+      "kind": "unverified"
+    },
+    {
+      "note": "Subagent readers could not run (DeepSeek provider returned 402 monthly quota exceeded); the plan and the implementation were grounded by reading the same files directly.",
+      "step": "implement",
+      "kind": "environment"
+    }
+  ],
+  "decisions": [
+    {
+      "decision": "Find a part's dies from PART_ALTERNATE first and complete the list from the part's work-order REQUIREMENT history, deduplicated by die number.",
+      "why": "FR-003 asks for exactly that precedence; PART_ALTERNATE is the only exported table that records a deliberate part-to-part association, and the requirement history is what the work-order flow already reads as a part's dies.",
+      "rejected": "PART_SUBSTITUTE (like-for-like material, not tooling) and a description match over FGT parts (invents associations).",
+      "by": "agent",
+      "at": "2026-11-14T21:50:22.983Z"
+    },
+    {
+      "decision": "A normalised term starting with FGT is a die number matched exactly; every other term is a part number, also tried once as an FGT-prefixed die number.",
+      "why": "FR-004 asks for the existing part-search normalisation, and FR-002 needs a typed die number that exists nowhere to be refused rather than silently answered as a part search.",
+      "rejected": "Treating every term as both a die number and a part number, which would answer a misspelled die with another part's dies.",
+      "by": "agent",
+      "at": "2026-11-14T21:50:22.983Z"
+    },
+    {
+      "decision": "A die's location is PART_SITE.PRIMARY_LOC_ID, then the lowest PART_LOCATION.LOCATION_ID, then no location at all.",
+      "why": "GetSubordinateParts.sql already resolves a die this way and records that quantity ranking is meaningless for a die; ordering the fallback by location id keeps it deterministic.",
+      "rejected": "The highest-quantity stock row, which is the rule the subordinate query replaced.",
+      "by": "agent",
+      "at": "2026-11-14T21:50:22.983Z"
+    },
+    {
+      "decision": "Each result row carries its own IsSelected toggled by a tap, with a visible count above the list, matching the New Request die step.",
+      "why": "FR-010 needs one or several chosen and still marked when results are revisited, and a multiple-selection ListView cannot be two-way bound without code-behind.",
+      "rejected": "ListView.SelectedItems read in code-behind, which would be a second source of truth beside the draft.",
+      "by": "agent",
+      "at": "2026-11-14T21:50:22.983Z"
+    },
+    {
+      "decision": "Raising a die request walks the chosen dies and raises one request per die, storing die.number and die.location in the request's answers; the card reads them for a generic request.",
+      "why": "FR-011 and FR-012: the queue separates entries by the captured value, and a generic request has no job for the board to resolve a die from.",
+      "rejected": "One request carrying several dies (the duplicate rule would collapse them) and resolving the location on the board (a read per card).",
+      "by": "agent",
+      "at": "2026-11-14T21:50:22.983Z"
+    },
+    {
+      "decision": "The die read gets its own seam, IGenericRequestDieData, implemented in MTM_Waitlist.GenericRequest.Data and delegated to from GenericRequestLiveStepData; the Die step reports Ready.",
+      "why": "The part step already established a read with its own seam and tests, and GenericRequestLiveStepData is the flow's delegating seam for every other step.",
+      "rejected": "Implementing the Visual SQL inside GenericRequestLiveStepData, which carries no Visual knowledge today.",
+      "by": "agent",
+      "at": "2026-11-14T21:50:22.983Z"
+    },
+    {
+      "decision": "The search shows a die's own description exactly as Visual records it, including 'Die still needs location', and never reads it as a location.",
+      "why": "FR-009 says so; on a job the same text means 'this job has no die', which is a different question from a search hit.",
+      "rejected": "Filtering placeholder-described dies out of the results, which would hide a die the plant records.",
+      "by": "agent",
+      "at": "2026-11-14T21:50:22.983Z"
+    },
+    {
+      "decision": "The die search is live only: no read shape and no mtm_mock mirror.",
+      "why": "Spec A4 and the FR-084 precedent for the incorrect-part search: an association search is not a mirrorable shape, and the app never refreshes the mirror.",
+      "rejected": "Adding a sixth read shape, which would mirror three Visual tables.",
+      "by": "agent",
+      "at": "2026-11-14T21:50:22.983Z"
+    },
+    {
+      "decision": "Normalise with PartMatchSearchInput and add a project reference from MTM_Waitlist.GenericRequest.Data to MTM_Waitlist.Waitlist.NewRequest",
+      "why": "FR-004 asks for the identical normalisation, so the one class that owns it is shared rather than copied",
+      "rejected": "a second copy of the padding rule in the die read",
+      "by": "agent",
+      "at": "2026-11-14T22:05:55.741Z"
+    },
+    {
+      "decision": "Keep the chosen dies in the view model and write them to the draft on Continue",
+      "why": "a re-search must not drop a choice, and the draft is only written when the requester leaves the step",
+      "rejected": "reading ListView.SelectedItems in code-behind",
+      "by": "agent",
+      "at": "2026-11-14T22:05:55.741Z"
+    },
+    {
+      "decision": "Stop the raise walk at the first failed write and say how many landed",
+      "why": "a failure proves nothing about the remaining dies, and a retry that silently re-raises the successful ones would duplicate them",
+      "rejected": "continuing past a failure and reporting only successes",
+      "by": "agent",
+      "at": "2026-11-14T22:05:55.741Z"
+    }
+  ],
+  "step_summaries": {
+    "plan": {
+      "summary": "Plan, research and design artifacts for a live Infor Visual die search that lists every die a part owns and raises one request per chosen die.",
+      "key_finding": "The die card cannot resolve a location for a generic request because there is no job, so the die's location must be stored on the request's own answers."
+    },
+    "tasks": {
+      "summary": "31 tasks in six phases: setup wording, a foundational read/raise phase, one phase per user story, and Polish."
+    },
+    "implement": {
+      "summary": "The die step now answers from a live Infor Visual search, lists every die a part owns with its location, and raises one request per chosen die with the die answer stored for the card."
+    }
+  },
+  "approach": "Add a checked-in GetDieSearch.sql that answers dies by die number, PART_ALTERNATE association or work-order requirement history, run it through a new IGenericRequestDieData seam behind the existing step seam, let the page choose one or several dies with a visible count, and raise one request per chosen die with die.number and die.location stored on its answers so the card can name both.",
+  "verified": [
+    {
+      "what": "plan blocks check out",
+      "command": "python3 .specify/extensions/companion/scripts/check_plan.py --feature-dir specs/020-generic-wc-die-search --strict",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 0.0,
+      "result": "[plan-check] plan.md: 2 screens, 11 parts. Every screen holds to its grammar."
+    },
+    {
+      "what": "The die search answers from Infor Visual alone, with no cached mirror and no job read",
+      "result": "read from the code: the read class has one executor dependency, and no read-shape or mirror entry was added"
+    },
+    {
+      "what": "Removing the stale ignored build leftovers (TempGenericRequest.Preview, MTM_Waitlist.Reporting) is what let a clean app build succeed",
+      "result": "confirmed: the app project globs sibling folders, and both leftover obj folders were producing CS0579 duplicates"
+    },
+    {
+      "what": "solution build",
+      "command": "dotnet build MTM_Waitlist.sln -v m",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 32.5,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:32.34",
+      "commit": "a26f09f4",
+      "tree": "c0d148b6c989ffb39c89ff62b0f38757d8c3e2cc"
+    },
+    {
+      "what": "full test suite",
+      "command": "dotnet test MTM_Waitlist.Tests\\MTM_Waitlist.Tests.csproj -p:Platform=x64",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 55.4,
+      "result": "  Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_ReachesTheRealProcedureReportsTheLoadedRowCountAndSwapsAtomically [< 1 ms] ·   Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_WithAnEmptyPayloadIsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  2663, Skipped:    56, Total:  2719, Duration: 36 s - MTM_Waitlist.Tests.dll (net10.0)",
+      "commit": "a26f09f4",
+      "tree": "c0d148b6c989ffb39c89ff62b0f38757d8c3e2cc"
+    },
+    {
+      "what": "full test suite after review cleanup",
+      "command": "dotnet test MTM_Waitlist.Tests\\MTM_Waitlist.Tests.csproj -p:Platform=x64",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 55.7,
+      "result": "  Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_ReachesTheRealProcedureReportsTheLoadedRowCountAndSwapsAtomically [1 ms] ·   Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_WithAnEmptyPayloadIsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  2663, Skipped:    56, Total:  2719, Duration: 36 s - MTM_Waitlist.Tests.dll (net10.0)",
+      "commit": "a26f09f4",
+      "tree": "4f293e428d99755452c330f9f13b95bf4c7d349f"
+    }
+  ],
+  "planBlocks": [
+    "screens"
+  ],
+  "currentTask": null,
+  "task_summaries": {
+    "T001": {
+      "status": "DONE",
+      "did": "Added die step wording: count, no-location, nothing-chosen, raised-many, and empty naming Infor Visual",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Strings/en-us/Resources.resw"
+      ]
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "Added the die search script, the stored die answer, the die read seam, the selectable option, the draft die list and the stub",
+      "files": [
+        "Database/InforVisual/Queues/Module_Waitlist/Queries/GetDieSearch.sql",
+        "MTM_Waitlist.Core/Models/GenericRequestDieAnswer.cs",
+        "MTM_Waitlist.GenericRequest/Contracts/IGenericRequestDieData.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestOptions.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestDraft.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestTestDoubles.cs"
+      ],
+      "wave": "T002-T007"
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "Added the die search script, the stored die answer, the die read seam, the selectable option, the draft die list and the stub",
+      "files": [
+        "Database/InforVisual/Queues/Module_Waitlist/Queries/GetDieSearch.sql",
+        "MTM_Waitlist.Core/Models/GenericRequestDieAnswer.cs",
+        "MTM_Waitlist.GenericRequest/Contracts/IGenericRequestDieData.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestOptions.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestDraft.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestTestDoubles.cs"
+      ],
+      "wave": "T002-T007"
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "Added the die search script, the stored die answer, the die read seam, the selectable option, the draft die list and the stub",
+      "files": [
+        "Database/InforVisual/Queues/Module_Waitlist/Queries/GetDieSearch.sql",
+        "MTM_Waitlist.Core/Models/GenericRequestDieAnswer.cs",
+        "MTM_Waitlist.GenericRequest/Contracts/IGenericRequestDieData.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestOptions.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestDraft.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestTestDoubles.cs"
+      ],
+      "wave": "T002-T007"
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "Added the die search script, the stored die answer, the die read seam, the selectable option, the draft die list and the stub",
+      "files": [
+        "Database/InforVisual/Queues/Module_Waitlist/Queries/GetDieSearch.sql",
+        "MTM_Waitlist.Core/Models/GenericRequestDieAnswer.cs",
+        "MTM_Waitlist.GenericRequest/Contracts/IGenericRequestDieData.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestOptions.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestDraft.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestTestDoubles.cs"
+      ],
+      "wave": "T002-T007"
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "Added the die search script, the stored die answer, the die read seam, the selectable option, the draft die list and the stub",
+      "files": [
+        "Database/InforVisual/Queues/Module_Waitlist/Queries/GetDieSearch.sql",
+        "MTM_Waitlist.Core/Models/GenericRequestDieAnswer.cs",
+        "MTM_Waitlist.GenericRequest/Contracts/IGenericRequestDieData.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestOptions.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestDraft.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestTestDoubles.cs"
+      ],
+      "wave": "T002-T007"
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "Added the die search script, the stored die answer, the die read seam, the selectable option, the draft die list and the stub",
+      "files": [
+        "Database/InforVisual/Queues/Module_Waitlist/Queries/GetDieSearch.sql",
+        "MTM_Waitlist.Core/Models/GenericRequestDieAnswer.cs",
+        "MTM_Waitlist.GenericRequest/Contracts/IGenericRequestDieData.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestOptions.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestDraft.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestTestDoubles.cs"
+      ],
+      "wave": "T002-T007"
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "Built the live die read over the checked-in script and registered its seam",
+      "files": [
+        "MTM_Waitlist.GenericRequest.Data/Services/GenericRequestDieData.cs",
+        "MTM_Waitlist.GenericRequest.Data/MTM_Waitlist.GenericRequest.Data.csproj",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ],
+      "wave": "T008-T009"
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "Built the live die read over the checked-in script and registered its seam",
+      "files": [
+        "MTM_Waitlist.GenericRequest.Data/Services/GenericRequestDieData.cs",
+        "MTM_Waitlist.GenericRequest.Data/MTM_Waitlist.GenericRequest.Data.csproj",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs"
+      ],
+      "wave": "T008-T009"
+    },
+    "T012": {
+      "status": "DONE",
+      "did": "Handed the die read to its seam, made the Die step ready and raised one request per chosen die with the die answer stored",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Services/GenericRequestLiveStepData.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestSubmission.cs"
+      ]
+    },
+    "T013": {
+      "status": "DONE",
+      "did": "Built the die step's search: empty stays put, unreachable keeps the term, choice gates Continue, several dies recorded in order",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestDieViewModel.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDieViewModelTests.cs"
+      ]
+    },
+    "T014": {
+      "status": "DONE",
+      "did": "Built the die step's search: empty stays put, unreachable keeps the term, choice gates Continue, several dies recorded in order",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestDieViewModel.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDieViewModelTests.cs"
+      ]
+    },
+    "T015": {
+      "status": "DONE",
+      "did": "Built the die step's search: empty stays put, unreachable keeps the term, choice gates Continue, several dies recorded in order",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestDieViewModel.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDieViewModelTests.cs"
+      ]
+    },
+    "T016": {
+      "status": "DONE",
+      "did": "Built the die step's search: empty stays put, unreachable keeps the term, choice gates Continue, several dies recorded in order",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestDieViewModel.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDieViewModelTests.cs"
+      ]
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "Drew the count, the per-row location wording and a checkbox per die, and covered every die a part owns",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestDiePage.xaml",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDieSearchTests.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/Views/GenericRequestDiePageMarkupTests.cs"
+      ]
+    },
+    "T018": {
+      "status": "DONE",
+      "did": "Drew the count, the per-row location wording and a checkbox per die, and covered every die a part owns",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestDiePage.xaml",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDieSearchTests.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/Views/GenericRequestDiePageMarkupTests.cs"
+      ]
+    },
+    "T019": {
+      "status": "DONE",
+      "did": "Drew the count, the per-row location wording and a checkbox per die, and covered every die a part owns",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestDiePage.xaml",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDieSearchTests.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/Views/GenericRequestDiePageMarkupTests.cs"
+      ]
+    },
+    "T020": {
+      "status": "DONE",
+      "did": "Drew the count, the per-row location wording and a checkbox per die, and covered every die a part owns",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestDiePage.xaml",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDieSearchTests.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/Views/GenericRequestDiePageMarkupTests.cs"
+      ]
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "Drew the count, the per-row location wording and a checkbox per die, and covered every die a part owns",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestDiePage.xaml",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDieSearchTests.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/Views/GenericRequestDiePageMarkupTests.cs"
+      ]
+    },
+    "T022": {
+      "status": "DONE",
+      "did": "Reviewed every chosen die, reported the raised count, and made the card name a generic die and its location from the stored answer",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestSummaryViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestResultViewModel.cs",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequestTitles.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "Strings/en-us/Resources.resw",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDieSubmissionTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Models/WaitlistRequestTitlesDieTests.cs"
+      ]
+    },
+    "T023": {
+      "status": "DONE",
+      "did": "Reviewed every chosen die, reported the raised count, and made the card name a generic die and its location from the stored answer",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestSummaryViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestResultViewModel.cs",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequestTitles.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "Strings/en-us/Resources.resw",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDieSubmissionTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Models/WaitlistRequestTitlesDieTests.cs"
+      ]
+    },
+    "T024": {
+      "status": "DONE",
+      "did": "Reviewed every chosen die, reported the raised count, and made the card name a generic die and its location from the stored answer",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestSummaryViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestResultViewModel.cs",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequestTitles.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "Strings/en-us/Resources.resw",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDieSubmissionTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Models/WaitlistRequestTitlesDieTests.cs"
+      ]
+    },
+    "T025": {
+      "status": "DONE",
+      "did": "Reviewed every chosen die, reported the raised count, and made the card name a generic die and its location from the stored answer",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestSummaryViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestResultViewModel.cs",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequestTitles.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "Strings/en-us/Resources.resw",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDieSubmissionTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Models/WaitlistRequestTitlesDieTests.cs"
+      ]
+    },
+    "T026": {
+      "status": "DONE",
+      "did": "Reviewed every chosen die, reported the raised count, and made the card name a generic die and its location from the stored answer",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestSummaryViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestResultViewModel.cs",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequestTitles.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "Strings/en-us/Resources.resw",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDieSubmissionTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Models/WaitlistRequestTitlesDieTests.cs"
+      ]
+    },
+    "T027": {
+      "status": "DONE",
+      "did": "Reviewed every chosen die, reported the raised count, and made the card name a generic die and its location from the stored answer",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestSummaryViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestResultViewModel.cs",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequestTitles.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "Strings/en-us/Resources.resw",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDieSubmissionTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Models/WaitlistRequestTitlesDieTests.cs"
+      ]
+    },
+    "T028": {
+      "status": "DONE",
+      "did": "Reviewed every chosen die, reported the raised count, and made the card name a generic die and its location from the stored answer",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestSummaryViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestResultViewModel.cs",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequestTitles.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "Strings/en-us/Resources.resw",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDieSubmissionTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Models/WaitlistRequestTitlesDieTests.cs"
+      ]
+    },
+    "T029": {
+      "status": "DONE",
+      "did": "Reviewed every chosen die, reported the raised count, and made the card name a generic die and its location from the stored answer",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestSummaryViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestResultViewModel.cs",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequestTitles.cs",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewViewModel.cs",
+        "Strings/en-us/Resources.resw",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDieSubmissionTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Models/WaitlistRequestTitlesDieTests.cs"
+      ]
+    },
+    "T030": {
+      "status": "DONE",
+      "did": "Build green and the full suite passed; the dead preview and the stale Reporting leftovers are gone and the boundary audit still passes",
+      "files": [
+        "TempGenericRequest.Preview",
+        "MTM_Waitlist.Reporting"
+      ],
+      "wave": "T030-T031"
+    },
+    "T031": {
+      "status": "DONE",
+      "did": "Build green and the full suite passed; the dead preview and the stale Reporting leftovers are gone and the boundary audit still passes",
+      "files": [
+        "TempGenericRequest.Preview",
+        "MTM_Waitlist.Reporting"
+      ],
+      "wave": "T030-T031"
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "Covered the stored die answer and the live read: normalisation, association order, empty, unavailable and the placeholder description",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDieAnswerTests.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDieDataTests.cs"
+      ],
+      "wave": "T010-T011"
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "Covered the stored die answer and the live read: normalisation, association order, empty, unavailable and the placeholder description",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDieAnswerTests.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestDieDataTests.cs"
+      ],
+      "wave": "T010-T011"
+    }
+  },
+  "last_action": "Build and full suite passed after the die search, the page and the card path landed.",
+  "risk": {
+    "tier": "high",
+    "computed": "high",
+    "reasons": [
+      "touches Database/InforVisual/Queues/Module_Waitlist/Queries/GetDieSearch.sql"
+    ]
+  }
 }

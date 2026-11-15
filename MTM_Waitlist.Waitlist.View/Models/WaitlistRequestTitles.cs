@@ -100,6 +100,11 @@ public static class WaitlistRequestTitles
         var choseADie = !string.IsNullOrWhiteSpace(storedDie);
         var chosen = choseADie ? FindDie(job, storedDie) : null;
 
+        // A generic request has no job, so the die and where it lives are the two answers the request stored when
+        // it was raised. Without them the card could name the die from its value alone but never its location
+        // (020 FR-012).
+        var statedDie = request is { IsGeneric: true } ? GenericRequestDieAnswer.TryRead(request.Answers) : null;
+
         return new RequestItemLine2Context(
             Answer: answer,
             // The component the operator picked is the one answer the request carries, exactly as the dunnage part
@@ -110,8 +115,12 @@ public static class WaitlistRequestTitles
             ScrapType: NamesToken(item, "scrap_type") ? StatedScrapType(request) ?? job?.ScrapType : null,
             DunnagePart: NamesToken(item, "dunnage_part") ? answer : null,
             JobPartNumber: NamesToken(item, "job_part_number") ? job?.JobPartNumber : null,
-            DieNumber: namesDie ? (choseADie ? chosen?.PartNumber ?? storedDie : job?.DieNumber) : null,
-            DieLocation: namesDie ? (choseADie ? chosen?.Location : job?.DieLocation) : null);
+            DieNumber: namesDie
+                ? (choseADie ? chosen?.PartNumber ?? statedDie?.DieNumber ?? storedDie : job?.DieNumber)
+                : null,
+            DieLocation: namesDie
+                ? (choseADie ? chosen?.Location ?? statedDie?.DieLocation : job?.DieLocation)
+                : null);
     }
 
     /// <summary>

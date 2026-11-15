@@ -24,12 +24,12 @@ namespace MTM_Waitlist.GenericRequest.Services;
 /// store could not be reached, which is what keeps a generic request as truthful as a work-order one (FR-028).
 /// </para>
 /// <para>
-/// <b>The die answer is not implemented here yet.</b> A die comes from a Visual search (020), so that read answers
-/// <see cref="GenericRequestStepResult{T}.Unavailable"/> and its step reports the source as not available and offers
-/// a retry, with no substitute offered (FR-012). The scrap type is read here (019): the plant's one shared list, with
-/// any type the arrangement records appended, and no job consulted. Dunnage shipped with its own seam (018): the
-/// dunnage step reads <see cref="IDunnageCatalogueReader"/> directly, and this class reads it only at raise time to
-/// record whether the chosen part is still offered. The part answer ships too: it lives on
+/// The die answer is read here (020) through <see cref="IGenericRequestDieData"/>: a live Infor Visual search that
+/// answers a die number or a part number, lists every die the match owns, and reports an unreachable source rather
+/// than substituting one (FR-002, FR-005, FR-015). The scrap type is read here (019): the plant's one shared list,
+/// with any type the arrangement records appended, and no job consulted. Dunnage shipped with its own seam (018):
+/// the dunnage step reads <see cref="IDunnageCatalogueReader"/> directly, and this class reads it only at raise time
+/// to record whether the chosen part is still offered. The part answer ships too: it lives on
 /// <see cref="IGenericRequestPartData"/>, which the part step asks directly.
 /// </para>
 /// </remarks>
@@ -44,6 +44,7 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
     private readonly IPersonIdentity _personIdentity;
     private readonly IEmployeeDirectoryService _employeeDirectoryService;
     private readonly IGenericRequestPartData _partData;
+    private readonly IGenericRequestDieData _dieData;
     private readonly IDunnageCatalogueReader _catalogueReader;
     private readonly ILuggerArrangementService _luggerArrangement;
 
@@ -55,6 +56,7 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
         IPersonIdentity personIdentity,
         IEmployeeDirectoryService employeeDirectoryService,
         IGenericRequestPartData partData,
+        IGenericRequestDieData dieData,
         IDunnageCatalogueReader catalogueReader,
         ILuggerArrangementService luggerArrangement)
     {
@@ -65,6 +67,7 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
         _personIdentity = personIdentity ?? throw new ArgumentNullException(nameof(personIdentity));
         _employeeDirectoryService = employeeDirectoryService ?? throw new ArgumentNullException(nameof(employeeDirectoryService));
         _partData = partData ?? throw new ArgumentNullException(nameof(partData));
+        _dieData = dieData ?? throw new ArgumentNullException(nameof(dieData));
         _catalogueReader = catalogueReader ?? throw new ArgumentNullException(nameof(catalogueReader));
         _luggerArrangement = luggerArrangement ?? throw new ArgumentNullException(nameof(luggerArrangement));
     }
@@ -240,26 +243,20 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
     public Task<GenericRequestStepResult<GenericRequestDieOption>> ReadDiesAsync(
         string searchText,
         CancellationToken cancellationToken = default) =>
-        Task.FromResult(GenericRequestStepResult<GenericRequestDieOption>.Unavailable(DateTimeOffset.UtcNow));
+        _dieData.ReadDiesAsync(searchText, cancellationToken);
 
     /// <summary>
     /// Whether a step that reads no rows can be shown.
     /// </summary>
     /// <remarks>
-    /// The part step ships with its live reads and the dunnage step reads the plant's catalogue through its own seam
-    /// (018), so both are ready. The scrap step's source is the plant's own in-memory list, so it is ready too (019).
-    /// The die step reports unavailable because its source has not shipped (020). Every other step has something to
-    /// show: its own answer fields. The result step's presentation comes from the raise attempt the summary recorded,
-    /// not from here.
+    /// Every step now has a live source of its own, so every step is ready. The die step stopped reporting
+    /// unavailable when its Infor Visual search shipped (020): its own read decides the presentation, and an
+    /// unreachable source is what the step's unavailable state is for.
     /// </remarks>
     public Task<GenericRequestStepAvailability> ReadStepAvailabilityAsync(
         GenericRequestStep step,
         CancellationToken cancellationToken = default) =>
-        Task.FromResult(step switch
-            {
-                GenericRequestStep.Die => GenericRequestStepAvailability.Unavailable(DateTimeOffset.UtcNow),
-                _ => GenericRequestStepAvailability.Ready(DateTimeOffset.UtcNow),
-            });
+        Task.FromResult(GenericRequestStepAvailability.Ready(DateTimeOffset.UtcNow));
 
     /// <inheritdoc />
     public async Task<GenericRequestSubmission> SubmitAsync(
@@ -288,50 +285,91 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
                 return GenericRequestSubmission.Failed(verification.Message, attemptedAtUtc);
             }
 
-            // The answers a generic request records on itself: the part answer when the request states a proved
-            // part, the dunnage answer when it asked for one, and the scrap type when the requester stated it. All
-            // three ride the existing answers column.
-            var answers = await AnswersForAsync(draft, cancellationToken).ConfigureAwait(false);
+            // A die request may be for several dies, and each chosen die is its own request: the request's one value
+            // column holds one die, so folding them together would collapse them on the queue (020 FR-011). Every
+            // other answer raises exactly one request, as it always has.
+            var dies = CapturedDies(draft);
+            var raisedIds = new List<string>();
+            var duplicateMessage = string.Empty;
 
-            var result = await _requestService
-                .SubmitAsync(
-                    new WaitlistRequestDraft
-                    {
-                        Building = draft.Building,
-                        WorkCenter = draft.WorkCenter,
-                        Category = draft.Category,
-                        Item = draft.ItemCode,
-                        InputValue = CapturedValue(draft),
-                        IsGeneric = true,
-                        Description = draft.Description,
-                        Answers = answers,
-                        AcceptedWarnings = draft.AcceptedWarnings.Count == 0 ? null : draft.AcceptedWarnings.ToArray(),
-                        WorkCenterName = _workCenterCatalogService.GetCurrentComputerName(),
-                        RequesterEmployeeNumber = verification.EmployeeNumber,
-                        RequesterEmployeeName = verification.EmployeeName,
-                        RequestedUtc = attemptedAtUtc,
-                        // The due time is deliberately left unset. The store derives it from this request's own
-                        // creation time and the allotment its request type configures, through the same
-                        // UrgencyDeadlineService the work-order flow uses, so one item waits the same length of
-                        // time however the request was raised.
-                        IsOverdue = false,
-                    },
-                    cancellationToken)
-                .ConfigureAwait(false);
-
-            if (result.Status == WaitlistRequestSubmitStatus.Success && result.Request is { } raised)
+            foreach (var die in dies)
             {
-                AppLog.Info(LogCategory, $"Raised generic request '{raised.Id}' for work center '{draft.WorkCenter}', item '{draft.ItemCode}'.");
-                return GenericRequestSubmission.Raised(raised.Id.ToString(), attemptedAtUtc);
+                // The answers a generic request records on itself: the part answer when the request states a proved
+                // part, the dunnage answer when it asked for one, the scrap type when the requester stated it, and
+                // the die when one was chosen. All of them ride the existing answers column.
+                var answers = await AnswersForAsync(draft, die, cancellationToken).ConfigureAwait(false);
+
+                var result = await _requestService
+                    .SubmitAsync(
+                        new WaitlistRequestDraft
+                        {
+                            Building = draft.Building,
+                            WorkCenter = draft.WorkCenter,
+                            Category = draft.Category,
+                            Item = draft.ItemCode,
+                            InputValue = die?.DieNumber ?? CapturedValue(draft),
+                            IsGeneric = true,
+                            Description = draft.Description,
+                            Answers = answers,
+                            AcceptedWarnings = draft.AcceptedWarnings.Count == 0 ? null : draft.AcceptedWarnings.ToArray(),
+                            WorkCenterName = _workCenterCatalogService.GetCurrentComputerName(),
+                            RequesterEmployeeNumber = verification.EmployeeNumber,
+                            RequesterEmployeeName = verification.EmployeeName,
+                            RequestedUtc = attemptedAtUtc,
+                            // The due time is deliberately left unset. The store derives it from this request's own
+                            // creation time and the allotment its request type configures, through the same
+                            // UrgencyDeadlineService the work-order flow uses, so one item waits the same length of
+                            // time however the request was raised.
+                            IsOverdue = false,
+                        },
+                        cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (result.Status == WaitlistRequestSubmitStatus.Success && result.Request is { } raised)
+                {
+                    AppLog.Info(
+                        LogCategory,
+                        $"Raised generic request '{raised.Id}' for work center '{draft.WorkCenter}', item '{draft.ItemCode}'"
+                        + (die is null ? "." : $", die '{die.DieNumber}'."));
+
+                    raisedIds.Add(raised.Id.ToString());
+                    continue;
+                }
+
+                AppLog.Info(LogCategory, $"The generic request was not raised: {result.Status} - {result.Message}");
+
+                // A duplicate is the queue saying the need is already covered, which is an answer rather than a
+                // fault: the other chosen dies are still raised, and the result step shows the queue's own words
+                // when none of them could be (FR-019).
+                if (result.Status == WaitlistRequestSubmitStatus.DuplicateWarningRequired)
+                {
+                    if (duplicateMessage.Length == 0)
+                    {
+                        duplicateMessage = result.Message;
+                    }
+
+                    continue;
+                }
+
+                // A write that failed proves nothing about the remaining dies, so the walk stops here and says how
+                // much of it landed rather than reporting a whole batch that partly did.
+                var raisedNote = raisedIds.Count == 0
+                    ? string.Empty
+                    : $" {raisedIds.Count} of {dies.Count} requests were raised before it failed.";
+
+                return GenericRequestSubmission.Failed(result.Message + raisedNote, attemptedAtUtc);
             }
 
-            AppLog.Info(LogCategory, $"The generic request was not raised: {result.Status} - {result.Message}");
+            if (raisedIds.Count > 0)
+            {
+                return GenericRequestSubmission.Raised(raisedIds, attemptedAtUtc);
+            }
 
-            // A duplicate is the queue saying the need is already covered, which is an answer rather than a fault,
-            // and the result step shows it with the one action that fits: back to the list (FR-019).
-            return result.Status == WaitlistRequestSubmitStatus.DuplicateWarningRequired
-                ? GenericRequestSubmission.Duplicate(result.Message, attemptedAtUtc)
-                : GenericRequestSubmission.Failed(result.Message, attemptedAtUtc);
+            return duplicateMessage.Length > 0
+                ? GenericRequestSubmission.Duplicate(duplicateMessage, attemptedAtUtc)
+                : GenericRequestSubmission.Failed(
+                    "The request could not be raised because the queue did not accept it. Try again.",
+                    attemptedAtUtc);
         }
         catch (OperationCanceledException)
         {
@@ -345,6 +383,19 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
                 attemptedAtUtc);
         }
     }
+
+    /// <summary>
+    /// The requests one draft raises: one per chosen die when the request states dies, and exactly one otherwise.
+    /// </summary>
+    /// <remarks>
+    /// A die request is the only one that raises several, because the request's single value column holds one die.
+    /// Every other request, and a die request that somehow states none, raises the single request the flow has
+    /// always raised (FR-011).
+    /// </remarks>
+    private static IReadOnlyList<GenericRequestDieOption?> CapturedDies(GenericRequestDraft draft) =>
+        draft.RequiresDie && draft.SelectedDies.Count > 0
+            ? draft.SelectedDies.Cast<GenericRequestDieOption?>().ToArray()
+            : new GenericRequestDieOption?[] { null };
 
     /// <summary>
     /// The one value the request is about, captured in <c>input_value</c>.
@@ -371,6 +422,13 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
             return draft.ScrapType;
         }
 
+        // A die request is about the die the requester chose, and that number is the detail the queue tells two
+        // requests raised from one item apart (020 FR-011).
+        if (draft.RequiresDie && draft.DieNumber.Length > 0)
+        {
+            return draft.DieNumber;
+        }
+
         return string.IsNullOrWhiteSpace(draft.Answer) ? null : draft.Answer;
     }
 
@@ -379,6 +437,7 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
     /// </summary>
     private async Task<IReadOnlyDictionary<string, string>?> AnswersForAsync(
         GenericRequestDraft draft,
+        GenericRequestDieOption? die,
         CancellationToken cancellationToken)
     {
         var answers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -401,6 +460,20 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
         if (draft.RequiresScrap)
         {
             foreach (var pair in new GenericRequestScrapAnswer { ScrapType = draft.ScrapType }.ToAnswers())
+            {
+                answers[pair.Key] = pair.Value;
+            }
+        }
+
+        // The die this request is for, with where it lives. The card reads both from here because a generic request
+        // has no job for the board to look a die up in (020 FR-012).
+        if (die is { } chosen)
+        {
+            foreach (var pair in new GenericRequestDieAnswer
+            {
+                DieNumber = chosen.DieNumber,
+                DieLocation = chosen.Location,
+            }.ToAnswers())
             {
                 answers[pair.Key] = pair.Value;
             }

@@ -74,6 +74,7 @@ public sealed partial class GenericRequestSummaryViewModel : GenericRequestStepV
             Draft.ResultMessage = submission.FailureMessage;
             Draft.ResultWasDuplicate = submission.IsDuplicate;
             Draft.RaisedRequestNumber = submission.RequestId;
+            Draft.RaisedRequestCount = submission.RaisedCount;
 
             if (!submission.IsRaised)
             {
@@ -113,7 +114,20 @@ public sealed partial class GenericRequestSummaryViewModel : GenericRequestStepV
         Add("GenericRequest_Summary_Sequence.Label", Draft.Sequence);
         Add("GenericRequest_Summary_Dunnage.Label", Join(Draft.DunnageType, Draft.DunnagePart));
         Add("GenericRequest_Summary_Scrap.Label", Draft.ScrapType);
-        Add("GenericRequest_Summary_Die.Label", Draft.DieNumber);
+
+        // A die request may be for several dies, so every one of them is reviewed. A review that showed only the
+        // first would understate what is about to be raised (FR-011).
+        if (Draft.SelectedDies.Count > 0)
+        {
+            foreach (var die in Draft.SelectedDies)
+            {
+                Add("GenericRequest_Summary_Die.Label", $"{die.DieNumber} ({die.LocationText})");
+            }
+        }
+        else
+        {
+            Add("GenericRequest_Summary_Die.Label", Draft.DieNumber);
+        }
         Add("GenericRequest_Summary_Estimate.Label", Draft.EstimatedMinutes is { } minutes
             ? minutes.ToString("0", CultureInfo.CurrentCulture)
             : string.Empty);

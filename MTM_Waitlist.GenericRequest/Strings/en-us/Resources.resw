@@ -84,7 +84,7 @@
     <value>Work in progress</value>
   </data>
   <data name="GenericRequest_Die_Intro.Text" xml:space="preserve">
-    <value>Search by die number or description, then pick the one the request needs.</value>
+    <value>Search by die (FGT) number or by the part the die makes, then choose every die the request needs.</value>
   </data>
   <data name="GenericRequest_Part_Empty.Text" xml:space="preserve">
     <value>No part matches this item.</value>
@@ -112,8 +112,9 @@
   </data>
   <data name="GenericRequest_Die_SearchButton.Content" xml:space="preserve">
     <value>Search</value>
-  </data>  <data name="GenericRequest_Die_Empty.Text" xml:space="preserve">
-    <value>No die matches that search.</value>
+  </data>
+  <data name="GenericRequest_Die_Empty.Text" xml:space="preserve">
+    <value>No die in Infor Visual matches that search.</value>
   </data>
   <data name="GenericRequest_Dunnage_Intro.Text" xml:space="preserve">
     <value>Choose a dunnage type, then the part that stands in for it.</value>
@@ -188,7 +189,19 @@
     <value>Choose a category</value>
   </data>
   <data name="GenericRequest_Die_Search.PlaceholderText" xml:space="preserve">
-    <value>Die number or description</value>
+    <value>Die number or part number</value>
+  </data>
+  <data name="GenericRequest_Die_Count.Text" xml:space="preserve">
+    <value>{0} dies match</value>
+  </data>
+  <data name="GenericRequest_Die_Count_One.Text" xml:space="preserve">
+    <value>1 die matches</value>
+  </data>
+  <data name="GenericRequest_Die_Location_None.Text" xml:space="preserve">
+    <value>No location recorded</value>
+  </data>
+  <data name="GenericRequest_Die_NothingChosen.Text" xml:space="preserve">
+    <value>Choose at least one die before continuing.</value>
   </data>
   <data name="GenericRequest_Scrap_Intro.Text" xml:space="preserve">
     <value>Pick the scrap type the request needs.</value>
@@ -306,6 +319,9 @@
   </data>
   <data name="GenericRequest_Result_Raised_NoNumber.Text" xml:space="preserve">
     <value>The request was raised and is now on the waitlist.</value>
+  </data>
+  <data name="GenericRequest_Result_Raised_Many.Text" xml:space="preserve">
+    <value>{0} requests were raised and are now on the waitlist.</value>
   </data>
   <data name="GenericRequest_Result_RetryFailed.Text" xml:space="preserve">
     <value>The request could not be submitted. Please try again.</value>

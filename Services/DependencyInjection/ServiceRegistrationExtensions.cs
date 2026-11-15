@@ -258,6 +258,10 @@ public static partial class ServiceRegistrationExtensions
         // sequence read to the same instance, so both routes reach one live implementation.
         services.AddSingleton<MTM_Waitlist.GenericRequest.Contracts.IGenericRequestPartData, MTM_Waitlist.GenericRequest.Data.Services.GenericRequestPartData>();
 
+        // The die answer's own seam (020). The die step asks the wide seam above, which forwards to this instance,
+        // so one live Infor Visual search answers every route.
+        services.AddSingleton<MTM_Waitlist.GenericRequest.Contracts.IGenericRequestDieData, MTM_Waitlist.GenericRequest.Data.Services.GenericRequestDieData>();
+
         services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestWorkCenterViewModel>();
         services.AddTransient<MTM_Waitlist.GenericRequest.Views.GenericRequestWorkCenterPage>();
         services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestCategoryViewModel>();

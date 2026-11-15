@@ -71,6 +71,13 @@ public sealed class GenericRequestDraft
 
     public string DieNumber { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Every die the requester chose, in the order they chose them. A die request may be for several dies, and each
+    /// one becomes its own request, so the whole list is kept and <see cref="DieNumber"/> stays the first of them for
+    /// the screens that read a single die (FR-010, FR-011).
+    /// </summary>
+    public List<GenericRequestDieOption> SelectedDies { get; } = new();
+
     public double Quantity { get; set; } = 1;
 
     public string Description { get; set; } = string.Empty;
@@ -95,6 +102,12 @@ public sealed class GenericRequestDraft
     /// request, which is also what the board targets it by.
     /// </summary>
     public string RaisedRequestNumber { get; set; } = string.Empty;
+
+    /// <summary>
+    /// How many requests the last raise produced. A die request raises one per chosen die, so the result step says
+    /// how many landed instead of naming one and leaving the others unsaid (FR-011).
+    /// </summary>
+    public int RaisedRequestCount { get; set; }
 
     /// <summary>
     /// What the result step shows. The raise attempt decides it, so an unraised request reads empty, a request the

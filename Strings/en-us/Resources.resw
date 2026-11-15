@@ -1267,6 +1267,9 @@
   <data name="Waitlist_Card_LuggerUnavailable.Text" xml:space="preserve">
     <value>Unavailable</value>
   </data>
+  <data name="Waitlist_Card_DieLocationMissing.Text" xml:space="preserve">
+    <value>No location recorded</value>
+  </data>
   <data name="Die Location" xml:space="preserve">
     <value>Die Location</value>
   </data>

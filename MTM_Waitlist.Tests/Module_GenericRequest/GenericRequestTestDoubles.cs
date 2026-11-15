@@ -34,6 +34,13 @@ internal sealed class StubGenericRequestStepData : IGenericRequestStepData
     public GenericRequestStepResult<GenericRequestScrapOption> ScrapTypes { get; set; } =
         GenericRequestStepResult<GenericRequestScrapOption>.Unavailable(DateTimeOffset.UtcNow);
 
+    /// <summary>What the die step's own read answers, so a search can populate, find nothing, or fail.</summary>
+    public GenericRequestStepResult<GenericRequestDieOption> Dies { get; set; } =
+        GenericRequestStepResult<GenericRequestDieOption>.Unavailable(DateTimeOffset.UtcNow);
+
+    /// <summary>The terms the die step searched with, in the order it searched.</summary>
+    public List<string> DieSearches { get; } = new();
+
     public GenericRequestStepAvailability Availability { get; set; } =
         GenericRequestStepAvailability.Ready(DateTimeOffset.UtcNow);
 
@@ -63,8 +70,11 @@ internal sealed class StubGenericRequestStepData : IGenericRequestStepData
     public Task<GenericRequestStepResult<GenericRequestScrapOption>> ReadScrapTypesAsync(CancellationToken cancellationToken = default) =>
         Task.FromResult(ScrapTypes);
 
-    public Task<GenericRequestStepResult<GenericRequestDieOption>> ReadDiesAsync(string searchText, CancellationToken cancellationToken = default) =>
-        Task.FromResult(GenericRequestStepResult<GenericRequestDieOption>.Unavailable(DateTimeOffset.UtcNow));
+    public Task<GenericRequestStepResult<GenericRequestDieOption>> ReadDiesAsync(string searchText, CancellationToken cancellationToken = default)
+    {
+        DieSearches.Add(searchText);
+        return Task.FromResult(Dies);
+    }
 
     public Task<GenericRequestStepAvailability> ReadStepAvailabilityAsync(GenericRequestStep step, CancellationToken cancellationToken = default) =>
         Task.FromResult(Availability);
@@ -221,6 +231,18 @@ internal sealed class StubGenericRequestPartData : IGenericRequestPartData
         string sequence,
         CancellationToken cancellationToken = default) =>
         Task.FromResult(GenericRequestQuantityReading.Unavailable(DateTimeOffset.UtcNow));
+}
+
+/// <summary>The live die search, as a test configures it, without an Infor Visual connection.</summary>
+internal sealed class StubGenericRequestDieData : IGenericRequestDieData
+{
+    public GenericRequestStepResult<GenericRequestDieOption> Dies { get; set; } =
+        GenericRequestStepResult<GenericRequestDieOption>.Unavailable(DateTimeOffset.UtcNow);
+
+    public Task<GenericRequestStepResult<GenericRequestDieOption>> ReadDiesAsync(
+        string searchText,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(Dies);
 }
 
 /// <summary>The signed-in person, as a session would report them.</summary>

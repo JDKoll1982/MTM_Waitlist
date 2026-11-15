@@ -13,13 +13,13 @@ public sealed class GenericRequestSubmission
     private GenericRequestSubmission(
         bool isRaised,
         bool isDuplicate,
-        string requestId,
+        IReadOnlyList<string> requestIds,
         DateTimeOffset attemptedAtUtc,
         string failureMessage)
     {
         IsRaised = isRaised;
         IsDuplicate = isDuplicate;
-        RequestId = requestId;
+        RequestIds = requestIds;
         AttemptedAtUtc = attemptedAtUtc;
         FailureMessage = failureMessage;
     }
@@ -34,8 +34,20 @@ public sealed class GenericRequestSubmission
     /// </summary>
     public bool IsDuplicate { get; }
 
-    /// <summary>The raised request's public identifier, or empty when the write failed.</summary>
-    public string RequestId { get; }
+    /// <summary>
+    /// Every request the store accepted, in the order they were raised. A die request may be for several dies and
+    /// each one is its own request, so more than one identifier is recorded (020 FR-011).
+    /// </summary>
+    public IReadOnlyList<string> RequestIds { get; }
+
+    /// <summary>
+    /// How many requests the store accepted. One for an ordinary request, and one per chosen die otherwise, so the
+    /// result step can say what was raised instead of naming a single request that stands for several (FR-011).
+    /// </summary>
+    public int RaisedCount => IsRaised ? RequestIds.Count : 0;
+
+    /// <summary>The first raised request's public identifier, or empty when the write failed.</summary>
+    public string RequestId => RequestIds.Count > 0 ? RequestIds[0] : string.Empty;
 
     /// <summary>When the write was attempted, in UTC.</summary>
     public DateTimeOffset AttemptedAtUtc { get; }
@@ -48,13 +60,17 @@ public sealed class GenericRequestSubmission
 
     /// <summary>The store accepted the request.</summary>
     public static GenericRequestSubmission Raised(string requestId, DateTimeOffset attemptedAtUtc) =>
-        new(true, false, requestId ?? string.Empty, attemptedAtUtc, string.Empty);
+        Raised([requestId ?? string.Empty], attemptedAtUtc);
+
+    /// <summary>The store accepted every one of these requests, one per chosen die.</summary>
+    public static GenericRequestSubmission Raised(IReadOnlyList<string> requestIds, DateTimeOffset attemptedAtUtc) =>
+        new(true, false, requestIds ?? Array.Empty<string>(), attemptedAtUtc, string.Empty);
 
     /// <summary>The queue already holds an active request for the same thing, so this one was not raised.</summary>
     public static GenericRequestSubmission Duplicate(string message, DateTimeOffset attemptedAtUtc) =>
-        new(false, true, string.Empty, attemptedAtUtc, message ?? string.Empty);
+        new(false, true, Array.Empty<string>(), attemptedAtUtc, message ?? string.Empty);
 
     /// <summary>The store refused the request, or could not be reached.</summary>
     public static GenericRequestSubmission Failed(string failureMessage, DateTimeOffset attemptedAtUtc) =>
-        new(false, false, string.Empty, attemptedAtUtc, failureMessage ?? string.Empty);
+        new(false, false, Array.Empty<string>(), attemptedAtUtc, failureMessage ?? string.Empty);
 }

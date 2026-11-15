@@ -112,6 +112,7 @@ public sealed partial class GenericRequestResultViewModel : GenericRequestStepVi
             var submission = await _data.SubmitAsync(Draft).ConfigureAwait(true);
 
             Draft.RaisedRequestNumber = submission.RequestId;
+            Draft.RaisedRequestCount = submission.RaisedCount;
             Draft.ResultWasDuplicate = submission.IsDuplicate;
             Draft.ResultMessage = submission.FailureMessage;
             Draft.ResultAttemptedAtUtc = submission.AttemptedAtUtc;
@@ -163,7 +164,7 @@ public sealed partial class GenericRequestResultViewModel : GenericRequestStepVi
                 : Draft.ResultWasDuplicate
                     ? GenericRequestResultOutcome.Duplicate
                     : GenericRequestResultOutcome.Failure,
-            raised ? RaisedMessage(Draft.RaisedRequestNumber) : FailureMessage(Draft.ResultMessage));
+            raised ? RaisedMessage(Draft.RaisedRequestCount, Draft.RaisedRequestNumber) : FailureMessage(Draft.ResultMessage));
 
         return Task.CompletedTask;
     }
@@ -186,13 +187,30 @@ public sealed partial class GenericRequestResultViewModel : GenericRequestStepVi
         };
     }
 
-    private static string RaisedMessage(string requestNumber) =>
-        string.IsNullOrWhiteSpace(requestNumber)
+    /// <summary>
+    /// The sentence the raised outcome shows: how many requests landed, or the one request's number.
+    /// </summary>
+    /// <remarks>
+    /// A die request raises one request per chosen die, so naming a single number for several would understate what
+    /// was raised (FR-011).
+    /// </remarks>
+    private static string RaisedMessage(int raisedCount, string requestNumber)
+    {
+        if (raisedCount > 1)
+        {
+            return string.Format(
+                CultureInfo.CurrentCulture,
+                "GenericRequest_Result_Raised_Many.Text".GetLocalized(),
+                raisedCount);
+        }
+
+        return string.IsNullOrWhiteSpace(requestNumber)
             ? "GenericRequest_Result_Raised_NoNumber.Text".GetLocalized()
             : string.Format(
                 CultureInfo.CurrentCulture,
                 "GenericRequest_Result_Raised_Message.Text".GetLocalized(),
                 requestNumber);
+    }
 
     /// <summary>
     /// The sentence a refusal or a failure shows, never blank.

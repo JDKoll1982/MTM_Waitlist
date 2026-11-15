@@ -20,6 +20,7 @@
     <ProjectReference Include="..\MTM_Waitlist.GenericRequest\MTM_Waitlist.GenericRequest.csproj" />
     <ProjectReference Include="..\MTM_Waitlist.Mock\MTM_Waitlist.Mock.csproj" />
     <ProjectReference Include="..\MTM_Waitlist.Settings\MTM_Waitlist.Settings.csproj" />
+    <ProjectReference Include="..\MTM_Waitlist.Waitlist.NewRequest\MTM_Waitlist.Waitlist.NewRequest.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -122,6 +122,7 @@ public sealed class GenericRequestDunnageSubmissionTests
                 Found = new EmployeeIdentity { EmployeeNumber = "1234", DisplayName = "J. Koll", IsActive = true },
             },
             new StubGenericRequestPartData(),
+            new StubGenericRequestDieData(),
             reader,
             new FakeLuggerArrangementService());
     }

@@ -1,5 +1,7 @@
 using System.Globalization;
 
+using CommunityToolkit.Mvvm.ComponentModel;
+
 using MTM_Waitlist.Module_Core.Helpers;
 
 namespace MTM_Waitlist.GenericRequest.Models;
@@ -160,4 +162,34 @@ public sealed record GenericRequestSequenceOption(
 public sealed record GenericRequestScrapOption(string ScrapType);
 
 /// <summary>A die the search matched.</summary>
-public sealed record GenericRequestDieOption(string DieNumber, string Description, string Location);
+/// <param name="DieNumber">The die's Infor Visual number, which is what the request stores.</param>
+/// <param name="Description">The die's own description, as Visual records it. The plant's placeholder text is kept
+/// rather than rewritten, because here it describes a die that exists and has no home yet (FR-009).</param>
+/// <param name="Location">Where the die lives, or empty when Visual records none.</param>
+public sealed partial class GenericRequestDieOption(string dieNumber, string description, string location)
+    : ObservableObject
+{
+    /// <summary>The die's Infor Visual number, which is what the request stores.</summary>
+    public string DieNumber { get; } = dieNumber;
+
+    /// <summary>The die's own description, as Visual records it.</summary>
+    public string Description { get; } = description;
+
+    /// <summary>Where the die lives, or empty when Visual records none.</summary>
+    public string Location { get; } = location;
+
+    /// <summary>
+    /// What the row draws for the location: the location itself, or the step's wording for a die whose home Visual
+    /// does not record. Never empty, so no result row can draw a blank location (FR-006, SC-005).
+    /// </summary>
+    public string LocationText => string.IsNullOrWhiteSpace(Location)
+        ? "GenericRequest_Die_Location_None.Text".GetLocalized()
+        : Location.Trim();
+
+    /// <summary>
+    /// Whether this die is one of the requester's choices. A die request may be for several dies, so a row is a
+    /// choice that is marked and unmarked rather than the step's single selection (FR-010).
+    /// </summary>
+    [ObservableProperty]
+    public partial bool IsSelected { get; set; }
+}

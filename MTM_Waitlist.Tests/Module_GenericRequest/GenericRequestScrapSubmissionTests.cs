@@ -108,9 +108,9 @@ public sealed class GenericRequestScrapSubmissionTests
             scrap.Presentation,
             "The scrap step's source is the plant's list, so it can be shown without a job read (FR-001).");
         Assert.AreEqual(
-            GenericRequestPresentation.Unavailable,
+            GenericRequestPresentation.Populated,
             die.Presentation,
-            "The die step still waits on its own source, which this chunk does not build.");
+            "The die step's source is the live Infor Visual search, so it can be shown without a job read either (020 FR-001).");
     }
 
     private static GenericRequestLiveStepData CreateLive(IWaitlistRequestService requests) =>
@@ -125,6 +125,7 @@ public sealed class GenericRequestScrapSubmissionTests
                 Found = new EmployeeIdentity { EmployeeNumber = "1234", DisplayName = "J. Koll", IsActive = true },
             },
             new StubGenericRequestPartData(),
+            new StubGenericRequestDieData(),
             new FakeDunnageCatalogueReader(),
             new FakeLuggerArrangementService());
 
