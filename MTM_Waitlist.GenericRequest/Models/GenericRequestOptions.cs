@@ -13,7 +13,26 @@ public sealed record GenericRequestWorkCenterOption(string Name, string Building
 /// <param name="Code">The category's stable catalog code, which is what its items are grouped by.</param>
 /// <param name="Name">The name a person reads.</param>
 /// <param name="Description">One line saying what the category covers.</param>
-public sealed record GenericRequestCategoryOption(string Code, string Name, string Description);
+/// <remarks>
+/// A category is drawn as a card the requester clicks, so the card carries whether it is the chosen one. The choice
+/// lives on the card rather than on the grid's selection, which is how the work center step's cards work too.
+/// </remarks>
+public sealed partial class GenericRequestCategoryOption(string code, string name, string description)
+    : ObservableObject
+{
+    /// <summary>The category's stable catalog code, which is what its items are grouped by.</summary>
+    public string Code { get; } = code;
+
+    /// <summary>The name a person reads.</summary>
+    public string Name { get; } = name;
+
+    /// <summary>One line saying what the category covers.</summary>
+    public string Description { get; } = description;
+
+    /// <summary>Whether this card is the category the requester chose.</summary>
+    [ObservableProperty]
+    public partial bool IsSelected { get; set; }
+}
 
 /// <summary>
 /// An item a category offers. The four flags say which extra steps this item's request needs, so the flow can skip a

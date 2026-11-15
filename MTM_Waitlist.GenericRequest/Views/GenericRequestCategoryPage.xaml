@@ -4,9 +4,43 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:MTM_Waitlist.GenericRequest.Controls"
+    xmlns:converters="using:MTM_Waitlist.Module_Settings.Converters"
     xmlns:models="using:MTM_Waitlist.GenericRequest.Models"
+    xmlns:shared="using:MTM_Waitlist.Module_Shared.Services"
     HorizontalAlignment="Stretch"
     VerticalAlignment="Stretch">
+
+    <Page.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+
+        <!--
+            The card is the clickable thing, so the item container draws nothing of its own: the work center step's
+            cards use the same presenter, which is what keeps the two screens looking like one flow.
+        -->
+        <Style x:Key="CategoryCardItemContainerStyle" TargetType="GridViewItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GridViewItem">
+                        <ListViewItemPresenter
+                            ContentMargin="0"
+                            ContentTransitions="{TemplateBinding ContentTransitions}"
+                            PointerOverBackground="Transparent"
+                            PressedBackground="Transparent"
+                            SelectedBackground="Transparent"
+                            SelectedPointerOverBackground="Transparent"
+                            SelectedPressedBackground="Transparent"
+                            SelectedBorderThickness="0"
+                            RevealBorderThickness="0"
+                            SelectionCheckMarkVisualEnabled="False" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
 
     <controls:GenericRequestStepFrame
         AttemptedAtDisplay="{x:Bind ViewModel.AttemptedAtDisplay, Mode=OneWay}"
@@ -20,27 +54,64 @@
         <controls:GenericRequestStepFrame.Body>
             <Grid>
                 <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
-                <ListView
+
+                <!--
+                    One card per category, drawn the way the work center cards are: a bordered surface, a title, a
+                    divider and the details beneath it, with an accent outline on the chosen card. The click is the
+                    choice, so the grid keeps no selection of its own and the outline follows the card's own flag.
+                -->
+                <GridView
                     AutomationProperties.Name="{x:Bind ViewModel.Title}"
+                    HorizontalContentAlignment="Stretch"
+                    IsItemClickEnabled="True"
+                    ItemClick="CategoryGridView_ItemClick"
+                    ItemContainerStyle="{StaticResource CategoryCardItemContainerStyle}"
                     ItemsSource="{x:Bind ViewModel.Options}"
-                    SelectedItem="{x:Bind ViewModel.Selected, Mode=TwoWay}"
-                    SelectionMode="Single">
-                    <ListView.ItemTemplate>
+                    SelectionMode="None"
+                    shared:CardGridSizing.MaximumColumns="3"
+                    shared:CardGridSizing.MinimumCardWidth="280">
+                    <GridView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <ItemsWrapGrid HorizontalAlignment="Stretch" Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </GridView.ItemsPanel>
+                    <GridView.ItemTemplate>
                         <DataTemplate x:DataType="models:GenericRequestCategoryOption">
-                            <StackPanel Padding="0,8" Spacing="4">
-                                <TextBlock
-                                    Text="{x:Bind Name}"
-                                    TextTrimming="CharacterEllipsis"
-                                    Style="{StaticResource BodyStrongTextBlockStyle}" />
-                                <TextBlock
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Text="{x:Bind Description}"
-                                    TextWrapping="Wrap"
-                                    Style="{StaticResource CaptionTextBlockStyle}" />
-                            </StackPanel>
+                            <Grid
+                                Margin="8"
+                                AutomationProperties.Name="{x:Bind Name}">
+                                <Border
+                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="12">
+                                    <StackPanel Padding="16" Spacing="10">
+                                        <TextBlock
+                                            FontSize="20"
+                                            FontWeight="SemiBold"
+                                            Text="{x:Bind Name}"
+                                            TextTrimming="CharacterEllipsis"
+                                            TextWrapping="Wrap" />
+                                        <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
+                                        <TextBlock
+                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                            Text="{x:Bind Description}"
+                                            TextWrapping="Wrap"
+                                            Style="{StaticResource BodyTextBlockStyle}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- The chosen card's outline, drawn on the card border like the work center's. -->
+                                <Border
+                                    BorderBrush="{ThemeResource SystemControlHighlightAccentBrush}"
+                                    BorderThickness="2"
+                                    CornerRadius="12"
+                                    IsHitTestVisible="False"
+                                    Visibility="{x:Bind IsSelected, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            </Grid>
                         </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
+                    </GridView.ItemTemplate>
+                </GridView>
             </Grid>
         </controls:GenericRequestStepFrame.Body>
     </controls:GenericRequestStepFrame>
