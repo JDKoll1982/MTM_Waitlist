@@ -10,31 +10,32 @@ namespace MTM_Waitlist.Tests.Module_Startup;
 /// Which launch outcomes the picture-copy statement may hold the window for.
 /// </summary>
 /// <remarks>
-/// The statement belongs in front of a surface that says nothing about pictures and is not otherwise waiting on the
-/// person. Machine setup is the exception it must never stand in front of: the computer cannot be used until it is
-/// set up, so that screen is the person's next action. Holding it there read as the launch hanging on its last step
-/// — the setup screen was there, behind a notice waiting to be acknowledged.
+/// The statement belongs in front of a surface that says nothing about pictures and expects nothing from the person
+/// first. Only the hand-over to the main screens qualifies: machine setup and sign-in are both things the person
+/// has to deal with before the board, and holding either read as the launch hanging — the setup screen on a first
+/// launch, and the sign-in form right after a setup save carried the launch on.
 /// </remarks>
 [TestClass]
 public sealed class PictureCopyHoldPolicyTests
 {
     [TestMethod]
-    public void Service_PictureCopyHoldPolicyTests_TheMachineSetupSurfaceIsNeverHeld()
+    public void Service_PictureCopyHoldPolicyTests_TheSurfacesThatNeedThePersonAreNeverHeld()
     {
         Assert.IsFalse(
             PictureCopyHoldPolicy.HoldsFor(LaunchOutcome.MachineSetup),
             "a computer that needs setting up hands over to setup on its own (FR-006)");
+
+        Assert.IsFalse(
+            PictureCopyHoldPolicy.HoldsFor(LaunchOutcome.SignIn),
+            "nobody reaches the board without signing in, so the form comes up on its own (FR-001)");
     }
 
     [TestMethod]
-    public void Service_PictureCopyHoldPolicyTests_TheSurfacesThatSayNothingAboutPicturesAreHeld()
+    public void Service_PictureCopyHoldPolicyTests_TheHandOverToTheMainScreensIsHeld()
     {
         Assert.IsTrue(
             PictureCopyHoldPolicy.HoldsFor(LaunchOutcome.MainScreens),
             "the shell says nothing about the picture copies, so the window states it first");
-        Assert.IsTrue(
-            PictureCopyHoldPolicy.HoldsFor(LaunchOutcome.SignIn),
-            "the sign-in form says nothing about the picture copies either");
     }
 
     [TestMethod]

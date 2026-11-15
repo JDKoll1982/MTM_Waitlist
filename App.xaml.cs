@@ -407,8 +407,9 @@ public partial class App : Application
     /// effort (FR-026), so it never stops the launch — but the launch window is what states it, and the surface
     /// that replaces it says nothing about pictures. The window therefore stays, with the failure and the button
     /// that lets the person go on, until they acknowledge it (owner decision, 2026-10-26). A launch that stopped at
-    /// a stated stop, or that needs this computer set up, is not held: that surface is the person's next action,
-    /// and a picture notice in front of it would delay the remedy they came for.
+    /// a stated stop, that needs this computer set up, or that is asking somebody to sign in is not held: those
+    /// surfaces are the person's next action, and a picture notice in front of one would delay the thing they came
+    /// for.
     /// </para>
     /// </remarks>
     private static async void OnLaunchShellReady(object? sender, LaunchOutcome outcome)
