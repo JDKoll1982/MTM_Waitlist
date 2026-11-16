@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Globalization;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -67,8 +68,35 @@ public sealed record GenericRequestItemOption(
     int MaxLength,
     int? AllottedMinutes)
 {
+    /// <summary>
+    /// The code the one card that stands for every finished-product pickup carries. It is never written to a
+    /// request: the page behind that card names the item that is.
+    /// </summary>
+    public const string FinishedProductGroupCode = "finished-product";
+
+    /// <summary>Whether this card stands for every finished-product pickup rather than naming one item.</summary>
+    public bool IsFinishedProductGroup => string.Equals(Code, FinishedProductGroupCode, StringComparison.Ordinal);
+
     /// <summary>Whether answering this item's question is required before the flow continues.</summary>
     public bool RequiresAnswer => AnswerKind != GenericRequestAnswerKind.None;
+
+    /// <summary>
+    /// The one card that stands for every finished-product pickup. Choosing it opens the page that asks which kind,
+    /// so the card itself asks nothing and needs nothing.
+    /// </summary>
+    public static GenericRequestItemOption FinishedProductGroup(string name) => new(
+        Code: FinishedProductGroupCode,
+        Name: name,
+        NeedsPart: false,
+        NeedsDunnage: false,
+        NeedsScrap: false,
+        NeedsDie: false,
+        PromptText: string.Empty,
+        AnswerKind: GenericRequestAnswerKind.None,
+        AnswerOptions: Array.Empty<string>(),
+        MinLength: 0,
+        MaxLength: 0,
+        AllottedMinutes: null);
 }
 
 /// <summary>What kind of answer an item's configuration asks for.</summary>
@@ -111,6 +139,21 @@ public static class SequenceSourceNames
         SequenceSource.VisualRequirement => "GenericRequest_Part_Source_VisualRequirement.Text".GetLocalized(),
         SequenceSource.WipFloor => "GenericRequest_Part_Source_WipFloor.Text".GetLocalized(),
         _ => throw new ArgumentOutOfRangeException(nameof(source), source, "That source has no name."),
+    };
+
+    /// <summary>
+    /// The system a source is inventoried in, which is what a sequence card names.
+    /// </summary>
+    /// <remarks>
+    /// Both Infor Visual sources are one system: a person reading the card wants to know which system holds the part,
+    /// not whether Visual recorded it as the order's own part or as a requirement at an operation.
+    /// </remarks>
+    public static string SystemOf(SequenceSource source) => source switch
+    {
+        SequenceSource.VisualOwnPart or SequenceSource.VisualRequirement =>
+            "GenericRequest_Part_System_Visual.Text".GetLocalized(),
+        SequenceSource.WipFloor => "GenericRequest_Part_System_Wip.Text".GetLocalized(),
+        _ => throw new ArgumentOutOfRangeException(nameof(source), source, "That source has no system."),
     };
 }
 
@@ -160,10 +203,41 @@ public sealed record GenericRequestSequenceOption(
     string OperationStatus,
     bool IsLastOperation,
     string NextResource,
-    bool HasCancelledOnlyOperations)
+    bool HasCancelledOnlyOperations) : INotifyPropertyChanged
 {
-    /// <summary>Every source that supplied this number, joined the way it is drawn (FR-004).</summary>
-    public string SourcesDisplay => string.Join(", ", Sources.Select(SequenceSourceNames.Of));
+    private bool _isSelected;
+
+    /// <summary>Raised when the card's own state changes, which is what the chosen outline follows.</summary>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>
+    /// Whether this card is the sequence the requester chose. The choice lives on the card rather than on the grid's
+    /// selection, which is how every other card list in this flow draws the one that was picked.
+    /// </summary>
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set
+        {
+            if (_isSelected == value)
+            {
+                return;
+            }
+
+            _isSelected = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsSelected)));
+        }
+    }
+
+    /// <summary>
+    /// Where this sequence is inventoried, as the card says it: each system holding it, named once, in the fixed
+    /// source order. A sequence both systems know reads "Inventoried With: Visual, WIP Application".
+    /// </summary>
+    public string InventoriedWith => string.Format(
+        CultureInfo.CurrentCulture,
+        "{0}: {1}",
+        "GenericRequest_Part_InventoriedWith_Label.Text".GetLocalized(),
+        string.Join(", ", Sources.Select(SequenceSourceNames.SystemOf).Distinct(StringComparer.CurrentCulture)));
 
     /// <summary>
     /// Every source that supplied this number, joined by its stable name, which is what the request records

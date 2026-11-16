@@ -66,6 +66,14 @@ public sealed class GenericRequestNavigator : IGenericRequestNavigator, IGeneric
     }
 
     /// <inheritdoc />
+    public void ShowFinishedProductChooser()
+    {
+        // The step on screen is still the item step: this page is the question its finished-product card asks, so
+        // answering it advances from the item step and going Back returns there.
+        _navigationService.NavigateTo(typeof(GenericRequestProductPickupViewModel).FullName!, Draft);
+    }
+
+    /// <inheritdoc />
     public void LeaveToWaitlist()
     {
         // The draft is left where it is: the result step is still on screen behind the waitlist, and a person who

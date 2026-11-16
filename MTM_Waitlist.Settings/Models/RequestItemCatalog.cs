@@ -81,6 +81,25 @@ public static class RequestItemCatalog
     public const string ProductPickupLabelResourceKey = "RequestItem_finished_product.DisplayName";
 
     /// <summary>
+    /// The four pickups the Item step offers as <b>one</b> card: finished goods, non-conforming stock, work in process
+    /// and outside service. They answer the same question — which kind of finished product is being collected — so the
+    /// step shows one card and the kind is picked on its own page, where each of the four keeps its own name.
+    /// </summary>
+    public static bool IsFinishedProductPickup(string? itemId) =>
+        itemId is "pickup-fg" or "pickup-ncm" or "pickup-wip" or "pickup-outside-service";
+
+    /// <summary>The label the Item step gives the one card that stands for every finished-product pickup.</summary>
+    public static string ResolveFinishedProductPickupLabel()
+    {
+        var localized = ProductPickupLabelResourceKey.GetLocalized();
+
+        return string.IsNullOrWhiteSpace(localized)
+            || string.Equals(localized, ProductPickupLabelResourceKey, StringComparison.Ordinal)
+            ? "Finished Product"
+            : localized;
+    }
+
+    /// <summary>
     /// The Item's umbrella phrase for card Line 1: the Category's own word, or an Item-specific phrase
     /// where the Item defines one (contract §2). The two wrong-material phrases are pinned verbatim and
     /// resolved through the resource mechanism (FR-022), with the pinned text itself as the fallback so
@@ -148,18 +167,18 @@ public static class RequestItemCatalog
     {
         ArgumentNullException.ThrowIfNull(item);
 
-        if (!SharesProductPickupLabel(item.Id))
-        {
-            return ResolveDisplayName(item);
-        }
-
-        var localized = ProductPickupLabelResourceKey.GetLocalized();
-
-        return string.IsNullOrWhiteSpace(localized)
-            || string.Equals(localized, ProductPickupLabelResourceKey, StringComparison.Ordinal)
-            ? "Finished Product"
-            : localized;
+        return SharesProductPickupLabel(item.Id)
+            ? ResolveFinishedProductPickupLabel()
+            : ResolveDisplayName(item);
     }
+
+    /// <summary>
+    /// The name a person reads for an Item named only by its catalogue code — the kind cards of the finished-product
+    /// page, which list the four pickups by their own names rather than by the label they share on the Item step.
+    /// A code the catalog does not hold answers empty rather than a guessed name.
+    /// </summary>
+    public static string ResolveCatalogItemName(string? itemId) =>
+        FindById(itemId) is { } item ? ResolveDisplayName(item) : string.Empty;
 
     /// <summary>
     /// Resolves an Item's pinned first line through the resource mechanism, falling back to the pinned text

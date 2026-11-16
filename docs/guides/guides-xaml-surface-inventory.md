@@ -117,6 +117,7 @@ Paths are relative to the repository root. *Modal* says whether the surface open
 | Page | Module_GenericRequest | GenericRequestDunnagePage.xaml | `Module_GenericRequest/Views/GenericRequestDunnagePage.xaml` | no |
 | Page | MTM_Waitlist.GenericRequest | GenericRequestItemPage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestItemPage.xaml` | no |
 | Page | MTM_Waitlist.GenericRequest | GenericRequestPartPage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestPartPage.xaml` | no |
+| Page | MTM_Waitlist.GenericRequest | GenericRequestProductPickupPage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestProductPickupPage.xaml` | no |
 | Page | MTM_Waitlist.GenericRequest | GenericRequestResultPage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestResultPage.xaml` | no |
 | Page | MTM_Waitlist.GenericRequest | GenericRequestScrapTypePage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestScrapTypePage.xaml` | no |
 | Page | MTM_Waitlist.GenericRequest | GenericRequestSummaryPage.xaml | `MTM_Waitlist.GenericRequest/Views/GenericRequestSummaryPage.xaml` | no |

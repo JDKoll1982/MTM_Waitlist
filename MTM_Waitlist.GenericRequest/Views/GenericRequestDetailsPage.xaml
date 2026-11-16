@@ -26,13 +26,6 @@
                     Minimum="1"
                     SpinButtonPlacementMode="Compact"
                     Value="{x:Bind ViewModel.Quantity, Mode=TwoWay}" />
-                <TextBox
-                    Height="160"
-                    x:Uid="GenericRequest_Details_Description"
-                    AcceptsReturn="True"
-                    AutomationProperties.Name="{x:Bind ViewModel.Title}"
-                    Text="{x:Bind ViewModel.Description, Mode=TwoWay}"
-                    TextWrapping="Wrap" />
             </StackPanel>
         </controls:GenericRequestStepFrame.Body>
     </controls:GenericRequestStepFrame>

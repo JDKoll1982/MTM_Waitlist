@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MTM_Waitlist.GenericRequest.Contracts;
 using MTM_Waitlist.GenericRequest.Models;
 using MTM_Waitlist.GenericRequest.ViewModels;
+using MTM_Waitlist.Module_Settings.Models;
 
 namespace MTM_Waitlist.Tests.Module_GenericRequest;
 
@@ -29,6 +30,20 @@ public sealed class GenericRequestItemViewModelTests
         MinLength: minLength,
         MaxLength: 200,
         AllottedMinutes: 15);
+
+    private static GenericRequestItemOption FinishedProductPickup(string code) => new(
+        Code: code,
+        Name: "Finished Product",
+        NeedsPart: false,
+        NeedsDunnage: false,
+        NeedsScrap: false,
+        NeedsDie: false,
+        PromptText: string.Empty,
+        AnswerKind: GenericRequestAnswerKind.None,
+        AnswerOptions: Array.Empty<string>(),
+        MinLength: 0,
+        MaxLength: 0,
+        AllottedMinutes: null);
 
     private static GenericRequestItemOption ItemThatAsksNothing() => new(
         Code: "pickup-riser-table",
@@ -107,6 +122,79 @@ public sealed class GenericRequestItemViewModelTests
             viewModel.Presentation,
             "an item whose configuration cannot be read must be reported, not offered without its question");
         Assert.IsFalse(viewModel.ContinueCommand.CanExecute(null), "the step must not advance past an unreadable source");
+    }
+
+    /// <summary>
+    /// The four finished-product pickups are one card: a person collecting the product is not choosing between
+    /// finished goods, non-conforming stock, work in process and outside service by name, so the set is folded into a
+    /// single card that opens the page asking which kind it is.
+    /// </summary>
+    [TestMethod]
+    public async Task Unit_GenericRequestItemViewModelTests_FinishedProductPickups_AreOfferedAsOneCard()
+    {
+        var (viewModel, _) = Create(
+            FinishedProductPickup("pickup-fg"),
+            FinishedProductPickup("pickup-ncm"),
+            FinishedProductPickup("pickup-wip"),
+            FinishedProductPickup("pickup-outside-service"),
+            ItemThatAsksNothing());
+
+        await viewModel.LoadAsync();
+
+        Assert.AreEqual(2, viewModel.Options.Count, "the four finished-product pickups must answer as one card");
+        Assert.IsTrue(viewModel.Options[0].IsFinishedProductGroup);
+        Assert.AreEqual(
+            RequestItemCatalog.ResolveFinishedProductPickupLabel(),
+            viewModel.Options[0].Name,
+            "the one card carries the label the three product pickups already share");
+        Assert.IsFalse(viewModel.Options[1].IsFinishedProductGroup);
+        Assert.AreEqual("pickup-riser-table", viewModel.Options[1].Code, "every other item keeps its own card");
+    }
+
+    /// <summary>
+    /// The card names no item, so it cannot leave the step until the page behind it has named the kind — and when
+    /// the draft already names one, the card reads as the chosen one and leaving keeps that item.
+    /// </summary>
+    [TestMethod]
+    public async Task Unit_GenericRequestItemViewModelTests_TheFinishedProductCard_NamesNoItemOfItsOwn()
+    {
+        var (viewModel, navigator) = Create(
+            FinishedProductPickup("pickup-fg"),
+            FinishedProductPickup("pickup-wip"));
+        await viewModel.LoadAsync();
+
+        viewModel.Selected = viewModel.Options[0];
+
+        Assert.IsFalse(
+            viewModel.ContinueCommand.CanExecute(null),
+            "the card has not named a kind yet, so the step cannot carry an item");
+
+        navigator.Draft.ItemCode = "pickup-wip";
+        await viewModel.LoadAsync();
+
+        Assert.IsNotNull(viewModel.Selected);
+        Assert.IsTrue(
+            viewModel.Selected.IsFinishedProductGroup,
+            "a draft that already names a finished-product pickup reads as the one card");
+        Assert.IsTrue(
+            viewModel.Options.Contains(viewModel.Selected),
+            "the chosen card is one of the cards the grid draws");
+        Assert.IsTrue(viewModel.ContinueCommand.CanExecute(null));
+
+        await viewModel.ContinueCommand.ExecuteAsync(null);
+
+        Assert.AreEqual("pickup-wip", navigator.Draft.ItemCode, "the kind the page recorded is the item that is kept");
+    }
+
+    [TestMethod]
+    public async Task Unit_GenericRequestItemViewModelTests_TheFinishedProductCard_OpensThePageThatAsksTheKind()
+    {
+        var (viewModel, navigator) = Create(FinishedProductPickup("pickup-fg"));
+        await viewModel.LoadAsync();
+
+        viewModel.OpenFinishedProductChooserCommand.Execute(null);
+
+        Assert.AreEqual(1, navigator.FinishedProductChooserCount);
     }
 
     [TestMethod]

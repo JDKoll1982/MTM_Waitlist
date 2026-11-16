@@ -71,9 +71,6 @@
   <data name="GenericRequest_Scrap_Title.Text" xml:space="preserve">
     <value>State the scrap type</value>
   </data>
-  <data name="GenericRequest_Details_Description.PlaceholderText" xml:space="preserve">
-    <value>What is this request for?</value>
-  </data>
   <data name="GenericRequest_Part_Search.PlaceholderText" xml:space="preserve">
     <value>Part number or description</value>
   </data>
@@ -105,7 +102,7 @@
     <value>There is nothing to state for this request.</value>
   </data>
   <data name="GenericRequest_Details_Intro.Text" xml:space="preserve">
-    <value>Say how many and anything a handler should know. The request is due at the end of the time its type allots.</value>
+    <value>Say how many of this item the request is for. It is due at the end of the time its type allots.</value>
   </data>
   <data name="GenericRequest_StepFrame_Continue.Content" xml:space="preserve">
     <value>Continue</value>
@@ -169,9 +166,6 @@
   </data>
   <data name="GenericRequest_Category_Empty.Text" xml:space="preserve">
     <value>This work center has no categories.</value>
-  </data>
-  <data name="GenericRequest_Details_Description.Header" xml:space="preserve">
-    <value>Description</value>
   </data>
   <data name="GenericRequest_StepFrame_Unavailable_Attempted.Text" xml:space="preserve">
     <value>Last attempt</value>
@@ -364,5 +358,23 @@
   </data>
   <data name="GenericRequest_Result_Retry.Content" xml:space="preserve">
     <value>Retry</value>
+  </data>
+  <data name="GenericRequest_Part_InventoriedWith_Label.Text" xml:space="preserve">
+    <value>Inventoried With</value>
+  </data>
+  <data name="GenericRequest_Part_System_Visual.Text" xml:space="preserve">
+    <value>Visual</value>
+  </data>
+  <data name="GenericRequest_Part_System_Wip.Text" xml:space="preserve">
+    <value>WIP Application</value>
+  </data>
+  <data name="GenericRequest_ProductPickup_Title.Text" xml:space="preserve">
+    <value>Which finished product?</value>
+  </data>
+  <data name="GenericRequest_ProductPickup_Intro.Text" xml:space="preserve">
+    <value>Finished goods, non-conforming stock, work in process and outside service are all picked up the same way. Say which one this request is for.</value>
+  </data>
+  <data name="GenericRequest_ProductPickup_Empty.Text" xml:space="preserve">
+    <value>This category has no finished-product pickups.</value>
   </data>
 </root>
