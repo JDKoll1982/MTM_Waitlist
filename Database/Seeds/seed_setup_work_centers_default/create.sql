@@ -6,8 +6,6 @@ USE mtm_waitlist;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
-TRUNCATE TABLE setup_work_centers_catalog;
-
 INSERT IGNORE INTO
     setup_work_centers_catalog (
         public_id,

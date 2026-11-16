@@ -7,9 +7,9 @@
 --          populated category / item_id columns map each legacy leaf onto its canonical Item. Both are read
 --          once, by a person, when this file is authored. The application never reads either document, and
 --          Database/Mock/... and the build carry no reference to them.
--- Rerunnable: TRUNCATE first, so the file is deterministic and the table matches this file exactly. A
---          reinstall therefore returns every Item to its seeded allotment, which is the intended behaviour of
---          a database reinstalled from seed.
+-- Rerunnable: the rows are inserted only when they are missing, so a second run of the deployment changes
+--          nothing and an operator's own edits to an Item's allotment survive. A fresh database still receives
+--          the full set below.
 -- Notes on individual rows:
 --   * The four out-of-scope Items (pickup-fg, pickup-ncm, pickup-wip, pickup-outside-service) are seeded like
 --     every other Item and hidden by the visibility rules, not by deletion: a hidden Item and a missing row
@@ -64,13 +64,7 @@ USE mtm_waitlist;
 
 SET NAMES utf8mb4;
 
-SET FOREIGN_KEY_CHECKS = 0;
-
-TRUNCATE TABLE waitlist_request_item_configs;
-
-SET FOREIGN_KEY_CHECKS = 1;
-
-INSERT INTO waitlist_request_item_configs
+INSERT IGNORE INTO waitlist_request_item_configs
     (public_id, item, category, control_flow, requires_answer, answer_value_type, prompt_text,
      min_length, max_length, options_json, detail_fields_json, allotted_minutes,
      created_utc, updated_utc)

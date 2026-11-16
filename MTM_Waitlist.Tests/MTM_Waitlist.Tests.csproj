@@ -54,5 +54,6 @@
     <ProjectReference Include="..\MTM_Waitlist.Mock.Service\MTM_Waitlist.Mock.Service.csproj" />
     <ProjectReference Include="..\MTM_Waitlist.GenericRequest\MTM_Waitlist.GenericRequest.csproj" />
     <ProjectReference Include="..\MTM_Waitlist.GenericRequest.Data\MTM_Waitlist.GenericRequest.Data.csproj" />
+    <ProjectReference Include="..\MTM_Database_Deployment.Core\MTM_Database_Deployment.Core.csproj" />
   </ItemGroup>
 </Project>

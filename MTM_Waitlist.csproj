@@ -148,6 +148,19 @@
     <Compile Remove="MTM_Waitlist.GenericRequest\**\*.cs" />
     <Compile Remove="MTM_Waitlist.GenericRequest.Controls\**\*.cs" />
     <Compile Remove="MTM_Waitlist.GenericRequest.Data\**\*.cs" />
+    <Compile Remove="MTM_Database_Deployment\**\*.cs" />
+    <Compile Remove="MTM_Database_Deployment.Core\**\*.cs" />
+
+    <!--
+      The database deployment tool is a second WinUI executable with its own window, so its XAML, PRI resources and
+      content belong to it alone. Without these the root project globs its MainWindow and App as well and compiles a
+      second copy (CS0111 on the generated bindings, then WMC9999).
+    -->
+    <Page Remove="MTM_Database_Deployment\**\*.xaml" />
+    <ApplicationDefinition Remove="MTM_Database_Deployment\**\*.xaml" />
+    <PRIResource Remove="MTM_Database_Deployment\**\*" />
+    <Content Remove="MTM_Database_Deployment\**\*.xaml" />
+    <None Remove="MTM_Database_Deployment\**\*.xaml" />
 
     <!--
       The generic request screens are their own project, so their XAML, PRI resources and content are theirs
