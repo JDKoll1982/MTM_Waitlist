@@ -160,8 +160,27 @@ truncated artifact, and it must not be "tidied" away:
   (`MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs`, `IsExemptFromSqlAudit`). The matching instances are
   listed under the "Retired objects" sections of `Database/Bootstrap/update_table_descriptions.sql`.
 - A rollback-only folder creates nothing, so it is **not** a duplicate of any create artifact and is outside the
-  duplicate-object check `validate-database-schema.ps1` performs over `create.sql` files.
+  duplicate-object rule the retired `validate-database-schema.ps1` used to check: two folders under one kind that
+  both create the same object name is still the defect, and it is now caught by review rather than by a script.
 - The same convention applies to retired procedures under `Database/StoredProcedures/`.
+
+### Review note — the installer and the validator are gone; one tool replaces them (approved 2026-11-16)
+
+`Database/install_local_database.bat`, `Database/install_local_database.vbs` and
+`.github/scripts/validate-database-schema.ps1` were deleted. The two review notes below record what they did wrong;
+they are kept as history, not as instructions, and the switches they describe (`-ApplySchema`, `-ApplySeeds`) no
+longer exist.
+
+- A store is created or brought up to date with **one** tool: `Database/DeployDatabase.cmd` (a double-clickable
+  launcher) or `dotnet run --project MTM_Database_Deployment`. It reads the artifact folders named above, shows
+  every difference on a review page, and writes only when the operator presses Save.
+- **It copies the chosen database into `{database}_backup` before its first statement**, in both modes, and stops
+  without writing if a copied table does not hold every row of its source. On a host with binary logging off this
+  copy is the only undo a deployment has.
+- There is no repair path. There is no switch that migrates a store as a side effect of checking it. The failure
+  mode those two review notes describe cannot recur, because nothing checks a store without the operator reading
+  what it is about to do.
+- Guide: `docs/guides/guides-database-deployment-tool.md`.
 
 ### Review note — validation never writes seed data (approved 2026-09-27)
 

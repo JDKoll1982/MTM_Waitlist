@@ -29,6 +29,20 @@ public sealed class Service_DeploymentEngineScopeTests
     }
 
     [TestMethod]
+    public void Service_DeploymentEngineTests_ScopeToDatabase_FindsTheUseLineUnderneathAScriptHeader()
+    {
+        var scoped = false;
+
+        var statements = Service_DeploymentEngine.ScopeToDatabase(
+            ["-- Create table: config_images_locations\n-- Engine: MySQL 5.7\n\nUSE mtm_waitlist"],
+            "mtm_waitlist_test",
+            ref scoped);
+
+        Assert.AreEqual("USE `mtm_waitlist_test`", statements[0]);
+        Assert.IsTrue(scoped, "a USE line under a script's header comment still names the live store");
+    }
+
+    [TestMethod]
     public void Service_DeploymentEngineTests_ScopeToDatabase_LeavesEveryOtherStatementAlone()
     {
         var scoped = false;

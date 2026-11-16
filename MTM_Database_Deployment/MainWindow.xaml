@@ -173,7 +173,7 @@
 
                             <RadioButtons
                                 AutomationProperties.Name="Which database"
-                                ItemsSource="{x:Bind ViewModel.DatabaseOptions}"
+                                ItemsSource="{x:Bind ViewModel.DatabaseOptions, Mode=OneWay}"
                                 SelectedIndex="{x:Bind ViewModel.DatabaseIndex, Mode=TwoWay}">
                                 <RadioButtons.ItemTemplate>
                                     <DataTemplate x:DataType="models:Model_DatabaseOption">
@@ -208,6 +208,38 @@
                                 <TextBlock Style="{StaticResource FriendlyBody}" Text="{x:Bind ViewModel.ConnectionDetail, Mode=OneWay}" />
                             </StackPanel>
                         </Grid>
+                    </Border>
+
+                    <!--  Keep a copy. Only offered once connected, because it reads the chosen database.  -->
+                    <Border Style="{StaticResource CardStyle}" Visibility="{x:Bind ui:Show.If(ViewModel.IsConnected), Mode=OneWay}">
+                        <StackPanel Spacing="10">
+                            <TextBlock Style="{StaticResource BodyStrongTextBlockStyle}" Text="Keep a copy of this database" />
+                            <TextBlock
+                                Style="{StaticResource FriendlyHint}"
+                                Text="Makes an exact duplicate on the same computer - every table, record, view and saved instruction. This database is only read, never changed."
+                                TextWrapping="Wrap" />
+
+                            <TextBox
+                                AutomationProperties.Name="Name for the copy"
+                                Header="Name for the copy"
+                                Text="{x:Bind ViewModel.CopyTargetName, Mode=TwoWay}" />
+
+                            <CheckBox
+                                Content="Replace it if a database with that name already exists"
+                                IsChecked="{x:Bind ViewModel.ReplaceCopyIfExists, Mode=TwoWay}" />
+
+                            <Button
+                                HorizontalAlignment="Left"
+                                Command="{x:Bind ViewModel.CopyDatabaseCommand}"
+                                Content="Make the copy"
+                                IsEnabled="{x:Bind ViewModel.CanCopy, Mode=OneWay}" />
+
+                            <TextBlock
+                                Style="{StaticResource FriendlyBody}"
+                                Text="{x:Bind ViewModel.CopyStatus, Mode=OneWay}"
+                                TextWrapping="Wrap"
+                                Visibility="{x:Bind ui:Show.If(ViewModel.HasCopyStatus), Mode=OneWay}" />
+                        </StackPanel>
                     </Border>
 
                     <Expander

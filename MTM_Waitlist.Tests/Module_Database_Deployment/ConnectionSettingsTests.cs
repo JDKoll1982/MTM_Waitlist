@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Database_Deployment.Models;
+using MTM_Database_Deployment.Services;
 
 namespace MTM_Waitlist.Tests.Module_Database_Deployment;
 
@@ -15,12 +16,18 @@ namespace MTM_Waitlist.Tests.Module_Database_Deployment;
 public sealed class Model_ConnectionSettingsTests
 {
     [TestMethod]
-    public void Model_ConnectionSettingsTests_ResolveAvailableDatabases_OffersTheThreeShippedStores()
+    public void Model_ConnectionSettingsTests_ResolveAvailableDatabases_OffersTheShippedStoresAndTheirCopies()
     {
         var settings = new Model_ConnectionSettings();
 
         CollectionAssert.AreEqual(
-            new[] { Model_ConnectionSettings.LiveDatabase, Model_ConnectionSettings.TestDatabase, "mtm_mock" },
+            new[]
+            {
+                Model_ConnectionSettings.LiveDatabase,
+                Model_ConnectionSettings.TestDatabase,
+                "mtm_mock",
+                "mtm_mock_test"
+            },
             settings.ResolveAvailableDatabases().ToArray());
     }
 
@@ -84,11 +91,13 @@ public sealed class Model_ConnectionSettingsTests
     public void Model_ConnectionSettingsTests_Clone_CopiesTheDatabaseListRatherThanSharingIt()
     {
         var settings = new Model_ConnectionSettings();
+        var shipped = settings.AvailableDatabases.Count;
         var clone = settings.Clone();
 
         settings.AvailableDatabases.Add("mtm_added_later");
 
-        Assert.AreEqual(3, clone.AvailableDatabases.Count);
+        Assert.AreEqual(shipped, clone.AvailableDatabases.Count);
+        CollectionAssert.DoesNotContain(clone.AvailableDatabases, "mtm_added_later");
     }
 
     [TestMethod]
@@ -125,5 +134,48 @@ public sealed class Model_ConnectionSettingsTests
         var option = Model_DatabaseOption.For(Model_ConnectionSettings.LiveDatabase);
 
         Assert.AreEqual(option.Display, option.ToString());
+    }
+
+    [TestMethod]
+    public void Model_ConnectionSettingsTests_For_CallsACopyOfTheMirrorACacheMirrorCopy()
+    {
+        var option = Model_DatabaseOption.For("mtm_mock_test");
+
+        Assert.AreEqual("Cache mirror copy", option.Title);
+        StringAssert.Contains(option.Description, "duplicate of the Infor Visual cache");
+    }
+
+    [TestMethod]
+    public void Model_ConnectionSettingsTests_ForMerge_KeepsTheConfiguredOrderThenAddsTheServerNames()
+    {
+        var options = Model_DatabaseOption.Merge(
+            ["mtm_waitlist", "mtm_waitlist_test", "mtm_mock"],
+            ["zz_other", "mtm_mock_test", "mtm_waitlist"]);
+
+        CollectionAssert.AreEqual(
+            new[] { "mtm_waitlist", "mtm_waitlist_test", "mtm_mock", "zz_other", "mtm_mock_test" },
+            options.Select(option => option.Name).ToArray());
+    }
+
+    [TestMethod]
+    public void Model_ConnectionSettingsTests_ForMerge_DoesNotListANameTwice()
+    {
+        var options = Model_DatabaseOption.Merge(["mtm_mock"], ["MTM_MOCK", "mtm_mock_test"]);
+
+        CollectionAssert.AreEqual(
+            new[] { "mtm_mock", "mtm_mock_test" },
+            options.Select(option => option.Name).ToArray());
+    }
+
+    [TestMethod]
+    public void Model_ConnectionSettingsTests_ServiceMerge_AddsAShippedNameToASettingsFileThatPredatesIt()
+    {
+        var merged = Service_DeploymentSettings.MergeAvailableDatabases(
+            ["mtm_waitlist", "mtm_mock", "mtm_mock_test"],
+            ["mtm_waitlist", "mtm_mock"]);
+
+        CollectionAssert.AreEqual(
+            new[] { "mtm_waitlist", "mtm_mock", "mtm_mock_test" },
+            merged.ToArray());
     }
 }

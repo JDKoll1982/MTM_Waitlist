@@ -60,13 +60,37 @@ public sealed class Service_DeploymentSettings
         try
         {
             var json = File.ReadAllText(SettingsPath);
-            var settings = JsonSerializer.Deserialize<Model_ConnectionSettings>(json, SerializerOptions);
-            return settings ?? new Model_ConnectionSettings();
+            var settings = JsonSerializer.Deserialize<Model_ConnectionSettings>(json, SerializerOptions)
+                ?? new Model_ConnectionSettings();
+
+            // A settings file written by an older build does not name a database that build never knew about, so the
+            // shipped defaults are folded in rather than replaced: the list grows, and the saved sign-in survives.
+            settings.AvailableDatabases = MergeAvailableDatabases(
+                new Model_ConnectionSettings().AvailableDatabases,
+                settings.AvailableDatabases);
+
+            return settings;
         }
         catch (Exception)
         {
             return new Model_ConnectionSettings();
         }
+    }
+
+    internal static List<string> MergeAvailableDatabases(IEnumerable<string> shipped, IEnumerable<string>? saved)
+    {
+        var names = new List<string>();
+
+        foreach (var name in shipped.Concat(saved ?? []))
+        {
+            var trimmed = name?.Trim();
+            if (!string.IsNullOrWhiteSpace(trimmed) && !names.Contains(trimmed, StringComparer.OrdinalIgnoreCase))
+            {
+                names.Add(trimmed);
+            }
+        }
+
+        return names;
     }
 
     public void Save(Model_ConnectionSettings settings)

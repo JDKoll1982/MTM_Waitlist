@@ -393,38 +393,32 @@ build, and re-specifying them would fork the record.
 1. **Journal and tick.** Companion's own `after-implement` hook records per-task progress into
    `.spec-context.json`; the tick marks in `tasks.md` are yours, each carrying its evidence.
 
-2. **Gates — all four, from the repository root.** Run all four, but read them for *new* findings rather than expecting
-   four clean exits; one of them is already red before any work is done here.
+2. **Gates — all three, from the repository root.** Run all three, but read them for *new* findings rather than
+   expecting three clean exits; one of them is already red before any work is done here.
 
 ```powershell
 pwsh -NoProfile -File scripts/build/run-tests.ps1 -All
 pwsh -NoProfile -ExecutionPolicy Bypass -File .github/scripts/validate-csharp-xaml-naming.ps1
 pwsh -NoProfile -ExecutionPolicy Bypass -File .github/scripts/validate-sql-naming.ps1
-# The schema validator is READ-ONLY unless you pass -ApplySchema. To get its live verdict, set the connection
-# string it names in the SAME process, as below — never export it into your environment and then forget it.
-$env:MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING = $env:MTM_WAITLIST_DB_CONNECTION_STRING
-pwsh -NoProfile -ExecutionPolicy Bypass -File .github/scripts/validate-database-schema.ps1
 ```
 
-   > **Read this before you run the validator.** On **2026-10-16 it destroyed the live `mtm_waitlist`** — every
-   > table dropped and recreated empty — because its repair path applied `Database/Bootstrap/create_database.sql`,
-   > whose first statement is `DROP DATABASE IF EXISTS mtm_waitlist`, to a store that already existed and was
-   > merely one deploy behind. The store was recovered from the Mock service's 01:00 dump. The script is fixed:
-   > the bootstrap now applies only when the database is genuinely absent, and **schema repair is opt-in via
-   > `-ApplySchema`**, so a plain run reports a gap and exits rather than migrating. The incident, the fix and its
-   > verification are recorded in
-   > `docs/defects/defects-database-critical-schema-validator-dropped-the-live-waitlist-store.md`.
+   > **There is no schema-validator gate any more.** `.github/scripts/validate-database-schema.ps1` was deleted on
+   > **2026-11-16**, together with `Database/install_local_database.bat` and its `.vbs` twin. Its repair path had
+   > destroyed the live `mtm_waitlist` on 2026-10-16 — every table dropped and recreated empty — because it applied
+   > `Database/Bootstrap/create_database.sql`, whose first statement is `DROP DATABASE IF EXISTS mtm_waitlist`, to
+   > a store that already existed and was merely one deploy behind. The store was recovered from the Mock
+   > service's 01:00 dump.
    >
-   > Two consequences for this run: run it **without** `-ApplySchema` (a current store validates and exits 0, which
-   > is the live verdict this gate wants), and keep `$env:MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING` scoped to the
-   > command rather than exported for the session.
+   > The replacement is one tool, `Database/DeployDatabase.cmd`, which shows every difference on a review page,
+   > writes only when the operator presses Save, and copies the chosen database into `{database}_backup` before
+   > its first statement (`docs/guides/guides-database-deployment-tool.md`). It is an operator tool, not a gate:
+   > there is nothing to run here, and nothing that migrates a store as a side effect of checking it.
 
    | Gate | State on this branch | What "good" means |
    |---|---|---|
    | `run-tests.ps1 -All` | green — 2214 tests, 2171 passed, 0 failed, 43 skipped (re-run on the host 2026-10-16; the four fewer skips are the live-store tests that a reachable store un-skips) | 0 failed |
    | C#/XAML naming guard | green — `Grandfathered: 249. New: 0.` | `New: 0`; a rising *new* count is the only thing to act on |
    | SQL naming guard | **exits 1, and did so before this work** — 12 findings at the commit this branch started from, 13 now | no *new* finding. Diff the finding sets against the pre-work commit if you need to attribute one |
-   | database schema validator | **read-only unless `-ApplySchema` is passed.** With `MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING` set it ran its live half on 2026-10-16 and reported **`mtm_waitlist` schema is valid**, exit 0, having written nothing | duplicate-object check passes **and** the live half actually runs |
 
    The SQL guard's findings are the filename shapes the repository's own conventions require (the seven
    `*_population.sql` queue-population files, the two `Database/Mock.Service/Restore/*.sql` scripts) plus two boolean

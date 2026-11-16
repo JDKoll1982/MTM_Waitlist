@@ -24,9 +24,11 @@ public sealed class Model_ConnectionSettings
     public int ConnectTimeoutSeconds { get; set; } = 5;
 
     /// <summary>
-    /// Databases the operator may pick from. A site can add its own names here without a rebuild.
+    /// Databases the operator may pick from. A site can add its own names here without a rebuild; anything the
+    /// server holds under the same prefix is added to this list after Connect, so a copy made with the tool does not
+    /// have to be typed in here first.
     /// </summary>
-    public List<string> AvailableDatabases { get; set; } = [LiveDatabase, TestDatabase, "mtm_mock"];
+    public List<string> AvailableDatabases { get; set; } = [LiveDatabase, TestDatabase, "mtm_mock", "mtm_mock_test"];
 
     /// <summary>
     /// The selectable databases, guaranteed to contain <see cref="Database"/> so a name that is not in

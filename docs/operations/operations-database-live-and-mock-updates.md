@@ -291,8 +291,11 @@ for it is reporting success without swapping a snapshot.
 >   schema validator's repair path applied `Database/Bootstrap/create_database.sql` — which begins with
 >   `DROP DATABASE IF EXISTS` — to this store, dropping every table, and the store was restored from the Mock
 >   service's 01:00 dump before this list was re-applied. Full record:
->   `docs/defects/defects-database-critical-schema-validator-dropped-the-live-waitlist-store.md`. The validator is fixed and is
->   now read-only unless `-ApplySchema` is passed.
+>   `docs/defects/defects-database-critical-schema-validator-dropped-the-live-waitlist-store.md`. That validator
+>   and the installer beside it were **deleted on 2026-11-16** and replaced by the review-before-write tool
+>   `Database/DeployDatabase.cmd`, which copies the database into `{database}_backup` before its first statement
+>   (`docs/guides/guides-database-deployment-tool.md`). The switches this note once described (`-ApplySchema`)
+>   no longer exist.
 > * **4.** Run on the restored store: `core_computers_registry` carries **only** `location`,
 >   `sp_auth_user_previous_sign_ins_list` returns 1 row from `information_schema.routines`, and the validator's own
 >   live half reports `mtm_waitlist` schema is valid.

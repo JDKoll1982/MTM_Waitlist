@@ -37,6 +37,7 @@ public sealed class Service_SchemaComparer
 
         var scratchDatabase = "mtm_expected_" + Guid.NewGuid().ToString("N")[..8];
         var changes = new List<Model_SchemaChange>();
+        var scopedUse = false;
 
         try
         {
@@ -51,9 +52,13 @@ public sealed class Service_SchemaComparer
                 var script = await File.ReadAllTextAsync(schemaObject.FullPath, cancellationToken).ConfigureAwait(false);
                 try
                 {
+                    // The scripts open with `USE <their own database>;` so they can be pasted into a client. Left
+                    // alone here, that line sends the expected-schema build into the real store — which both
+                    // corrupts the comparison and writes to a database a check must never touch.
                     await _gateway.ExecuteStatementsAsync(
                         scratchDatabase,
-                        Service_SqlScriptParser.SplitStatements(script),
+                        Service_DeploymentEngine.ScopeToDatabase(
+                            Service_SqlScriptParser.SplitStatements(script), scratchDatabase, ref scopedUse),
                         continueOnError: false,
                         onError: null,
                         disableForeignKeyChecks: true,
@@ -72,7 +77,16 @@ public sealed class Service_SchemaComparer
             var liveTables = await _gateway.ReadTableSnapshotsAsync(database, cancellationToken).ConfigureAwait(false);
 
             BuildTableChanges(expectedTables, liveTables, database, changes);
-            BuildObjectChanges(objects, database, changes);
+
+            var (alreadySeeded, _) = await AppliedSeedLedger
+                .ResolveAsync(
+                    _gateway,
+                    database,
+                    objects.Where(item => item.Kind == Enum_SqlObjectKind.Seed).Select(item => item.RelativePath).ToList(),
+                    cancellationToken)
+                .ConfigureAwait(false);
+
+            BuildObjectChanges(objects, database, alreadySeeded, changes);
 
             return new Model_DeploymentPlan
             {
@@ -213,7 +227,11 @@ public sealed class Service_SchemaComparer
             }
         }
 
-        foreach (var tableName in live.Keys.Where(name => !expected.ContainsKey(name)).OrderBy(name => name, StringComparer.OrdinalIgnoreCase))
+        foreach (var tableName in live.Keys
+                     .Where(name => !expected.ContainsKey(name))
+                     // The tool's own seed ledger is bookkeeping, not a leftover: it is never offered for removal.
+                     .Where(name => !string.Equals(name, AppliedSeedLedger.TableName, StringComparison.OrdinalIgnoreCase))
+                     .OrderBy(name => name, StringComparer.OrdinalIgnoreCase))
         {
             changes.Add(new Model_SchemaChange
             {
@@ -228,6 +246,7 @@ public sealed class Service_SchemaComparer
     private static void BuildObjectChanges(
         IReadOnlyList<Model_SqlObject> objects,
         string database,
+        IReadOnlySet<string> alreadySeeded,
         List<Model_SchemaChange> changes)
     {
         foreach (var view in objects.Where(item => item.Kind == Enum_SqlObjectKind.View))
@@ -265,11 +284,18 @@ public sealed class Service_SchemaComparer
 
         foreach (var seed in objects.Where(item => item.Kind == Enum_SqlObjectKind.Seed))
         {
+            // A store that has already received this seed is not offered it again: the safe update an operator uses
+            // on a live store must not put a shipped default back over their own value.
+            if (alreadySeeded.Contains(seed.RelativePath))
+            {
+                continue;
+            }
+
             changes.Add(new Model_SchemaChange
             {
                 Kind = Enum_ChangeKind.RunSeed,
                 Target = seed.RelativePath,
-                Detail = "idempotent seed data",
+                Detail = "seed data, applied once per database",
                 SourcePath = seed.FullPath
             });
         }

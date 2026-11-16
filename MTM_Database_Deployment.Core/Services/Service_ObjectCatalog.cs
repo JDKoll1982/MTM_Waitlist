@@ -31,6 +31,13 @@ public sealed class Service_ObjectCatalog
 
     public string SqlRoot => _sqlRoot;
 
+    /// <summary>
+    /// The maintained description file, which sits beside the bootstrap rather than under a kind folder because it
+    /// describes the whole store at once.
+    /// </summary>
+    public static string DescriptionsScriptPath(string sqlRoot) =>
+        Path.Combine(sqlRoot, "Bootstrap", "update_table_descriptions.sql");
+
     public IReadOnlyList<Model_SqlObject> LoadObjects()
     {
         var objects = new List<Model_SqlObject>();

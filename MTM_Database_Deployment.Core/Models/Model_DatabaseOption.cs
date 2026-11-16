@@ -24,6 +24,19 @@ public sealed class Model_DatabaseOption
         var isTest = name.EndsWith("_test", StringComparison.OrdinalIgnoreCase);
         var isMirror = name.Equals("mtm_mock", StringComparison.OrdinalIgnoreCase);
 
+        // A copy of the mirror is checked first: it is a test database by its ending, but what an operator needs to
+        // know is that it is a copy of the cache, not a practice copy of the waitlist.
+        if (isTest && name.StartsWith("mtm_mock", StringComparison.OrdinalIgnoreCase))
+        {
+            return new Model_DatabaseOption
+            {
+                Name = name,
+                Title = "Cache mirror copy",
+                Description = "A duplicate of the Infor Visual cache, for trying a rebuild without touching the one "
+                    + "the app falls back to. Safe to change."
+            };
+        }
+
         if (isTest)
         {
             return new Model_DatabaseOption
@@ -51,5 +64,30 @@ public sealed class Model_DatabaseOption
             Title = "Live database",
             Description = "The database the app uses every day. Changes here are real."
         };
+    }
+
+    /// <summary>
+    /// The configured databases in their configured order, then any the server holds that the settings file has
+    /// never heard of.
+    /// </summary>
+    /// <remarks>
+    /// The second half is what keeps a hand-made copy usable: an operator who duplicates a database with the tool
+    /// has to be able to pick the copy on the next run without editing a settings file first.
+    /// </remarks>
+    public static IReadOnlyList<Model_DatabaseOption> Merge(
+        IEnumerable<string> configured,
+        IEnumerable<string> discovered)
+    {
+        var names = new List<string>();
+        foreach (var name in configured.Concat(discovered))
+        {
+            var trimmed = name?.Trim();
+            if (!string.IsNullOrWhiteSpace(trimmed) && !names.Contains(trimmed, StringComparer.OrdinalIgnoreCase))
+            {
+                names.Add(trimmed);
+            }
+        }
+
+        return names.Select(For).ToList();
     }
 }

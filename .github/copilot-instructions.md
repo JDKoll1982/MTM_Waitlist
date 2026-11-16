@@ -230,10 +230,27 @@ When executing complex, cross-file architectural edits, you must strictly move t
 
 ## Destructive-Tooling Traps (read before running anything under `Database/`)
 
-- **`.github/scripts/validate-database-schema.ps1` destroyed the live `mtm_waitlist` on 2026-10-16.** Its repair path applied `Database/Bootstrap/create_database.sql`, whose first statement is `DROP DATABASE IF EXISTS mtm_waitlist;` **to a store that already existed and was merely one deploy behind** — every table came back empty, and the store was recovered from the Mock service's 01:00 dump. Fixed: the bootstrap now applies **only when the database is genuinely absent**, and **schema repair is opt-in (`-ApplySchema`)**. A plain run reports a gap and exits; it never writes. Full record: `docs/defects/defects-database-critical-schema-validator-dropped-the-live-waitlist-store.md`.
-- **`-DatabaseName` does not redirect that script's install.** Every artifact under `Database/Tables/**` carries its own `USE mtm_waitlist;`, so the install always targets `mtm_waitlist` whatever the connection string names. Never treat `-DatabaseName` as a sandbox.
-- **The plant host has `log_bin = OFF`.** There are no MySQL binary logs off `172.16.1.104`, so there is no point-in-time recovery: the Mock service's daily dump under `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\backups\<database>\` is the only copy, and it is a day old. Treat every write to a store on that host as irreversible for the last day.
-- **Several repo scripts write when run.** `refresh_schema_drift.ps1 -Apply`, `verify_mtm_mock_deploy.ps1` (drops `mtm_mock`), and `validate-database-schema.ps1 -ApplySchema` all rewrite a store. Read the switch before running any of them; the read-only forms are the drift report with no `-Apply`, `build_mtm_mock_masters.ps1 -Check`, and `Database/Mock/Validation/read_shape_metadata/validate.sql`.
+- **There is no install script and no schema validator any more.** `Database/install_local_database.bat`, its `.vbs`
+  GUI twin, and `.github/scripts/validate-database-schema.ps1` were deleted on 2026-11-16. A store is created or
+  brought up to date with **one** tool: `Database/DeployDatabase.cmd` (or `dotnet run --project
+  MTM_Database_Deployment`). It shows every difference before it writes, and it copies the chosen database into
+  `{database}_backup` before its first statement. Full guide:
+  `docs/guides/guides-database-deployment-tool.md`. Do not reintroduce a check-then-repair script: that shape is
+  what destroyed the live `mtm_waitlist` on 2026-10-16 (record:
+  `docs/defects/defects-database-critical-schema-validator-dropped-the-live-waitlist-store.md`).
+- **Every script names `mtm_waitlist`, and the tool alone re-points it.** Each artifact under `Database/**` opens
+  with `USE mtm_waitlist;` so it can be pasted into a client, and that line sits underneath a header comment. The
+  deployment tool rewrites it to the database chosen on the first page; nothing else does. A hand-run script, or a
+  new tool that forgets this, writes to the live store whatever connection string it was given.
+- **The plant host has `log_bin = OFF`.** There are no MySQL binary logs off `172.16.1.104`, so there is no
+  point-in-time recovery: the Mock service's daily dump under
+  `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\backups\<database>\` is the only other copy, and it is a day old. Treat
+  every write to a store on that host as irreversible for the last day, and treat `{database}_backup` as the only
+  undo a deployment has.
+- **Several repo scripts write when run.** `refresh_schema_drift.ps1 -Apply` and `verify_mtm_mock_deploy.ps1`
+  (drops `mtm_mock`) rewrite a store. Read the switch before running either; the read-only forms are the drift
+  report with no `-Apply`, `build_mtm_mock_masters.ps1 -Check`, and
+  `Database/Mock/Validation/read_shape_metadata/validate.sql`.
 
 <!-- BEGIN token-budget concise-mode -->
 <!-- toggled: 2026-09-12 -->

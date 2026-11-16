@@ -29,6 +29,25 @@ public sealed class LocalStateFreeTests
     /// <summary>The one file allowed to write under the application's own local folder.</summary>
     private const string PictureCacheAuthority = "ImageCachePaths.cs";
 
+    /// <summary>
+    /// The standalone database deployment tool's review files, which are kept on the machine on purpose.
+    /// </summary>
+    /// <remarks>
+    /// FR-025 and SC-016 govern the application: a fault of the waitlist app is recorded in the store, not on the
+    /// machine. The deployment tool is a different program with a different reader — the person who ran it has to
+    /// be able to hand IT the crash log, and the report of what a run changed has to survive the run. It cannot
+    /// record either in a store, because it is used precisely when the store is unreachable, missing, or being
+    /// rebuilt.
+    /// </remarks>
+    private static readonly Dictionary<string, string> s_operatorToolExemptions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["MTM_Database_Deployment.Core/Services/Service_FailureLog.cs"] =
+            "writes the crash log an operator sends to IT; the tool has no store to record a fault in.",
+        ["MTM_Database_Deployment/ViewModels/ViewModel_DatabaseDeployment.cs"] =
+            "writes the report of what a deployment changed, which is the operator's own evidence that the run "
+            + "did what the review screen said.",
+    };
+
     /// <summary>Ways a file gets written, which is what this check looks for.</summary>
     private static readonly Regex s_fileWriter = new(
         @"File\.(WriteAllText|WriteAllLines|AppendAllText|AppendAllLines|Create|OpenWrite)|new\s+StreamWriter|Directory\.CreateDirectory",
@@ -61,6 +80,11 @@ public sealed class LocalStateFreeTests
                 continue;
             }
 
+            if (s_operatorToolExemptions.ContainsKey(Relative(file).Replace('\\', '/')))
+            {
+                continue;
+            }
+
             if (s_fileWriter.IsMatch(text))
             {
                 offenders.Add(Relative(file));
@@ -73,6 +97,37 @@ public sealed class LocalStateFreeTests
             "These files write under the application's own local folder, so something is kept on the machine that is not the picture copy (FR-025, SC-016):"
                 + Environment.NewLine
                 + string.Join(Environment.NewLine, offenders));
+    }
+
+    /// <summary>
+    /// Every deployment-tool exemption must still name a file that still writes under the local folder, so an
+    /// exemption cannot outlive the code it was written for.
+    /// </summary>
+    [TestMethod]
+    public void Service_LocalStateFreeTests_EveryOperatorToolExemptionIsStillAccurate()
+    {
+        var stale = new List<string>();
+
+        foreach (var entry in s_operatorToolExemptions)
+        {
+            var path = Path.Combine([Root, .. entry.Key.Split('/')]);
+            if (!File.Exists(path))
+            {
+                stale.Add($"{entry.Key}: file no longer exists.");
+                continue;
+            }
+
+            var text = File.ReadAllText(path);
+            if (!text.Contains("LocalApplicationData", StringComparison.Ordinal) || !s_fileWriter.IsMatch(text))
+            {
+                stale.Add($"{entry.Key}: no longer writes under the local folder — remove the exemption.");
+            }
+        }
+
+        Assert.AreEqual(
+            0,
+            stale.Count,
+            "Stale deployment-tool exemptions:" + Environment.NewLine + string.Join(Environment.NewLine, stale));
     }
 
     /// <summary>

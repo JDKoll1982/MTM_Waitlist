@@ -30,13 +30,13 @@ rather than the eight content dialogs and one windowed editor the codebase held 
 
 | Kind | Count |
 |---|---|
-| `App` | 3 |
-| `Window` | 4 |
+| `App` | 4 |
+| `Window` | 5 |
 | `Page` | 54 |
 | `Dialog` | 9 |
 | `Control` | 13 |
 | `ResourceDictionary` | 11 |
-| **All** | **94** |
+| **All** | **96** |
 
 ## The inventory
 
@@ -46,6 +46,7 @@ Paths are relative to the repository root. *Modal* says whether the surface open
 |---|---|---|---|---|
 | App | (root) | App.xaml | `App.xaml` | no |
 | App | MTM_Waitlist.Mock.Service | App.xaml | `MTM_Waitlist.Mock.Service/App.xaml` | no |
+| App | MTM_Database_Deployment | App.xaml | `MTM_Database_Deployment/App.xaml` | no |
 | Control | MTM_Waitlist.Shared | MessageDialogContent.xaml | `MTM_Waitlist.Shared/Dialogs/MessageDialogContent.xaml` | no |
 | Control | Module_Mock | ReadStatusIndicator.xaml | `Module_Mock/Views/ReadStatusIndicator.xaml` | no |
 | Control | Module_Settings | DeveloperLogPanelView.xaml | `Module_Settings/Views/DeveloperLogPanelView.xaml` | no |
@@ -133,6 +134,7 @@ Paths are relative to the repository root. *Modal* says whether the surface open
 | ResourceDictionary | Styles | TooltipStandard.xaml | `Styles/TooltipStandard.xaml` | no |
 | Window | MTM_Waitlist.Mock.Service | ServiceShellWindow.xaml | `MTM_Waitlist.Mock.Service/Views/ServiceShellWindow.xaml` | no |
 | Window | (root) | MainWindow.xaml | `MainWindow.xaml` | no |
+| Window | MTM_Database_Deployment | MainWindow.xaml | `MTM_Database_Deployment/MainWindow.xaml` | no |
 | Window | Module_Shared | ControlInspectorDetailWindow.xaml | `Module_Shared/Views/ControlInspectorDetailWindow.xaml` | no |
 
 ## What the audit enforces

@@ -81,6 +81,45 @@ public sealed class InlineSqlAuditTests
     };
 
     /// <summary>
+    /// The schema deployment tool's reviewed statement-text exemptions: the files that carry
+    /// <c>information_schema</c> reads and the DDL the tool exists to issue.
+    /// </summary>
+    /// <remarks>
+    /// The stored-procedure rule governs how the application reaches its own stores. This tool is the one that
+    /// <i>creates</i> those procedures, and the rule is unreachable for it in both directions: a fresh database has
+    /// no procedure to call yet, and no procedure can be installed into an arbitrary target to read that target's
+    /// catalogue. Each entry names exactly what is there, and the accuracy test below fails once an entry no longer
+    /// describes its file.
+    /// </remarks>
+    private static readonly Dictionary<string, string> s_schemaToolAllowlist = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["MTM_Database_Deployment.Core/Models/Model_TableSnapshot.cs"] =
+            "the comparison model renders CREATE INDEX and ADD CONSTRAINT text for a difference it has already "
+            + "found; the text is the requested change, not a statement against a known store.",
+        ["MTM_Database_Deployment.Core/Services/Service_DeploymentEngine.cs"] =
+            "the fresh-rebuild path drops and recreates the database the operator named on the review screen. "
+            + "That statement is the deployment; there is no procedure to call, because a database being created "
+            + "cannot already hold one.",
+        ["MTM_Database_Deployment.Core/Services/AppliedSeedLedger.cs"] =
+            "reads, creates and fills the tool's own record of which seeds a store has received. It is this tool's "
+            + "bookkeeping rather than application data, so no application procedure owns it, and it has to work "
+            + "against a database that may be mid-rebuild.",
+        ["MTM_Database_Deployment.Core/Services/DatabaseBackup.cs"] =
+            "copies every table of the chosen database into {database}_backup before a run writes anything, "
+            + "with CREATE TABLE ... LIKE and INSERT ... SELECT. A copy of the store is the only undo this tool "
+            + "has on a host with binary logging off, so it cannot be deferred to a procedure in a database that "
+            + "may be mid-rebuild.",
+        ["MTM_Database_Deployment.Core/Services/Service_MySqlGateway.cs"] =
+            "reads TABLE/COLUMNS/STATISTICS/KEY_COLUMN_USAGE from information_schema to learn what the target "
+            + "already holds. The catalogue is read-only server metadata and cannot be wrapped by a procedure "
+            + "installed into a database that may not exist.",
+        ["MTM_Database_Deployment.Core/Services/Service_SchemaComparer.cs"] =
+            "builds the ALTER TABLE / DROP statements that turn a difference into a change, and the throw-away "
+            + "scratch database used to read a script's own definition. Issuing those statements is the "
+            + "deployment, so they cannot be routed to a stored procedure.",
+    };
+
+    /// <summary>
     /// Fails when any MySQL statement marker survives in application code (SC-013).
     /// </summary>
     [TestMethod]
@@ -91,6 +130,11 @@ public sealed class InlineSqlAuditTests
 
         foreach (var file in EnumerateApplicationSourceFiles(repositoryRoot))
         {
+            if (s_schemaToolAllowlist.ContainsKey(ToRelativePath(repositoryRoot, file)))
+            {
+                continue;
+            }
+
             // Comments are removed first: a doc comment that explains which statement an artifact
             // replaced is documentation of the removal, not statement text in application code.
             var code = StripComments(File.ReadAllText(file));
@@ -112,6 +156,38 @@ public sealed class InlineSqlAuditTests
                 + "application code must carry no inline or hard-coded statement text:"
                 + Environment.NewLine
                 + string.Join(Environment.NewLine, violations));
+    }
+
+    /// <summary>
+    /// Every schema-tool exemption must still describe a real file that still carries a statement marker, so an
+    /// exemption cannot outlive the code it was written for and quietly cover a file that has since changed shape.
+    /// </summary>
+    [TestMethod]
+    public void Audit_InlineSqlAuditTests_EverySchemaToolAllowlistEntryIsStillAccurate()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var stale = new List<string>();
+
+        foreach (var entry in s_schemaToolAllowlist)
+        {
+            var path = Path.Combine([repositoryRoot, .. entry.Key.Split('/')]);
+            if (!File.Exists(path))
+            {
+                stale.Add($"{entry.Key}: file no longer exists.");
+                continue;
+            }
+
+            var code = StripComments(File.ReadAllText(path));
+            if (!s_statementMarkers.Any(marker => marker.Pattern.IsMatch(code)))
+            {
+                stale.Add($"{entry.Key}: no longer carries statement text — remove the exemption.");
+            }
+        }
+
+        Assert.AreEqual(
+            0,
+            stale.Count,
+            "Stale schema-tool statement-text exemptions:" + Environment.NewLine + string.Join(Environment.NewLine, stale));
     }
 
     /// <summary>

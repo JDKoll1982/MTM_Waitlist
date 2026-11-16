@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk" TreatAsLocalProperty="Platform">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -20,6 +20,18 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <NoWarn>CS1591</NoWarn>
+  </PropertyGroup>
+
+  <!--
+    A WinUI project is never AnyCPU: the Windows App SDK self-contained payload and Win2D both refuse it. The
+    solution already maps its "Any CPU" configuration onto x64, but a per-project build does not go through that
+    mapping — the C# extension's build task passes Platform=AnyCPU straight to MSBuild, which then fails with
+    "WindowsAppSDKSelfContained requires a supported Windows architecture". The TreatAsLocalProperty attribute on
+    the Project element above is what lets this file replace the caller's value instead of arguing with it, so the
+    same project builds whether it is reached through the solution or on its own.
+  -->
+  <PropertyGroup>
+    <Platform Condition="'$(Platform)' == '' or '$(Platform)' == 'AnyCPU'">x64</Platform>
   </PropertyGroup>
 
   <!--
@@ -45,6 +57,31 @@
     </Content>
     <Content Include="..\Database\Seeds\**\create.sql">
       <Link>Database\Seeds\%(RecursiveDir)create.sql</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <!-- The maintained descriptions, which the engine applies after the tables so a fresh store reads the same
+         as one that has been updated in place. -->
+    <Content Include="..\Database\Bootstrap\update_table_descriptions.sql">
+      <Link>Database\Bootstrap\update_table_descriptions.sql</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+
+    <!-- The cache mirror's own tree. It describes a different schema, so it ships beside the waitlist tree and is
+         chosen by the database's name rather than mixed in. -->
+    <Content Include="..\Database\Mock\Tables\**\create.sql">
+      <Link>Database\Mock\Tables\%(RecursiveDir)create.sql</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Database\Mock\StoredProcedures\**\create.sql">
+      <Link>Database\Mock\StoredProcedures\%(RecursiveDir)create.sql</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Database\Mock\Seeds\**\create.sql">
+      <Link>Database\Mock\Seeds\%(RecursiveDir)create.sql</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Database\Mock\Bootstrap\update_table_descriptions.sql">
+      <Link>Database\Mock\Bootstrap\update_table_descriptions.sql</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="deployment.settings.json">

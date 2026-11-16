@@ -9,6 +9,7 @@
   "AvailableDatabases": [
     "mtm_waitlist",
     "mtm_waitlist_test",
-    "mtm_mock"
+    "mtm_mock",
+    "mtm_mock_test"
   ]
 }

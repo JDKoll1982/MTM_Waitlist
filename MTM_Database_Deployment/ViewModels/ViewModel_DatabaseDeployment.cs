@@ -24,7 +24,7 @@ public partial class ViewModel_DatabaseDeployment : ObservableObject
     private const string GlyphLock = "\uE72E";
 
     private readonly Service_DeploymentSettings _settingsService;
-    private readonly Service_ObjectCatalog _catalog;
+    private Service_ObjectCatalog _catalog;
     private readonly Model_ConnectionSettings _settings;
     private CancellationTokenSource? _cancellation;
     private Model_DeploymentPlan? _plan;
@@ -134,14 +134,33 @@ public partial class ViewModel_DatabaseDeployment : ObservableObject
     [ObservableProperty]
     public partial string SignInSummary { get; set; } = "Sign in";
 
+    /// <summary>The name the operator types for the copy made on this page.</summary>
+    [ObservableProperty]
+    public partial string CopyTargetName { get; set; } = string.Empty;
+
+    /// <summary>Set only when the operator accepts replacing a database that already has the copy's name.</summary>
+    [ObservableProperty]
+    public partial bool ReplaceCopyIfExists { get; set; }
+
+    [ObservableProperty]
+    public partial string CopyStatus { get; set; } = string.Empty;
+
     public ObservableCollection<Model_ChangeGroup> ChangeGroups { get; } = new();
 
     /// <summary>
-    /// The databases the operator can choose between, in the order the settings file lists them.
+    /// The databases the operator can choose between: the configured ones in order, then anything the server holds
+    /// that the settings file has not heard of, added once Connect has reached it.
     /// </summary>
-    public IReadOnlyList<Model_DatabaseOption> DatabaseOptions { get; }
+    [ObservableProperty]
+    public partial ObservableCollection<Model_DatabaseOption> DatabaseOptions { get; set; } = new();
 
     public string FolderDetail => _catalog.SqlRoot;
+
+    /// <summary>
+    /// True when the chosen database is one this tool ships scripts for. The waitlist store and the cache mirror
+    /// have different schemas, and neither is written with the other's tree.
+    /// </summary>
+    public bool IsDatabaseSupported => DeploymentScope.SqlRootFor(_settingsService.SqlRoot, Database) is not null;
 
     public bool IsSafeMode => ModeIndex == 0;
 
@@ -149,9 +168,19 @@ public partial class ViewModel_DatabaseDeployment : ObservableObject
 
     public bool CanConnect => !IsBusy;
 
-    public bool CanCheck => !IsBusy && IsConnected;
+    public bool CanCheck => !IsBusy && IsConnected && IsDatabaseSupported;
 
-    public bool CanSave => !IsBusy && HasChecked && (IsSafeMode || ConfirmRebuild);
+    public bool CanSave => !IsBusy && HasChecked && IsDatabaseSupported && (IsSafeMode || ConfirmRebuild);
+
+    /// <summary>
+    /// The copy needs a connection, a name of its own, and no run in progress.
+    /// </summary>
+    public bool CanCopy => !IsBusy
+        && IsConnected
+        && !string.IsNullOrWhiteSpace(CopyTargetName)
+        && !string.Equals(CopyTargetName.Trim(), Database, StringComparison.OrdinalIgnoreCase);
+
+    public bool HasCopyStatus => !string.IsNullOrWhiteSpace(CopyStatus);
 
     public string SaveButtonText => IsRebuildMode ? "Erase everything and rebuild" : "Save the changes";
 
@@ -174,7 +203,7 @@ public partial class ViewModel_DatabaseDeployment : ObservableObject
     public ViewModel_DatabaseDeployment()
     {
         _settingsService = new Service_DeploymentSettings();
-        _catalog = new Service_ObjectCatalog(_settingsService.SqlRoot);
+        _catalog = CreateCatalog(Database);
         _settings = _settingsService.Load();
 
         PreferredServer = _settings.PreferredServer;
@@ -185,11 +214,10 @@ public partial class ViewModel_DatabaseDeployment : ObservableObject
         Password = _settings.Password;
         ServerDetail = $"First tries {PreferredServer}, then {FallbackServer}.";
         SignInSummary = string.IsNullOrWhiteSpace(UserName) ? "Sign in" : $"Sign in as {UserName}";
+        CopyTargetName = SuggestedCopyName(Database);
 
-        DatabaseOptions = _settings
-            .ResolveAvailableDatabases()
-            .Select(Model_DatabaseOption.For)
-            .ToList();
+        DatabaseOptions = new ObservableCollection<Model_DatabaseOption>(
+            _settings.ResolveAvailableDatabases().Select(Model_DatabaseOption.For));
 
         for (var index = 0; index < DatabaseOptions.Count; index++)
         {
@@ -199,6 +227,8 @@ public partial class ViewModel_DatabaseDeployment : ObservableObject
                 break;
             }
         }
+
+        UpdateSafetyLine();
     }
 
     /// <summary>
@@ -223,6 +253,12 @@ public partial class ViewModel_DatabaseDeployment : ObservableObject
         HasChecked = false;
         HasResult = false;
         IsConnected = false;
+        _catalog = CreateCatalog(option.Name);
+        OnPropertyChanged(nameof(FolderDetail));
+        OnPropertyChanged(nameof(IsDatabaseSupported));
+        CopyTargetName = SuggestedCopyName(option.Name);
+        CopyStatus = string.Empty;
+        ReplaceCopyIfExists = false;
         ChangeGroups.Clear();
         ChangeHeadline = "Nothing checked yet";
         ChangeDetail = "Connect first, then press Check the database.";
@@ -284,21 +320,89 @@ public partial class ViewModel_DatabaseDeployment : ObservableObject
         OnPropertyChanged(nameof(CanConnect));
         OnPropertyChanged(nameof(CanCheck));
         OnPropertyChanged(nameof(CanSave));
+        OnPropertyChanged(nameof(CanCopy));
     }
+
+    /// <summary>
+    /// The catalog for the chosen database's own tree. An unsupported name keeps the waitlist tree, which can be
+    /// displayed but never saved: <see cref="IsDatabaseSupported"/> gates the buttons.
+    /// </summary>
+    private Service_ObjectCatalog CreateCatalog(string database) =>
+        new(DeploymentScope.SqlRootFor(_settingsService.SqlRoot, database) ?? _settingsService.SqlRoot);
+
+    partial void OnCopyTargetNameChanged(string value) => OnPropertyChanged(nameof(CanCopy));
+
+    partial void OnCopyStatusChanged(string value) => OnPropertyChanged(nameof(HasCopyStatus));
+
+    /// <summary>
+    /// The name a copy is offered under. It ends in <c>_copy</c> rather than <c>_test</c> on purpose: a database
+    /// called <c>mtm_waitlist_test</c> already exists, and offering that name would put the replace box in front of
+    /// the practice copy.
+    /// </summary>
+    private static string SuggestedCopyName(string database) =>
+        string.IsNullOrWhiteSpace(database) ? "_copy" : $"{database.Trim()}_copy";
 
     private void UpdateSafetyLine()
     {
         if (IsRebuildMode)
         {
             SafetyLine = ConfirmRebuild
-                ? "Everything in the database will be erased and rebuilt. This cannot be undone."
+                ? "Every table is emptied and rebuilt. A copy of what is in there now is saved first as "
+                  + $"{DatabaseBackup.BackupName(Database)}."
                 : "This erases every record. Only do this on a database you are happy to wipe.";
             return;
         }
 
-        SafetyLine = RemoveDatabaseOnlyObjects
+        SafetyLine = (RemoveDatabaseOnlyObjects
             ? "Your records are kept. Leftover columns and tables this tool does not use will be deleted."
-            : "Your records are kept. Nothing is deleted.";
+            : "Your records are kept. Nothing is deleted.")
+            + BackupSentence();
+    }
+
+    /// <summary>
+    /// The copy the run takes before its first statement, said in the same sentence as the rest of the safety line
+    /// so the operator reads it where the reassurance is, not only in the report afterwards.
+    /// </summary>
+    private string BackupSentence() => string.IsNullOrWhiteSpace(Database)
+        ? string.Empty
+        : $" A copy of every table is saved as {DatabaseBackup.BackupName(Database)} before anything changes.";
+
+    /// <summary>
+    /// Adds every <c>mtm_*</c> database the server holds to the picker, keeping the configured order in front and the
+    /// current choice selected.
+    /// </summary>
+    /// <remarks>
+    /// A refresh that fails leaves the configured list in place: not being able to list databases is not a reason to
+    /// tell an operator they cannot connect.
+    /// </remarks>
+    private async Task RefreshDatabaseOptionsAsync(Service_MySqlGateway gateway, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var rows = await gateway
+                .QueryAsync("information_schema", "SHOW DATABASES;", cancellationToken)
+                .ConfigureAwait(true);
+
+            var discovered = rows
+                .Select(row => row[0])
+                .Where(name => name.StartsWith("mtm_", StringComparison.OrdinalIgnoreCase));
+
+            var options = Model_DatabaseOption.Merge(_settings.ResolveAvailableDatabases(), discovered);
+            var selected = options
+                .Select((option, index) => (option, index))
+                .FirstOrDefault(pair => string.Equals(pair.option.Name, Database, StringComparison.OrdinalIgnoreCase));
+
+            DatabaseOptions = new ObservableCollection<Model_DatabaseOption>(options);
+
+            if (selected.option is not null)
+            {
+                DatabaseIndex = selected.index;
+            }
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            AppendLog("The database list could not be read: " + exception.Message);
+        }
     }
 
     /// <summary>
@@ -331,9 +435,7 @@ public partial class ViewModel_DatabaseDeployment : ObservableObject
             try
             {
                 await using var connection = await gateway.OpenAsync(Database, _cancellation.Token).ConfigureAwait(true);
-                await using var command = connection.CreateCommand();
-                command.CommandText = "SELECT 1;";
-                await command.ExecuteScalarAsync(_cancellation.Token).ConfigureAwait(true);
+                await connection.PingAsync(_cancellation.Token).ConfigureAwait(true);
             }
             catch (MySqlException mysql) when (mysql.Number == 1049)
             {
@@ -344,12 +446,25 @@ public partial class ViewModel_DatabaseDeployment : ObservableObject
             ServerDetail = $"Connected to {gateway.ActiveServer}:{gateway.Port}";
             SignInSummary = string.IsNullOrWhiteSpace(UserName) ? "Signed in" : $"Signed in as {UserName}";
 
+            // Whatever the server actually holds now becomes selectable, so a copy made with this tool — or by
+            // anybody else — can be chosen without editing deployment.settings.json first.
+            await RefreshDatabaseOptionsAsync(gateway, _cancellation.Token).ConfigureAwait(true);
+
             if (databaseMissing)
             {
                 ConnectionHeadline = "Connected - but that database does not exist yet";
                 ConnectionDetail =
                     $"We reached the database computer, but there is nothing called '{Database}' on it. "
                     + "'Start over' can create it, or ask IT for the right name in Advanced settings.";
+            }
+            else if (!IsDatabaseSupported)
+            {
+                // The waitlist store and the cache mirror have different schemas. Saying so here is what stops a
+                // deployment from writing one application's tables into the other's database.
+                ConnectionHeadline = "Connected - but this tool does not update that database";
+                ConnectionDetail = DeploymentScope.UnsupportedDatabaseMessage(Database);
+                AppendLog(ConnectionDetail);
+                return;
             }
             else if (gateway.UsingFallback)
             {
@@ -397,7 +512,7 @@ public partial class ViewModel_DatabaseDeployment : ObservableObject
     [RelayCommand]
     private async Task CheckAsync()
     {
-        if (IsBusy)
+        if (IsBusy || !IsDatabaseSupported)
         {
             return;
         }
@@ -436,7 +551,7 @@ public partial class ViewModel_DatabaseDeployment : ObservableObject
     [RelayCommand]
     private async Task SaveAsync()
     {
-        if (IsBusy)
+        if (IsBusy || !IsDatabaseSupported)
         {
             return;
         }
@@ -460,7 +575,7 @@ public partial class ViewModel_DatabaseDeployment : ObservableObject
         try
         {
             var gateway = CreateGateway();
-            var engine = new Service_DeploymentEngine(gateway, _catalog);
+            var engine = new Service_DeploymentEngine(gateway, _catalog, new DatabaseBackup(gateway));
             var progress = new Progress<string>(message =>
             {
                 ProgressMessage = message;
@@ -530,6 +645,59 @@ public partial class ViewModel_DatabaseDeployment : ObservableObject
     }
 
     /// <summary>
+    /// Duplicates the chosen database into a database of its own, leaving the source untouched. This is the "keep
+    /// what is there before we work on it" action, and the only one that copies rows and stored instructions rather
+    /// than just a shape.
+    /// </summary>
+    [RelayCommand]
+    private async Task CopyDatabaseAsync()
+    {
+        if (!CanCopy)
+        {
+            return;
+        }
+
+        var target = CopyTargetName.Trim();
+        IsBusy = true;
+        _cancellation = new CancellationTokenSource();
+        CopyStatus = $"Copying {Database} into {target}...";
+        AppendLog($"Copying {Database} into {target}.");
+
+        try
+        {
+            var gateway = CreateGateway();
+            await gateway.ResolveServerAsync(_cancellation.Token).ConfigureAwait(true);
+
+            var progress = new Progress<string>(message =>
+            {
+                CopyStatus = message;
+                AppendLog(message);
+            });
+
+            var outcome = await new DatabaseBackup(gateway)
+                .DuplicateAsync(Database, target, ReplaceCopyIfExists, progress, _cancellation.Token)
+                .ConfigureAwait(true);
+
+            CopyStatus = outcome.Summary;
+            AppendLog(outcome.Summary);
+        }
+        catch (OperationCanceledException)
+        {
+            CopyStatus = "The copy was stopped before it finished, so it may be incomplete.";
+            AppendLog("Copy stopped.");
+        }
+        catch (Exception exception)
+        {
+            CopyStatus = exception.Message;
+            AppendLog("Copy failed: " + exception.Message);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    /// <summary>
     /// Checks the user name and password without moving the wizard on, so a wrong password is caught
     /// while the operator is still looking at the field.
     /// </summary>
@@ -552,9 +720,7 @@ public partial class ViewModel_DatabaseDeployment : ObservableObject
             await gateway.ResolveServerAsync(cancellation.Token).ConfigureAwait(true);
 
             await using var connection = await gateway.OpenAsync(Database, cancellation.Token).ConfigureAwait(true);
-            await using var command = connection.CreateCommand();
-            command.CommandText = "SELECT 1;";
-            await command.ExecuteScalarAsync(cancellation.Token).ConfigureAwait(true);
+            await connection.PingAsync(cancellation.Token).ConfigureAwait(true);
 
             SignInGlyph = GlyphCheck;
             SignInMessage = $"Signed in as {UserName} on {gateway.ActiveServer}. Database: {Database}.";
@@ -819,10 +985,16 @@ public partial class ViewModel_DatabaseDeployment : ObservableObject
 
         ResultGlyph = GlyphCheck;
         ResultHeadline = IsRebuildMode ? "The database was rebuilt" : "All done - the database is up to date";
+
+        // The copy is reported with the sentence the backup service produced, so a database that had nothing to
+        // copy says that rather than claiming a copy exists.
+        var backupNote = result.Messages.FirstOrDefault(message =>
+            message.Contains(DatabaseBackup.BackupName(Database), StringComparison.OrdinalIgnoreCase));
+
         ResultDetail = IsRebuildMode
-            ? "Every table was recreated empty and the standard lists were filled in."
+            ? "Every table was recreated empty and the standard lists were filled in. " + backupNote
             : $"{result.AppliedCount} item(s) saved, {result.BenignSkipCount} were already in place. "
-              + "Your records were not changed.";
+              + "Your records were not changed. " + backupNote;
     }
 
     private async Task<Model_DeploymentPlan> BuildPlanAsync(Service_MySqlGateway gateway)

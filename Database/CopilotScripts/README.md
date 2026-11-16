@@ -142,10 +142,11 @@ $env:MYSQL_PWD='root'; pwsh -NoProfile -File Database/CopilotScripts/capture_moc
 - `rollback.sql` is not regenerated: it deletes by `is_seed_content = 1` per shape, so it already covers whatever
   this writes.
 - **Both deploy paths run this first**, so there is no separate step to remember. `deploy_mtm_mock.ps1` runs it as
-  its step 0, and the GUI installer `Database/install_local_database.vbs` runs it immediately before its cache
-  phase, which then applies whatever seed it wrote. Both treat exit 3 as ordinary and any other failure as a
-  warning, and neither can be failed by it. The installer hands the password over through `MYSQL_PWD` rather than
-  an argument, because it writes every command it runs to its log.
+  its step 0, and the installer did too until 2026-11-16, when the installer was deleted along with
+  `validate-database-schema.ps1` and replaced by the review-before-write tool `Database/DeployDatabase.cmd`
+  (`docs/guides/guides-database-deployment-tool.md`). Both treat exit 3 as ordinary and any other failure as a
+  warning, and neither can be failed by it. The deleted installer handed the password over through `MYSQL_PWD`
+  rather than an argument, because it wrote every command it ran to its log.
 - **Exit codes.** **0** the seed was written; **3** there is nothing here to capture and nothing was written — no
   mirror tables at all, or a mirror holding only seed content because it has never been refreshed; **1** the
   capture failed and the seed on disk is untouched. `deploy_mtm_mock.ps1` runs this as its step 0 and treats 3 as

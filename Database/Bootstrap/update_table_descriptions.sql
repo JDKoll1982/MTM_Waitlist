@@ -579,7 +579,7 @@ SET
 SET
     @sql_stmt := IF(
         @has_is_generic_column = 0,
-        'ALTER TABLE waitlist_requests_queue ADD COLUMN is_generic TINYINT(1) NOT NULL DEFAULT 0 COMMENT ''Whether this request was raised at a generic work center, with no work order anywhere (FR-008).'' AFTER answers_json',
+        'ALTER TABLE waitlist_requests_queue ADD COLUMN is_generic TINYINT(1) NOT NULL DEFAULT 0 COMMENT ''Whether this request was raised at a generic work center, with no work order anywhere (FR-008, research R2).'' AFTER answers_json',
         'SELECT ''waitlist_requests_queue.is_generic already exists'''
     );
 
@@ -602,7 +602,7 @@ SET
 SET
     @sql_stmt := IF(
         @has_description_column = 0,
-        'ALTER TABLE waitlist_requests_queue ADD COLUMN description VARCHAR(500) NULL COMMENT ''The requester''''s optional free-text description of what they need (FR-016). Distinct from note, which the material handler writes.'' AFTER is_generic',
+        'ALTER TABLE waitlist_requests_queue ADD COLUMN description VARCHAR(500) NULL COMMENT ''The requester''''s optional free-text description (FR-016). Distinct from note, which the material handler writes.'' AFTER is_generic',
         'SELECT ''waitlist_requests_queue.description already exists'''
     );
 
@@ -678,10 +678,10 @@ MODIFY COLUMN category VARCHAR(16) NOT NULL COMMENT 'The Category the requester 
 MODIFY COLUMN item VARCHAR(64) NOT NULL COMMENT 'The Item the requester chose: one of the catalogued Item codes.',
 MODIFY COLUMN input_value VARCHAR(255) NULL COMMENT 'The answer captured for an Item whose flow collects one.',
 MODIFY COLUMN answers_json JSON NULL COMMENT 'The answers a request captured beyond input_value, keyed by the label the Item declared; NULL when the request captured none (FR-073, FR-087).',
-MODIFY COLUMN is_generic TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Whether this request was raised at a generic work center, with no work order anywhere (FR-008).',
-MODIFY COLUMN description VARCHAR(500) NULL COMMENT 'The requester''s optional free-text description of what they need (FR-016). Distinct from note, which the material handler writes.',
+MODIFY COLUMN is_generic TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Whether this request was raised at a generic work center, with no work order anywhere (FR-008, research R2).',
+MODIFY COLUMN description VARCHAR(500) NULL COMMENT 'The requester''s optional free-text description (FR-016). Distinct from note, which the material handler writes.',
 MODIFY COLUMN accepted_warnings_json JSON NULL COMMENT 'Every warning the requester accepted when raising the request, so the stored row states what they were told (FR-019).',
-MODIFY COLUMN active_setup_job_id VARCHAR(64) NULL COMMENT 'Active setup job associated with the request at submission time, or NULL for a generic request, which has no work order (FR-008).',
+MODIFY COLUMN active_setup_job_id VARCHAR(64) NULL COMMENT 'The work order the request was raised against, or NULL for a generic request (FR-008).',
 MODIFY COLUMN provenance_work_order VARCHAR(64) NULL COMMENT 'The job a generic request''s values were taken from, or NULL when no job filled it. Provenance, never identity: is_generic stays 1 and active_setup_job_id stays NULL (FR-011, FR-013).',
 MODIFY COLUMN work_center_name VARCHAR(64) NOT NULL COMMENT 'Work center that submitted the request.',
 MODIFY COLUMN requester_employee_number VARCHAR(32) NOT NULL COMMENT 'Employee number of the requester.',
