@@ -6,7 +6,8 @@
 -- The two columns specs/012-waitlist-card-layout added (`handler_status`, `answers_json`) go with the table and
 -- need no per-column drop: there is no path in this repository that removes only the columns of a table the
 -- reinstall recreates. The same holds for the four changes specs/016-generic-wc-request-foundation makes
--- (`active_setup_job_id` nullable, `is_generic`, `description`, `accepted_warnings_json`).
+-- (`active_setup_job_id` nullable, `is_generic`, `description`, `accepted_warnings_json`), and for
+-- `provenance_work_order`, which specs/021-generic-wc-optional-job-fill adds.
 
 USE mtm_waitlist;
 

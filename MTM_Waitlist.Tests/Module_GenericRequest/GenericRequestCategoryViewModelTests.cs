@@ -191,6 +191,7 @@ public sealed class GenericRequestCategoryViewModelTests
 
         describeDraft(navigator.Draft);
 
-        return (new GenericRequestCategoryViewModel(data, navigator), data, navigator);
+        // No job is running unless a test says otherwise, which is what keeps this file about the categories.
+        return (new GenericRequestCategoryViewModel(data, new StubGenericRequestJobFillData(), navigator), data, navigator);
     }
 }

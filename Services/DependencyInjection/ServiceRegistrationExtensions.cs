@@ -264,6 +264,10 @@ public static partial class ServiceRegistrationExtensions
         // so one die search answers every route. It travels read shape 12 for the same reason.
         services.AddSingleton<MTM_Waitlist.GenericRequest.Contracts.IGenericRequestDieData, MTM_Waitlist.GenericRequest.Data.Services.GenericRequestDieData>();
 
+        // The job-fill offer's own seam (021). It is implemented at the composition root because it wraps the Setup
+        // module's active-job read, and no library in this solution may reference that module (research R4).
+        services.AddSingleton<MTM_Waitlist.GenericRequest.Contracts.IGenericRequestJobFillData, GenericRequestJobFillSource>();
+
         services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestWorkCenterViewModel>();
         services.AddTransient<MTM_Waitlist.GenericRequest.Views.GenericRequestWorkCenterPage>();
         services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestCategoryViewModel>();

@@ -52,8 +52,79 @@
         RetryCommand="{x:Bind ViewModel.RetryCommand}"
         TitleKey="{x:Bind ViewModel.TitleKey}">
         <controls:GenericRequestStepFrame.Body>
-            <Grid>
-                <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
+            <Grid RowSpacing="12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel
+                    Grid.Row="0"
+                    Padding="16"
+                    Spacing="8"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    Visibility="{x:Bind ViewModel.OfferVisibility, Mode=OneWay}">
+                    <TextBlock
+                        Text="{x:Bind ViewModel.OfferTitle, Mode=OneWay}"
+                        TextWrapping="Wrap"
+                        Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <TextBlock
+                        Text="{x:Bind ViewModel.OfferQuestion, Mode=OneWay}"
+                        TextWrapping="Wrap"
+                        Style="{StaticResource BodyTextBlockStyle}" />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button
+                            Content="{x:Bind ViewModel.AcceptContent}"
+                            Command="{x:Bind ViewModel.AcceptFillCommand}"
+                            Style="{StaticResource AccentButtonStyle}" />
+                        <Button
+                            Content="{x:Bind ViewModel.DeclineContent}"
+                            Command="{x:Bind ViewModel.DeclineFillCommand}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <TextBlock
+                    Grid.Row="0"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="{x:Bind ViewModel.FilledLine, Mode=OneWay}"
+                    TextWrapping="Wrap"
+                    Visibility="{x:Bind ViewModel.FilledVisibility, Mode=OneWay}"
+                    Style="{StaticResource BodyTextBlockStyle}" />
+
+                <StackPanel
+                    Grid.Row="0"
+                    Padding="16"
+                    Spacing="8"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    Visibility="{x:Bind ViewModel.FillUnavailableVisibility, Mode=OneWay}">
+                    <TextBlock
+                        Text="{x:Bind ViewModel.FillUnavailableText}"
+                        TextWrapping="Wrap"
+                        Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind ViewModel.FillAttemptedLabel}"
+                            Style="{StaticResource BodyTextBlockStyle}" />
+                        <TextBlock
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{x:Bind ViewModel.FillAttemptedAtDisplay, Mode=OneWay}"
+                            Style="{StaticResource BodyTextBlockStyle}" />
+                        <Button
+                            Content="{x:Bind ViewModel.RetryContent}"
+                            Command="{x:Bind ViewModel.RetryFillCommand}"
+                            Style="{StaticResource AccentButtonStyle}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <Grid Grid.Row="1">
+                    <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
 
                 <!--
                     One card per category, drawn the way the work center cards are: a bordered surface, a title, a
@@ -112,6 +183,7 @@
                         </DataTemplate>
                     </GridView.ItemTemplate>
                 </GridView>
+                </Grid>
             </Grid>
         </controls:GenericRequestStepFrame.Body>
     </controls:GenericRequestStepFrame>

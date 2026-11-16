@@ -191,6 +191,30 @@
   <data name="GenericRequest_Category_Title.Text" xml:space="preserve">
     <value>Choose a category</value>
   </data>
+  <data name="GenericRequest_Category_JobFill_Title.Text" xml:space="preserve">
+    <value>A job is running at this work center</value>
+  </data>
+  <data name="GenericRequest_Category_JobFill_Question.Text" xml:space="preserve">
+    <value>Fill this request from job {0} at {1}?</value>
+  </data>
+  <data name="GenericRequest_Category_JobFill_Accept.Content" xml:space="preserve">
+    <value>Fill the request</value>
+  </data>
+  <data name="GenericRequest_Category_JobFill_Decline.Content" xml:space="preserve">
+    <value>Start blank</value>
+  </data>
+  <data name="GenericRequest_Category_JobFill_Filled.Text" xml:space="preserve">
+    <value>Filled from job {0}</value>
+  </data>
+  <data name="GenericRequest_Category_JobFill_Unavailable.Text" xml:space="preserve">
+    <value>The running job could not be read</value>
+  </data>
+  <data name="GenericRequest_Category_JobFill_Attempted.Text" xml:space="preserve">
+    <value>Last attempt</value>
+  </data>
+  <data name="GenericRequest_JobFill_FromJob.Text" xml:space="preserve">
+    <value>From job {0}</value>
+  </data>
   <data name="GenericRequest_Die_Search.PlaceholderText" xml:space="preserve">
     <value>Die number or part number</value>
   </data>

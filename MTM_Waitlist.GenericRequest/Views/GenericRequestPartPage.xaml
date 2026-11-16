@@ -58,6 +58,13 @@
                     </AutoSuggestBox>
 
                     <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind ViewModel.FromJobText, Mode=OneWay}"
+                        TextWrapping="Wrap"
+                        Visibility="{x:Bind ViewModel.FromJobVisibility, Mode=OneWay}"
+                        Style="{StaticResource CaptionTextBlockStyle}" />
+
+                    <TextBlock
                         x:Uid="GenericRequest_Part_NoMatch"
                         Foreground="{ThemeResource SystemFillColorCautionBrush}"
                         TextWrapping="Wrap"

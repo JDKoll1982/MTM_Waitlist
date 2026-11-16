@@ -312,6 +312,10 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
                             IsGeneric = true,
                             Description = draft.Description,
                             Answers = answers,
+                            // The job a filled request took its values from is provenance, not identity: the request
+                            // stays generic, keeps no work order as its own, and every row a die request raises
+                            // records the same job because all of them were filled from it (021 FR-011, FR-013).
+                            ProvenanceWorkOrder = draft.JobFill?.WorkOrder,
                             AcceptedWarnings = draft.AcceptedWarnings.Count == 0 ? null : draft.AcceptedWarnings.ToArray(),
                             WorkCenterName = _workCenterCatalogService.GetCurrentComputerName(),
                             RequesterEmployeeNumber = verification.EmployeeNumber,

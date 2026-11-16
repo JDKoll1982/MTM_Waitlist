@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using System.Globalization;
 
+using Microsoft.UI.Xaml;
+
 using MTM_Waitlist.GenericRequest.Contracts;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Shared.ViewModels;
@@ -85,6 +87,22 @@ public sealed partial class GenericRequestDunnageViewModel : GenericRequestStepV
     /// </summary>
     protected override bool CanAnswer => Catalogue.SelectedPart is not null;
 
+    /// <summary>
+    /// The qualifier that says this dunnage part came from the running job, or empty when it did not or the requester
+    /// has changed it since (FR-006, FR-007).
+    /// </summary>
+    public string FromJobText => Draft.JobFill is { IsDunnageFromJob: true } fill
+        ? string.Format(
+            CultureInfo.CurrentCulture,
+            "GenericRequest_JobFill_FromJob.Text".GetLocalized(),
+            fill.WorkOrder)
+        : string.Empty;
+
+    /// <summary>Whether the qualifier is drawn at all.</summary>
+    public bool HasFromJob => FromJobText.Length > 0;
+
+    public Visibility FromJobVisibility => HasFromJob ? Visibility.Visible : Visibility.Collapsed;
+
     protected override async Task LoadCoreAsync()
     {
         // The frame says it is reading rather than reporting a finished read: an empty catalogue is an answer, and
@@ -103,6 +121,14 @@ public sealed partial class GenericRequestDunnageViewModel : GenericRequestStepV
 
         if (Presentation == GenericRequestPresentation.Populated)
         {
+            // The dunnage part the running job carries is offered as this step's choice. A part the requester has
+            // already chosen is never replaced (FR-005, FR-007).
+            if (Draft.DunnagePart.Length == 0 && Draft.JobFill is { IsDunnageFromJob: true } fill)
+            {
+                Draft.DunnagePart = fill.DunnagePart;
+                Draft.DunnageType = fill.DunnageType;
+            }
+
             // A revisit shows the part the draft remembers. A part that has left the catalogue is not chosen and
             // the draft keeps the value it had, which is what records it as no longer offered at raise time.
             Catalogue.SelectPartNumber(Draft.DunnagePart);
@@ -128,6 +154,17 @@ public sealed partial class GenericRequestDunnageViewModel : GenericRequestStepV
     {
         if (e.PropertyName is nameof(DunnageCatalogueViewModel.SelectedPart))
         {
+            // A dunnage part other than the job's is the requester's own choice, so the step stops saying the job
+            // supplied it (FR-007).
+            if (Draft.JobFill is { IsDunnageFromJob: true } fill
+                && !string.Equals(fill.DunnagePart, Catalogue.SelectedPart?.PartNumber, StringComparison.OrdinalIgnoreCase))
+            {
+                Draft.JobFill.ClearDunnage();
+                OnPropertyChanged(nameof(FromJobText));
+                OnPropertyChanged(nameof(HasFromJob));
+                OnPropertyChanged(nameof(FromJobVisibility));
+            }
+
             OnPropertyChanged(nameof(SelectedPartDisplay));
             NotifyAnswerChanged();
         }

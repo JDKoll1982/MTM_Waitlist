@@ -24,6 +24,12 @@
 -- `accepted_warnings_json` records every warning the requester accepted, which is what makes the stored request
 -- state what the requester was told (FR-019). All three default honestly for a row written before this change:
 -- a work-order request reads as not generic, with no description and no accepted warnings.
+-- Extended by specs/021-generic-wc-optional-job-fill: one column, `provenance_work_order`, records the job a generic
+-- request's values were taken from. It is deliberately not `active_setup_job_id`: that column means the request's
+-- identity, and a filled request is still a generic request, so writing the job there would make it look like a
+-- work-order request to every reader that looks at the column without also reading `is_generic` (FR-011, FR-013,
+-- research R3). It is nullable with no default, so every row written before this change reads as "not filled" rather
+-- than a special case.
 
 USE mtm_waitlist;
 
@@ -44,6 +50,7 @@ CREATE TABLE IF NOT EXISTS waitlist_requests_queue (
     description VARCHAR(500) NULL COMMENT 'The requester''s optional free-text description (FR-016). Distinct from note, which the material handler writes.',
     accepted_warnings_json JSON NULL COMMENT 'Every warning the requester accepted when raising the request, so the stored row states what they were told (FR-019).',
     active_setup_job_id VARCHAR(64) NULL COMMENT 'The work order the request was raised against, or NULL for a generic request (FR-008).',
+    provenance_work_order VARCHAR(64) NULL COMMENT 'The job a generic request''s values were taken from, or NULL when no job filled it. Provenance, never identity: is_generic stays 1 and active_setup_job_id stays NULL (FR-011, FR-013).',
     work_center_name VARCHAR(64) NOT NULL,
     requester_employee_number VARCHAR(32) NOT NULL,
     requester_employee_name VARCHAR(128) NOT NULL,

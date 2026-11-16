@@ -118,6 +118,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             Description = ReadNullableString(row, "description"),
             AcceptedWarnings = ReadWarnings(row, "accepted_warnings_json"),
             ActiveSetupJobId = ReadString(row, "active_setup_job_id"),
+            ProvenanceWorkOrder = ReadNullableString(row, "provenance_work_order"),
             WorkCenterName = ReadString(row, "work_center_name"),
             RequesterEmployeeNumber = ReadString(row, "requester_employee_number"),
             RequesterEmployeeName = ReadString(row, "requester_employee_name"),
@@ -1155,6 +1156,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             Description = string.IsNullOrWhiteSpace(draft.Description) ? null : draft.Description.Trim(),
             AcceptedWarnings = draft.AcceptedWarnings,
             ActiveSetupJobId = draft.ActiveSetupJobId.Trim(),
+            ProvenanceWorkOrder = string.IsNullOrWhiteSpace(draft.ProvenanceWorkOrder) ? null : draft.ProvenanceWorkOrder.Trim(),
             WorkCenterName = draft.WorkCenterName.Trim(),
             RequesterEmployeeNumber = draft.RequesterEmployeeNumber.Trim(),
             RequesterEmployeeName = draft.RequesterEmployeeName.Trim(),
@@ -1195,6 +1197,7 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
                     ["p_is_generic"] = request.IsGeneric ? 1 : 0,
                     ["p_description"] = request.Description,
                     ["p_accepted_warnings_json"] = SerializeWarnings(request.AcceptedWarnings),
+                    ["p_provenance_work_order"] = request.ProvenanceWorkOrder,
                 },
                 MySqlDatabaseTarget.MtmWaitlist,
                 cancellationToken).ConfigureAwait(false);

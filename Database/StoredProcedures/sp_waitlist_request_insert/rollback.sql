@@ -4,7 +4,8 @@
 -- body restores an insert that carries no answers; `p_answers_json` goes with the definition, and the row's
 -- `answers_json` column is the table change's to roll back (task T003). The same holds for
 -- `p_is_generic`, `p_description` and `p_accepted_warnings_json`, which specs/016-generic-wc-request-foundation
--- appended to the definition.
+-- appended to the definition, and for `p_provenance_work_order`, which specs/021-generic-wc-optional-job-fill
+-- appends. The row's `provenance_work_order` column is the table change's to roll back.
 
 USE mtm_waitlist;
 

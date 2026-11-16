@@ -129,6 +129,22 @@ public sealed partial class GenericRequestPartViewModel : GenericRequestStepView
     /// <summary>True when the chosen operation hands the part on to another resource.</summary>
     public bool HasNextResource => NextResourceDisplay.Length > 0;
 
+    /// <summary>
+    /// The qualifier that says this part came from the running job, or empty when it did not or the requester has
+    /// changed it since (FR-006, FR-007).
+    /// </summary>
+    public string FromJobText => Draft.JobFill is { IsPartFromJob: true } fill
+        ? string.Format(
+            CultureInfo.CurrentCulture,
+            "GenericRequest_JobFill_FromJob.Text".GetLocalized(),
+            fill.WorkOrder)
+        : string.Empty;
+
+    /// <summary>Whether the qualifier is drawn at all.</summary>
+    public bool HasFromJob => FromJobText.Length > 0;
+
+    public Visibility FromJobVisibility => HasFromJob ? Visibility.Visible : Visibility.Collapsed;
+
     // The three reads draw independently, so each region's presence is its own projection rather than one state
     // standing for the whole body (plan OD-1).
     public Visibility NoMatchVisibility => HasNoMatch ? Visibility.Visible : Visibility.Collapsed;
@@ -235,6 +251,14 @@ public sealed partial class GenericRequestPartViewModel : GenericRequestStepView
         SearchText = part.PartNumber;
         HasNoMatch = false;
 
+        // A part other than the one the job carried is the requester's own statement, so the step stops saying the
+        // job supplied it (FR-007).
+        if (Draft.JobFill is { IsPartFromJob: true } fill
+            && !string.Equals(fill.PartNumber, part.PartNumber, StringComparison.OrdinalIgnoreCase))
+        {
+            ForgetTheJobPart();
+        }
+
         if (changed)
         {
             ClearSequenceAndReading();
@@ -243,6 +267,40 @@ public sealed partial class GenericRequestPartViewModel : GenericRequestStepView
         Draft.PartNumber = part.PartNumber;
 
         await LoadSequencesAsync();
+    }
+
+    private string _pendingJobPart = string.Empty;
+
+    private string _pendingJobSequence = string.Empty;
+
+    /// <summary>
+    /// Put the part the running job carries into the search box and remember it as pending, without writing it to the
+    /// draft.
+    /// </summary>
+    /// <remarks>
+    /// The candidate is offered, never accepted: the completions read is what proves the part exists, and a part
+    /// nobody proved must not reach the request (FR-010). A part the requester has already stated is never replaced
+    /// (FR-007), and a candidate the completion read does not return leaves the draft exactly as it was.
+    /// </remarks>
+    private void SeedFromTheJobFill()
+    {
+        if (Draft.PartNumber.Length > 0 || Draft.JobFill is not { IsPartFromJob: true } fill)
+        {
+            return;
+        }
+
+        SearchText = fill.PartNumber;
+        _pendingJobPart = fill.PartNumber;
+        _pendingJobSequence = fill.IsSequenceFromJob ? fill.Sequence : string.Empty;
+    }
+
+    /// <summary>Stop claiming the part came from the job, and say so on screen.</summary>
+    private void ForgetTheJobPart()
+    {
+        Draft.JobFill?.ClearPart();
+        OnPropertyChanged(nameof(FromJobText));
+        OnPropertyChanged(nameof(HasFromJob));
+        OnPropertyChanged(nameof(FromJobVisibility));
     }
 
     /// <summary>Refuse the typed number, naming both sources searched (FR-002).</summary>
@@ -258,6 +316,16 @@ public sealed partial class GenericRequestPartViewModel : GenericRequestStepView
     {
         SelectedSequence = sequence;
 
+        // A sequence other than the job's is the requester's own choice, so it stops reading as the job's.
+        if (Draft.JobFill is { IsSequenceFromJob: true } fill
+            && !string.Equals(fill.Sequence, sequence?.Sequence, StringComparison.OrdinalIgnoreCase))
+        {
+            Draft.JobFill.ClearSequence();
+            OnPropertyChanged(nameof(FromJobText));
+            OnPropertyChanged(nameof(HasFromJob));
+            OnPropertyChanged(nameof(FromJobVisibility));
+        }
+
         if (sequence is null)
         {
             ClearReading();
@@ -270,6 +338,8 @@ public sealed partial class GenericRequestPartViewModel : GenericRequestStepView
 
     protected override async Task LoadCoreAsync()
     {
+        SeedFromTheJobFill();
+
         if (Draft.PartNumber.Length > 0)
         {
             SearchText = Draft.PartNumber;
@@ -288,19 +358,36 @@ public sealed partial class GenericRequestPartViewModel : GenericRequestStepView
         // the requester was in the middle of rather than throwing it away.
         await SearchAsync();
 
-        if (Draft.PartNumber.Length == 0 || !IsPopulated)
+        var wanted = _pendingJobPart.Length > 0 ? _pendingJobPart : Draft.PartNumber;
+        if (wanted.Length == 0 || !IsPopulated)
         {
             return;
         }
 
         var restored = Completions.FirstOrDefault(
-            part => string.Equals(part.PartNumber, Draft.PartNumber, StringComparison.OrdinalIgnoreCase));
+            part => string.Equals(part.PartNumber, wanted, StringComparison.OrdinalIgnoreCase));
 
-        if (restored is not null)
+        if (restored is null)
         {
-            AcceptedPart = restored;
-            await LoadSequencesAsync();
+            // A candidate the completion read does not return is not proved, so it is dropped rather than accepted:
+            // nothing is written to the draft and the step waits for the requester.
+            _pendingJobPart = string.Empty;
+            _pendingJobSequence = string.Empty;
+            return;
         }
+
+        AcceptedPart = restored;
+        Draft.PartNumber = restored.PartNumber;
+
+        if (_pendingJobSequence.Length > 0 && Draft.Sequence.Length == 0)
+        {
+            Draft.Sequence = _pendingJobSequence;
+        }
+
+        _pendingJobPart = string.Empty;
+        _pendingJobSequence = string.Empty;
+
+        await LoadSequencesAsync();
     }
 
     protected override void CommitToDraft()
@@ -340,6 +427,12 @@ public sealed partial class GenericRequestPartViewModel : GenericRequestStepView
         AcceptedPart = null;
         Draft.PartNumber = string.Empty;
         ClearSequenceAndReading();
+
+        if (Draft.JobFill is { IsPartFromJob: true })
+        {
+            ForgetTheJobPart();
+        }
+
         NotifyAnswerChanged();
     }
 

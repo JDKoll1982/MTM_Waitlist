@@ -119,10 +119,31 @@ Accepting the offer must not turn the request into a work-order request. It stil
 - **A2**: Reading a job's values after the requester accepts uses the same reads the work-order flow already performs; no new integration is introduced.
 - **A3**: The offer is per request, not per work center and not remembered, so a requester who declined once is asked again on their next request.
 - **A4**: Provenance is a stored field on the request and a rendered line on the detail page; it is not a card cell, because the card must not show a work order.
+- **A5**: The offer is a question asked as the work center step is left, before the category step appears. It is a decision, not a page: the flow has one more question on one step, and no new step is added to the wizard.
+- **A6**: Each pre-filled value says where it came from on the step that shows it, and stops saying so the moment the requester changes it.
+- **A7**: Declining is remembered only for the request in progress. Nothing about the refusal is stored, because A3 says the choice is per request and a refusal is not a defect.
 
-## Design note (2026-11-03)
+## Design (resolved 2026-11-15)
 
-The review host that rendered this screen against in-memory values has been deleted, so no approved rendering of it can
-be opened any more; only this specification and the review record remain. **Clarification about design is required when
-this chunk is implemented**, before the screen is built: what the step shows, what it shows when its source is
-unavailable, and the exact wording.
+The review host that rendered this screen against in-memory values has been deleted, so no approved rendering of it can be
+opened any more; only this specification and the review record remain. The questions it left open are answered here so the
+screen can be built without a second design pass:
+
+- **What the step shows**: the offer is asked on leaving the work center step, naming the work center and the running job.
+  Accepting fills the request; declining leaves it blank. A work center with no job never sees the question.
+- **What it shows when its source is unavailable**: the offer itself is not made. If the job's values fail to arrive after
+  acceptance, the step says the job could not be read, shows when it was attempted, and offers a retry, and the request is
+  not presented as filled (FR-016).
+- **The wording** is pinned in Verbatim Constraints below.
+
+## Verbatim Constraints
+
+The offer, its two answers, the pre-filled qualifier and the provenance line carry exactly this copy:
+
+- Offer title: `A job is running at this work center`
+- Offer question: `Fill this request from job {0} at {1}?`
+- Accept: `Fill the request`
+- Decline: `Start blank`
+- Pre-filled qualifier: `From job {0}`
+- Provenance line on the detail page and in any export: `Filled from job {0}`
+- Unavailable reading: `The running job could not be read`

@@ -4817,6 +4817,7 @@ SELECT
     description,
     accepted_warnings_json,
     active_setup_job_id,
+    provenance_work_order,
     work_center_name,
     requester_employee_number,
     requester_employee_name,
@@ -4921,7 +4922,8 @@ CREATE PROCEDURE sp_waitlist_request_insert(
     IN p_answers_json JSON,
     IN p_is_generic TINYINT,
     IN p_description VARCHAR(500),
-    IN p_accepted_warnings_json JSON
+    IN p_accepted_warnings_json JSON,
+    IN p_provenance_work_order VARCHAR(64)
 )
 INSERT INTO waitlist_requests_queue (
     public_id,
@@ -4935,6 +4937,7 @@ INSERT INTO waitlist_requests_queue (
     description,
     accepted_warnings_json,
     active_setup_job_id,
+    provenance_work_order,
     work_center_name,
     requester_employee_number,
     requester_employee_name,
@@ -4960,6 +4963,7 @@ VALUES (
     NULLIF(TRIM(COALESCE(p_description, '')) COLLATE utf8mb4_unicode_ci, ''),
     p_accepted_warnings_json,
     NULLIF(TRIM(COALESCE(p_active_setup_job_id, '')) COLLATE utf8mb4_unicode_ci, ''),
+    NULLIF(TRIM(COALESCE(p_provenance_work_order, '')) COLLATE utf8mb4_unicode_ci, ''),
     TRIM(p_work_center_name),
     TRIM(p_requester_employee_number),
     TRIM(p_requester_employee_name),
@@ -5118,6 +5122,7 @@ SELECT
     q.description,
     q.accepted_warnings_json,
     q.active_setup_job_id,
+    q.provenance_work_order,
     q.work_center_name,
     q.requester_employee_number,
     q.requester_employee_name,

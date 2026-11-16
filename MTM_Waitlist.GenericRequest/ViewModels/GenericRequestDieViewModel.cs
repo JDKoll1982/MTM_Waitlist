@@ -5,6 +5,8 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
+using Microsoft.UI.Xaml;
+
 using MTM_Waitlist.GenericRequest.Contracts;
 using MTM_Waitlist.GenericRequest.Models;
 using MTM_Waitlist.Module_Core.Helpers;
@@ -32,6 +34,12 @@ public sealed partial class GenericRequestDieViewModel : GenericRequestStepViewM
 
     /// <summary>Every die the requester has marked, in the order they marked them.</summary>
     private readonly List<GenericRequestDieOption> _chosen = new();
+
+    /// <summary>
+    /// The die the running job carries, waiting to be proved by the search. It is a candidate, not a choice, so a die
+    /// the search does not return leaves nothing chosen (FR-010).
+    /// </summary>
+    private string _pendingJobDie = string.Empty;
 
     /// <summary>
     /// Which search is the current one. Typing fires a read per keystroke, and a read that lands after a later one
@@ -162,8 +170,26 @@ public sealed partial class GenericRequestDieViewModel : GenericRequestStepViewM
 
     protected override bool CanAnswer => _chosen.Count > 0;
 
+    /// <summary>
+    /// The qualifier that says these dies came from the running job, or empty when they did not or the requester has
+    /// changed the choice since (FR-006, FR-007).
+    /// </summary>
+    public string FromJobText => Draft.JobFill is { IsDieFromJob: true } fill && IsChosen(fill.DieNumber)
+        ? string.Format(
+            CultureInfo.CurrentCulture,
+            "GenericRequest_JobFill_FromJob.Text".GetLocalized(),
+            fill.WorkOrder)
+        : string.Empty;
+
+    /// <summary>Whether the qualifier is drawn at all.</summary>
+    public bool HasFromJob => FromJobText.Length > 0;
+
+    public Visibility FromJobVisibility => HasFromJob ? Visibility.Visible : Visibility.Collapsed;
+
     protected override async Task LoadCoreAsync()
     {
+        SeedChosenDies();
+
         var term = SearchText.Trim();
         var generation = ++_searchGeneration;
 
@@ -203,6 +229,7 @@ public sealed partial class GenericRequestDieViewModel : GenericRequestStepViewM
         }
 
         AdoptFreshRows();
+        AdoptPendingJobDie();
 
         MatchCount = result.Count;
         OnPropertyChanged(nameof(CountText));
@@ -221,6 +248,67 @@ public sealed partial class GenericRequestDieViewModel : GenericRequestStepViewM
 
         NotifyChoiceChanged();
     }
+    /// <summary>
+    /// Start this step with the dies the draft already holds, and put the running job's die in front of the requester
+    /// as a candidate the search can prove.
+    /// </summary>
+    /// <remarks>
+    /// A marked die survives leaving and returning to the step, because the draft is what remembers the choice. The
+    /// job's die is only a search term here: it is marked once the search returns it, so a die Infor Visual no longer
+    /// records leaves nothing chosen and the step cannot advance (FR-010, 020 FR-002).
+    /// </remarks>
+    private void SeedChosenDies()
+    {
+        if (_chosen.Count == 0)
+        {
+            _chosen.AddRange(Draft.SelectedDies);
+
+            if (_chosen.Count == 0
+                && Draft.JobFill is { IsDieFromJob: true } fill
+                && fill.DieNumber.Length > 0)
+            {
+                _pendingJobDie = fill.DieNumber;
+            }
+        }
+
+        if (SearchText.Trim().Length == 0)
+        {
+            // The search is what proves a die exists, so the job's die is searched for exactly as a typed one is.
+            SearchText = Draft.DieNumber.Length > 0
+                ? Draft.DieNumber
+                : _pendingJobDie.Length > 0
+                    ? _pendingJobDie
+                    : _chosen.Count > 0 ? _chosen[0].DieNumber : string.Empty;
+        }
+
+        OnPropertyChanged(nameof(FromJobText));
+        OnPropertyChanged(nameof(HasFromJob));
+        OnPropertyChanged(nameof(FromJobVisibility));
+    }
+
+    /// <summary>
+    /// Mark the job's die if the search that just ran returned it, and forget it either way.
+    /// </summary>
+    /// <remarks>
+    /// A die the search did not return is not offered, so the requester is asked to choose one rather than raising a
+    /// request for a die the plant's system does not record.
+    /// </remarks>
+    private void AdoptPendingJobDie()
+    {
+        if (_pendingJobDie.Length == 0)
+        {
+            return;
+        }
+
+        var match = Options.FirstOrDefault(option => SameDie(option.DieNumber, _pendingJobDie));
+        _pendingJobDie = string.Empty;
+
+        if (match is not null)
+        {
+            match.IsSelected = true;
+        }
+    }
+
     /// <summary>Drop everything the previous search matched, without asking anything.</summary>
     private void ClearMatches()
     {
@@ -275,6 +363,17 @@ public sealed partial class GenericRequestDieViewModel : GenericRequestStepViewM
             _chosen.Add(option);
         }
 
+        // A set of dies that no longer includes the job's is the requester's own choice, so the step stops saying the
+        // job supplied it (FR-007).
+        if (Draft.JobFill is { IsDieFromJob: true } fill
+            && !_chosen.Any(chosen => SameDie(chosen.DieNumber, fill.DieNumber)))
+        {
+            Draft.JobFill.ClearDie();
+            OnPropertyChanged(nameof(FromJobText));
+            OnPropertyChanged(nameof(HasFromJob));
+            OnPropertyChanged(nameof(FromJobVisibility));
+        }
+
         NotifyChoiceChanged();
     }
 
@@ -282,6 +381,9 @@ public sealed partial class GenericRequestDieViewModel : GenericRequestStepViewM
     {
         OnPropertyChanged(nameof(HintText));
         OnPropertyChanged(nameof(HasHint));
+        OnPropertyChanged(nameof(FromJobText));
+        OnPropertyChanged(nameof(HasFromJob));
+        OnPropertyChanged(nameof(FromJobVisibility));
         NotifyAnswerChanged();
     }
 

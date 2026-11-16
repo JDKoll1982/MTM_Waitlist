@@ -706,8 +706,23 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
             ("Item", Item.Title),
             ("Identifier", Item.Subtitle),
             ("Request details", FieldValue(Item, "Request details")),
-            ("Work order", JobWorkOrder(request)));
+            ("Work order", JobWorkOrder(request)),
+            // The job this request was filled from is provenance, not identity: it is drawn beside the work order
+            // rather than in its place, and a request that no job filled draws no row at all (021 FR-013).
+            ("Waitlist_Detail_JobFill_Provenance.Text".GetLocalized(), ProvenanceWorkOrder(request)));
     }
+
+    /// <summary>
+    /// The job this request was filled from, or null when no job filled it — which leaves the row undrawn rather
+    /// than filled with an empty state.
+    /// </summary>
+    /// <remarks>
+    /// This is the stored provenance column and never <see cref="WaitlistRequest.ActiveSetupJobId"/>: a filled
+    /// request is still a generic request, so its job is what it was filled from and not what it is
+    /// (021 FR-011, FR-013).
+    /// </remarks>
+    private static string? ProvenanceWorkOrder(WaitlistRequest? request) =>
+        string.IsNullOrWhiteSpace(request?.ProvenanceWorkOrder) ? null : request!.ProvenanceWorkOrder!.Trim();
 
     /// <summary>
     /// The work order the job this request belongs to is for, as <c>WO-######</c>, or null when the job is

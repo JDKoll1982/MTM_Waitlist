@@ -176,6 +176,14 @@
                     Grid.Row="3"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                     Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="{x:Bind ViewModel.FromJobText, Mode=OneWay}"
+                    Visibility="{x:Bind ViewModel.FromJobVisibility, Mode=OneWay}" />
+
+                <TextBlock
+                    Grid.Row="3"
+                    HorizontalAlignment="Right"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
                     Text="{x:Bind ViewModel.HintText, Mode=OneWay}"
                     Visibility="{x:Bind ViewModel.HasHint, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
             </Grid>

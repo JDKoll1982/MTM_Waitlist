@@ -45,6 +45,15 @@ public sealed class WaitlistRequest
     /// </summary>
     public bool IsGeneric { get; init; }
 
+    /// <summary>
+    /// The job a filled generic request took its values from, or null when no job filled it.
+    /// </summary>
+    /// <remarks>
+    /// This is provenance and is drawn as such: it is never the request's identity, it is never a card cell, and a
+    /// request that carries it is still a generic request (021 FR-011, FR-012, FR-013).
+    /// </remarks>
+    public string? ProvenanceWorkOrder { get; init; }
+
     /// <summary>The requester's optional free-text description (FR-016), or null when they wrote none.</summary>
     public string? Description { get; init; }
 

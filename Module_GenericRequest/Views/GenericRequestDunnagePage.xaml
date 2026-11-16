@@ -37,6 +37,12 @@
                         Style="{StaticResource BodyStrongTextBlockStyle}" />
                     <TextBlock
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind ViewModel.FromJobText, Mode=OneWay}"
+                        TextWrapping="Wrap"
+                        Visibility="{x:Bind ViewModel.FromJobVisibility, Mode=OneWay}"
+                        Style="{StaticResource CaptionTextBlockStyle}" />
+                    <TextBlock
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                         Text="{x:Bind ViewModel.SecondPartNote}"
                         TextWrapping="Wrap"
                         Style="{StaticResource CaptionTextBlockStyle}" />

@@ -16,6 +16,10 @@
 -- `p_is_generic` is what the row states, never an inference from a null job id (research R2), and
 -- `p_accepted_warnings_json` is written through as it arrives for the same reason `p_answers_json` is: a JSON
 -- column needs no TRIM, and a caller with none passes NULL.
+-- Extended by specs/021-generic-wc-optional-job-fill: `p_provenance_work_order` is appended after
+-- `p_accepted_warnings_json`, so every existing caller's dictionary stays valid and a caller that passes nothing
+-- writes NULL. It records the job a generic request's values were taken from, and it is never written into
+-- `active_setup_job_id`, which means the request's identity (FR-011, FR-013, research R3).
 
 USE mtm_waitlist;
 
@@ -42,7 +46,8 @@ CREATE PROCEDURE sp_waitlist_request_insert(
     IN p_answers_json JSON,
     IN p_is_generic TINYINT,
     IN p_description VARCHAR(500),
-    IN p_accepted_warnings_json JSON
+    IN p_accepted_warnings_json JSON,
+    IN p_provenance_work_order VARCHAR(64)
 )
 INSERT INTO waitlist_requests_queue (
     public_id,
@@ -56,6 +61,7 @@ INSERT INTO waitlist_requests_queue (
     description,
     accepted_warnings_json,
     active_setup_job_id,
+    provenance_work_order,
     work_center_name,
     requester_employee_number,
     requester_employee_name,
@@ -81,6 +87,7 @@ VALUES (
     NULLIF(TRIM(COALESCE(p_description, '')) COLLATE utf8mb4_unicode_ci, ''),
     p_accepted_warnings_json,
     NULLIF(TRIM(COALESCE(p_active_setup_job_id, '')) COLLATE utf8mb4_unicode_ci, ''),
+    NULLIF(TRIM(COALESCE(p_provenance_work_order, '')) COLLATE utf8mb4_unicode_ci, ''),
     TRIM(p_work_center_name),
     TRIM(p_requester_employee_number),
     TRIM(p_requester_employee_name),

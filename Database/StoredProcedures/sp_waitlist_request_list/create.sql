@@ -10,6 +10,9 @@
 -- Extended by specs/016-generic-wc-request-foundation: every row now also carries `is_generic`, `description` and
 -- `accepted_warnings_json`, so one read gives the board everything a generic card draws and no per-row second read
 -- is needed (research R10).
+-- Extended by specs/021-generic-wc-optional-job-fill: every row also carries `provenance_work_order`, so both
+-- request reads answer the same row shape. The card draws nothing from it: a filled request draws the generic card,
+-- which has no job cell (FR-012, research R9).
 
 USE mtm_waitlist;
 
@@ -37,6 +40,7 @@ SELECT
     q.description,
     q.accepted_warnings_json,
     q.active_setup_job_id,
+    q.provenance_work_order,
     q.work_center_name,
     q.requester_employee_number,
     q.requester_employee_name,

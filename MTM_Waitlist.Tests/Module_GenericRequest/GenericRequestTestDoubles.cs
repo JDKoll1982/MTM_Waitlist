@@ -245,6 +245,73 @@ internal sealed class StubGenericRequestDieData : IGenericRequestDieData
         Task.FromResult(Dies);
 }
 
+/// <summary>
+/// The job running at a work center, held in memory, so a test can say what the offer would be told without a
+/// database or the Setup module.
+/// </summary>
+/// <remarks>
+/// The probe and the read answer separately, because they are asked at two different moments: the probe names the job
+/// so the requester can be offered it, and the values are read only once they accept (FR-001, FR-002). The counts are
+/// what lets a test prove nothing was read before the choice.
+/// </remarks>
+internal sealed class StubGenericRequestJobFillData : IGenericRequestJobFillData
+{
+    /// <summary>The running job's work order, or null when no job is running.</summary>
+    public string? RunningJobWorkOrder { get; set; }
+
+    /// <summary>The values an accepted offer reads, or null when the job went away before the read.</summary>
+    public GenericRequestJobFill? Fill { get; set; }
+
+    /// <summary>Whether the probe could not answer.</summary>
+    public bool ProbeFails { get; set; }
+
+    /// <summary>Whether the value read could not answer.</summary>
+    public bool ReadFails { get; set; }
+
+    /// <summary>The time the failing value read reports, so a test can prove it is drawn.</summary>
+    public DateTimeOffset ReadAttemptedAtUtc { get; set; } = DateTimeOffset.UtcNow;
+
+    public int ProbeCount { get; private set; }
+
+    public int ReadCount { get; private set; }
+
+    public Task<GenericRequestStepResult<GenericRequestJobFillCandidate>> ProbeAsync(
+        string workCenter,
+        CancellationToken cancellationToken = default)
+    {
+        ProbeCount++;
+
+        if (ProbeFails)
+        {
+            return Task.FromResult(GenericRequestStepResult<GenericRequestJobFillCandidate>.Unavailable(ReadAttemptedAtUtc));
+        }
+
+        return Task.FromResult(
+            string.IsNullOrWhiteSpace(RunningJobWorkOrder)
+                ? GenericRequestStepResult<GenericRequestJobFillCandidate>.Empty(ReadAttemptedAtUtc)
+                : GenericRequestStepResult<GenericRequestJobFillCandidate>.Populated(
+                    [new GenericRequestJobFillCandidate { WorkOrder = RunningJobWorkOrder! }],
+                    ReadAttemptedAtUtc));
+    }
+
+    public Task<GenericRequestStepResult<GenericRequestJobFill>> ReadAsync(
+        string workCenter,
+        CancellationToken cancellationToken = default)
+    {
+        ReadCount++;
+
+        if (ReadFails)
+        {
+            return Task.FromResult(GenericRequestStepResult<GenericRequestJobFill>.Unavailable(ReadAttemptedAtUtc));
+        }
+
+        return Task.FromResult(
+            Fill is null
+                ? GenericRequestStepResult<GenericRequestJobFill>.Empty(ReadAttemptedAtUtc)
+                : GenericRequestStepResult<GenericRequestJobFill>.Populated([Fill], ReadAttemptedAtUtc));
+    }
+}
+
 /// <summary>The signed-in person, as a session would report them.</summary>
 internal sealed class StubPersonIdentity : IPersonIdentity
 {

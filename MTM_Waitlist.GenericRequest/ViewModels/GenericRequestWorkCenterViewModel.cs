@@ -61,9 +61,13 @@ public sealed partial class GenericRequestWorkCenterViewModel : GenericRequestSt
         }
 
         // Choosing a different work centre makes every answer below it a statement about a work centre the request no
-        // longer belongs to, so they are cleared rather than carried into a request the person did not describe.
+        // longer belongs to, so they are cleared rather than carried into a request the person did not describe. The
+        // job fill goes with them, and the offer is open again: the question that was answered was about the other
+        // work centre's job (FR-003, FR-009).
         Draft.WorkCenter = selected.Name;
         Draft.Building = selected.Building;
+        Draft.JobFill = null;
+        Draft.JobFillAnswered = false;
         Draft.Category = string.Empty;
         Draft.ItemCode = string.Empty;
         Draft.ItemName = string.Empty;

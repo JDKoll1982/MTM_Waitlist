@@ -635,6 +635,40 @@ EXECUTE stmt;
 
 DEALLOCATE PREPARE stmt;
 
+-- ============================================================
+-- waitlist_requests_queue - feature 021-generic-wc-optional-job-fill (FR-011, FR-013)
+-- ============================================================
+-- One column added to a table that already exists, guarded for the same reason the blocks above are.
+--   Owning artifact: Database/Tables/18_waitlist_requests_queue/create.sql, with its rollback beside it and its
+--     body registered in Database/Tables/AllTables.sql.
+--   `provenance_work_order` names the job a generic request's values were taken from. It is provenance, not
+--     identity: `is_generic` stays 1 and `active_setup_job_id` stays NULL on a filled request, because writing the
+--     job into the identity column would make a filled request answer "work-order request" to every reader that
+--     looks at the column without also reading the flag (research R3).
+
+SET
+    @has_provenance_work_order_column := (
+        SELECT COUNT(*)
+        FROM information_schema.columns
+        WHERE
+            table_schema = DATABASE()
+            AND table_name = 'waitlist_requests_queue'
+            AND column_name = 'provenance_work_order'
+    );
+
+SET
+    @sql_stmt := IF(
+        @has_provenance_work_order_column = 0,
+        'ALTER TABLE waitlist_requests_queue ADD COLUMN provenance_work_order VARCHAR(64) NULL COMMENT ''The job a generic request''''s values were taken from, or NULL when no job filled it. Provenance, never identity: is_generic stays 1 and active_setup_job_id stays NULL (FR-011, FR-013).'' AFTER active_setup_job_id',
+        'SELECT ''waitlist_requests_queue.provenance_work_order already exists'''
+    );
+
+PREPARE stmt FROM @sql_stmt;
+
+EXECUTE stmt;
+
+DEALLOCATE PREPARE stmt;
+
 ALTER TABLE waitlist_requests_queue
 MODIFY COLUMN id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Surrogate primary key.',
 MODIFY COLUMN public_id CHAR(36) NOT NULL COMMENT 'Public UUID for the waitlist request.',
@@ -648,6 +682,7 @@ MODIFY COLUMN is_generic TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Whether this req
 MODIFY COLUMN description VARCHAR(500) NULL COMMENT 'The requester''s optional free-text description of what they need (FR-016). Distinct from note, which the material handler writes.',
 MODIFY COLUMN accepted_warnings_json JSON NULL COMMENT 'Every warning the requester accepted when raising the request, so the stored row states what they were told (FR-019).',
 MODIFY COLUMN active_setup_job_id VARCHAR(64) NULL COMMENT 'Active setup job associated with the request at submission time, or NULL for a generic request, which has no work order (FR-008).',
+MODIFY COLUMN provenance_work_order VARCHAR(64) NULL COMMENT 'The job a generic request''s values were taken from, or NULL when no job filled it. Provenance, never identity: is_generic stays 1 and active_setup_job_id stays NULL (FR-011, FR-013).',
 MODIFY COLUMN work_center_name VARCHAR(64) NOT NULL COMMENT 'Work center that submitted the request.',
 MODIFY COLUMN requester_employee_number VARCHAR(32) NOT NULL COMMENT 'Employee number of the requester.',
 MODIFY COLUMN requester_employee_name VARCHAR(128) NOT NULL COMMENT 'Display name of the requester.',

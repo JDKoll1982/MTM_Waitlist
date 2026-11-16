@@ -1388,6 +1388,9 @@
   <data name="Waitlist_Detail_DeclaredFields.Title" xml:space="preserve">
     <value>Item details</value>
   </data>
+  <data name="Waitlist_Detail_JobFill_Provenance.Text" xml:space="preserve">
+    <value>Filled from job</value>
+  </data>
   <data name="RequestItem_deliver_wrong_coil.Line1" xml:space="preserve">
     <value>Wrong Coil Bring:</value>
   </data>

@@ -30,6 +30,16 @@ public sealed class WaitlistRequestDraft
     /// </summary>
     public bool IsGeneric { get; init; }
 
+    /// <summary>
+    /// The job a filled generic request took its values from, or null when no job filled it.
+    /// </summary>
+    /// <remarks>
+    /// Provenance, not identity: it is written to its own column and never to
+    /// <see cref="ActiveSetupJobId"/>, so a filled request is still a generic request to every reader
+    /// (021 FR-011, FR-013).
+    /// </remarks>
+    public string? ProvenanceWorkOrder { get; init; }
+
     /// <summary>The requester's optional free-text description (FR-016). Distinct from <see cref="Note"/>, which
     /// the material handler writes.</summary>
     public string? Description { get; init; }

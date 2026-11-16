@@ -3,8 +3,1118 @@
   "specName": "021 Generic Work Center — Optional Job Fill",
   "branch": "021-generic-wc-optional-job-fill",
   "selectedAt": "2026-11-03T20:45:18.725Z",
-  "currentStep": "specify",
-  "status": "draft",
-  "history": [],
-  "telemetryInstanceId": "c05bcfe5-847a-4ae9-a9bc-2fc04845e8bd"
+  "currentStep": "implement",
+  "status": "completed",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-15T23:01:11.678Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-11-15T23:02:25.251Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-15T23:02:31.815Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-11-15T23:08:07.049Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-15T23:09:56.944Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:10:18.681Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-15T23:10:45.638Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T001",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:11:42.099Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T002",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:11:42.100Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T003",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:11:42.100Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T004",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:11:42.101Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:11:42.101Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:13:23.342Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:13:23.343Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:13:23.344Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T009",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:13:23.344Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T010",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:14:09.508Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T011",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:14:09.509Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T012",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:14:09.509Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T013",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:21:51.903Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T014",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:21:51.904Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T015",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:21:51.904Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T016",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:21:56.098Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:21:56.293Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T018",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:21:56.293Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T019",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:21:56.294Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T020",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:21:56.294Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T021",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:21:56.295Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T022",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:22:00.023Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T023",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:22:00.023Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T024",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:22:00.023Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T025",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:22:00.024Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T026",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:22:00.218Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T027",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:26:07.277Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T028",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:26:07.278Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T029",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:26:07.476Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T030",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:26:07.477Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T031",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:28:03.084Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T032",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:29:51.231Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-15T23:29:51.294Z"
+    },
+    {
+      "step": "converge",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-15T23:30:07.399Z"
+    },
+    {
+      "step": "converge",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-11-15T23:30:33.987Z"
+    }
+  ],
+  "telemetryInstanceId": "c05bcfe5-847a-4ae9-a9bc-2fc04845e8bd",
+  "unattended": true,
+  "request": "021-generic-wc-optional-job-fill",
+  "expectations": [
+    "the generic flow's steps, order and confirmation are unchanged when no job is running",
+    "the job is never the request's identity and never appears as a card cell",
+    "no new integration or endpoint is introduced",
+    "nothing about a declined offer is stored or shown again within the request"
+  ],
+  "context": [
+    "area: MTM_Waitlist.GenericRequest (step view models, draft, flow rules, live step data)",
+    "area: MTM_Waitlist.GenericRequest.Data (live part and die reads)",
+    "area: MTM_Waitlist.Setup (SetupActiveJobSnapshot, IActiveJobItemResolverService, sp_setup_active_jobs_latest_by_work_center_get)",
+    "area: Services/GenericRequestNavigator.cs and ServiceRegistrationExtensions.cs (composition root)",
+    "area: Database/StoredProcedures and Database/Tables (request persistence, provenance column)",
+    "constraint: every data operation goes through a stored procedure, with create.sql and rollback.sql beside it",
+    "constraint: internal stores are read and written live; external Visual reads go through the mock fallback shapes",
+    "constraint: no new integration; the job read reuses the work-order flow's own read (assumption A2)"
+  ],
+  "coverage": {
+    "FR-001": {
+      "title": "A running job at a generic work center is offered as a fill",
+      "tasks": [
+        "T013",
+        "T017",
+        "T022"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestJobFillOfferTests.cs::LoadAsync_ARunningJobIsOfferedAndItsValuesAreNotReadYet"
+      ]
+    },
+    "FR-002": {
+      "title": "The choice is never made for the requester and the job is not read before it",
+      "tasks": [
+        "T002",
+        "T013",
+        "T017"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestJobFillOfferTests.cs::LoadAsync_ARunningJobIsOfferedAndItsValuesAreNotReadYet"
+      ]
+    },
+    "FR-003": {
+      "title": "Declining leaves the flow unchanged, is not a failure, and is not asked again in that request",
+      "tasks": [
+        "T013",
+        "T017"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestJobFillOfferTests.cs::DeclineFillCommand_LeavesTheRequestBlankAndIsNeverAskedAgainInTheRequest"
+      ]
+    },
+    "FR-004": {
+      "title": "No offer appears when no job is running",
+      "tasks": [
+        "T013",
+        "T017"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestJobFillOfferTests.cs::LoadAsync_AWorkCenterWithNoJobNeverSeesTheOffer"
+      ]
+    },
+    "FR-005": {
+      "title": "Accepting pre-fills the answers the job carries",
+      "tasks": [
+        "T015",
+        "T018",
+        "T019",
+        "T020"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestJobFillSeedingTests.cs::PartStep_OffersTheJobsPartAndSequenceAndStillProvesThem"
+      ]
+    },
+    "FR-006": {
+      "title": "Every pre-filled value says it came from the job",
+      "tasks": [
+        "T015",
+        "T023",
+        "T024",
+        "T025"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestJobFillSeedingTests.cs::DieStep_MarksTheJobsDieAndStillSearchesForIt"
+      ]
+    },
+    "FR-007": {
+      "title": "Every pre-filled value stays changeable and a changed value is what the request carries",
+      "tasks": [
+        "T015",
+        "T018",
+        "T019",
+        "T020"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestJobFillSeedingTests.cs::PartStep_StatingAnotherPartStopsItReadingAsTheJobs"
+      ]
+    },
+    "FR-008": {
+      "title": "A value the job does not carry is still asked of the requester",
+      "tasks": [
+        "T015",
+        "T018"
+      ],
+      "assumes": "A job that carries no part leaves the part step asking, which is the step's existing behaviour with an empty draft value."
+    },
+    "FR-009": {
+      "title": "Changing the item clears the answers that belonged to the previous item",
+      "tasks": [
+        "T015",
+        "T021"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestJobFillSeedingTests.cs::ItemStep_ChangingTheItemDropsTheFillAndItsAnswers"
+      ]
+    },
+    "FR-010": {
+      "title": "A pre-filled value that its owning chunk proves is still proved",
+      "tasks": [
+        "T015",
+        "T018"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestJobFillSeedingTests.cs::PartStep_OffersTheJobsPartAndSequenceAndStillProvesThem"
+      ]
+    },
+    "FR-011": {
+      "title": "A filled request keeps the generic identity and never takes the job as its identity",
+      "tasks": [
+        "T015",
+        "T026",
+        "T027"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Waitlist/WaitlistRequestJobFillProvenanceTests.cs::SubmitAsync_TheGenericRaiseCarriesTheJobAsProvenanceOnly"
+      ]
+    },
+    "FR-012": {
+      "title": "A filled request draws the generic card with no work order cell",
+      "tasks": [
+        "T027",
+        "T028"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Waitlist/WaitlistDetailJobFillProvenanceTests.cs::CreateSessionOrder_AFilledGenericRequestDrawsNoWorkOrderCell"
+      ]
+    },
+    "FR-013": {
+      "title": "The job is recorded and shown as provenance, distinct from identity",
+      "tasks": [
+        "T026",
+        "T027",
+        "T028",
+        "T030"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Waitlist/WaitlistDetailJobFillProvenanceTests.cs::OnNavigatedTo_AFilledRequestNamesTheJobItWasFilledFrom"
+      ]
+    },
+    "FR-014": {
+      "title": "A job that closes or changes before submission does not invalidate the request",
+      "tasks": [
+        "T015",
+        "T018"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestJobFillSeedingTests.cs::PartStep_AJobThatClosedStillLeavesTheValuesItSupplied"
+      ]
+    },
+    "FR-015": {
+      "title": "No offer is made to a person who may not see the job's data",
+      "tasks": [
+        "T011"
+      ],
+      "assumes": "No permission in the application governs job visibility, so no requester is excluded and the gate point is named in one adapter."
+    },
+    "FR-016": {
+      "title": "An unreadable job is reported unavailable with the attempt time and a retry",
+      "tasks": [
+        "T014",
+        "T017"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestJobFillFailureTests.cs::AcceptFillCommand_AnUnreadableJobSeedsNothingAndReportsTheAttempt"
+      ]
+    },
+    "FR-017": {
+      "title": "Every remaining Temp artefact of this feature is deleted and the build stays green",
+      "tasks": [
+        "T031"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/TempArtefactBoundaryAuditTests.cs::every Temp boundary check"
+      ]
+    }
+  },
+  "classification": {
+    "projectedFiles": 14,
+    "projectedTasks": 22,
+    "scopeSignal": "none",
+    "verdict": "oversized"
+  },
+  "intent": "Let a generic work center offer to fill a request from the job running on it, with the job kept as provenance rather than identity.",
+  "size": "oversized",
+  "decisions": [
+    {
+      "decision": "The offer is a panel on the Category step, probed when that step loads.",
+      "why": "Launch from a work-center tile goes straight to Category, so the category step is the first step after the work center on both entry paths.",
+      "rejected": "A new wizard step, or a ContentDialog raised from the work center view model.",
+      "by": "agent",
+      "at": "2026-11-15T23:09:23.804Z"
+    },
+    {
+      "decision": "The fill seeds the job's part, sequence, die and dunnage and never the category or item.",
+      "why": "The job carries no generic item code, and the item is the request's identity.",
+      "rejected": "Mapping the job's part onto a generic item.",
+      "by": "agent",
+      "at": "2026-11-15T23:09:23.804Z"
+    },
+    {
+      "decision": "Provenance is a new nullable provenance_work_order column.",
+      "why": "active_setup_job_id means identity and is returned unconditionally by both request reads.",
+      "rejected": "Reusing active_setup_job_id, or storing the job inside answers_json.",
+      "by": "agent",
+      "at": "2026-11-15T23:09:23.804Z"
+    },
+    {
+      "decision": "The job read is an interface in the generic module, implemented at the composition root over IActiveJobItemResolverService.",
+      "why": "No library in the solution references MTM_Waitlist.Setup, and RequestJobAvailabilityProvider already sets this pattern.",
+      "rejected": "A project reference from the generic data library into Setup.",
+      "by": "agent",
+      "at": "2026-11-15T23:09:23.804Z"
+    },
+    {
+      "decision": "The probe answers only the job's work order; values are read after acceptance.",
+      "why": "FR-001 needs the job named, FR-002 forbids reading its values before the choice.",
+      "rejected": "One read whose values are held back until accepted.",
+      "by": "agent",
+      "at": "2026-11-15T23:09:23.804Z"
+    },
+    {
+      "decision": "A failed value read leaves the panel unavailable with the attempt time and a retry, and seeds nothing.",
+      "why": "FR-016 asks for that report and forbids presenting a partly filled request as complete.",
+      "rejected": "Failing the whole step, or silently continuing.",
+      "by": "agent",
+      "at": "2026-11-15T23:09:23.804Z"
+    },
+    {
+      "decision": "The offer is not gated on a permission; the adapter carries a simplified note where a gate would go.",
+      "why": "None of the twenty-one declared permissions governs seeing a job's data, and a new key would invent the role policy.",
+      "rejected": "Gating on permission.setup.work_centers, or minting a new permission key.",
+      "by": "agent",
+      "at": "2026-11-15T23:09:23.804Z"
+    },
+    {
+      "decision": "Provenance is rendered on the detail page only.",
+      "why": "FR-012 forbids a job cell on the card and no request export exists.",
+      "rejected": "A card cell, or inventing an export surface.",
+      "by": "agent",
+      "at": "2026-11-15T23:09:23.804Z"
+    },
+    {
+      "decision": "The offer is answered by a per-request flag on the draft rather than by a step of its own.",
+      "why": "The flow's step order is unchanged, and a declined offer must not be asked again within the request.",
+      "rejected": "A new wizard step, or remembering the refusal anywhere outside the request.",
+      "by": "agent",
+      "at": "2026-11-15T23:29:51.468Z"
+    },
+    {
+      "decision": "Each step seeds itself from the fill when it loads, not when the offer is accepted.",
+      "why": "The category commit clears the answers below it, so a seed written at accept time would be wiped before the steps that use it ran.",
+      "rejected": "Writing the seeded values into the draft at accept time.",
+      "by": "agent",
+      "at": "2026-11-15T23:29:51.468Z"
+    },
+    {
+      "decision": "Changing the item drops the fill outright, work order included.",
+      "why": "It is the clear rule the design already records: once the answers that belonged to the previous item are gone, no value in the request came from the job.",
+      "rejected": "Keeping the work order and raising a request whose provenance names a job it draws nothing from.",
+      "by": "agent",
+      "at": "2026-11-15T23:29:51.468Z"
+    },
+    {
+      "decision": "The detail page draws the provenance as the row label with the work order beside it.",
+      "why": "Every row on that page is a label and a value, so the pinned sentence reads as the row rather than through a second surface.",
+      "rejected": "A separate single-line block above the card.",
+      "by": "agent",
+      "at": "2026-11-15T23:29:51.468Z"
+    },
+    {
+      "decision": "An item change only drops the fill when a different item was already chosen for this request.",
+      "why": "The first item a request picks has nothing before it to carry anything over from, and clearing there threw the accepted fill away before any step could use it.",
+      "rejected": "Clearing on every selection whose code differs from the stored one, which is every first selection.",
+      "by": "agent",
+      "at": "2026-11-15T23:43:26.420Z"
+    },
+    {
+      "decision": "A category change drops the fill, but the first category picked does not.",
+      "why": "The answers the fill supplied were statements about the item under the previous category; a request with no previous category has nothing to carry over.",
+      "rejected": "Clearing unconditionally, which emptied the fill on the very pick that follows accepting it.",
+      "by": "agent",
+      "at": "2026-11-15T23:43:26.420Z"
+    },
+    {
+      "decision": "A different work center drops the fill and reopens the offer.",
+      "why": "The question that was answered was about the other work center's job, so the new work center's own job must be offered (FR-001, FR-003).",
+      "rejected": "Keeping the fill and the answered flag, which showed a job at a press the request had left.",
+      "by": "agent",
+      "at": "2026-11-15T23:43:26.420Z"
+    },
+    {
+      "decision": "The job's die and part are candidates held outside the draft until their own reads return them.",
+      "why": "A seeded die or part that the source does not record must not be raised, and the fill must never stand in for the read that proves it (FR-010, 020 FR-002).",
+      "rejected": "Writing the values into the draft at load time, which left an unproved part or die on a request when the read found nothing.",
+      "by": "agent",
+      "at": "2026-11-15T23:43:26.420Z"
+    }
+  ],
+  "step_summaries": {
+    "specify": {
+      "summary": "Planned an optional job fill asked on the Category step, seeded onto the part, dunnage and die steps, with provenance stored on the request.",
+      "key_finding": "The work center step is skipped on the normal launch path, so the offer belongs on the Category step."
+    },
+    "tasks": {
+      "summary": "31 tasks: foundational schema, seam and write path, then User Story 1 (offer and seeding), User Story 2 (provenance), then polish."
+    },
+    "implement": {
+      "summary": "The generic flow now offers to fill a request from the job running at the work center, seeds the job's part, die and dunnage as changeable candidates, and records the job as provenance on the raised request."
+    }
+  },
+  "approach": "A new job-fill seam in the generic module, implemented at the composition root over the Setup module's existing active-job read, drives a panel on the Category step. Accepting seeds the job's part, sequence, die and dunnage onto the draft as changeable candidates, and the job is written to a new provenance column through the existing request write path.",
+  "currentTask": null,
+  "task_summaries": {
+    "T001": {
+      "status": "DONE",
+      "did": "Added the job-fill model, its seam, the pinned copy, and the provenance column with its master scripts.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestJobFill.cs",
+        "MTM_Waitlist.GenericRequest/Contracts/IGenericRequestJobFillData.cs",
+        "MTM_Waitlist.GenericRequest/Strings/en-us/Resources.resw",
+        "Database/Tables/18_waitlist_requests_queue/create.sql",
+        "Database/Tables/18_waitlist_requests_queue/rollback.sql",
+        "Database/Tables/AllTables.sql",
+        "Database/Bootstrap/update_table_descriptions.sql"
+      ],
+      "wave": "T001-T005"
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "Added the job-fill model, its seam, the pinned copy, and the provenance column with its master scripts.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestJobFill.cs",
+        "MTM_Waitlist.GenericRequest/Contracts/IGenericRequestJobFillData.cs",
+        "MTM_Waitlist.GenericRequest/Strings/en-us/Resources.resw",
+        "Database/Tables/18_waitlist_requests_queue/create.sql",
+        "Database/Tables/18_waitlist_requests_queue/rollback.sql",
+        "Database/Tables/AllTables.sql",
+        "Database/Bootstrap/update_table_descriptions.sql"
+      ],
+      "wave": "T001-T005"
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "Added the job-fill model, its seam, the pinned copy, and the provenance column with its master scripts.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestJobFill.cs",
+        "MTM_Waitlist.GenericRequest/Contracts/IGenericRequestJobFillData.cs",
+        "MTM_Waitlist.GenericRequest/Strings/en-us/Resources.resw",
+        "Database/Tables/18_waitlist_requests_queue/create.sql",
+        "Database/Tables/18_waitlist_requests_queue/rollback.sql",
+        "Database/Tables/AllTables.sql",
+        "Database/Bootstrap/update_table_descriptions.sql"
+      ],
+      "wave": "T001-T005"
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "Added the job-fill model, its seam, the pinned copy, and the provenance column with its master scripts.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestJobFill.cs",
+        "MTM_Waitlist.GenericRequest/Contracts/IGenericRequestJobFillData.cs",
+        "MTM_Waitlist.GenericRequest/Strings/en-us/Resources.resw",
+        "Database/Tables/18_waitlist_requests_queue/create.sql",
+        "Database/Tables/18_waitlist_requests_queue/rollback.sql",
+        "Database/Tables/AllTables.sql",
+        "Database/Bootstrap/update_table_descriptions.sql"
+      ],
+      "wave": "T001-T005"
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "Added the job-fill model, its seam, the pinned copy, and the provenance column with its master scripts.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestJobFill.cs",
+        "MTM_Waitlist.GenericRequest/Contracts/IGenericRequestJobFillData.cs",
+        "MTM_Waitlist.GenericRequest/Strings/en-us/Resources.resw",
+        "Database/Tables/18_waitlist_requests_queue/create.sql",
+        "Database/Tables/18_waitlist_requests_queue/rollback.sql",
+        "Database/Tables/AllTables.sql",
+        "Database/Bootstrap/update_table_descriptions.sql"
+      ],
+      "wave": "T001-T005"
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "Gave the insert its provenance parameter, returned it from both request reads, and carried it on the request models and the draft.",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_request_insert/create.sql",
+        "Database/StoredProcedures/sp_waitlist_request_insert/rollback.sql",
+        "Database/StoredProcedures/sp_waitlist_request_get/create.sql",
+        "Database/StoredProcedures/sp_waitlist_request_list/create.sql",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequestDraft.cs",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequest.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestDraft.cs"
+      ],
+      "wave": "T006-T009"
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "Gave the insert its provenance parameter, returned it from both request reads, and carried it on the request models and the draft.",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_request_insert/create.sql",
+        "Database/StoredProcedures/sp_waitlist_request_insert/rollback.sql",
+        "Database/StoredProcedures/sp_waitlist_request_get/create.sql",
+        "Database/StoredProcedures/sp_waitlist_request_list/create.sql",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequestDraft.cs",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequest.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestDraft.cs"
+      ],
+      "wave": "T006-T009"
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "Gave the insert its provenance parameter, returned it from both request reads, and carried it on the request models and the draft.",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_request_insert/create.sql",
+        "Database/StoredProcedures/sp_waitlist_request_insert/rollback.sql",
+        "Database/StoredProcedures/sp_waitlist_request_get/create.sql",
+        "Database/StoredProcedures/sp_waitlist_request_list/create.sql",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequestDraft.cs",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequest.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestDraft.cs"
+      ],
+      "wave": "T006-T009"
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "Gave the insert its provenance parameter, returned it from both request reads, and carried it on the request models and the draft.",
+      "files": [
+        "Database/StoredProcedures/sp_waitlist_request_insert/create.sql",
+        "Database/StoredProcedures/sp_waitlist_request_insert/rollback.sql",
+        "Database/StoredProcedures/sp_waitlist_request_get/create.sql",
+        "Database/StoredProcedures/sp_waitlist_request_list/create.sql",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequestDraft.cs",
+        "MTM_Waitlist.Waitlist.View/Models/WaitlistRequest.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestDraft.cs"
+      ],
+      "wave": "T006-T009"
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "Mirrored the procedures in the master script, added the job-fill source at the composition root, and passed provenance into the request write.",
+      "files": [
+        "Database/StoredProcedures/AllSPs.sql",
+        "Services/GenericRequestJobFillSource.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs",
+        "MTM_Waitlist.Waitlist.View/Services/WaitlistRequestService.cs"
+      ],
+      "wave": "T010-T012"
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "Mirrored the procedures in the master script, added the job-fill source at the composition root, and passed provenance into the request write.",
+      "files": [
+        "Database/StoredProcedures/AllSPs.sql",
+        "Services/GenericRequestJobFillSource.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs",
+        "MTM_Waitlist.Waitlist.View/Services/WaitlistRequestService.cs"
+      ],
+      "wave": "T010-T012"
+    },
+    "T012": {
+      "status": "DONE",
+      "did": "Mirrored the procedures in the master script, added the job-fill source at the composition root, and passed provenance into the request write.",
+      "files": [
+        "Database/StoredProcedures/AllSPs.sql",
+        "Services/GenericRequestJobFillSource.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs",
+        "MTM_Waitlist.Waitlist.View/Services/WaitlistRequestService.cs"
+      ],
+      "wave": "T010-T012"
+    },
+    "T013": {
+      "status": "DONE",
+      "did": "Wrote the offer, failure and seeding tests that drive the category, part, die, dunnage and item steps through their public surface.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestJobFillOfferTests.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestJobFillFailureTests.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestJobFillSeedingTests.cs"
+      ],
+      "wave": "T013-T015"
+    },
+    "T014": {
+      "status": "DONE",
+      "did": "Wrote the offer, failure and seeding tests that drive the category, part, die, dunnage and item steps through their public surface.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestJobFillOfferTests.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestJobFillFailureTests.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestJobFillSeedingTests.cs"
+      ],
+      "wave": "T013-T015"
+    },
+    "T015": {
+      "status": "DONE",
+      "did": "Wrote the offer, failure and seeding tests that drive the category, part, die, dunnage and item steps through their public surface.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestJobFillOfferTests.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestJobFillFailureTests.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestJobFillSeedingTests.cs"
+      ],
+      "wave": "T013-T015"
+    },
+    "T016": {
+      "status": "DONE",
+      "did": "Added the in-memory job-fill seam to the shared test doubles, with separate probe and read answers and read counts.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestTestDoubles.cs"
+      ]
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "The category step asks the offer, the part, dunnage and die steps seed from it and drop the qualifier when changed, and a changed item drops the fill.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestCategoryViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestPartViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestDunnageViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestDieViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestItemViewModel.cs"
+      ],
+      "wave": "T017-T021"
+    },
+    "T018": {
+      "status": "DONE",
+      "did": "The category step asks the offer, the part, dunnage and die steps seed from it and drop the qualifier when changed, and a changed item drops the fill.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestCategoryViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestPartViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestDunnageViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestDieViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestItemViewModel.cs"
+      ],
+      "wave": "T017-T021"
+    },
+    "T019": {
+      "status": "DONE",
+      "did": "The category step asks the offer, the part, dunnage and die steps seed from it and drop the qualifier when changed, and a changed item drops the fill.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestCategoryViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestPartViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestDunnageViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestDieViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestItemViewModel.cs"
+      ],
+      "wave": "T017-T021"
+    },
+    "T020": {
+      "status": "DONE",
+      "did": "The category step asks the offer, the part, dunnage and die steps seed from it and drop the qualifier when changed, and a changed item drops the fill.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestCategoryViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestPartViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestDunnageViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestDieViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestItemViewModel.cs"
+      ],
+      "wave": "T017-T021"
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "The category step asks the offer, the part, dunnage and die steps seed from it and drop the qualifier when changed, and a changed item drops the fill.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestCategoryViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestPartViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestDunnageViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestDieViewModel.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestItemViewModel.cs"
+      ],
+      "wave": "T017-T021"
+    },
+    "T022": {
+      "status": "DONE",
+      "did": "Drew the offer panel on the category page and the From job qualifier on the part, dunnage and die pages.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestCategoryPage.xaml",
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestPartPage.xaml",
+        "Module_GenericRequest/Views/GenericRequestDunnagePage.xaml",
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestDiePage.xaml"
+      ],
+      "wave": "T022-T025"
+    },
+    "T023": {
+      "status": "DONE",
+      "did": "Drew the offer panel on the category page and the From job qualifier on the part, dunnage and die pages.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestCategoryPage.xaml",
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestPartPage.xaml",
+        "Module_GenericRequest/Views/GenericRequestDunnagePage.xaml",
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestDiePage.xaml"
+      ],
+      "wave": "T022-T025"
+    },
+    "T024": {
+      "status": "DONE",
+      "did": "Drew the offer panel on the category page and the From job qualifier on the part, dunnage and die pages.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestCategoryPage.xaml",
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestPartPage.xaml",
+        "Module_GenericRequest/Views/GenericRequestDunnagePage.xaml",
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestDiePage.xaml"
+      ],
+      "wave": "T022-T025"
+    },
+    "T025": {
+      "status": "DONE",
+      "did": "Drew the offer panel on the category page and the From job qualifier on the part, dunnage and die pages.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestCategoryPage.xaml",
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestPartPage.xaml",
+        "Module_GenericRequest/Views/GenericRequestDunnagePage.xaml",
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestDiePage.xaml"
+      ],
+      "wave": "T022-T025"
+    },
+    "T026": {
+      "status": "DONE",
+      "did": "The raise writes the filled job's work order as provenance on every request it creates and keeps the identity generic.",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Services/GenericRequestLiveStepData.cs"
+      ]
+    },
+    "T027": {
+      "status": "DONE",
+      "did": "Proved a filled request is raised generic, reaches the queue with its provenance, reads back on both reads, and leaves the card job-free.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/WaitlistRequestJobFillProvenanceTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/WaitlistDetailJobFillProvenanceTests.cs"
+      ],
+      "wave": "T027-T028"
+    },
+    "T028": {
+      "status": "DONE",
+      "did": "Proved a filled request is raised generic, reaches the queue with its provenance, reads back on both reads, and leaves the card job-free.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Waitlist/WaitlistRequestJobFillProvenanceTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/WaitlistDetailJobFillProvenanceTests.cs"
+      ],
+      "wave": "T027-T028"
+    },
+    "T029": {
+      "status": "DONE",
+      "did": "Added the provenance copy and the provenance row on the request detail page.",
+      "files": [
+        "Strings/en-us/Resources.resw",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs"
+      ]
+    },
+    "T030": {
+      "status": "DONE",
+      "did": "Added the provenance copy and the provenance row on the request detail page.",
+      "files": [
+        "Strings/en-us/Resources.resw",
+        "MTM_Waitlist.Waitlist.View/ViewModels/WaitlistViewDetailViewModel.cs"
+      ]
+    },
+    "T031": {
+      "status": "DONE",
+      "did": "Confirmed no Temp artefact of the feature remains anywhere in the solution and the boundary audit still passes.",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/TempArtefactBoundaryAuditTests.cs"
+      ]
+    },
+    "T032": {
+      "status": "DONE",
+      "did": "Validated against the success criteria: the solution builds at the documented gate and the full suite is green.",
+      "files": [
+        "MTM_Waitlist.sln",
+        "MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj"
+      ]
+    }
+  },
+  "verified": [
+    {
+      "what": "solution build at the documented gate",
+      "command": "dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false --nologo",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 40.3,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:40.09",
+      "commit": "8c41621b",
+      "tree": "b6e98848b1b6e6969ab9172faebceed216ff8686"
+    },
+    {
+      "what": "full unit suite",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 --nologo",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 54.0,
+      "result": "  Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_ReachesTheRealProcedureReportsTheLoadedRowCountAndSwapsAtomically [< 1 ms] ·   Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_WithAnEmptyPayloadIsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  2718, Skipped:    56, Total:  2774, Duration: 36 s - MTM_Waitlist.Tests.dll (net10.0)",
+      "commit": "8c41621b",
+      "tree": "158b60b5b7dc13502d1ebf69852e081e3f3cd4f7"
+    },
+    {
+      "what": "The offer is drawn only when a job is running, and the job's values are read only after acceptance",
+      "result": "Proved through the category step's own load and accept commands, with the probe and read counts asserted."
+    },
+    {
+      "what": "Accepting seeds the job's part, die and dunnage and none of the request's identity",
+      "result": "Proved through the draft and each step's own load, with the part still completed, listed and measured."
+    },
+    {
+      "what": "A filled request stays generic, reaches the queue with its provenance, and reads back on both request reads",
+      "result": "Proved through the stored-procedure parameters the write carries and through the row mapping both reads use."
+    },
+    {
+      "what": "The detail page draws the job as provenance and the generic card draws no work-order cell",
+      "result": "Proved through the page's own sections for a filled and an unfilled request, and through the card's cells."
+    },
+    {
+      "what": "solution build after the review fixes",
+      "command": "dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false --nologo",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 40.2,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:40.06",
+      "commit": "8c41621b",
+      "tree": "d1957e79aa7573f32bd9f0268777e6391acb8897"
+    },
+    {
+      "what": "full unit suite after the review fixes",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 --nologo",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 54.1,
+      "result": "  Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_ReachesTheRealProcedureReportsTheLoadedRowCountAndSwapsAtomically [< 1 ms] ·   Skipped Database_MockMirrorRefreshWriterIntegrationTests_RefreshAsync_WithAnEmptyPayloadIsALegitimateEmptySnapshot [< 1 ms] · Passed!  - Failed:     0, Passed:  2724, Skipped:    56, Total:  2780, Duration: 36 s - MTM_Waitlist.Tests.dll (net10.0)",
+      "commit": "8c41621b",
+      "tree": "ef4a94e39c874386495ccd4dace2fc61d8fbefea"
+    },
+    {
+      "what": "The high-depth review's four findings, all fixed and re-proved",
+      "result": "Two independent reviews ran; the schema and write-path review was clean, and the other found four defects that are now fixed with regression tests."
+    }
+  ],
+  "concerns": [
+    {
+      "note": "simplified: the offer is not gated on a permission, because the application declares none that governs seeing a job's data. When one is added it belongs in GenericRequestJobFillSource, before the read. FR-015's condition therefore cannot arise today.",
+      "step": "implement"
+    },
+    {
+      "note": "The stored-procedure changes are authored and mirrored but were not applied to a live database in this run: the schema and procedure integration tests are among the environment-gated skips.",
+      "step": "implement"
+    },
+    {
+      "note": "The first independent review found a defect that made the feature inert: the accepted fill was discarded on the first item pick because the draft had no previous item code. Fixed, with a regression test covering the first pick and a changed one.",
+      "step": "implement"
+    }
+  ],
+  "last_action": "Build and full suite green after the offer, the seeds and the provenance landed.",
+  "risk": {
+    "tier": "high",
+    "computed": "high",
+    "reasons": [
+      "touches Database/Bootstrap/update_table_descriptions.sql, Database/StoredProcedures/AllSPs.sql, Database/StoredProcedures/sp_waitlist_request_get/create.sql and 6 more"
+    ]
+  },
+  "convergeStartedAt": "2026-11-15T23:30:07.491Z",
+  "convergePasses": [
+    {
+      "startedAt": "2026-11-15T23:30:07.600Z",
+      "by": "extension",
+      "finishedAt": "2026-11-15T23:30:34.172Z",
+      "added": [],
+      "completed": true
+    }
+  ]
 }

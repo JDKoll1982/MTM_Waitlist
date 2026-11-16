@@ -9,6 +9,9 @@
 -- (`handler_status`, `answers_json`). A detail page that shows a generic request cannot be written against a read
 -- that omits the three new facts, and a page drawing the same request as the list must not disagree with it about
 -- the condition or the answers.
+-- Extended by specs/021-generic-wc-optional-job-fill: the row now also carries `provenance_work_order`, the job a
+-- filled generic request took its values from, so the detail page can draw it as provenance beside the request's
+-- identity rather than as one of its own fields (FR-013).
 
 USE mtm_waitlist;
 
@@ -31,6 +34,7 @@ SELECT
     description,
     accepted_warnings_json,
     active_setup_job_id,
+    provenance_work_order,
     work_center_name,
     requester_employee_number,
     requester_employee_name,

@@ -157,10 +157,17 @@ public sealed partial class GenericRequestItemViewModel : GenericRequestStepView
         }
 
         // A different item asks a different question, so an answer given for the previous item is not an answer to
-        // this one and is cleared rather than carried across.
+        // this one and is cleared rather than carried across. The fill goes with it, because every answer it
+        // supplied was a statement about the item the request no longer carries (FR-009). Only a *changed* item
+        // counts: the first item a request ever picks has nothing before it to carry anything over from.
         if (!string.Equals(value?.Code, Draft.ItemCode, StringComparison.OrdinalIgnoreCase))
         {
             Answer = string.Empty;
+
+            if (Draft.ItemCode.Length > 0)
+            {
+                Draft.JobFill = null;
+            }
         }
 
         OnPropertyChanged(nameof(PromptText));

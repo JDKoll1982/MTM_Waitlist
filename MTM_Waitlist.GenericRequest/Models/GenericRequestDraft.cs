@@ -14,6 +14,26 @@ public sealed class GenericRequestDraft
     /// <summary>The building the chosen work center stands in, which is what the request is filed under.</summary>
     public string Building { get; set; } = string.Empty;
 
+    /// <summary>
+    /// The job a generic request's values were taken from, or null when no job filled it.
+    /// </summary>
+    /// <remarks>
+    /// It records where an answer came from, never what the request is: the identity stays the work center and the
+    /// stated item, so a filled request is still a generic request (FR-011). The fill's own flags say whether each
+    /// answer is still the job's, and they are cleared when the requester changes that answer (FR-007).
+    /// </remarks>
+    public GenericRequestJobFill? JobFill { get; set; }
+
+    /// <summary>
+    /// Whether the offer has been answered for this request, by accepting it or by declining it.
+    /// </summary>
+    /// <remarks>
+    /// The choice belongs to one request and is asked once: a declined offer is not a failure and is not shown again
+    /// on every later step, and a second request at the same work center is offered again because its draft is new
+    /// (FR-003, A3, A7).
+    /// </remarks>
+    public bool JobFillAnswered { get; set; }
+
     /// <summary>The category the requester chose.</summary>
     public string Category { get; set; } = string.Empty;
 
