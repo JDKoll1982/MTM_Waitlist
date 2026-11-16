@@ -3,8 +3,540 @@
   "specName": "022 Generic Work Center — Temp-to-Live Conversion and Verification",
   "branch": "022-generic-wc-temp-to-live-verification",
   "selectedAt": "2026-11-03T20:45:21.064Z",
-  "currentStep": "specify",
-  "status": "draft",
-  "history": [],
-  "telemetryInstanceId": "f4c59860-bbec-411c-9ba8-c5b515f59ef3"
+  "currentStep": "implement",
+  "status": "completed",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-16T17:55:00.231Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-11-16T17:56:25.007Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-16T17:56:35.971Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-16T17:58:12.775Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-16T17:58:16.774Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-16T17:58:28.535Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-16T17:58:50.260Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-16T17:59:08.860Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-16T17:59:12.221Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-16T17:59:23.870Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T001",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-16T18:00:46.077Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T002",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-16T18:00:49.737Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T003",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-16T18:00:53.110Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T004",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-16T18:00:56.851Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-16T18:03:02.474Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-16T18:03:06.204Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-16T18:03:09.582Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-16T18:03:13.241Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T009",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-16T18:03:17.037Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T010",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-16T18:03:20.706Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T011",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-16T18:05:16.305Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-16T18:05:16.419Z"
+    }
+  ],
+  "telemetryInstanceId": "f4c59860-bbec-411c-9ba8-c5b515f59ef3",
+  "unattended": true,
+  "expectations": [
+    "re-deciding a screen's approved presentation: a disagreement is resolved in the chunk that owns that screen",
+    "verifying a deferred chunk's screen beyond its unavailable presentation",
+    "changing runtime behaviour beyond removing the temporary material and proving the live presentations"
+  ],
+  "context": [
+    "spec: 015-generic-wc-ui-shell owns the Temp naming rule and the guard this chunk tightens to zero",
+    "spec: 016 to 021 own the screens, live sources and deletions this chunk verifies",
+    "constraint: every data operation goes through a stored procedure (constitution III)",
+    "constraint: no demo/mock mode may exist, and RetiredSymbolAuditTests fails the build if one returns",
+    "area: MTM_Waitlist.Tests/Module_GenericRequest/TempArtefactBoundaryAuditTests.cs already carries the boundary check",
+    "area: repository docs tree carries no per-screen verification record yet"
+  ],
+  "coverage": {
+    "FR-001": {
+      "title": "After this chunk the solution MUST contain no Temp artefact belonging to this feature, checked across source, XAML, resources, project files, configuration and database artefacts",
+      "tasks": [
+        "T001",
+        "T003"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/TempArtefactBoundaryAuditTests.cs::TheSolutionCarriesNoTempArtefact"
+      ]
+    },
+    "FR-002": {
+      "title": "Where the preview project is retained it MUST be the only place the Temp naming appears and MUST stay unreachable from the shipped application",
+      "tasks": [
+        "T001"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/TempArtefactBoundaryAuditTests.cs::TheShippedApplicationDoesNotReferenceThePreview"
+      ]
+    },
+    "FR-003": {
+      "title": "A build-time check MUST fail, naming the offending artefact, if any Temp artefact appears in the reported scope",
+      "tasks": [
+        "T001",
+        "T004"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/TempArtefactBoundaryAuditTests.cs::TheCheckNamesAnOffence"
+      ]
+    },
+    "FR-004": {
+      "title": "The check's exemptions MUST be listed one at a time, never by pattern",
+      "tasks": [
+        "T002",
+        "T003"
+      ]
+    },
+    "FR-005": {
+      "title": "The application MUST build, start and reach the board after every removal, with nothing dangling",
+      "tasks": [
+        "T011"
+      ]
+    },
+    "FR-006": {
+      "title": "No Temp artefact MAY be renamed into a permanent-looking name instead of being replaced or deleted",
+      "tasks": [
+        "T005"
+      ]
+    },
+    "FR-007": {
+      "title": "Any Temp database artefact MUST be dropped by its own artifact in the same change, touching no other store",
+      "tasks": [
+        "T001"
+      ]
+    },
+    "FR-008": {
+      "title": "Each screen MUST present on its live source the same populated, empty and unavailable presentations approved on preview",
+      "tasks": [
+        "T005",
+        "T006"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestWorkCenterViewModelTests.cs::LoadAsync_AnUnreadableWorkCenterListOffersTheAttemptTimeAndARetry",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestSummaryViewModelTests.cs::LoadAsync_AnUnreadableReviewOffersTheAttemptTimeAndARetry"
+      ]
+    },
+    "FR-009": {
+      "title": "The unavailable presentation MUST carry the time of the attempt and a retry control on every screen",
+      "tasks": [
+        "T006"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestWorkCenterViewModelTests.cs::LoadAsync_AnUnreadableWorkCenterListOffersTheAttemptTimeAndARetry",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestSummaryViewModelTests.cs::LoadAsync_AnUnreadableReviewOffersTheAttemptTimeAndARetry"
+      ]
+    },
+    "FR-010": {
+      "title": "The generic card MUST draw from a live request the same cells in the same places as the approved variant, and no unapproved cell",
+      "tasks": [
+        "T005",
+        "T007"
+      ]
+    },
+    "FR-011": {
+      "title": "Awkward real values MUST render exactly as the preview scenarios proved them",
+      "tasks": [
+        "T007"
+      ]
+    },
+    "FR-012": {
+      "title": "The whole flow MUST remain walkable end to end on live data, by the same controls, with no dead end",
+      "tasks": [
+        "T010"
+      ]
+    },
+    "FR-013": {
+      "title": "Every disagreement between approved preview and live presentation MUST be recorded and resolved before completion",
+      "tasks": [
+        "T008"
+      ]
+    },
+    "FR-014": {
+      "title": "Every screen's verification MUST be recorded individually, naming the screen, the presentations compared and the outcome",
+      "tasks": [
+        "T005",
+        "T006",
+        "T008"
+      ],
+      "tests": [
+        "specs/022-generic-wc-temp-to-live-verification/verification.md"
+      ]
+    },
+    "FR-015": {
+      "title": "A chunk that has not shipped MUST leave its screen reporting the answer source unavailable from a live check",
+      "tasks": [
+        "T009"
+      ]
+    },
+    "FR-016": {
+      "title": "A deferred chunk MUST leave no Temp artefact and MUST NOT change any other screen's behaviour",
+      "tasks": [
+        "T009"
+      ]
+    },
+    "FR-017": {
+      "title": "A deferred chunk, when it later ships, MUST make its screen work without any other screen being edited",
+      "tasks": [
+        "T009"
+      ]
+    }
+  },
+  "intent": "Prove the temporary preview material is gone and each generic work center screen still behaves on live data as the owner approved",
+  "size": "normal",
+  "classification": {
+    "projectedFiles": 6,
+    "projectedTasks": 14,
+    "scopeSignal": "none",
+    "verdict": "normal"
+  },
+  "decisions": [
+    {
+      "decision": "Scan every project the solution names, not just the application's reference graph",
+      "why": "FR-001 speaks about the solution, and the deleted preview project no longer bounds the risk",
+      "rejected": "keeping the reference-graph scan, which cannot see a Temp artefact in the tests or deployment tools",
+      "by": "agent",
+      "at": "2026-11-16T17:58:22.052Z"
+    },
+    {
+      "decision": "Keep the guard's own file name and exempt it by exact path",
+      "why": "FR-004 wants exemptions that can be read one at a time; renaming a guard to dodge its own rule hides the rule",
+      "rejected": "renaming the audit to avoid the prefix",
+      "by": "agent",
+      "at": "2026-11-16T17:58:22.052Z"
+    },
+    {
+      "decision": "Allow an exemption keyed by exact path plus exact declared name",
+      "why": "TempRootFixture means a temporary directory and the rest of its file must stay checked",
+      "rejected": "exempting the whole file, or renaming an unrelated fixture",
+      "by": "agent",
+      "at": "2026-11-16T17:58:22.052Z"
+    },
+    {
+      "decision": "Exempt TemporaryCredentialAttemptLimitTests.cs rather than narrowing the file-name rule",
+      "why": "narrowing to Temp[A-Z] would stop catching a TempSomething.cs artefact, the shape this feature's material took",
+      "rejected": "narrowing the rule",
+      "by": "agent",
+      "at": "2026-11-16T17:58:22.052Z"
+    },
+    {
+      "decision": "Put the per-screen record in the feature directory as verification.md",
+      "why": "spec assumption A4 puts the evidence with the feature documentation, as 018 did with wording.md",
+      "rejected": "a page under docs, or a JSON manifest read by a test",
+      "by": "agent",
+      "at": "2026-11-16T17:58:22.052Z"
+    },
+    {
+      "decision": "Cite the tests the owning chunks already ship as each screen's evidence",
+      "why": "a second copy of the same assertions is evidence that can drift from the first",
+      "rejected": "a new end-to-end UI test per screen, which needs a review host that no longer exists",
+      "by": "agent",
+      "at": "2026-11-16T17:58:22.052Z"
+    },
+    {
+      "decision": "Read the project list from MTM_Waitlist.sln rather than globbing *.csproj",
+      "why": "FR-001 speaks about the solution, and the solution file is what states it",
+      "rejected": "a directory walk, which would also scan scratch projects nobody considers part of the solution",
+      "by": "agent",
+      "at": "2026-11-16T18:06:57.222Z"
+    },
+    {
+      "decision": "Structured offences with a kind, so an exemption can match one declaration",
+      "why": "TempRootFixture is a temporary directory, and the rest of its file must stay checked",
+      "rejected": "path-only exemptions, which would stop checking whole files",
+      "by": "agent",
+      "at": "2026-11-16T18:06:57.222Z"
+    },
+    {
+      "decision": "Add one unreadable-source test each for the work center and summary steps",
+      "why": "FR-014 needs evidence per screen, and those two had none for the unavailable presentation",
+      "rejected": "recording the unavailable presentation as proven by the shared base class alone",
+      "by": "agent",
+      "at": "2026-11-16T18:06:57.222Z"
+    }
+  ],
+  "step_summaries": {
+    "specify": {
+      "summary": "Widen the Temp boundary audit to the whole solution with exact reasoned exemptions, and record one verification entry per screen from the tests that already prove it",
+      "key_finding": "the guard already exists and is clean, but it only walks the application's reference graph, so a Temp artefact parked in the tests or the deployment tools would go unnoticed"
+    },
+    "tasks": {
+      "summary": "11 tasks in three phases: four sequential edits widening the Temp guard, six writing the per-screen verification record, one validation run"
+    },
+    "implement": {
+      "summary": "The Temp guard now covers the whole solution with exact reasoned exemptions, and the ten-screen verification record is written with evidence cited per screen"
+    }
+  },
+  "approach": "Widen the existing Temp boundary audit to every project the solution names, with exemptions keyed by exact path or exact path plus name, and write one verification entry per screen in the feature directory from the tests that already prove each presentation.",
+  "currentTask": null,
+  "task_summaries": {
+    "T001": {
+      "status": "DONE",
+      "did": "The audit now enumerates every project the solution file names instead of walking the application reference graph",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/TempArtefactBoundaryAuditTests.cs"
+      ]
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "Offences are structured, and an exemption can name one declaration in an otherwise checked file",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/TempArtefactBoundaryAuditTests.cs"
+      ]
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "Three exemptions recorded with written reasons: the guard file, TempRootFixture by path and name, and the temporary-credential test file",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/TempArtefactBoundaryAuditTests.cs"
+      ]
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "The deliberate-offence case still names the type and the resource key, and still leaves an unrelated constant alone; 3 of 3 audit tests pass",
+      "files": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/TempArtefactBoundaryAuditTests.cs"
+      ]
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "Ten screen entries written, each naming its page, its live read and the three presentations compared",
+      "files": [
+        "specs/022-generic-wc-temp-to-live-verification/verification.md"
+      ]
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "Every entry now names the tests proving its presentations; two screens had no unreadable-source test, so one was added for each",
+      "files": [
+        "specs/022-generic-wc-temp-to-live-verification/verification.md",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestWorkCenterViewModelTests.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestSummaryViewModelTests.cs"
+      ]
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "The four awkward values are tabulated: two proven by tests, two recorded as unproven rather than claimed",
+      "files": [
+        "specs/022-generic-wc-temp-to-live-verification/verification.md"
+      ]
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "All ten entries record an outcome of matches; the two outstanding items are listed as open rather than as differences",
+      "files": [
+        "specs/022-generic-wc-temp-to-live-verification/verification.md"
+      ]
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "The deferred-chunk section states no chunk is deferred today and shows the unavailable presentation that a deferred screen would offer, with its evidence",
+      "files": [
+        "specs/022-generic-wc-temp-to-live-verification/verification.md"
+      ]
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "The record ends with the three commands a later reader runs to re-prove it, including the Temp search",
+      "files": [
+        "specs/022-generic-wc-temp-to-live-verification/verification.md"
+      ]
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "Solution builds with 0 errors and the suite is green: 2825 passed, 0 failed, 61 live-database tests skipped",
+      "files": [
+        "MTM_Waitlist.sln"
+      ]
+    }
+  },
+  "verified": [
+    {
+      "what": "Solution build",
+      "command": "dotnet build MTM_Waitlist.sln -v q --nologo",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 46.4,
+      "result": "    4 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:46.13",
+      "commit": "bfdfdbd5",
+      "tree": "472887e5174ed3169f1f1281a2c9fee39a39d1fc"
+    },
+    {
+      "what": "Full test suite",
+      "command": "dotnet test MTM_Waitlist.Tests\\MTM_Waitlist.Tests.csproj --no-build --nologo",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 31.5,
+      "result": "  Skipped Service_SeedLedgerLiveTests_BuildPlanAsync_StillOffersASeedTheStoreHasNeverReceived [4 ms] ·   Skipped Service_SeedLedgerLiveTests_ApplyAsync_RecordsAStoreSetUpBeforeTheLedgerWithoutRunningItsSeeds [< 1 ms] · Passed!  - Failed:     0, Passed:  2825, Skipped:    61, Total:  2886, Duration: 30 s - MTM_Waitlist.Tests.dll (net10.0)",
+      "commit": "bfdfdbd5",
+      "tree": "1d5e7c69cfd810b6879e2fc0fb417781e198badf"
+    },
+    {
+      "what": "Temp boundary guard",
+      "command": "dotnet test MTM_Waitlist.Tests\\MTM_Waitlist.Tests.csproj --no-build --nologo --filter FullyQualifiedName~TempArtefactBoundaryAuditTests",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 2.0,
+      "result": "Test run for C:\\Users\\jkoll\\source\\repos\\MTM_Waitlist\\MTM_Waitlist.Tests\\bin\\Debug\\net10.0-windows10.0.19041.0\\win-x64\\MTM_Waitlist.Tests.dll (.NETCoreApp,Version=v10.0) · A total of 1 test files matched the specified pattern. · Passed!  - Failed:     0, Passed:     3, Skipped:     0, Total:     3, Duration: 580 ms - MTM_Waitlist.Tests.dll (net10.0)",
+      "commit": "bfdfdbd5",
+      "tree": "b9c048cd02465f011714d40d068eca521f221b7e"
+    },
+    {
+      "what": "A temp artefact in a project the application cannot reach is now caught: the guard reads the solution file and scans all 17 projects",
+      "command": "code review of TempArtefactBoundaryAuditTests",
+      "result": "the scan reports zero offences across the solution with three named exemptions"
+    },
+    {
+      "what": "Two screens had no unreadable-source test, so the record's unavailable evidence for them was an assumption",
+      "command": "inspection of the generic request test suite",
+      "result": "one test added per screen, both pass"
+    }
+  ],
+  "concerns": [
+    {
+      "note": "The owner's screen-by-screen re-confirmation that the spec's design note requires could not be taken in an unattended run; the record compares against the owning chunk's specification and tests, and lists the re-confirmation as open.",
+      "step": "implement"
+    },
+    {
+      "note": "Two awkward values FR-011 names, a long work center name and a part number containing a slash, have no dedicated test; the record marks them unproven rather than claiming them.",
+      "step": "implement"
+    }
+  ],
+  "last_action": "All 11 tasks closed; solution builds with 0 errors, suite green at 2825 passed and 0 failed"
 }
