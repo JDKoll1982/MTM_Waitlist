@@ -257,6 +257,49 @@ public sealed class GenericRequestJobFillSeedingTests
         Assert.IsFalse(viewModel.ContinueCommand.CanExecute(null), "so the step waits for the requester");
     }
 
+    [TestMethod]
+    public async Task ViewModel_GenericRequestJobFillSeedingTests_AValueTheJobDoesNotCarryIsStillAskedOfTheRequester()
+    {
+        // The job names itself and states nothing else, so every step still asks for its own answer (FR-008).
+        var partData = new StubPartData { Completions = [Part("PART-1")], Sequences = [Sequence("20")] };
+        var partNavigator = Draft(GenericRequestJobFill.FromJob("WO-9001"));
+        var partViewModel = new GenericRequestPartViewModel(partData, partNavigator);
+
+        await partViewModel.LoadAsync();
+
+        Assert.IsFalse(partViewModel.HasFromJob, "the job stated no part, so nothing reads as the job's");
+        Assert.IsNull(partViewModel.AcceptedPart, "and no part arrives from it");
+        Assert.AreEqual(string.Empty, partNavigator.Draft.PartNumber, "the requester still has to state the part");
+        Assert.IsFalse(partViewModel.ContinueCommand.CanExecute(null), "so the step waits for them");
+
+        var dieData = new StubGenericRequestStepData
+        {
+            Dies = GenericRequestStepResult<GenericRequestDieOption>.Populated(
+                [new GenericRequestDieOption("FGT0602-01", "Die one", "ROW-2")],
+                DateTimeOffset.UtcNow),
+        };
+        var dieNavigator = Draft(GenericRequestJobFill.FromJob("WO-9001"));
+        var dieViewModel = new GenericRequestDieViewModel(dieData, dieNavigator);
+
+        await dieViewModel.LoadAsync();
+
+        Assert.IsFalse(dieViewModel.HasFromJob, "the job stated no die, so nothing reads as the job's");
+        Assert.AreEqual(0, dieViewModel.Options.Count(option => option.IsSelected), "no die is chosen for the requester");
+        Assert.IsFalse(dieViewModel.ContinueCommand.CanExecute(null), "so the step still asks for one");
+
+        var dunnageNavigator = Draft(GenericRequestJobFill.FromJob("WO-9001"));
+        var dunnageViewModel = new GenericRequestDunnageViewModel(
+            new DunnageCatalogueViewModel(
+                new StubCatalogueReader([DunnagePart("DNG0007788")]),
+                new InMemoryScopedPreferenceStore()),
+            dunnageNavigator);
+
+        await dunnageViewModel.LoadAsync();
+
+        Assert.IsFalse(dunnageViewModel.HasFromJob, "the job stated no dunnage, so nothing reads as the job's");
+        Assert.IsNull(dunnageViewModel.Catalogue.SelectedPart, "and no dunnage part is chosen for the requester");
+    }
+
     private static GenericRequestPartOption Part(string partNumber) =>
         new(partNumber, string.Empty, SequenceSource.VisualOwnPart);
 
