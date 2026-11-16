@@ -350,7 +350,8 @@
     "area: Database/StoredProcedures and Database/Tables (request persistence, provenance column)",
     "constraint: every data operation goes through a stored procedure, with create.sql and rollback.sql beside it",
     "constraint: internal stores are read and written live; external Visual reads go through the mock fallback shapes",
-    "constraint: no new integration; the job read reuses the work-order flow's own read (assumption A2)"
+    "constraint: no new integration; the job read reuses the work-order flow's own read (assumption A2)",
+    "Audited 2026-11-16 against the shipped code: spec, plan, research, data model, both contracts and all 32 ticked tasks. The one gap found was FR-008 having no test, now closed; nothing was unbuilt."
   ],
   "coverage": {
     "FR-001": {
@@ -437,7 +438,10 @@
         "T015",
         "T018"
       ],
-      "assumes": "A job that carries no part leaves the part step asking, which is the step's existing behaviour with an empty draft value."
+      "assumes": "A job that carries no part leaves the part step asking, which is the step's existing behaviour with an empty draft value.",
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestJobFillSeedingTests.cs::ViewModel_GenericRequestJobFillSeedingTests_AValueTheJobDoesNotCarryIsStillAskedOfTheRequester"
+      ]
     },
     "FR-009": {
       "title": "Changing the item clears the answers that belonged to the previous item",
@@ -1099,7 +1103,7 @@
       "step": "implement"
     }
   ],
-  "last_action": "Build and full suite green after the offer, the seeds and the provenance landed.",
+  "last_action": "Audited the finished feature against its spec and closed the one test gap (FR-008); build and full suite green at 2823 passed / 61 skipped / 0 failed.",
   "risk": {
     "tier": "high",
     "computed": "high",
