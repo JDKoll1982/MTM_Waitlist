@@ -315,6 +315,7 @@ public sealed partial class GenericRequestPartViewModel : GenericRequestStepView
     public async Task ChooseSequenceAsync(GenericRequestSequenceOption? sequence)
     {
         SelectedSequence = sequence;
+        MarkChosenSequence();
 
         // A sequence other than the job's is the requester's own choice, so it stops reading as the job's.
         if (Draft.JobFill is { IsSequenceFromJob: true } fill
@@ -490,6 +491,7 @@ public sealed partial class GenericRequestPartViewModel : GenericRequestStepView
 
         SelectedSequence = result.Items.FirstOrDefault(
             sequence => string.Equals(sequence.Sequence, Draft.Sequence, StringComparison.OrdinalIgnoreCase));
+        MarkChosenSequence();
 
         if (SelectedSequence is null)
         {
@@ -501,6 +503,18 @@ public sealed partial class GenericRequestPartViewModel : GenericRequestStepView
         }
 
         NotifyAnswerChanged();
+    }
+
+    /// <summary>
+    /// Mark the card the requester picked, and clear every other card, so the accent outline follows the choice even
+    /// when the card that was clicked was already the chosen one.
+    /// </summary>
+    private void MarkChosenSequence()
+    {
+        foreach (var candidate in Sequences)
+        {
+            candidate.IsSelected = ReferenceEquals(candidate, SelectedSequence);
+        }
     }
 
     private async Task LoadQuantityAsync()

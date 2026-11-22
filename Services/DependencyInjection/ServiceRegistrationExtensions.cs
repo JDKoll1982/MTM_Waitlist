@@ -88,6 +88,9 @@ public static partial class ServiceRegistrationExtensions
             pageService.Configure<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestWorkCenterViewModel, MTM_Waitlist.GenericRequest.Views.GenericRequestWorkCenterPage>();
             pageService.Configure<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestCategoryViewModel, MTM_Waitlist.GenericRequest.Views.GenericRequestCategoryPage>();
             pageService.Configure<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestItemViewModel, MTM_Waitlist.GenericRequest.Views.GenericRequestItemPage>();
+            // The finished-product page is asked by the item step's one product card, so it is reached from that
+            // step rather than by the flow's step order (its own route is what the navigator asks for).
+            pageService.Configure<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestProductPickupViewModel, MTM_Waitlist.GenericRequest.Views.GenericRequestProductPickupPage>();
             pageService.Configure<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestPartViewModel, MTM_Waitlist.GenericRequest.Views.GenericRequestPartPage>();
             // The dunnage step's page is not in this list any more: it moved to the application project, and its
             // route is contributed by ServiceRegistrationExtensions.DunnageCataloguePage.cs (018, FR-001).
@@ -274,6 +277,8 @@ public static partial class ServiceRegistrationExtensions
         services.AddTransient<MTM_Waitlist.GenericRequest.Views.GenericRequestCategoryPage>();
         services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestItemViewModel>();
         services.AddTransient<MTM_Waitlist.GenericRequest.Views.GenericRequestItemPage>();
+        services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestProductPickupViewModel>();
+        services.AddTransient<MTM_Waitlist.GenericRequest.Views.GenericRequestProductPickupPage>();
         services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestPartViewModel>();
         services.AddTransient<MTM_Waitlist.GenericRequest.Views.GenericRequestPartPage>();
         services.AddTransient<MTM_Waitlist.GenericRequest.ViewModels.GenericRequestDunnageViewModel>();

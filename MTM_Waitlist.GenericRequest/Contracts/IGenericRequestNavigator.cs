@@ -21,6 +21,15 @@ public interface IGenericRequestNavigator
     /// <summary>Show <paramref name="step"/>.</summary>
     void GoTo(GenericRequestStep step);
 
+    /// <summary>
+    /// Show the page that asks which kind of finished product the request is picking up.
+    /// </summary>
+    /// <remarks>
+    /// The page asks a question of the item step, so it is reached from that step rather than visited in the flow's
+    /// order: the item is still the step on screen, and leaving the page for a kind moves on from the item step.
+    /// </remarks>
+    void ShowFinishedProductChooser();
+
     /// <summary>Leave the flow and show the waitlist, so the person sees what has just been raised.</summary>
     void LeaveToWaitlist();
 

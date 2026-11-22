@@ -120,6 +120,27 @@ public sealed class NewRequestJobTypeViewModelTests
         Assert.AreSame(state, navigation.Navigations.Single().Parameter);
     }
 
+    /// <summary>
+    /// The clicked card is the one the step marks, so its accent outline follows the click rather than the grid's
+    /// own selection — the arrangement the generic flow's category cards use.
+    /// </summary>
+    [TestMethod]
+    public async Task ViewModel_NewRequestJobTypeViewModelTests_SelectCategory_MarksOnlyTheClickedCard()
+    {
+        var viewModel = CreateViewModel(availability: RequestJobPartAvailability.All);
+        viewModel.OnNavigatedTo(new NewRequestFlowState { WorkCenter = "100-03" });
+
+        await WaitUntilAsync(() => !viewModel.IsLoading && viewModel.Options.Count > 1);
+        var clicked = viewModel.Options[1];
+
+        viewModel.SelectOptionCommand.Execute(clicked);
+
+        Assert.IsTrue(clicked.IsSelected, "The card the person clicked must carry the choice.");
+        Assert.IsTrue(
+            viewModel.Options.Where(option => !ReferenceEquals(option, clicked)).All(option => !option.IsSelected),
+            "No other card may keep the outline.");
+    }
+
     [TestMethod]
     public async Task ViewModel_NewRequestJobTypeViewModelTests_SelectCategory_LeavesNoTypeOrSubtypeBehind()
     {

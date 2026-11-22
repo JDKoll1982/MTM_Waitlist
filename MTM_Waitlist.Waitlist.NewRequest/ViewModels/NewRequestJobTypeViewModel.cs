@@ -164,6 +164,13 @@ public partial class NewRequestJobTypeViewModel : ObservableRecipient, INavigati
             return;
         }
 
+        // The clicked card carries the choice, the way the generic flow's category cards do: the grid keeps no
+        // selection of its own, so every card is marked explicitly.
+        foreach (var option in Options)
+        {
+            option.IsSelected = ReferenceEquals(option, tile);
+        }
+
         _state.Category = category;
         _state.Item = null;
         _state.ItemConfiguration = null;

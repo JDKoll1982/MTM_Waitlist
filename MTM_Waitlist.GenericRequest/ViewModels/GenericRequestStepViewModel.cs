@@ -88,6 +88,12 @@ public abstract partial class GenericRequestStepViewModel : ObservableObject
     /// </summary>
     protected virtual bool CanAnswer => true;
 
+    /// <summary>
+    /// The step Back returns to. A page opened from inside a step returns to that step rather than to the one
+    /// before it, because it is a question asked by that step and not a step of its own.
+    /// </summary>
+    protected virtual GenericRequestStep BackStep => GenericRequestFlowRules.PreviousStep(Draft, Step);
+
     /// <summary>When the last read was attempted, for the unavailable presentation.</summary>
     public string AttemptedAtDisplay => AttemptedAtUtc is { } at
         ? at.ToLocalTime().ToString("g", CultureInfo.CurrentCulture)
@@ -170,5 +176,5 @@ public abstract partial class GenericRequestStepViewModel : ObservableObject
         _navigator.GoTo(GenericRequestFlowRules.NextStep(Draft, Step));
     }
 
-    private void GoBack() => _navigator.GoTo(GenericRequestFlowRules.PreviousStep(Draft, Step));
+    private void GoBack() => _navigator.GoTo(BackStep);
 }

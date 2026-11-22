@@ -25,8 +25,14 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <ProgressRing IsActive="{x:Bind ViewModel.IsLoading, Mode=OneWay}" />
+                <!--
+                    One card per item, carrying nothing but the item's name. The one finished-product card opens the
+                    page that asks which kind it is, so a click on it is the way to that page rather than a choice.
+                -->
                 <GridView
                     AutomationProperties.Name="{x:Bind ViewModel.Title}"
+                    IsItemClickEnabled="True"
+                    ItemClick="ItemGridView_ItemClick"
                     ItemsSource="{x:Bind ViewModel.Options}"
                     SelectedItem="{x:Bind ViewModel.Selected, Mode=TwoWay}"
                     SelectionMode="Single">
@@ -39,18 +45,11 @@
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                                 BorderThickness="1"
                                 CornerRadius="8">
-                                <StackPanel Spacing="4">
-                                    <TextBlock
-                                        Text="{x:Bind Name}"
-                                        TextTrimming="CharacterEllipsis"
-                                        TextWrapping="Wrap"
-                                        Style="{StaticResource BodyStrongTextBlockStyle}" />
-                                    <TextBlock
-                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                        Text="{x:Bind Code}"
-                                        TextTrimming="CharacterEllipsis"
-                                        Style="{StaticResource CaptionTextBlockStyle}" />
-                                </StackPanel>
+                                <TextBlock
+                                    Text="{x:Bind Name}"
+                                    TextTrimming="CharacterEllipsis"
+                                    TextWrapping="Wrap"
+                                    Style="{StaticResource BodyStrongTextBlockStyle}" />
                             </Border>
                         </DataTemplate>
                     </GridView.ItemTemplate>

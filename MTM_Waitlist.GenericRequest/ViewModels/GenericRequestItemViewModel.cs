@@ -1,12 +1,14 @@
 using System.Collections.ObjectModel;
 
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 using Microsoft.UI.Xaml;
 
 using MTM_Waitlist.GenericRequest.Contracts;
 using MTM_Waitlist.GenericRequest.Models;
 using MTM_Waitlist.Module_Core.Helpers;
+using MTM_Waitlist.Module_Settings.Models;
 
 namespace MTM_Waitlist.GenericRequest.ViewModels;
 
@@ -88,8 +90,14 @@ public sealed partial class GenericRequestItemViewModel : GenericRequestStepView
     /// <summary>The note shown while the question is unanswered, worded for the person answering it.</summary>
     public string AnswerIncompleteText => "GenericRequest_Item_Answer_Incomplete.Text".GetLocalized();
 
-    /// <summary>A question that does not apply is answered, so the step can be left.</summary>
-    protected override bool CanAnswer => Selected is not null && IsAnswerComplete;
+    /// <summary>
+    /// A question that does not apply is answered, so the step can be left. The finished-product card names no item
+    /// of its own, so it can only leave the step once the page behind it has named the kind.
+    /// </summary>
+    protected override bool CanAnswer =>
+        Selected is { IsFinishedProductGroup: true }
+            ? RequestItemCatalog.IsFinishedProductPickup(Draft.ItemCode)
+            : Selected is not null && IsAnswerComplete;
 
     private bool IsAnswerComplete
     {
@@ -109,19 +117,49 @@ public sealed partial class GenericRequestItemViewModel : GenericRequestStepView
         }
     }
 
+    /// <summary>
+    /// Show the page that asks which kind of finished product this request is picking up.
+    /// </summary>
+    /// <remarks>
+    /// The four finished-product pickups are one card here, because a person collecting the product is not choosing
+    /// between finished goods, non-conforming stock, work in process and outside service by name — they know which
+    /// one it is, and the page behind the card asks them. Clicking the card never selects it, so the item is only
+    /// ever named by that page (FR-007).
+    /// </remarks>
+    [RelayCommand]
+    private void OpenFinishedProductChooser() => Navigator.ShowFinishedProductChooser();
+
     protected override async Task LoadCoreAsync()
     {
         var result = await _data.ReadItemsAsync(Draft.Category);
 
         Options.Clear();
+        var finishedProductCardAdded = false;
         foreach (var option in result.Items)
         {
-            Options.Add(option);
+            if (!RequestItemCatalog.IsFinishedProductPickup(option.Code))
+            {
+                Options.Add(option);
+                continue;
+            }
+
+            // The first of the four takes the card and the rest are folded into it, so the card keeps the place in
+            // the list the catalog gave that family.
+            if (!finishedProductCardAdded)
+            {
+                finishedProductCardAdded = true;
+                Options.Add(GenericRequestItemOption.FinishedProductGroup(
+                    RequestItemCatalog.ResolveFinishedProductPickupLabel()));
+            }
         }
 
-        // The item is matched on its catalogue code, not its name: three product pickups share one displayed label,
-        // so a name would select whichever came first rather than the one that was chosen.
-        Selected = Options.FirstOrDefault(option => string.Equals(option.Code, Draft.ItemCode, StringComparison.OrdinalIgnoreCase));
+        // The item is matched on its catalogue code, not its name: the finished-product pickups share one displayed
+        // label, so a name would select whichever came first rather than the one that was chosen. A draft that
+        // already names one of them is the card itself, which is how the step reads when it is returned to.
+        Selected = Options.FirstOrDefault(option => string.Equals(option.Code, Draft.ItemCode, StringComparison.OrdinalIgnoreCase))
+            ?? (RequestItemCatalog.IsFinishedProductPickup(Draft.ItemCode)
+                ? Options.FirstOrDefault(option => option.IsFinishedProductGroup)
+                : null);
 
         if (Selected is not null && string.Equals(Selected.Code, Draft.ItemCode, StringComparison.OrdinalIgnoreCase))
         {
@@ -134,6 +172,13 @@ public sealed partial class GenericRequestItemViewModel : GenericRequestStepView
     protected override void CommitToDraft()
     {
         if (Selected is not { } selected)
+        {
+            return;
+        }
+
+        // The finished-product card names no item, so leaving the step with it chosen keeps the item the page behind
+        // it recorded rather than writing a code no request can carry.
+        if (selected.IsFinishedProductGroup)
         {
             return;
         }
@@ -159,8 +204,10 @@ public sealed partial class GenericRequestItemViewModel : GenericRequestStepView
         // A different item asks a different question, so an answer given for the previous item is not an answer to
         // this one and is cleared rather than carried across. The fill goes with it, because every answer it
         // supplied was a statement about the item the request no longer carries (FR-009). Only a *changed* item
-        // counts: the first item a request ever picks has nothing before it to carry anything over from.
-        if (!string.Equals(value?.Code, Draft.ItemCode, StringComparison.OrdinalIgnoreCase))
+        // counts: the first item a request ever picks has nothing before it to carry anything over from, and the
+        // finished-product card names no item at all, so it changes nothing the step holds.
+        if (value?.IsFinishedProductGroup != true
+            && !string.Equals(value?.Code, Draft.ItemCode, StringComparison.OrdinalIgnoreCase))
         {
             Answer = string.Empty;
 

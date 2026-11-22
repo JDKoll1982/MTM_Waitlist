@@ -104,11 +104,16 @@ internal sealed class StubGenericRequestNavigator : IGenericRequestNavigator
     /// <summary>How many times the flow was asked to show the waitlist.</summary>
     public int LeaveToWaitlistCount { get; private set; }
 
+    /// <summary>How many times the finished-product page was asked for, so a test can prove a card opened it.</summary>
+    public int FinishedProductChooserCount { get; private set; }
+
     public void GoTo(GenericRequestStep step)
     {
         CurrentStep = step;
         Visited.Add(step);
     }
+
+    public void ShowFinishedProductChooser() => FinishedProductChooserCount++;
 
     public void LeaveToWaitlist() => LeaveToWaitlistCount++;
 

@@ -168,6 +168,39 @@ public sealed class NewRequestWorkCenterViewModelTests
         Assert.AreEqual(0, viewModel.HotWorkCenters.Count);
     }
 
+    /// <summary>
+    /// Typing in the search box opens the other work centers, because a search looks past this computer's own ones;
+    /// clearing the box closes them again.
+    /// </summary>
+    [TestMethod]
+    public void ViewModel_NewRequestWorkCenterViewModelTests_FilterText_OpensTheOtherWorkCentersWhileItHasText()
+    {
+        var catalogService = new FakeWorkCenterCatalogService
+        {
+            Catalog = BuildCatalog(
+                hot: new[] { "Press 1" },
+                other: new[] { "Press 2" },
+                active: new[] { "Press 1", "Press 2" },
+                details: new Dictionary<string, WorkCenterDetail>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["Press 1"] = new() { Building = "Expo Drive" },
+                    ["Press 2"] = new() { Building = "Expo Drive" },
+                }),
+        };
+        var viewModel = CreateViewModel(catalogService, new StubBuildingSelectionService(), new RecordingNavigationService());
+
+        viewModel.OnNavigatedTo(new NewRequestFlowState());
+        Assert.IsFalse(viewModel.IsOtherWorkCentersExpanded, "an empty box leaves the other work centers closed");
+
+        viewModel.FilterText = "press";
+
+        Assert.IsTrue(viewModel.IsOtherWorkCentersExpanded, "a search opens them, so the matches are all on screen");
+
+        viewModel.FilterText = "   ";
+
+        Assert.IsFalse(viewModel.IsOtherWorkCentersExpanded, "whitespace is not a search");
+    }
+
     [TestMethod]
     public void ViewModel_NewRequestWorkCenterViewModelTests_OtherWorkCentersHeader_TracksExpandedState()
     {

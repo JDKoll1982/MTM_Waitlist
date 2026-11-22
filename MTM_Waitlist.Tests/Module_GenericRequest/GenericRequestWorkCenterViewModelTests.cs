@@ -68,4 +68,22 @@ public sealed class GenericRequestWorkCenterViewModelTests
             navigator.Draft.ScrapType,
             "Going back and forward through the same work center changes nothing.");
     }
+
+    [TestMethod]
+    public async Task ViewModel_GenericRequestWorkCenterViewModelTests_LoadAsync_AnUnreadableWorkCenterListOffersTheAttemptTimeAndARetry()
+    {
+        var attemptedAt = new DateTimeOffset(2026, 11, 16, 14, 5, 0, TimeSpan.Zero);
+        var data = new StubGenericRequestStepData
+        {
+            WorkCenters = GenericRequestStepResult<GenericRequestWorkCenterOption>.Unavailable(attemptedAt),
+        };
+
+        var viewModel = new GenericRequestWorkCenterViewModel(data, new StubGenericRequestNavigator());
+        await viewModel.LoadAsync();
+
+        Assert.IsTrue(viewModel.IsUnavailable, "an unreadable work center list must not present as an empty one");
+        Assert.AreEqual(attemptedAt, viewModel.AttemptedAtUtc, "the unavailable presentation carries the time of the attempt");
+        Assert.AreNotEqual(string.Empty, viewModel.AttemptedAtDisplay, "the attempt time must be offered to the requester");
+        Assert.IsTrue(viewModel.RetryCommand.CanExecute(null), "the unavailable presentation must offer a retry");
+    }
 }
