@@ -73,8 +73,12 @@ public sealed class GenericRequestDieData : IGenericRequestDieData
         // A bare number could be a die whose prefix was left off. The search asks once more as a die number rather
         // than refusing a die the plant records, and it asks with the typed term's own answer already exhausted
         // above, so a part number never loses its dies to the retry (research R2).
+        var partNumber = DieSearchPartNumber(term);
+
         if (rows.Count == 0 && DieNumberCandidate(term) is { } candidate)
         {
+            // Answered as a die number, so the term named no part and the dies it found keep their number alone.
+            partNumber = string.Empty;
             rows = await TryReadAsync(candidate, cancellationToken).ConfigureAwait(false);
             if (rows is null)
             {
@@ -89,7 +93,10 @@ public sealed class GenericRequestDieData : IGenericRequestDieData
         {
             if (row.DieNumber.Length > 0 && seen.Add(row.DieNumber))
             {
-                options.Add(new GenericRequestDieOption(row.DieNumber, row.Description, row.Location));
+                options.Add(new GenericRequestDieOption(row.DieNumber, row.Description, row.Location)
+                {
+                    PartNumber = partNumber,
+                });
             }
         }
 
@@ -130,6 +137,14 @@ public sealed class GenericRequestDieData : IGenericRequestDieData
     /// The die number a bare term could be, or <see langword="null"/> when the term already names a family or is not
     /// a number the plant's die numbering could produce.
     /// </summary>
+    /// <summary>
+    /// The part a die search names, or empty when the term is a die number rather than a part number. The plant's die
+    /// numbers share one prefix, so a term that does not carry it — and answered dies of its own accord, without the
+    /// bare-number retry — is the part those dies are for.
+    /// </summary>
+    private static string DieSearchPartNumber(string term) =>
+        term.StartsWith(PartPictureLayout.DieFolder, StringComparison.OrdinalIgnoreCase) ? string.Empty : term;
+
     private static string? DieNumberCandidate(string term)
     {
         foreach (var prefix in PartPictureLayout.KnownPartNumberPrefixes)

@@ -31,6 +31,32 @@ public sealed class GenericRequestDieAnswerTests
     }
 
     [TestMethod]
+    public void Model_GenericRequestDieAnswerTests_ADieSearchedThroughPartsRoundTripsThatPart()
+    {
+        // The part is what the board writes beside the die on the card, and a generic request has no job to read it
+        // from, so it must survive the answers column with the die (owner decision, 2026-11-23).
+        var answers = new GenericRequestDieAnswer
+        {
+            DieNumber = "FGT0150-01",
+            DieLocation = "DIE SHOP",
+            DiePartNumber = "24733467-PKG",
+        }.ToAnswers();
+
+        Assert.AreEqual("24733467-PKG", answers[GenericRequestDieAnswer.DiePartNumberKey]);
+        Assert.AreEqual("24733467-PKG", GenericRequestDieAnswer.TryRead(answers)!.DiePartNumber);
+    }
+
+    [TestMethod]
+    public void Model_GenericRequestDieAnswerTests_ToAnswers_ADieWithNoPartRecordsNoPartKey()
+    {
+        var answers = new GenericRequestDieAnswer { DieNumber = "FGT0602-01" }.ToAnswers();
+
+        Assert.IsFalse(
+            answers.ContainsKey(GenericRequestDieAnswer.DiePartNumberKey),
+            "A die searched by its own number names no part, so the card reads one that was never named.");
+    }
+
+    [TestMethod]
     public void Model_GenericRequestDieAnswerTests_ToAnswers_ABlankDieRecordsNoKeyAtAll()
     {
         var answers = new GenericRequestDieAnswer { DieNumber = "   ", DieLocation = "U-B0-01" }.ToAnswers();

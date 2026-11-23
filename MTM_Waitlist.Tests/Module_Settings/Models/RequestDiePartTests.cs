@@ -63,6 +63,41 @@ public sealed class RequestDiePartTests
     }
 
     [TestMethod]
+    public void Model_RequestDiePartTests_ComposeWithPart_WritesThePartThenTheDieInBrackets()
+    {
+        Assert.AreEqual(
+            "24733467-PKG - (FGT0002001)",
+            RequestDiePart.ComposeWithPart("  24733467-PKG  ", "  FGT0002001 "),
+            "the part a die is for leads, and the die follows in brackets");
+    }
+
+    [TestMethod]
+    public void Model_RequestDiePartTests_ComposeWithPart_ADieWithNoPartKeepsItsOwnNumberAlone()
+    {
+        // A generic request answered by searching a die number named no part, and an empty bracket in front of the
+        // die would say nothing while taking the room.
+        foreach (var part in new[] { null, string.Empty, "   " })
+        {
+            Assert.AreEqual(
+                "FGT0002001",
+                RequestDiePart.ComposeWithPart(part, "FGT0002001"),
+                $"a part of '{part}' leaves the die as its own number");
+        }
+    }
+
+    [TestMethod]
+    public void Model_RequestDiePartTests_ComposeWithPart_YieldsNothingWithoutADieNumber()
+    {
+        foreach (var number in new[] { null, string.Empty, "   " })
+        {
+            Assert.AreEqual(
+                string.Empty,
+                RequestDiePart.ComposeWithPart("24733467-PKG", number),
+                "a request that names no die names nothing, part or no part");
+        }
+    }
+
+    [TestMethod]
     public void Model_RequestDiePartTests_Summary_ReportsWhatTheDieHasRatherThanNothing()
     {
         var described = new RequestDiePart { PartNumber = "FGT0002000", Location = "DIE SHOP", Description = "Die 9003-A" };

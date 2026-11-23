@@ -23,7 +23,8 @@ public sealed record RequestItemLine2Context(
     string? Answer = null,
     string? Component = null,
     string? Defect = null,
-    string? JobPartNumber = null);
+    string? JobPartNumber = null,
+    string? DiePartNumber = null);
 
 /// <summary>The resolved identifier, and whether it resolved at all.</summary>
 public sealed record RequestItemLine2Result(string Text, bool IsResolved, string ProblemKey, string Problem)
@@ -200,6 +201,9 @@ public sealed class RequestItemLine2Resolver
             // without a separator dangling when the location is unknown (FR-056). It is composed here rather than
             // accepted ready-made, so every caller that can supply a die gets the same formatting.
             ["die"] = RequestDiePart.ComposeLabel(context.DieNumber),
+            // The die's identifier as a card's first line draws it: the part the die is for, then the die's own
+            // number in brackets. Composed here for the same reason {die} is, so every caller writes it one way.
+            ["die_with_part"] = RequestDiePart.ComposeWithPart(context.DiePartNumber, context.DieNumber),
             ["dunnage_part"] = context.DunnagePart,
             ["sequence_number"] = context.SequenceNumber,
             ["scrap_type"] = context.ScrapType,

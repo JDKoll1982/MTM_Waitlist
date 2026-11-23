@@ -60,10 +60,11 @@ public sealed class RequestItemDefinition
     /// </para>
     /// <para>
     /// <b>Token set (closed).</b> Job-derived: <c>part_number</c>, <c>part_description</c>,
-    /// <c>die_number</c>, <c>die_location</c>, <c>die</c>, <c>dunnage_part</c>, <c>sequence_number</c>,
-    /// <c>scrap_type</c>, <c>job_part_number</c>. Captured during the flow: <c>answer</c>, <c>component</c>,
-    /// <c>defect</c>. An unknown token is a reportable configuration problem, never a silent blank
-    /// (FR-026).
+    /// <c>die_number</c>, <c>die_location</c>, <c>die</c>, <c>die_with_part</c>, <c>dunnage_part</c>,
+    /// <c>sequence_number</c>, <c>scrap_type</c>, <c>job_part_number</c>. Captured during the flow: <c>answer</c>,
+    /// <c>component</c>, <c>defect</c>. An unknown token is a reportable configuration problem, never a silent blank
+    /// (FR-026). <c>die_with_part</c> is the die written as the part it is for and its own number —
+    /// <c>PART - (FGT0001-01)</c> — and reads as the number alone when the request names no part.
     /// </para>
     /// </summary>
     public string CardLine2Template { get; init; } = string.Empty;

@@ -37,6 +37,29 @@ public sealed class RequestDiePart
     /// </summary>
     public static string ComposeLabel(string? partNumber) => partNumber?.Trim() ?? string.Empty;
 
+    /// <summary>
+    /// The die as a card's first line draws it: the part the die is for, then the die's own number in brackets —
+    /// <c>24733467-PKG - (FGT0150-01)</c>.
+    /// </summary>
+    /// <param name="diePartNumber">The part the die is assigned to, or blank when the request does not name it.</param>
+    /// <param name="dieNumber">The die's own <c>FGT</c> number.</param>
+    /// <remarks>
+    /// A die whose part the request does not name reads as its number alone rather than as an empty bracket, so a
+    /// generic request answered by searching a die number still says which die it is (owner decision, 2026-11-23).
+    /// </remarks>
+    public static string ComposeWithPart(string? diePartNumber, string? dieNumber)
+    {
+        var die = ComposeLabel(dieNumber);
+        var part = diePartNumber?.Trim();
+
+        if (die.Length == 0)
+        {
+            return string.Empty;
+        }
+
+        return string.IsNullOrEmpty(part) ? die : $"{part} - ({die})";
+    }
+
     /// <summary>The secondary line under the die's number on a card — the part the die is assigned to.</summary>
     public string Summary => string.IsNullOrWhiteSpace(Description)
         ? (HasLocation ? Location : "Die")

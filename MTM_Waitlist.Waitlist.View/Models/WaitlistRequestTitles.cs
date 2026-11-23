@@ -89,12 +89,13 @@ public static class WaitlistRequestTitles
         var item = request?.ItemDefinition;
         var job = jobAvailability;
 
-        // The die is handed over when a template names the die at all — as its own composed value, or as either
-        // half of it — so an Item that writes `{die}` is not left unresolved while one that writes
-        // `{die_number}` still resolves (FR-053, FR-056).
+        // The die is handed over when a template names the die at all — as its own composed value, as the part and
+        // the die written together, or as either half of it — so an Item that writes `{die}` is not left unresolved
+        // while one that writes `{die_number}` still resolves (FR-053, FR-056).
         var namesDie = NamesToken(item, "die")
             || NamesToken(item, "die_number")
-            || NamesToken(item, "die_location");
+            || NamesToken(item, "die_location")
+            || NamesToken(item, "die_with_part");
 
         var storedDie = namesDie ? answer : null;
         var choseADie = !string.IsNullOrWhiteSpace(storedDie);
@@ -120,6 +121,12 @@ public static class WaitlistRequestTitles
                 : null,
             DieLocation: namesDie
                 ? (choseADie ? chosen?.Location ?? statedDie?.DieLocation : job?.DieLocation)
+                : null,
+            // The part the die is for: what a generic request recorded when it was raised — the part the die was
+            // found through — or, for a work-order request, the job's own part. The card's first line writes the two
+            // together, so a handler reads which part the die makes without opening anything (owner decision).
+            DiePartNumber: namesDie
+                ? statedDie?.DiePartNumber ?? job?.JobPartNumber
                 : null);
     }
 

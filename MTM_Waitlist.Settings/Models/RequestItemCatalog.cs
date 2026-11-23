@@ -20,7 +20,7 @@ public static class RequestItemCatalog
     {
         // --- Pickup (11) ---
         Item(RequestCategory.Pickup, 1, "pickup-coil", "coil-or-flatstock", "{part_number}", "pickup-coil"),
-        Item(RequestCategory.Pickup, 2, "pickup-die", "die", "{die}", "pickup-die", cardLine1Template: "{umbrella} {job_part_number}"),
+        Item(RequestCategory.Pickup, 2, "pickup-die", "die", "{die}", "pickup-die", cardLine1Template: "{umbrella} {die_with_part}"),
         Item(RequestCategory.Pickup, 3, "pickup-component", "component", "{component}", "pickup-component"),
         Item(RequestCategory.Pickup, 4, "pickup-fg", "finished-goods-fg", "{part_number}", "pickup-fg"),
         Item(RequestCategory.Pickup, 5, "pickup-ncm", "non-conforming-ncm", "{part_number}", "pickup-ncm"),
@@ -37,7 +37,7 @@ public static class RequestItemCatalog
         Item(RequestCategory.Deliver, 3, "deliver-hopper", "hopper", "Hopper", "deliver-hopper"),
         Item(RequestCategory.Deliver, 4, "deliver-flatstock", "flatstock", "{part_number}", "deliver-flatstock"),
         Item(RequestCategory.Deliver, 5, "deliver-component", "component", "{component}", "deliver-component"),
-        Item(RequestCategory.Deliver, 6, "deliver-die", "die", "{die}", "deliver-die", cardLine1Template: "{umbrella} {job_part_number}"),
+        Item(RequestCategory.Deliver, 6, "deliver-die", "die", "{die}", "deliver-die", cardLine1Template: "{umbrella} {die_with_part}"),
         Item(RequestCategory.Deliver, 7, "deliver-dunnage", "dunnage", "{dunnage_part}", "deliver-dunnage"),
         Item(RequestCategory.Deliver, 8, "deliver-wrong-coil", "wrong-coil", "{part_number}", "deliver-wrong-coil"),
         Item(RequestCategory.Deliver, 9, "deliver-wrong-flatstock", "wrong-flatstock", "{part_number}", "deliver-wrong-flatstock"),

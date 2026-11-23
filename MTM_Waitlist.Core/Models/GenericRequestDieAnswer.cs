@@ -27,11 +27,21 @@ public sealed record GenericRequestDieAnswer
     /// <summary>Where the die lives, as the search resolved it.</summary>
     public const string DieLocationKey = "die.location";
 
+    /// <summary>The part the die is for: the part number the requester searched the die through.</summary>
+    public const string DiePartNumberKey = "die.part_number";
+
     /// <summary>The chosen die's number, or blank when the request states no die.</summary>
     public string DieNumber { get; init; } = string.Empty;
 
     /// <summary>The chosen die's location, or blank when Visual records none.</summary>
     public string DieLocation { get; init; } = string.Empty;
+
+    /// <summary>
+    /// The part the die makes, or blank when the requester searched the die by its own number. A generic request has
+    /// no job, so this is the only place the board can learn it, and the request's card writes the part and the die
+    /// together (owner decision, 2026-11-23).
+    /// </summary>
+    public string DiePartNumber { get; init; } = string.Empty;
 
     /// <summary>Whether the die's location is known, which is what the card draws on.</summary>
     public bool HasLocation => !string.IsNullOrWhiteSpace(DieLocation);
@@ -59,6 +69,11 @@ public sealed record GenericRequestDieAnswer
             answers[DieLocationKey] = DieLocation.Trim();
         }
 
+        if (!string.IsNullOrWhiteSpace(DiePartNumber))
+        {
+            answers[DiePartNumberKey] = DiePartNumber.Trim();
+        }
+
         return answers;
     }
 
@@ -84,6 +99,7 @@ public sealed record GenericRequestDieAnswer
         {
             DieNumber = dieNumber,
             DieLocation = Read(answers, DieLocationKey).Trim(),
+            DiePartNumber = Read(answers, DiePartNumberKey).Trim(),
         };
     }
 

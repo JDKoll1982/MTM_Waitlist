@@ -60,6 +60,24 @@ public sealed class GenericRequestDieDataTests
         CollectionAssert.AreEqual(
             new[] { "FGT0602-01", "FGT0602-02", "FGT0603-01" },
             result.Items.Select(option => option.DieNumber).ToArray());
+        CollectionAssert.AreEqual(
+            new[] { "PART-9003", "PART-9003", "PART-9003" },
+            result.Items.Select(option => option.PartNumber).ToArray(),
+            "The dies a part search found are that part's dies, and the card writes the part and the die together.");
+    }
+
+    [TestMethod]
+    public async Task Audit_GenericRequestDieDataTests_ADieNumberSearchNamesNoPart()
+    {
+        var dies = GenericRequestReadShapes.DieData(Executor(_ => VisualQueryOutcome.Ok(
+            (System.Collections.Generic.IReadOnlyDictionary<string, object?>[])[DieRow("FGT0602-01", "BASE DIE", "U-B0-01")])));
+
+        var result = await dies.ReadDiesAsync("FGT0602-01");
+
+        Assert.AreEqual(
+            string.Empty,
+            result.Items[0].PartNumber,
+            "A term that is itself a die number named no part, so the card has to fall back to the die alone.");
     }
 
     [TestMethod]

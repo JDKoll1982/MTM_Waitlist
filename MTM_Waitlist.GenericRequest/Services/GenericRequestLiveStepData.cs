@@ -478,6 +478,7 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
             {
                 DieNumber = chosen.DieNumber,
                 DieLocation = chosen.Location,
+                DiePartNumber = chosen.PartNumber,
             }.ToAnswers())
             {
                 answers[pair.Key] = pair.Value;

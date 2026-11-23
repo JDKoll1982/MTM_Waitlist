@@ -138,7 +138,10 @@ public sealed class RequestItemCatalogTests
             var die = RequestItemCatalog.FindById(itemId)!;
 
             Assert.AreEqual("{die}", die.CardLine2Template, $"{itemId}'s identifier is the die and its location, composed as one value.");
-            Assert.AreEqual("{umbrella} {job_part_number}", die.CardLine1Template, $"{itemId}'s first line names the part the die is assigned to.");
+            Assert.AreEqual(
+                "{umbrella} {die_with_part}",
+                die.CardLine1Template,
+                $"{itemId}'s first line names the part the die is for and the die itself, in that order.");
         }
     }
 }

@@ -272,6 +272,13 @@ public sealed partial class GenericRequestDieOption(string dieNumber, string des
     public string Location { get; } = location;
 
     /// <summary>
+    /// The part this die was found through, or empty when the requester searched a die number instead. A generic
+    /// request has no job, so this is the only place the board can learn which part the die is for; the request
+    /// card writes the two together (owner decision, 2026-11-23).
+    /// </summary>
+    public string PartNumber { get; init; } = string.Empty;
+
+    /// <summary>
     /// What the row draws for the location: the location itself, or the step's wording for a die whose home Visual
     /// does not record. Never empty, so no result row can draw a blank location (FR-006, SC-005).
     /// </summary>

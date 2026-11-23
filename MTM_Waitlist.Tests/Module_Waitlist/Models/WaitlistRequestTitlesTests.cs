@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
@@ -143,9 +144,15 @@ public sealed class WaitlistRequestTitlesTests
     }
 
     [TestMethod]
-    public void Model_WaitlistRequestTitlesTests_ResolveLine1_DieItemsNameTheRequestingJobsPartNumber()
+    public void Model_WaitlistRequestTitlesTests_ResolveLine1_DieItemsWriteTheJobsPartThenTheDieInBrackets()
     {
-        foreach (var (itemId, expected) in new[] { ("pickup-die", "Pickup Die: PART-9003"), ("deliver-die", "Deliver Die: PART-9003") })
+        // Both halves in one read: a handler must learn which part the die makes and which die to fetch without
+        // opening anything, so the part leads and the die follows in brackets (owner decision, 2026-11-23).
+        foreach (var (itemId, expected) in new[]
+        {
+            ("pickup-die", "Pickup Die: PART-9003 - (FGT0002000)"),
+            ("deliver-die", "Deliver Die: PART-9003 - (FGT0002000)"),
+        })
         {
             var request = new WaitlistRequest { Category = "Pickup", Item = itemId };
 
@@ -153,8 +160,53 @@ public sealed class WaitlistRequestTitlesTests
                 Find(itemId),
                 WaitlistRequestTitles.ResolveContext(request, DieJob()));
 
-            Assert.AreEqual(expected, line1, $"{itemId}'s first line names the part the die is assigned to.");
+            Assert.AreEqual(expected, line1, $"{itemId}'s first line names the part the die is assigned to and the die.");
         }
+    }
+
+    [TestMethod]
+    public void Model_WaitlistRequestTitlesTests_ResolveLine1_AGenericDieItemNamesThePartTheDieWasSearchedThrough()
+    {
+        // A generic work center has no job, so the part reaches the card from the answer the request recorded when
+        // the requester searched the die through that part (020 FR-012).
+        var request = new WaitlistRequest
+        {
+            Category = "Pickup",
+            Item = "pickup-die",
+            IsGeneric = true,
+            InputValue = "FGT0150-01",
+            Answers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                [GenericRequestDieAnswer.DieNumberKey] = "FGT0150-01",
+                [GenericRequestDieAnswer.DieLocationKey] = "DIE SHOP",
+                [GenericRequestDieAnswer.DiePartNumberKey] = "24733467-PKG",
+            },
+        };
+
+        Assert.AreEqual(
+            "Pickup Die: 24733467-PKG - (FGT0150-01)",
+            WaitlistRequestTitles.ResolveLine1(request.ItemDefinition, WaitlistRequestTitles.ResolveContext(request)));
+    }
+
+    [TestMethod]
+    public void Model_WaitlistRequestTitlesTests_ResolveLine1_AGenericDieSearchedByItsNumberKeepsItsNumberAlone()
+    {
+        // Nothing named a part, so the card says the die rather than an empty bracket in front of it.
+        var request = new WaitlistRequest
+        {
+            Category = "Deliver",
+            Item = "deliver-die",
+            IsGeneric = true,
+            InputValue = "FGT0150-01",
+            Answers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                [GenericRequestDieAnswer.DieNumberKey] = "FGT0150-01",
+            },
+        };
+
+        Assert.AreEqual(
+            "Deliver Die: FGT0150-01",
+            WaitlistRequestTitles.ResolveLine1(request.ItemDefinition, WaitlistRequestTitles.ResolveContext(request)));
     }
 
     [TestMethod]
