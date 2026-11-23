@@ -362,6 +362,11 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
     partial void OnFilterTextChanged(string value)
     {
         ApplyFilter();
+
+        // Searching is how a person looks past this computer's own work centers, so text in the box opens the other
+        // work centers and clearing it closes them again, exactly as the New Request step does. A computer with no
+        // local work centers keeps them open, because collapsing there would leave the page with no cards at all.
+        IsOtherWorkCentersExpanded = !string.IsNullOrWhiteSpace(value) || _hotWorkCenterNames.Count == 0;
     }
 
     private void OnBuildingChanged(object? sender, EventArgs e)
