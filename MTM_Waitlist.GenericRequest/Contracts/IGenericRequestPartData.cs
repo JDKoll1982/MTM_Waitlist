@@ -44,4 +44,19 @@ public interface IGenericRequestPartData
         string partNumber,
         string sequence,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// How much of <paramref name="partNumber"/> is on hand across the whole part, with no sequence to read it
+    /// against.
+    /// </summary>
+    /// <remarks>
+    /// A coil and a flatstock are stocked as whole pieces and are not attributed to a work-order sequence, so their
+    /// part step asks this instead of <see cref="ReadQuantityAsync"/>. The WIP floor is asked first and Infor Visual's
+    /// part-wide total answers when the floor holds nothing, which is the same ownership rule the part-wide stock
+    /// answer uses. An unreachable system answers <see cref="GenericRequestQuantityReading.Unavailable"/> with the
+    /// attempt time rather than a figure.
+    /// </remarks>
+    Task<GenericRequestQuantityReading> ReadPartQuantityAsync(
+        string partNumber,
+        CancellationToken cancellationToken = default);
 }

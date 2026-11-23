@@ -110,6 +110,38 @@ public sealed class GenericRequestFlowRulesTests
             "a proved-part request is not one of the three answered on their own step, so it still answers details");
     }
 
+    [DataTestMethod]
+    [DataRow("MMC0000658", DisplayName = "a coil")]
+    [DataRow("MMF0005511", DisplayName = "a flatstock")]
+    public void Audit_GenericRequestFlowRulesTests_ACoilOrFlatstockSkipsTheDetailsPage(string partNumber)
+    {
+        var draft = new GenericRequestDraft { RequiresPart = true, PartNumber = partNumber };
+
+        CollectionAssert.DoesNotContain(
+            GenericRequestFlowRules.Order(draft).ToArray(),
+            GenericRequestStep.Details,
+            "a coil and a flatstock are stated by the part step alone, so the details page has nothing to ask");
+        Assert.AreEqual(
+            GenericRequestStep.Summary,
+            GenericRequestFlowRules.NextStep(draft, GenericRequestStep.Part),
+            "the part step should lead straight to the review");
+        Assert.AreEqual(
+            GenericRequestStep.Part,
+            GenericRequestFlowRules.PreviousStep(draft, GenericRequestStep.Summary),
+            "going back from the review should return to the part step, not to a page that was never shown");
+    }
+
+    [TestMethod]
+    public void Audit_GenericRequestFlowRulesTests_APartThatIsNotACoilOrFlatstockKeepsTheDetailsPage()
+    {
+        var draft = new GenericRequestDraft { RequiresPart = true, PartNumber = "100-AAA" };
+
+        CollectionAssert.Contains(
+            GenericRequestFlowRules.Order(draft).ToArray(),
+            GenericRequestStep.Details,
+            "only the coil and flatstock prefixes skip the details page; every other part still answers it");
+    }
+
     [TestMethod]
     public void Audit_GenericRequestFlowRulesTests_TheEndsOfTheFlowAreClamped()
     {

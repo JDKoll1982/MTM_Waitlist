@@ -45,8 +45,10 @@ DECLARE @ContainsPattern nvarchar(580) =
 IF @TermNormalized = ''
 BEGIN
     RETURN;
-END
+END;
 
+-- The terminator above is required, not cosmetic: a CTE must be preceded by a terminated statement, so a batch
+-- whose IF block ends without one fails to parse at the WITH below ("Incorrect syntax near the keyword 'with'").
 WITH DieMatches AS
 (
     SELECT

@@ -386,6 +386,16 @@ public sealed class GenericRequestJobFillSeedingTests
             return Task.FromResult(
                 GenericRequestQuantityReading.OnHand(5m, SequenceSource.WipFloor, GenericRequestPartStage.Wip, DateTimeOffset.UtcNow));
         }
+
+        public Task<GenericRequestQuantityReading> ReadPartQuantityAsync(
+            string partNumber,
+            CancellationToken cancellationToken = default)
+        {
+            QuantityReads++;
+
+            return Task.FromResult(
+                GenericRequestQuantityReading.OnHand(5m, SequenceSource.WipFloor, GenericRequestPartStage.Unknown, DateTimeOffset.UtcNow));
+        }
     }
 
     private sealed class StubCatalogueReader(DunnageCataloguePart[] parts) : IDunnageCatalogueReader

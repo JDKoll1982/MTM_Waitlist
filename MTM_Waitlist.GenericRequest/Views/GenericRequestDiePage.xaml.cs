@@ -8,6 +8,12 @@ namespace MTM_Waitlist.GenericRequest.Views;
 
 public sealed partial class GenericRequestDiePage : Page
 {
+    /// <summary>
+    /// How many characters the requester has to type before Infor Visual is asked. A read per keystroke would be a
+    /// plant-system connection per letter, which is the same rule the part step's search follows.
+    /// </summary>
+    private const int MinimumSearchLength = 2;
+
     public GenericRequestDiePage()
         : this(GenericRequestPageServices.Get<GenericRequestDieViewModel>())
     {
@@ -29,10 +35,17 @@ public sealed partial class GenericRequestDiePage : Page
     /// </summary>
     private void OnSearchTextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
     {
-        if (args.Reason is AutoSuggestionBoxTextChangeReason.UserInput)
+        if (args.Reason is not AutoSuggestionBoxTextChangeReason.UserInput)
         {
-            _ = ViewModel.LoadAsync();
+            return;
         }
+
+        if (sender.Text.Trim().Length < MinimumSearchLength)
+        {
+            return;
+        }
+
+        _ = ViewModel.LoadAsync();
     }
 
     /// <summary>

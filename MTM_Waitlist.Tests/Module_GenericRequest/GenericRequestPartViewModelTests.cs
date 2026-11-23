@@ -232,6 +232,118 @@ public sealed class GenericRequestPartViewModelTests
         Assert.AreEqual("100-AAA", Part("100-AAA").ToString());
     }
 
+    [TestMethod]
+    public async Task Audit_GenericRequestPartViewModelTests_ACoilStatesThePartAloneAndShowsWhatIsOnHand()
+    {
+        var coil = new GenericRequestPartOption("MMC0000658", "Coil, 10Ga X 6.000", SequenceSource.VisualOwnPart);
+        var (viewModel, navigator) = Create(
+            completions: (MTM_Waitlist.GenericRequest.Models.GenericRequestPartOption[])[coil],
+            sequences: GenericRequestStepResult<GenericRequestSequenceOption>.Populated(
+                (MTM_Waitlist.GenericRequest.Models.GenericRequestSequenceOption[])[Sequence("10")],
+                DateTimeOffset.UtcNow),
+            partWideReading: GenericRequestQuantityReading.OnHand(
+                4998.7m,
+                SequenceSource.VisualOwnPart,
+                GenericRequestPartStage.Unknown,
+                DateTimeOffset.UtcNow));
+
+        await viewModel.LoadAsync();
+        navigator.Draft.RequiresPart = true;
+        navigator.Draft.ItemCode = "pickup-coil";
+        await viewModel.AcceptPartAsync(coil);
+
+        Assert.IsTrue(viewModel.IsCoilOrFlatstock, "an MMC part number is a coil");
+        Assert.AreEqual(0, viewModel.Sequences.Count, "a coil is not attributed to a work-order sequence");
+        Assert.AreEqual("4999", viewModel.DetailQuantityOnHand, "the whole-part figure is rounded up");
+        Assert.AreEqual("Coil, 10Ga X 6.000", viewModel.DetailDescription);
+        Assert.IsTrue(viewModel.ContinueCommand.CanExecute(null), "the part alone answers a coil");
+
+        await viewModel.ContinueCommand.ExecuteAsync(null);
+
+        Assert.AreEqual(string.Empty, navigator.Draft.Sequence, "a coil request records no sequence");
+        Assert.AreEqual(
+            GenericRequestStep.Summary,
+            navigator.CurrentStep,
+            "a coil has nothing for the details page to ask, so it goes straight to the review");
+    }
+
+    [TestMethod]
+    public async Task Audit_GenericRequestPartViewModelTests_AFailedPartWideReadKeepsACoilOnTheStep()
+    {
+        var (viewModel, navigator) = Create(
+            completions: (MTM_Waitlist.GenericRequest.Models.GenericRequestPartOption[])[Part("MMF0005511")],
+            partWideReading: GenericRequestQuantityReading.Unavailable(DateTimeOffset.UtcNow));
+
+        await viewModel.LoadAsync();
+        navigator.Draft.ItemCode = "deliver-flatstock";
+        await viewModel.AcceptPartAsync(Part("MMF0005511"));
+
+        Assert.IsTrue(viewModel.IsCoilOrFlatstock, "an MMF part number is a flatstock");
+        Assert.IsFalse(
+            viewModel.ContinueCommand.CanExecute(null),
+            "the step does not advance on a quantity nobody answered");
+        Assert.AreEqual(0, navigator.Visited.Count);
+    }
+
+    [DataTestMethod]
+    [DataRow("pickup-coil", DisplayName = "the Pickup coil-and-flatstock item")]
+    [DataRow("deliver-coil", DisplayName = "the Deliver coil item")]
+    [DataRow("deliver-flatstock", DisplayName = "the Deliver flatstock item")]
+    public async Task Audit_GenericRequestPartViewModelTests_ACoilOrFlatstockItemOffersOnlyCoilAndFlatstockParts(string itemCode)
+    {
+        var (viewModel, navigator) = Create(
+            completions: (MTM_Waitlist.GenericRequest.Models.GenericRequestPartOption[])[
+                Part("MMC0000658"),
+                Part("MMF0005511"),
+                Part("100-AAA")]);
+        navigator.Draft.ItemCode = itemCode;
+        viewModel.SearchText = "MM";
+
+        await viewModel.SearchAsync();
+
+        CollectionAssert.AreEqual(
+            new[] { "MMC0000658", "MMF0005511" },
+            viewModel.Completions.Select(option => option.PartNumber).ToArray(),
+            "a coil or flatstock request is only ever about a coil or a flatstock");
+    }
+
+    [DataTestMethod]
+    [DataRow("pickup-fg", DisplayName = "a finished-good pickup")]
+    [DataRow("pickup-ncm", DisplayName = "a non-conforming pickup")]
+    [DataRow("pickup-wip", DisplayName = "a work-in-process pickup")]
+    [DataRow("pickup-outside-service", DisplayName = "an outside-service pickup")]
+    public async Task Audit_GenericRequestPartViewModelTests_EveryOtherItemOffersNoCoilOrFlatstockPart(string itemCode)
+    {
+        var (viewModel, navigator) = Create(
+            completions: (MTM_Waitlist.GenericRequest.Models.GenericRequestPartOption[])[
+                Part("MMC0000658"),
+                Part("MMF0005511"),
+                Part("100-AAA")]);
+        navigator.Draft.ItemCode = itemCode;
+        viewModel.SearchText = "MM";
+
+        await viewModel.SearchAsync();
+
+        CollectionAssert.AreEqual(
+            new[] { "100-AAA" },
+            viewModel.Completions.Select(option => option.PartNumber).ToArray(),
+            "only the coil and flatstock items are about a coil or a flatstock");
+    }
+
+    [TestMethod]
+    public async Task Audit_GenericRequestPartViewModelTests_AItemThatIsNotAboutACoilOrFlatstockCannotAcceptOne()
+    {
+        var (viewModel, navigator) = Create(
+            completions: (MTM_Waitlist.GenericRequest.Models.GenericRequestPartOption[])[Part("100-AAA")]);
+        navigator.Draft.ItemCode = "pickup-fg";
+
+        await viewModel.LoadAsync();
+        await viewModel.AcceptPartAsync(Part("MMC0000658"));
+
+        Assert.IsNull(viewModel.AcceptedPart, "a part the item cannot be about is never accepted");
+        Assert.AreEqual(string.Empty, navigator.Draft.PartNumber);
+    }
+
     private static GenericRequestPartOption Part(string partNumber) =>
         new(partNumber, string.Empty, SequenceSource.VisualOwnPart);
 
@@ -251,7 +363,8 @@ public sealed class GenericRequestPartViewModelTests
     private static (GenericRequestPartViewModel ViewModel, StubGenericRequestNavigator Navigator) Create(
         IReadOnlyList<GenericRequestPartOption> completions,
         GenericRequestStepResult<GenericRequestSequenceOption>? sequences = null,
-        GenericRequestQuantityReading? reading = null)
+        GenericRequestQuantityReading? reading = null,
+        GenericRequestQuantityReading? partWideReading = null)
     {
         var data = new StubPartData
         {
@@ -261,6 +374,7 @@ public sealed class GenericRequestPartViewModelTests
             Sequences = sequences
                 ?? GenericRequestStepResult<GenericRequestSequenceOption>.Empty(DateTimeOffset.UtcNow),
             Reading = reading ?? GenericRequestQuantityReading.Unavailable(DateTimeOffset.UtcNow),
+            PartWideReading = partWideReading ?? GenericRequestQuantityReading.Unavailable(DateTimeOffset.UtcNow),
         };
 
         var navigator = new StubGenericRequestNavigator();
@@ -285,6 +399,16 @@ public sealed class GenericRequestPartViewModelTests
         public GenericRequestQuantityReading Reading { get; init; } =
             GenericRequestQuantityReading.Unavailable(DateTimeOffset.UtcNow);
 
+        /// <summary>
+        /// The answer a coil's or a flatstock's part-wide quantity read gets, which is a different question from
+        /// <see cref="Reading"/>: it has no sequence to read against.
+        /// </summary>
+        public GenericRequestQuantityReading PartWideReading { get; init; } =
+            GenericRequestQuantityReading.Unavailable(DateTimeOffset.UtcNow);
+
+        /// <summary>The part numbers a part-wide read was made for, so a test can prove the sequence path was not used.</summary>
+        public List<string> PartWideReads { get; } = new();
+
         public Task<GenericRequestStepResult<GenericRequestPartOption>> ReadCompletionsAsync(
             string term,
             CancellationToken cancellationToken = default) =>
@@ -298,5 +422,13 @@ public sealed class GenericRequestPartViewModelTests
             string partNumber,
             string sequence,
             CancellationToken cancellationToken = default) => Task.FromResult(Reading);
+
+        public Task<GenericRequestQuantityReading> ReadPartQuantityAsync(
+            string partNumber,
+            CancellationToken cancellationToken = default)
+        {
+            PartWideReads.Add(partNumber);
+            return Task.FromResult(PartWideReading);
+        }
     }
 }

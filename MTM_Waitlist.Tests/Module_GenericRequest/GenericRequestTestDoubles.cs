@@ -236,6 +236,11 @@ internal sealed class StubGenericRequestPartData : IGenericRequestPartData
         string sequence,
         CancellationToken cancellationToken = default) =>
         Task.FromResult(GenericRequestQuantityReading.Unavailable(DateTimeOffset.UtcNow));
+
+    public Task<GenericRequestQuantityReading> ReadPartQuantityAsync(
+        string partNumber,
+        CancellationToken cancellationToken = default) =>
+        Task.FromResult(GenericRequestQuantityReading.Unavailable(DateTimeOffset.UtcNow));
 }
 
 /// <summary>The live die search, as a test configures it, without an Infor Visual connection.</summary>

@@ -100,7 +100,7 @@
                         Visibility="{x:Bind ViewModel.NoMatchVisibility, Mode=OneWay}"
                         Style="{StaticResource BodyTextBlockStyle}" />
 
-                    <StackPanel Spacing="8">
+                    <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.SequenceSectionVisibility, Mode=OneWay}">
                         <TextBlock
                             x:Uid="GenericRequest_Part_Sequence_Title"
                             Style="{StaticResource BodyStrongTextBlockStyle}" />
@@ -207,9 +207,66 @@
                         </GridView>
                     </StackPanel>
 
+                    <!--
+                        A coil and a flatstock are whole pieces stocked by part rather than by work-order sequence, so
+                        the step states the part alone and draws one card where the sequence choices would be: the part
+                        number, what is on hand for it (rounded up), and the part's own description.
+                    -->
+                    <StackPanel Spacing="8" Visibility="{x:Bind ViewModel.PartDetailVisibility, Mode=OneWay}">
+                        <TextBlock
+                            x:Uid="GenericRequest_Part_Detail_Title"
+                            Style="{StaticResource BodyStrongTextBlockStyle}" />
+
+                        <Border
+                            MinHeight="132"
+                            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="12">
+                            <StackPanel Padding="16" Spacing="10">
+                                <TextBlock
+                                    FontSize="18"
+                                    FontWeight="SemiBold"
+                                    Text="{x:Bind ViewModel.DetailPartNumber, Mode=OneWay}"
+                                    TextTrimming="CharacterEllipsis" />
+                                <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}" />
+                                <Grid ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock
+                                        x:Uid="GenericRequest_Part_Detail_OnHand"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Style="{StaticResource BodyTextBlockStyle}" />
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Text="{x:Bind ViewModel.DetailQuantityOnHand, Mode=OneWay}"
+                                        Style="{StaticResource BodyTextBlockStyle}" />
+                                </Grid>
+                                <Grid ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock
+                                        x:Uid="GenericRequest_Part_Detail_Description"
+                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                        Style="{StaticResource BodyTextBlockStyle}" />
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Text="{x:Bind ViewModel.DetailDescription, Mode=OneWay}"
+                                        TextWrapping="Wrap"
+                                        Style="{StaticResource BodyTextBlockStyle}" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
                     <StackPanel Spacing="8">
                         <TextBlock
                             x:Uid="GenericRequest_Part_Quantity_Title"
+                            Visibility="{x:Bind ViewModel.QuantityHeadingVisibility, Mode=OneWay}"
                             Style="{StaticResource BodyStrongTextBlockStyle}" />
 
                         <StackPanel

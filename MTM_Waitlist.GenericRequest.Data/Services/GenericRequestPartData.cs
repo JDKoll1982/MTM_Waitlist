@@ -288,6 +288,37 @@ public sealed class GenericRequestPartData : IGenericRequestPartData
             .ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
+    public async Task<GenericRequestQuantityReading> ReadPartQuantityAsync(
+        string partNumber,
+        CancellationToken cancellationToken = default)
+    {
+        var normalizedPart = (partNumber ?? string.Empty).Trim();
+        if (normalizedPart.Length == 0)
+        {
+            return GenericRequestQuantityReading.Unavailable(DateTimeOffset.UtcNow);
+        }
+
+        // The floor is live and holds its stock by part across locations. It answers first, exactly as the
+        // part-wide stock answer does: a part the floor holds is the floor's, and Visual answers only when it holds
+        // nothing.
+        var floorRows = await _floor
+            .GetInventoryLocationsAsync(normalizedPart, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (floorRows.Count > 0)
+        {
+            return GenericRequestQuantityReading.OnHand(
+                floorRows.Sum(row => row.Quantity),
+                SequenceSource.WipFloor,
+                GenericRequestPartStage.Unknown,
+                DateTimeOffset.UtcNow);
+        }
+
+        return await ReadFromVisualAsync(normalizedPart, GenericRequestPartStage.Unknown, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
     private async Task<GenericRequestQuantityReading> ReadFromFloorAsync(
         string partNumber,
         string sequence,

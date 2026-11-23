@@ -144,6 +144,49 @@ public sealed class GenericRequestQuantityTests
             ])
             : VisualQueryOutcome.Ok([]);
 
+    [TestMethod]
+    public async Task Audit_GenericRequestQuantityTests_ACoilsPartWideFigureAddsUpTheFloorsLocations()
+    {
+        var floor = new RecordingFloor((System.Collections.Generic.Dictionary<string, object?>[])[
+            Row(("Location", "A-01"), ("Quantity", 7m)),
+            Row(("Location", "B-02"), ("Quantity", 5.5m))]);
+        var partData = Create(State("R", isLastOperation: 0), floor);
+
+        var reading = await partData.ReadPartQuantityAsync("MMC0000658");
+
+        Assert.AreEqual(GenericRequestQuantityKind.OnHand, reading.Kind);
+        Assert.AreEqual(12.5m, reading.Figure, "the part-wide figure is every location's stock added up");
+        Assert.AreEqual(SequenceSource.WipFloor, reading.AnsweredBy);
+        Assert.AreEqual(1, floor.QueryCount, "one floor read answers the whole part");
+    }
+
+    [TestMethod]
+    public async Task Audit_GenericRequestQuantityTests_APartTheFloorDoesNotHoldIsAnsweredByVisualPartWide()
+    {
+        var floor = new RecordingFloor([]);
+        var partData = Create(State("R", isLastOperation: 0), floor, visualFigure: 42m);
+
+        var reading = await partData.ReadPartQuantityAsync("MMF0005511");
+
+        Assert.AreEqual(GenericRequestQuantityKind.OnHand, reading.Kind);
+        Assert.AreEqual(42m, reading.Figure, "nothing on the floor leaves Visual answering for the whole part");
+        Assert.AreEqual(SequenceSource.VisualOwnPart, reading.AnsweredBy);
+    }
+
+    [TestMethod]
+    public async Task Audit_GenericRequestQuantityTests_AnUnansweredPartWideFigureIsUnavailableRatherThanZero()
+    {
+        var executor = new FakeVisualQueryExecutor((_, _) => VisualQueryOutcome.Unreachable("the plant system is down"));
+        var partData = GenericRequestReadShapes.PartData(
+            executor,
+            new WipFloorInventoryService(new RecordingFloor([])));
+
+        var reading = await partData.ReadPartQuantityAsync("MMC0000658");
+
+        Assert.AreEqual(GenericRequestPresentation.Unavailable, reading.Presentation);
+        Assert.IsNull(reading.Figure, "a read that failed is not a confident zero");
+    }
+
     private static GenericRequestPartData Create(
         Func<string, IReadOnlyDictionary<string, object?>, VisualQueryOutcome> visual,
         RecordingFloor floor,

@@ -44,7 +44,7 @@ public sealed partial class GenericRequestPartViewModel : GenericRequestStepView
 
         _data = data;
         RetrySequencesCommand = new AsyncRelayCommand(LoadSequencesAsync);
-        RetryQuantityCommand = new AsyncRelayCommand(LoadQuantityAsync);
+        RetryQuantityCommand = new AsyncRelayCommand(RetryQuantityAsync);
     }
 
     public override GenericRequestStep Step => GenericRequestStep.Part;
@@ -155,13 +155,47 @@ public sealed partial class GenericRequestPartViewModel : GenericRequestStepView
 
     public Visibility SequencesUnavailableVisibility => IsSequencesUnavailable ? Visibility.Visible : Visibility.Collapsed;
 
-    public Visibility QuantityAnsweredVisibility => IsQuantityAnswered ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility QuantityAnsweredVisibility => IsQuantityAnswered && !IsCoilOrFlatstock ? Visibility.Visible : Visibility.Collapsed;
 
     public Visibility NextResourceVisibility => HasNextResource ? Visibility.Visible : Visibility.Collapsed;
 
-    public Visibility NothingOnHandVisibility => HasNothingOnHand ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility NothingOnHandVisibility => HasNothingOnHand && !IsCoilOrFlatstock ? Visibility.Visible : Visibility.Collapsed;
 
     public Visibility QuantityUnavailableVisibility => IsQuantityUnavailable ? Visibility.Visible : Visibility.Collapsed;
+
+    /// <summary>
+    /// Whether the accepted part is a coil or a flatstock. Those two kinds are stocked as whole pieces and are not
+    /// attributed to a work-order sequence, so the step states the part alone: the sequence list gives way to one
+    /// detail card, and no sequence is recorded.
+    /// </summary>
+    public bool IsCoilOrFlatstock => GenericRequestPartKind.IsCoilOrFlatstock(AcceptedPart?.PartNumber ?? Draft.PartNumber);
+
+    /// <summary>Whether the sequence choices are drawn. A coil or flatstock has none.</summary>
+    public Visibility SequenceSectionVisibility => IsCoilOrFlatstock ? Visibility.Collapsed : Visibility.Visible;
+
+    /// <summary>Whether the one detail card is drawn in place of the sequence choices.</summary>
+    public Visibility PartDetailVisibility => IsCoilOrFlatstock ? Visibility.Visible : Visibility.Collapsed;
+
+    /// <summary>
+    /// Whether the on-hand heading is drawn. A coil's or a flatstock's figure is on the detail card, so the heading
+    /// only stays for a read that failed and still needs its retry.
+    /// </summary>
+    public Visibility QuantityHeadingVisibility =>
+        IsCoilOrFlatstock && !IsQuantityUnavailable ? Visibility.Collapsed : Visibility.Visible;
+
+    /// <summary>The part the detail card names.</summary>
+    public string DetailPartNumber => AcceptedPart?.PartNumber ?? string.Empty;
+
+    /// <summary>The part's own description, or empty when the supplying system holds none.</summary>
+    public string DetailDescription => AcceptedPart?.Description ?? string.Empty;
+
+    /// <summary>
+    /// How much of the part is on hand across the whole part, rounded up, because a coil and a flatstock are counted
+    /// in whole pieces. Empty until the read answers.
+    /// </summary>
+    public string DetailQuantityOnHand => QuantityReading?.Figure is { } figure
+        ? Math.Ceiling(figure).ToString("0", CultureInfo.CurrentCulture)
+        : string.Empty;
 
     public bool HasSequences => SequencesPresentation == GenericRequestPresentation.Populated;
 
@@ -180,13 +214,14 @@ public sealed partial class GenericRequestPartViewModel : GenericRequestStepView
     public string QuantityAttemptedAtDisplay => FormatAttempt(QuantityAttemptedAtUtc);
 
     /// <summary>
-    /// Three answers decide this: an accepted part, a chosen sequence, and a quantity that was actually read. A
-    /// figure of zero and a not-inventoried part both count as read, because the requester may still raise the
-    /// request after being warned (FR-014, FR-015, FR-017).
+    /// What decides this: an accepted part and a quantity that was actually read. A coil or a flatstock has no
+    /// sequence to choose, so only the other parts also require one. A figure of zero and a not-inventoried part
+    /// both count as read, because the requester may still raise the request after being warned (FR-014, FR-015,
+    /// FR-017).
     /// </summary>
     protected override bool CanAnswer =>
         AcceptedPart is not null
-        && SelectedSequence is not null
+        && (IsCoilOrFlatstock || SelectedSequence is not null)
         && QuantityReading is { Presentation: GenericRequestPresentation.Populated };
 
     /// <summary>
@@ -225,7 +260,13 @@ public sealed partial class GenericRequestPartViewModel : GenericRequestStepView
         Completions.Clear();
         foreach (var part in result.Items)
         {
-            Completions.Add(part);
+            // The item decides which kinds of part it can be about: a coil or flatstock item offers only those two,
+            // and every other item offers neither, so a number that names the wrong kind is never suggested to the
+            // requester and can never be accepted (owner decision, 2026-11-23).
+            if (GenericRequestPartKind.AllowsPart(Draft.ItemCode, part.PartNumber))
+            {
+                Completions.Add(part);
+            }
         }
 
         var failed = result.Presentation == GenericRequestPresentation.Unavailable;
@@ -242,6 +283,14 @@ public sealed partial class GenericRequestPartViewModel : GenericRequestStepView
     public async Task AcceptPartAsync(GenericRequestPartOption? part)
     {
         if (part is null)
+        {
+            return;
+        }
+
+        // The item decides which kinds of part it can be about, so a part the item cannot state is refused here as
+        // well as being kept out of the completion list — the acceptance is where the draft would otherwise record it
+        // (owner decision, 2026-11-23).
+        if (!GenericRequestPartKind.AllowsPart(Draft.ItemCode, part.PartNumber))
         {
             return;
         }
@@ -265,6 +314,14 @@ public sealed partial class GenericRequestPartViewModel : GenericRequestStepView
         }
 
         Draft.PartNumber = part.PartNumber;
+
+        // A coil or a flatstock states the part alone: there is no sequence to list, so the step reads what is on
+        // hand across the whole part and draws it on the detail card instead (owner decision, 2026-11-23).
+        if (IsCoilOrFlatstock)
+        {
+            await LoadPartDetailAsync();
+            return;
+        }
 
         await LoadSequencesAsync();
     }
@@ -452,7 +509,24 @@ public sealed partial class GenericRequestPartViewModel : GenericRequestStepView
         OnPropertyChanged(nameof(IsQuantityAnswered));
         OnPropertyChanged(nameof(QuantityAnsweredVisibility));
         OnPropertyChanged(nameof(QuantityUnavailableVisibility));
+        OnPropertyChanged(nameof(QuantityHeadingVisibility));
     }
+
+    partial void OnAcceptedPartChanged(GenericRequestPartOption? value)
+    {
+        OnPropertyChanged(nameof(IsCoilOrFlatstock));
+        OnPropertyChanged(nameof(SequenceSectionVisibility));
+        OnPropertyChanged(nameof(PartDetailVisibility));
+        OnPropertyChanged(nameof(QuantityHeadingVisibility));
+        OnPropertyChanged(nameof(DetailPartNumber));
+        OnPropertyChanged(nameof(DetailDescription));
+        OnPropertyChanged(nameof(QuantityAnsweredVisibility));
+        OnPropertyChanged(nameof(NothingOnHandVisibility));
+        NotifyAnswerChanged();
+    }
+
+    partial void OnQuantityReadingChanged(GenericRequestQuantityReading? value) =>
+        OnPropertyChanged(nameof(DetailQuantityOnHand));
 
     partial void OnHasNoMatchChanged(bool value) => OnPropertyChanged(nameof(NoMatchVisibility));
 
@@ -540,6 +614,50 @@ public sealed partial class GenericRequestPartViewModel : GenericRequestStepView
 
         NotifyAnswerChanged();
     }
+
+    /// <summary>
+    /// Read what is on hand across the whole part, for a coil or a flatstock, which has no sequence to read it
+    /// against.
+    /// </summary>
+    /// <remarks>
+    /// The figure is a whole-part total, so the sequence-derived details — the stage, the next resource — are empty
+    /// here rather than borrowed from a sequence that was never chosen.
+    /// </remarks>
+    private async Task LoadPartDetailAsync()
+    {
+        if (AcceptedPart is not { } part)
+        {
+            return;
+        }
+
+        var reading = await _data.ReadPartQuantityAsync(part.PartNumber);
+
+        Sequences.Clear();
+        SequencesPresentation = GenericRequestPresentation.Empty;
+        SequencesAttemptedAtUtc = null;
+        HasNoSequence = false;
+        SelectedSequence = null;
+
+        QuantityReading = reading;
+        QuantityPresentation = reading.Presentation;
+        QuantityAttemptedAtUtc = reading.AttemptedAtUtc;
+
+        QuantityFigure = reading.FigureDisplay;
+        QuantityAnsweredBy = reading.AnsweredByDisplay;
+        StageLabel = string.Empty;
+        NextResourceDisplay = string.Empty;
+        HasNothingOnHand = reading.IsAnswered
+            && reading.Kind == GenericRequestQuantityKind.OnHand
+            && reading.Figure is 0m;
+
+        NotifyAnswerChanged();
+    }
+
+    /// <summary>
+    /// Re-read whichever quantity this step asked for: the part's own total for a coil or a flatstock, and the
+    /// chosen sequence's reading for every other part.
+    /// </summary>
+    private Task RetryQuantityAsync() => IsCoilOrFlatstock ? LoadPartDetailAsync() : LoadQuantityAsync();
 
     private void ClearSequenceAndReading()
     {

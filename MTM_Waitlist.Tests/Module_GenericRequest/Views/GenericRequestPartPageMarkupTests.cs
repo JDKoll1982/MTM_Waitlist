@@ -65,6 +65,30 @@ public sealed class GenericRequestPartPageMarkupTests
             "the inventoried-with line replaces the old source line rather than sitting beside it");
     }
 
+    [TestMethod]
+    public void UI_GenericRequestPartPageMarkupTests_ACoilOrFlatstock_DrawsTheDetailCardInsteadOfTheSequences()
+    {
+        var markup = ReadMarkup();
+
+        StringAssert.Contains(
+            markup,
+            "{x:Bind ViewModel.PartDetailVisibility, Mode=OneWay}",
+            "the one detail card is drawn only for a coil or a flatstock");
+        StringAssert.Contains(markup, "{x:Bind ViewModel.DetailPartNumber, Mode=OneWay}", "the card names the part");
+        StringAssert.Contains(
+            markup,
+            "{x:Bind ViewModel.DetailQuantityOnHand, Mode=OneWay}",
+            "the card says how much of the part is on hand");
+        StringAssert.Contains(
+            markup,
+            "{x:Bind ViewModel.DetailDescription, Mode=OneWay}",
+            "the card carries the part's own description");
+        StringAssert.Contains(
+            markup,
+            "{x:Bind ViewModel.SequenceSectionVisibility, Mode=OneWay}",
+            "the sequence choices give way to the card, so a coil is never asked for a sequence");
+    }
+
     private static string ReadMarkup() =>
         File.ReadAllText(Path.Combine(RepositoryPatternScan.FindRepositoryRoot(), PagePath));
 }
