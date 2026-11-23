@@ -133,11 +133,33 @@ public static class ImageCachePaths
             "Assets",
             "DunnageImages"),
         Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Programs",
+            "MTM_Receiving_Application",
+            "Assets",
+            "DunnageImages"),
+        Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
             "MTM_Receiving_Application",
             "Assets",
             "DunnageImages"),
+        Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
+            "MTM_Receiving_Application",
+            "Assets",
+            "DunnageImages"),
     ];
+
+    /// <summary>
+    /// The environment variable that names the folder to share the Dunnage copies with, when the receiving
+    /// application's cache is somewhere none of the candidates below reach.
+    /// </summary>
+    /// <remarks>
+    /// A per-user install location is the case this exists for: an application built or run from its own output
+    /// folder caches beside its executable, under a folder this application cannot guess, so the same 170 pictures
+    /// end up copied twice on one machine. Naming the folder here makes both applications share one copy.
+    /// </remarks>
+    public const string SharedDunnageCacheEnvironmentVariable = "MTM_DUNNAGE_IMAGE_CACHE";
 
     /// <summary>Whether the shared receiving-application folder has been settled for this process yet.</summary>
     private static bool s_sharedDunnageCacheDecided;
@@ -161,11 +183,36 @@ public static class ImageCachePaths
     {
         if (s_sharedDunnageCacheDecided is false)
         {
-            s_sharedDunnageCache = FindWritableReceivingCache();
+            s_sharedDunnageCache = FindNamedReceivingCache() ?? FindWritableReceivingCache();
             s_sharedDunnageCacheDecided = true;
         }
 
         return s_sharedDunnageCache ?? Path.Combine(LocalCacheRoot, DunnageFolderName);
+    }
+
+    /// <summary>
+    /// The folder named by <see cref="SharedDunnageCacheEnvironmentVariable"/>, when it is absolute and this account
+    /// may write in it, or <see langword="null"/>.
+    /// </summary>
+    /// <remarks>
+    /// Checked before the candidates below because a named folder is an answer, not a guess: somebody has said where
+    /// the two applications should keep one copy, so it is used if it can be written to. A name that is blank,
+    /// relative (a literal <c>%VARIABLE%</c> that would not expand) or unwritable is ignored rather than preferred,
+    /// because pointing the mirror at a folder that cannot be written leaves every copy failing silently.
+    /// </remarks>
+    private static string? FindNamedReceivingCache()
+    {
+        var named = Environment.GetEnvironmentVariable(SharedDunnageCacheEnvironmentVariable);
+        if (string.IsNullOrWhiteSpace(named))
+        {
+            return null;
+        }
+
+        var expanded = Environment.ExpandEnvironmentVariables(named.Trim());
+
+        return expanded.Contains('%') || Path.IsPathFullyQualified(expanded) is false || IsFolderWritable(expanded) is false
+            ? null
+            : expanded;
     }
 
     /// <summary>

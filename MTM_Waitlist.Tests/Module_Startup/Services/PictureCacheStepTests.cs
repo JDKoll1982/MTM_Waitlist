@@ -137,6 +137,30 @@ public sealed class PictureCacheStepTests
         StringAssert.Contains(outcome.Diagnosis!, "2 replaced copies cleaned up");
     }
 
+    [TestMethod]
+    public async Task Service_PictureCacheStepTests_RunAsync_WritesTheMirrorsProgressOntoTheFeed()
+    {
+        // Arrange: the mirror reports as it walks, which is what lets the splash show movement rather than a bar
+        // that cannot move until the walk has finished.
+        var cache = new RecordingPictureCache
+        {
+            ProgressReports = (ImageCacheSyncProgress[])[new ImageCacheSyncProgress("dunnage pictures", 50, 2)],
+        };
+
+        var step = new PictureCacheStep(new LaunchStepCatalog(), cache);
+        var feed = new LaunchActivityFeed();
+
+        // Act
+        await step.RunAsync(Context(feed), CancellationToken.None);
+
+        // Assert: the line names the source and both numbers, and it belongs to the picture step.
+        var line = feed.Entries.Single(entry => entry.Kind is LaunchFeedEntryKind.SubOperation);
+        Assert.AreEqual("picture-cache", line.StepId);
+        StringAssert.Contains(line.Text, "dunnage pictures");
+        StringAssert.Contains(line.Text, "2 copied");
+        StringAssert.Contains(line.Text, "50 checked");
+    }
+
     /// <summary>
     /// A folder the copies cannot be written into is named as the folder, not as the share. The two faults have
     /// different remedies, and the line on the splash screen is the only clue the person reading it gets.
@@ -288,6 +312,9 @@ public sealed class PictureCacheStepTests
         /// <summary>The exception the mirror throws, when the test is exercising the seam being wrong.</summary>
         public Exception? Throw { get; set; }
 
+        /// <summary>What the mirror reports as it walks, for a test that is reading the feed's progress lines.</summary>
+        public IReadOnlyList<ImageCacheSyncProgress> ProgressReports { get; set; } = Array.Empty<ImageCacheSyncProgress>();
+
         /// <inheritdoc />
         public Task<ImageCacheSyncResult> SynchronizeAsync(CancellationToken cancellationToken = default)
         {
@@ -296,6 +323,22 @@ public sealed class PictureCacheStepTests
             return Throw is not null
                 ? Task.FromException<ImageCacheSyncResult>(Throw)
                 : Task.FromResult(Result);
+        }
+
+        /// <inheritdoc />
+        public Task<ImageCacheSyncResult> SynchronizeAsync(
+            IProgress<ImageCacheSyncProgress>? progress,
+            CancellationToken cancellationToken = default)
+        {
+            if (progress is not null)
+            {
+                foreach (var report in ProgressReports)
+                {
+                    progress.Report(report);
+                }
+            }
+
+            return SynchronizeAsync(cancellationToken);
         }
     }
 }

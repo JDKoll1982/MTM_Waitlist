@@ -123,6 +123,21 @@
                     Text="{x:Bind ViewModel.ProgressText, Mode=OneWay}"
                     TextAlignment="Center"
                     TextWrapping="Wrap" />
+
+                <!--
+                    What the step under way is doing right now, when it reports as it goes. A share that answers
+                    slowly cannot be given a proportion before its walk ends, so this line carries the movement.
+                -->
+                <TextBlock
+                    x:Name="ProgressDetailTextBlock"
+                    AutomationProperties.AutomationId="SplashPage_ProgressDetail"
+                    HorizontalAlignment="Center"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    Text="{x:Bind ViewModel.ProgressDetail, Mode=OneWay}"
+                    TextAlignment="Center"
+                    TextWrapping="Wrap"
+                    Visibility="{x:Bind ViewModel.ProgressDetailVisibility, Mode=OneWay}" />
             </StackPanel>
 
             <Border

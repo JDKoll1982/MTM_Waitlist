@@ -34,8 +34,16 @@ public sealed class PictureCacheStep : ILaunchStep
     /// </summary>
     internal const string StepId = "picture-cache";
 
-    /// <summary>The module name every entry this step records carries.</summary>
+    /// <summary>
+    /// The module name every entry this step records carries.
+    /// </summary>
     private const string LogModule = "PictureCache";
+
+    /// <summary>
+    /// How long a refresh may take before its own duration is recorded where the store keeps it. Under this the
+    /// step is invisible to the person waiting; over it, the number is the evidence they come back for.
+    /// </summary>
+    private const double SlowRefreshSeconds = 2;
 
     private readonly LaunchStep _descriptor;
     private readonly IImageCacheSyncService _pictureCache;
@@ -62,28 +70,46 @@ public sealed class PictureCacheStep : ILaunchStep
 
         return LaunchStepSupport.RunGuardedAsync(
             "The picture copies could not be refreshed",
-            RefreshAsync,
+            token => RefreshAsync(context, token),
             cancellationToken);
     }
 
     /// <summary>Runs the mirror and reports what it found, in the reader's own words.</summary>
+    /// <param name="context">The launch context, whose feed carries the step's own progress lines.</param>
     /// <param name="cancellationToken">Cancelled when the launch is abandoned or the stated maximum passes.</param>
-    private async Task<LaunchStepOutcome> RefreshAsync(CancellationToken cancellationToken)
+    private async Task<LaunchStepOutcome> RefreshAsync(LaunchStepContext context, CancellationToken cancellationToken)
     {
         var started = System.Diagnostics.Stopwatch.GetTimestamp();
 
         AppLog.Info(LogModule, "The picture refresh step has started.");
 
-        var result = await _pictureCache.SynchronizeAsync(cancellationToken).ConfigureAwait(false);
+        // The walk reports as it goes, so the splash shows what the refresh is doing instead of a bar that cannot
+        // move until the whole walk has finished (owner decision, 2026-11-23). The reports are coarse, and the feed
+        // is the same record the rest of the launch writes to.
+        var progress = new FeedProgress(context, _descriptor);
 
-        var elapsed = System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalSeconds.ToString("0.0", System.Globalization.CultureInfo.CurrentCulture);
+        var result = await _pictureCache.SynchronizeAsync(progress, cancellationToken).ConfigureAwait(false);
 
-        AppLog.Info(
-            LogModule,
+        var elapsedSeconds = System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalSeconds;
+        var elapsed = elapsedSeconds.ToString("0.0", System.Globalization.CultureInfo.CurrentCulture);
+
+        var summary =
             $"The picture refresh step answered after {elapsed} second(s): {result.Copied} copied, {result.Removed} removed, "
             + $"{result.ArchivesRemoved} replaced copies cleaned up, {result.NotCopied} could not be copied, "
             + $"{result.SourcesSkipped.Count} source(s) left alone, {result.DestinationsUnavailable.Count} whose folder "
-            + "could not be written.");
+            + "could not be written.";
+
+        if (elapsedSeconds >= SlowRefreshSeconds)
+        {
+            // The store keeps warnings by default and drops progress lines, so a refresh slow enough to be noticed
+            // on the splash is recorded at a level that survives — otherwise the number that explains the wait is
+            // written where nobody will ever read it (owner decision, 2026-11-23).
+            AppLog.Warn(LogModule, summary);
+        }
+        else
+        {
+            AppLog.Info(LogModule, summary);
+        }
 
         if (result.DestinationsUnavailable.Count > 0)
         {
@@ -128,6 +154,8 @@ public sealed class PictureCacheStep : ILaunchStep
             ? $"The picture copies were refreshed: {result.Copied} copied, {result.Removed} removed and {result.ArchivesRemoved} replaced copies cleaned up."
             : "The picture copies were already up to date.";
 
+        outcome += $" It took {elapsed} second(s).";
+
         if (result.NotCopied > 0)
         {
             // Said out loud rather than left to be discovered: the run copied the rest, so the cache is complete
@@ -142,5 +170,28 @@ public sealed class PictureCacheStep : ILaunchStep
         }
 
         return new LaunchStepOutcome(LaunchStepStatus.Succeeded, outcome, LaunchRemedySet.None);
+    }
+
+    /// <summary>Writes the mirror's own progress lines onto the launch feed, in the order they happen.</summary>
+    /// <remarks>
+    /// Deliberately not <see cref="Progress{T}"/>: that posts each report to the constructing thread's context, and
+    /// a post that lands after the step has written its own completion line would leave the feed out of order. The
+    /// mirror reports on the thread that is walking, and the feed is thread-safe, so the line is appended there.
+    /// </remarks>
+    private sealed class FeedProgress(LaunchStepContext context, LaunchStep step) : IProgress<ImageCacheSyncProgress>
+    {
+        /// <inheritdoc />
+        public void Report(ImageCacheSyncProgress value)
+        {
+            ArgumentNullException.ThrowIfNull(value);
+
+            context.Feed.Append(new LaunchFeedEntry(
+                DateTimeOffset.UtcNow,
+                step.Id,
+                LaunchFeedEntryKind.SubOperation,
+                $"{value.SourceLabel}: {value.Copied} copied, {value.Examined} checked",
+                step.Target,
+                null));
+        }
     }
 }

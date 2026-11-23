@@ -184,6 +184,11 @@ public sealed class LaunchStepWiringTests
     {
         public Task<ImageCacheSyncResult> SynchronizeAsync(CancellationToken cancellationToken = default)
             => Task.FromResult(ImageCacheSyncResult.NothingToDo);
+
+        public Task<ImageCacheSyncResult> SynchronizeAsync(
+            IProgress<ImageCacheSyncProgress>? progress,
+            CancellationToken cancellationToken = default)
+            => Task.FromResult(ImageCacheSyncResult.NothingToDo);
     }
 
     /// <summary>The external-system probe, which this check never drives.</summary>

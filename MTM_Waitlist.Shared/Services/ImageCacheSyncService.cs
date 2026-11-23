@@ -73,7 +73,13 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
     }
 
     /// <inheritdoc />
-    public async Task<ImageCacheSyncResult> SynchronizeAsync(CancellationToken cancellationToken = default)
+    public Task<ImageCacheSyncResult> SynchronizeAsync(CancellationToken cancellationToken = default) =>
+        SynchronizeAsync(null, cancellationToken);
+
+    /// <inheritdoc />
+    public async Task<ImageCacheSyncResult> SynchronizeAsync(
+        IProgress<ImageCacheSyncProgress>? progress,
+        CancellationToken cancellationToken = default)
     {
         IReadOnlyList<ImageCacheSource> sources;
 
@@ -128,7 +134,7 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
         // reported as an unhandled fault, and this step's whole contract is that it cannot fail (FR-026).
         try
         {
-            return await Task.Run(() => Synchronize(sources, cancellationToken)).ConfigureAwait(false);
+            return await Task.Run(() => Synchronize(sources, progress, cancellationToken)).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
@@ -156,6 +162,24 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
     /// </remarks>
     public static ImageCacheSyncResult Synchronize(
         IReadOnlyList<ImageCacheSource> sources,
+        CancellationToken cancellationToken = default) =>
+        Synchronize(sources, progress: null, cancellationToken);
+
+    /// <summary>
+    /// The whole synchronisation, reporting each source's walk as it advances.
+    /// </summary>
+    /// <param name="sources">The picture sources to mirror.</param>
+    /// <param name="progress">
+    /// Receives a line per source as its walk advances, or <see langword="null"/> when the caller has no surface.
+    /// </param>
+    /// <param name="cancellationToken">
+    /// Stops the walk. A cancelled walk returns the counts it reached rather than throwing, and never deletes
+    /// anything it has not yet compared against the share.
+    /// </param>
+    /// <returns>A summary of what was copied and removed.</returns>
+    public static ImageCacheSyncResult Synchronize(
+        IReadOnlyList<ImageCacheSource> sources,
+        IProgress<ImageCacheSyncProgress>? progress,
         CancellationToken cancellationToken = default)
     {
         var copied = 0;
@@ -224,7 +248,7 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
 
             try
             {
-                var sourceResult = SynchronizeSource(source, cancellationToken);
+                var sourceResult = SynchronizeSource(source, progress, cancellationToken);
                 copied += sourceResult.Copied;
                 removed += sourceResult.Removed;
                 archivesRemoved += sourceResult.ArchivesRemoved;
@@ -275,6 +299,27 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
     private static string Elapsed(long started) =>
         Stopwatch.GetElapsedTime(started).TotalSeconds.ToString("0.0", CultureInfo.CurrentCulture) + " second(s)";
 
+    /// <summary>
+    /// How many pictures are compared between two progress lines. Coarse on purpose: a surface wants to see
+    /// movement, not a line per file, and the feed is the debugging record rather than a transcript.
+    /// </summary>
+    private const int ProgressEveryFiles = 25;
+
+    /// <summary>Reports the source's progress when the throttle allows it.</summary>
+    private static void ReportProgressIfDue(
+        IProgress<ImageCacheSyncProgress>? progress,
+        string label,
+        int examined,
+        int copied)
+    {
+        if (progress is null || examined % ProgressEveryFiles != 0)
+        {
+            return;
+        }
+
+        progress.Report(new ImageCacheSyncProgress(label, examined, copied));
+    }
+
     /// <summary>Mirrors one source, returning what it did.</summary>
     /// <remarks>
     /// The caller has already established that the source can be read and that the copies can be written: this walk
@@ -284,6 +329,7 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
     /// </remarks>
     private static (int Copied, int Removed, int ArchivesRemoved, int NotCopied) SynchronizeSource(
         ImageCacheSource source,
+        IProgress<ImageCacheSyncProgress>? progress,
         CancellationToken cancellationToken)
     {
         // What the share holds, gathered before anything is deleted, so the deletion pass can only ever remove a
@@ -291,6 +337,7 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
         var onShare = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var copied = 0;
         var notCopied = 0;
+        var examined = 0;
 
         // The listing is asked for entries rather than names, because an entry carries the size and the last-written
         // time the copy decision needs. A name would have to be turned back into a file — one extra request to the
@@ -328,6 +375,7 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
             }
 
             onShare.Add(relativePath);
+            examined++;
 
             var cachePath = ImageCachePaths.CachePathFor(source.CacheRoot, relativePath);
             var cacheDirectory = Path.GetDirectoryName(cachePath);
@@ -338,6 +386,7 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
 
             if (ImageCachePaths.ShouldCopyToCache(shared, cachePath) is false)
             {
+                ReportProgressIfDue(progress, source.Label, examined, copied);
                 continue;
             }
 
@@ -362,7 +411,13 @@ public sealed class ImageCacheSyncService : IImageCacheSyncService
                     LogModule,
                     $"The picture '{sharedPath}' could not be copied to '{cachePath}': {exception.GetType().Name}: {exception.Message}");
             }
+
+            ReportProgressIfDue(progress, source.Label, examined, copied);
         }
+
+        // The walk is over, so the last number is the whole of what this source held: reported even when the
+        // throttle above has not come round, because a surface showing "174 checked" is the proof it finished.
+        progress?.Report(new ImageCacheSyncProgress(source.Label, examined, copied));
 
         var removed = 0;
 

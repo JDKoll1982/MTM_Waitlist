@@ -57,6 +57,50 @@ public sealed class SplashViewModelTests
     }
 
     [TestMethod]
+    public void ViewModel_SplashViewModelTests_AStepThatReportsItsOwnWork_ShowsItBeneathItsNameAndClearsItWhenTheStepEnds()
+    {
+        // Arrange
+        var feed = new LaunchActivityFeed();
+        var viewModel = new SplashViewModel(new LaunchStepCatalog(), feed);
+
+        feed.Append(Line("picture-cache", LaunchFeedEntryKind.StepStarted, "Refreshing the picture copies", "the picture share", null));
+
+        // Act: the picture refresh says what its walk has done so far.
+        feed.Append(Line(
+            "picture-cache",
+            LaunchFeedEntryKind.SubOperation,
+            "dunnage pictures: 24 copied, 174 checked",
+            "the picture share",
+            null));
+
+        // Assert: the movement is drawn, and the step keeps its own line above it.
+        Assert.AreEqual("dunnage pictures: 24 copied, 174 checked", viewModel.ProgressDetail);
+        Assert.AreEqual(Microsoft.UI.Xaml.Visibility.Visible, viewModel.ProgressDetailVisibility);
+        Assert.AreEqual("Refreshing the picture copies", viewModel.CurrentStep);
+
+        // Act: the step ends, so the detail it was reporting is no longer true.
+        feed.Append(Line("picture-cache", LaunchFeedEntryKind.StepCompleted, "The picture copies were refreshed.", "the picture share", true));
+
+        Assert.AreEqual(string.Empty, viewModel.ProgressDetail);
+        Assert.AreEqual(Microsoft.UI.Xaml.Visibility.Collapsed, viewModel.ProgressDetailVisibility);
+    }
+
+    [TestMethod]
+    public void ViewModel_SplashViewModelTests_ASubOperationForAnotherStep_DoesNotSpeakForTheStepUnderWay()
+    {
+        // Arrange
+        var feed = new LaunchActivityFeed();
+        var viewModel = new SplashViewModel(new LaunchStepCatalog(), feed);
+        feed.Append(Line("picture-cache", LaunchFeedEntryKind.StepStarted, "Refreshing the picture copies", "the picture share", null));
+
+        // Act: a line belonging to a step that is not the one in flight.
+        feed.Append(Line("store-reachability", LaunchFeedEntryKind.SubOperation, "the store answered", "the store", null));
+
+        // Assert
+        Assert.AreEqual(string.Empty, viewModel.ProgressDetail, "only the step under way can say what it is doing");
+    }
+
+    [TestMethod]
     public void ViewModel_SplashViewModelTests_Progress_IsDerivedSoItCannotDisagreeWithTheLinesBesideIt()
     {
         // Arrange

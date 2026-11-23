@@ -236,6 +236,30 @@ public sealed class ImageCachePathsTests
             "a shared folder has to be the receiving application's own cache rather than somewhere new");
     }
 
+    [TestMethod]
+    public void Helper_ImageCachePathsTests_ANamedSharedDunnageFolder_IsUsedWhenThisAccountMayWriteInIt()
+    {
+        var named = Path.Combine(_workingDirectory, "receiving-cache");
+        Directory.CreateDirectory(named);
+        var previous = Environment.GetEnvironmentVariable(ImageCachePaths.SharedDunnageCacheEnvironmentVariable);
+
+        try
+        {
+            Environment.SetEnvironmentVariable(ImageCachePaths.SharedDunnageCacheEnvironmentVariable, named);
+            ImageCachePaths.ForgetSharedDunnageCacheDecision();
+
+            Assert.AreEqual(
+                named,
+                ImageCachePaths.ResolveDunnageCacheFolder(),
+                "a named folder is an answer rather than a guess, so it is used instead of keeping a second copy");
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(ImageCachePaths.SharedDunnageCacheEnvironmentVariable, previous);
+            ImageCachePaths.ForgetSharedDunnageCacheDecision();
+        }
+    }
+
     /// <summary>
     /// The two part collections keep their own cache folders, named for the collections themselves. A Visual part
     /// and a WIP part may share a part number, so a shared folder would make one copy stand for two parts

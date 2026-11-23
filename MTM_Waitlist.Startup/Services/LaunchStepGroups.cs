@@ -26,6 +26,13 @@ public sealed record LaunchStepGroup(string Id, IReadOnlyList<string> Members);
 /// credential are separate questions about the same person — so they may run together too (SC-006).
 /// </para>
 /// <para>
+/// <b>The picture refresh is in the first group because it never touches the store.</b> It reads a share and writes
+/// this computer's copies, which is exactly the kind of work the group exists to overlap with the settings read and
+/// the first store contact: run on its own ahead of them, its walk is time nothing else is doing anything with
+/// (owner decision, 2026-11-23). It keeps its own bound and its best-effort marker, so a share that is slow cannot
+/// hold the others past their own maximums.
+/// </para>
+/// <para>
 /// <b>Everything else keeps its order.</b> A member of a group starts at the group's first catalogue position and
 /// nothing else moves: <c>visual-priming</c> stays last before the hand-over, because its verdict must be settled
 /// before the shell opens (FR-029).
@@ -38,7 +45,7 @@ public static class LaunchStepGroups
     (MTM_Waitlist.Module_Startup.Services.LaunchStepGroup[])[
         new(
             "first-contact",
-            (string[])["read-local-settings", "read-hardware-identity", "store-reachability"]),
+            (string[])["picture-cache", "read-local-settings", "read-hardware-identity", "store-reachability"]),
         new(
             "session-checks",
             (string[])["judge-session", "check-computer-against-store", "check-temporary-credential"]),

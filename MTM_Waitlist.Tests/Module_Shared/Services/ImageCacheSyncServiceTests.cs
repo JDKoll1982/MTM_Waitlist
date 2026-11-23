@@ -67,11 +67,38 @@ public sealed class ImageCacheSyncServiceTests
         Assert.IsTrue(File.Exists(Path.Combine(_cacheRoot, "request_category", "Pickup.jpeg")));
     }
 
+    [TestMethod]
+    public void Service_ImageCacheSyncServiceTests_TheWalkReportsWhatItHasCheckedAndCopied()
+    {
+        WriteSharedPicture(@"request_item\pickup-coil.png");
+        WriteSharedPicture(@"work_center\100-03.jpg");
+        WriteSharedPicture(@"request_category\Pickup.jpeg");
+
+        var reports = new List<ImageCacheSyncProgress>();
+
+        ImageCacheSyncService.Synchronize(
+            (MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[Source(_shareRoot, _cacheRoot)],
+            new RecordingProgress(reports.Add),
+            CancellationToken.None);
+
+        Assert.IsTrue(reports.Count > 0, "the surface has to hear the walk happened");
+
+        var last = reports[^1];
+        Assert.AreEqual("test pictures", last.SourceLabel);
+        Assert.AreEqual(3, last.Examined, "the closing line counts every picture the source holds");
+        Assert.AreEqual(3, last.Copied, "all three were copied, so the closing line says so");
+    }
+
+    /// <summary>Collects the reports a run makes, so a test can read the numbers a surface would draw.</summary>
+    private sealed class RecordingProgress(Action<ImageCacheSyncProgress> onReport) : IProgress<ImageCacheSyncProgress>
+    {
+        public void Report(ImageCacheSyncProgress value) => onReport(value);
+    }
+
     /// <summary>
     /// The rule the whole cache turns on. A copy that matches its original by size and last-written time is left
     /// alone, so a startup with nothing new on the share reads no picture at all.
-    /// </summary>
-    [TestMethod]
+    /// </summary>    [TestMethod]
     public void Service_ImageCacheSyncServiceTests_AnUnchangedPictureIsNotCopiedAgain()
     {
         WriteSharedPicture(@"request_item\pickup-coil.png");

@@ -70,6 +70,11 @@ internal sealed class FakeImageCacheSyncService : IImageCacheSyncService
             ? Task.FromResult(Result)
             : Task.FromException<ImageCacheSyncResult>(Failure);
     }
+
+    public Task<ImageCacheSyncResult> SynchronizeAsync(
+        IProgress<ImageCacheSyncProgress>? progress,
+        CancellationToken cancellationToken = default) =>
+        SynchronizeAsync(cancellationToken);
 }
 
 internal sealed class FakeImageStorageConfigurationResolver : IImageStorageConfigurationResolver

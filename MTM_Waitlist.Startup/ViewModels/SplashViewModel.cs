@@ -3,6 +3,8 @@ using System.Reflection;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
+using Microsoft.UI.Xaml;
+
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Startup.Models;
 using MTM_Waitlist.Module_Startup.Services;
@@ -116,6 +118,23 @@ public sealed partial class SplashViewModel : ObservableObject
     /// </remarks>
     [ObservableProperty]
     public partial bool IsWaitingOnSomethingRemote { get; set; }
+
+    /// <summary>
+    /// What the step under way says it is doing right now, when that step reports as it goes. Empty for a step
+    /// that says nothing, so the surface never invents progress it was not told about.
+    /// </summary>
+    /// <remarks>
+    /// A step that waits on a share cannot know a proportion until its walk has finished, so the bar sweeps and
+    /// this line carries the movement instead. The picture refresh is the step that uses it today: "dunnage
+    /// pictures: 24 copied, 174 checked" is the difference between a launch that is working and one that looks
+    /// stuck (owner decision, 2026-11-23).
+    /// </remarks>
+    [ObservableProperty]
+    public partial string ProgressDetail { get; set; } = string.Empty;
+
+    /// <summary>Whether there is a line about the step's own work to draw.</summary>
+    public Visibility ProgressDetailVisibility =>
+        ProgressDetail.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
 
     /// <summary>How many steps have finished, which is the progress bar's position.</summary>
     [ObservableProperty]
@@ -239,6 +258,9 @@ public sealed partial class SplashViewModel : ObservableObject
     /// <inheritdoc cref="OnProgressValueChanged" />
     partial void OnProgressMaximumChanged(double value) => OnPropertyChanged(nameof(ProgressPercentText));
 
+    /// <inheritdoc cref="OnProgressValueChanged" />
+    partial void OnProgressDetailChanged(string value) => OnPropertyChanged(nameof(ProgressDetailVisibility));
+
     /// <summary>Adds the row and refreshes everything the surface reads from it.</summary>
     /// <param name="entry">The line the launch wrote.</param>
     private void Apply(LaunchFeedEntry entry)
@@ -286,8 +308,19 @@ public sealed partial class SplashViewModel : ObservableObject
         {
             case LaunchFeedEntryKind.StepStarted:
                 CurrentStep = entry.Text;
+                ProgressDetail = string.Empty;
                 _waitingStepId = entry.Target is null ? null : entry.StepId;
                 IsWaitingOnSomethingRemote = _waitingStepId is not null;
+                break;
+
+            case LaunchFeedEntryKind.SubOperation:
+                // The step says what it is doing right now, beneath its name rather than in place of it. Only the
+                // step under way can speak for the surface, so a late line for an earlier step is ignored.
+                if (string.Equals(entry.StepId, _waitingStepId, StringComparison.Ordinal))
+                {
+                    ProgressDetail = entry.Text;
+                }
+
                 break;
 
             case LaunchFeedEntryKind.StepCompleted:
@@ -298,6 +331,7 @@ public sealed partial class SplashViewModel : ObservableObject
                     IsWaitingOnSomethingRemote = false;
                 }
 
+                ProgressDetail = string.Empty;
                 break;
 
             default:

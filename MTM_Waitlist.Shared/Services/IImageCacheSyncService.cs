@@ -26,7 +26,31 @@ public interface IImageCacheSyncService
     /// managed to copy, having deleted nothing, so the next run picks up where this one stopped.
     /// </remarks>
     Task<ImageCacheSyncResult> SynchronizeAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Brings the local cache up to date, reporting as it goes what each source has done so far.
+    /// </summary>
+    /// <param name="progress">
+    /// Receives a line per source as its walk advances, so a surface can show movement instead of a proportion it
+    /// cannot know until the walk has finished. Reports are coarse on purpose: a share of a few hundred pictures
+    /// produces a handful, not one per file.
+    /// </param>
+    /// <param name="cancellationToken">Cancellation token for the operation.</param>
+    /// <returns>A summary of what was copied and removed.</returns>
+    /// <remarks>
+    /// The same run as <see cref="SynchronizeAsync(CancellationToken)"/>; only the reporting differs. A caller with
+    /// no surface of its own — the settings screen's manual refresh — uses the other overload and hears nothing.
+    /// </remarks>
+    Task<ImageCacheSyncResult> SynchronizeAsync(
+        IProgress<ImageCacheSyncProgress>? progress,
+        CancellationToken cancellationToken = default);
 }
+
+/// <summary>How far one source's walk has got, for a surface that wants to show movement.</summary>
+/// <param name="SourceLabel">The source's own name, as the result and the log carry it.</param>
+/// <param name="Examined">How many pictures of that source have been compared so far.</param>
+/// <param name="Copied">How many of them were copied because they were missing or had changed.</param>
+public sealed record ImageCacheSyncProgress(string SourceLabel, int Examined, int Copied);
 
 /// <summary>What one synchronisation did, so the startup step can say so rather than guess.</summary>
 /// <param name="Copied">How many pictures were copied because they were missing or had changed.</param>
