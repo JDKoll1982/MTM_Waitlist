@@ -179,7 +179,7 @@ public sealed class WaitlistViewViewModelScrapCardTests
     {
         Item = "pickup-scrap",
         DetailFields =
-        [
+        (MTM_Waitlist.Module_Settings.Models.RequestItemFieldDefinition[])[
             new RequestItemFieldDefinition
             {
                 Label = "Scrap Type",
@@ -254,7 +254,7 @@ public sealed class WaitlistViewViewModelScrapCardTests
     private sealed class SingleDeclaration : IRequestItemConfigurationService
     {
         public Task<RequestItemConfigurationSet> GetConfigurationsAsync(CancellationToken cancellationToken = default) =>
-            Task.FromResult(RequestItemConfigurationSet.From([Declaration()]));
+            Task.FromResult(RequestItemConfigurationSet.From((MTM_Waitlist.Module_Settings.Models.RequestItemConfiguration[])[Declaration()]));
 
         public Task<RequestItemConfiguration> GetConfigurationAsync(string itemCode, CancellationToken cancellationToken = default) =>
             Task.FromResult(Declaration());
@@ -301,7 +301,7 @@ public sealed class WaitlistViewViewModelScrapCardTests
 
         public Task RefreshAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
 
-        public IReadOnlyList<string> Buildings => ["Expo Drive", "VITS"];
+        public IReadOnlyList<string> Buildings => (string[])["Expo Drive", "VITS"];
 
         public string SelectedBuilding { get; set; }
     }

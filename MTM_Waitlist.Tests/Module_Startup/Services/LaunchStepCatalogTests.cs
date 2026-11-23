@@ -83,7 +83,7 @@ public sealed class LaunchStepCatalogTests
         // A scan whose scope resolves to nothing finds nothing, so the derived-count check would pass without
         // reading a file. This proves the scope reaches the catalogue before that check is believed.
         var hits = RepositoryPatternScan.Scan(
-            [("the catalogue itself", @"public sealed class LaunchStepCatalog")],
+            ((string Description, string Pattern)[])[("the catalogue itself", @"public sealed class LaunchStepCatalog")],
             CatalogSourceScope);
 
         Assert.AreEqual(1, hits.Count, "the derived-count check's scope does not cover the catalogue source");

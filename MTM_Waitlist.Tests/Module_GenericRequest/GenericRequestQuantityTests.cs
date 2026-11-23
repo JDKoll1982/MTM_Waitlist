@@ -23,7 +23,7 @@ public sealed class GenericRequestQuantityTests
     [TestMethod]
     public async Task Audit_GenericRequestQuantityTests_AnOpenOperationIsAnsweredByTheFloor()
     {
-        var floor = new RecordingFloor([Row(("OperationQuantity", 12), ("LocationCount", 2))]);
+        var floor = new RecordingFloor((System.Collections.Generic.Dictionary<string, object?>[])[Row(("OperationQuantity", 12), ("LocationCount", 2))]);
         var partData = Create(State("R", isLastOperation: 0), floor);
 
         var reading = await partData.ReadQuantityAsync("100-AAA", "20");
@@ -53,7 +53,7 @@ public sealed class GenericRequestQuantityTests
     [TestMethod]
     public async Task Audit_GenericRequestQuantityTests_AnOperationHandingThePartToOutsideServiceIsWorkInProgress()
     {
-        var floor = new RecordingFloor([Row(("OperationQuantity", 12), ("LocationCount", 2))]);
+        var floor = new RecordingFloor((System.Collections.Generic.Dictionary<string, object?>[])[Row(("OperationQuantity", 12), ("LocationCount", 2))]);
         var partData = Create(State("R", isLastOperation: 0, nextResource: "Outside Service"), floor);
 
         var reading = await partData.ReadQuantityAsync("100-AAA", "90");
@@ -67,7 +67,7 @@ public sealed class GenericRequestQuantityTests
     [TestMethod]
     public async Task Audit_GenericRequestQuantityTests_TheLastOpenOperationIsTheFinishedGoodEvenWhileStillOnTheFloor()
     {
-        var floor = new RecordingFloor([Row(("OperationQuantity", 5), ("LocationCount", 1))]);
+        var floor = new RecordingFloor((System.Collections.Generic.Dictionary<string, object?>[])[Row(("OperationQuantity", 5), ("LocationCount", 1))]);
         var partData = Create(State("R", isLastOperation: 1, nextResource: string.Empty), floor);
 
         var reading = await partData.ReadQuantityAsync("100-AAA", "900");
@@ -80,7 +80,7 @@ public sealed class GenericRequestQuantityTests
     [TestMethod]
     public async Task Audit_GenericRequestQuantityTests_AnUnrecordedStateAsksTheFloorFirst()
     {
-        var floor = new RecordingFloor([Row(("OperationQuantity", 7), ("LocationCount", 1))]);
+        var floor = new RecordingFloor((System.Collections.Generic.Dictionary<string, object?>[])[Row(("OperationQuantity", 7), ("LocationCount", 1))]);
         var partData = Create(State(status: null, isLastOperation: 0), floor);
 
         var reading = await partData.ReadQuantityAsync("100-AAA", "20");
@@ -93,7 +93,7 @@ public sealed class GenericRequestQuantityTests
     [TestMethod]
     public async Task Audit_GenericRequestQuantityTests_TheFloorHoldingNoneFallsBackToVisualByPartNumber()
     {
-        var floor = new RecordingFloor([Row(("OperationQuantity", 0), ("LocationCount", 0))]);
+        var floor = new RecordingFloor((System.Collections.Generic.Dictionary<string, object?>[])[Row(("OperationQuantity", 0), ("LocationCount", 0))]);
         var partData = Create(State(status: null, isLastOperation: 0), floor);
 
         var reading = await partData.ReadQuantityAsync("100-AAA", "20");
@@ -105,7 +105,7 @@ public sealed class GenericRequestQuantityTests
     [TestMethod]
     public async Task Audit_GenericRequestQuantityTests_ZeroOnHandIsAFigureRatherThanAnAbsence()
     {
-        var floor = new RecordingFloor([Row(("OperationQuantity", 0), ("LocationCount", 0))]);
+        var floor = new RecordingFloor((System.Collections.Generic.Dictionary<string, object?>[])[Row(("OperationQuantity", 0), ("LocationCount", 0))]);
         var partData = Create(State("U", isLastOperation: 0), floor, visualFigure: 0m);
 
         var reading = await partData.ReadQuantityAsync("100-AAA", "20");
@@ -118,11 +118,11 @@ public sealed class GenericRequestQuantityTests
     [TestMethod]
     public async Task Audit_GenericRequestQuantityTests_AnUnreadableStateIsUnavailableAndReportsNoFigure()
     {
-        var floor = new RecordingFloor([Row(("OperationQuantity", 12), ("LocationCount", 2))]);
+        var floor = new RecordingFloor((System.Collections.Generic.Dictionary<string, object?>[])[Row(("OperationQuantity", 12), ("LocationCount", 2))]);
         var executor = new FakeVisualQueryExecutor(
             (script, _) => script.EndsWith(StateScript, StringComparison.OrdinalIgnoreCase)
                 ? VisualQueryOutcome.Unreachable("the plant system is down")
-                : VisualQueryOutcome.Ok([Row(("WarehouseQuantity", 30))]));
+                : VisualQueryOutcome.Ok((System.Collections.Generic.IReadOnlyDictionary<string, object?>[])[Row(("WarehouseQuantity", 30))]));
 
         var partData = GenericRequestReadShapes.PartData(executor, new WipFloorInventoryService(floor));
 
@@ -139,7 +139,7 @@ public sealed class GenericRequestQuantityTests
         string nextResource = "") =>
         (script, _) => script.EndsWith(StateScript, StringComparison.OrdinalIgnoreCase)
             ? VisualQueryOutcome.Ok(
-            [
+            (System.Collections.Generic.IReadOnlyDictionary<string, object?>[])[
                 Row(("OperationStatus", status), ("IsLastOperation", isLastOperation), ("NextResource", nextResource)),
             ])
             : VisualQueryOutcome.Ok([]);
@@ -152,7 +152,7 @@ public sealed class GenericRequestQuantityTests
         var executor = new FakeVisualQueryExecutor(
             (script, parameters) => script.EndsWith(StateScript, StringComparison.OrdinalIgnoreCase)
                 ? visual(script, parameters)
-                : VisualQueryOutcome.Ok([Row(("WarehouseQuantity", visualFigure))]));
+                : VisualQueryOutcome.Ok((System.Collections.Generic.IReadOnlyDictionary<string, object?>[])[Row(("WarehouseQuantity", visualFigure))]));
 
         return GenericRequestReadShapes.PartData(executor, new WipFloorInventoryService(floor));
     }

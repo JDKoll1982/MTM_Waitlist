@@ -32,7 +32,7 @@ public sealed class LoggingSeamAuditTests
         // A scan whose scope resolves to nothing finds nothing, so the two checks below would pass without ever
         // reading a file. This proves the scope reaches the seam before either of them is believed.
         var hits = RepositoryPatternScan.Scan(
-            [("the seam's own contract", @"public interface ILogService")],
+            ((string Description, string Pattern)[])[("the seam's own contract", @"public interface ILogService")],
             LoggingModuleScope);
 
         Assert.AreEqual(

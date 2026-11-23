@@ -56,7 +56,7 @@ public sealed class StartupRecoveryServiceTests
         var recovery = new StartupRecoveryService(configuration);
 
         var result = await recovery.RestoreDefaultsAsync(
-            ["person", "role", "permission", "user_active_sessions"],
+            (string[])["person", "role", "permission", "user_active_sessions"],
             CancellationToken.None);
 
         Assert.IsTrue(result.Succeeded, "refusing to reset is an answer, not a failure of the launch");
@@ -74,7 +74,7 @@ public sealed class StartupRecoveryServiceTests
         var recovery = new StartupRecoveryService(configuration);
 
         var result = await recovery.RestoreDefaultsAsync(
-            [MachineConfigurationParts.Configuration],
+            (string[])[MachineConfigurationParts.Configuration],
             CancellationToken.None);
 
         Assert.IsTrue(result.Succeeded);
@@ -93,7 +93,7 @@ public sealed class StartupRecoveryServiceTests
         var recovery = new StartupRecoveryService(configuration);
 
         var result = await recovery.RepairWithoutAskingAsync(
-            [MachineConfigurationParts.ScopedPreference],
+            (string[])[MachineConfigurationParts.ScopedPreference],
             CancellationToken.None);
 
         Assert.IsTrue(result.Succeeded);
@@ -113,7 +113,7 @@ public sealed class StartupRecoveryServiceTests
         var recovery = new StartupRecoveryService(configuration);
 
         var result = await recovery.RepairWithoutAskingAsync(
-            [
+            (string[])[
                 MachineConfigurationParts.ComputerName,
                 MachineConfigurationParts.Location,
             ],
@@ -136,11 +136,11 @@ public sealed class StartupRecoveryServiceTests
         var recovery = new StartupRecoveryService(configuration);
 
         var first = await recovery.RepairWithoutAskingAsync(
-            [MachineConfigurationParts.ScopedPreference],
+            (string[])[MachineConfigurationParts.ScopedPreference],
             CancellationToken.None);
 
         var second = await recovery.RepairWithoutAskingAsync(
-            [MachineConfigurationParts.ScopedPreference],
+            (string[])[MachineConfigurationParts.ScopedPreference],
             CancellationToken.None);
 
         CollectionAssert.Contains(first.Reset.ToArray(), MachineConfigurationParts.ScopedPreference);
@@ -158,7 +158,7 @@ public sealed class StartupRecoveryServiceTests
         var recovery = new StartupRecoveryService(configuration);
 
         var result = await recovery.RepairWithoutAskingAsync(
-            [MachineConfigurationParts.ScopedPreference],
+            (string[])[MachineConfigurationParts.ScopedPreference],
             CancellationToken.None);
 
         Assert.IsTrue(result.Succeeded, "failing to repair is an answer, not a fault of the launch");
@@ -175,7 +175,7 @@ public sealed class StartupRecoveryServiceTests
         var recovery = new StartupRecoveryService(configuration);
 
         var result = await recovery.RepairWithoutAskingAsync(
-            [MachineConfigurationParts.ScopedPreference],
+            (string[])[MachineConfigurationParts.ScopedPreference],
             CancellationToken.None);
 
         Assert.IsTrue(result.Succeeded, "changing nothing is an answer, not a fault of the launch");

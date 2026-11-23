@@ -145,7 +145,7 @@ public sealed class WaitlistDetailJobFillProvenanceTests
 
         public Task RefreshAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
 
-        public IReadOnlyList<string> Buildings => ["Expo Drive"];
+        public IReadOnlyList<string> Buildings => (string[])["Expo Drive"];
 
         public string SelectedBuilding { get; set; } = "Expo Drive";
     }

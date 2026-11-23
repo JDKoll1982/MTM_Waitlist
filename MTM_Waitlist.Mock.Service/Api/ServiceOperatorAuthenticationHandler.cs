@@ -121,7 +121,7 @@ public sealed class ServiceOperatorAuthenticationHandler : AuthenticationHandler
         }
 
         var identity = new ClaimsIdentity(
-            [
+            (System.Security.Claims.Claim[])[
                 new Claim(ClaimTypes.Name, userName),
                 new Claim(ClaimTypes.Role, operatorIdentity.RoleCode),
             ],

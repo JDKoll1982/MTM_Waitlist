@@ -21,7 +21,7 @@ public sealed class GenericRequestWorkCenterViewModelTests
         var data = new StubGenericRequestStepData
         {
             WorkCenters = GenericRequestStepResult<GenericRequestWorkCenterOption>.Populated(
-                [
+                (MTM_Waitlist.GenericRequest.Models.GenericRequestWorkCenterOption[])[
                     new GenericRequestWorkCenterOption("WC-1", "Expo Drive"),
                     new GenericRequestWorkCenterOption("WC-2", "Vits Drive"),
                 ],
@@ -51,7 +51,7 @@ public sealed class GenericRequestWorkCenterViewModelTests
         var data = new StubGenericRequestStepData
         {
             WorkCenters = GenericRequestStepResult<GenericRequestWorkCenterOption>.Populated(
-                [new GenericRequestWorkCenterOption("WC-1", "Expo Drive")],
+                (MTM_Waitlist.GenericRequest.Models.GenericRequestWorkCenterOption[])[new GenericRequestWorkCenterOption("WC-1", "Expo Drive")],
                 DateTimeOffset.UtcNow),
         };
         var navigator = new StubGenericRequestNavigator();

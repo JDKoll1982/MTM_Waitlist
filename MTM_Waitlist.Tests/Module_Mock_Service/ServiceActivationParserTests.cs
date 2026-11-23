@@ -100,7 +100,7 @@ public sealed class ServiceActivationParserTests
         Assert.AreEqual(
             ServiceActivationParser.RequestedSurface.Status,
             ServiceActivationParser.ParseTokens(
-            [
+            (string[])[
                 @"C:\Services\MTM_Waitlist.Mock.Service\MTM_Waitlist.Mock.Service.exe",
                 "--open-status"
             ]));
@@ -112,7 +112,7 @@ public sealed class ServiceActivationParserTests
         Assert.AreEqual(
             ServiceActivationParser.RequestedSurface.None,
             ServiceActivationParser.ParseTokens(
-            [
+            (string[])[
                 @"C:\Services\MTM_Waitlist.Mock.Service\MTM_Waitlist.Mock.Service.exe"
             ]),
             "The path alone must never open a window: that is the logon auto-start case.");

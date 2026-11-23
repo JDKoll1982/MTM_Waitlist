@@ -959,11 +959,11 @@ public sealed class WaitlistViewViewModelActionTests
         /// <summary>The request's stored state, which is what decides who holds the claim.</summary>
         public WaitlistRequest Current => _current;
 
-        public IReadOnlyList<WaitlistRequest> GetActiveRequests(string? building = null) => [_current];
+        public IReadOnlyList<WaitlistRequest> GetActiveRequests(string? building = null) => (MTM_Waitlist.Module_Waitlist.Models.WaitlistRequest[])[_current];
 
         public WaitlistRequest? GetRequest(Guid requestId) => requestId == _current.Id ? _current : null;
 
-        public IReadOnlyList<WaitlistRequest> GetMyRequests(string requesterEmployeeNumber, string? building = null) => [_current];
+        public IReadOnlyList<WaitlistRequest> GetMyRequests(string requesterEmployeeNumber, string? building = null) => (MTM_Waitlist.Module_Waitlist.Models.WaitlistRequest[])[_current];
 
         public IReadOnlyList<WaitlistRequestAuditEntry> GetAuditTrail(Guid requestId) => [];
 

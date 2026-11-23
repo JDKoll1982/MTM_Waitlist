@@ -22,7 +22,7 @@ public sealed class VisualReadFallbackParityTests
     [TestMethod]
     public async Task Service_VisualReadFallbackParityTests_WorkOrderLookup_UnreachableServesMirrorThroughShapeProcedure()
     {
-        var cache = new RecordingMirrorCache([Row(("PartNumber", "P-1"), ("Description", "Ring"), ("WorkCenter", "WC-1"))]);
+        var cache = new RecordingMirrorCache((System.Collections.Generic.Dictionary<string, object?>[])[Row(("PartNumber", "P-1"), ("Description", "Ring"), ("WorkCenter", "WC-1"))]);
         var fallback = new VisualWorkOrderLookupFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Unreachable("down")), cache);
 
         var rows = await fallback.ReadAsync(new VisualWorkOrderLookupRequest("WO-1"));
@@ -39,7 +39,7 @@ public sealed class VisualReadFallbackParityTests
     [TestMethod]
     public async Task Service_VisualReadFallbackParityTests_WorkOrderLookup_EmptyLiveAnswerIsNotReplacedByCache()
     {
-        var cache = new RecordingMirrorCache([Row(("PartNumber", "SHOULD-NOT-APPEAR"))]);
+        var cache = new RecordingMirrorCache((System.Collections.Generic.Dictionary<string, object?>[])[Row(("PartNumber", "SHOULD-NOT-APPEAR"))]);
         var fallback = new VisualWorkOrderLookupFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Ok([])), cache);
 
         var result = await fallback.ReadWithProvenanceAsync(new VisualWorkOrderLookupRequest("WO-1"));
@@ -54,7 +54,7 @@ public sealed class VisualReadFallbackParityTests
     [TestMethod]
     public async Task Service_VisualReadFallbackParityTests_OperationSequences_UnreachableServesMirrorThroughShapeProcedure()
     {
-        var cache = new RecordingMirrorCache([Row(("SequenceNumber", "020"), ("Description", "Blank"))]);
+        var cache = new RecordingMirrorCache((System.Collections.Generic.Dictionary<string, object?>[])[Row(("SequenceNumber", "020"), ("Description", "Blank"))]);
         var fallback = new VisualOperationSequencesFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Unreachable("down")), cache);
 
         var rows = await fallback.ReadAsync(new VisualOperationSequenceRequest("WO-1", "P-1"));
@@ -69,7 +69,7 @@ public sealed class VisualReadFallbackParityTests
     [TestMethod]
     public async Task Service_VisualReadFallbackParityTests_OperationSequences_EmptyLiveAnswerIsNotReplacedByCache()
     {
-        var cache = new RecordingMirrorCache([Row(("SequenceNumber", "999"))]);
+        var cache = new RecordingMirrorCache((System.Collections.Generic.Dictionary<string, object?>[])[Row(("SequenceNumber", "999"))]);
         var fallback = new VisualOperationSequencesFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Ok([])), cache);
 
         var result = await fallback.ReadWithProvenanceAsync(new VisualOperationSequenceRequest("WO-1", "P-1"));
@@ -84,7 +84,7 @@ public sealed class VisualReadFallbackParityTests
     [TestMethod]
     public async Task Service_VisualReadFallbackParityTests_SubordinateParts_UnreachableServesMirrorThroughShapeProcedure()
     {
-        var cache = new RecordingMirrorCache([
+        var cache = new RecordingMirrorCache((System.Collections.Generic.Dictionary<string, object?>[])[
             Row(("Category", "Coil"), ("PartNumber", "SUB-1"), ("Description", "Sub"), ("Location", "V-A0-01"), ("User8", "U8"), ("OnHandQuantity", 12.5m))
         ]);
         var fallback = new VisualSubordinatePartsFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Unreachable("down")), cache);
@@ -103,7 +103,7 @@ public sealed class VisualReadFallbackParityTests
     [TestMethod]
     public async Task Service_VisualReadFallbackParityTests_SubordinateParts_EmptyLiveAnswerIsNotReplacedByCache()
     {
-        var cache = new RecordingMirrorCache([Row(("PartNumber", "SHOULD-NOT-APPEAR"))]);
+        var cache = new RecordingMirrorCache((System.Collections.Generic.Dictionary<string, object?>[])[Row(("PartNumber", "SHOULD-NOT-APPEAR"))]);
         var fallback = new VisualSubordinatePartsFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Ok([])), cache);
 
         var result = await fallback.ReadWithProvenanceAsync(new VisualSubordinatePartRequest("WO-1", "P-1", "020"));
@@ -118,7 +118,7 @@ public sealed class VisualReadFallbackParityTests
     [TestMethod]
     public async Task Service_VisualReadFallbackParityTests_InventoryLocations_UnreachableServesMirrorThroughShapeProcedure()
     {
-        var cache = new RecordingMirrorCache([Row(("PartNumber", "P-1"), ("Location", "V-A0-01"), ("OnHandQuantity", 46000m))]);
+        var cache = new RecordingMirrorCache((System.Collections.Generic.Dictionary<string, object?>[])[Row(("PartNumber", "P-1"), ("Location", "V-A0-01"), ("OnHandQuantity", 46000m))]);
         var fallback = new VisualInventoryLocationsFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Unreachable("down")), cache);
 
         var rows = await fallback.ReadAsync(new VisualInventoryLocationRequest("P-1"));
@@ -133,7 +133,7 @@ public sealed class VisualReadFallbackParityTests
     [TestMethod]
     public async Task Service_VisualReadFallbackParityTests_InventoryLocations_EmptyLiveAnswerIsNotReplacedByCache()
     {
-        var cache = new RecordingMirrorCache([Row(("Location", "SHOULD-NOT-APPEAR"))]);
+        var cache = new RecordingMirrorCache((System.Collections.Generic.Dictionary<string, object?>[])[Row(("Location", "SHOULD-NOT-APPEAR"))]);
         var fallback = new VisualInventoryLocationsFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Ok([])), cache);
 
         var result = await fallback.ReadWithProvenanceAsync(new VisualInventoryLocationRequest("P-1"));
@@ -148,7 +148,7 @@ public sealed class VisualReadFallbackParityTests
     [TestMethod]
     public async Task Service_VisualReadFallbackParityTests_DispositionInput_UnreachableServesMirrorThroughShapeProcedure()
     {
-        var cache = new RecordingMirrorCache([
+        var cache = new RecordingMirrorCache((System.Collections.Generic.Dictionary<string, object?>[])[
             Row(("WorkOrderStatus", "R"), ("OpenWorkOrderQuantity", 5m), ("FinishedGoodsQuantity", 2m), ("HasOutsideVendorOperation", true))
         ]);
         var fallback = new VisualDispositionInputFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Unreachable("down")), cache);
@@ -166,7 +166,7 @@ public sealed class VisualReadFallbackParityTests
     [TestMethod]
     public async Task Service_VisualReadFallbackParityTests_DispositionInput_EmptyLiveAnswerIsNotReplacedByCache()
     {
-        var cache = new RecordingMirrorCache([Row(("WorkOrderStatus", "R"))]);
+        var cache = new RecordingMirrorCache((System.Collections.Generic.Dictionary<string, object?>[])[Row(("WorkOrderStatus", "R"))]);
         var fallback = new VisualDispositionInputFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Ok([])), cache);
 
         var result = await fallback.ReadWithProvenanceAsync(new VisualDispositionInputRequest("WO-1", "P-1", "100-12"));
@@ -181,7 +181,7 @@ public sealed class VisualReadFallbackParityTests
     [TestMethod]
     public async Task Service_VisualReadFallbackParityTests_EmployeeByNumber_UnreachableServesMirrorThroughShapeProcedure()
     {
-        var cache = new RecordingMirrorCache([
+        var cache = new RecordingMirrorCache((System.Collections.Generic.Dictionary<string, object?>[])[
             Row(("EmployeeNumber", "6229"), ("FirstName", "John"), ("LastName", "Koll"))
         ]);
         var fallback = new VisualEmployeeByNumberFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Unreachable("down")), cache);
@@ -202,7 +202,7 @@ public sealed class VisualReadFallbackParityTests
     {
         // A number the plant system does not hold is a real, empty answer; the mirror must not invent a name for
         // it, because the set-up path has to be able to say it cannot be completed (FR-013).
-        var cache = new RecordingMirrorCache([Row(("EmployeeNumber", "SHOULD-NOT-APPEAR"))]);
+        var cache = new RecordingMirrorCache((System.Collections.Generic.Dictionary<string, object?>[])[Row(("EmployeeNumber", "SHOULD-NOT-APPEAR"))]);
         var fallback = new VisualEmployeeByNumberFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Ok([])), cache);
 
         var result = await fallback.ReadWithProvenanceAsync(new VisualEmployeeByNumberRequest("6229"));
@@ -217,7 +217,7 @@ public sealed class VisualReadFallbackParityTests
     [TestMethod]
     public async Task Service_VisualReadFallbackParityTests_FailedLiveRead_SurfacesInsteadOfReadingTheCache()
     {
-        var cache = new RecordingMirrorCache([Row(("PartNumber", "SHOULD-NOT-APPEAR"))]);
+        var cache = new RecordingMirrorCache((System.Collections.Generic.Dictionary<string, object?>[])[Row(("PartNumber", "SHOULD-NOT-APPEAR"))]);
         var fallback = new VisualWorkOrderLookupFallback(
             new FakeVisualQueryExecutor(VisualQueryOutcome.Failed("SQL error 102")),
             cache);
@@ -348,7 +348,7 @@ public sealed class VisualReadFallbackParityTests
     [TestMethod]
     public async Task Service_VisualReadFallbackParityTests_PartMatches_UnreachableServesMirrorThroughShapeProcedure()
     {
-        var cache = new RecordingMirrorCache([Row(("PartNumber", "100-AAA"), ("Description", "Bracket"))]);
+        var cache = new RecordingMirrorCache((System.Collections.Generic.Dictionary<string, object?>[])[Row(("PartNumber", "100-AAA"), ("Description", "Bracket"))]);
         var fallback = new VisualPartMatchesFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Unreachable("down")), cache);
 
         var rows = await fallback.ReadAsync(new VisualPartMatchesRequest("100-AAA"));
@@ -364,7 +364,7 @@ public sealed class VisualReadFallbackParityTests
     [TestMethod]
     public async Task Service_VisualReadFallbackParityTests_PartMatches_EmptyLiveAnswerIsNotReplacedByCache()
     {
-        var cache = new RecordingMirrorCache([Row(("PartNumber", "SHOULD-NOT-APPEAR"))]);
+        var cache = new RecordingMirrorCache((System.Collections.Generic.Dictionary<string, object?>[])[Row(("PartNumber", "SHOULD-NOT-APPEAR"))]);
         var fallback = new VisualPartMatchesFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Ok([])), cache);
 
         var result = await fallback.ReadWithProvenanceAsync(new VisualPartMatchesRequest("100-AAA"));
@@ -378,7 +378,7 @@ public sealed class VisualReadFallbackParityTests
     public async Task Service_VisualReadFallbackParityTests_PartSequences_UnreachableServesMirrorThroughShapeProcedure()
     {
         var cache = new RecordingMirrorCache(
-        [
+        (System.Collections.Generic.Dictionary<string, object?>[])[
             Row(
                 ("Sequence", "020"),
                 ("Description", "CNC LATHE"),
@@ -405,7 +405,7 @@ public sealed class VisualReadFallbackParityTests
     public async Task Service_VisualReadFallbackParityTests_PartSequenceState_UnreachableServesMirrorThroughShapeProcedure()
     {
         var cache = new RecordingMirrorCache(
-        [
+        (System.Collections.Generic.Dictionary<string, object?>[])[
             Row(("OperationStatus", "R"), ("IsLastOperation", 1), ("NextResource", "GRIND")),
         ]);
         var fallback = new VisualPartSequenceStateFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Unreachable("down")), cache);
@@ -425,7 +425,7 @@ public sealed class VisualReadFallbackParityTests
     public async Task Service_VisualReadFallbackParityTests_DieSearch_UnreachableServesMirrorThroughShapeProcedure()
     {
         var cache = new RecordingMirrorCache(
-        [
+        (System.Collections.Generic.Dictionary<string, object?>[])[
             Row(
                 ("DieNumber", "FGT0602-01"),
                 ("Description", "BASE DIE"),
@@ -448,7 +448,7 @@ public sealed class VisualReadFallbackParityTests
     [TestMethod]
     public async Task Service_VisualReadFallbackParityTests_DieSearch_EmptyLiveAnswerIsNotReplacedByCache()
     {
-        var cache = new RecordingMirrorCache([Row(("DieNumber", "SHOULD-NOT-APPEAR"))]);
+        var cache = new RecordingMirrorCache((System.Collections.Generic.Dictionary<string, object?>[])[Row(("DieNumber", "SHOULD-NOT-APPEAR"))]);
         var fallback = new VisualDieSearchFallback(new FakeVisualQueryExecutor(VisualQueryOutcome.Ok([])), cache);
 
         var result = await fallback.ReadWithProvenanceAsync(new VisualDieSearchRequest("PART-9003"));
@@ -567,9 +567,9 @@ public sealed class VisualReadFallbackParityTests
     [TestMethod]
     public async Task Service_VisualReadFallbackParityTests_WhenTheVerdictIsCached_TheMirrorAnswersWithoutTouchingInforVisual()
     {
-        var cache = new RecordingMirrorCache([Row(("PartNumber", "P-CACHED"), ("Description", "Ring"), ("WorkCenter", "WC-1"))]);
+        var cache = new RecordingMirrorCache((System.Collections.Generic.Dictionary<string, object?>[])[Row(("PartNumber", "P-CACHED"), ("Description", "Ring"), ("WorkCenter", "WC-1"))]);
         var executor = new FakeVisualQueryExecutor(
-            VisualQueryOutcome.Ok([Row(("PartNumber", "P-LIVE"), ("Description", "Ring"), ("WorkCenter", "WC-1"))]));
+            VisualQueryOutcome.Ok((System.Collections.Generic.IReadOnlyDictionary<string, object?>[])[Row(("PartNumber", "P-LIVE"), ("Description", "Ring"), ("WorkCenter", "WC-1"))]));
         var fallback = new VisualWorkOrderLookupFallback(
             executor,
             cache,
@@ -589,9 +589,9 @@ public sealed class VisualReadFallbackParityTests
     [TestMethod]
     public async Task Service_VisualReadFallbackParityTests_WhenTheVerdictIsUnknown_TheLiveReadIsStillAttempted()
     {
-        var cache = new RecordingMirrorCache([Row(("PartNumber", "P-CACHED"))]);
+        var cache = new RecordingMirrorCache((System.Collections.Generic.Dictionary<string, object?>[])[Row(("PartNumber", "P-CACHED"))]);
         var executor = new FakeVisualQueryExecutor(
-            VisualQueryOutcome.Ok([Row(("PartNumber", "P-LIVE"), ("Description", "Ring"), ("WorkCenter", "WC-1"))]));
+            VisualQueryOutcome.Ok((System.Collections.Generic.IReadOnlyDictionary<string, object?>[])[Row(("PartNumber", "P-LIVE"), ("Description", "Ring"), ("WorkCenter", "WC-1"))]));
         var fallback = new VisualWorkOrderLookupFallback(
             executor,
             cache,
@@ -607,9 +607,9 @@ public sealed class VisualReadFallbackParityTests
     [TestMethod]
     public async Task Service_VisualReadFallbackParityTests_WhenTheVerdictReturnsToLive_TheVeryNextReadGoesLiveAgain()
     {
-        var cache = new RecordingMirrorCache([Row(("PartNumber", "P-CACHED"))]);
+        var cache = new RecordingMirrorCache((System.Collections.Generic.Dictionary<string, object?>[])[Row(("PartNumber", "P-CACHED"))]);
         var executor = new FakeVisualQueryExecutor(
-            VisualQueryOutcome.Ok([Row(("PartNumber", "P-LIVE"), ("Description", "Ring"), ("WorkCenter", "WC-1"))]));
+            VisualQueryOutcome.Ok((System.Collections.Generic.IReadOnlyDictionary<string, object?>[])[Row(("PartNumber", "P-LIVE"), ("Description", "Ring"), ("WorkCenter", "WC-1"))]));
         var detector = new StubReachabilityDetector(VisualReadStatus.Cached);
         var fallback = new VisualWorkOrderLookupFallback(executor, cache, detector);
 
@@ -641,9 +641,9 @@ public sealed class VisualReadFallbackParityTests
     [TestMethod]
     public async Task Service_VisualReadFallbackParityTests_WithoutAVerdictSource_TheLiveReadIsStillAttempted()
     {
-        var cache = new RecordingMirrorCache([Row(("PartNumber", "P-CACHED"))]);
+        var cache = new RecordingMirrorCache((System.Collections.Generic.Dictionary<string, object?>[])[Row(("PartNumber", "P-CACHED"))]);
         var executor = new FakeVisualQueryExecutor(
-            VisualQueryOutcome.Ok([Row(("PartNumber", "P-LIVE"), ("Description", "Ring"), ("WorkCenter", "WC-1"))]));
+            VisualQueryOutcome.Ok((System.Collections.Generic.IReadOnlyDictionary<string, object?>[])[Row(("PartNumber", "P-LIVE"), ("Description", "Ring"), ("WorkCenter", "WC-1"))]));
         var fallback = new VisualWorkOrderLookupFallback(executor, cache);
 
         var result = await fallback.ReadWithProvenanceAsync(new VisualWorkOrderLookupRequest("WO-1"));

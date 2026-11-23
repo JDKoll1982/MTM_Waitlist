@@ -107,7 +107,7 @@ public sealed class NewRequestSummaryHonestyTests
             "The average weight must report itself absent rather than render a value nobody resolved.");
         Assert.AreEqual(
             0,
-            FabricatedValueGuard.FindFabricatedLooking([viewModel.CoilNumber, viewModel.CoilQuantityOnHand, viewModel.CoilDescription, viewModel.CoilAverageWeight]).Count,
+            FabricatedValueGuard.FindFabricatedLooking((string?[])[viewModel.CoilNumber, viewModel.CoilQuantityOnHand, viewModel.CoilDescription, viewModel.CoilAverageWeight]).Count,
             "No coil field may carry a fabricated-looking value.");
     }
 

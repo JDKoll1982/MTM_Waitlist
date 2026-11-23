@@ -64,7 +64,7 @@ internal sealed class RecordingLogStore : IMySqlHelperServer
     public bool IsBlocked => !Volatile.Read(ref _gate).Task.IsCompleted;
 
     /// <summary>The messages that reached the store, in order.</summary>
-    public IReadOnlyList<string?> Messages => [.. Writes.Select(write => write.Message)];
+    public IReadOnlyList<string?> Messages => (string?[])[.. Writes.Select(write => write.Message)];
 
     /// <summary>Holds the writer inside its next write until <see cref="ReleaseWrites"/> is called.</summary>
     public void BlockWrites() => Volatile.Write(ref _gate, Held());

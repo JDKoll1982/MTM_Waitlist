@@ -35,7 +35,7 @@ public sealed class InternalStoreRetryPolicy
 
     /// <summary>Delays between attempts, plus the next-retry guidance — approximately 1 s, 2 s, and 4 s.</summary>
     public static readonly IReadOnlyList<TimeSpan> DefaultDelays =
-    [
+    (System.TimeSpan[])[
         TimeSpan.FromSeconds(1),
         TimeSpan.FromSeconds(2),
         TimeSpan.FromSeconds(4),

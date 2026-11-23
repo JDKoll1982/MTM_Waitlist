@@ -20,7 +20,7 @@ public sealed class DunnageCatalogueReaderTests
         var workflow = new RecordingDunnageWorkflowService
         {
             Parts =
-            [
+            (MTM_Waitlist.Module_Setup.Models.SetupDunnagePart[])[
                 new SetupDunnagePart
                 {
                     Id = "DNG-PART-01",
@@ -61,7 +61,7 @@ public sealed class DunnageCatalogueReaderTests
     [TestMethod]
     public async Task Service_DunnageCatalogueReaderTests_OneCallReadsTheWholeCatalogue()
     {
-        var workflow = new RecordingDunnageWorkflowService { Parts = [new SetupDunnagePart { Id = "A" }] };
+        var workflow = new RecordingDunnageWorkflowService { Parts = (MTM_Waitlist.Module_Setup.Models.SetupDunnagePart[])[new SetupDunnagePart { Id = "A" }] };
 
         await new DunnageCatalogueReader(workflow).ReadAllAsync();
 

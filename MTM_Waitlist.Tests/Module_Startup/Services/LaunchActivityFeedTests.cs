@@ -36,7 +36,7 @@ public sealed class LaunchActivityFeedTests
         // A scan whose scope resolves to nothing finds nothing, so the structural check below would pass without
         // ever reading a file. This proves the scope reaches the feed before that check is believed.
         var hits = RepositoryPatternScan.Scan(
-            [("the feed itself", @"public sealed class LaunchActivityFeed")],
+            ((string Description, string Pattern)[])[("the feed itself", @"public sealed class LaunchActivityFeed")],
             FeedSourceScope);
 
         Assert.AreEqual(1, hits.Count, "the structural check's scope does not cover the feed source");

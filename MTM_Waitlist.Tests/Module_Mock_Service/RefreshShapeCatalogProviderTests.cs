@@ -178,13 +178,13 @@ public sealed class RefreshShapeCatalogProviderTests
         var provider = CreateProvider(
             key => Metadata(ColumnsFor(key)),
             catalog:
-            [
+            (MTM_Waitlist.Mock.Models.VisualReadShape[])[
                 new VisualReadShape
                 {
                     Key = "work_order_lookup",
                     Module = VisualReadShapeModule.ModuleSetup,
                     SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Setup/Queries/DoesNotExist.sql",
-                    OutputColumns = [new VisualShapeColumn("PartNumber", "nvarchar(60)")]
+                    OutputColumns = (MTM_Waitlist.Mock.Models.VisualShapeColumn[])[new VisualShapeColumn("PartNumber", "nvarchar(60)")]
                 }
             ]);
 

@@ -54,7 +54,7 @@ public sealed class ServiceApiSecurityTests
     {
         using var fixture = new ServiceApiFixture();
 
-        var outcome = await fixture.Operations.RunRefreshAsync(["not_a_shape"]);
+        var outcome = await fixture.Operations.RunRefreshAsync((string[])["not_a_shape"]);
 
         Assert.IsFalse(outcome.Succeeded);
         Assert.AreEqual(400, outcome.StatusCode);

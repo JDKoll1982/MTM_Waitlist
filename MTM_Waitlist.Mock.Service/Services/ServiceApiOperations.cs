@@ -380,7 +380,7 @@ public sealed class ServiceApiOperations
         }
         else if (TryResolveStore(storeName, out var store))
         {
-            stores = [store];
+            stores = (MTM_Waitlist.Mock.Service.Models.BackupStore[])[store];
         }
         else
         {

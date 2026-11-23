@@ -215,7 +215,7 @@ public sealed class PreSignInStepsTests
             Assert.Inconclusive("This machine reports no hardware address, so the registry read cannot be exercised.");
         }
 
-        var store = new StubMySqlHelperServer([RegistryRow(probe.Hostname, probe.MacAddress)]);
+        var store = new StubMySqlHelperServer((System.Collections.Generic.Dictionary<string, object?>[])[RegistryRow(probe.Hostname, probe.MacAddress)]);
         var step = new ReadComputerRecordStep(new LaunchStepCatalog(), new MachineFactsService(store));
 
         // Act

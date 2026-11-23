@@ -32,7 +32,7 @@ public static class ImageCachePaths
     /// The extensions a picture can have. The cache carries only these, exactly as the image screens accept only
     /// these, so a stray file on the share is neither copied nor counted as something to keep.
     /// </summary>
-    public static readonly IReadOnlyList<string> SupportedExtensions = [".png", ".jpg", ".jpeg"];
+    public static readonly IReadOnlyList<string> SupportedExtensions = (string[])[".png", ".jpg", ".jpeg"];
 
     /// <summary>
     /// A sub-folder the application owns for its own working files. It is never mirrored in the other direction:
@@ -125,7 +125,7 @@ public static class ImageCachePaths
     /// </para>
     /// </remarks>
     public static IReadOnlyList<string> ReceivingApplicationDunnageCaches { get; } =
-    [
+    (string[])[
         Path.Combine(AppContext.BaseDirectory, "Assets", "DunnageImages"),
         Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),

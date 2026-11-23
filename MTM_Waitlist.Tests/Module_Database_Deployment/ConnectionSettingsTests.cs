@@ -149,8 +149,8 @@ public sealed class Model_ConnectionSettingsTests
     public void Model_ConnectionSettingsTests_ForMerge_KeepsTheConfiguredOrderThenAddsTheServerNames()
     {
         var options = Model_DatabaseOption.Merge(
-            ["mtm_waitlist", "mtm_waitlist_test", "mtm_mock"],
-            ["zz_other", "mtm_mock_test", "mtm_waitlist"]);
+            (string[])["mtm_waitlist", "mtm_waitlist_test", "mtm_mock"],
+            (string[])["zz_other", "mtm_mock_test", "mtm_waitlist"]);
 
         CollectionAssert.AreEqual(
             new[] { "mtm_waitlist", "mtm_waitlist_test", "mtm_mock", "zz_other", "mtm_mock_test" },
@@ -160,7 +160,7 @@ public sealed class Model_ConnectionSettingsTests
     [TestMethod]
     public void Model_ConnectionSettingsTests_ForMerge_DoesNotListANameTwice()
     {
-        var options = Model_DatabaseOption.Merge(["mtm_mock"], ["MTM_MOCK", "mtm_mock_test"]);
+        var options = Model_DatabaseOption.Merge((string[])["mtm_mock"], (string[])["MTM_MOCK", "mtm_mock_test"]);
 
         CollectionAssert.AreEqual(
             new[] { "mtm_mock", "mtm_mock_test" },
@@ -171,8 +171,8 @@ public sealed class Model_ConnectionSettingsTests
     public void Model_ConnectionSettingsTests_ServiceMerge_AddsAShippedNameToASettingsFileThatPredatesIt()
     {
         var merged = Service_DeploymentSettings.MergeAvailableDatabases(
-            ["mtm_waitlist", "mtm_mock", "mtm_mock_test"],
-            ["mtm_waitlist", "mtm_mock"]);
+            (string[])["mtm_waitlist", "mtm_mock", "mtm_mock_test"],
+            (string[])["mtm_waitlist", "mtm_mock"]);
 
         CollectionAssert.AreEqual(
             new[] { "mtm_waitlist", "mtm_mock", "mtm_mock_test" },

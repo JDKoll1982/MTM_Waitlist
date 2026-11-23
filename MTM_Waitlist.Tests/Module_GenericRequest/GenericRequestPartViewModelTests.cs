@@ -31,7 +31,7 @@ public sealed class GenericRequestPartViewModelTests
     public async Task Audit_GenericRequestPartViewModelTests_APartWithNoSequenceCannotAdvance()
     {
         var (viewModel, _) = Create(
-            completions: [Part("100-AAA")],
+            completions: (MTM_Waitlist.GenericRequest.Models.GenericRequestPartOption[])[Part("100-AAA")],
             sequences: GenericRequestStepResult<GenericRequestSequenceOption>.Empty(DateTimeOffset.UtcNow));
 
         await viewModel.LoadAsync();
@@ -45,9 +45,9 @@ public sealed class GenericRequestPartViewModelTests
     public async Task Audit_GenericRequestPartViewModelTests_ChangingThePartClearsTheSequenceAndTheReading()
     {
         var (viewModel, navigator) = Create(
-            completions: [Part("100-AAA"), Part("200-BBB")],
+            completions: (MTM_Waitlist.GenericRequest.Models.GenericRequestPartOption[])[Part("100-AAA"), Part("200-BBB")],
             sequences: GenericRequestStepResult<GenericRequestSequenceOption>.Populated(
-                [Sequence("20")],
+                (MTM_Waitlist.GenericRequest.Models.GenericRequestSequenceOption[])[Sequence("20")],
                 DateTimeOffset.UtcNow),
             reading: GenericRequestQuantityReading.OnHand(5m, SequenceSource.WipFloor, GenericRequestPartStage.Wip, DateTimeOffset.UtcNow));
 
@@ -68,9 +68,9 @@ public sealed class GenericRequestPartViewModelTests
     public async Task Audit_GenericRequestPartViewModelTests_TheStepDoesNotAdvanceWithoutAChosenSequence()
     {
         var (viewModel, _) = Create(
-            completions: [Part("100-AAA")],
+            completions: (MTM_Waitlist.GenericRequest.Models.GenericRequestPartOption[])[Part("100-AAA")],
             sequences: GenericRequestStepResult<GenericRequestSequenceOption>.Populated(
-                [Sequence("20")],
+                (MTM_Waitlist.GenericRequest.Models.GenericRequestSequenceOption[])[Sequence("20")],
                 DateTimeOffset.UtcNow));
 
         await viewModel.LoadAsync();
@@ -83,8 +83,8 @@ public sealed class GenericRequestPartViewModelTests
     public async Task Audit_GenericRequestPartViewModelTests_AFigureOfZeroStillLetsTheRequestGoOn()
     {
         var (viewModel, navigator) = Create(
-            completions: [Part("100-AAA")],
-            sequences: GenericRequestStepResult<GenericRequestSequenceOption>.Populated([Sequence("20")], DateTimeOffset.UtcNow),
+            completions: (MTM_Waitlist.GenericRequest.Models.GenericRequestPartOption[])[Part("100-AAA")],
+            sequences: GenericRequestStepResult<GenericRequestSequenceOption>.Populated((MTM_Waitlist.GenericRequest.Models.GenericRequestSequenceOption[])[Sequence("20")], DateTimeOffset.UtcNow),
             reading: GenericRequestQuantityReading.OnHand(0m, SequenceSource.WipFloor, GenericRequestPartStage.Wip, DateTimeOffset.UtcNow));
 
         await viewModel.LoadAsync();
@@ -104,9 +104,9 @@ public sealed class GenericRequestPartViewModelTests
     public async Task Audit_GenericRequestPartViewModelTests_AnOutsideServiceOperationIsWorkInProgressAndSaysWhereThePartGoesNext()
     {
         var (viewModel, navigator) = Create(
-            completions: [Part("100-AAA")],
+            completions: (MTM_Waitlist.GenericRequest.Models.GenericRequestPartOption[])[Part("100-AAA")],
             sequences: GenericRequestStepResult<GenericRequestSequenceOption>.Populated(
-                [Sequence("90", isLastOperation: false, nextResource: "Outside Service")],
+                (MTM_Waitlist.GenericRequest.Models.GenericRequestSequenceOption[])[Sequence("90", isLastOperation: false, nextResource: "Outside Service")],
                 DateTimeOffset.UtcNow),
             reading: GenericRequestQuantityReading.OnHand(12m, SequenceSource.WipFloor, GenericRequestPartStage.Wip, DateTimeOffset.UtcNow));
 
@@ -128,8 +128,8 @@ public sealed class GenericRequestPartViewModelTests
     public async Task Audit_GenericRequestPartViewModelTests_AnUnreadQuantityKeepsTheStep()
     {
         var (viewModel, _) = Create(
-            completions: [Part("100-AAA")],
-            sequences: GenericRequestStepResult<GenericRequestSequenceOption>.Populated([Sequence("20")], DateTimeOffset.UtcNow),
+            completions: (MTM_Waitlist.GenericRequest.Models.GenericRequestPartOption[])[Part("100-AAA")],
+            sequences: GenericRequestStepResult<GenericRequestSequenceOption>.Populated((MTM_Waitlist.GenericRequest.Models.GenericRequestSequenceOption[])[Sequence("20")], DateTimeOffset.UtcNow),
             reading: GenericRequestQuantityReading.Unavailable(DateTimeOffset.UtcNow));
 
         await viewModel.LoadAsync();
@@ -144,8 +144,8 @@ public sealed class GenericRequestPartViewModelTests
     public async Task Audit_GenericRequestPartViewModelTests_TheDraftKeepsThePartSequenceAndSource()
     {
         var (viewModel, navigator) = Create(
-            completions: [Part("100-AAA")],
-            sequences: GenericRequestStepResult<GenericRequestSequenceOption>.Populated([Sequence("20")], DateTimeOffset.UtcNow),
+            completions: (MTM_Waitlist.GenericRequest.Models.GenericRequestPartOption[])[Part("100-AAA")],
+            sequences: GenericRequestStepResult<GenericRequestSequenceOption>.Populated((MTM_Waitlist.GenericRequest.Models.GenericRequestSequenceOption[])[Sequence("20")], DateTimeOffset.UtcNow),
             reading: GenericRequestQuantityReading.OnHand(4m, SequenceSource.VisualOwnPart, GenericRequestPartStage.FinishedGood, DateTimeOffset.UtcNow));
 
         await viewModel.LoadAsync();
@@ -185,7 +185,7 @@ public sealed class GenericRequestPartViewModelTests
             CompletionsFactory = term => term == "A0"
                 ? stalled.Task
                 : Task.FromResult(GenericRequestStepResult<GenericRequestPartOption>.Populated(
-                    [Part("A0003")],
+                    (MTM_Waitlist.GenericRequest.Models.GenericRequestPartOption[])[Part("A0003")],
                     DateTimeOffset.UtcNow)),
         };
 
@@ -208,8 +208,8 @@ public sealed class GenericRequestPartViewModelTests
     public async Task Audit_GenericRequestPartViewModelTests_EditingTheTermWithdrawsTheAcceptedPart()
     {
         var (viewModel, navigator) = Create(
-            completions: [Part("100-AAA")],
-            sequences: GenericRequestStepResult<GenericRequestSequenceOption>.Populated([Sequence("20")], DateTimeOffset.UtcNow),
+            completions: (MTM_Waitlist.GenericRequest.Models.GenericRequestPartOption[])[Part("100-AAA")],
+            sequences: GenericRequestStepResult<GenericRequestSequenceOption>.Populated((MTM_Waitlist.GenericRequest.Models.GenericRequestSequenceOption[])[Sequence("20")], DateTimeOffset.UtcNow),
             reading: GenericRequestQuantityReading.OnHand(5m, SequenceSource.WipFloor, GenericRequestPartStage.Wip, DateTimeOffset.UtcNow));
 
         await viewModel.LoadAsync();
@@ -242,7 +242,7 @@ public sealed class GenericRequestPartViewModelTests
         new(
             sequence,
             string.Empty,
-            [SequenceSource.VisualOwnPart, SequenceSource.WipFloor],
+            (MTM_Waitlist.GenericRequest.Models.SequenceSource[])[SequenceSource.VisualOwnPart, SequenceSource.WipFloor],
             "R",
             isLastOperation,
             nextResource,

@@ -926,7 +926,7 @@ public sealed class PermissionsViewModelTests
         private readonly IReadOnlyList<UserRosterRow> _people;
 
         internal FakeUserManagementService(params (long UserId, string DisplayName, string Username, string RoleCode)[] people) =>
-            _people = [.. people.Select(person => new UserRosterRow(
+            _people = (MTM_Waitlist.Module_Core.Models.UserManagement.UserRosterRow[])[.. people.Select(person => new UserRosterRow(
                 person.UserId,
                 $"public-{person.UserId}",
                 person.Username,
@@ -965,7 +965,7 @@ public sealed class PermissionsViewModelTests
     {
         public Task<IReadOnlyList<RoleCatalogEntry>> GetRolesAsync(CancellationToken cancellationToken = default) =>
             Task.FromResult<IReadOnlyList<RoleCatalogEntry>>(
-            [
+            (MTM_Waitlist.Module_Core.Contracts.Services.RoleCatalogEntry[])[
                 new RoleCatalogEntry(1, "developer", "Developer", 100),
                 new RoleCatalogEntry(2, "plant_manager", "Plant Manager", 80),
                 new RoleCatalogEntry(3, "setup_lead", "Setup Lead", 40),

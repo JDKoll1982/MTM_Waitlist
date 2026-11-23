@@ -70,7 +70,7 @@ public sealed class LuggerDumpPointResolutionTests
     {
         // Door 6 took both types and was blocked, so each type promoted the lugger next in its own order.
         var snapshot = LuggerArrangementSnapshot.Create(
-        [
+        (MTM_Waitlist.Module_Core.Models.ScrapAssignment[])[
             Row(Door7, "Available", Scrap, 1, true),
             Row(Door6, "Full", Scrap, 2, false),
             Row(Extra, "Available", "galvanized steel", 1, true),

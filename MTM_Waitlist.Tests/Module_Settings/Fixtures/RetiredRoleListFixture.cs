@@ -28,14 +28,14 @@ public static class RetiredRoleListFixture
 {
     /// <summary>Every role entry in <see cref="DefectTypeCatalogAllowedRoles"/> and <see cref="SetupWorkCenterManageRoles"/> that matches no catalogue role.</summary>
     public static IReadOnlyList<string> EntriesMatchingNoCatalogRole { get; } =
-    [
+    (string[])[
         "administrator",
         "Setup Tech",
     ];
 
     /// <summary>`MTM_Waitlist.Core/Services/RequestActionPolicy.cs` — <c>HandlerRoles</c>.</summary>
     public static IReadOnlyList<string> RequestActionPolicyHandlerRoles { get; } =
-    [
+    (string[])[
         "Material Handler",
         "Production",
         "Production Lead",
@@ -48,7 +48,7 @@ public static class RetiredRoleListFixture
 
     /// <summary>`MTM_Waitlist.Mock.Service/Api/ServiceOperatorRoles.cs` — <c>Approved</c>.</summary>
     public static IReadOnlyList<string> ServiceOperatorRolesApproved { get; } =
-    [
+    (string[])[
         "Admin",
         "Developer",
         "Plant Manager",
@@ -58,7 +58,7 @@ public static class RetiredRoleListFixture
 
     /// <summary>`MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.cs` — <c>AllowedIgnoredLocationManageRoles</c>.</summary>
     public static IReadOnlyList<string> SettingsIgnoredLocationManageRoles { get; } =
-    [
+    (string[])[
         "Admin",
         "Developer",
         "Plant Manager",
@@ -70,7 +70,7 @@ public static class RetiredRoleListFixture
 
     /// <summary>`MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.cs` — <c>AllowedHotWorkCenterManageRoles</c>.</summary>
     public static IReadOnlyList<string> SettingsHotWorkCenterManageRoles { get; } =
-    [
+    (string[])[
         "Admin",
         "Developer",
         "Plant Manager",
@@ -80,14 +80,14 @@ public static class RetiredRoleListFixture
 
     /// <summary>`MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.cs` — <c>AllowedImageLocationManageRoles</c>.</summary>
     public static IReadOnlyList<string> SettingsImageLocationManageRoles { get; } =
-    [
+    (string[])[
         "Admin",
         "Developer",
     ];
 
     /// <summary>`MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.cs` — <c>AllowedCacheRefreshRoles</c>.</summary>
     public static IReadOnlyList<string> SettingsCacheRefreshRoles { get; } =
-    [
+    (string[])[
         "Admin",
         "Developer",
         "Plant Manager",
@@ -95,7 +95,7 @@ public static class RetiredRoleListFixture
 
     /// <summary>`MTM_Waitlist.Settings/Operations/ViewModels/UrgencyAllotmentEditorViewModel.cs` — <c>AllowedUrgencyManageRoles</c>.</summary>
     public static IReadOnlyList<string> UrgencyAllotmentManageRoles { get; } =
-    [
+    (string[])[
         "Admin",
         "Developer",
         "Plant Manager",
@@ -103,7 +103,7 @@ public static class RetiredRoleListFixture
 
     /// <summary>`MTM_Waitlist.Settings/Services/DefectTypeCatalogService.cs` — <c>AllowedRoles</c>.</summary>
     public static IReadOnlyList<string> DefectTypeCatalogAllowedRoles { get; } =
-    [
+    (string[])[
         "admin",
         "administrator",
         "developer",
@@ -111,14 +111,14 @@ public static class RetiredRoleListFixture
 
     /// <summary>`MTM_Waitlist.Settings/Devices/ViewModels/ComputerManagementViewModel.cs` — <c>AllowedComputerManageRoles</c>.</summary>
     public static IReadOnlyList<string> ComputerManageRoles { get; } =
-    [
+    (string[])[
         "Admin",
         "Developer",
     ];
 
     /// <summary>`MTM_Waitlist.Setup/Services/DunnageWorkflowService.cs` — <c>AllowedQuickAddRoles</c>.</summary>
     public static IReadOnlyList<string> DunnageQuickAddRoles { get; } =
-    [
+    (string[])[
         "Admin",
         "Developer",
         "Plant Manager",
@@ -128,7 +128,7 @@ public static class RetiredRoleListFixture
 
     /// <summary>`MTM_Waitlist.Setup/ViewModels/SetupWorkCenterViewModel.cs` — <c>AllowedManageRoles</c>.</summary>
     public static IReadOnlyList<string> SetupWorkCenterManageRoles { get; } =
-    [
+    (string[])[
         "Setup Tech",
         "Admin",
         "Developer",
@@ -139,7 +139,7 @@ public static class RetiredRoleListFixture
 
     /// <summary>`ViewModels/ShellViewModel.cs` — <c>GetUserPresentation</c>, the badge map. Not a permission.</summary>
     public static IReadOnlyList<string> ShellBadgeRoleVocabulary { get; } =
-    [
+    (string[])[
         "developer",
         "admin",
         "administrator",

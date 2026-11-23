@@ -78,7 +78,7 @@ public partial class LuggerArrangementViewModel : ObservableRecipient, INavigati
 
     /// <summary>The four statuses a lugger may carry, in the words the procedures accept.</summary>
     public IReadOnlyList<string> StatusOptions { get; } =
-    [
+    (string[])[
         LuggerStatus.Available,
         LuggerStatus.Backup,
         LuggerStatus.Full,

@@ -60,7 +60,7 @@ public sealed class GenericRequestSubmission
 
     /// <summary>The store accepted the request.</summary>
     public static GenericRequestSubmission Raised(string requestId, DateTimeOffset attemptedAtUtc) =>
-        Raised([requestId ?? string.Empty], attemptedAtUtc);
+        Raised((string[])[requestId ?? string.Empty], attemptedAtUtc);
 
     /// <summary>The store accepted every one of these requests, one per chosen die.</summary>
     public static GenericRequestSubmission Raised(IReadOnlyList<string> requestIds, DateTimeOffset attemptedAtUtc) =>

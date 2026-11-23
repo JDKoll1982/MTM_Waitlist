@@ -327,7 +327,7 @@ public partial class EditUserViewModel : ObservableRecipient, INavigationAware
     public async Task RefreshEntitlementAsync(CancellationToken cancellationToken = default)
     {
         var answers = await _permissionService
-            .HasPermissionsAsync([PermissionKeys.AdminUsers, PermissionKeys.AdminResetPassword], cancellationToken)
+            .HasPermissionsAsync((string[])[PermissionKeys.AdminUsers, PermissionKeys.AdminResetPassword], cancellationToken)
             .ConfigureAwait(true);
 
         var mayManage = answers.TryGetValue(PermissionKeys.AdminUsers, out var manage) && manage;

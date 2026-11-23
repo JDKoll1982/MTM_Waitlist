@@ -24,7 +24,7 @@ public static class VisualReadShapeCatalog
 {
     /// <summary>Creates the twelve shipped read-shape definitions.</summary>
     public static IReadOnlyList<VisualReadShape> Create() =>
-    [
+    (MTM_Waitlist.Mock.Models.VisualReadShape[])[
         new VisualReadShape
         {
             Key = "work_order_lookup",
@@ -32,11 +32,11 @@ public static class VisualReadShapeCatalog
             SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Setup/Queries/LookupWorkOrder.sql",
             PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/work_order_lookup_population.sql",
             InputParameters =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeParameter[])[
                 new VisualShapeParameter("NormalizedWorkOrder", "nvarchar(30)", IsRequired: true)
             ],
             OutputColumns =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeColumn[])[
                 new VisualShapeColumn("PartNumber", "nvarchar(60)"),
                 new VisualShapeColumn("Description", "nvarchar(255)"),
                 new VisualShapeColumn("WorkCenter", "nvarchar(32)")
@@ -49,12 +49,12 @@ public static class VisualReadShapeCatalog
             SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Setup/Queries/GetSequences.sql",
             PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/operation_sequences_population.sql",
             InputParameters =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeParameter[])[
                 new VisualShapeParameter("NormalizedWorkOrder", "nvarchar(30)", IsRequired: true),
                 new VisualShapeParameter("PartNumber", "nvarchar(60)", IsRequired: true)
             ],
             OutputColumns =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeColumn[])[
                 new VisualShapeColumn("SequenceNumber", "int"),
                 new VisualShapeColumn("Description", "nvarchar(255)")
             ]
@@ -66,7 +66,7 @@ public static class VisualReadShapeCatalog
             SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Setup/Queries/GetSubordinateParts.sql",
             PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/subordinate_parts_population.sql",
             InputParameters =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeParameter[])[
                 new VisualShapeParameter("NormalizedWorkOrder", "nvarchar(30)", IsRequired: true),
                 // The operation's part number. Persisted as `parent_part_number` so that the
                 // returned `PartNumber` means the SUBORDINATE part, exactly as in the live read.
@@ -74,7 +74,7 @@ public static class VisualReadShapeCatalog
                 new VisualShapeParameter("SequenceNumber", "nvarchar(20)", IsRequired: true)
             ],
             OutputColumns =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeColumn[])[
                 new VisualShapeColumn("Category", "nvarchar(64)"),
                 new VisualShapeColumn("PartNumber", "nvarchar(60)"),
                 new VisualShapeColumn("Description", "nvarchar(255)"),
@@ -90,12 +90,12 @@ public static class VisualReadShapeCatalog
             SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Waitlist/Queries/GetInventoryLocations.sql",
             PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/inventory_locations_population.sql",
             InputParameters =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeParameter[])[
                 // The same value is both the read's input and one of its output columns.
                 new VisualShapeParameter("PartNumber", "nvarchar(60)", IsRequired: true)
             ],
             OutputColumns =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeColumn[])[
                 new VisualShapeColumn("PartNumber", "nvarchar(60)"),
                 new VisualShapeColumn("Location", "nvarchar(64)"),
                 new VisualShapeColumn("OnHandQuantity", "decimal(18,4)")
@@ -108,13 +108,13 @@ public static class VisualReadShapeCatalog
             SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Waitlist/Queries/GetDispositionInput.sql",
             PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/disposition_input_population.sql",
             InputParameters =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeParameter[])[
                 new VisualShapeParameter("WorkOrder", "nvarchar(30)", IsRequired: true),
                 new VisualShapeParameter("PartNumber", "nvarchar(60)", IsRequired: true),
                 new VisualShapeParameter("WorkCenter", "nvarchar(30)", IsRequired: true)
             ],
             OutputColumns =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeColumn[])[
                 new VisualShapeColumn("WorkOrderStatus", "nvarchar(8)"),
                 new VisualShapeColumn("OpenWorkOrderQuantity", "decimal(18,4)"),
                 new VisualShapeColumn("FinishedGoodsQuantity", "decimal(18,4)"),
@@ -134,11 +134,11 @@ public static class VisualReadShapeCatalog
             SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Startup/Queries/GetEmployeeByNumber.sql",
             PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/employee_by_number_population.sql",
             InputParameters =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeParameter[])[
                 new VisualShapeParameter("EmployeeNumber", "nvarchar(32)", IsRequired: true)
             ],
             OutputColumns =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeColumn[])[
                 new VisualShapeColumn("EmployeeNumber", "nvarchar(32)"),
                 new VisualShapeColumn("FirstName", "nvarchar(128)"),
                 new VisualShapeColumn("LastName", "nvarchar(128)")
@@ -151,12 +151,12 @@ public static class VisualReadShapeCatalog
             SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartWarehouseQuantities.sql",
             PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/part_warehouse_quantities_population.sql",
             InputParameters =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeParameter[])[
                 // The same value is both the read's input and one of its output columns.
                 new VisualShapeParameter("PartNumber", "nvarchar(60)", IsRequired: true)
             ],
             OutputColumns =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeColumn[])[
                 // The part-wide on-hand quantity summed over ALL of the part's locations, and that same sum
                 // restricted to finished-goods locations. One row per part — never a per-location figure.
                 new VisualShapeColumn("PartNumber", "nvarchar(60)"),
@@ -171,7 +171,7 @@ public static class VisualReadShapeCatalog
             SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Setup/Queries/GetWorkOrderSearch.sql",
             PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/work_order_search_population.sql",
             InputParameters =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeParameter[])[
                 // The three things an operator searches BY. Each may be empty (an empty filter is no
                 // constraint), so the read is always handed all three values.
                 new VisualShapeParameter("WorkOrderText", "nvarchar(60)", IsRequired: true),
@@ -179,7 +179,7 @@ public static class VisualReadShapeCatalog
                 new VisualShapeParameter("CustomerFilter", "nvarchar(120)", IsRequired: true)
             ],
             OutputColumns =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeColumn[])[
                 // One row per open, addressable work order. The customer is the real name from the
                 // allocation (CUST_ORDER_ALLOC.CUST_NAME), never the customer id.
                 new VisualShapeColumn("WorkOrder", "nvarchar(32)"),
@@ -198,13 +198,13 @@ public static class VisualReadShapeCatalog
             SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartMatches.sql",
             PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/part_matches_population.sql",
             InputParameters =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeParameter[])[
                 // The typed term is what an operator searches BY, so each mirror row carries its own part number
                 // in it and the read procedure filters on the output columns.
                 new VisualShapeParameter("Term", "nvarchar(190)", IsRequired: true)
             ],
             OutputColumns =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeColumn[])[
                 new VisualShapeColumn("PartNumber", "nvarchar(60)"),
                 new VisualShapeColumn("Description", "nvarchar(255)")
             ]
@@ -216,11 +216,11 @@ public static class VisualReadShapeCatalog
             SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartSequences.sql",
             PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/part_sequences_population.sql",
             InputParameters =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeParameter[])[
                 new VisualShapeParameter("PartNumber", "nvarchar(60)", IsRequired: true)
             ],
             OutputColumns =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeColumn[])[
                 // One row per (sequence, relation). SequenceSource is kept because the caller merges the rows a
                 // number is named by into one option, and IsLastOperation/NextResource carry the plant's typing
                 // rule; CancelledOnly marks a sequence none of whose operations is still live.
@@ -240,12 +240,12 @@ public static class VisualReadShapeCatalog
             SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Waitlist/Queries/GetPartSequenceState.sql",
             PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/part_sequence_state_population.sql",
             InputParameters =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeParameter[])[
                 new VisualShapeParameter("PartNumber", "nvarchar(60)", IsRequired: true),
                 new VisualShapeParameter("Sequence", "nvarchar(20)", IsRequired: true)
             ],
             OutputColumns =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeColumn[])[
                 new VisualShapeColumn("OperationStatus", "nvarchar(1)"),
                 new VisualShapeColumn("IsLastOperation", "int"),
                 new VisualShapeColumn("NextResource", "nvarchar(255)")
@@ -258,13 +258,13 @@ public static class VisualReadShapeCatalog
             SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Waitlist/Queries/GetDieSearch.sql",
             PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/die_search_population.sql",
             InputParameters =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeParameter[])[
                 // The term is a die number or a part number, so each mirror row carries the term that named the
                 // die: the die's own number for a direct match, the part's number for an alternate or a history.
                 new VisualShapeParameter("Term", "nvarchar(190)", IsRequired: true)
             ],
             OutputColumns =
-            [
+            (MTM_Waitlist.Mock.Models.VisualShapeColumn[])[
                 // Exactly the live read's projection. The association rank is not carried: the read procedure
                 // derives it from Association, so a die under two associations is still reported once, under the
                 // strongest — which is what keeps the projection identical to the live answer.

@@ -222,7 +222,7 @@ public sealed class RequestItemPickerRulesTests
 
         var jobs = EightConfigurations()
             .Concat(
-            [
+            (MTM_Waitlist.Module_Settings.Models.RequestJobPartAvailability[])[
                 NoReturningWork with { HasFinishedGoodsToReturn = true },
                 NoReturningWork with { HasNonconformingStockToReturn = true },
                 NoReturningWork with { HasWorkInProgressToReturn = true },

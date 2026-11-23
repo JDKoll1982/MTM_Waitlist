@@ -157,7 +157,7 @@ public sealed class NewRequestSkidCountViewModelTests
             Item = "pickup-fg",
             ControlFlow = RequestItemConfiguration.DirectToConfirmation,
             DetailFields =
-            [
+            (MTM_Waitlist.Module_Settings.Models.RequestItemFieldDefinition[])[
                 new RequestItemFieldDefinition
                 {
                     Label = NewRequestFlowRules.SkidCountLabel,

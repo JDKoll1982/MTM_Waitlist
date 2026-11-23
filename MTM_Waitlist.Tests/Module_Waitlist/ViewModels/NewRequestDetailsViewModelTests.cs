@@ -133,7 +133,7 @@ public sealed class NewRequestDetailsViewModelTests
         RequiresAnswer = true,
         AnswerValueType = RequestItemValueType.Enum,
         PromptText = "Which part comes off the table?",
-        Options = ["MMF0001154", "MMC0001000"],
+        Options = (string[])["MMF0001154", "MMC0001000"],
         AllottedMinutes = 15,
     };
 

@@ -113,7 +113,7 @@ public partial class UserManagementViewModel : ObservableRecipient, INavigationA
     public ObservableCollection<UserSummary> PageRows { get; } = new();
 
     /// <summary>The page sizes the footer offers, smallest first.</summary>
-    public IReadOnlyList<int> RowsPerPageOptions { get; } = [10, 15, 25, 50];
+    public IReadOnlyList<int> RowsPerPageOptions { get; } = (int[])[10, 15, 25, 50];
 
     /// <summary>The roles the filter offers, from the one catalogue read.</summary>
     public ObservableCollection<UserListFilterOption> RoleOptions { get; } = new();

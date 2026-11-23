@@ -63,7 +63,7 @@ public sealed class GenericRequestItemQuestionTests
         var configuration = Configuration(
             "pickup-coil",
             RequiresAnswerOn(("Coil", list: string.Empty)),
-            options: ["Hot rolled", "Cold rolled"]);
+            options: (string[])["Hot rolled", "Cold rolled"]);
 
         var options = await ReadItemsAsync(Definition("pickup-coil", "{answer}"), configuration);
 
@@ -118,10 +118,10 @@ public sealed class GenericRequestItemQuestionTests
     {
         var data = new GenericRequestLiveStepData(
             new StubWorkCenterCatalogService(),
-            new StubNewRequestPickerService { Items = [definition] },
+            new StubNewRequestPickerService { Items = (MTM_Waitlist.Module_Settings.Models.RequestItemDefinition[])[definition] },
             new StubRequestItemConfigurationService
             {
-                Configurations = RequestItemConfigurationSet.From([configuration]),
+                Configurations = RequestItemConfigurationSet.From((MTM_Waitlist.Module_Settings.Models.RequestItemConfiguration[])[configuration]),
             },
             new RecordingWaitlistRequestService(),
             new StubPersonIdentity(),
@@ -166,7 +166,7 @@ public sealed class GenericRequestItemQuestionTests
     };
 
     private static IReadOnlyList<RequestItemFieldDefinition> RequiresAnswerOn((string Label, string list) field) =>
-        [
+        (MTM_Waitlist.Module_Settings.Models.RequestItemFieldDefinition[])[
             new RequestItemFieldDefinition
             {
                 Label = field.Label,

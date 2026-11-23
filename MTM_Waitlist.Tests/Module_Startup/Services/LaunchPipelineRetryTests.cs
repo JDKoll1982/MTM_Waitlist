@@ -275,7 +275,7 @@ public sealed class LaunchPipelineRetryTests
         /// <summary>Signs a person in, as the sign-in steps do once they have accepted a credential.</summary>
         public LaunchRun SignedIn()
         {
-            Person.Apply(7L, "JKoll", "J. Koll", "1007", "developer", ["developer"]);
+            Person.Apply(7L, "JKoll", "J. Koll", "1007", "developer", (string[])["developer"]);
             PendingSignIn.Hold("JKoll", "a-secret-the-test-owns");
 
             return this;

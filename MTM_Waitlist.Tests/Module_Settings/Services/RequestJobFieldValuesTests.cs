@@ -24,7 +24,7 @@ public sealed class RequestJobFieldValuesTests
     public void Service_RequestJobFieldValuesTests_Resolve_ComponentDescriptionAndQuantityComeFromTheComponentTheRequestNames()
     {
         var job = RequestJobPartAvailability.None.WithComponentFacts(
-            [new("FGT0002000", new RequestComponentFacts("Rear bracket", "1,200"))]);
+            (System.Collections.Generic.KeyValuePair<string, MTM_Waitlist.Module_Settings.Models.RequestComponentFacts>[])[new("FGT0002000", new RequestComponentFacts("Rear bracket", "1,200"))]);
         var answers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { ["Component"] = "fgt0002000" };
 
         Assert.AreEqual("Rear bracket", RequestJobFieldValues.Resolve("Part description", job, answers));
@@ -35,7 +35,7 @@ public sealed class RequestJobFieldValuesTests
     public void Service_RequestJobFieldValuesTests_Resolve_ComponentFactsAreAbsentWhenTheComponentHasNone()
     {
         var job = RequestJobPartAvailability.None.WithComponentFacts(
-            [new("FGT0002000", new RequestComponentFacts("Rear bracket", "1,200"))]);
+            (System.Collections.Generic.KeyValuePair<string, MTM_Waitlist.Module_Settings.Models.RequestComponentFacts>[])[new("FGT0002000", new RequestComponentFacts("Rear bracket", "1,200"))]);
         var answers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { ["Component"] = "FGT0009999" };
 
         Assert.IsNull(RequestJobFieldValues.Resolve("Part description", job, answers));
@@ -104,7 +104,7 @@ public sealed class RequestJobFieldValuesTests
 
     /// <summary>A job carrying two dies, with the second one the request is actually for (FR-057).</summary>
     private static RequestJobPartAvailability TwoDieJob() => DieJob().WithDies(
-    [
+    (MTM_Waitlist.Module_Settings.Models.RequestDiePart[])[
         new RequestDiePart { PartNumber = "FGT0002000", Location = "DIE SHOP" },
         new RequestDiePart { PartNumber = "D-9001", Location = "PRESS BAY" },
     ]);
@@ -135,7 +135,7 @@ public sealed class RequestJobFieldValuesTests
         // The second die has no recorded location, so its entry is its number alone and no separator is left
         // hanging off it.
         var twoDies = DieJob().WithDies(
-        [
+        (MTM_Waitlist.Module_Settings.Models.RequestDiePart[])[
             new RequestDiePart { PartNumber = "FGT0002000", Location = "DIE SHOP" },
             new RequestDiePart { PartNumber = "D-9001", Location = string.Empty },
         ]);
@@ -148,7 +148,7 @@ public sealed class RequestJobFieldValuesTests
     {
         // A location the job does not record is omitted rather than drawn as a blank standing in for a value.
         var noLocations = DieJob().WithDies(
-        [
+        (MTM_Waitlist.Module_Settings.Models.RequestDiePart[])[
             new RequestDiePart { PartNumber = "FGT0002000", Location = string.Empty },
             new RequestDiePart { PartNumber = "D-9001", Location = string.Empty },
         ]);
@@ -237,7 +237,7 @@ public sealed class RequestJobFieldValuesTests
     public void Service_RequestJobFieldValuesTests_Resolve_HomeLocationListsEveryLocationTheJobsDunnagePartsRecord()
     {
         var dunnage = MaterialJob().WithDunnageParts(
-        [
+        (MTM_Waitlist.Module_Settings.Models.RequestDunnagePart[])[
             new RequestDunnagePart { PartNumber = "D-100", HomeLocation = "AISLE 4" },
             new RequestDunnagePart { PartNumber = "D-200", HomeLocation = "RACK B" },
         ]);
@@ -250,7 +250,7 @@ public sealed class RequestJobFieldValuesTests
     {
         // A location the job does not record is omitted rather than invented or drawn blank (FR-058, FR-089).
         var noLocations = MaterialJob().WithDunnageParts(
-        [
+        (MTM_Waitlist.Module_Settings.Models.RequestDunnagePart[])[
             new RequestDunnagePart { PartNumber = "D-100", HomeLocation = "  " },
             new RequestDunnagePart { PartNumber = "D-200" },
         ]);

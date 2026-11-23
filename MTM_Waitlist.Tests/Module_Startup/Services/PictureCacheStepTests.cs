@@ -54,7 +54,7 @@ public sealed class PictureCacheStepTests
         // answers with rather than an exception.
         var cache = new RecordingPictureCache
         {
-            Result = new ImageCacheSyncResult(2, 0, ["the Dunnage share"]),
+            Result = new ImageCacheSyncResult(2, 0, (string[])["the Dunnage share"]),
         };
 
         var step = new PictureCacheStep(new LaunchStepCatalog(), cache);
@@ -79,7 +79,7 @@ public sealed class PictureCacheStepTests
         // Arrange
         var cache = new RecordingPictureCache
         {
-            Result = new ImageCacheSyncResult(0, 0, ["the Dunnage share"]),
+            Result = new ImageCacheSyncResult(0, 0, (string[])["the Dunnage share"]),
         };
 
         var step = new PictureCacheStep(new LaunchStepCatalog(), cache);
@@ -100,7 +100,7 @@ public sealed class PictureCacheStepTests
         var feed = new LaunchActivityFeed();
         var cache = new RecordingPictureCache
         {
-            Result = new ImageCacheSyncResult(0, 0, ["the Dunnage share"]),
+            Result = new ImageCacheSyncResult(0, 0, (string[])["the Dunnage share"]),
         };
 
         var step = new PictureCacheStep(new LaunchStepCatalog(), cache);
@@ -149,7 +149,7 @@ public sealed class PictureCacheStepTests
         {
             Result = new ImageCacheSyncResult(0, 0, [])
             {
-                DestinationsUnavailable = ["dunnage pictures"],
+                DestinationsUnavailable = (string[])["dunnage pictures"],
             },
         };
 
@@ -185,7 +185,7 @@ public sealed class PictureCacheStepTests
             {
                 Result = new ImageCacheSyncResult(0, 0, [])
                 {
-                    DestinationsUnavailable = ["dunnage pictures"],
+                    DestinationsUnavailable = (string[])["dunnage pictures"],
                 },
             };
 

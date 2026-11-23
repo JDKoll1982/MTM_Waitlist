@@ -656,7 +656,7 @@ public sealed class RetiredSymbolAuditTests
     [TestMethod]
     public void Audit_RetiredSymbolAuditTests_PatternScan_WithAKnownPresentLiteralFindsIt()
     {
-        var hits = RepositoryPatternScan.Scan([("waitlist field population", new Regex(@"AddRequestFields", RegexOptions.Compiled))]);
+        var hits = RepositoryPatternScan.Scan(((string Description, System.Text.RegularExpressions.Regex Pattern)[])[("waitlist field population", new Regex(@"AddRequestFields", RegexOptions.Compiled))]);
 
         Assert.IsTrue(hits.Count > 0, "The scan helper failed to find a literal that is present in the repository.");
         Assert.IsTrue(hits.All(hit => hit.LineNumber > 0), "Every hit must report the line it was found on.");
@@ -818,7 +818,7 @@ public sealed class RetiredSymbolAuditTests
         var alternation = string.Join("|", typeNames.Select(Regex.Escape));
 
         return
-        [
+        ((string Description, string Pattern)[])[
             ("removed startup type declaration", $@"\b(class|interface|record|enum|struct)\s+({alternation})\b"),
             (
                 "removed window-handoff member declaration",
@@ -929,7 +929,7 @@ internal static class RepositoryPatternScan
         ArgumentNullException.ThrowIfNull(patterns);
 
         return Scan(
-            [.. patterns.Select(entry => (entry.Description, new Regex(entry.Pattern, RegexOptions.Compiled | RegexOptions.CultureInvariant)))],
+            ((string Description, System.Text.RegularExpressions.Regex Pattern)[])[.. patterns.Select(entry => (entry.Description, new Regex(entry.Pattern, RegexOptions.Compiled | RegexOptions.CultureInvariant)))],
             scope);
     }
 

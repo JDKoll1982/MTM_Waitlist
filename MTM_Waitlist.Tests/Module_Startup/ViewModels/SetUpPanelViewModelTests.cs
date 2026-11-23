@@ -77,7 +77,7 @@ public sealed class SetUpPanelViewModelTests
     {
         var store = new StubStore
         {
-            Rows = [new Dictionary<string, object?> { ["username_normalized"] = "6229", ["role_code"] = "production" }],
+            Rows = (System.Collections.Generic.Dictionary<string, object?>[])[new Dictionary<string, object?> { ["username_normalized"] = "6229", ["role_code"] = "production" }],
         };
         var panel = Build(store);
         AccountSetupResult? created = null;

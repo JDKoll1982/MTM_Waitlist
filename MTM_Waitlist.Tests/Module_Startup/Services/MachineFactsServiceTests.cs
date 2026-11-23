@@ -89,7 +89,7 @@ public sealed class MachineFactsServiceTests
             Assert.Inconclusive("This machine reports no hardware address, so the registry read cannot be exercised.");
         }
 
-        var stub = new StubMySqlHelperServer([RegistryRow(isRegistered: 1L, macAddress: probe.MacAddress)]);
+        var stub = new StubMySqlHelperServer((System.Collections.Generic.Dictionary<string, object?>[])[RegistryRow(isRegistered: 1L, macAddress: probe.MacAddress)]);
         var service = new MachineFactsService(stub);
 
         var registered = await service.RefreshAsync();
@@ -107,7 +107,7 @@ public sealed class MachineFactsServiceTests
     [TestMethod]
     public async Task Service_MachineFactsServiceTests_RefreshAsync_WhenTheRowCarriesAnotherMachinesAddressIsNotThisMachinesRecord()
     {
-        var stub = new StubMySqlHelperServer([RegistryRow(isRegistered: 1L, macAddress: "00-00-00-00-00-01")]);
+        var stub = new StubMySqlHelperServer((System.Collections.Generic.Dictionary<string, object?>[])[RegistryRow(isRegistered: 1L, macAddress: "00-00-00-00-00-01")]);
         var service = new MachineFactsService(stub);
 
         if (!service.HardwareIdentityReadable)
@@ -134,7 +134,7 @@ public sealed class MachineFactsServiceTests
             Assert.Inconclusive("This machine reports no hardware address, so the registry read cannot be exercised.");
         }
 
-        var stub = new StubMySqlHelperServer([RegistryRow(isRegistered: true, macAddress: probe.MacAddress)]);
+        var stub = new StubMySqlHelperServer((System.Collections.Generic.Dictionary<string, object?>[])[RegistryRow(isRegistered: true, macAddress: probe.MacAddress)]);
         var service = new MachineFactsService(stub);
 
         Assert.IsTrue(await service.RefreshAsync());

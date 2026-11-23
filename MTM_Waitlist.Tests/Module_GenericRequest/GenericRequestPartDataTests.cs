@@ -22,9 +22,9 @@ public sealed class GenericRequestPartDataTests
     {
         var partData = Create(
             script => script.EndsWith("GetPartMatches.sql", StringComparison.OrdinalIgnoreCase)
-                ? VisualQueryOutcome.Ok([Row(("PartNumber", "100-AAA"), ("Description", "Bracket"))])
+                ? VisualQueryOutcome.Ok((System.Collections.Generic.IReadOnlyDictionary<string, object?>[])[Row(("PartNumber", "100-AAA"), ("Description", "Bracket"))])
                 : VisualQueryOutcome.Ok([]),
-            floorRows: [Row(("PartNumber", "200-BBB"))]);
+            floorRows: (System.Collections.Generic.Dictionary<string, object?>[])[Row(("PartNumber", "200-BBB"))]);
 
         var result = await partData.ReadCompletionsAsync("10");
 
@@ -41,7 +41,7 @@ public sealed class GenericRequestPartDataTests
     {
         var partData = Create(
             _ => VisualQueryOutcome.Ok([]),
-            floorRows: [Row(("PartNumber", "200-BBB"))]);
+            floorRows: (System.Collections.Generic.Dictionary<string, object?>[])[Row(("PartNumber", "200-BBB"))]);
 
         var result = await partData.ReadCompletionsAsync("200");
 
@@ -54,7 +54,7 @@ public sealed class GenericRequestPartDataTests
     {
         var partData = Create(
             _ => VisualQueryOutcome.Unreachable("the plant system is down"),
-            floorRows: [Row(("PartNumber", "200-BBB"))]);
+            floorRows: (System.Collections.Generic.Dictionary<string, object?>[])[Row(("PartNumber", "200-BBB"))]);
 
         var result = await partData.ReadCompletionsAsync("200");
 
@@ -67,11 +67,11 @@ public sealed class GenericRequestPartDataTests
     {
         var executor = new FakeVisualQueryExecutor((_, _) => VisualQueryOutcome.Unreachable("the plant system is down"));
         var mirror = new StubMirrorStore(
-            ("sp_visual_part_matches_get", [Row(("PartNumber", "100-AAA"), ("Description", "Bracket"))]));
+            ("sp_visual_part_matches_get", (System.Collections.Generic.Dictionary<string, object?>[])[Row(("PartNumber", "100-AAA"), ("Description", "Bracket"))]));
 
         var partData = GenericRequestReadShapes.PartData(
             executor,
-            new WipFloorInventoryService(new StubMySqlHelperServer([Row(("PartNumber", "200-BBB"))])),
+            new WipFloorInventoryService(new StubMySqlHelperServer((System.Collections.Generic.Dictionary<string, object?>[])[Row(("PartNumber", "200-BBB"))])),
             mirror: mirror);
 
         var result = await partData.ReadCompletionsAsync("100");
@@ -91,7 +91,7 @@ public sealed class GenericRequestPartDataTests
         var executor = new FakeVisualQueryExecutor((_, _) => VisualQueryOutcome.Unreachable("the plant system is down"));
         var mirror = new StubMirrorStore(
             ("sp_visual_part_sequences_get",
-            [
+            (System.Collections.Generic.Dictionary<string, object?>[])[
                 Row(
                     ("Sequence", "020"),
                     ("Description", "CNC LATHE"),
@@ -122,11 +122,11 @@ public sealed class GenericRequestPartDataTests
         var partData = Create(
             script => script.EndsWith("GetPartSequences.sql", StringComparison.OrdinalIgnoreCase)
                 ? VisualQueryOutcome.Ok(
-                [
+                (System.Collections.Generic.IReadOnlyDictionary<string, object?>[])[
                     SequenceRow("20", "CNC LATHE", "R", "OwnPart", cancelledOnly: 0),
                 ])
                 : VisualQueryOutcome.Ok([]),
-            floorRows: [Row(("Sequence", "20"))]);
+            floorRows: (System.Collections.Generic.Dictionary<string, object?>[])[Row(("Sequence", "20"))]);
 
         var result = await partData.ReadSequencesAsync("100-AAA");
 
@@ -147,7 +147,7 @@ public sealed class GenericRequestPartDataTests
         var partData = Create(
             script => script.EndsWith("GetPartSequences.sql", StringComparison.OrdinalIgnoreCase)
                 ? VisualQueryOutcome.Ok(
-                [
+                (System.Collections.Generic.IReadOnlyDictionary<string, object?>[])[
                     SequenceRow("90", "ASSEMBLY", "R", "OwnPart", cancelledOnly: 0, isLastOperation: 0, nextResource: "Outside Service"),
                     SequenceRow("900", "FINAL", "R", "OwnPart", cancelledOnly: 0, isLastOperation: 1),
                 ])
@@ -169,7 +169,7 @@ public sealed class GenericRequestPartDataTests
         var partData = Create(
             script => script.EndsWith("GetPartSequences.sql", StringComparison.OrdinalIgnoreCase)
                 ? VisualQueryOutcome.Ok(
-                [
+                (System.Collections.Generic.IReadOnlyDictionary<string, object?>[])[
                     SequenceRow("30", "PRESS", "X", "OwnPart", cancelledOnly: 1),
                 ])
                 : VisualQueryOutcome.Ok([]),
@@ -186,7 +186,7 @@ public sealed class GenericRequestPartDataTests
     {
         var partData = Create(
             _ => VisualQueryOutcome.Ok([]),
-            floorRows: [Row(("Sequence", "N/A"))]);
+            floorRows: (System.Collections.Generic.Dictionary<string, object?>[])[Row(("Sequence", "N/A"))]);
 
         var result = await partData.ReadSequencesAsync("100-AAA");
 
@@ -198,7 +198,7 @@ public sealed class GenericRequestPartDataTests
     {
         var partData = Create(
             _ => VisualQueryOutcome.Ok([]),
-            floorRows: [Row(("Sequence", "10")), Row(("Sequence", "9"))]);
+            floorRows: (System.Collections.Generic.Dictionary<string, object?>[])[Row(("Sequence", "10")), Row(("Sequence", "9"))]);
 
         var result = await partData.ReadSequencesAsync("100-AAA");
 
@@ -212,7 +212,7 @@ public sealed class GenericRequestPartDataTests
         var partData = Create(
             script => script.EndsWith("GetPartSequences.sql", StringComparison.OrdinalIgnoreCase)
                 ? VisualQueryOutcome.Ok(
-                [
+                (System.Collections.Generic.IReadOnlyDictionary<string, object?>[])[
                     SequenceRow("40", "MILL", "U", "OwnPart", cancelledOnly: 0),
                     SequenceRow("40", "MILL", "U", "Requirement", cancelledOnly: 0),
                 ])

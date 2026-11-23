@@ -429,8 +429,8 @@ public sealed class SignInViewModelTests
             return Task.FromResult<IReadOnlyList<Dictionary<string, object?>>>(
                 storedProcedureName switch
                 {
-                    CredentialReadProcedure => [_account],
-                    PreviousPeopleReadProcedure => [.. PreviousPeople],
+                    CredentialReadProcedure => (System.Collections.Generic.Dictionary<string, object?>[])[_account],
+                    PreviousPeopleReadProcedure => (System.Collections.Generic.Dictionary<string, object?>[])[.. PreviousPeople],
                     _ => [],
                 });
         }

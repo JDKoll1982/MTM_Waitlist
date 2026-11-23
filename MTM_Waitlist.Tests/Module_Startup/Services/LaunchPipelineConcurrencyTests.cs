@@ -199,7 +199,7 @@ public sealed class LaunchPipelineConcurrencyTests
 
         public LaunchRun SignedIn()
         {
-            Person.Apply(7L, "JKoll", "J. Koll", "1007", "developer", ["developer"]);
+            Person.Apply(7L, "JKoll", "J. Koll", "1007", "developer", (string[])["developer"]);
             PendingSignIn.Hold("JKoll", "a-secret-the-test-owns");
 
             return this;

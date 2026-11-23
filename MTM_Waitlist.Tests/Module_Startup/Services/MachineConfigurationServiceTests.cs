@@ -338,7 +338,7 @@ public sealed class MachineConfigurationServiceTests
     {
         var stub = new StubMySqlHelperServer();
 
-        var result = await CreateService(stub).ResetToDefaultsAsync(["something_else"], CancellationToken.None);
+        var result = await CreateService(stub).ResetToDefaultsAsync((string[])["something_else"], CancellationToken.None);
 
         // An unknown word is not guessed at, and it is not a part of this machine's configuration.
         Assert.IsTrue(result.Succeeded);
@@ -352,7 +352,7 @@ public sealed class MachineConfigurationServiceTests
         var stub = new StubMySqlHelperServer().Returns(LookupProcedure, RegistryRow());
 
         var result = await CreateService(stub).ResetToDefaultsAsync(
-            [MachineConfigurationParts.Location],
+            (string[])[MachineConfigurationParts.Location],
             CancellationToken.None);
 
         Assert.IsTrue(result.Succeeded);
@@ -380,7 +380,7 @@ public sealed class MachineConfigurationServiceTests
         var stub = new StubMySqlHelperServer().Returns(LookupProcedure, RegistryRow());
 
         var result = await CreateService(stub).ResetToDefaultsAsync(
-            [MachineConfigurationParts.Configuration],
+            (string[])[MachineConfigurationParts.Configuration],
             CancellationToken.None);
 
         // The shorthand names the two, and the result says what was restored rather than echoing the word the
@@ -411,7 +411,7 @@ public sealed class MachineConfigurationServiceTests
             .Returns(HolderProcedure, RegistryRow(id: 9L, computerName: Hostname, displayName: "MTMFG-161"));
 
         var result = await CreateService(stub).ResetToDefaultsAsync(
-            [MachineConfigurationParts.ComputerName],
+            (string[])[MachineConfigurationParts.ComputerName],
             CancellationToken.None);
 
         Assert.IsFalse(result.Succeeded);
@@ -430,7 +430,7 @@ public sealed class MachineConfigurationServiceTests
         var stub = new StubMySqlHelperServer().Returns(LookupProcedure, []);
 
         var result = await CreateService(stub).ResetToDefaultsAsync(
-            [MachineConfigurationParts.Configuration],
+            (string[])[MachineConfigurationParts.Configuration],
             CancellationToken.None);
 
         // There is no configuration to restore and no identifier to address it by. The machine is already in
@@ -446,7 +446,7 @@ public sealed class MachineConfigurationServiceTests
         var stub = new StubMySqlHelperServer().Returns(LookupProcedure, RegistryRow());
 
         var result = await CreateService(stub).ResetToDefaultsAsync(
-            [MachineConfigurationParts.ScopedPreference],
+            (string[])[MachineConfigurationParts.ScopedPreference],
             CancellationToken.None);
 
         Assert.IsTrue(result.Succeeded);

@@ -17,7 +17,7 @@ public sealed class SetupWorkOrderSearchDialogViewModelTests
     public async Task ViewModel_SetupWorkOrderSearchDialogViewModelTests_Search_HandsTheThreeFragmentsToTheReadAndSelectsTheFirstRow()
     {
         var search = new StubWorkOrderSearchService(
-        [
+        (MTM_Waitlist.Module_Setup.Models.SetupWorkOrderSearchResult[])[
             Row("WO-075201", "105803-08", "Volvo - Mack Trucks (45)"),
             Row("WO-075200", "105798-04", "DETROIT DIESEL"),
         ]);
@@ -71,7 +71,7 @@ public sealed class SetupWorkOrderSearchDialogViewModelTests
     [TestMethod]
     public async Task ViewModel_SetupWorkOrderSearchDialogViewModelTests_Accept_RecordsTheChosenOrderForTheCaller()
     {
-        var search = new StubWorkOrderSearchService([Row("WO-075201", "105803-08", "Volvo")]);
+        var search = new StubWorkOrderSearchService((MTM_Waitlist.Module_Setup.Models.SetupWorkOrderSearchResult[])[Row("WO-075201", "105803-08", "Volvo")]);
         var viewModel = new SetupWorkOrderSearchDialogViewModel(search);
         await viewModel.SearchCommand.ExecuteAsync(null);
 
@@ -96,7 +96,7 @@ public sealed class SetupWorkOrderSearchDialogViewModelTests
     public async Task ViewModel_SetupWorkOrderSearchDialogViewModelTests_Search_ThatFinishesAfterTheWindowClosedLeavesTheDeadWindowAlone()
     {
         var release = new TaskCompletionSource();
-        var search = new StubWorkOrderSearchService([Row("WO-075201", "105803-08", "Volvo")]) { BeforeReturning = () => release.Task };
+        var search = new StubWorkOrderSearchService((MTM_Waitlist.Module_Setup.Models.SetupWorkOrderSearchResult[])[Row("WO-075201", "105803-08", "Volvo")]) { BeforeReturning = () => release.Task };
         var viewModel = new SetupWorkOrderSearchDialogViewModel(search);
 
         var running = viewModel.SearchCommand.ExecuteAsync(null);

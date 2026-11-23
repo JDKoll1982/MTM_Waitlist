@@ -105,7 +105,7 @@ public sealed class ReadShapeContentShippingAuditTests
 
         Assert.IsFalse(IsShipped(moduleSetupOnly, "Database/InforVisual/Queues/Module_Startup/Queries/GetEmployeeByNumber.sql"));
         Assert.IsTrue(IsShipped(moduleSetupOnly, "Database/InforVisual/Queues/Module_Setup/Queries/LookupWorkOrder.sql"));
-        Assert.IsTrue(IsShipped(["Database/InforVisual/Queues/**/*.sql"], "Database/InforVisual/Queues/Module_Startup/Queries/GetEmployeeByNumber.sql"));
+        Assert.IsTrue(IsShipped((string[])["Database/InforVisual/Queues/**/*.sql"], "Database/InforVisual/Queues/Module_Startup/Queries/GetEmployeeByNumber.sql"));
     }
 
     /// <summary>Records the violation when the project copies nothing that covers the script's folder.</summary>

@@ -67,7 +67,7 @@ public sealed class SetupDunnageImageSearchDialogRegressionTests
         var reader = new FakeDunnageCatalogueReader
         {
             Parts =
-            [
+            (MTM_Waitlist.Module_Shared.Models.DunnageCataloguePart[])[
                 FakeDunnageCataloguePart.Of("dng-3", typeName: "Tote", imagePath: "Parts/tote.png"),
                 FakeDunnageCataloguePart.Of("DNG-1", typeName: "Rack", imagePath: "Parts/rack.png"),
                 FakeDunnageCataloguePart.Of("Dng-2", typeName: "Crate", imagePath: "Parts/crate.png"),
@@ -99,7 +99,7 @@ public sealed class SetupDunnageImageSearchDialogRegressionTests
         var reader = new FakeDunnageCatalogueReader
         {
             Parts =
-            [
+            (MTM_Waitlist.Module_Shared.Models.DunnageCataloguePart[])[
                 FakeDunnageCataloguePart.Of("DNG-1", imagePath: "Parts/rack.png"),
                 FakeDunnageCataloguePart.Of("DNG-2"),
             ],
@@ -129,7 +129,7 @@ public sealed class SetupDunnageImageSearchDialogRegressionTests
     public async Task Service_SetupDunnageImageSearchDialogRegressionTests_ChoosingAPartStillRaisesTheAcceptGate()
     {
         var viewModel = new SetupDunnageImageSearchDialogViewModel(
-            new FakeDunnageCatalogueReader { Parts = [FakeDunnageCataloguePart.Of("DNG-1")] },
+            new FakeDunnageCatalogueReader { Parts = (MTM_Waitlist.Module_Shared.Models.DunnageCataloguePart[])[FakeDunnageCataloguePart.Of("DNG-1")] },
             new InMemoryScopedPreferenceStore());
         await viewModel.InitializeAsync();
 

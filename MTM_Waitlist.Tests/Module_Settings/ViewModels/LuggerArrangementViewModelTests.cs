@@ -632,7 +632,7 @@ public sealed class LuggerArrangementViewModelTests
                 : Task.FromResult(WriteAnswer);
 
         private static IReadOnlyList<Lugger> SeededLuggers() =>
-        [
+        (MTM_Waitlist.Module_Core.Models.Lugger[])[
             new Lugger { PublicId = Door6, Name = "Door 6 Lugger", Status = LuggerStatus.Available, DisplayPosition = 1 },
             new Lugger { PublicId = Door7, Name = "Door 7 Lugger", Status = LuggerStatus.Available, DisplayPosition = 2 },
             new Lugger { PublicId = Door9, Name = "Door 9 Lugger", Status = LuggerStatus.Full, DisplayPosition = 3 },
@@ -648,7 +648,7 @@ public sealed class LuggerArrangementViewModelTests
         ];
 
         private static IReadOnlyList<ScrapAssignment> SeededRows() =>
-        [
+        (MTM_Waitlist.Module_Core.Models.ScrapAssignment[])[
             Row(Door6, "Door 6 Lugger", LuggerStatus.Available, "3003 aluminum", "3003 Aluminum", dumpPoint: true, sortPosition: 1),
             Row(Extra, "Extra Lugger", LuggerStatus.Backup, "3003 aluminum", "3003 Aluminum", dumpPoint: false, sortPosition: 2),
             Row(Door7, "Door 7 Lugger", LuggerStatus.Available, "galvanized steel", "Galvanized Steel", dumpPoint: true, sortPosition: 1),

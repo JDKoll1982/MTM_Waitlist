@@ -68,7 +68,7 @@ public partial class NewRequestHopperViewModel : ObservableRecipient, INavigatio
     private NewRequestFlowState? _state;
 
     /// <summary>The three sizes the step offers, in the order it offers them (FR-077).</summary>
-    public IReadOnlyList<string> Sizes { get; } = [SmallSize, MediumSize, LargeSize];
+    public IReadOnlyList<string> Sizes { get; } = (string[])[SmallSize, MediumSize, LargeSize];
 
     [ObservableProperty]
     public partial string WorkCenterText

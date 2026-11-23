@@ -35,13 +35,13 @@ public static class LaunchStepGroups
 {
     /// <summary>The groups this launch runs concurrently, in catalogue order.</summary>
     public static IReadOnlyList<LaunchStepGroup> Shipped { get; } =
-    [
+    (MTM_Waitlist.Module_Startup.Services.LaunchStepGroup[])[
         new(
             "first-contact",
-            ["read-local-settings", "read-hardware-identity", "store-reachability"]),
+            (string[])["read-local-settings", "read-hardware-identity", "store-reachability"]),
         new(
             "session-checks",
-            ["judge-session", "check-computer-against-store", "check-temporary-credential"]),
+            (string[])["judge-session", "check-computer-against-store", "check-temporary-credential"]),
     ];
 
     /// <summary>

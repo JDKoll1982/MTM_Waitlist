@@ -176,7 +176,7 @@ public sealed class WaitlistViewDetailFieldTests
             => new(RequestItemConfiguration.Malformed(itemCode, RequestItemConfiguration.ResolveMalformedMessage()));
 
         public Task<RequestItemConfigurationSet> GetConfigurationsAsync(CancellationToken cancellationToken = default)
-            => Task.FromResult(RequestItemConfigurationSet.From([_configuration]));
+            => Task.FromResult(RequestItemConfigurationSet.From((MTM_Waitlist.Module_Settings.Models.RequestItemConfiguration[])[_configuration]));
 
         public Task<RequestItemConfiguration> GetConfigurationAsync(string itemCode, CancellationToken cancellationToken = default)
             => Task.FromResult(_configuration);
@@ -255,7 +255,7 @@ internal sealed class WaitlistTestBuildingSelectionService : IBuildingSelectionS
     /// <inheritdoc />
     public Task RefreshAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
     /// <inheritdoc />
-    public IReadOnlyList<string> Buildings => ["Expo Drive"];
+    public IReadOnlyList<string> Buildings => (string[])["Expo Drive"];
 
     /// <inheritdoc />
     public string SelectedBuilding { get; set; } = "Expo Drive";

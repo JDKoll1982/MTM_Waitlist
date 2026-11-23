@@ -50,7 +50,7 @@ public static class PermissionMigrationBaseline
     /// scoped <c>all_users</c>, so the re-rank moves no row's effective answer.
     /// </summary>
     public static IReadOnlyList<SeededSettingRow> SettingsScopeCensus { get; } =
-    [
+    (MTM_Waitlist.Tests.Module_Settings.Fixtures.PermissionMigrationBaseline.SeededSettingRow[])[
         new("sessions.retention_inactive_days", "all_users", "all_users"),
         new("waitlist.resolved_retention_days", "all_users", "all_users"),
         new("settings.history_retention_days", "all_users", "all_users"),
@@ -67,7 +67,7 @@ public static class PermissionMigrationBaseline
     /// The sign-in names the shipping seed assigns the retired role, spelled as the seed stores them.
     /// </summary>
     public static IReadOnlyList<string> AccountsHoldingRetiredRole { get; } =
-    [
+    (string[])[
         "test.admin",
     ];
 }

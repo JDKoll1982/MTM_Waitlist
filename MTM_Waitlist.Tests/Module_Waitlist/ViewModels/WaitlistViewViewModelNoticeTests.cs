@@ -98,7 +98,7 @@ public sealed class WaitlistViewViewModelNoticeTests
     {
         var arrangement = new FakeArrangementService { Watermark = 5 };
         arrangement.Changes.AddRange(
-        [
+        (MTM_Waitlist.Module_Core.Models.ArrangementChange[])[
             new ArrangementChange { Id = 4, ChangeKind = ArrangementChange.Kinds.LuggerAdded, LuggerName = "Lugger A" },
             new ArrangementChange { Id = 5, ChangeKind = ArrangementChange.Kinds.LuggerRenamed, LuggerName = "Lugger B", PreviousValue = "Lugger A" },
         ]);
@@ -135,7 +135,7 @@ public sealed class WaitlistViewViewModelNoticeTests
         ChangeKind = ArrangementChange.Kinds.LuggerAdded,
         LuggerName = "Lugger A",
         MessageTemplate = "Lugger_Notice.LuggerAdded",
-        MessageArguments = ["Lugger A"],
+        MessageArguments = (string[])["Lugger A"],
     };
 
     private static WaitlistViewViewModel BuildViewModel(bool holdsHandlerPermission, ILuggerChangeNoticeService notices) => new(

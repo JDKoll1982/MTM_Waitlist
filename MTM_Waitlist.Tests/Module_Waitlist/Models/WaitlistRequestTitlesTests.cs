@@ -221,7 +221,7 @@ public sealed class WaitlistRequestTitlesTests
         HasDunnage = true,
         JobPartNumber = "PART-9004",
     }).WithDunnageParts(
-    [
+    (MTM_Waitlist.Module_Settings.Models.RequestDunnagePart[])[
         new RequestDunnagePart { PartNumber = "DN-STL-4", ImagePath = @"X:\Dunnage\Parts\Steel Rack.png" },
         new RequestDunnagePart { PartNumber = "DN-BOX-2" },
     ]);
@@ -525,7 +525,7 @@ public sealed class WaitlistRequestTitlesTests
     /// never recorded a die falls back to.
     /// </summary>
     private static RequestJobPartAvailability TwoDieJob() => DieJob().WithDies(
-    [
+    (MTM_Waitlist.Module_Settings.Models.RequestDiePart[])[
         new RequestDiePart { PartNumber = "FGT0002000", Location = "DIE SHOP" },
         new RequestDiePart { PartNumber = "D-9001", Location = "PRESS BAY" },
     ]);

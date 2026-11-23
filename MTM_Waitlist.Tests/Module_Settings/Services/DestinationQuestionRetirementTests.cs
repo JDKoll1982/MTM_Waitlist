@@ -168,7 +168,7 @@ public sealed class DestinationQuestionRetirementTests
         var root = RepositoryPatternScan.FindRepositoryRoot();
 
         return
-        [
+        (string[])[
             Path.Combine(root, "Database", "Seeds", "seed_waitlist_request_item_configs", "create.sql"),
             Path.Combine(root, "Database", "Seeds", "AllSeeds.sql"),
         ];

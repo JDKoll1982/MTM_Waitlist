@@ -27,7 +27,7 @@ public static class GenericRequestCategoryCatalog
     /// The categories in the order the work-order wizard lists them (Pickup, Deliver, Other).
     /// </summary>
     public static IReadOnlyList<GenericRequestCategoryOption> All() =>
-    [
+    (MTM_Waitlist.GenericRequest.Models.GenericRequestCategoryOption[])[
         Option("Pickup", "Move a thing from another location to this work center."),
         Option("Deliver", "Deliver a thing to this work center."),
         Option("Other", "Anything else, described in your own words."),

@@ -21,7 +21,7 @@ public sealed class Service_DeploymentEngineScopeTests
         var scoped = false;
 
         var statements = Service_DeploymentEngine.ScopeToDatabase(
-            ["USE mtm_waitlist", "SELECT 1"], "mtm_waitlist_test", ref scoped);
+            (string[])["USE mtm_waitlist", "SELECT 1"], "mtm_waitlist_test", ref scoped);
 
         Assert.AreEqual("USE `mtm_waitlist_test`", statements[0]);
         Assert.AreEqual("SELECT 1", statements[1]);
@@ -34,7 +34,7 @@ public sealed class Service_DeploymentEngineScopeTests
         var scoped = false;
 
         var statements = Service_DeploymentEngine.ScopeToDatabase(
-            ["-- Create table: config_images_locations\n-- Engine: MySQL 5.7\n\nUSE mtm_waitlist"],
+            (string[])["-- Create table: config_images_locations\n-- Engine: MySQL 5.7\n\nUSE mtm_waitlist"],
             "mtm_waitlist_test",
             ref scoped);
 
@@ -48,7 +48,7 @@ public sealed class Service_DeploymentEngineScopeTests
         var scoped = false;
 
         var statements = Service_DeploymentEngine.ScopeToDatabase(
-            ["SELECT 1", "CALL sp_thing()"], "mtm_waitlist_test", ref scoped);
+            (string[])["SELECT 1", "CALL sp_thing()"], "mtm_waitlist_test", ref scoped);
 
         CollectionAssert.AreEqual(new[] { "SELECT 1", "CALL sp_thing()" }, statements.ToArray());
         Assert.IsFalse(scoped);
@@ -59,7 +59,7 @@ public sealed class Service_DeploymentEngineScopeTests
     {
         var scoped = false;
 
-        var statements = Service_DeploymentEngine.ScopeToDatabase(["USE `mtm_waitlist`"], "mtm_waitlist", ref scoped);
+        var statements = Service_DeploymentEngine.ScopeToDatabase((string[])["USE `mtm_waitlist`"], "mtm_waitlist", ref scoped);
 
         Assert.AreEqual("USE `mtm_waitlist`", statements[0]);
         Assert.IsFalse(scoped);
@@ -71,7 +71,7 @@ public sealed class Service_DeploymentEngineScopeTests
         var scoped = false;
 
         var statements = Service_DeploymentEngine.ScopeToDatabase(
-            ["SELECT 'USE mtm_waitlist' AS note"], "mtm_waitlist_test", ref scoped);
+            (string[])["SELECT 'USE mtm_waitlist' AS note"], "mtm_waitlist_test", ref scoped);
 
         Assert.AreEqual("SELECT 'USE mtm_waitlist' AS note", statements[0]);
         Assert.IsFalse(scoped);

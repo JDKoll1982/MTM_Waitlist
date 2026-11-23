@@ -169,14 +169,14 @@ public sealed class PermissionChangeSetServiceTests
         // ---- A value that has moved is refused, and the key that moved is named (FR-070).
         await service.ApplyAsync(
             _targetUserId,
-            [new PermissionChange(ChangedKeys[0], From: baseline[ChangedKeys[0]], To: !baseline[ChangedKeys[0]])]).ConfigureAwait(false);
+            (MTM_Waitlist.Module_Core.Contracts.Services.PermissionChange[])[new PermissionChange(ChangedKeys[0], From: baseline[ChangedKeys[0]], To: !baseline[ChangedKeys[0]])]).ConfigureAwait(false);
 
         var afterSecondSave = await HistoryCountAsync().ConfigureAwait(false);
 
         // The `from` is now stale: the store holds the opposite of it.
         var moved = await service.ApplyAsync(
             _targetUserId,
-            [new PermissionChange(ChangedKeys[0], From: baseline[ChangedKeys[0]], To: baseline[ChangedKeys[0]])]).ConfigureAwait(false);
+            (MTM_Waitlist.Module_Core.Contracts.Services.PermissionChange[])[new PermissionChange(ChangedKeys[0], From: baseline[ChangedKeys[0]], To: baseline[ChangedKeys[0]])]).ConfigureAwait(false);
 
         Assert.AreEqual(PermissionChangeOutcomeKind.ValueMoved, moved.Kind, "A value that moved is refused rather than overwritten.");
         Assert.AreEqual(ChangedKeys[0], moved.MovedKey, "Which key moved is reported, not just that something did.");
@@ -188,7 +188,7 @@ public sealed class PermissionChangeSetServiceTests
         // ---- The one fixed row is refused (FR-059).
         var fixedRow = await service.ApplyAsync(
             _targetUserId,
-            [new PermissionChange(PermissionKeys.AdminPermissions, From: null, To: true)]).ConfigureAwait(false);
+            (MTM_Waitlist.Module_Core.Contracts.Services.PermissionChange[])[new PermissionChange(PermissionKeys.AdminPermissions, From: null, To: true)]).ConfigureAwait(false);
 
         Assert.AreEqual(PermissionChangeOutcomeKind.GateFixed, fixedRow.Kind);
         Assert.AreEqual(PermissionKeys.AdminPermissions, fixedRow.MovedKey, "The row the refusal is about is named.");
@@ -196,7 +196,7 @@ public sealed class PermissionChangeSetServiceTests
         // ---- A key outside the permission namespace is refused.
         var outsideNamespace = await service.ApplyAsync(
             _targetUserId,
-            [new PermissionChange("admin.users.list_filter", From: null, To: true)]).ConfigureAwait(false);
+            (MTM_Waitlist.Module_Core.Contracts.Services.PermissionChange[])[new PermissionChange("admin.users.list_filter", From: null, To: true)]).ConfigureAwait(false);
 
         Assert.AreEqual(PermissionChangeOutcomeKind.KeyInvalid, outsideNamespace.Kind);
         Assert.AreEqual(

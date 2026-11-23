@@ -299,7 +299,7 @@ public sealed class NewRequestPartSearchViewModelTests
             RequiresAnswer = true,
             AnswerValueType = RequestItemValueType.Text,
             DetailFields =
-            [
+            (MTM_Waitlist.Module_Settings.Models.RequestItemFieldDefinition[])[
                 new RequestItemFieldDefinition
                 {
                     Label = "Reason",

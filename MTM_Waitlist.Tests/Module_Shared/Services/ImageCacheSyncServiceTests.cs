@@ -57,7 +57,7 @@ public sealed class ImageCacheSyncServiceTests
         WriteSharedPicture(@"work_center\100-03.jpg");
         WriteSharedPicture(@"request_category\Pickup.jpeg");
 
-        var result = ImageCacheSyncService.Synchronize([Source(_shareRoot, _cacheRoot)]);
+        var result = ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[Source(_shareRoot, _cacheRoot)]);
 
         Assert.AreEqual(3, result.Copied, "Every supported picture on the share is copied.");
         Assert.AreEqual(0, result.Removed);
@@ -76,8 +76,8 @@ public sealed class ImageCacheSyncServiceTests
     {
         WriteSharedPicture(@"request_item\pickup-coil.png");
 
-        var first = ImageCacheSyncService.Synchronize([Source(_shareRoot, _cacheRoot)]);
-        var second = ImageCacheSyncService.Synchronize([Source(_shareRoot, _cacheRoot)]);
+        var first = ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[Source(_shareRoot, _cacheRoot)]);
+        var second = ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[Source(_shareRoot, _cacheRoot)]);
 
         Assert.AreEqual(1, first.Copied);
         Assert.AreEqual(0, second.Copied, "A picture that has not changed must not be copied a second time.");
@@ -95,7 +95,7 @@ public sealed class ImageCacheSyncServiceTests
         var stamp = new DateTime(2026, 1, 2, 3, 4, 5, DateTimeKind.Utc);
         File.SetLastWriteTimeUtc(shared, stamp);
 
-        ImageCacheSyncService.Synchronize([Source(_shareRoot, _cacheRoot)]);
+        ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[Source(_shareRoot, _cacheRoot)]);
 
         Assert.AreEqual(
             stamp,
@@ -108,12 +108,12 @@ public sealed class ImageCacheSyncServiceTests
     {
         var shared = WriteSharedPicture(@"request_item\pickup-coil.png", 1, 2, 3);
 
-        ImageCacheSyncService.Synchronize([Source(_shareRoot, _cacheRoot)]);
+        ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[Source(_shareRoot, _cacheRoot)]);
 
         File.WriteAllBytes(shared, [1, 2, 3, 4, 5, 6]);
         File.SetLastWriteTimeUtc(shared, File.GetLastWriteTimeUtc(Path.Combine(_cacheRoot, "request_item", "pickup-coil.png")));
 
-        var second = ImageCacheSyncService.Synchronize([Source(_shareRoot, _cacheRoot)]);
+        var second = ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[Source(_shareRoot, _cacheRoot)]);
 
         Assert.AreEqual(1, second.Copied, "A picture of a different size has changed, whatever its time says.");
         Assert.AreEqual(6, new FileInfo(Path.Combine(_cacheRoot, "request_item", "pickup-coil.png")).Length);
@@ -123,12 +123,12 @@ public sealed class ImageCacheSyncServiceTests
     public void Service_ImageCacheSyncServiceTests_APictureThatWasEditedIsCopiedAgain()
     {
         var shared = WriteSharedPicture(@"request_item\pickup-coil.png");
-        ImageCacheSyncService.Synchronize([Source(_shareRoot, _cacheRoot)]);
+        ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[Source(_shareRoot, _cacheRoot)]);
 
         // Same size, later time: exactly what editing a picture and saving it over the original looks like.
         File.SetLastWriteTimeUtc(shared, DateTime.UtcNow.AddMinutes(5));
 
-        var second = ImageCacheSyncService.Synchronize([Source(_shareRoot, _cacheRoot)]);
+        var second = ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[Source(_shareRoot, _cacheRoot)]);
 
         Assert.AreEqual(1, second.Copied, "A picture edited in place has changed even though its size has not.");
     }
@@ -139,11 +139,11 @@ public sealed class ImageCacheSyncServiceTests
     {
         var shared = WriteSharedPicture(@"request_item\pickup-coil.png");
         WriteSharedPicture(@"work_center\100-03.png");
-        ImageCacheSyncService.Synchronize([Source(_shareRoot, _cacheRoot)]);
+        ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[Source(_shareRoot, _cacheRoot)]);
 
         File.Delete(shared);
 
-        var second = ImageCacheSyncService.Synchronize([Source(_shareRoot, _cacheRoot)]);
+        var second = ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[Source(_shareRoot, _cacheRoot)]);
 
         Assert.AreEqual(1, second.Removed, "The copy of a deleted picture goes with it.");
         Assert.IsFalse(File.Exists(Path.Combine(_cacheRoot, "request_item", "pickup-coil.png")));
@@ -167,7 +167,7 @@ public sealed class ImageCacheSyncServiceTests
         await cancelled.CancelAsync();
 
         var result = await new ImageCacheSyncService(_ => Task.FromResult<IReadOnlyList<ImageCacheSource>>(
-                [Source(_shareRoot, _cacheRoot)]))
+                (MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[Source(_shareRoot, _cacheRoot)]))
             .SynchronizeAsync(cancelled.Token);
 
         Assert.IsNotNull(result, "a cancelled refresh answers with a result, and never throws out of the task");
@@ -182,7 +182,7 @@ public sealed class ImageCacheSyncServiceTests
     public void Service_ImageCacheSyncServiceTests_ACancelledRunDeletesNothingAlreadyCached()
     {
         WriteSharedPicture(@"request_item\pickup-coil.png");
-        ImageCacheSyncService.Synchronize([Source(_shareRoot, _cacheRoot)]);
+        ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[Source(_shareRoot, _cacheRoot)]);
 
         // The original is gone, so an uncancelled run would remove this copy.
         File.Delete(Path.Combine(_shareRoot, "request_item", "pickup-coil.png"));
@@ -190,7 +190,7 @@ public sealed class ImageCacheSyncServiceTests
         using var cancelled = new CancellationTokenSource();
         cancelled.Cancel();
 
-        var result = ImageCacheSyncService.Synchronize([Source(_shareRoot, _cacheRoot)], cancelled.Token);
+        var result = ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[Source(_shareRoot, _cacheRoot)], cancelled.Token);
 
         Assert.AreEqual(0, result.Removed, "a cancelled run removes nothing");
         Assert.AreEqual(0, result.Copied);
@@ -208,10 +208,10 @@ public sealed class ImageCacheSyncServiceTests
     public void Service_ImageCacheSyncServiceTests_AnUnreachableSourceIsLeftExactlyAsItIs()
     {
         WriteSharedPicture(@"request_item\pickup-coil.png");
-        ImageCacheSyncService.Synchronize([Source(_shareRoot, _cacheRoot)]);
+        ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[Source(_shareRoot, _cacheRoot)]);
 
         var missingShare = Path.Combine(_workingDirectory, "no-such-share");
-        var result = ImageCacheSyncService.Synchronize([Source(missingShare, _cacheRoot)]);
+        var result = ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[Source(missingShare, _cacheRoot)]);
 
         Assert.AreEqual(0, result.Copied);
         Assert.AreEqual(0, result.Removed, "Nothing may be removed while the share cannot be read.");
@@ -235,7 +235,7 @@ public sealed class ImageCacheSyncServiceTests
         File.WriteAllText(notAFolder, "x");
         var unusableCache = Path.Combine(notAFolder, "DunnageImages");
 
-        var result = ImageCacheSyncService.Synchronize([Source(_shareRoot, unusableCache)]);
+        var result = ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[Source(_shareRoot, unusableCache)]);
 
         Assert.AreEqual(0, result.Copied);
         Assert.AreEqual(
@@ -263,7 +263,7 @@ public sealed class ImageCacheSyncServiceTests
         // system refuses. This is the shape of a picture held open by another program, without needing one.
         Directory.CreateDirectory(Path.Combine(_cacheRoot, "request_item", "steel-rack.png"));
 
-        var result = ImageCacheSyncService.Synchronize([Source(_shareRoot, _cacheRoot)]);
+        var result = ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[Source(_shareRoot, _cacheRoot)]);
 
         Assert.AreEqual(2, result.Copied, "the two pictures that could be copied were still copied");
         Assert.AreEqual(1, result.NotCopied, "the one that could not is counted rather than swallowed");
@@ -279,7 +279,7 @@ public sealed class ImageCacheSyncServiceTests
         WriteSharedPicture(@"notes.txt");
         WriteSharedPicture(@"request_item\pickup-coil.bmp");
 
-        var result = ImageCacheSyncService.Synchronize([Source(_shareRoot, _cacheRoot)]);
+        var result = ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[Source(_shareRoot, _cacheRoot)]);
 
         Assert.AreEqual(1, result.Copied, "Only the picture kinds the image screens accept are cached.");
         Assert.IsFalse(File.Exists(Path.Combine(_cacheRoot, "notes.txt")));
@@ -299,7 +299,7 @@ public sealed class ImageCacheSyncServiceTests
         Directory.CreateDirectory(Path.GetDirectoryName(workingFile)!);
         File.WriteAllBytes(workingFile, [9, 9, 9]);
 
-        var result = ImageCacheSyncService.Synchronize([Source(_shareRoot, _cacheRoot)]);
+        var result = ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[Source(_shareRoot, _cacheRoot)]);
 
         Assert.AreEqual(1, result.Copied);
         Assert.AreEqual(0, result.Removed);
@@ -316,7 +316,7 @@ public sealed class ImageCacheSyncServiceTests
         WriteSharedPicture("waitlist-picture.png");
 
         var result = ImageCacheSyncService.Synchronize(
-        [
+        (MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[
             Source(_shareRoot, Path.Combine(_cacheRoot, ImageCachePaths.WaitlistFolderName)),
             new("dunnage pictures", otherShare, Path.Combine(_cacheRoot, ImageCachePaths.DunnageFolderName)),
         ]);
@@ -391,7 +391,7 @@ public sealed class ImageCacheSyncServiceTests
         WritePartCollectionPicture(PartPictureLayout.VisualCollection, "MMC-1.png");
         WritePartCollectionPicture(PartPictureLayout.WipCollection, "MMC-1.png");
 
-        var result = ImageCacheSyncService.Synchronize([PictureSource()]);
+        var result = ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[PictureSource()]);
 
         Assert.AreEqual(
             1,
@@ -412,7 +412,7 @@ public sealed class ImageCacheSyncServiceTests
         Directory.CreateDirectory(Path.GetDirectoryName(staleCopy)!);
         File.WriteAllBytes(staleCopy, [5, 5, 5, 5]);
 
-        var result = ImageCacheSyncService.Synchronize([PictureSource()]);
+        var result = ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[PictureSource()]);
 
         Assert.AreEqual(1, result.Removed, "A part picture is the part store's to keep, not the mirror's.");
         Assert.IsFalse(File.Exists(staleCopy));
@@ -423,7 +423,7 @@ public sealed class ImageCacheSyncServiceTests
     {
         WriteSharedPicture(@"Visual\MMC\MMC-1.png");
 
-        var result = ImageCacheSyncService.Synchronize([Source(_shareRoot, _cacheRoot)]);
+        var result = ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[Source(_shareRoot, _cacheRoot)]);
 
         Assert.AreEqual(
             1,
@@ -448,7 +448,7 @@ public sealed class ImageCacheSyncServiceTests
         Directory.CreateDirectory(Path.GetDirectoryName(archived)!);
         File.WriteAllBytes(archived, [9, 9, 9]);
 
-        var result = ImageCacheSyncService.Synchronize([SourceKeepingArchives(_shareRoot, _cacheRoot, days: 30)]);
+        var result = ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[SourceKeepingArchives(_shareRoot, _cacheRoot, days: 30)]);
 
         Assert.AreEqual(1, result.ArchivesRemoved, "an archive older than the period is removed from the share");
         Assert.IsFalse(File.Exists(archived));
@@ -468,7 +468,7 @@ public sealed class ImageCacheSyncServiceTests
     {
         var source = SourceKeepingArchives(_shareRoot, _cacheRoot, days: 30);
 
-        ImageCacheSyncService.Synchronize([source]);
+        ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[source]);
 
         // Planted after today's sweep has run: an expired archive that only a second sweep could find.
         var sharePicture = WriteSharedPicture(@"request_item\pickup-coil.png");
@@ -479,7 +479,7 @@ public sealed class ImageCacheSyncServiceTests
         Directory.CreateDirectory(Path.GetDirectoryName(archived)!);
         File.WriteAllBytes(archived, [9, 9, 9]);
 
-        var second = ImageCacheSyncService.Synchronize([source]);
+        var second = ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[source]);
 
         Assert.AreEqual(0, second.ArchivesRemoved, "today's sweep has already run, so this launch does not repeat it");
         Assert.IsTrue(File.Exists(archived), "the archive is left for tomorrow's first launch");
@@ -487,7 +487,7 @@ public sealed class ImageCacheSyncServiceTests
         // Tomorrow's launch is what this file is for: with the stamp gone, the sweep runs and the archive goes.
         File.Delete(Path.Combine(_cacheRoot, "archive-sweep.stamp"));
 
-        var third = ImageCacheSyncService.Synchronize([source]);
+        var third = ImageCacheSyncService.Synchronize((MTM_Waitlist.Module_Shared.Services.ImageCacheSource[])[source]);
 
         Assert.AreEqual(1, third.ArchivesRemoved, "the next sweep that runs still removes what has expired");
         Assert.IsFalse(File.Exists(archived));

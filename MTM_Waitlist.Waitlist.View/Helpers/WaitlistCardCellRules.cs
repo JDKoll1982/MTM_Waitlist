@@ -171,7 +171,7 @@ public static class WaitlistCardCellRules
             return null;
         }
 
-        var slot = Array.FindIndex(pinned, candidate => Matches([candidate], label));
+        var slot = Array.FindIndex(pinned, candidate => Matches((string[])[candidate], label));
 
         return slot < 0 ? null : slot;
     }
@@ -370,7 +370,7 @@ public static class WaitlistCardCellRules
             return false;
         }
 
-        return !Matches(["false", "no", "0", "unchecked", "unticked"], answer.Trim());
+        return !Matches((string[])["false", "no", "0", "unchecked", "unticked"], answer.Trim());
     }
 
     /// <summary>
@@ -518,7 +518,7 @@ public static class WaitlistCardCellRules
     public static bool IsKnownUnfillableField(string? itemCode, string? label) =>
         !string.IsNullOrWhiteSpace(label)
         && IsDunnageItem(itemCode)
-        && Matches(["description"], label);
+        && Matches((string[])["description"], label);
 
     /// <summary>The dunnage Items, the two that declare a field nothing can answer (FR-095).</summary>
     /// <param name="itemCode">The request's Item code.</param>

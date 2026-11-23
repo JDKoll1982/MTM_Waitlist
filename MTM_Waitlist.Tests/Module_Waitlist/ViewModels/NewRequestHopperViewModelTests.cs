@@ -221,7 +221,7 @@ public sealed class NewRequestHopperViewModelTests
             Item = "pickup-hopper",
             ControlFlow = RequestItemConfiguration.DirectToConfirmation,
             DetailFields =
-            [
+            (MTM_Waitlist.Module_Settings.Models.RequestItemFieldDefinition[])[
                 new RequestItemFieldDefinition
                 {
                     Label = NewRequestFlowRules.HopperSizeLabel,

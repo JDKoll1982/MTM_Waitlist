@@ -60,7 +60,7 @@ public static class PartPictureLayout
     /// size's own word, which is also the answer the flow records and the key the card resolves, so one spelling
     /// serves the step, the share and the card.
     /// </summary>
-    public static readonly IReadOnlyList<string> HopperSizeCodes = ["Small", "Medium", "Large"];
+    public static readonly IReadOnlyList<string> HopperSizeCodes = (string[])["Small", "Medium", "Large"];
 
     /// <summary>
     /// The extension a hopper reference picture is <b>stored</b> under when this application writes one. The three
@@ -79,7 +79,7 @@ public static class PartPictureLayout
     /// the size step and the card's Size cell draw the placeholder for three files that were sitting in the folder
     /// (2026-10-23). The picture rule reads the file's own header, so the extension is a name rather than a format.
     /// </remarks>
-    public static readonly IReadOnlyList<string> HopperPictureExtensions = [".png", ".jpg", ".jpeg"];
+    public static readonly IReadOnlyList<string> HopperPictureExtensions = (string[])[".png", ".jpg", ".jpeg"];
 
     /// <summary>The store/read scope for a hopper size's reference picture.</summary>
     /// <remarks>
@@ -104,7 +104,7 @@ public static class PartPictureLayout
     /// The two part scopes, in the order a screen lists them. A part picture is keyed by the system and the part
     /// number together, never by the part number alone, which is why this list exists rather than a single scope.
     /// </summary>
-    public static readonly IReadOnlyList<string> PartScopes = [VisualPartScope, WipPartScope];
+    public static readonly IReadOnlyList<string> PartScopes = (string[])[VisualPartScope, WipPartScope];
 
     /// <summary>
     /// The two collection folders that hold part pictures, in the order the scopes are listed.
@@ -113,14 +113,14 @@ public static class PartPictureLayout
     /// These are the folders a walk of the share must leave alone, because what lives in them belongs to this
     /// machine's own copy store and is fetched a part at a time rather than mirrored in one pass (FR-030).
     /// </remarks>
-    public static readonly IReadOnlyList<string> PartCollectionFolders = [VisualCollection, WipCollection];
+    public static readonly IReadOnlyList<string> PartCollectionFolders = (string[])[VisualCollection, WipCollection];
 
     /// <summary>
     /// The mapping from a part number's prefix to its family, in the order the prefixes are tested. The prefix is
     /// authoritative: a part whose stored category disagrees with its number is still placed by its number.
     /// </summary>
     private static readonly IReadOnlyList<(string Prefix, string Family, string Folder)> PrefixFamilies =
-    [
+    ((string Prefix, string Family, string Folder)[])[
         ("MMC", "Coil", CoilFolder),
         ("MMF", "Flatstock", FlatstockFolder),
         ("FGT", "Die", DieFolder),

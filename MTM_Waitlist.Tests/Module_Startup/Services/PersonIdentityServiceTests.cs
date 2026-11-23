@@ -69,7 +69,7 @@ public sealed class PersonIdentityServiceTests
             displayName: "John K",
             employeeNumber: "E-1042",
             currentRoleCode: "role:developer",
-            heldRoleCodes: ["role:Developer", "Setup Lead"]);
+            heldRoleCodes: (string[])["role:Developer", "Setup Lead"]);
 
         Assert.IsTrue(person.Holds("developer"));
         Assert.IsTrue(person.Holds("DEVELOPER"));
@@ -98,7 +98,7 @@ public sealed class PersonIdentityServiceTests
     {
         var person = new PersonIdentityService(new StubMySqlHelperServer([]));
 
-        person.Apply(42L, "JOHN", "John K", null, "developer", ["developer", "role:developer", "DEVELOPER"]);
+        person.Apply(42L, "JOHN", "John K", null, "developer", (string[])["developer", "role:developer", "DEVELOPER"]);
 
         Assert.AreEqual(1, person.HeldRoleCodes.Count);
     }
@@ -120,7 +120,7 @@ public sealed class PersonIdentityServiceTests
     public void Service_PersonIdentityServiceTests_Clear_EndsTheIdentity()
     {
         var person = new PersonIdentityService(new StubMySqlHelperServer([]));
-        person.Apply(42L, "JOHN", "John K", "E-1042", "developer", ["setup lead"]);
+        person.Apply(42L, "JOHN", "John K", "E-1042", "developer", (string[])["setup lead"]);
 
         person.Clear();
 
@@ -140,7 +140,7 @@ public sealed class PersonIdentityServiceTests
     {
         var stub = new StubMySqlHelperServer([]);
         var person = new PersonIdentityService(stub);
-        person.Apply(42L, "JOHN", "John K", "E-1042", "developer", ["setup lead"]);
+        person.Apply(42L, "JOHN", "John K", "E-1042", "developer", (string[])["setup lead"]);
 
         Assert.IsFalse(await person.ResolveAsync("   "));
 
@@ -161,8 +161,8 @@ public sealed class PersonIdentityServiceTests
     public async Task Service_PersonIdentityServiceTests_ResolveAsync_RowAppliesThePersonTheStoreReportsAndEveryHeldRole()
     {
         var stub = new StubMySqlHelperServer(
-            [PersonRow("role:developer")],
-            [RoleRow("role:developer"), RoleRow("role:setup_lead")]);
+            (System.Collections.Generic.Dictionary<string, object?>[])[PersonRow("role:developer")],
+            (System.Collections.Generic.Dictionary<string, object?>[])[RoleRow("role:developer"), RoleRow("role:setup_lead")]);
         var person = new PersonIdentityService(stub);
 
         var resolved = await person.ResolveAsync("  john  ");
@@ -191,7 +191,7 @@ public sealed class PersonIdentityServiceTests
     {
         // An inner-joined assignment read answers nothing for a person with no assignment, and the identity read
         // still puts one role in force. The gate must admit that role and nothing else.
-        var stub = new StubMySqlHelperServer([PersonRow("role:developer")]);
+        var stub = new StubMySqlHelperServer((System.Collections.Generic.Dictionary<string, object?>[])[PersonRow("role:developer")]);
         var person = new PersonIdentityService(stub);
 
         Assert.IsTrue(await person.ResolveAsync("john"));
@@ -206,8 +206,8 @@ public sealed class PersonIdentityServiceTests
     public async Task Service_PersonIdentityServiceTests_ResolveAsync_IgnoresAnAssignmentRowWithNoRoleCode()
     {
         var stub = new StubMySqlHelperServer(
-            [PersonRow("role:developer")],
-            [RoleRow(string.Empty), RoleRow("role:setup_lead")]);
+            (System.Collections.Generic.Dictionary<string, object?>[])[PersonRow("role:developer")],
+            (System.Collections.Generic.Dictionary<string, object?>[])[RoleRow(string.Empty), RoleRow("role:setup_lead")]);
         var person = new PersonIdentityService(stub);
 
         Assert.IsTrue(await person.ResolveAsync("john"));
@@ -222,7 +222,7 @@ public sealed class PersonIdentityServiceTests
         var row = PersonRow("developer");
         row.Remove("employee_identifier");
 
-        var person = new PersonIdentityService(new StubMySqlHelperServer([row]));
+        var person = new PersonIdentityService(new StubMySqlHelperServer((System.Collections.Generic.Dictionary<string, object?>[])[row]));
 
         Assert.IsTrue(await person.ResolveAsync("john"));
         Assert.IsNull(person.EmployeeNumber);
@@ -233,7 +233,7 @@ public sealed class PersonIdentityServiceTests
     {
         var stub = new StubMySqlHelperServer([]);
         var person = new PersonIdentityService(stub);
-        person.Apply(42L, "JOHN", "John K", "E-1042", "developer", ["setup lead"]);
+        person.Apply(42L, "JOHN", "John K", "E-1042", "developer", (string[])["setup lead"]);
 
         var resolved = await person.ResolveAsync("JOHN");
 

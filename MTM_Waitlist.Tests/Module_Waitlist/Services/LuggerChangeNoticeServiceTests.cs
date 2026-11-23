@@ -27,7 +27,7 @@ public sealed class LuggerChangeNoticeServiceTests
     {
         var arrangement = new FakeArrangementService { Watermark = 8 };
         arrangement.Changes.AddRange(
-        [
+        (MTM_Waitlist.Module_Core.Models.ArrangementChange[])[
             Change(6, ArrangementChange.Kinds.LuggerAdded),
             Change(7, ArrangementChange.Kinds.LuggerAdded),
             Change(8, ArrangementChange.Kinds.LuggerAdded),
@@ -47,7 +47,7 @@ public sealed class LuggerChangeNoticeServiceTests
     {
         var arrangement = new FakeArrangementService { Watermark = 8 };
         arrangement.Changes.AddRange(
-        [
+        (MTM_Waitlist.Module_Core.Models.ArrangementChange[])[
             Change(6, ArrangementChange.Kinds.LuggerAdded),
             Change(10, ArrangementChange.Kinds.AssignmentAdded),
             Change(8, ArrangementChange.Kinds.LuggerRemoved),
@@ -71,7 +71,7 @@ public sealed class LuggerChangeNoticeServiceTests
     {
         var arrangement = new FakeArrangementService { Watermark = 4 };
         arrangement.Changes.AddRange(
-        [
+        (MTM_Waitlist.Module_Core.Models.ArrangementChange[])[
             Change(1, ArrangementChange.Kinds.LuggerAdded),
             Change(4, ArrangementChange.Kinds.LuggerRenamed),
         ]);
@@ -141,7 +141,7 @@ public sealed class LuggerChangeNoticeServiceTests
     {
         var arrangement = new FakeArrangementService { Watermark = 0 };
         arrangement.Changes.AddRange(
-        [
+        (MTM_Waitlist.Module_Core.Models.ArrangementChange[])[
             Change(1, ArrangementChange.Kinds.LuggerAdded),
             Change(2, ArrangementChange.Kinds.AssignmentAdded),
         ]);

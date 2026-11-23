@@ -44,7 +44,7 @@ internal sealed class FakeOperatorRoleResolver : IServiceOperatorRoleResolver
             ["shop.user"] = new ServiceOperatorIdentity(OrdinaryUserId, "setup", "Setup"),
         };
 
-        _permittedUserIds = new HashSet<long>(permittedUserIds ?? [OperatorUserId]);
+        _permittedUserIds = new HashSet<long>(permittedUserIds ?? (long[])[OperatorUserId]);
     }
 
     /// <inheritdoc />

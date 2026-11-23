@@ -1512,7 +1512,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
         ScrapType = "Scrap Type Required",
         DieNumber = "FGT0002000",
         DieLocation = "DIE SHOP",
-        DunnageParts = [new RequestDunnagePart { PartNumber = "DUN0000100", HomeLocation = "A-12" }],
+        DunnageParts = (MTM_Waitlist.Module_Settings.Models.RequestDunnagePart[])[new RequestDunnagePart { PartNumber = "DUN0000100", HomeLocation = "A-12" }],
     };
 
     /// <summary>

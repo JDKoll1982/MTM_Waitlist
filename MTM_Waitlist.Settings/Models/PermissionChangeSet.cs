@@ -98,7 +98,7 @@ public sealed class PermissionChangeSet
         if (Entries.Count == 1)
         {
             return
-            [
+            (string[])[
                 string.Format(culture, "Permissions_Save.Confirmation".GetLocalized(), ChangedLabels[0], who),
             ];
         }

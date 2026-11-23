@@ -501,7 +501,7 @@ public sealed class NewRequestWorkCenterViewModelTests
             Task.FromResult(RequestJobPartAvailability.All);
 
         public IReadOnlyList<RequestCategory> GetVisibleCategories(RequestJobPartAvailability availability) =>
-        [
+        (MTM_Waitlist.Module_Settings.Models.RequestCategory[])[
             RequestCategory.Pickup,
             RequestCategory.Deliver,
             RequestCategory.Assist,

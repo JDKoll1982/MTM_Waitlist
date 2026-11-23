@@ -91,7 +91,7 @@ public sealed class PersonIdentityService : IPersonIdentity
             // it — the fault that ends this process as a stowed exception with no stack of its own.
             lock (_rolesGate)
             {
-                return [.. _heldRoleCodes];
+                return (string[])[.. _heldRoleCodes];
             }
         }
     }

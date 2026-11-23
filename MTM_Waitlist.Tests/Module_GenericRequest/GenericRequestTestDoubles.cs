@@ -295,7 +295,7 @@ internal sealed class StubGenericRequestJobFillData : IGenericRequestJobFillData
             string.IsNullOrWhiteSpace(RunningJobWorkOrder)
                 ? GenericRequestStepResult<GenericRequestJobFillCandidate>.Empty(ReadAttemptedAtUtc)
                 : GenericRequestStepResult<GenericRequestJobFillCandidate>.Populated(
-                    [new GenericRequestJobFillCandidate { WorkOrder = RunningJobWorkOrder! }],
+                    (MTM_Waitlist.GenericRequest.Models.GenericRequestJobFillCandidate[])[new GenericRequestJobFillCandidate { WorkOrder = RunningJobWorkOrder! }],
                     ReadAttemptedAtUtc));
     }
 
@@ -313,7 +313,7 @@ internal sealed class StubGenericRequestJobFillData : IGenericRequestJobFillData
         return Task.FromResult(
             Fill is null
                 ? GenericRequestStepResult<GenericRequestJobFill>.Empty(ReadAttemptedAtUtc)
-                : GenericRequestStepResult<GenericRequestJobFill>.Populated([Fill], ReadAttemptedAtUtc));
+                : GenericRequestStepResult<GenericRequestJobFill>.Populated((MTM_Waitlist.GenericRequest.Models.GenericRequestJobFill[])[Fill], ReadAttemptedAtUtc));
     }
 }
 
@@ -330,7 +330,7 @@ internal sealed class StubPersonIdentity : IPersonIdentity
 
     public string CurrentRoleCode { get; set; } = "MATERIAL_HANDLER";
 
-    public IReadOnlyList<string> HeldRoleCodes { get; set; } = ["MATERIAL_HANDLER"];
+    public IReadOnlyList<string> HeldRoleCodes { get; set; } = (string[])["MATERIAL_HANDLER"];
 
     public bool IsSignedIn { get; set; } = true;
 
@@ -537,8 +537,8 @@ internal sealed class RecordingWaitlistRequestService : IWaitlistRequestService
     public Task<WaitlistRequest?> UpdateNoteAsync(
         Guid requestId,
         string? note,
-        string? handlerEmployeeNumber,
-        string employeeNumber,
+        string? actorEmployeeNumber = null,
+        string? actorEmployeeName = null,
         CancellationToken cancellationToken = default) => Task.FromResult<WaitlistRequest?>(null);
 
     public Task<WaitlistRequest?> AcceptAsync(

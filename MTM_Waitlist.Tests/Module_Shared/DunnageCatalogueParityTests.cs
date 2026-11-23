@@ -76,15 +76,15 @@ public sealed class DunnageCatalogueParityTests
     {
         var catalogue = new FakeDunnageCatalogueReader
         {
-            Parts = [FakeDunnageCataloguePart.Of("DNG-1")],
+            Parts = (MTM_Waitlist.Module_Shared.Models.DunnageCataloguePart[])[FakeDunnageCataloguePart.Of("DNG-1")],
         };
 
         Assert.IsTrue(await AppearsOnBothAsync(catalogue, "DNG-1"), "a part the source holds is offered by both surfaces.");
 
-        catalogue.Parts = [FakeDunnageCataloguePart.Of("DNG-1"), FakeDunnageCataloguePart.Of("DNG-2")];
+        catalogue.Parts = (MTM_Waitlist.Module_Shared.Models.DunnageCataloguePart[])[FakeDunnageCataloguePart.Of("DNG-1"), FakeDunnageCataloguePart.Of("DNG-2")];
         Assert.IsTrue(await AppearsOnBothAsync(catalogue, "DNG-2"), "a part added to the source appears on both surfaces.");
 
-        catalogue.Parts = [FakeDunnageCataloguePart.Of("DNG-2")];
+        catalogue.Parts = (MTM_Waitlist.Module_Shared.Models.DunnageCataloguePart[])[FakeDunnageCataloguePart.Of("DNG-2")];
         Assert.IsFalse(await AppearsOnBothAsync(catalogue, "DNG-1"), "a part removed from the source is offered by neither.");
     }
 

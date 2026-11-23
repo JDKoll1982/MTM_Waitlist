@@ -208,11 +208,11 @@ public partial class PinRevealDialogViewModel : ObservableObject
         Title = TitleText,
         Subtitle = PersonName,
         Sections =
-        [
+        (MTM_Waitlist.Module_Core.Models.PrintableReportSection[])[
             new PrintableReportSection
             {
                 Fields =
-                [
+                (MTM_Waitlist.Module_Core.Models.PrintableReportField[])[
                     new PrintableReportField { Label = PersonLabelText, Value = PersonName },
                     new PrintableReportField { Label = SignInNameLabelText, Value = SignInName },
                     new PrintableReportField { Label = CredentialLabelText, Value = Pin },
@@ -220,7 +220,7 @@ public partial class PinRevealDialogViewModel : ObservableObject
                     new PrintableReportField { Label = IssuedByLabelText, Value = IssuedByText },
                 ],
             },
-            new PrintableReportSection { Lines = [InstructionText, SecondResetText] },
+            new PrintableReportSection { Lines = (string[])[InstructionText, SecondResetText] },
         ],
     };
 

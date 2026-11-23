@@ -46,7 +46,7 @@ public static class BackupStoreExtensions
 
     /// <summary>Returns every store in the fixed set.</summary>
     public static IReadOnlyList<BackupStore> All { get; } =
-    [
+    (MTM_Waitlist.Mock.Service.Models.BackupStore[])[
         BackupStore.MtmWaitlist,
         BackupStore.MtmWipApplicationWinforms,
         BackupStore.MtmReceivingApplication,

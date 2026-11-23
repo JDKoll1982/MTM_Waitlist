@@ -44,7 +44,7 @@ public sealed class LaunchStepRunnerTests
             "configuration",
             (context, _) =>
             {
-                linesWhenTheWorkStarts = [.. context.Feed.Entries];
+                linesWhenTheWorkStarts = (MTM_Waitlist.Module_Startup.Models.LaunchFeedEntry[])[.. context.Feed.Entries];
                 return Task.FromResult(Succeeded());
             });
 

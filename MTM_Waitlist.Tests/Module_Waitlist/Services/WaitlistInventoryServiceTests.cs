@@ -103,7 +103,7 @@ public sealed class WaitlistInventoryServiceTests
     /// (V-B2-10) that must both be omitted.
     /// </summary>
     private static IReadOnlyList<VisualInventoryLocationRow> CreateRowSet() =>
-    [
+    (MTM_Waitlist.Mock.Models.VisualInventoryLocationRow[])[
         new VisualInventoryLocationRow { PartNumber = "MMC0001000", Location = "V-A0-01", OnHandQuantity = 10m },
         new VisualInventoryLocationRow { PartNumber = "MMC0001000", Location = "WC", OnHandQuantity = 5m },
         new VisualInventoryLocationRow { PartNumber = "MMC0001000", Location = "SHIP", OnHandQuantity = 3m },

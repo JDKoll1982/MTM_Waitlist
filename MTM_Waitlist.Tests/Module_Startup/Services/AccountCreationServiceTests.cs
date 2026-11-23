@@ -36,7 +36,7 @@ public sealed class AccountCreationServiceTests
         var store = new StubStore
         {
             Rows =
-            [
+            (System.Collections.Generic.Dictionary<string, object?>[])[
                 new Dictionary<string, object?>
                 {
                     ["user_id"] = 42L,
@@ -66,7 +66,7 @@ public sealed class AccountCreationServiceTests
     {
         var store = new StubStore
         {
-            Rows = [new Dictionary<string, object?> { ["username_normalized"] = "6229", ["role_code"] = "production" }],
+            Rows = (System.Collections.Generic.Dictionary<string, object?>[])[new Dictionary<string, object?> { ["username_normalized"] = "6229", ["role_code"] = "production" }],
         };
 
         await new AccountCreationService(store).CreateAsync(Draft());
@@ -88,7 +88,7 @@ public sealed class AccountCreationServiceTests
     {
         var store = new StubStore
         {
-            Rows = [new Dictionary<string, object?> { ["username_normalized"] = "6229" }],
+            Rows = (System.Collections.Generic.Dictionary<string, object?>[])[new Dictionary<string, object?> { ["username_normalized"] = "6229" }],
         };
 
         await new AccountCreationService(store).CreateAsync(Draft(pin: "2468"));

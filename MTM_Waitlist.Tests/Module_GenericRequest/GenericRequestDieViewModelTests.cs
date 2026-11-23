@@ -89,7 +89,7 @@ public sealed class GenericRequestDieViewModelTests
     {
         var (viewModel, _, _) = Create(
             GenericRequestStepResult<GenericRequestDieOption>.Populated(
-                [Die("FGT0602-01", "DIE", "U-B0-01")],
+                (MTM_Waitlist.GenericRequest.Models.GenericRequestDieOption[])[Die("FGT0602-01", "DIE", "U-B0-01")],
                 DateTimeOffset.UtcNow));
 
         viewModel.SearchText = "FGT0602";
@@ -108,7 +108,7 @@ public sealed class GenericRequestDieViewModelTests
     {
         var (viewModel, _, _) = Create(
             GenericRequestStepResult<GenericRequestDieOption>.Populated(
-                [Die("FGT0602-01", "DIE", "U-B0-01"), Die("FGT0602-02", "DIE TWO", string.Empty)],
+                (MTM_Waitlist.GenericRequest.Models.GenericRequestDieOption[])[Die("FGT0602-01", "DIE", "U-B0-01"), Die("FGT0602-02", "DIE TWO", string.Empty)],
                 DateTimeOffset.UtcNow));
 
         viewModel.SearchText = "FGT0602";
@@ -138,7 +138,7 @@ public sealed class GenericRequestDieViewModelTests
         Assert.AreEqual("PART-9003", viewModel.SearchText, "The typed term is kept for the retry (FR-005).");
 
         data.Dies = GenericRequestStepResult<GenericRequestDieOption>.Populated(
-            [Die("FGT0602-01", "DIE", "U-B0-01")],
+            (MTM_Waitlist.GenericRequest.Models.GenericRequestDieOption[])[Die("FGT0602-01", "DIE", "U-B0-01")],
             DateTimeOffset.UtcNow);
         await viewModel.RetryCommand.ExecuteAsync(null);
 
@@ -154,7 +154,7 @@ public sealed class GenericRequestDieViewModelTests
     {
         var (viewModel, _, navigator) = Create(
             GenericRequestStepResult<GenericRequestDieOption>.Populated(
-                [
+                (MTM_Waitlist.GenericRequest.Models.GenericRequestDieOption[])[
                     Die("FGT0602-01", "DIE", "U-B0-01"),
                     Die("FGT0602-02", "DIE TWO", "U-B0-02"),
                     Die("FGT0603-01", "DIE THREE", "U-B1-01"),
@@ -181,7 +181,7 @@ public sealed class GenericRequestDieViewModelTests
     {
         var (viewModel, data, _) = Create(
             GenericRequestStepResult<GenericRequestDieOption>.Populated(
-                [Die("FGT0602-01", "DIE", "U-B0-01")],
+                (MTM_Waitlist.GenericRequest.Models.GenericRequestDieOption[])[Die("FGT0602-01", "DIE", "U-B0-01")],
                 DateTimeOffset.UtcNow));
 
         viewModel.SearchText = "FGT0602";
@@ -189,7 +189,7 @@ public sealed class GenericRequestDieViewModelTests
         viewModel.Options[0].IsSelected = true;
 
         data.Dies = GenericRequestStepResult<GenericRequestDieOption>.Populated(
-            [Die("FGT0602-01", "DIE", "U-B0-01"), Die("FGT0603-01", "ANOTHER", "U-B1-01")],
+            (MTM_Waitlist.GenericRequest.Models.GenericRequestDieOption[])[Die("FGT0602-01", "DIE", "U-B0-01"), Die("FGT0603-01", "ANOTHER", "U-B1-01")],
             DateTimeOffset.UtcNow);
         viewModel.SearchText = "FGT";
         await viewModel.SearchCommand.ExecuteAsync(null);
@@ -205,7 +205,7 @@ public sealed class GenericRequestDieViewModelTests
     {
         var (viewModel, _, _) = Create(
             GenericRequestStepResult<GenericRequestDieOption>.Populated(
-                [
+                (MTM_Waitlist.GenericRequest.Models.GenericRequestDieOption[])[
                     Die("FGT0602-01", "DIE", "U-B0-01"),
                     Die("FGT0602-02", "DIE TWO", "U-B0-02"),
                 ],
@@ -226,7 +226,7 @@ public sealed class GenericRequestDieViewModelTests
     {
         var (viewModel, _, _) = Create(
             GenericRequestStepResult<GenericRequestDieOption>.Populated(
-                [Die("FGT0602-01", "DIE", string.Empty)],
+                (MTM_Waitlist.GenericRequest.Models.GenericRequestDieOption[])[Die("FGT0602-01", "DIE", string.Empty)],
                 DateTimeOffset.UtcNow));
 
         viewModel.SearchText = "FGT0602";

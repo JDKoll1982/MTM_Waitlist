@@ -93,7 +93,7 @@ public sealed class Model_SchemaChangeTests
             Database = "sample",
             GeneratedAt = DateTimeOffset.Now,
             Changes =
-            [
+            (MTM_Database_Deployment.Models.Model_SchemaChange[])[
                 new Model_SchemaChange
                 {
                     Kind = Enum_ChangeKind.ExtraColumn,
@@ -123,7 +123,7 @@ public sealed class Model_SchemaChangeTests
             Port = 3306,
             Database = "sample",
             GeneratedAt = DateTimeOffset.Now,
-            Changes = [new Model_SchemaChange { Kind = Enum_ChangeKind.AddColumn, Target = "t.c" }]
+            Changes = (MTM_Database_Deployment.Models.Model_SchemaChange[])[new Model_SchemaChange { Kind = Enum_ChangeKind.AddColumn, Target = "t.c" }]
         };
 
         Assert.AreEqual(0, plan.BlockingExtraCount);

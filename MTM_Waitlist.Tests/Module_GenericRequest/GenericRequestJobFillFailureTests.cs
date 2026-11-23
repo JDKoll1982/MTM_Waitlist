@@ -73,7 +73,7 @@ public sealed class GenericRequestJobFillFailureTests
 
     private static GenericRequestStepResult<GenericRequestCategoryOption> Populated() =>
         GenericRequestStepResult<GenericRequestCategoryOption>.Populated(
-            [new GenericRequestCategoryOption("Pickup", "Pickup", "Move it")],
+            (MTM_Waitlist.GenericRequest.Models.GenericRequestCategoryOption[])[new GenericRequestCategoryOption("Pickup", "Pickup", "Move it")],
             DateTimeOffset.UtcNow);
 
     private static (

@@ -68,7 +68,7 @@ internal static class FabricatedValueGuard
     {
         ArgumentNullException.ThrowIfNull(values);
 
-        return [.. values.Where(value => IsFabricatedLooking(value)).Select(value => value!)];
+        return (string[])[.. values.Where(value => IsFabricatedLooking(value)).Select(value => value!)];
     }
 }
 

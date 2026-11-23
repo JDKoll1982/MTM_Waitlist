@@ -284,7 +284,7 @@ public sealed class IdentifierSignInServiceTests
             CallCount++;
 
             IReadOnlyList<Dictionary<string, object?>> rows = UserId > 0
-                ? [new Dictionary<string, object?> { ["id"] = UserId }]
+                ? (System.Collections.Generic.Dictionary<string, object?>[])[new Dictionary<string, object?> { ["id"] = UserId }]
                 : [];
 
             return Task.FromResult(rows);

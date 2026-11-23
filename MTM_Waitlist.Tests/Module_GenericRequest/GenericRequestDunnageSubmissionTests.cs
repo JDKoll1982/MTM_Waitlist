@@ -23,7 +23,7 @@ public sealed class GenericRequestDunnageSubmissionTests
     {
         var reader = new FakeDunnageCatalogueReader
         {
-            Parts = [FakeDunnageCataloguePart.Of("DNG-1", typeName: "Rack")],
+            Parts = (MTM_Waitlist.Module_Shared.Models.DunnageCataloguePart[])[FakeDunnageCataloguePart.Of("DNG-1", typeName: "Rack")],
         };
         var data = CreateLive(reader, out var requests);
 
@@ -50,7 +50,7 @@ public sealed class GenericRequestDunnageSubmissionTests
     {
         var reader = new FakeDunnageCatalogueReader
         {
-            Parts = [FakeDunnageCataloguePart.Of("DNG-1")],
+            Parts = (MTM_Waitlist.Module_Shared.Models.DunnageCataloguePart[])[FakeDunnageCataloguePart.Of("DNG-1")],
         };
         var data = CreateLive(reader, out var requests);
 
@@ -72,7 +72,7 @@ public sealed class GenericRequestDunnageSubmissionTests
     {
         var reader = new FakeDunnageCatalogueReader
         {
-            Parts = [FakeDunnageCataloguePart.Of("DNG-OTHER", typeName: "Tote")],
+            Parts = (MTM_Waitlist.Module_Shared.Models.DunnageCataloguePart[])[FakeDunnageCataloguePart.Of("DNG-OTHER", typeName: "Tote")],
         };
         var data = CreateLive(reader, out var requests);
 

@@ -18,7 +18,7 @@ public sealed class GenericRequestDieDataTests
     [TestMethod]
     public async Task Audit_GenericRequestDieDataTests_ADieNumberAnswersThatDieAndIsMatchedAsTyped()
     {
-        var executor = Executor(_ => VisualQueryOutcome.Ok([DieRow("FGT0602-01", "BASE DIE", "U-B0-01")]));
+        var executor = Executor(_ => VisualQueryOutcome.Ok((System.Collections.Generic.IReadOnlyDictionary<string, object?>[])[DieRow("FGT0602-01", "BASE DIE", "U-B0-01")]));
         var dies = GenericRequestReadShapes.DieData(executor);
 
         var result = await dies.ReadDiesAsync("FGT0602-01");
@@ -48,7 +48,7 @@ public sealed class GenericRequestDieDataTests
     public async Task Audit_GenericRequestDieDataTests_APartNumberReturnsEveryDieItOwnsWithItsLocation()
     {
         var dies = GenericRequestReadShapes.DieData(Executor(_ => VisualQueryOutcome.Ok(
-        [
+        (System.Collections.Generic.IReadOnlyDictionary<string, object?>[])[
             DieRow("FGT0602-01", "DIE ONE", "U-B0-01"),
             DieRow("FGT0602-02", "DIE TWO", "U-B0-02"),
             DieRow("FGT0603-01", "DIE THREE", "U-B1-01"),
@@ -82,7 +82,7 @@ public sealed class GenericRequestDieDataTests
     {
         var executor = new FakeVisualQueryExecutor((_, parameters) =>
             string.Equals(Convert.ToString(parameters["Term"]), "FGT0001000", StringComparison.Ordinal)
-                ? VisualQueryOutcome.Ok([DieRow("FGT0001000", "DIE", "U-B0-01")])
+                ? VisualQueryOutcome.Ok((System.Collections.Generic.IReadOnlyDictionary<string, object?>[])[DieRow("FGT0001000", "DIE", "U-B0-01")])
                 : VisualQueryOutcome.Ok([]));
 
         var result = await GenericRequestReadShapes.DieData(executor).ReadDiesAsync("1000");
@@ -112,7 +112,7 @@ public sealed class GenericRequestDieDataTests
     {
         var executor = Executor(_ => VisualQueryOutcome.Unreachable("the plant system is down"));
         var mirror = new StubMirrorStore(
-            ("sp_visual_die_search_get", [DieRow("FGT0602-01", "BASE DIE", "U-B0-01")]));
+            ("sp_visual_die_search_get", (System.Collections.Generic.Dictionary<string, object?>[])[DieRow("FGT0602-01", "BASE DIE", "U-B0-01")]));
 
         var result = await GenericRequestReadShapes.DieData(executor, mirror: mirror).ReadDiesAsync("PART-9003");
 
@@ -132,9 +132,9 @@ public sealed class GenericRequestDieDataTests
     [TestMethod]
     public async Task Audit_GenericRequestDieDataTests_ASettledUnreachableVerdictIsAnsweredFromTheMirrorWithoutAskingVisual()
     {
-        var executor = Executor(_ => VisualQueryOutcome.Ok([DieRow("FGT0602-01", "BASE DIE", "U-B0-01")]));
+        var executor = Executor(_ => VisualQueryOutcome.Ok((System.Collections.Generic.IReadOnlyDictionary<string, object?>[])[DieRow("FGT0602-01", "BASE DIE", "U-B0-01")]));
         var mirror = new StubMirrorStore(
-            ("sp_visual_die_search_get", [DieRow("FGT7777-01", "CACHED DIE", "U-B9-09")]));
+            ("sp_visual_die_search_get", (System.Collections.Generic.Dictionary<string, object?>[])[DieRow("FGT7777-01", "CACHED DIE", "U-B9-09")]));
 
         var dies = GenericRequestReadShapes.DieData(
             executor,
@@ -165,7 +165,7 @@ public sealed class GenericRequestDieDataTests
     public async Task Audit_GenericRequestDieDataTests_ADieWithNoLocationSaysSoInsteadOfDrawingBlank()
     {
         var dies = GenericRequestReadShapes.DieData(Executor(_ => VisualQueryOutcome.Ok(
-        [
+        (System.Collections.Generic.IReadOnlyDictionary<string, object?>[])[
             DieRow("FGT0602-01", "BASE DIE", null),
         ])));
 
@@ -181,7 +181,7 @@ public sealed class GenericRequestDieDataTests
     public async Task Audit_GenericRequestDieDataTests_APlaceholderDescriptionIsKeptAsTheDescription()
     {
         var dies = GenericRequestReadShapes.DieData(Executor(_ => VisualQueryOutcome.Ok(
-        [
+        (System.Collections.Generic.IReadOnlyDictionary<string, object?>[])[
             DieRow("FGT0602-01", "Die still needs location", "U-B0-01"),
         ])));
 
@@ -197,7 +197,7 @@ public sealed class GenericRequestDieDataTests
     [TestMethod]
     public async Task Audit_GenericRequestDieDataTests_AnEmptyTermReadsNothingAtAll()
     {
-        var executor = Executor(_ => VisualQueryOutcome.Ok([DieRow("FGT0602-01", "BASE DIE", "U-B0-01")]));
+        var executor = Executor(_ => VisualQueryOutcome.Ok((System.Collections.Generic.IReadOnlyDictionary<string, object?>[])[DieRow("FGT0602-01", "BASE DIE", "U-B0-01")]));
 
         var result = await GenericRequestReadShapes.DieData(executor).ReadDiesAsync("   ");
 
@@ -208,7 +208,7 @@ public sealed class GenericRequestDieDataTests
     [TestMethod]
     public async Task Audit_GenericRequestDieDataTests_ASettledUnreachableVerdictAnswersWithoutTouchingVisual()
     {
-        var executor = Executor(_ => VisualQueryOutcome.Ok([DieRow("FGT0602-01", "BASE DIE", "U-B0-01")]));
+        var executor = Executor(_ => VisualQueryOutcome.Ok((System.Collections.Generic.IReadOnlyDictionary<string, object?>[])[DieRow("FGT0602-01", "BASE DIE", "U-B0-01")]));
         var dies = GenericRequestReadShapes.DieData(executor, new StubVisualReachability(VisualReadStatus.Cached));
 
         var result = await dies.ReadDiesAsync("FGT0602-01");
@@ -226,7 +226,7 @@ public sealed class GenericRequestDieDataTests
     [TestMethod]
     public async Task Audit_GenericRequestDieDataTests_ALiveVerdictStillAsksVisual()
     {
-        var executor = Executor(_ => VisualQueryOutcome.Ok([DieRow("FGT0602-01", "BASE DIE", "U-B0-01")]));
+        var executor = Executor(_ => VisualQueryOutcome.Ok((System.Collections.Generic.IReadOnlyDictionary<string, object?>[])[DieRow("FGT0602-01", "BASE DIE", "U-B0-01")]));
         var dies = GenericRequestReadShapes.DieData(executor, new StubVisualReachability(VisualReadStatus.Live));
 
         var result = await dies.ReadDiesAsync("FGT0602-01");

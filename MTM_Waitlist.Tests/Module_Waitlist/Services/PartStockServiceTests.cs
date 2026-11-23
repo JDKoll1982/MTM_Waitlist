@@ -15,7 +15,7 @@ public sealed class PartStockServiceTests
     [TestMethod]
     public async Task Service_PartStockServiceTests_GetStockAsync_WhenTheWipFloorHoldsThePartAnswersFromTheWipApp()
     {
-        var wip = new StubWipReader([new WipLocationQuantity("B-2", 5m), new WipLocationQuantity("A-1", 7m)]);
+        var wip = new StubWipReader((MTM_Waitlist.Module_Core.Services.WipLocationQuantity[])[new WipLocationQuantity("B-2", 5m), new WipLocationQuantity("A-1", 7m)]);
         var visualLocations = new FakeVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow>([]);
 
         var snapshot = await Create(wip, visualLocations).GetStockAsync(" FGT0002000 ");
@@ -31,12 +31,12 @@ public sealed class PartStockServiceTests
     public async Task Service_PartStockServiceTests_GetStockAsync_WhenTheWipFloorHoldsNothingAnswersFromVisualWithTheWarehouseTotal()
     {
         var visualLocations = new FakeVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow>(
-        [
+        (MTM_Waitlist.Mock.Models.VisualInventoryLocationRow[])[
             new VisualInventoryLocationRow { PartNumber = "FGT0002000", Location = "RACK-1", OnHandQuantity = 40m },
             new VisualInventoryLocationRow { PartNumber = "FGT0002000", Location = "WC", OnHandQuantity = 9m },
         ]);
         var quantities = new FakeVisualReadFallback<VisualPartWarehouseQuantitiesRequest, VisualPartWarehouseQuantitiesRow>(
-        [
+        (MTM_Waitlist.Mock.Models.VisualPartWarehouseQuantitiesRow[])[
             new VisualPartWarehouseQuantitiesRow { PartNumber = "FGT0002000", WarehouseQuantity = 49m },
         ]);
 
@@ -77,7 +77,7 @@ public sealed class PartStockServiceTests
     [TestMethod]
     public async Task Service_PartStockServiceTests_LoadAsync_FillsTheLocationsAndTotalFromTheAnswer()
     {
-        var wip = new StubWipReader([new WipLocationQuantity("A-1", 1234.5m)]);
+        var wip = new StubWipReader((MTM_Waitlist.Module_Core.Services.WipLocationQuantity[])[new WipLocationQuantity("A-1", 1234.5m)]);
         var viewModel = new PartStockDialogViewModel(Create(wip, null));
 
         await viewModel.LoadAsync("FGT0002000");
@@ -112,11 +112,11 @@ public sealed class PartStockServiceTests
         // the live case: all 2,885 of its units sit in `WC`, and hiding that location left the window saying
         // "No stock is recorded" beside a card that read 2,885.
         var visualLocations = new FakeVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow>(
-        [
+        (MTM_Waitlist.Mock.Models.VisualInventoryLocationRow[])[
             new VisualInventoryLocationRow { PartNumber = "A0006376159-Blank", Location = "WC", OnHandQuantity = 2885m },
         ]);
         var quantities = new FakeVisualReadFallback<VisualPartWarehouseQuantitiesRequest, VisualPartWarehouseQuantitiesRow>(
-        [
+        (MTM_Waitlist.Mock.Models.VisualPartWarehouseQuantitiesRow[])[
             new VisualPartWarehouseQuantitiesRow { PartNumber = "A0006376159-Blank", WarehouseQuantity = 2885m },
         ]);
         var viewModel = new PartStockDialogViewModel(Create(new StubWipReader([]), visualLocations, quantities));
@@ -138,7 +138,7 @@ public sealed class PartStockServiceTests
         // back empty. That is not "no stock", and the window says so rather than contradicting the figure it draws.
         var visualLocations = new FakeVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow>([]);
         var quantities = new FakeVisualReadFallback<VisualPartWarehouseQuantitiesRequest, VisualPartWarehouseQuantitiesRow>(
-        [
+        (MTM_Waitlist.Mock.Models.VisualPartWarehouseQuantitiesRow[])[
             new VisualPartWarehouseQuantitiesRow { PartNumber = "A0006376159-Blank", WarehouseQuantity = 2885m },
         ]);
         var viewModel = new PartStockDialogViewModel(Create(new StubWipReader([]), visualLocations, quantities));
@@ -157,7 +157,7 @@ public sealed class PartStockServiceTests
     public async Task Service_PartStockServiceTests_LoadAsync_WhenThePartHoldsNothingSaysThereIsNoStock()
     {
         var visualLocations = new FakeVisualReadFallback<VisualInventoryLocationRequest, VisualInventoryLocationRow>(
-        [
+        (MTM_Waitlist.Mock.Models.VisualInventoryLocationRow[])[
             new VisualInventoryLocationRow { PartNumber = "FGT0002000", Location = "RACK-1", OnHandQuantity = 0m },
         ]);
         var viewModel = new PartStockDialogViewModel(Create(new StubWipReader([]), visualLocations));

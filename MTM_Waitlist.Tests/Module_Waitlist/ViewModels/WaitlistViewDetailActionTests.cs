@@ -284,7 +284,7 @@ public sealed class WaitlistViewDetailActionTests
             OccurredUtc = s_now.AddHours(-2),
         };
 
-        var service = new StubRequestService(BuildRequest()) { AuditTrail = [entry] };
+        var service = new StubRequestService(BuildRequest()) { AuditTrail = (MTM_Waitlist.Module_Waitlist.Models.WaitlistRequestAuditEntry[])[entry] };
         var viewModel = BuildViewModel(service);
 
         await viewModel.LoadHistoryAsync().ConfigureAwait(false);
@@ -330,7 +330,7 @@ public sealed class WaitlistViewDetailActionTests
         var newest = s_now.AddMinutes(-5);
         var entry = new WaitlistRequestAuditEntry { EventType = "NoteUpdated", OccurredUtc = newest };
         var seen = new RecordingMessageSeenStore();
-        var viewModel = BuildViewModel(new StubRequestService(BuildRequest()) { AuditTrail = [entry] }, seen);
+        var viewModel = BuildViewModel(new StubRequestService(BuildRequest()) { AuditTrail = (MTM_Waitlist.Module_Waitlist.Models.WaitlistRequestAuditEntry[])[entry] }, seen);
 
         await viewModel.LoadHistoryAsync().ConfigureAwait(false);
 
@@ -486,11 +486,11 @@ public sealed class WaitlistViewDetailActionTests
         /// <summary>What the store's history read returns.</summary>
         public IReadOnlyList<WaitlistRequestAuditEntry> AuditTrail { get; set; } = [];
 
-        public IReadOnlyList<WaitlistRequest> GetActiveRequests(string? building = null) => [_request];
+        public IReadOnlyList<WaitlistRequest> GetActiveRequests(string? building = null) => (MTM_Waitlist.Module_Waitlist.Models.WaitlistRequest[])[_request];
 
         public WaitlistRequest? GetRequest(Guid requestId) => requestId == _request.Id ? _request : null;
 
-        public IReadOnlyList<WaitlistRequest> GetMyRequests(string requesterEmployeeNumber, string? building = null) => [_request];
+        public IReadOnlyList<WaitlistRequest> GetMyRequests(string requesterEmployeeNumber, string? building = null) => (MTM_Waitlist.Module_Waitlist.Models.WaitlistRequest[])[_request];
 
         public IReadOnlyList<WaitlistRequestAuditEntry> GetAuditTrail(Guid requestId) => [];
 

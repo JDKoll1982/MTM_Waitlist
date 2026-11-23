@@ -382,7 +382,7 @@ public sealed class CreateUserViewModelTests
     {
         public Task<IReadOnlyList<RoleCatalogEntry>> GetRolesAsync(CancellationToken cancellationToken = default) =>
             Task.FromResult<IReadOnlyList<RoleCatalogEntry>>(
-            [
+            (MTM_Waitlist.Module_Core.Contracts.Services.RoleCatalogEntry[])[
                 new RoleCatalogEntry(1, "developer", "Developer", 100),
                 new RoleCatalogEntry(2, "it_department", "IT Department", 90),
                 new RoleCatalogEntry(3, "plant_manager", "Plant Manager", 80),

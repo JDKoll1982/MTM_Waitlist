@@ -24,10 +24,10 @@ public sealed class RefreshCycleGateTests
         using var fixture = new EngineFixture();
         var shape = fixture.RefreshableShapes[0];
 
-        var firstCycle = fixture.Engine.TryRunShapesAsync([shape]);
+        var firstCycle = fixture.Engine.TryRunShapesAsync((MTM_Waitlist.Mock.Models.VisualReadShape[])[shape]);
         await fixture.PayloadSource.WaitUntilEnteredAsync();
 
-        var secondCycle = await fixture.Engine.TryRunShapesAsync([shape]);
+        var secondCycle = await fixture.Engine.TryRunShapesAsync((MTM_Waitlist.Mock.Models.VisualReadShape[])[shape]);
 
         Assert.IsNull(
             secondCycle,
@@ -48,8 +48,8 @@ public sealed class RefreshCycleGateTests
 
         fixture.PayloadSource.Release();
 
-        var first = await fixture.Engine.TryRunShapesAsync([shape]);
-        var second = await fixture.Engine.TryRunShapesAsync([shape]);
+        var first = await fixture.Engine.TryRunShapesAsync((MTM_Waitlist.Mock.Models.VisualReadShape[])[shape]);
+        var second = await fixture.Engine.TryRunShapesAsync((MTM_Waitlist.Mock.Models.VisualReadShape[])[shape]);
 
         Assert.IsNotNull(first);
         Assert.IsNotNull(second, "The gate must be released when a cycle ends.");
@@ -64,7 +64,7 @@ public sealed class RefreshCycleGateTests
 
         fixture.PayloadSource.Release();
 
-        var records = await fixture.Engine.TryRunShapesAsync([fixture.RefreshableShapes[1]]);
+        var records = await fixture.Engine.TryRunShapesAsync((MTM_Waitlist.Mock.Models.VisualReadShape[])[fixture.RefreshableShapes[1]]);
 
         Assert.IsNotNull(records);
         Assert.AreEqual(1, records!.Count);
@@ -85,7 +85,7 @@ public sealed class RefreshCycleGateTests
 
         fixture.PayloadSource.Release();
 
-        var records = await fixture.Engine.TryRunShapesAsync([shape]);
+        var records = await fixture.Engine.TryRunShapesAsync((MTM_Waitlist.Mock.Models.VisualReadShape[])[shape]);
         Assert.IsNotNull(records);
 
         // Wait on the recorder's own completion, not on the store: the store's in-memory record is set inside
@@ -115,7 +115,7 @@ public sealed class RefreshCycleGateTests
         recorder.Dispose();
         fixture.PayloadSource.Release();
 
-        await fixture.Engine.TryRunShapesAsync([shape]);
+        await fixture.Engine.TryRunShapesAsync((MTM_Waitlist.Mock.Models.VisualReadShape[])[shape]);
         await Task.Delay(50);
 
         Assert.IsNull(fixture.RunRecordStore.GetLastRun(shape.Key));

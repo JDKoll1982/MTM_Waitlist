@@ -340,7 +340,7 @@ public sealed class WaitlistViewViewModelFieldTests
             HasActiveJob = true,
             HasDunnage = true,
         }).WithDunnageParts(
-        [
+        (MTM_Waitlist.Module_Settings.Models.RequestDunnagePart[])[
             new RequestDunnagePart { PartNumber = "DN-STL-4", ImagePath = @"X:\Dunnage\Parts\Steel Rack.png" },
         ]);
 
@@ -370,7 +370,7 @@ public sealed class WaitlistViewViewModelFieldTests
             HasActiveJob = true,
             HasDunnage = true,
         }).WithDunnageParts(
-        [
+        (MTM_Waitlist.Module_Settings.Models.RequestDunnagePart[])[
             new RequestDunnagePart { PartNumber = "DN-STL-4", ImagePath = @"X:\Dunnage\Parts\Steel Rack.png" },
         ]);
 
@@ -748,7 +748,7 @@ public sealed class WaitlistViewViewModelFieldTests
         public StubItemConfigurationService(RequestItemConfiguration declaration) => _declaration = declaration;
 
         public Task<RequestItemConfigurationSet> GetConfigurationsAsync(CancellationToken cancellationToken = default) =>
-            Task.FromResult(RequestItemConfigurationSet.From([_declaration]));
+            Task.FromResult(RequestItemConfigurationSet.From((MTM_Waitlist.Module_Settings.Models.RequestItemConfiguration[])[_declaration]));
 
         public Task<RequestItemConfiguration> GetConfigurationAsync(
             string itemCode,

@@ -125,10 +125,10 @@ public partial class DeveloperLogPanelViewModel : ObservableObject
     /// type any value into is not a bound the screen can promise. It is a plain list of whole days so the control
     /// needs no conversion between a number box's decimal and the integer the procedure takes.
     /// </remarks>
-    public IReadOnlyList<int> WindowDayOptions { get; } = [1, 7, DefaultWindowDays, MaximumWindowDays];
+    public IReadOnlyList<int> WindowDayOptions { get; } = (int[])[1, 7, DefaultWindowDays, MaximumWindowDays];
 
     /// <summary>The page sizes the panel offers, in entries. The store clamps to the same ceiling.</summary>
-    public IReadOnlyList<int> PageSizeOptions { get; } = [50, DefaultPageSize, 500, MaximumPageSize];
+    public IReadOnlyList<int> PageSizeOptions { get; } = (int[])[50, DefaultPageSize, 500, MaximumPageSize];
 
     /// <summary>The chosen severity, or null for any severity.</summary>
     [ObservableProperty]
@@ -371,14 +371,14 @@ public partial class DeveloperLogPanelViewModel : ObservableObject
             return;
         }
 
-        Copy([entry], "Settings_LogPanel_Copied_Entry.Text");
+        Copy((MTM_Waitlist.Module_Logging.LogPanelEntry[])[entry], "Settings_LogPanel_Copied_Entry.Text");
     }
 
     /// <summary>
     /// Copies the entries currently listed, which the read has already bounded by the page size.
     /// </summary>
     [RelayCommand]
-    public void CopyList() => Copy([.. Entries], "Settings_LogPanel_Copied_List.Text");
+    public void CopyList() => Copy((MTM_Waitlist.Module_Logging.LogPanelEntry[])[.. Entries], "Settings_LogPanel_Copied_List.Text");
 
     /// <summary>
     /// Choosing the grouped view changes what the next read asks for; it does not read by itself.

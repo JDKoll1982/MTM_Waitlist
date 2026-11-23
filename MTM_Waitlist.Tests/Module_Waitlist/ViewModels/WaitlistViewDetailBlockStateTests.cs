@@ -124,7 +124,7 @@ public sealed class WaitlistViewDetailBlockStateTests
                 throw new InvalidOperationException("mtm_waitlist is unreachable.");
             }
 
-            return [Request];
+            return (MTM_Waitlist.Module_Waitlist.Models.WaitlistRequest[])[Request];
         }
     }
 
@@ -134,7 +134,7 @@ public sealed class WaitlistViewDetailBlockStateTests
         /// <summary>The request read.</summary>
         public WaitlistRequest Request { get; } = Sparse();
 
-        public override IReadOnlyList<WaitlistRequest> GetActiveRequests(string? building = null) => [Request];
+        public override IReadOnlyList<WaitlistRequest> GetActiveRequests(string? building = null) => (MTM_Waitlist.Module_Waitlist.Models.WaitlistRequest[])[Request];
     }
 
     /// <summary>A pickup request with no work order, no work centre and no typed detail, so no block has a source.</summary>

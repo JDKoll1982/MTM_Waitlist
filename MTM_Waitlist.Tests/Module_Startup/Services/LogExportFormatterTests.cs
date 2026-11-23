@@ -33,7 +33,7 @@ public sealed class LogExportFormatterTests
         var entry = SampleEntry();
 
         // Act
-        var text = LogExportFormatter.Format(Filter, [entry]);
+        var text = LogExportFormatter.Format(Filter, (MTM_Waitlist.Module_Logging.LogPanelEntry[])[entry]);
 
         // Assert: the fault in full, so the copy is the evidence rather than a summary of it (FR-032, FR-038).
         StringAssert.Contains(text, entry.ExceptionDetail!, "the serialized exception chain was not carried");
@@ -58,7 +58,7 @@ public sealed class LogExportFormatterTests
     public void Service_LogExportFormatterTests_Format_NamesTheFilterItCameFrom()
     {
         // Act
-        var text = LogExportFormatter.Format(Filter, [SampleEntry()]);
+        var text = LogExportFormatter.Format(Filter, (MTM_Waitlist.Module_Logging.LogPanelEntry[])[SampleEntry()]);
 
         // Assert: a reader handed a pasted copy has to be able to tell a filtered sample from a whole history.
         StringAssert.Contains(text, "Filter: " + Filter);
@@ -68,7 +68,7 @@ public sealed class LogExportFormatterTests
     public void Service_LogExportFormatterTests_Format_WhenTheFilterIsBlankStillSaysWhereTheCopyCameFrom()
     {
         // Act
-        var text = LogExportFormatter.Format(null, [SampleEntry()]);
+        var text = LogExportFormatter.Format(null, (MTM_Waitlist.Module_Logging.LogPanelEntry[])[SampleEntry()]);
 
         // Assert: silence here would read as "everything", which is a claim the copy cannot make.
         StringAssert.Contains(text, "Filter: no filter");
@@ -81,7 +81,7 @@ public sealed class LogExportFormatterTests
         var entry = SampleEntry() with { Message = new string('x', LogExportFormatter.CeilingCharacters * 3) };
 
         // Act
-        var text = LogExportFormatter.Format(Filter, [entry]);
+        var text = LogExportFormatter.Format(Filter, (MTM_Waitlist.Module_Logging.LogPanelEntry[])[entry]);
 
         // Assert: cut with a marker, never silently (FR-038).
         Assert.IsTrue(
@@ -98,7 +98,7 @@ public sealed class LogExportFormatterTests
     public void Service_LogExportFormatterTests_Format_WhenTheTextIsShortCarriesNoCutMarker()
     {
         // Act
-        var text = LogExportFormatter.Format(Filter, [SampleEntry()]);
+        var text = LogExportFormatter.Format(Filter, (MTM_Waitlist.Module_Logging.LogPanelEntry[])[SampleEntry()]);
 
         // Assert: a short copy must not read as a cut one, exactly as a short exception chain must not.
         Assert.IsFalse(
@@ -110,7 +110,7 @@ public sealed class LogExportFormatterTests
     public void Service_LogExportFormatterTests_Format_SeparatesTheEntriesAndSaysHowManyThereAre()
     {
         // Act
-        var text = LogExportFormatter.Format(Filter, [SampleEntry(), SampleEntry() with { Id = 43 }]);
+        var text = LogExportFormatter.Format(Filter, (MTM_Waitlist.Module_Logging.LogPanelEntry[])[SampleEntry(), SampleEntry() with { Id = 43 }]);
 
         // Assert: two entries are two entries, told apart without counting lines by eye.
         StringAssert.Contains(text, "Entries: 2");
@@ -123,7 +123,7 @@ public sealed class LogExportFormatterTests
     public void Service_LogExportFormatterTests_Format_IntroducesNoNameTheStoreIsForbiddenToHold()
     {
         // Act
-        var text = LogExportFormatter.Format(Filter, [SampleEntry()]);
+        var text = LogExportFormatter.Format(Filter, (MTM_Waitlist.Module_Logging.LogPanelEntry[])[SampleEntry()]);
 
         // Assert: the formatter adds no field of its own, so its own vocabulary cannot offer a place for a
         // credential or a token the store is forbidden to keep (§6, FR-036).

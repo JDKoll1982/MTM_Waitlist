@@ -361,7 +361,7 @@ internal sealed class MachineSetupPerson : IPersonIdentity
     public string CurrentRoleCode => _roleCode;
 
     /// <inheritdoc />
-    public IReadOnlyList<string> HeldRoleCodes => _roleCode.Length == 0 ? [] : [_roleCode];
+    public IReadOnlyList<string> HeldRoleCodes => _roleCode.Length == 0 ? [] : (string[])[_roleCode];
 
     /// <inheritdoc />
     /// <remarks>

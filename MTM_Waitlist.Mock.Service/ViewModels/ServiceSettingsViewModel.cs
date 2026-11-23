@@ -203,7 +203,7 @@ public sealed partial class ServiceSettingsViewModel : ObservableObject, IServic
             "Service_Settings.RestoreGroupDescription".GetLocalized(),
             "restore", "recover", "replace", "put", "back", "artifact", "file", "emergency", "undo");
 
-        Groups = [RefreshGroup, ApiGroup, OperatorAccessGroup, VisualGroup, MySqlGroup, BackupGroup, RestoreGroup];
+        Groups = (MTM_Waitlist.Mock.Service.ViewModels.ServiceSettingsGroupViewModel[])[RefreshGroup, ApiGroup, OperatorAccessGroup, VisualGroup, MySqlGroup, BackupGroup, RestoreGroup];
     }
 
     private string _searchQuery;

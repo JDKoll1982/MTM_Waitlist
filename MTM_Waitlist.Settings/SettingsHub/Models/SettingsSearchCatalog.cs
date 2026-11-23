@@ -14,7 +14,7 @@ internal static class SettingsSearchCatalog
 {
     /// <summary>Every entry, in the order the pages are offered on the hub.</summary>
     internal static IReadOnlyList<SettingsSearchTarget> All { get; } =
-    [
+    (MTM_Waitlist.Module_Settings.Models.SettingsSearchTarget[])[
         new("App theme", "General", SettingsViewModel.GeneralSettingsRouteViewModelName, "AppearanceExpander",
             "appearance theme light dark default system colour color look style"),
         new("New request alerts", "General", SettingsViewModel.GeneralSettingsRouteViewModelName, "NewRequestAlertsExpander",

@@ -28,7 +28,7 @@ public sealed class PictureCopyHoldTests
 
         // Act
         var holding = hold.HoldIfTheRefreshFailed(
-        [
+        (MTM_Waitlist.Module_Startup.Models.LaunchFeedEntry[])[
             Line("picture-cache", LaunchFeedEntryKind.StepStarted, "Refreshing the picture copies", null),
             Line("picture-cache", LaunchFeedEntryKind.StepFailed, "The picture share could not be read.", false),
             Line("read-local-settings", LaunchFeedEntryKind.StepStarted, "Reading this computer's saved settings", null),
@@ -48,7 +48,7 @@ public sealed class PictureCopyHoldTests
 
         // Act
         var holding = hold.HoldIfTheRefreshFailed(
-        [
+        (MTM_Waitlist.Module_Startup.Models.LaunchFeedEntry[])[
             Line("picture-cache", LaunchFeedEntryKind.StepStarted, "Refreshing the picture copies", null),
             Line("picture-cache", LaunchFeedEntryKind.StepCompleted, "The picture copies were already up to date.", true),
         ]);
@@ -66,7 +66,7 @@ public sealed class PictureCopyHoldTests
 
         // Act: the store failing is the pipeline's business and has its own surface; it is not a picture statement.
         var holding = hold.HoldIfTheRefreshFailed(
-        [
+        (MTM_Waitlist.Module_Startup.Models.LaunchFeedEntry[])[
             Line("picture-cache", LaunchFeedEntryKind.StepCompleted, "The picture copies were refreshed: 4 copied.", true),
             Line("store-reachability", LaunchFeedEntryKind.StepFailed, "The store did not answer.", false),
         ]);
@@ -82,7 +82,7 @@ public sealed class PictureCopyHoldTests
         // Arrange
         var hold = new PictureCopyHold();
         hold.HoldIfTheRefreshFailed(
-        [
+        (MTM_Waitlist.Module_Startup.Models.LaunchFeedEntry[])[
             Line("picture-cache", LaunchFeedEntryKind.StepFailed, "The picture share could not be read.", false),
         ]);
 

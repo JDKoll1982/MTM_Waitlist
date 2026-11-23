@@ -64,7 +64,7 @@ public sealed class GenericRequestJobFillSource : IGenericRequestJobFillData
             return snapshot is null || snapshot.WorkOrder.Trim().Length == 0
                 ? GenericRequestStepResult<GenericRequestJobFillCandidate>.Empty(attemptedAtUtc)
                 : GenericRequestStepResult<GenericRequestJobFillCandidate>.Populated(
-                    [new GenericRequestJobFillCandidate { WorkOrder = snapshot.WorkOrder.Trim() }],
+                    (MTM_Waitlist.GenericRequest.Models.GenericRequestJobFillCandidate[])[new GenericRequestJobFillCandidate { WorkOrder = snapshot.WorkOrder.Trim() }],
                     attemptedAtUtc);
         }
         catch (OperationCanceledException)
@@ -119,7 +119,7 @@ public sealed class GenericRequestJobFillSource : IGenericRequestJobFillData
                 LogCategory,
                 $"The job-fill offer was accepted at work center '{workCenter}' for job '{fill.WorkOrder}'.");
 
-            return GenericRequestStepResult<GenericRequestJobFill>.Populated([fill], attemptedAtUtc);
+            return GenericRequestStepResult<GenericRequestJobFill>.Populated((MTM_Waitlist.GenericRequest.Models.GenericRequestJobFill[])[fill], attemptedAtUtc);
         }
         catch (OperationCanceledException)
         {

@@ -193,7 +193,7 @@ public sealed class NewRequestComponentViewModelTests
         Item = RequestItemCatalog.FindById("deliver-component"),
         ItemConfiguration = RowWithPrompt("Choose the component to bring."),
         Availability = (RequestJobPartAvailability.None with { HasActiveJob = true, HasComponent = true })
-            .WithComponentPartNumbers([FirstComponent, SecondComponent]),
+            .WithComponentPartNumbers((string[])[FirstComponent, SecondComponent]),
     };
 
     private static NewRequestComponentViewModel CreateViewModel(RecordingNavigationService? navigation = null)

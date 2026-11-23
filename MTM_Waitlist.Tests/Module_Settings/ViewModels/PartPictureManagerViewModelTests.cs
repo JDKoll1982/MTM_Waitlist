@@ -54,7 +54,7 @@ public sealed class PartPictureManagerViewModelTests
             NullLogger<PartPictureWriteService>.Instance);
 
         _coverageService = new PartPictureCoverageService(
-            [new StubPartNumberSource(PartPictureSystem.Wip, "MMC0001000", "MMC0002000")],
+            (MTM_Waitlist.Module_Settings.Services.IPartNumberSource[])[new StubPartNumberSource(PartPictureSystem.Wip, "MMC0001000", "MMC0002000")],
             _readService,
             NullLogger<PartPictureCoverageService>.Instance);
 

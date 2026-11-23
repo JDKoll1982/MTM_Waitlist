@@ -161,7 +161,7 @@ public sealed class LaunchEdgeCaseTests
         // Arrange: a signed-in person whose relaunch cannot happen.
         var store = new SessionStore();
         var person = new PersonIdentityService(store);
-        person.Apply(7L, "JKoll", "J. Koll", "1042", "developer", ["developer"]);
+        person.Apply(7L, "JKoll", "J. Koll", "1042", "developer", (string[])["developer"]);
 
         var machine = new FakeMachineFacts
         {
@@ -225,7 +225,7 @@ public sealed class LaunchEdgeCaseTests
             CancellationToken cancellationToken = default)
             => Task.FromResult<IReadOnlyList<Dictionary<string, object?>>>(
                 string.Equals(storedProcedureName, "sp_auth_user_credential_get", StringComparison.Ordinal)
-                    ? [account]
+                    ? (System.Collections.Generic.Dictionary<string, object?>[])[account]
                     : []);
 
         public Task<int> ExecuteStoredProcedureNonQueryAsync(

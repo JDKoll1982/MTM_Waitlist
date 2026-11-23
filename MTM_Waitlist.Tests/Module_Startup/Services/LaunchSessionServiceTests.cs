@@ -257,7 +257,7 @@ public sealed class LaunchSessionServiceTests
             if (string.Equals(storedProcedureName, GetProcedure, StringComparison.Ordinal))
             {
                 return Task.FromResult<IReadOnlyList<Dictionary<string, object?>>>(
-                    _sessionRow is null ? [] : [_sessionRow]);
+                    _sessionRow is null ? [] : (System.Collections.Generic.Dictionary<string, object?>[])[_sessionRow]);
             }
 
             if (string.Equals(storedProcedureName, SettingsReadProcedure, StringComparison.Ordinal))
@@ -265,7 +265,7 @@ public sealed class LaunchSessionServiceTests
                 return Task.FromResult<IReadOnlyList<Dictionary<string, object?>>>(
                     SessionLengthMinutes is null
                         ? []
-                        : [new Dictionary<string, object?> { ["setting_value_int"] = (long)SessionLengthMinutes.Value }]);
+                        : (System.Collections.Generic.Dictionary<string, object?>[])[new Dictionary<string, object?> { ["setting_value_int"] = (long)SessionLengthMinutes.Value }]);
             }
 
             return Task.FromResult<IReadOnlyList<Dictionary<string, object?>>>([]);

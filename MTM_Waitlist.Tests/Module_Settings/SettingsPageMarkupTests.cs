@@ -422,7 +422,7 @@ public sealed class SettingsPageMarkupTests
             ElementWithName(markup, "AdministrationCategoryPanel").Contains("SettingsExpander", StringComparison.Ordinal),
             "The Administration category holds entries that navigate, so nothing in it expands.");
 
-        var titles = ResourceValues(["Administration_Users.Title", "Administration_Permissions.Title"]);
+        var titles = ResourceValues((string[])["Administration_Users.Title", "Administration_Permissions.Title"]);
         Assert.AreEqual(2, titles.Count, "Both entries must have a title of their own.");
         Assert.AreNotEqual(
             titles[0],

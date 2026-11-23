@@ -16,7 +16,7 @@ namespace MTM_Waitlist.Tests.Module_Mock_Service;
 public sealed class RefreshEngineTests
 {
     private static readonly IReadOnlyList<VisualReadShape> TwoShapeCatalog =
-    [
+    (MTM_Waitlist.Mock.Models.VisualReadShape[])[
         new VisualReadShape
         {
             Key = "work_order_lookup",
@@ -25,8 +25,8 @@ public sealed class RefreshEngineTests
             // Catalog validation requires a population read to exist on disk, so the synthetic shapes point at
             // the shipped one; the engine tests never execute it (the payload source is stubbed).
             PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/work_order_lookup_population.sql",
-            InputParameters = [new VisualShapeParameter("NormalizedWorkOrder", "nvarchar(30)", true)],
-            OutputColumns = [new VisualShapeColumn("PartNumber", "nvarchar(60)")]
+            InputParameters = (MTM_Waitlist.Mock.Models.VisualShapeParameter[])[new VisualShapeParameter("NormalizedWorkOrder", "nvarchar(30)", true)],
+            OutputColumns = (MTM_Waitlist.Mock.Models.VisualShapeColumn[])[new VisualShapeColumn("PartNumber", "nvarchar(60)")]
         },
         new VisualReadShape
         {
@@ -34,8 +34,8 @@ public sealed class RefreshEngineTests
             Module = VisualReadShapeModule.ModuleSetup,
             SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Setup/Queries/GetSequences.sql",
             PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/operation_sequences_population.sql",
-            InputParameters = [new VisualShapeParameter("NormalizedWorkOrder", "nvarchar(30)", true)],
-            OutputColumns = [new VisualShapeColumn("SequenceNumber", "int")]
+            InputParameters = (MTM_Waitlist.Mock.Models.VisualShapeParameter[])[new VisualShapeParameter("NormalizedWorkOrder", "nvarchar(30)", true)],
+            OutputColumns = (MTM_Waitlist.Mock.Models.VisualShapeColumn[])[new VisualShapeColumn("SequenceNumber", "int")]
         }
     ];
 
@@ -304,7 +304,7 @@ public sealed class RefreshEngineTests
         var engine = CreateEngine(
             new StubPayloadSource(),
             writer,
-            [withOverride, TwoShapeCatalog[1]],
+            (MTM_Waitlist.Mock.Models.VisualReadShape[])[withOverride, TwoShapeCatalog[1]],
             refreshInterval: TimeSpan.FromHours(3),
             timeProvider: new FixedTimeProvider(utcNow, zone));
 

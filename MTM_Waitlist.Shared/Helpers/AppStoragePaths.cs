@@ -79,7 +79,7 @@ public static class AppStoragePaths
     /// disagree about them.
     /// </remarks>
     public static readonly IReadOnlyList<string> CollectionFolderNames =
-    [
+    (string[])[
         PartPictureLayout.WaitlistCollection,
         PartPictureLayout.VisualCollection,
         PartPictureLayout.WipCollection,
@@ -95,7 +95,7 @@ public static class AppStoragePaths
     /// own folder. The names are the scope values themselves, kept verbatim.
     /// </remarks>
     public static readonly IReadOnlyList<string> ApplicationOwnKindFolderNames =
-    [
+    (string[])[
         "work_center",
         "request_item",
         "request_category",

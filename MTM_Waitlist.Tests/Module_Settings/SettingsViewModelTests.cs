@@ -68,9 +68,9 @@ public sealed class SettingsViewModelTests
         var preferences = new InMemoryScopedPreferenceStore();
         var service = new IgnoredLocationsService(
             preferences,
-            PermissionStub.Holding([PermissionKeys.SettingsIgnoredLocations]));
+            PermissionStub.Holding((string[])[PermissionKeys.SettingsIgnoredLocations]));
 
-        var saved = await service.SaveIgnoredLocationsAsync(["SCRAP-3"]);
+        var saved = await service.SaveIgnoredLocationsAsync((string[])["SCRAP-3"]);
 
         Assert.IsFalse(saved, "The write is refused for a person who holds only the read entitlement.");
         Assert.AreEqual(0, preferences.Writes.Count, "A refused write writes nothing at all.");
@@ -1009,7 +1009,7 @@ public sealed class SettingsViewModelTests
     {
         var cache = new FakeImageCacheSyncService
         {
-            Result = new ImageCacheSyncResult(4, 2, ["waitlist pictures"])
+            Result = new ImageCacheSyncResult(4, 2, (string[])["waitlist pictures"])
         };
 
         var viewModel = BuildViewModel(
@@ -1034,8 +1034,8 @@ public sealed class SettingsViewModelTests
         {
             Catalog = new WorkCenterCatalogResult
             {
-                HotWorkCenters = ["100-03"],
-                OtherWorkCenters = ["100-06", "V100-33"],
+                HotWorkCenters = (string[])["100-03"],
+                OtherWorkCenters = (string[])["100-06", "V100-33"],
                 WorkCenterDetails = new Dictionary<string, WorkCenterDetail>(StringComparer.OrdinalIgnoreCase)
                 {
                     ["100-03"] = new() { Building = "Expo Drive" },

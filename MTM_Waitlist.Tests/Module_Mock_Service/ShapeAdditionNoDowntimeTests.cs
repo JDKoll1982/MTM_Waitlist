@@ -61,8 +61,8 @@ public sealed class ShapeAdditionNoDowntimeTests
                 Module = VisualReadShapeModule.ModuleWaitlist,
                 SourceScriptRelativePath = "Database/InforVisual/Queues/Module_Waitlist/Queries/SixthShape.sql",
                 PopulationScriptRelativePath = "Database/InforVisual/Queues/Module_Mock/Populations/sixth_shape_population.sql",
-                InputParameters = [new VisualShapeParameter("PartNumber", "nvarchar(60)", IsRequired: true)],
-                OutputColumns = [new VisualShapeColumn("Description", "nvarchar(255)")],
+                InputParameters = (MTM_Waitlist.Mock.Models.VisualShapeParameter[])[new VisualShapeParameter("PartNumber", "nvarchar(60)", IsRequired: true)],
+                OutputColumns = (MTM_Waitlist.Mock.Models.VisualShapeColumn[])[new VisualShapeColumn("Description", "nvarchar(255)")],
             })
             .ToArray();
 

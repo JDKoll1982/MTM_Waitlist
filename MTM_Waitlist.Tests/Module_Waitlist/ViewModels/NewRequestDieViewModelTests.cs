@@ -122,7 +122,7 @@ public sealed class NewRequestDieViewModelTests
     public void ViewModel_NewRequestDieViewModelTests_OnNavigatedTo_ComingBackWithDiesChosenShowsThemMarkedAgain()
     {
         var state = TwoDieState();
-        state.SelectedDies = [Die(FirstDie, "DIE SHOP")];
+        state.SelectedDies = (MTM_Waitlist.Module_Settings.Models.RequestDiePart[])[Die(FirstDie, "DIE SHOP")];
         state.InputValue = "FGT0002000";
         var viewModel = CreateViewModel();
 
@@ -288,7 +288,7 @@ public sealed class NewRequestDieViewModelTests
         Category = RequestCategory.Pickup,
         Item = RequestItemCatalog.FindById("pickup-die"),
         Availability = (RequestJobPartAvailability.None with { HasActiveJob = true, HasDie = true })
-            .WithDies([Die(FirstDie, "DIE SHOP"), Die(SecondDie, "PRESS BAY")]),
+            .WithDies((MTM_Waitlist.Module_Settings.Models.RequestDiePart[])[Die(FirstDie, "DIE SHOP"), Die(SecondDie, "PRESS BAY")]),
     };
 
     private static NewRequestFlowState DeliverDieState() => new()
@@ -297,7 +297,7 @@ public sealed class NewRequestDieViewModelTests
         Category = RequestCategory.Deliver,
         Item = RequestItemCatalog.FindById("deliver-die"),
         Availability = (RequestJobPartAvailability.None with { HasActiveJob = true, HasDie = true })
-            .WithDies([Die(FirstDie, "DIE SHOP")]),
+            .WithDies((MTM_Waitlist.Module_Settings.Models.RequestDiePart[])[Die(FirstDie, "DIE SHOP")]),
     };
 
     private static NewRequestDieViewModel CreateViewModel(RecordingNavigationService? navigation = null)

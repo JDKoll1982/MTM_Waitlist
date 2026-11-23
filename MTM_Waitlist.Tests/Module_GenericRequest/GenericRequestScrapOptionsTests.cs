@@ -25,7 +25,7 @@ public sealed class GenericRequestScrapOptionsTests
         var data = CreateLive(new FakeLuggerArrangementService
         {
             Snapshot = LuggerArrangementSnapshot.Create(
-            [
+            (MTM_Waitlist.Module_Core.Models.ScrapAssignment[])[
                 FakeScrapAssignment.Of("Aardvark Scrap", "Door 1 Lugger"),
                 FakeScrapAssignment.Of("Steel", "Door 2 Lugger"),
             ]),
@@ -48,7 +48,7 @@ public sealed class GenericRequestScrapOptionsTests
         var data = CreateLive(new FakeLuggerArrangementService
         {
             Snapshot = LuggerArrangementSnapshot.Create(
-            [
+            (MTM_Waitlist.Module_Core.Models.ScrapAssignment[])[
                 FakeScrapAssignment.Of(ScrapDecisionRules.NoScrap, "Door 1 Lugger"),
                 FakeScrapAssignment.Of(ScrapDecisionRules.RequiredPlaceholder, "Door 2 Lugger"),
             ]),
@@ -81,7 +81,7 @@ public sealed class GenericRequestScrapOptionsTests
         var data = CreateLive(new FakeLuggerArrangementService
         {
             Snapshot = LuggerArrangementSnapshot.Create(
-            [
+            (MTM_Waitlist.Module_Core.Models.ScrapAssignment[])[
                 FakeScrapAssignment.Of("Steel", "Door 1 Lugger", LuggerStatus.Available, sortPosition: 1),
                 FakeScrapAssignment.Of("Steel", "Door 2 Lugger", LuggerStatus.Full, isDumpPoint: false, sortPosition: 2),
             ]),

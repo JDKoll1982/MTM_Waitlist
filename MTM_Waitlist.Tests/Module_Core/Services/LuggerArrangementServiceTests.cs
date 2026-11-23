@@ -118,7 +118,7 @@ public sealed class LuggerArrangementServiceTests
 
     /// <summary>The seven pairings the default seed writes, in the arrangement read's column shape.</summary>
     private static IReadOnlyList<ScrapAssignment> SeededRows() =>
-    [
+    (MTM_Waitlist.Module_Core.Models.ScrapAssignment[])[
         Row(Door6, "Available", "3003 aluminum", "3003 Aluminum", dumpPoint: true, sortPosition: 1, position: 1),
         Row(Extra, "Backup", "3003 aluminum", "3003 Aluminum", dumpPoint: false, sortPosition: 2, position: 5),
         Row(Door7, "Available", "galvanized steel", "Galvanized Steel", dumpPoint: true, sortPosition: 1, position: 2),

@@ -52,7 +52,7 @@ public sealed class LuggerImageResolver : ILuggerImageResolver
     /// PNG first because it is what the rest of the plant's artwork uses; the raster formats Windows draws without a
     /// codec follow it.
     /// </remarks>
-    public static readonly IReadOnlyList<string> SupportedExtensions = [".png", ".jpg", ".jpeg", ".bmp", ".gif"];
+    public static readonly IReadOnlyList<string> SupportedExtensions = (string[])[".png", ".jpg", ".jpeg", ".bmp", ".gif"];
 
     private readonly IImageStorageConfigurationResolver _storage;
 

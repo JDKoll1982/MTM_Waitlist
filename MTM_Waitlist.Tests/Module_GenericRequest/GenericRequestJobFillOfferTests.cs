@@ -130,7 +130,7 @@ public sealed class GenericRequestJobFillOfferTests
             new StubGenericRequestStepData
             {
                 Categories = GenericRequestStepResult<GenericRequestCategoryOption>.Populated(
-                    [new GenericRequestCategoryOption("Pickup", "Pickup", "Move it"), new GenericRequestCategoryOption("Deliver", "Deliver", "Deliver it")],
+                    (MTM_Waitlist.GenericRequest.Models.GenericRequestCategoryOption[])[new GenericRequestCategoryOption("Pickup", "Pickup", "Move it"), new GenericRequestCategoryOption("Deliver", "Deliver", "Deliver it")],
                     DateTimeOffset.UtcNow),
             },
             fill,
@@ -147,7 +147,7 @@ public sealed class GenericRequestJobFillOfferTests
 
     private static GenericRequestStepResult<GenericRequestCategoryOption> Populated() =>
         GenericRequestStepResult<GenericRequestCategoryOption>.Populated(
-            [new GenericRequestCategoryOption("Pickup", "Pickup", "Move it")],
+            (MTM_Waitlist.GenericRequest.Models.GenericRequestCategoryOption[])[new GenericRequestCategoryOption("Pickup", "Pickup", "Move it")],
             DateTimeOffset.UtcNow);
 
     /// <summary>

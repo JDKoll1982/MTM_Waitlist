@@ -53,7 +53,7 @@ public sealed class WaitlistLineCardCellTests
     public void Model_WaitlistLineCardCellTests_CellsToDraw_OnlyTheCellsWithANeighbourDrawAHairline()
     {
         var cells = WaitlistLineCardCell.CellsToDraw(
-        [
+        (MTM_Waitlist.Module_Waitlist.Models.WaitlistLineCardCell?[])[
             new WaitlistLineCardCell { Label = "One", Value = "1", Order = 1 },
             new WaitlistLineCardCell { Label = "Two", Value = "2", Order = 2 },
             new WaitlistLineCardCell { Label = "Three", Value = "3", Order = 3 },
@@ -77,11 +77,11 @@ public sealed class WaitlistLineCardCellTests
     [TestMethod]
     public void Model_WaitlistLineCardCellTests_CellsToDraw_AShortPanelDrawsNoOuterBorder()
     {
-        var single = WaitlistLineCardCell.CellsToDraw([new WaitlistLineCardCell { Label = "One", Value = "1" }]);
+        var single = WaitlistLineCardCell.CellsToDraw((MTM_Waitlist.Module_Waitlist.Models.WaitlistLineCardCell?[])[new WaitlistLineCardCell { Label = "One", Value = "1" }]);
         Assert.IsFalse(single[0].DrawsLeftHairline || single[0].DrawsTopHairline, "The only cell of a one-cell panel draws no hairline at all.");
 
         var three = WaitlistLineCardCell.CellsToDraw(
-        [
+        (MTM_Waitlist.Module_Waitlist.Models.WaitlistLineCardCell?[])[
             new WaitlistLineCardCell { Label = "One", Value = "1", Order = 1 },
             new WaitlistLineCardCell { Label = "Two", Value = "2", Order = 2 },
             new WaitlistLineCardCell { Label = "Three", Value = "3", Order = 3 },
@@ -153,7 +153,7 @@ public sealed class WaitlistLineCardCellTests
         Assert.AreEqual(0, WaitlistLineCardCell.CellsToDraw(null).Count);
         Assert.AreEqual(
             0,
-            WaitlistLineCardCell.CellsToDraw([new WaitlistLineCardCell { Label = "CardCellPartType", Order = 1 }]).Count);
+            WaitlistLineCardCell.CellsToDraw((MTM_Waitlist.Module_Waitlist.Models.WaitlistLineCardCell?[])[new WaitlistLineCardCell { Label = "CardCellPartType", Order = 1 }]).Count);
     }
 
     /// <summary>

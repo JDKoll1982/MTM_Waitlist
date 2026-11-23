@@ -182,37 +182,37 @@ public sealed class LuggerChangeNoticeService : ILuggerChangeNoticeService
         switch (change.ChangeKind)
         {
             case ArrangementChange.Kinds.LuggerAdded when hasScrapType:
-                return ("Lugger_Notice.LuggerAddedForScrap", [lugger, scrapType]);
+                return ("Lugger_Notice.LuggerAddedForScrap", (string[])[lugger, scrapType]);
 
             case ArrangementChange.Kinds.LuggerAdded:
-                return ("Lugger_Notice.LuggerAdded", [lugger]);
+                return ("Lugger_Notice.LuggerAdded", (string[])[lugger]);
 
             case ArrangementChange.Kinds.LuggerRenamed when hasScrapType:
-                return ("Lugger_Notice.LuggerRenamedForScrap", [Text(change.PreviousValue), RenamedTo(change), scrapType]);
+                return ("Lugger_Notice.LuggerRenamedForScrap", (string[])[Text(change.PreviousValue), RenamedTo(change), scrapType]);
 
             case ArrangementChange.Kinds.LuggerRenamed:
-                return ("Lugger_Notice.LuggerRenamed", [Text(change.PreviousValue), RenamedTo(change)]);
+                return ("Lugger_Notice.LuggerRenamed", (string[])[Text(change.PreviousValue), RenamedTo(change)]);
 
             case ArrangementChange.Kinds.LuggerRemoved when hasScrapType:
-                return ("Lugger_Notice.LuggerRemovedForScrap", [lugger, scrapType]);
+                return ("Lugger_Notice.LuggerRemovedForScrap", (string[])[lugger, scrapType]);
 
             case ArrangementChange.Kinds.LuggerRemoved:
-                return ("Lugger_Notice.LuggerRemoved", [lugger]);
+                return ("Lugger_Notice.LuggerRemoved", (string[])[lugger]);
 
             case ArrangementChange.Kinds.StatusChanged:
-                return ("Lugger_Notice.StatusChanged", [lugger, Text(change.PreviousValue), Text(change.NewValue), scrapType]);
+                return ("Lugger_Notice.StatusChanged", (string[])[lugger, Text(change.PreviousValue), Text(change.NewValue), scrapType]);
 
             case ArrangementChange.Kinds.DumpPointPromoted:
-                return ("Lugger_Notice.DumpPointPromoted", [Text(change.PreviousValue), Text(change.NewValue), scrapType]);
+                return ("Lugger_Notice.DumpPointPromoted", (string[])[Text(change.PreviousValue), Text(change.NewValue), scrapType]);
 
             case ArrangementChange.Kinds.AssignmentAdded:
-                return ("Lugger_Notice.AssignmentAdded", [lugger, scrapType]);
+                return ("Lugger_Notice.AssignmentAdded", (string[])[lugger, scrapType]);
 
             case ArrangementChange.Kinds.AssignmentRemoved:
-                return ("Lugger_Notice.AssignmentRemoved", [lugger, scrapType]);
+                return ("Lugger_Notice.AssignmentRemoved", (string[])[lugger, scrapType]);
 
             case ArrangementChange.Kinds.AssignmentReordered:
-                return ("Lugger_Notice.AssignmentReordered", [lugger, Text(change.PreviousValue), Text(change.NewValue), scrapType]);
+                return ("Lugger_Notice.AssignmentReordered", (string[])[lugger, Text(change.PreviousValue), Text(change.NewValue), scrapType]);
 
             default:
                 return ("Lugger_Notice.Fallback", Array.Empty<string>());

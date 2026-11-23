@@ -63,7 +63,7 @@ public sealed class PreviousSignInService
                     cancellationToken)
                 .ConfigureAwait(false);
 
-            return [.. rows.Select(Map).Where(person => person is not null).Select(person => person!)];
+            return (MTM_Waitlist.Module_Startup.Models.PreviousSignIn[])[.. rows.Select(Map).Where(person => person is not null).Select(person => person!)];
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {

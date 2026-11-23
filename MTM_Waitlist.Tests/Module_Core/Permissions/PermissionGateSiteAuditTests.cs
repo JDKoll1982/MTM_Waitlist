@@ -292,7 +292,7 @@ public sealed class PermissionGateSiteAuditTests
     {
         var resources = ReadProductionFile("Strings/en-us/Resources.resw");
 
-        return [.. Regex.Matches(resources, @"<data name=""Role_(?<code>[a-z_]+)\.Text""[^>]*>\s*<value>(?<name>[^<]+)</value>")
+        return (string[])[.. Regex.Matches(resources, @"<data name=""Role_(?<code>[a-z_]+)\.Text""[^>]*>\s*<value>(?<name>[^<]+)</value>")
             .Select(match => match.Groups["name"].Value.Trim())];
     }
 

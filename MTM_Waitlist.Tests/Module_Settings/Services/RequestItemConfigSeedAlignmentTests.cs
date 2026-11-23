@@ -677,7 +677,7 @@ public sealed class RequestItemConfigSeedAlignmentTests
         LuggerLocation = "Door 6 Lugger",
         DieNumber = "FGT0002000",
         DieLocation = "DIE SHOP",
-        DunnageParts = [new RequestDunnagePart { PartNumber = "DUN0000100", HomeLocation = "A-12" }],
+        DunnageParts = (MTM_Waitlist.Module_Settings.Models.RequestDunnagePart[])[new RequestDunnagePart { PartNumber = "DUN0000100", HomeLocation = "A-12" }],
         ComponentFacts = new Dictionary<string, RequestComponentFacts>(StringComparer.OrdinalIgnoreCase)
         {
             ["FGT0002000"] = new RequestComponentFacts("Rear bracket", string.Empty),

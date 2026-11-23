@@ -187,7 +187,7 @@ public sealed class TemporaryCredentialAttemptLimitTests
 
             return Task.FromResult<IReadOnlyList<Dictionary<string, object?>>>(
                 string.Equals(storedProcedureName, CredentialReadProcedure, StringComparison.Ordinal)
-                    ? [_account]
+                    ? (System.Collections.Generic.Dictionary<string, object?>[])[_account]
                     : []);
         }
 

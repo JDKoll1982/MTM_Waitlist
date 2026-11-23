@@ -107,7 +107,7 @@ public sealed class WaitlistViewViewModelScrapChangeTests
             {
                 Item = "pickup-scrap",
                 DetailFields =
-                [
+                (MTM_Waitlist.Module_Settings.Models.RequestItemFieldDefinition[])[
                     new RequestItemFieldDefinition
                     {
                         Label = "Scrap Type",

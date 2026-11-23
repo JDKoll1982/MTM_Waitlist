@@ -113,7 +113,7 @@ public sealed class MockServiceRefreshClientTests
         var handler = new RecordingHandler(HttpStatusCode.OK, body);
         var client = CreateClient(handler, Endpoint, UserName);
 
-        var result = await client.RequestRefreshAsync(["work_order_lookup"]);
+        var result = await client.RequestRefreshAsync((string[])["work_order_lookup"]);
 
         Assert.IsTrue(result.Succeeded);
         Assert.AreEqual("refreshed", result.ShapeOutcomes["work_order_lookup"]);

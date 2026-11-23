@@ -468,7 +468,7 @@ internal static class MachineSetupAbortRoutes
 {
     /// <summary>Every route out of setup that is not completion, in the contract's own order.</summary>
     internal static IReadOnlyList<MachineSetupAbortRoute> All { get; } =
-    [
+    (MTM_Waitlist.Module_Startup.ViewModels.MachineSetupAbortRoute[])[
         MachineSetupAbortRoute.WindowClosed,
         MachineSetupAbortRoute.Escape,
         MachineSetupAbortRoute.AltF4,

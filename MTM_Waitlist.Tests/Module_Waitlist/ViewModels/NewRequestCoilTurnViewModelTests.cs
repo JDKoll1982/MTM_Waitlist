@@ -153,7 +153,7 @@ public sealed class NewRequestCoilTurnViewModelTests
             Item = "assist-coil-turn",
             ControlFlow = RequestItemConfiguration.DirectToConfirmation,
             DetailFields =
-            [
+            (MTM_Waitlist.Module_Settings.Models.RequestItemFieldDefinition[])[
                 new RequestItemFieldDefinition
                 {
                     Label = NewRequestFlowRules.CoilWeightLabel,

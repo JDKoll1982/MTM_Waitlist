@@ -217,7 +217,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_RefreshFromDatabaseAsync_LoadsOpenRequestsFromDb()
     {
         var helper = new StubMySqlHelperServer(
-        [
+        (System.Collections.Generic.Dictionary<string, object?>[])[
             new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase)
             {
                 ["public_id"] = "f0000000-00aa-4000-8000-0000000000aa",
@@ -270,7 +270,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_RefreshFromDatabaseAsync_CarriesTheHandlersNameAlongsideTheNumber()
     {
         var helper = new StubMySqlHelperServer(
-        [
+        (System.Collections.Generic.Dictionary<string, object?>[])[
             new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase)
             {
                 ["public_id"] = "f0000000-00aa-4000-8000-0000000000ab",
@@ -1672,7 +1672,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_RefreshFromDatabaseAsync_MapsTheHandlerConditionAndTheAnswersOntoTheRow()
     {
         var helper = new StubMySqlHelperServer(
-        [
+        (System.Collections.Generic.Dictionary<string, object?>[])[
             new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase)
             {
                 ["public_id"] = "f0000000-00aa-4000-8000-0000000000ac",
@@ -1709,7 +1709,7 @@ public sealed class WaitlistRequestServiceTests
         // A half-read map would put cells on the card that the request never captured; the row carries no
         // readable answers instead (FR-006).
         var helper = new StubMySqlHelperServer(
-        [
+        (System.Collections.Generic.Dictionary<string, object?>[])[
             new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase)
             {
                 ["public_id"] = "f0000000-00aa-4000-8000-0000000000ad",

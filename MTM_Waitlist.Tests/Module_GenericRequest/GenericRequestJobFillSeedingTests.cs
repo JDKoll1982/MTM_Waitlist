@@ -28,7 +28,7 @@ public sealed class GenericRequestJobFillSeedingTests
         var data = new StubGenericRequestStepData
         {
             Categories = GenericRequestStepResult<GenericRequestCategoryOption>.Populated(
-                [new GenericRequestCategoryOption("Pickup", "Pickup", "Move it")],
+                (MTM_Waitlist.GenericRequest.Models.GenericRequestCategoryOption[])[new GenericRequestCategoryOption("Pickup", "Pickup", "Move it")],
                 DateTimeOffset.UtcNow),
         };
         var fill = new StubGenericRequestJobFillData
@@ -64,7 +64,7 @@ public sealed class GenericRequestJobFillSeedingTests
     [TestMethod]
     public async Task ViewModel_GenericRequestJobFillSeedingTests_PartStep_OffersTheJobsPartAndSequenceAndStillProvesThem()
     {
-        var partData = new StubPartData { Completions = [Part("PART-1")], Sequences = [Sequence("20")] };
+        var partData = new StubPartData { Completions = (MTM_Waitlist.GenericRequest.Models.GenericRequestPartOption[])[Part("PART-1")], Sequences = (MTM_Waitlist.GenericRequest.Models.GenericRequestSequenceOption[])[Sequence("20")] };
         var navigator = Draft(GenericRequestJobFill.FromJob("WO-9001", "PART-1", "20"));
         var viewModel = new GenericRequestPartViewModel(partData, navigator);
 
@@ -81,7 +81,7 @@ public sealed class GenericRequestJobFillSeedingTests
     [TestMethod]
     public async Task ViewModel_GenericRequestJobFillSeedingTests_PartStep_StatingAnotherPartStopsItReadingAsTheJobs()
     {
-        var partData = new StubPartData { Completions = [Part("PART-1"), Part("PART-2")] };
+        var partData = new StubPartData { Completions = (MTM_Waitlist.GenericRequest.Models.GenericRequestPartOption[])[Part("PART-1"), Part("PART-2")] };
         var navigator = Draft(GenericRequestJobFill.FromJob("WO-9001", "PART-1", "20"));
         var viewModel = new GenericRequestPartViewModel(partData, navigator);
 
@@ -100,7 +100,7 @@ public sealed class GenericRequestJobFillSeedingTests
         var data = new StubGenericRequestStepData
         {
             Dies = GenericRequestStepResult<GenericRequestDieOption>.Populated(
-                [new GenericRequestDieOption("FGT0602-01", "Die one", "ROW-2")],
+                (MTM_Waitlist.GenericRequest.Models.GenericRequestDieOption[])[new GenericRequestDieOption("FGT0602-01", "Die one", "ROW-2")],
                 DateTimeOffset.UtcNow),
         };
         var navigator = Draft(GenericRequestJobFill.FromJob("WO-9001", dieNumber: "FGT0602-01"));
@@ -120,7 +120,7 @@ public sealed class GenericRequestJobFillSeedingTests
         var data = new StubGenericRequestStepData
         {
             Dies = GenericRequestStepResult<GenericRequestDieOption>.Populated(
-                [
+                (MTM_Waitlist.GenericRequest.Models.GenericRequestDieOption[])[
                     new GenericRequestDieOption("FGT0602-01", "Die one", "ROW-2"),
                     new GenericRequestDieOption("FGT0999-01", "Die two", "ROW-3"),
                 ],
@@ -167,7 +167,7 @@ public sealed class GenericRequestJobFillSeedingTests
         var data = new StubGenericRequestStepData
         {
             Items = GenericRequestStepResult<GenericRequestItemOption>.Populated(
-                [Item("pickup-part", needsPart: true), Item("pickup-part-two", needsPart: true)],
+                (MTM_Waitlist.GenericRequest.Models.GenericRequestItemOption[])[Item("pickup-part", needsPart: true), Item("pickup-part-two", needsPart: true)],
                 DateTimeOffset.UtcNow),
         };
         var navigator = Draft(GenericRequestJobFill.FromJob("WO-9001", "PART-1", "20"));
@@ -185,7 +185,7 @@ public sealed class GenericRequestJobFillSeedingTests
     [TestMethod]
     public async Task ViewModel_GenericRequestJobFillSeedingTests_PartStep_AJobThatClosedStillLeavesTheValuesItSupplied()
     {
-        var partData = new StubPartData { Completions = [Part("PART-1")], Sequences = [Sequence("20")] };
+        var partData = new StubPartData { Completions = (MTM_Waitlist.GenericRequest.Models.GenericRequestPartOption[])[Part("PART-1")], Sequences = (MTM_Waitlist.GenericRequest.Models.GenericRequestSequenceOption[])[Sequence("20")] };
         var navigator = Draft(GenericRequestJobFill.FromJob("WO-9001", "PART-1", "20"));
         var viewModel = new GenericRequestPartViewModel(partData, navigator);
 
@@ -204,7 +204,7 @@ public sealed class GenericRequestJobFillSeedingTests
         var data = new StubGenericRequestStepData
         {
             Items = GenericRequestStepResult<GenericRequestItemOption>.Populated(
-                [Item("pickup-part", needsPart: true), Item("pickup-part-two", needsPart: true)],
+                (MTM_Waitlist.GenericRequest.Models.GenericRequestItemOption[])[Item("pickup-part", needsPart: true), Item("pickup-part-two", needsPart: true)],
                 DateTimeOffset.UtcNow),
         };
         var navigator = Draft(GenericRequestJobFill.FromJob("WO-9001", "PART-1", "20"));
@@ -245,7 +245,7 @@ public sealed class GenericRequestJobFillSeedingTests
     [TestMethod]
     public async Task ViewModel_GenericRequestJobFillSeedingTests_PartStep_APartTheCompletionsDoNotReturnIsNeverWrittenToTheDraft()
     {
-        var partData = new StubPartData { Completions = [Part("PART-2")] };
+        var partData = new StubPartData { Completions = (MTM_Waitlist.GenericRequest.Models.GenericRequestPartOption[])[Part("PART-2")] };
         var navigator = Draft(GenericRequestJobFill.FromJob("WO-9001", "PART-1", "20"));
         var viewModel = new GenericRequestPartViewModel(partData, navigator);
 
@@ -261,7 +261,7 @@ public sealed class GenericRequestJobFillSeedingTests
     public async Task ViewModel_GenericRequestJobFillSeedingTests_AValueTheJobDoesNotCarryIsStillAskedOfTheRequester()
     {
         // The job names itself and states nothing else, so every step still asks for its own answer (FR-008).
-        var partData = new StubPartData { Completions = [Part("PART-1")], Sequences = [Sequence("20")] };
+        var partData = new StubPartData { Completions = (MTM_Waitlist.GenericRequest.Models.GenericRequestPartOption[])[Part("PART-1")], Sequences = (MTM_Waitlist.GenericRequest.Models.GenericRequestSequenceOption[])[Sequence("20")] };
         var partNavigator = Draft(GenericRequestJobFill.FromJob("WO-9001"));
         var partViewModel = new GenericRequestPartViewModel(partData, partNavigator);
 
@@ -275,7 +275,7 @@ public sealed class GenericRequestJobFillSeedingTests
         var dieData = new StubGenericRequestStepData
         {
             Dies = GenericRequestStepResult<GenericRequestDieOption>.Populated(
-                [new GenericRequestDieOption("FGT0602-01", "Die one", "ROW-2")],
+                (MTM_Waitlist.GenericRequest.Models.GenericRequestDieOption[])[new GenericRequestDieOption("FGT0602-01", "Die one", "ROW-2")],
                 DateTimeOffset.UtcNow),
         };
         var dieNavigator = Draft(GenericRequestJobFill.FromJob("WO-9001"));
@@ -304,7 +304,7 @@ public sealed class GenericRequestJobFillSeedingTests
         new(partNumber, string.Empty, SequenceSource.VisualOwnPart);
 
     private static GenericRequestSequenceOption Sequence(string sequence) =>
-        new(sequence, string.Empty, [SequenceSource.VisualOwnPart], "R", false, string.Empty, HasCancelledOnlyOperations: false);
+        new(sequence, string.Empty, (MTM_Waitlist.GenericRequest.Models.SequenceSource[])[SequenceSource.VisualOwnPart], "R", false, string.Empty, HasCancelledOnlyOperations: false);
 
     private static GenericRequestItemOption Item(string code, bool needsPart) => new(
         Code: code,

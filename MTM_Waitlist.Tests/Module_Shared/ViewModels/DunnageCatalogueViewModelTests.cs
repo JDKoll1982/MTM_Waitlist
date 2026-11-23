@@ -76,7 +76,7 @@ public sealed class DunnageCatalogueViewModelTests
             viewModel.EmptyStateMessage.Contains("No Dunnage parts", StringComparison.OrdinalIgnoreCase),
             $"A read still loading must not claim the plant holds nothing: '{viewModel.EmptyStateMessage}' (FR-010).");
 
-        gate.SetResult([Part("DNG-1")]);
+        gate.SetResult((MTM_Waitlist.Module_Shared.Models.DunnageCataloguePart[])[Part("DNG-1")]);
 
         Assert.AreEqual(DunnageCatalogueLoadOutcome.Ready, (await pending).Outcome);
         Assert.IsFalse(viewModel.IsBusy);

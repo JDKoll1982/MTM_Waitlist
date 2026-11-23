@@ -163,7 +163,7 @@ public sealed class NewRequestItemViewModelTests
         public RequestItemDefinition? FindById(string? id) => RequestItemCatalog.FindById(id);
 
         public IReadOnlyList<RequestCategory> GetCategoriesInOrder() =>
-        [
+        (MTM_Waitlist.Module_Settings.Models.RequestCategory[])[
             RequestCategory.Pickup,
             RequestCategory.Deliver,
             RequestCategory.Assist,

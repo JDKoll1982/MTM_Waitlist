@@ -25,7 +25,7 @@ public sealed class PermissionHoldersViewModelTests
     {
         var service = new FakePermissionAdministrationService
         {
-            Holders = new PermissionHolders(["it_department", "plant_manager"], []),
+            Holders = new PermissionHolders((string[])["it_department", "plant_manager"], []),
         };
 
         var viewModel = Build(service: service);
@@ -51,8 +51,8 @@ public sealed class PermissionHoldersViewModelTests
         var service = new FakePermissionAdministrationService
         {
             Holders = new PermissionHolders(
-                ["plant_manager"],
-                [
+                (string[])["plant_manager"],
+                (MTM_Waitlist.Module_Core.Contracts.Services.PermissionHolder[])[
                     new PermissionHolder(11, "Ada Granted", "6229", "setup", IsSwitchedOff: false, IsGranted: true),
                     new PermissionHolder(12, "Bo Denied", "6230", "setup", IsSwitchedOff: false, IsGranted: false),
                 ]),
@@ -72,8 +72,8 @@ public sealed class PermissionHoldersViewModelTests
         var service = new FakePermissionAdministrationService
         {
             Holders = new PermissionHolders(
-                ["plant_manager"],
-                [new PermissionHolder(12, "Bo Denied", "6230", "setup", IsSwitchedOff: false, IsGranted: false)]),
+                (string[])["plant_manager"],
+                (MTM_Waitlist.Module_Core.Contracts.Services.PermissionHolder[])[new PermissionHolder(12, "Bo Denied", "6230", "setup", IsSwitchedOff: false, IsGranted: false)]),
         };
 
         var viewModel = Build(service: service);
@@ -93,8 +93,8 @@ public sealed class PermissionHoldersViewModelTests
         var service = new FakePermissionAdministrationService
         {
             Holders = new PermissionHolders(
-                ["plant_manager"],
-                [new PermissionHolder(13, "Cy Off", "6231", "setup", IsSwitchedOff: true, IsGranted: true)]),
+                (string[])["plant_manager"],
+                (MTM_Waitlist.Module_Core.Contracts.Services.PermissionHolder[])[new PermissionHolder(13, "Cy Off", "6231", "setup", IsSwitchedOff: true, IsGranted: true)]),
         };
 
         var viewModel = Build(service: service);
@@ -130,7 +130,7 @@ public sealed class PermissionHoldersViewModelTests
         // A feature several roles hold, with no exceptions: nobody DIFFERS, but people hold it.
         var service = new FakePermissionAdministrationService
         {
-            Holders = new PermissionHolders(["plant_manager", "developer"], []),
+            Holders = new PermissionHolders((string[])["plant_manager", "developer"], []),
         };
 
         var viewModel = Build(service: service);
@@ -149,8 +149,8 @@ public sealed class PermissionHoldersViewModelTests
         var service = new FakePermissionAdministrationService
         {
             Holders = new PermissionHolders(
-                ["plant_manager"],
-                [new PermissionHolder(11, "Ada Granted", "6229", "setup", IsSwitchedOff: false, IsGranted: true)]),
+                (string[])["plant_manager"],
+                (MTM_Waitlist.Module_Core.Contracts.Services.PermissionHolder[])[new PermissionHolder(11, "Ada Granted", "6229", "setup", IsSwitchedOff: false, IsGranted: true)]),
         };
 
         var viewModel = Build(service: service);
@@ -171,8 +171,8 @@ public sealed class PermissionHoldersViewModelTests
         var service = new FakePermissionAdministrationService
         {
             Holders = new PermissionHolders(
-                ["plant_manager"],
-                [new PermissionHolder(11, "Ada Granted", "6229", "setup", IsSwitchedOff: false, IsGranted: true)]),
+                (string[])["plant_manager"],
+                (MTM_Waitlist.Module_Core.Contracts.Services.PermissionHolder[])[new PermissionHolder(11, "Ada Granted", "6229", "setup", IsSwitchedOff: false, IsGranted: true)]),
         };
 
         var viewModel = Build(service: service, navigation: navigation);
