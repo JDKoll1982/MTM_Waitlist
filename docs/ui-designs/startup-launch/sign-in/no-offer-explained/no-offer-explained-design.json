@@ -1,0 +1,101 @@
+{
+  "workflow": "startup-launch",
+  "workflow_variant": "engineer",
+  "screen": "sign-in",
+  "refactor": "no-offer-explained",
+  "title": "Say why the previous-people list is missing",
+  "audience": "developer",
+  "window": {
+    "kind": "stage",
+    "stage": "sign-in",
+    "viewports": [
+      { "name": "stage", "width": 780, "height": 640, "scale": 1 }
+    ]
+  },
+  "before": {
+    "kind": "reconstruction",
+    "mockup": "mockups/no-offer-explained-before.html",
+    "captured_at": null,
+    "capture_command": null,
+    "source_xaml": [
+      "Module_Startup/Views/SignInPage.xaml",
+      "MTM_Waitlist.Startup/ViewModels/SignInViewModel.cs",
+      "MTM_Waitlist.Startup/Services/PreviousSignInService.cs"
+    ]
+  },
+  "after": {
+    "mockup": "mockups/no-offer-explained-after.html"
+  },
+  "states": [
+    { "name": "default", "applies_to": ["before", "after"] },
+    { "name": "state-error", "applies_to": ["before", "after"] }
+  ],
+  "callouts": [
+    "The offer column stays where it is and says why it is empty, instead of the column disappearing.",
+    "Sign-in itself is unchanged: the form still works with the name typed by hand."
+  ],
+  "elements": [
+    {
+      "design": "Sign-in form (identifier, hint, Continue)",
+      "winui": "TextBox, TextBlock, Button (AccentButtonStyle)",
+      "code": [
+        "Module_Startup/Views/SignInPage.xaml",
+        "MTM_Waitlist.Startup/ViewModels/SignInViewModel.cs"
+      ],
+      "note": "unchanged"
+    },
+    {
+      "design": "Offer column and the note in its place",
+      "winui": "Grid column, Border divider, InfoBar (Informational)",
+      "code": [
+        "Module_Startup/Views/SignInPage.xaml"
+      ],
+      "note": "the column and its divider are shown when there are people or a reason there are none"
+    },
+    {
+      "design": "Read failure reported instead of swallowed",
+      "winui": "Boolean on the read result, surfaced as a view-model property",
+      "code": [
+        "MTM_Waitlist.Startup/Services/PreviousSignInService.cs",
+        "MTM_Waitlist.Startup/ViewModels/SignInViewModel.cs"
+      ],
+      "note": "the service currently logs and returns an empty list"
+    },
+    {
+      "design": "The note's wording",
+      "winui": "New resource string Startup_SignIn.PreviousPeopleUnavailable",
+      "code": [
+        "Strings/en-us/Resources.resw"
+      ],
+      "note": "reuses the existing Startup_SignIn.PreviousPeopleHeading for the column title"
+    },
+    {
+      "design": "Refusal strip",
+      "winui": "Border + TextBlock (SystemFillColorCriticalBackgroundBrush)",
+      "code": [
+        "Module_Startup/Views/SignInPage.xaml",
+        "Strings/en-us/Resources.resw"
+      ],
+      "note": "unchanged; the state shows the note coexists with a refusal"
+    }
+  ],
+  "workflow_refs": [
+    { "sheet": 2, "nodes": ["v_signin", "s_people", "x_offer"] }
+  ],
+  "design_system": {
+    "resources": [
+      "Styles/FontSizes.xaml",
+      "Styles/Thickness.xaml",
+      "Styles/TextBlock.xaml",
+      "Styles/ModuleSetup.xaml",
+      "Styles/Dialogs.xaml"
+    ]
+  },
+  "approval": {
+    "approved_at": null,
+    "approved_by": null,
+    "sources_sha256": null,
+    "rendered_sha256": null,
+    "design_system_sha256": null
+  }
+}

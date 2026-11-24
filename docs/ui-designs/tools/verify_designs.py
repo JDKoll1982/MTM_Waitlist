@@ -22,6 +22,7 @@ verifier could not run.
 import argparse
 import json
 import pathlib
+import re
 import sys
 
 TOOLS = pathlib.Path(__file__).resolve().parent
@@ -34,6 +35,7 @@ import diagram_context  # noqa: E402
 import render_mockup as render  # noqa: E402
 
 REQUIRED_VIEWPORTS = {"wide": (1600, 1000), "medium": (1280, 800), "minimum": (900, 500)}
+STAGE_SIZE = re.compile(r"new SizeInt32\((\d+),\s*(\d+)\)")
 HEADINGS = [
     "## A. Current State",
     "## B. Proposed Improvement",
@@ -69,6 +71,15 @@ def load(path):
         raise render.RenderError(f"{pathlib.Path(path).name} is not valid JSON: {error}") from error
 
 
+def launch_stage_sizes():
+    """The window sizes the host gives each launch stage, read from the code that sets them."""
+    path = REPO / "MainWindow.xaml.cs"
+    if not path.is_file():
+        return set()
+    return {(int(width), int(height)) for width, height in STAGE_SIZE.findall(
+        path.read_text(encoding="utf-8"))}
+
+
 def check_viewports(design, report):
     declared = {}
     for entry in (design.get("window") or {}).get("viewports") or []:
@@ -77,6 +88,22 @@ def check_viewports(design, report):
                                        float(entry.get("scale", 1)))
         except (KeyError, TypeError, ValueError):
             report.error(f"a viewport entry is incomplete: {entry}")
+    kind = render.window_kind(design)
+    if kind == "stage":
+        if "stage" not in declared:
+            report.error("a stage design declares the launch stage's own window size as "
+                         "viewport 'stage' (for example 780x640 for sign-in)")
+        else:
+            width, height, _ = declared["stage"]
+            known = launch_stage_sizes()
+            if known and (width, height) not in known:
+                report.error(f"the stage viewport {width}x{height} is not a launch stage size "
+                             "in MainWindow.xaml.cs")
+        return declared, "stage"
+    if kind != "shell":
+        report.error("window.kind must be 'shell' (the three desk sizes) or 'stage' "
+                     "(the launch stage's own window size)")
+        return declared, "wide"
     for name, (width, height) in REQUIRED_VIEWPORTS.items():
         if name not in declared:
             report.error(f"viewport '{name}' is missing; designs are checked at "
@@ -84,10 +111,7 @@ def check_viewports(design, report):
         elif declared[name][:2] != (width, height):
             report.error(f"viewport '{name}' is {declared[name][0]}x{declared[name][1]}; "
                          f"it must be {width}x{height}")
-    if "wide" not in declared:
-        report.error("the 'wide' viewport is required: the canonical images and the comparison "
-                     "are rendered from it")
-    return declared
+    return declared, "wide"
 
 
 def check_workflow(design, report, diagrams):
@@ -95,7 +119,7 @@ def check_workflow(design, report, diagrams):
     try:
         document, _ = diagrams.select(workflow, design.get("workflow_variant"))
     except (render.RenderError, diagram_context.DiagramError) as error:
-        report.error(str(error))
+        check_unmapped_flow(design, report, str(error))
         return
     spec = json.loads(document["spec_path"].read_text(encoding="utf-8"))
     sheets = spec.get("sheets") or []
@@ -115,6 +139,23 @@ def check_workflow(design, report, diagrams):
             if node not in known:
                 report.error(f"workflow_ref node '{node}' is not on sheet {number} of "
                              f"{workflow}; the spec has no such node")
+
+
+def check_unmapped_flow(design, report, reason):
+    """A flow the diagram set does not map must name its own source instead of citing nodes."""
+    sources = design.get("flow_source") or []
+    if design.get("workflow_refs"):
+        report.error(f"{reason}; a flow outside the diagram set cannot cite workflow_refs")
+        return
+    if not sources:
+        report.error(f"{reason}; add flow_source naming the files that describe this flow")
+        return
+    missing = [source for source in sources if not (REPO / source).is_file()]
+    if missing:
+        report.error("flow_source names files that do not exist: " + ", ".join(missing))
+        return
+    report.warn(f"workflow '{design.get('workflow')}' is not mapped in docs/diagrams; the flow "
+                f"source is recorded instead ({', '.join(sources)})")
 
 
 def check_before(design, design_dir, declared, report):
@@ -159,7 +200,7 @@ def check_before(design, design_dir, declared, report):
         report.error("before.kind must be 'capture' or 'reconstruction'")
 
 
-def check_images(design, design_dir, declared, report):
+def check_images(design, design_dir, declared, canonical, report):
     refactor = design["refactor"]
     states = design.get("states") or []
     if not states:
@@ -192,8 +233,8 @@ def check_images(design, design_dir, declared, report):
     comparison = design_dir / f"{refactor}-comparison.png"
     if not comparison.is_file():
         report.error(f"missing comparison image: {comparison.name}")
-    elif "wide" in declared:
-        width, height, scale = declared["wide"]
+    elif canonical in declared:
+        width, height, scale = declared[canonical]
         actual = render.png_size(comparison)
         if actual[0] < int(width * scale * 2) or actual[1] < int(height * scale):
             report.error(f"{comparison.name} is {actual[0]}x{actual[1]}; it must hold two "
@@ -294,10 +335,14 @@ def check(design_path, diagrams, require_approval=False):
         return report, design
     if design_path.name != f"{design['refactor']}-design.json":
         report.error(f"the design file must be named {design['refactor']}-design.json")
-    declared = check_viewports(design, report)
+    if design_path.parent.name != design["refactor"]:
+        report.error(f"each run lives in its own folder: move this design to "
+                     f".../{design['screen']}/{design['refactor']}/ (the folder must be named "
+                     f"'{design['refactor']}')")
+    declared, canonical = check_viewports(design, report)
     check_workflow(design, report, diagrams)
     check_before(design, design_path.parent, declared, report)
-    check_images(design, design_path.parent, declared, report)
+    check_images(design, design_path.parent, declared, canonical, report)
     check_elements(design, report)
     check_proposal(design, design_path.parent, report)
     check_render_and_approval(design, design_path, report, require_approval)

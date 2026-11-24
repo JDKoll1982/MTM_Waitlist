@@ -1,25 +1,26 @@
 # Workflow diagrams
 
-Four end-to-end workflows in this application, mapped from the code and rendered as print-ready
-flowcharts. Each has an **engineer** version — class names, command names, service interfaces, stored
-procedures, cache-fallback shapes — and a **friendly** version in plain language for the people who use
-the screens. Both come from the same source, so they cannot disagree.
-
-The point of the set is a refactor: the same job is done twice in this application, once for a work order
-and once for a generic request, and the two copies have drifted. [diagram-workflow-refactor-notes.md](./diagram-workflow-refactor-notes.md)
+Five workflows in this application, mapped from the code and rendered as print-ready flowcharts. Each
+has an **engineer** version — class names, command names, service
+interfaces, stored procedures, cache-fallback shapes — and a **friendly** version in plain language for
+the people who use the screens; both come from one spec, so they cannot disagree. The two request flows
+that carry the duplicated job also feed a refactor: [diagram-workflow-refactor-notes.md](./diagram-workflow-refactor-notes.md)
 turns that into something `/speckit.specify` can consume.
 
-## The eight documents
+## The ten documents
 
 | # | Workflow | Engineer | Plain language | Sheets |
 | --- | --- | --- | --- | --- |
-| 1 | Work Order — New Request | [PDF](./pdf/diagram-workorder-new-request.pdf) | [PDF](./pdf/diagram-workorder-new-request-friendly.pdf) | 5 / 2 |
-| 2 | Work Order — Work Center Setup | [PDF](./pdf/diagram-workorder-workcenter-setup.pdf) | [PDF](./pdf/diagram-workorder-workcenter-setup-friendly.pdf) | 5 / 2 |
-| 3 | Generic Request — New Request | [PDF](./pdf/diagram-generic-new-request.pdf) | [PDF](./pdf/diagram-generic-new-request-friendly.pdf) | 4 / 2 |
-| 4 | Generic Request — Work Center Setup | [PDF](./pdf/diagram-generic-workcenter-setup.pdf) | [PDF](./pdf/diagram-generic-workcenter-setup-friendly.pdf) | 2 / 2 |
+| 1 | Work Order — New Request | [PDF](./pdf/workorder-new-request/diagram-workorder-new-request.pdf) | [PDF](./pdf/workorder-new-request/diagram-workorder-new-request-friendly.pdf) | 5 / 2 |
+| 2 | Work Order — Work Center Setup | [PDF](./pdf/workorder-workcenter-setup/diagram-workorder-workcenter-setup.pdf) | [PDF](./pdf/workorder-workcenter-setup/diagram-workorder-workcenter-setup-friendly.pdf) | 5 / 2 |
+| 3 | Generic Request — New Request | [PDF](./pdf/generic-new-request/diagram-generic-new-request.pdf) | [PDF](./pdf/generic-new-request/diagram-generic-new-request-friendly.pdf) | 4 / 2 |
+| 4 | Generic Request — Work Center Setup | [PDF](./pdf/generic-workcenter-setup/diagram-generic-workcenter-setup.pdf) | [PDF](./pdf/generic-workcenter-setup/diagram-generic-workcenter-setup-friendly.pdf) | 2 / 2 |
+| 5 | Startup — launch and sign-in | [PDF](./pdf/startup-launch/diagram-startup-launch.pdf) | [PDF](./pdf/startup-launch/diagram-startup-launch-friendly.pdf) | 3 / 2 |
 
-The finished documents are in [`pdf/`](./pdf/); the Graphviz sources they are described by are in
-[`dot/`](./dot/); the specs that generate both are in [`tools/`](./tools/README.md).
+The finished documents are in [`pdf/<workflow>/`](./pdf/); the Graphviz sources they are described by are
+in [`dot/<workflow>/`](./dot/); the specs that generate both are in [`tools/`](./tools/README.md). Each
+workflow owns one folder under `pdf/` and one under `dot/`, so a run of the diagram workflow never shares a
+folder with another workflow.
 
 ## How to read a page
 
@@ -88,7 +89,9 @@ procedure — correlate with the code, scope the change, report a diagram/code d
 `workflow-diagram-context` skill.
 
 A change that alters what a person sees also needs a rendered BEFORE and AFTER design, not just the
-flow: see [`../ui-designs/`](../ui-designs/README.md).
+flow: see [`../ui-designs/`](../ui-designs/README.md). To run the map and the design as one task, use
+the `/qol.run-whole-workflow` prompt, which follows
+[`ui-designs-09`](../ui-designs/ui-designs-09-run-the-whole-workflow.md).
 
 ## Print contract
 

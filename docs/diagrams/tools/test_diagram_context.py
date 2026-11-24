@@ -67,13 +67,13 @@ def build_fixture(root, spec=None, with_dot=True, with_pdf=False, manifest=None)
     if with_dot:
         nodes = {1: ["a_start", "x_next", "x_flag"], 2: ["y_here", "s_call"]}
         for index, names in nodes.items():
-            (root / "dot").mkdir(parents=True, exist_ok=True)
+            (root / "dot" / "fixture").mkdir(parents=True, exist_ok=True)
             body = "".join(f"    {name} [shape=box];\n" for name in names)
-            (root / "dot" / f"fixture-{index}.dot").write_text(
+            (root / "dot" / "fixture" / f"fixture-{index}.dot").write_text(
                 f"digraph fixture{index} {{\n{body}}}\n", encoding="utf-8")
     if with_pdf:
-        (root / "pdf").mkdir(parents=True, exist_ok=True)
-        (root / "pdf" / "fixture.pdf").write_bytes(b"%PDF-1.4\n% fixture\n")
+        (root / "pdf" / "fixture").mkdir(parents=True, exist_ok=True)
+        (root / "pdf" / "fixture" / "fixture.pdf").write_bytes(b"%PDF-1.4\n% fixture\n")
     write_json(tools / "manifest.json", manifest or {"documents": [
         {"workflow": "fixture", "variant": "engineer", "title": "Fixture",
          "output": "fixture.pdf", "spec": "spec-fixture.json"},
@@ -82,7 +82,7 @@ def build_fixture(root, spec=None, with_dot=True, with_pdf=False, manifest=None)
 
 
 def digest_for(diagrams, document, **kwargs):
-    return context.build(document, dot_dir=diagrams.root / "dot",
+    return context.build(document, dot_dir=diagrams.dot_folder(document),
                          known_outputs=diagrams.known_outputs(), **kwargs)
 
 
@@ -91,10 +91,10 @@ class RealDiagramSet(unittest.TestCase):
     def setUpClass(cls):
         cls.diagrams = context.DiagramSet(DIAGRAMS)
 
-    def test_every_workflow_has_two_variants(self):
+    def test_every_workflow_has_its_documented_variants(self):
         workflows = self.diagrams.workflows()
         self.assertEqual(sorted(workflows), ["generic-new-request", "generic-workcenter-setup",
-                                             "workorder-new-request",
+                                             "startup-launch", "workorder-new-request",
                                              "workorder-workcenter-setup"])
         for name, documents in workflows.items():
             self.assertEqual(sorted(document["variant"] for document in documents),
@@ -108,7 +108,9 @@ class RealDiagramSet(unittest.TestCase):
                     ("workorder-new-request", "friendly"): 2,
                     ("workorder-workcenter-setup", "friendly"): 2,
                     ("generic-new-request", "friendly"): 2,
-                    ("generic-workcenter-setup", "friendly"): 2}
+                    ("generic-workcenter-setup", "friendly"): 2,
+                    ("startup-launch", "engineer"): 3,
+                    ("startup-launch", "friendly"): 2}
         for key, sheets in expected.items():
             document, _ = self.diagrams.select(*key)
             summary = self.diagrams.summary(document)

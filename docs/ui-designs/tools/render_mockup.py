@@ -35,6 +35,16 @@ CSS_IMPORT = re.compile(r"""@import\s+(?:url\()?["']([^"']+)["']""", re.IGNORECA
 REQUIRED_VIEWPORTS = [("wide", 1600, 1000), ("medium", 1280, 800), ("minimum", 900, 500)]
 DEFAULT_STATE = "default"
 DEFAULT_VIEWPORT = "wide"
+STAGE_VIEWPORT = "stage"
+
+
+def window_kind(design):
+    return (design.get("window") or {}).get("kind", "shell")
+
+
+def canonical_viewport(design):
+    """The viewport the canonical images and the comparison are drawn from."""
+    return STAGE_VIEWPORT if window_kind(design) == "stage" else DEFAULT_VIEWPORT
 
 
 class RenderError(Exception):
@@ -346,22 +356,22 @@ def build(design_path, edge_path=None):
                     if entry["sha256"] == default_hash:
                         raise RenderError(
                             f"state '{state}' rendered identically to '{DEFAULT_STATE}' for "
-                            f"{variant} at {viewport['name']}; the mockup does not respond to "
-                            "that state — check that it has an element id 'state-" + state + "' "
-                            "and a rule that changes it")
+                            f"{variant} at {viewport['name']}; the mockup does not respond to it — "
+                            f"check for an element with id '{state}' and a rule in mockup.css that "
+                            "reveals its content")
             canonical = f"{refactor}-{variant}.png"
-            chosen = [entry for entry in images
-                      if entry.startswith(f"{refactor}-{variant}-{DEFAULT_STATE}-")]
-            wide_name = f"{refactor}-{variant}-{DEFAULT_STATE}-{DEFAULT_VIEWPORT}.png"
+            name_of_canonical = canonical_viewport(design)
+            wide_name = f"{refactor}-{variant}-{DEFAULT_STATE}-{name_of_canonical}.png"
             if wide_name not in images:
                 raise RenderError(f"the {variant} mockup has no '{DEFAULT_STATE}' state at the "
-                                  f"'{DEFAULT_VIEWPORT}' viewport ({chosen})")
+                                  f"'{name_of_canonical}' viewport")
             shutil.copyfile(design_dir / wide_name, design_dir / canonical)
             size = png_size(design_dir / canonical)
             images[canonical] = {"width": size[0], "height": size[1],
                                  "sha256": sha256_file(design_dir / canonical)}
 
-        wide = next((entry for entry in sizes if entry["name"] == DEFAULT_VIEWPORT), sizes[0])
+        wide = next((entry for entry in sizes if entry["name"] == canonical_viewport(design)),
+                    sizes[0])
         compare_html = design_dir / "mockups" / f"{refactor}-compare.html"
         compare_html.parent.mkdir(parents=True, exist_ok=True)
         css_href = pathlib.PurePath(os.path.relpath(TOOLS / "mockup" / "mockup.css",

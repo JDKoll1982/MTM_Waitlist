@@ -11,7 +11,10 @@ guides.
 
 `docs/ui-designs/ui-designs-guide.md` is the method and the accuracy rules.
 `docs/ui-designs/ui-designs-01…08-*.md` are the per-image prompts. `docs/ui-designs/tools/` renders and
-checks. Read the guide before the first use; after that, work from it rather than from memory.
+checks. Read the guide before the first use; after that, work from it rather than from memory. When one task
+runs the whole thing - map the flow, design, verify, approve, implement - start from
+`docs/ui-designs/ui-designs-09-run-the-whole-workflow.md`, or invoke the installed workspace prompt
+`/qol.run-whole-workflow`, which asks for the run's inputs first.
 
 ## When this applies
 
@@ -25,7 +28,9 @@ backend-only change with no visible effect; if the backend change becomes visibl
    sheets name the views, view models, commands and procedures. A field or a step that is not in the
    diagrams and not in the code does not go into a design.
 2. **Inspect the existing interface.** XAML, view model, commands, bindings, validation, and the styles in
-   `Styles/*.xaml`. The design's `design_system.resources` names the XAML its tokens come from.
+   `Styles/*.xaml`. The design's `design_system.resources` names the XAML its tokens come from. A surface
+   the diagram set does not map — `startup-launch` is one — records its flow source in `flow_source`, and
+   a fixed launch stage records its own window size as `window.kind: "stage"`.
 3. **BEFORE.** Capture the running application with `scripts/ui-automation/capture_app_window.ps1` and
    record the capture, or — when the app cannot be started or driven — reconstruct the screen from its
    XAML and mark it a reconstruction. Never present a reconstruction as a screenshot.
@@ -41,12 +46,20 @@ backend-only change with no visible effect; if the backend change becomes visibl
 8. **Implement against the approved AFTER.** Afterwards capture the real screen and compare it with the
    approved image; record every deviation, intentional or not.
 
+## Where a run lives
+
+Every run gets its own folder, named for the refactor:
+`docs/ui-designs/<workflow>/<screen>/<refactor>/`. The record, the mockups, the renders, the render
+record and the proposal all live inside it, so a second refactor on the same screen cannot overwrite the
+first. `tools/template/` is copied into that folder; the verifier rejects a record that is not in a
+folder named after its refactor.
+
 ## Commands
 
 ```powershell
-python docs\ui-designs\tools\render_mockup.py --design "<design.json>"
-python docs\ui-designs\tools\verify_designs.py --design "<design.json>"
-python docs\ui-designs\tools\render_mockup.py --design "<design.json>" --approve --by "<name>"
+python docs\ui-designs\tools\render_mockup.py --design "<run folder>\<refactor>-design.json"
+python docs\ui-designs\tools\verify_designs.py --design "<run folder>\<refactor>-design.json"
+python docs\ui-designs\tools\render_mockup.py --design "<run folder>\<refactor>-design.json" --approve --by "<name>"
 python docs\ui-designs\tools\verify_designs.py --all --require-approval
 ```
 

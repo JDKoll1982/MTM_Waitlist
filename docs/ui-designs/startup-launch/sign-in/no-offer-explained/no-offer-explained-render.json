@@ -1,0 +1,80 @@
+{
+ "renderer": "headless Microsoft Edge",
+ "edge": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+ "rendered_at": "2026-11-24T08:08:25-06:00",
+ "viewports": [
+  {
+   "name": "stage",
+   "width": 780,
+   "height": 640,
+   "scale": 1.0
+  }
+ ],
+ "states": [
+  {
+   "name": "default",
+   "applies_to": [
+    "before",
+    "after"
+   ]
+  },
+  {
+   "name": "state-error",
+   "applies_to": [
+    "before",
+    "after"
+   ]
+  }
+ ],
+ "sources": {
+  "docs/ui-designs/tools/mockup/mockup.css": "748fdf8c9837c2a101609e8ce5d44cd9b76f0d7d7378f04f17306a79c03d671c",
+  "docs/ui-designs/startup-launch/sign-in/no-offer-explained/mockups/no-offer-explained-after.html": "a3343f1ccd141989f6281d4c3ba679eebd1287a8b3563f9101bb728178b764f9",
+  "docs/ui-designs/startup-launch/sign-in/no-offer-explained/mockups/no-offer-explained-before.html": "308c33700c52edd0c777cc3b2b4e3e3e421c332d3549a904d20dfcabbb60f4a3"
+ },
+ "sources_sha256": "9b1ab92c78fd6cb0c065327a2aab9cef13fe5cb36ede315f22625e82e59ed551",
+ "design_system": {
+  "Styles/FontSizes.xaml": "7f0ec01791e19f5e875a28b89dc98e779b46fb8be8d671c053ab34f82b1beeac",
+  "Styles/Thickness.xaml": "02724f1114ce07b7ad88a53d7dd6bcc2b4cf5262313c79475f8f654edb36acf0",
+  "Styles/TextBlock.xaml": "6c012953d5f8a48e0382d178d091b3d38b03799981ce1c4797299650b17743ab",
+  "Styles/ModuleSetup.xaml": "03d42ac9cad7d0a39e84c6ad29f2df71288d21d288b3b910f1bdf7c51e400341",
+  "Styles/Dialogs.xaml": "0d81d35f05aac5b649b081ac55270cbf544bffb0ff13966de0cfe42895600834"
+ },
+ "design_system_sha256": "6cc10e88fd5302d8a734cb06a4fa072cdf1969c9038d4156d725c818e9dbc30a",
+ "images": {
+  "no-offer-explained-after-default-stage.png": {
+   "width": 780,
+   "height": 640,
+   "sha256": "555f0e80c25f036b2a7efd9d9872857a6e15a641df7acf4ae28e0ed6584378a4"
+  },
+  "no-offer-explained-after-state-error-stage.png": {
+   "width": 780,
+   "height": 640,
+   "sha256": "7ce6979930aba9fe615ed561d4da30a15a87ec6f26d890ef89266860cdad159b"
+  },
+  "no-offer-explained-after.png": {
+   "width": 780,
+   "height": 640,
+   "sha256": "555f0e80c25f036b2a7efd9d9872857a6e15a641df7acf4ae28e0ed6584378a4"
+  },
+  "no-offer-explained-before-default-stage.png": {
+   "width": 780,
+   "height": 640,
+   "sha256": "1a435f2de02c5c32863d0c42d0658827d380a9fbac5092095a10a5100826fcdc"
+  },
+  "no-offer-explained-before-state-error-stage.png": {
+   "width": 780,
+   "height": 640,
+   "sha256": "9e727765c5f295f9038eb9ed9c2fda39a14f11579c5c10ebad9b09e7c5c22ae3"
+  },
+  "no-offer-explained-before.png": {
+   "width": 780,
+   "height": 640,
+   "sha256": "1a435f2de02c5c32863d0c42d0658827d380a9fbac5092095a10a5100826fcdc"
+  },
+  "no-offer-explained-comparison.png": {
+   "width": 1656,
+   "height": 900,
+   "sha256": "f888f6e1c2335904b311e4f8b244e9d367c78551c63d9354a78590283eb689e3"
+  }
+ }
+}

@@ -105,7 +105,7 @@ example `{ "sheet": 1, "nodes": ["v_wc", "d_gate"] }`. `verify_designs.py` fails
 a sheet that does not exist or a node id that is not on it — so update the record in the same change as the
 spec.
 
-A proposal references the PDF by relative link (`../../diagrams/pdf/<document>.pdf`). Do not copy the PDF
+A proposal references the PDF by relative link (`../../diagrams/pdf/<workflow>/<document>.pdf`). Do not copy the PDF
 into the design folder. Only if a proposal must inline a still, export the 300 DPI PNG of that sheet into
 the design folder as `<refactor>-workflow-<document>-sheet-<n>.png`, and delete it if the proposal later
 stops needing it.
@@ -144,7 +144,7 @@ dashed off-page connector. The shapes differ as well as the colours, so the page
 | Item | Requirement |
 | --- | --- |
 | Source | JSON spec under `docs/diagrams/tools/`; `.dot` and PDF are build output |
-| Deliverable | PDF in `docs/diagrams/pdf/` from `render_sheets.py` |
+| Deliverable | PDF in `docs/diagrams/pdf/<workflow>/` from `render_sheets.py` |
 | Evidence | `verify_pdfs.py` passes every page; the 300 DPI PNG of the changed page was looked at |
 | Dependencies | PyMuPDF, the Segoe UI face that ships with Windows; Graphviz only for hand inspection |
 | Design record | `workflow_refs` resolve, and `verify_designs.py --all` stays clean |
@@ -155,14 +155,14 @@ Sources and output keep the pipeline's own names:
 
 ```
 docs/diagrams/tools/spec-diagram-<workflow>[-friendly].json
-docs/diagrams/dot/diagram-<workflow>[-friendly]-<n>-<slug>.dot
-docs/diagrams/pdf/diagram-<workflow>[-friendly].pdf
+docs/diagrams/dot/<workflow>/diagram-<workflow>[-friendly]-<n>-<slug>.dot
+docs/diagrams/pdf/<workflow>/diagram-<workflow>[-friendly].pdf
 ```
 
 A still inside a design folder, only when one is unavoidable:
 
 ```
-docs/ui-designs/<workflow>/<screen>/<refactor>-workflow-<document>-sheet-<n>.png
+docs/ui-designs/<workflow>/<screen>/<refactor>/<refactor>-workflow-<document>-sheet-<n>.png
 ```
 
 ## 9. Validation checklist

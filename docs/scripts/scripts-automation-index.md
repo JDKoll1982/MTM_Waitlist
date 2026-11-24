@@ -13,6 +13,7 @@ ships with the application — the app's own behaviour never depends on these fi
 | [`service/`](../../scripts/service/) | `measure-reliability-window.ps1` — measure the Mock service reliability criteria. |
 | [`store/`](../../scripts/store/) | `publish-app-payload.ps1` — publish the application in the shape the MTM Loader delivers, with its `build-manifest.json`. Documented on its own page. |
 | [`spec-kit/`](../../scripts/spec-kit/) | `companion-clear-concerns.py`, `companion-open-tasks.py`, `run-ralph-deepseek.ps1` — work with the Spec Kit Companion and the Ralph loop. |
+| [`docs/`](../../scripts/docs/) | `generate-docs.ps1` — read the C# and XAML and produce the diagram gap worklist (`-Mode Facts`/`Gaps`) and the UI-design mockups plus their PNGs (`-Mode Designs`). |
 | [`ui-automation/`](../../scripts/ui-automation/) | Driving the running app through UI Automation; documented on its own page. |
 
 Every script resolves the repository from its own location, so all of them run from any working directory.

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>BEFORE — sign-in with the previous-people offer unreadable</title>
+  <link rel="stylesheet" href="../../../../tools/mockup/mockup.css">
+</head>
+<body class="mockup" data-variant="before">
+  <span class="state" id="state-error"></span>
+
+  <div class="variant-banner">
+    BEFORE — CURRENT IMPLEMENTATION
+    <span class="provenance">reconstruction from Module_Startup/Views/SignInPage.xaml; the offer read failed</span>
+  </div>
+
+  <div class="titlebar">
+    <span class="caption">MTM Waitlist</span>
+    <span class="glyph">— □ ✕</span>
+  </div>
+
+  <main class="page" style="height: calc(100vh - 33px - 32px); padding: 32px; row-gap: 16px;">
+    <div class="page-header" style="gap: 4px;">
+      <h1 class="page-title" style="font-size: 28px;">Sign in</h1>
+      <p class="page-subtitle" style="font-size: 14px;">Sign in to carry on. Your session and this computer are checked against the store.</p>
+    </div>
+
+    <div style="display: flex; flex: 1 1 auto; min-height: 0; column-gap: 0;">
+      <div style="flex: 1 1 auto; min-width: 0; overflow: auto;">
+        <div class="field" style="margin-bottom: 8px;">
+          <div class="label">User name or employee number</div>
+          <div class="input" style="min-height: 32px;"></div>
+        </div>
+        <p style="margin: 0 0 8px; font-size: 14px; color: var(--text-secondary);">
+          Type your user name, or your four-digit employee number. A number is looked up in the plant
+          system if the store does not hold it.
+        </p>
+        <button class="button primary" style="min-height: 32px;">Continue</button>
+      </div>
+      <!-- Nothing on the right: the offer could not be read, so the column and its divider are gone. -->
+    </div>
+
+    <div class="infobar error when-error" style="margin-bottom: 0;">
+      <span>⛔</span>
+      <div>The store could not be reached, so the sign-in could not be confirmed. Try again shortly.</div>
+    </div>
+
+    <p class="stamp" style="margin: 0;">Sheet 1 of 1 · startup-launch · screen: sign in · 780 × 640 window</p>
+  </main>
+</body>
+</html>

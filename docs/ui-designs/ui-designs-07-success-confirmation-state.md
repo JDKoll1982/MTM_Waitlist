@@ -63,7 +63,7 @@ Record before drawing:
    - an in-page result panel where the app replaces the form with its result.
 4. Keep the screen that raised the confirmation visible behind it; that context is the point.
 5. Render:
-   `python docs\ui-designs\tools\render_mockup.py --design "<absolute path>\<refactor>-design.json"`.
+   `python docs\ui-designs\tools\render_mockup.py --design "<absolute path>\<refactor>\<refactor>-design.json"`.
 6. Confirm `<refactor>-after-state-success-wide.png` differs from `default`.
 
 ## 5. Visual standards
@@ -119,7 +119,7 @@ Record before drawing:
 5. **Next actions.** Each one is a real command; in the app, clicking it reaches the place the image
    implies.
 6. **No over-claim.** No atomicity, notification or downstream effect the code does not have.
-7. **Verify.** `verify_designs.py --design "<absolute path>\<refactor>-design.json"` is clean.
+7. **Verify.** `verify_designs.py --design "<absolute path>\<refactor>\<refactor>-design.json"` is clean.
 
 ## 10. Acceptance criteria
 

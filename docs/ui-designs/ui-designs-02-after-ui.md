@@ -105,7 +105,7 @@ verifier fails when a heading or an embedded image is missing.
 4. Number the changes with `<span class="callout">1</span>` where the change is, and put the matching
    sentences in `callouts[]`. Those are the only annotations allowed on the design.
 5. Render:
-   `python docs\ui-designs\tools\render_mockup.py --design "<absolute path>\<refactor>-design.json"`.
+   `python docs\ui-designs\tools\render_mockup.py --design "<absolute path>\<refactor>\<refactor>-design.json"`.
    The renderer resolves every output path itself, so a relative design path works here too.
 6. Look at `<-refactor>-after.png` and `<-refactor>-comparison.png`. A label on a border, a clipped row, a
    collapsed column, or a callout pointing at nothing means it is not finished.
@@ -166,7 +166,7 @@ verifier fails when a heading or an embedded image is missing.
 ## 8. File naming
 
 ```
-docs/ui-designs/<workflow>/<screen>/
+docs/ui-designs/<workflow>/<screen>/<refactor>/
   <refactor>-design.json
   mockups/<refactor>-after.html
   <refactor>-after.png
@@ -181,7 +181,7 @@ name them.
 
 ## 9. Validation checklist
 
-1. **Verify.** `python docs\ui-designs\tools\verify_designs.py --design "<absolute path>\<refactor>-design.json"`
+1. **Verify.** `python docs\ui-designs\tools\verify_designs.py --design "<absolute path>\<refactor>\<refactor>-design.json"`
    — no errors about images, elements, workflow refs or the proposal.
 2. **States.** Every state named in the record produced a different PNG from `default`; a state whose file
    is byte-identical to `default` never applied, which means its anchor name is wrong.

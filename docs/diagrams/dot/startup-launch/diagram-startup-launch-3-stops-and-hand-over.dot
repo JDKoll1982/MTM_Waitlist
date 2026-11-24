@@ -1,0 +1,69 @@
+// Diagram 5 / Sheet 3 of 3 — Startup launch: stops, remedies and hand-over — Sheet 3 of 3
+// Source of truth: BlockedStatePage, BlockedStateViewModel, LaunchRemedySet, BlockedStateRemedies, StartupRecoveryService, PictureCacheStep, VisualVerdictPrimingStep, LaunchActivityFeed
+digraph StartupLaunch3 {
+  graph [
+    rankdir=LR, splines=polyline, overlap=false, nodesep=0.45, ranksep=0.55,
+    newrank=true, fontname="Segoe UI", fontsize=11, bgcolor="#FFFFFF", pad=0.02
+  ];
+  node [
+    shape=box, style="rounded,filled", fontname="Segoe UI", fontsize=11,
+    margin="0.10,0.05", penwidth=1.5, color="#111111", fillcolor="#FFFFFF"
+  ];
+  edge [
+    fontname="Segoe UI", fontsize=11, color="#111111", arrowsize=0.6,
+    penwidth=1.5, fontcolor="#111111"
+  ];
+  subgraph cluster_ui {
+    label="1 · UI — launch surfaces"; fontcolor="#0B3D91"; color="#1F6FEB";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    u_blocked [shape=box, label="BlockedStatePage\nretry · reset · close", fillcolor="#DCE9FF"];
+    u_shell [shape=box, label="ShellPage\nfirst screen", fillcolor="#DCE9FF"];
+  }
+  subgraph cluster_vm {
+    label="2 · ViewModels and routing"; fontcolor="#4B2A8A"; color="#8250DF";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    x_from [shape=cds, label="[From Sheet 2]\nsigned in", fillcolor="#E8F0FF", color="#1F6FEB", style="filled,dashed"];
+    v_app [shape=box, label="App.Show\nLaunchSurface", fillcolor="#EFE3FF"];
+    v_blocked [shape=box, label="BlockedState\nViewModel", fillcolor="#EFE3FF"];
+    v_life [shape=box, label="AppLifecycleHost\nRestarter", fillcolor="#EFE3FF"];
+  }
+  subgraph cluster_svc {
+    label="3 · Services (DI)"; fontcolor="#0A5A4F"; color="#0F7B6C";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    s_remedy [shape=box, label="RemedySet ·\nBlockedStateRemedies", fillcolor="#D6F5F0"];
+    s_recovery [shape=box, label="StartupRecovery\nService", fillcolor="#D6F5F0"];
+    s_pics [shape=box, label="PictureCacheStep\nbest effort", fillcolor="#D6F5F0"];
+    s_priming [shape=box, label="VerdictPriming\nbest effort", fillcolor="#D6F5F0"];
+    s_feed [shape=box, label="LaunchActivity\nFeed", fillcolor="#D6F5F0"];
+  }
+  subgraph cluster_data {
+    label="4 · Store"; fontcolor="#5A4300"; color="#8A6D3B";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    db_log [shape=cylinder, label="ops_startup_logs\nILogService", fillcolor="#EDEDED", fontname="Consolas"];
+    db_reset [shape=cylinder, label="sp_machine_\nconfiguration_reset", fillcolor="#EDEDED", fontname="Consolas"];
+  }
+  { rank=same; u_blocked; x_from; s_remedy; db_log; }
+  u_blocked -> x_from -> s_remedy -> db_log [style=invis, constraint=false];
+  { rank=same; u_shell; v_app; s_recovery; db_reset; }
+  u_shell -> v_app -> s_recovery -> db_reset [style=invis, constraint=false];
+  { rank=same; v_blocked; s_pics; }
+  v_blocked -> s_pics [style=invis, constraint=false];
+  { rank=same; v_life; s_priming; }
+  v_life -> s_priming [style=invis, constraint=false];
+  u_blocked -> u_shell [style=invis, constraint=true];
+  x_from -> v_app -> v_blocked -> v_life [style=invis, constraint=true];
+  s_remedy -> s_recovery -> s_pics -> s_priming -> s_feed [style=invis, constraint=true];
+  db_log -> db_reset [style=invis, constraint=true];
+  x_from -> v_app [label="hand-over"];
+  v_app -> u_shell [label="MainScreens"];
+  v_app -> v_blocked [label="Blocked"];
+  v_blocked -> u_blocked [label="cause", style=dashed, color="#8250DF"];
+  v_blocked -> s_remedy [label="remedies"];
+  s_remedy -> s_recovery [label="retry"];
+  s_recovery -> db_reset [label="preview"];
+  v_blocked -> v_life [label="End()"];
+  v_life -> db_log [label="flush"];
+  s_pics -> s_feed [label="line", style=dashed, color="#B7791F"];
+  s_priming -> s_feed [label="line", style=dashed, color="#B7791F"];
+  s_recovery -> db_log [label="fault", style=dashed, color="#C62828", arrowhead=none, constraint=false];
+}

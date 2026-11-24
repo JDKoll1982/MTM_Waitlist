@@ -64,7 +64,7 @@ Record before drawing:
    - the rest of the page in its normal tokens.
 4. If a cancel command exists, show it; if it does not, do not invent one.
 5. Render:
-   `python docs\ui-designs\tools\render_mockup.py --design "<absolute path>\<refactor>-design.json"`.
+   `python docs\ui-designs\tools\render_mockup.py --design "<absolute path>\<refactor>\<refactor>-design.json"`.
 6. Confirm `<refactor>-after-state-loading-wide.png` differs from `default`.
 
 ## 5. Visual standards
@@ -118,7 +118,7 @@ Record before drawing:
 5. **Layout stability.** The page did not move when the state changed.
 6. **Wording.** `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\ui-automation\ocr_png.ps1 -Path <png>`
    (Windows PowerShell 5.1) and `Resources.resw`; proposed wording is labelled as proposed.
-7. **Verify.** `verify_designs.py --design "<absolute path>\<refactor>-design.json"` is clean.
+7. **Verify.** `verify_designs.py --design "<absolute path>\<refactor>\<refactor>-design.json"` is clean.
 
 ## 10. Acceptance criteria
 

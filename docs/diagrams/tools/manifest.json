@@ -55,6 +55,20 @@
    "title": "Generic Request — Work Center Setup (plain language)",
    "output": "diagram-generic-workcenter-setup-friendly.pdf",
    "spec": "spec-diagram-generic-workcenter-setup-friendly.json"
+  },
+  {
+   "workflow": "startup-launch",
+   "variant": "engineer",
+   "title": "Startup — launch, sign-in and hand-over",
+   "output": "diagram-startup-launch.pdf",
+   "spec": "spec-diagram-startup-launch.json"
+  },
+  {
+   "workflow": "startup-launch",
+   "variant": "friendly",
+   "title": "Startup — launch and sign-in (plain language)",
+   "output": "diagram-startup-launch-friendly.pdf",
+   "spec": "spec-diagram-startup-launch-friendly.json"
   }
  ]
 }

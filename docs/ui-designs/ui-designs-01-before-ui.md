@@ -65,7 +65,7 @@ Establish and write down:
 3. Capture: `pwsh -File scripts\ui-automation\capture_app_window.ps1 -Maximize`. It polls for a non-zero
    main window handle, because the shell appears only after startup validation against the store, which
    has measured longer than nine seconds.
-4. Save the capture as `docs/ui-designs/<<WORKFLOW>>/<<SCREEN>>/<<REFACTOR>>-before.png`. It must be at
+4. Save the capture as `docs/ui-designs/<<WORKFLOW>>/<<SCREEN>>/<<REFACTOR>>/<<REFACTOR>>-before.png`. It must be at
    least 900 × 500; do not upscale it to 1600 × 1000 to match the mockups — the verifier accepts the
    real capture size.
 5. In the design record set `before.kind` to `"capture"`, `captured_at` to the ISO timestamp from the
@@ -91,7 +91,7 @@ Use only when the application cannot run. It is a reconstruction and says so.
    misaligned. A tidy reconstruction is a false before.
 5. Fill `before.source_xaml` with the files you drew from; every path must exist.
 6. Render:
-   `python docs\ui-designs\tools\render_mockup.py --design "<absolute path>\<<REFACTOR>>-design.json"`.
+   `python docs\ui-designs\tools\render_mockup.py --design "<absolute path>\<<REFACTOR>>\<<REFACTOR>>-design.json"`.
    The renderer resolves every output path itself, so a relative design path works; an absolute path is
    still the clearest in a script.
 
@@ -139,7 +139,7 @@ Use only when the application cannot run. It is a reconstruction and says so.
 
 ## 8. File naming
 
-Given `docs/ui-designs/<<WORKFLOW>>/<<SCREEN>>/`:
+Given `docs/ui-designs/<<WORKFLOW>>/<<SCREEN>>/<<REFACTOR>>/`:
 
 ```
 <<REFACTOR>>-design.json
@@ -153,7 +153,7 @@ The renderer names the files; do not rename them afterwards, and do not hand-wri
 
 ## 9. Validation checklist
 
-1. **Record.** `python docs\ui-designs\tools\verify_designs.py --design "<absolute path>\<<REFACTOR>>-design.json"`
+1. **Record.** `python docs\ui-designs\tools\verify_designs.py --design "<absolute path>\<<REFACTOR>>\<<REFACTOR>>-design.json"`
    reports no error about `before`.
 2. **Kind.** A capture has `captured_at`, a `capture_command` and no `mockup`; a reconstruction has a
    mockup, `source_xaml` entries that exist, and the word "reconstruction" in the banner.

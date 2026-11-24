@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AFTER — sign-in states why the offer is missing</title>
+  <link rel="stylesheet" href="../../../../tools/mockup/mockup.css">
+</head>
+<body class="mockup" data-variant="after">
+  <span class="state" id="state-error"></span>
+
+  <div class="variant-banner">
+    AFTER — PROPOSED QOL IMPROVEMENT
+    <span class="provenance">mockup, not a screenshot</span>
+  </div>
+
+  <div class="titlebar">
+    <span class="caption">MTM Waitlist</span>
+    <span class="glyph">— □ ✕</span>
+  </div>
+
+  <main class="page" style="height: calc(100vh - 33px - 32px); padding: 32px; row-gap: 16px;">
+    <div class="page-header" style="gap: 4px;">
+      <h1 class="page-title" style="font-size: 28px;">Sign in</h1>
+      <p class="page-subtitle" style="font-size: 14px;">Sign in to carry on. Your session and this computer are checked against the store.</p>
+    </div>
+
+    <div style="display: flex; flex: 1 1 auto; min-height: 0;">
+      <div style="flex: 1 1 auto; min-width: 0; overflow: auto;">
+        <div class="field" style="margin-bottom: 8px;">
+          <div class="label">User name or employee number</div>
+          <div class="input" style="min-height: 32px;"></div>
+        </div>
+        <p style="margin: 0 0 8px; font-size: 14px; color: var(--text-secondary);">
+          Type your user name, or your four-digit employee number. A number is looked up in the plant
+          system if the store does not hold it.
+        </p>
+        <button class="button primary" style="min-height: 32px;">Continue</button>
+      </div>
+
+      <div style="width: 1px; margin: 0 20px; background: var(--card-stroke);"></div>
+
+      <div style="width: 280px; flex: 0 0 280px; overflow: auto;">
+        <div style="font-weight: 600; margin-bottom: 8px;">Signed in here before <span class="callout">1</span></div>
+        <div class="infobar">
+          <span>ⓘ</span>
+          <div>
+            <div class="title">Who signed in here before could not be read</div>
+            <div style="margin-top: 2px;">Type your user name. Your PIN is still required.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="infobar error when-error">
+      <span>⛔</span>
+      <div>The store could not be reached, so the sign-in could not be confirmed. Try again shortly.</div>
+    </div>
+
+    <p class="stamp" style="margin: 0;">Sheet 1 of 1 · startup-launch · screen: sign in · 780 × 640 window</p>
+  </main>
+</body>
+</html>

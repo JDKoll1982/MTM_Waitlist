@@ -1,0 +1,79 @@
+// Diagram 5 / Sheet 1 of 3 — Startup launch: entry and this computer — Sheet 1 of 3
+// Source of truth: App.xaml.cs, LaunchPipeline, LaunchStepCatalog, ConfigurationStep, StoreReachabilityStep, MachineReadinessStep, MachineConfigurationService
+digraph StartupLaunch1 {
+  graph [
+    rankdir=LR, splines=polyline, overlap=false, nodesep=0.45, ranksep=0.55,
+    newrank=true, fontname="Segoe UI", fontsize=11, bgcolor="#FFFFFF", pad=0.02
+  ];
+  node [
+    shape=box, style="rounded,filled", fontname="Segoe UI", fontsize=11,
+    margin="0.10,0.05", penwidth=1.5, color="#111111", fillcolor="#FFFFFF"
+  ];
+  edge [
+    fontname="Segoe UI", fontsize=11, color="#111111", arrowsize=0.6,
+    penwidth=1.5, fontcolor="#111111"
+  ];
+  subgraph cluster_ui {
+    label="1 · UI — launch surfaces"; fontcolor="#0B3D91"; color="#1F6FEB";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    u_splash [shape=box, label="SplashPage\nstatus · progress", fillcolor="#DCE9FF"];
+    u_setup [shape=box, label="MachineSetupPage\nlocation", fillcolor="#DCE9FF"];
+  }
+  subgraph cluster_vm {
+    label="2 · ViewModels and routing"; fontcolor="#4B2A8A"; color="#8250DF";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    v_app [shape=box, label="App.Show\nLaunchSurface", fillcolor="#EFE3FF"];
+    v_pipe [shape=box, label="LaunchPipeline\nRunAsync", fillcolor="#EFE3FF"];
+    v_feed [shape=box, label="SplashViewModel\nfeed", fillcolor="#EFE3FF"];
+    d_conf [shape=diamond, label="configured?", fillcolor="#FFF1C9", color="#B7791F", margin="0.01,0.01"];
+  }
+  subgraph cluster_svc {
+    label="3 · Services (DI)"; fontcolor="#0A5A4F"; color="#0F7B6C";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    s_budget [shape=box, label="LaunchBudget\n45 s", fillcolor="#D6F5F0"];
+    s_cfg [shape=box, label="ConfigurationStep", fillcolor="#D6F5F0"];
+    s_reach [shape=box, label="StoreReachability\nStep", fillcolor="#D6F5F0"];
+    s_ready [shape=box, label="MachineReadiness\nStep", fillcolor="#D6F5F0"];
+    x_block [shape=cds, label="[To Sheet 3]\nBlocked", fillcolor="#E8F0FF", color="#1F6FEB", style="filled,dashed"];
+  }
+  subgraph cluster_data {
+    label="4 · Store"; fontcolor="#5A4300"; color="#8A6D3B";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    db_settings [shape=cylinder, label="sp_config_\nsettings_get", fillcolor="#EDEDED", fontname="Consolas"];
+    db_lookup [shape=cylinder, label="sp_core_computers_\nregistry_lookup", fillcolor="#EDEDED", fontname="Consolas"];
+    db_config [shape=cylinder, label="sp_core_computers_\nregistry_get_all", fillcolor="#EDEDED", fontname="Consolas"];
+    db_save [shape=cylinder, label="sp_core_computers_\nregistry_upsert", fillcolor="#EDEDED", fontname="Consolas"];
+    x_signin [shape=cds, label="[To Sheet 2]\nSignIn", fillcolor="#E8F0FF", color="#1F6FEB", style="filled,dashed"];
+  }
+  { rank=same; u_splash; v_app; s_budget; db_settings; }
+  u_splash -> v_app -> s_budget -> db_settings [style=invis, constraint=false];
+  { rank=same; u_setup; v_pipe; s_cfg; db_lookup; }
+  u_setup -> v_pipe -> s_cfg -> db_lookup [style=invis, constraint=false];
+  { rank=same; v_feed; s_reach; db_config; }
+  v_feed -> s_reach -> db_config [style=invis, constraint=false];
+  { rank=same; d_conf; s_ready; db_save; }
+  d_conf -> s_ready -> db_save [style=invis, constraint=false];
+  { rank=same; x_block; x_signin; }
+  x_block -> x_signin [style=invis, constraint=false];
+  u_splash -> u_setup [style=invis, constraint=true];
+  v_app -> v_pipe -> v_feed -> d_conf [style=invis, constraint=true];
+  s_budget -> s_cfg -> s_reach -> s_ready -> x_block [style=invis, constraint=true];
+  db_settings -> db_lookup -> db_config -> db_save -> x_signin [style=invis, constraint=true];
+  v_app -> v_pipe [label="RunAsync"];
+  v_pipe -> v_feed [label="feed", style=dashed, color="#8250DF"];
+  v_feed -> u_splash [label="bind", style=dashed, color="#8250DF"];
+  v_pipe -> s_budget [label="bounded"];
+  v_pipe -> s_cfg [label="1"];
+  s_cfg -> db_settings;
+  s_cfg -> s_reach [label="2"];
+  s_reach -> db_settings [label="probe", style=dotted];
+  s_reach -> s_ready [label="3"];
+  s_ready -> db_lookup;
+  s_ready -> db_config;
+  s_ready -> d_conf;
+  d_conf -> u_setup [label="no"];
+  u_setup -> db_save [label="writes"];
+  d_conf -> x_signin [label="yes"];
+  v_pipe -> x_block [label="fails", color="#C62828", penwidth=2.0];
+  s_budget -> x_block [label="budget", style=dashed, color="#B7791F"];
+}

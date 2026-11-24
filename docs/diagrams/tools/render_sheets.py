@@ -201,7 +201,12 @@ class Sheet:
                              fontfile=str(FONT_B_FILE), color=rgb(title_colour))
 
         boxes, y = {}, y0
+        self._pos, self._row_top, self._row_bottom = {}, {}, {}
+        self._gutters = [(band[self.columns[index]][1], band[self.columns[index + 1]][0])
+                         for index in range(len(self.columns) - 1)]
+        self._row_gap = row_gap
         for row in range(self.rows):
+            self._row_top[row] = y
             for lane in self.columns:
                 if len(self.lanes[lane]) <= row:
                     continue
@@ -212,14 +217,20 @@ class Sheet:
                 top = y + (row_h[row] - height) / 2
                 box = fitz.Rect(cx - lane_w[lane] / 2, top, cx + lane_w[lane] / 2, top + height)
                 boxes[node_id] = box
+                self._pos[node_id] = (self.columns.index(lane), row)
                 self._box(page, box, kind, lines, size, line_h)
+            self._row_bottom[row] = y + row_h[row]
             y += row_h[row] + row_gap
 
         self.boxes = list(boxes.values())
+        self._lines, self._pending = [], []
         for edge in self.spec["edges"]:
             a, b, label, style = (list(edge) + ["", ""])[:4]
             if a in boxes and b in boxes:
-                self._arrow(page, boxes[a], boxes[b], label, style, size)
+                self._arrow(page, boxes[a], boxes[b], label, style, size, a, b)
+        for pending in self._pending:
+            self._label(page, *pending)
+        self._pending = []
 
     def _box(self, page, box, kind, lines, size, line_h):
         if kind == "dec":
@@ -243,11 +254,23 @@ class Sheet:
                              color=rgb(INK))
             text_y += line_h
 
-    def _arrow(self, page, src, dst, label, style, size):
+    def _arrow(self, page, src, dst, label, style, size, a=None, b=None):
         colour = rgb(EDGE.get(style, "#212A2E"))
         dashed = "[3 3] 0" if style in DASHED_EDGE else None
         width = 2.0 if style == "red" else 1.2
         arrow = style not in NO_ARROW
+
+        points = self._lane_skip(src, dst, a, b, style)
+        if points:
+            for start, end in zip(points, points[1:]):
+                page.draw_line(start, end, color=colour, width=width, dashes=dashed)
+                self._lines.append((start, end))
+            if arrow:
+                self._head(page, points[-2], points[-1], colour)
+            if label:
+                self._pending.append((label, (points[2].x + points[3].x) / 2, points[2].y - 4,
+                                      size, colour, "middle"))
+            return
 
         if abs((src.x0 + src.x1) - (dst.x0 + dst.x1)) < 4:
             if style in NO_ARROW:
@@ -255,11 +278,12 @@ class Sheet:
             start = fitz.Point((src.x0 + src.x1) / 2, src.y1 + 1)
             end = fitz.Point((dst.x0 + dst.x1) / 2, dst.y0 - 1)
             page.draw_line(start, end, color=colour, width=width, dashes=dashed)
+            self._lines.append((start, end))
             if arrow:
                 self._head(page, start, end, colour)
             if label:
-                self._label(page, label, start.x + 5, (start.y + end.y) / 2 + 3, size, colour,
-                            anchor="left")
+                self._pending.append((label, start.x + 5, (start.y + end.y) / 2 + 3,
+                                      size, colour, "left"))
             return
 
         right = dst.x0 > src.x1
@@ -271,10 +295,41 @@ class Sheet:
         p3, p4 = fitz.Point(mid, ey), fitz.Point(ex, ey)
         for start, end in ((p1, p2), (p2, p3), (p3, p4)):
             page.draw_line(start, end, color=colour, width=width, dashes=dashed)
+            self._lines.append((start, end))
         if arrow:
             self._head(page, p3, p4, colour)
         if label:
-            self._label(page, label, mid, (sy + ey) / 2 + 3, size, colour, anchor="middle")
+            if abs(sy - ey) > 4:
+                # A label centred on a vertical leg would cut a hole in the line, so it sits beside it.
+                self._pending.append((label, mid + 4, (sy + ey) / 2 + 3, size, colour, "left"))
+            else:
+                self._pending.append((label, mid, sy - 3, size, colour, "middle"))
+
+    def _lane_skip(self, src, dst, a, b, style=""):
+        """Waypoints for an edge that crosses a lane in between: the verticals run in the gutters either
+        side of the skipped lanes and the long horizontal runs in the empty gap between two rows, so the
+        line never passes through a box on the way."""
+        if a is None or b is None or a not in self._pos or b not in self._pos:
+            return None
+        (source_lane, source_row), (target_lane, target_row) = self._pos[a], self._pos[b]
+        if target_lane - source_lane < 2:
+            return None
+
+        out_x = sum(self._gutters[source_lane]) / 2
+        in_x = sum(self._gutters[target_lane - 1]) / 2
+        below = target_row > source_row or (target_row == source_row and source_row < self.rows - 1)
+        corridor = (self._row_bottom[source_row] + self._row_gap / 2 if below
+                    else self._row_top[source_row] - self._row_gap / 2)
+        if style in NO_ARROW:
+            # A note link that shares a source with a real edge would otherwise be drawn underneath it,
+            # so it runs in its own parallel track a few points clear of the edge it shadows.
+            out_x += 4
+            in_x -= 4
+            corridor += 6 if below else -6
+
+        sy, ey = (src.y0 + src.y1) / 2, (dst.y0 + dst.y1) / 2
+        return [fitz.Point(src.x1 + 1, sy), fitz.Point(out_x, sy), fitz.Point(out_x, corridor),
+                fitz.Point(in_x, corridor), fitz.Point(in_x, ey), fitz.Point(dst.x0 - 1, ey)]
 
     def _label(self, page, text, cx, cy, size, colour, anchor="middle"):
         text = text.replace("\n", " ")
@@ -289,12 +344,27 @@ class Sheet:
                 rect = fitz.Rect(cx - 1.5, cy - height + 2 + nudge,
                                  cx + width + 1.5, cy + 2 + nudge)
             if not any(rect.intersects(used) for used in self.used_labels) and not any(
-                    rect.intersects(box) for box in self.boxes):
+                    rect.intersects(box) for box in self.boxes) and not self._hits_line(rect):
                 break
         self.used_labels.append(rect)
         page.draw_rect(rect, color=None, fill=(1, 1, 1), width=0)
         page.insert_text((rect.x0 + 1.5, rect.y1 - 2), text, fontsize=label_size,
                          fontname=FONT, fontfile=str(FONT_FILE), color=colour)
+
+    def _hits_line(self, rect):
+        """Whether an axis-aligned edge runs through the rect — a label is never laid over a line."""
+        for start, end in self._lines:
+            if abs(start.x - end.x) < 0.6:
+                if (rect.x0 - 1 <= start.x <= rect.x1 + 1
+                        and not (max(start.y, end.y) < rect.y0 - 1
+                                 or min(start.y, end.y) > rect.y1 + 1)):
+                    return True
+            elif abs(start.y - end.y) < 0.6:
+                if (rect.y0 - 1 <= start.y <= rect.y1 + 1
+                        and not (max(start.x, end.x) < rect.x0 - 1
+                                 or min(start.x, end.x) > rect.x1 + 1)):
+                    return True
+        return False
 
     @staticmethod
     def _head(page, start, end, colour):
@@ -344,7 +414,8 @@ def build(manifest_path):
             drawing = Sheet(sheet)
             drawing.draw(page, drawing.fit())
             legend(page)
-        target = PDF_DIR / document["output"]
+        target = PDF_DIR / document["workflow"] / document["output"]
+        target.parent.mkdir(parents=True, exist_ok=True)
         pdf.save(str(target), garbage=4, deflate=True)
         pdf.close()
         written.append((target.name, len(sheets)))

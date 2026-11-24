@@ -134,11 +134,35 @@ def emit(sheet):
     return "\n".join(lines) + "\n"
 
 
-def write(sheet):
-    DOT_DIR.mkdir(parents=True, exist_ok=True)
-    path = DOT_DIR / (sheet["file"] + ".dot")
+def orphans(sheet):
+    """Nodes no edge touches: a box drawn on the sheet with nothing leading into or out of it."""
+    connected = {end for edge in sheet["edges"] for end in edge[:2]}
+    return [node_id for lane in sheet["lanes"].values() for node_id, _, _ in lane
+            if node_id not in connected]
+
+
+def write(sheet, workflow):
+    folder = DOT_DIR / workflow
+    folder.mkdir(parents=True, exist_ok=True)
+    path = folder / (sheet["file"] + ".dot")
     path.write_text(emit(sheet), encoding="utf-8")
+    loose = orphans(sheet)
+    if loose:
+        print(f"warning: {path.name} draws {', '.join(loose)} with no edge — the flow will not "
+              f"read through it; add the edge to the spec", file=sys.stderr)
     return path.name
+
+
+def workflow_of(spec, spec_path):
+    """The workflow a spec belongs to: declared in the spec, else read from its file name."""
+    if spec.get("workflow"):
+        return spec["workflow"]
+    name = pathlib.Path(spec_path).stem
+    if name.startswith("spec-diagram-"):
+        name = name[len("spec-diagram-"):]
+    if name.endswith("-friendly"):
+        name = name[: -len("-friendly")]
+    return name
 
 
 if __name__ == "__main__":
@@ -146,5 +170,6 @@ if __name__ == "__main__":
         sys.exit("usage: dotgen.py <spec.json> [spec.json ...]")
     for argument in sys.argv[1:]:
         spec = json.loads(pathlib.Path(argument).read_text(encoding="utf-8"))
+        workflow = workflow_of(spec, argument)
         for sheet in spec["sheets"]:
-            print("wrote", write(sheet))
+            print("wrote", write(sheet, workflow))

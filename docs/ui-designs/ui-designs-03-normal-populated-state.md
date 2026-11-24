@@ -56,7 +56,7 @@ Record before drawing:
 3. If the same state also appears in the before reconstruction, put the matching content in
    `mockups/<refactor>-before.html` so the comparison isolates the design change rather than the data.
 4. Render:
-   `python docs\ui-designs\tools\render_mockup.py --design "<absolute path>\<refactor>-design.json"`.
+   `python docs\ui-designs\tools\render_mockup.py --design "<absolute path>\<refactor>\<refactor>-design.json"`.
    Any path works: the renderer resolves the output path before Edge sees it.
 5. The renderer writes `<refactor>-after.png` from the `default` state at `wide`, and every
    `default`/viewport combination.
@@ -126,7 +126,7 @@ The renderer writes these names in the design folder; do not rename them.
 
 1. **Bytes differ.** `default` must differ from every other state's file. If it matches `state-empty`
    byte for byte, the state anchors are wrong.
-2. **Verify.** `python docs\ui-designs\tools\verify_designs.py --design "<absolute path>\<refactor>-design.json"`.
+2. **Verify.** `python docs\ui-designs\tools\verify_designs.py --design "<absolute path>\<refactor>\<refactor>-design.json"`.
 3. **Text.** `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\ui-automation\ocr_png.ps1 -Path <png>`
    over `<refactor>-after.png`, compared with `Resources.resw`.
 4. **Field set.** Against the XAML: no field added, none missing, none reordered.

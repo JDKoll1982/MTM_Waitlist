@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AFTER — proposed QOL improvement</title>
+  <link rel="stylesheet" href="../../../../tools/mockup/mockup.css">
+</head>
+<body class="mockup" data-variant="after">
+  <span class="state" id="state-default"></span>
+  <span class="state" id="state-no-job"></span>
+  <span class="state" id="state-error"></span>
+
+  <div class="variant-banner">
+    AFTER — PROPOSED QOL IMPROVEMENT
+    <span class="provenance">mockup, not a screenshot</span>
+  </div>
+
+  <div class="titlebar">
+    <span class="caption">MTM Waitlist</span>
+    <span class="glyph">— □ ✕</span>
+  </div>
+
+  <div class="shell" style="height: calc(100vh - 32px - 62px);">
+    <nav class="nav">
+      <div class="item selected"><span class="icon">▤</span> Waitlist</div>
+      <div class="item"><span class="icon">▦</span> Setup</div>
+      <div class="item"><span class="icon">⚙</span> Settings</div>
+    </nav>
+
+    <main class="page">
+      <div class="page-header">
+        <h1 class="page-title">New request <span class="callout">1</span></h1>
+        <p class="page-subtitle">Tap your press. The running job is shown where you choose.</p>
+      </div>
+
+      <div class="row wrap">
+        <div class="tile selected" style="width: 240px;">
+          <span class="name">Press 12 <span class="callout">2</span></span>
+          <span class="detail">Job 47211 · Running</span>
+          <span class="badge">24 in coil</span>
+        </div>
+        <div class="tile" style="width: 240px;">
+          <span class="name">Press 14</span>
+          <span class="detail">No job running</span>
+          <span class="badge">Idle</span>
+        </div>
+        <div class="tile" style="width: 240px;">
+          <span class="name">Press 18</span>
+          <span class="detail">Job 47218 · Running</span>
+          <span class="badge">Flatstock</span>
+        </div>
+      </div>
+
+      <div class="infobar caution when-no-job">
+        <span>⚠</span>
+        <div>
+          <div class="title">This press has no running job</div>
+          <div>Start a job in Setup, or pick another press.</div>
+        </div>
+      </div>
+
+      <div class="infobar error when-error">
+        <span>⛔</span>
+        <div>
+          <div class="title">The press list could not be read</div>
+          <div>Infor Visual is not reachable. Try again when the plant network is back.</div>
+        </div>
+      </div>
+
+      <div class="action-bar" style="margin-top: auto;">
+        <button class="button">Back</button>
+        <button class="button primary">Continue</button>
+      </div>
+
+      <p class="stamp">Sheet 1 of 5 · workorder-new-request · screen: work-centre selection</p>
+    </main>
+  </div>
+</body>
+</html>

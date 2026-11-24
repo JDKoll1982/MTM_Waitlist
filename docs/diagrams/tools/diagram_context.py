@@ -92,7 +92,7 @@ class DiagramSet:
             seen.add(key)
             document = dict(entry)
             document["spec_path"] = self.tools / entry["spec"]
-            document["pdf_path"] = self.pdf_dir / entry["output"]
+            document["pdf_path"] = self.pdf_dir / entry["workflow"] / entry["output"]
             documents.append(document)
         return documents
 
@@ -136,7 +136,8 @@ class DiagramSet:
                 sheets = None
         dots = 0
         if spec_present and sheets:
-            dots = sum(1 for name in self._dot_names(document) if (self.dot_dir / name).is_file())
+            dots = sum(1 for name in self._dot_names(document)
+                   if (self.dot_folder(document) / name).is_file())
         return {
             "spec": spec_present,
             "sheets": sheets,
@@ -144,6 +145,10 @@ class DiagramSet:
             "dots": dots,
             "pdf": document["pdf_path"].is_file(),
         }
+
+    def dot_folder(self, document):
+        """Each workflow's Graphviz sources live in their own folder: dot/<workflow>/."""
+        return self.dot_dir / document["workflow"]
 
     def _dot_names(self, document):
         if not document["spec_path"].is_file():
@@ -302,7 +307,7 @@ def write_pngs(path, out_dir=PNG_DIR, dpi=150):
     return written
 
 
-def build(document, sheet=None, inspect=False, png=False, dot_dir=DIAGRAMS / "dot",
+def build(document, sheet=None, inspect=False, png=False, dot_dir=None,
           known_outputs=None, adhoc_dot=None, max_text=700):
     warnings = []
     spec_present = document["spec_path"].is_file()
@@ -531,14 +536,14 @@ def main(argv=None):
                 "output": pdf.name, "pdf_path": pdf,
             }
             digest = build(document, sheet=args.sheet, inspect=args.inspect_pdf or args.png,
-                           png=args.png, dot_dir=diagrams.root / "dot",
+                           png=args.png, dot_dir=None,
                            known_outputs=diagrams.known_outputs(),
                            adhoc_dot=pathlib.Path(args.dot) if args.dot else None)
         else:
             document, defaulted = diagrams.select(args.workflow, args.variant)
             digest = build(document, sheet=args.sheet, inspect=args.inspect_pdf or args.png,
                            png=args.png,
-                           dot_dir=(diagrams.root / "dot"),
+                           dot_dir=diagrams.dot_folder(document),
                            known_outputs=diagrams.known_outputs())
             if defaulted:
                 digest.setdefault("notes", []).append(

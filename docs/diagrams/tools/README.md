@@ -8,12 +8,13 @@ spec, not a `.dot` or a PDF: both are build output.
 | File | What it is |
 | --- | --- |
 | `spec-*.json` | The source of truth. One file per document; one entry per sheet: title, source-of-truth note, lane order, lane titles, nodes (`[id, label, kind]`) and edges (`[from, to, label, style]`). |
-| `manifest.json` | Which spec builds which PDF, in what order, and which workflow and variant each document belongs to. Sheet numbering (`Sheet X of Y`) is computed from spec order, so it cannot go stale. |
+| `manifest.json` | Which spec builds which PDF, in what order, and which workflow and variant each document belongs to. The workflow also names the `dot/` and `pdf/` subfolder a run writes to. | Sheet numbering (`Sheet X of Y`) is computed from spec order, so it cannot go stale. |
 | `diagram_context.py` | **Read-only.** Prints a workflow's sheets, nodes, edges, findings and connectors as a digest for an agent; checks the `.dot` files against the spec and reports missing sources. |
 | `test_diagram_context.py` | Tests for the digest: the real diagram set, plus fixtures for a missing spec, `.dot` or PDF, an out-of-range sheet reference and a duplicate manifest entry. |
-| `dotgen.py` | Spec → `.dot` in `docs/diagrams/dot/`. Valid Graphviz, one sheet per file, for editing or a quick single-page look. |
-| `render_sheets.py` | Spec → the print-ready PDFs in `docs/diagrams/pdf/`. Draws each sheet on an explicit swimlane grid rather than handing layout to Graphviz, because the print contract cannot be met by automatic layout. |
+| `dotgen.py` | Spec → `.dot` in `docs/diagrams/dot/<workflow>/`. Valid Graphviz, one sheet per file, for editing or a quick single-page look. |
+| `render_sheets.py` | Spec → the print-ready PDFs in `docs/diagrams/pdf/<workflow>/`. Draws each sheet on an explicit swimlane grid rather than handing layout to Graphviz, because the print contract cannot be met by automatic layout. |
 | `verify_pdfs.py` | Asserts the print contract on every page and writes 300 DPI PNGs for a visual check. |
+| `dotgen.py` node check | Warns when a spec draws a node no edge touches, so a box cannot be left standing alone by accident. |
 
 ## Node kinds
 
@@ -46,6 +47,20 @@ Read-only: it reads the spec, checks the `.dot` against it, and reports a missin
 implying it was read. `--format json` for structured output, `--strict` to exit non-zero on a warning,
 and `--spec/--dot/--pdf-file` for a diagram set outside this folder.
 
+## Check a spec against the code
+
+`scripts\docs\generate-docs.ps1` parses the C# with the Roslyn parser PowerShell already carries
+(no packages, no compilation) and reports where a spec and the code disagree:
+
+```powershell
+pwsh scripts\docs\generate-docs.ps1 -Mode Gaps -Workflow startup-launch
+```
+
+It writes `code-facts.json` (types, constructor/field/creation/call/DI-resolution edges, `sp_*`
+references, with file and line) and `diagram-gaps.md`, which names the JSON location to edit for each
+orphan node, label the code does not hold, and edge the code proves but the spec omits. It never edits
+a spec: the wording of a label, a note or a lane choice stays an authoring decision.
+
 ## Test
 
 ```powershell
@@ -55,8 +70,8 @@ python -m unittest discover -s docs\diagrams\tools -p "test_*.py"
 `dotgen.py` takes any number of spec files. `verify_pdfs.py` writes PNGs to
 `%TEMP%\mtm-diagrams\png`; pass `--no-png` to skip that.
 
-Build output is split by type: `dotgen.py` writes `docs/diagrams/dot/*.dot` and `render_sheets.py`
-writes `docs/diagrams/pdf/*.pdf`. Neither folder is edited by hand; recreate it by running the
+Build output is split by type: `dotgen.py` writes `docs/diagrams/dot/<workflow>/*.dot` and `render_sheets.py`
+writes `docs/diagrams/pdf/<workflow>/*.pdf`, where the workflow is the one declared at the top of the spec. Neither folder is edited by hand; recreate it by running the
 scripts.
 
 Requires PyMuPDF (`pip install pymupdf`), the Segoe UI face (Windows), and — only if you want to

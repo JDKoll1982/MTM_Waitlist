@@ -30,6 +30,8 @@ REFACTOR = "fixture-change"
 VIEWPORTS = [{"name": "wide", "width": 1600, "height": 1000, "scale": 1},
              {"name": "medium", "width": 1280, "height": 800, "scale": 1},
              {"name": "minimum", "width": 900, "height": 500, "scale": 1}]
+STAGE_WINDOW = {"kind": "stage", "stage": "sign-in",
+                "viewports": [{"name": "stage", "width": 780, "height": 640, "scale": 1}]}
 
 
 def write_png(path, width, height, rgb=(255, 255, 255)):
@@ -101,8 +103,9 @@ PROPOSAL = """# QOL Refactor — Before and After Design
 
 
 def make_design(root, *, approved=False, before_kind="reconstruction", states=None,
-                refactor=REFACTOR, viewports=None, proposal=PROPOSAL):
-    design_dir = pathlib.Path(root) / WORKFLOW / "fixture-screen"
+                refactor=REFACTOR, viewports=None, proposal=PROPOSAL, workflow=WORKFLOW,
+                window=None, flow_source=None, workflow_refs=None):
+    design_dir = pathlib.Path(root) / WORKFLOW / "fixture-screen" / refactor
     (design_dir / "mockups").mkdir(parents=True)
     (design_dir / "mockups" / "mockup.css").write_text(".mockup { color: #1b1b1b; }\n",
                                                        encoding="utf-8")
@@ -122,14 +125,16 @@ def make_design(root, *, approved=False, before_kind="reconstruction", states=No
                   if before_kind == "reconstruction"
                   else [{"name": "default", "applies_to": ["after"]}, {"name": "state-error", "applies_to": ["after"]}])
 
+    window = window or {"viewports": viewports or VIEWPORTS}
+    canonical = "stage" if window.get("kind") == "stage" else "wide"
     design = {
-        "workflow": WORKFLOW,
+        "workflow": workflow,
         "workflow_variant": "engineer",
         "screen": "fixture-screen",
         "refactor": refactor,
         "title": "Fixture change",
         "audience": "developer",
-        "window": {"viewports": viewports or VIEWPORTS},
+        "window": window,
         "before": ({"kind": "reconstruction",
                     "mockup": f"mockups/{refactor}-before.html",
                     "captured_at": None,
@@ -148,11 +153,14 @@ def make_design(root, *, approved=False, before_kind="reconstruction", states=No
                       "winui": "GridView with ItemTemplate",
                       "code": ["Module_Waitlist/Views/WaitlistViewPage.xaml"],
                       "note": None}],
-        "workflow_refs": [{"sheet": 1, "nodes": ["v_wc", "d_gate"]}],
+        "workflow_refs": workflow_refs if workflow_refs is not None else [
+            {"sheet": 1, "nodes": ["v_wc", "d_gate"]}],
         "design_system": {"resources": ["Styles/FontSizes.xaml", "Styles/Thickness.xaml"]},
         "approval": {"approved_at": None, "approved_by": None, "sources_sha256": None,
                      "rendered_sha256": None, "design_system_sha256": None},
     }
+    if flow_source is not None:
+        design["flow_source"] = flow_source
     design_path = design_dir / f"{refactor}-design.json"
     design_path.write_text(json.dumps(design, indent=1), encoding="utf-8")
 
@@ -165,8 +173,8 @@ def make_design(root, *, approved=False, before_kind="reconstruction", states=No
                 write_png(design_dir / f"{refactor}-{variant}-{state['name']}-{viewport['name']}.png",
                           int(viewport["width"] * viewport.get("scale", 1)),
                           int(viewport["height"] * viewport.get("scale", 1)))
-        wide = next((viewport for viewport in sizes if viewport["name"] == "wide"), sizes[0])
-        shutil.copyfile(design_dir / f"{refactor}-{variant}-default-wide.png",
+        wide = next((viewport for viewport in sizes if viewport["name"] == canonical), sizes[0])
+        shutil.copyfile(design_dir / f"{refactor}-{variant}-default-{wide['name']}.png",
                         design_dir / f"{refactor}-{variant}.png")
     if before_kind == "capture":
         write_png(design_dir / f"{refactor}-before.png", 1600, 1000)
@@ -303,6 +311,44 @@ class Verification(unittest.TestCase):
             path.write_text(json.dumps(design, indent=1), encoding="utf-8")
             report, _ = self.check(path)
             self.assertTrue(any("must name the XAML" in error for error in report.errors))
+
+    def test_stage_design_uses_the_launch_stage_size(self):
+        with tempfile.TemporaryDirectory() as folder:
+            _, path = make_design(folder, window=STAGE_WINDOW)
+            report, _ = self.check(path)
+            self.assertEqual(report.errors, [], report.errors)
+
+    def test_stage_size_the_host_does_not_set_fails(self):
+        with tempfile.TemporaryDirectory() as folder:
+            window = {"kind": "stage", "stage": "sign-in",
+                      "viewports": [{"name": "stage", "width": 777, "height": 640, "scale": 1}]}
+            _, path = make_design(folder, window=window)
+            report, _ = self.check(path)
+            self.assertTrue(any("not a launch stage size" in error for error in report.errors))
+
+    def test_unmapped_workflow_with_a_recorded_flow_source_passes(self):
+        with tempfile.TemporaryDirectory() as folder:
+            _, path = make_design(
+                folder, workflow="unmapped-flow",
+                flow_source=["docs/living-specs/living-specs-capability-startup-launch.spec.md"],
+                workflow_refs=[])
+            report, _ = self.check(path)
+            self.assertEqual(report.errors, [], report.errors)
+            self.assertTrue(any("not mapped" in warning for warning in report.warnings))
+
+    def test_unmapped_workflow_without_a_flow_source_fails(self):
+        with tempfile.TemporaryDirectory() as folder:
+            _, path = make_design(folder, workflow="unmapped-flow", workflow_refs=[])
+            report, _ = self.check(path)
+            self.assertTrue(any("add flow_source" in error for error in report.errors))
+
+    def test_unmapped_workflow_cannot_cite_diagram_nodes(self):
+        with tempfile.TemporaryDirectory() as folder:
+            _, path = make_design(
+                folder, workflow="unmapped-flow",
+                flow_source=["docs/living-specs/living-specs-capability-startup-launch.spec.md"])
+            report, _ = self.check(path)
+            self.assertTrue(any("cannot cite workflow_refs" in error for error in report.errors))
 
 
 class CommandLine(unittest.TestCase):

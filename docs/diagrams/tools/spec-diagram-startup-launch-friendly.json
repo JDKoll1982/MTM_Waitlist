@@ -1,0 +1,305 @@
+{
+ "workflow": "startup-launch",
+ "sheets": [
+  {
+   "file": "diagram-startup-launch-friendly-1-turning-it-on",
+   "name": "StartupFriendly1",
+   "title": "Startup — made simple · Sheet 1 of 2: turning it on",
+   "sheet": "Sheet 1 of 2",
+   "source": "LaunchPipeline, LaunchStepCatalog, ConfigurationStep, StoreReachabilityStep, MachineReadinessStep, PictureCacheStep",
+   "lanes": {
+    "ui": [
+     [
+      "u_launch",
+      "The launch window\\nstatus, progress\\nand the count",
+      "ui"
+     ],
+     [
+      "u_setup",
+      "Setup screen\\nwhere this computer\\nstands",
+      "ui"
+     ],
+     [
+      "u_signin",
+      "Sign-in screen\\nname, then PIN",
+      "ui"
+     ]
+    ],
+    "vm": [
+     [
+      "v_limits",
+      "One step at a time,\\neach with a time\\nlimit",
+      "vm"
+     ],
+     [
+      "d_ready",
+      "Is this computer\\nset up yet?",
+      "dec"
+     ],
+     [
+      "x_next",
+      "[To Sheet 2]\\nSigning in",
+      "conn"
+     ]
+    ],
+    "svc": [
+     [
+      "s_pictures",
+      "Copies the shared\\npictures: best\\neffort, so never\\nholds up the launch",
+      "svc"
+     ],
+     [
+      "s_settings",
+      "Reads what this\\ncomputer keeps",
+      "svc"
+     ],
+     [
+      "s_store",
+      "Asks the store\\nif it answers",
+      "svc"
+     ],
+     [
+      "s_computer",
+      "Reads this\\ncomputer's name",
+      "svc"
+     ]
+    ],
+    "data": [
+     [
+      "d_settings",
+      "This computer's\\nsettings",
+      "db"
+     ],
+     [
+      "d_record",
+      "This computer's\\nrecord",
+      "db"
+     ],
+     [
+      "d_place",
+      "Where the computer\\nstands",
+      "db"
+     ]
+    ]
+   },
+   "lane_titles": {
+    "ui": "1 · What you see",
+    "vm": "2 · What the app checks",
+    "svc": "3 · What it does",
+    "data": "4 · Where it looks"
+   },
+   "edges": [
+    [
+     "u_launch",
+     "v_limits",
+     "start"
+    ],
+    [
+     "v_limits",
+     "s_pictures",
+     "first"
+    ],
+    [
+     "s_settings",
+     "d_settings"
+    ],
+    [
+     "s_settings",
+     "s_store",
+     "asks"
+    ],
+    [
+     "s_store",
+     "s_computer",
+     "then"
+    ],
+    [
+     "s_computer",
+     "d_record"
+    ],
+    [
+     "s_computer",
+     "d_place"
+    ],
+    [
+     "d_ready",
+     "u_setup",
+     "no"
+    ],
+    [
+     "u_setup",
+     "d_place",
+     "writes"
+    ],
+    [
+     "d_ready",
+     "x_next",
+     "yes"
+    ],
+    [
+     "x_next",
+     "u_signin"
+    ]
+   ]
+  },
+  {
+   "file": "diagram-startup-launch-friendly-2-signing-in",
+   "name": "StartupFriendly2",
+   "title": "Startup — made simple · Sheet 2 of 2: signing in",
+   "sheet": "Sheet 2 of 2",
+   "source": "SignInPage, SignInViewModel, IdentifierSignInService, CredentialCheckService, LaunchSessionService, PreviousSignInService",
+   "lanes": {
+    "ui": [
+     [
+      "u_signin",
+      "Sign-in screen\\nname, then PIN",
+      "ui"
+     ],
+     [
+      "u_form",
+      "The form to set\\nyourself up",
+      "ui"
+     ],
+     [
+      "u_first",
+      "The first screen",
+      "ui"
+     ]
+    ],
+    "vm": [
+     [
+      "x_back",
+      "[From Sheet 1]\\nturning it on",
+      "conn"
+     ],
+     [
+      "d_known",
+      "Does it know\\nthe name?",
+      "dec"
+     ],
+     [
+      "v_offer",
+      "The people who\\nsigned in here\\nbefore",
+      "vm"
+     ]
+    ],
+    "svc": [
+     [
+      "s_name",
+      "Looks the name up\\nhere, then at the\\nplant system",
+      "svc"
+     ],
+     [
+      "s_pin",
+      "Checks the PIN",
+      "svc"
+     ],
+     [
+      "s_session",
+      "Notes that you\\nare signed in",
+      "svc"
+     ],
+     [
+      "s_setup",
+      "Sets up a new\\naccount",
+      "svc"
+     ]
+    ],
+    "data": [
+     [
+      "d_people",
+      "Employee list",
+      "db"
+     ],
+     [
+      "d_accounts",
+      "Accounts\\nand roles",
+      "db"
+     ],
+     [
+      "d_pins",
+      "PINs, never shown",
+      "db"
+     ],
+     [
+      "d_recent",
+      "People who signed\\nin here before",
+      "db"
+     ],
+     [
+      "n_offer",
+      "Worth fixing: when that\\nlist cannot be read, it\\nvanishes without a word.",
+      "refactor"
+     ]
+    ]
+   },
+   "lane_titles": {
+    "ui": "1 · What you see",
+    "vm": "2 · What it checks",
+    "svc": "3 · What it does",
+    "data": "4 · Where it looks"
+   },
+   "edges": [
+    [
+     "x_back",
+     "u_signin",
+     "shows"
+    ],
+    [
+     "u_signin",
+     "d_known",
+     "type a name"
+    ],
+    [
+     "s_name",
+     "d_known",
+     "known?"
+    ],
+    [
+     "v_offer",
+     "n_offer",
+     "cannot read",
+     "link"
+    ],
+    [
+     "v_offer",
+     "d_recent"
+    ],
+    [
+     "s_name",
+     "d_people"
+    ],
+    [
+     "d_known",
+     "u_form",
+     "no"
+    ],
+    [
+     "s_setup",
+     "d_accounts",
+     "writes"
+    ],
+    [
+     "s_pin",
+     "d_pins",
+     "checks"
+    ],
+    [
+     "s_pin",
+     "s_session",
+     "accepted"
+    ],
+    [
+     "s_session",
+     "d_accounts",
+     "session"
+    ],
+    [
+     "s_session",
+     "u_first",
+     "signed in"
+    ]
+   ]
+  }
+ ]
+}

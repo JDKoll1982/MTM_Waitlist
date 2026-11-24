@@ -2,8 +2,8 @@
 
 ## What exists
 
-`docs/diagrams/` holds four end-to-end workflow maps, each in an engineer version and a plain-language
-version, plus one refactor note:
+`docs/diagrams/` holds five workflow maps, each in an engineer version and a plain-language version,
+plus one refactor note:
 
 | Document | Sheets | Subject |
 | --- | --- | --- |
@@ -11,7 +11,9 @@ version, plus one refactor note:
 | `diagram-workorder-workcenter-setup.pdf` | 5 | Work-center setup, selection through save |
 | `diagram-generic-new-request.pdf` | 4 | Generic request, work center through result |
 | `diagram-generic-workcenter-setup.pdf` | 2 | The configuration paths a generic request depends on |
-| `diagram-*-friendly.pdf` (4) | 2 each | The same four flows in plain language, role-free wording |
+| `diagram-*-friendly.pdf` (5) | 2 each | The same five flows in plain language, role-free wording |
+| `diagram-startup-launch.pdf` | 3 | Startup launch: entry and this computer, signing in, stops and hand-over |
+| `diagram-startup-launch-friendly.pdf` | 2 | The same launch in plain language |
 | `diagram-workflow-refactor-notes.md` | — | Comparison matrix, duplication hotspots, Spec Kit inputs |
 
 Both variants come from one spec each, so the friendly sheet is a *translation*, not a second diagram.
@@ -40,8 +42,8 @@ through the column gutter.
 
 `dot` needs `-Gmargin=0`, otherwise it reserves its own 0.5 in page margin on top of the content.
 
-Build output is split by type: the PDFs live in `docs/diagrams/pdf/` and the Graphviz sources in
-`docs/diagrams/dot/`. The `.dot` files are still emitted — they are the canonical graph description and
+Build output is split by type and by workflow: the PDFs live in `docs/diagrams/pdf/<workflow>/` and the
+Graphviz sources in `docs/diagrams/dot/<workflow>/`, with the workflow declared at the top of each spec. The `.dot` files are still emitted — they are the canonical graph description and
 are useful for inspecting one sheet — but they are not what produces the PDF.
 
 ## Page geometry

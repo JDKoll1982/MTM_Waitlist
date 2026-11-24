@@ -58,9 +58,9 @@ def check(path, png_dir):
 def main():
     png_dir = None if "--no-png" in sys.argv else PNG
     failed = 0
-    pdfs = sorted(PDF_DIR.glob("*.pdf"))
+    pdfs = sorted(PDF_DIR.rglob("*.pdf"))
     if not pdfs:
-        sys.exit(f"no PDFs in {PDF_DIR}")
+        sys.exit(f"no PDFs under {PDF_DIR}")
     for path in pdfs:
         problems, smallest, largest = check(path, png_dir)
         status = "OK" if not problems else "FAIL"

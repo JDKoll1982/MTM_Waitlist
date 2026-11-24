@@ -65,7 +65,7 @@ Decide and record, before drawing:
 4. If the app draws `Assets/Placeholders/waitlist-empty-state.png`, place it at its real size, centred,
    with the message beneath.
 5. Render:
-   `python docs\ui-designs\tools\render_mockup.py --design "<absolute path>\<refactor>-design.json"`.
+   `python docs\ui-designs\tools\render_mockup.py --design "<absolute path>\<refactor>\<refactor>-design.json"`.
 6. Confirm `<refactor>-after-state-empty-wide.png` differs from `<refactor>-after.png`.
 
 Do not annotate. Do not pre-fill a field "for context". Do not show an error.
@@ -124,7 +124,7 @@ If the before reconstruction shows the same state, the renderer also writes
 5. **Placeholders.** `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\ui-automation\ocr_png.ps1 -Path <png>`
    (Windows PowerShell 5.1) and compare with `Resources.resw`; placeholder colour is secondary.
 6. **Empty kind.** The proposal's claim matches the screen: initial, no selection, no data or unavailable.
-7. **Verify.** `verify_designs.py --design "<absolute path>\<refactor>-design.json"` is clean.
+7. **Verify.** `verify_designs.py --design "<absolute path>\<refactor>\<refactor>-design.json"` is clean.
 
 ## 10. Acceptance criteria
 

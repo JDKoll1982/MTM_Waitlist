@@ -1,0 +1,537 @@
+{
+ "workflow": "startup-launch",
+ "sheets": [
+  {
+   "file": "diagram-startup-launch-1-entry",
+   "name": "StartupLaunch1",
+   "title": "Diagram 5 / Sheet 1 of 3 — Startup launch: entry and this computer",
+   "sheet": "Sheet 1 of 3",
+   "source": "App.xaml.cs, LaunchPipeline, LaunchStepCatalog, ConfigurationStep, StoreReachabilityStep, MachineReadinessStep, MachineConfigurationService",
+   "lanes": {
+    "ui": [
+     [
+      "u_splash",
+      "SplashPage\\nstatus · progress",
+      "ui"
+     ],
+     [
+      "u_setup",
+      "MachineSetupPage\\nlocation",
+      "ui"
+     ]
+    ],
+    "vm": [
+     [
+      "v_app",
+      "App.Show\\nLaunchSurface",
+      "vm"
+     ],
+     [
+      "v_pipe",
+      "LaunchPipeline\\nRunAsync",
+      "vm"
+     ],
+     [
+      "v_feed",
+      "SplashViewModel\\nfeed",
+      "vm"
+     ],
+     [
+      "d_conf",
+      "configured?",
+      "dec"
+     ]
+    ],
+    "svc": [
+     [
+      "s_budget",
+      "LaunchBudget\\n45 s",
+      "svc"
+     ],
+     [
+      "s_cfg",
+      "ConfigurationStep",
+      "svc"
+     ],
+     [
+      "s_reach",
+      "StoreReachability\\nStep",
+      "svc"
+     ],
+     [
+      "s_ready",
+      "MachineReadiness\\nStep",
+      "svc"
+     ],
+     [
+      "x_block",
+      "[To Sheet 3]\\nBlocked",
+      "conn"
+     ]
+    ],
+    "data": [
+     [
+      "db_settings",
+      "sp_config_\\nsettings_get",
+      "db"
+     ],
+     [
+      "db_lookup",
+      "sp_core_computers_\\nregistry_lookup",
+      "db"
+     ],
+     [
+      "db_config",
+      "sp_core_computers_\\nregistry_get_all",
+      "db"
+     ],
+     [
+      "db_save",
+      "sp_core_computers_\\nregistry_upsert",
+      "db"
+     ],
+     [
+      "x_signin",
+      "[To Sheet 2]\\nSignIn",
+      "conn"
+     ]
+    ]
+   },
+   "lane_titles": {
+    "ui": "1 · UI — launch surfaces",
+    "vm": "2 · ViewModels and routing",
+    "svc": "3 · Services (DI)",
+    "data": "4 · Store"
+   },
+   "edges": [
+    [
+     "v_app",
+     "v_pipe",
+     "RunAsync"
+    ],
+    [
+     "v_pipe",
+     "v_feed",
+     "feed",
+     "vdash"
+    ],
+    [
+     "v_feed",
+     "u_splash",
+     "bind",
+     "vdash"
+    ],
+    [
+     "v_pipe",
+     "s_budget",
+     "bounded"
+    ],
+    [
+     "v_pipe",
+     "s_cfg",
+     "1"
+    ],
+    [
+     "s_cfg",
+     "db_settings"
+    ],
+    [
+     "s_cfg",
+     "s_reach",
+     "2"
+    ],
+    [
+     "s_reach",
+     "db_settings",
+     "probe",
+     "dots"
+    ],
+    [
+     "s_reach",
+     "s_ready",
+     "3"
+    ],
+    [
+     "s_ready",
+     "db_lookup"
+    ],
+    [
+     "s_ready",
+     "db_config"
+    ],
+    [
+     "s_ready",
+     "d_conf"
+    ],
+    [
+     "d_conf",
+     "u_setup",
+     "no"
+    ],
+    [
+     "u_setup",
+     "db_save",
+     "writes"
+    ],
+    [
+     "d_conf",
+     "x_signin",
+     "yes"
+    ],
+    [
+     "v_pipe",
+     "x_block",
+     "fails",
+     "red"
+    ],
+    [
+     "s_budget",
+     "x_block",
+     "budget",
+     "dash"
+    ]
+   ]
+  },
+  {
+   "file": "diagram-startup-launch-2-sign-in",
+   "name": "StartupLaunch2",
+   "title": "Diagram 5 / Sheet 2 of 3 — Startup launch: signing in",
+   "sheet": "Sheet 2 of 3",
+   "source": "SignInPage, SignInViewModel, IdentifierSignInService, CredentialCheckService, LaunchSessionService, PreviousSignInService, AccountCreationService",
+   "lanes": {
+    "ui": [
+     [
+      "u_signin",
+      "SignInPage\\nidentifier · PIN",
+      "ui"
+     ]
+    ],
+    "vm": [
+     [
+      "v_signin",
+      "SignInViewModel\\nEnterAsync",
+      "vm"
+     ],
+     [
+      "d_ident",
+      "identifier\\nknown?",
+      "dec"
+     ],
+     [
+      "v_setup",
+      "SetUpPanel\\nViewModel",
+      "vm"
+     ],
+     [
+      "x_from",
+      "[From Sheet 1]\\nresolve-person",
+      "conn"
+     ],
+     [
+      "x_next",
+      "[To Sheet 3]\\nMainScreens",
+      "conn"
+     ]
+    ],
+    "svc": [
+     [
+      "s_ident",
+      "IdentifierSignIn\\nService",
+      "svc"
+     ],
+     [
+      "s_people",
+      "PreviousSignIn\\nService",
+      "svc"
+     ],
+     [
+      "s_cred",
+      "CredentialCheck\\nService",
+      "svc"
+     ],
+     [
+      "s_session",
+      "LaunchSession\\nService",
+      "svc"
+     ],
+     [
+      "s_account",
+      "AccountCreation\\nService",
+      "svc"
+     ]
+    ],
+    "data": [
+     [
+      "db_employee",
+      "sp_core_employee_\\nby_identifier_get",
+      "db"
+     ],
+     [
+      "db_prev",
+      "sp_auth_user_\\nprevious_sign_ins",
+      "db"
+     ],
+     [
+      "x_offer",
+      "[REFACTOR] a failed offer\\nread returns [] and the\\ncolumn vanishes",
+      "refactor"
+     ],
+     [
+      "db_cred",
+      "sp_auth_user_\\ncredential_get",
+      "db"
+     ],
+     [
+      "db_user",
+      "sp_auth_user_row_get\\nsp_core_account_\\nsetup_create",
+      "db"
+     ]
+    ]
+   },
+   "lane_titles": {
+    "ui": "1 · UI — launch surfaces",
+    "vm": "2 · ViewModels and commands",
+    "svc": "3 · Services (DI)",
+    "data": "4 · Store"
+   },
+   "edges": [
+    [
+     "x_from",
+     "v_signin"
+    ],
+    [
+     "v_signin",
+     "u_signin",
+     "bind",
+     "vdash"
+    ],
+    [
+     "v_signin",
+     "s_ident",
+     "Enter"
+    ],
+    [
+     "s_ident",
+     "db_employee"
+    ],
+    [
+     "s_ident",
+     "d_ident",
+     "held?"
+    ],
+    [
+     "d_ident",
+     "v_setup",
+     "no"
+    ],
+    [
+     "d_ident",
+     "s_cred",
+     "yes"
+    ],
+    [
+     "s_cred",
+     "db_cred",
+     "PIN"
+    ],
+    [
+     "s_cred",
+     "s_session",
+     "accepted"
+    ],
+    [
+     "s_session",
+     "db_user",
+     "session"
+    ],
+    [
+     "v_setup",
+     "s_account",
+     "create"
+    ],
+    [
+     "s_account",
+     "db_user",
+     "writes"
+    ],
+    [
+     "v_signin",
+     "s_people",
+     "offer",
+     "dash"
+    ],
+    [
+     "s_people",
+     "db_prev",
+     "",
+     "dots"
+    ],
+    [
+     "s_people",
+     "x_offer",
+     "needs",
+     "link"
+    ],
+    [
+     "s_session",
+     "x_next",
+     "signed in"
+    ]
+   ]
+  },
+  {
+   "file": "diagram-startup-launch-3-stops-and-hand-over",
+   "name": "StartupLaunch3",
+   "title": "Diagram 5 / Sheet 3 of 3 — Startup launch: stops, remedies and hand-over",
+   "sheet": "Sheet 3 of 3",
+   "source": "BlockedStatePage, BlockedStateViewModel, LaunchRemedySet, BlockedStateRemedies, StartupRecoveryService, PictureCacheStep, VisualVerdictPrimingStep, LaunchActivityFeed",
+   "lanes": {
+    "ui": [
+     [
+      "u_blocked",
+      "BlockedStatePage\\nretry · reset · close",
+      "ui"
+     ],
+     [
+      "u_shell",
+      "ShellPage\\nfirst screen",
+      "ui"
+     ]
+    ],
+    "vm": [
+     [
+      "x_from",
+      "[From Sheet 2]\\nsigned in",
+      "conn"
+     ],
+     [
+      "v_app",
+      "App.Show\\nLaunchSurface",
+      "vm"
+     ],
+     [
+      "v_blocked",
+      "BlockedState\\nViewModel",
+      "vm"
+     ],
+     [
+      "v_life",
+      "AppLifecycleHost\\nRestarter",
+      "vm"
+     ]
+    ],
+    "svc": [
+     [
+      "s_remedy",
+      "RemedySet ·\\nBlockedStateRemedies",
+      "svc"
+     ],
+     [
+      "s_recovery",
+      "StartupRecovery\\nService",
+      "svc"
+     ],
+     [
+      "s_pics",
+      "PictureCacheStep\\nbest effort",
+      "svc"
+     ],
+     [
+      "s_priming",
+      "VerdictPriming\\nbest effort",
+      "svc"
+     ],
+     [
+      "s_feed",
+      "LaunchActivity\\nFeed",
+      "svc"
+     ]
+    ],
+    "data": [
+     [
+      "db_log",
+      "ops_startup_logs\\nILogService",
+      "db"
+     ],
+     [
+      "db_reset",
+      "sp_machine_\\nconfiguration_reset",
+      "db"
+     ]
+    ]
+   },
+   "lane_titles": {
+    "ui": "1 · UI — launch surfaces",
+    "vm": "2 · ViewModels and routing",
+    "svc": "3 · Services (DI)",
+    "data": "4 · Store"
+   },
+   "edges": [
+    [
+     "x_from",
+     "v_app",
+     "hand-over"
+    ],
+    [
+     "v_app",
+     "u_shell",
+     "MainScreens"
+    ],
+    [
+     "v_app",
+     "v_blocked",
+     "Blocked"
+    ],
+    [
+     "v_blocked",
+     "u_blocked",
+     "cause",
+     "vdash"
+    ],
+    [
+     "v_blocked",
+     "s_remedy",
+     "remedies"
+    ],
+    [
+     "s_remedy",
+     "s_recovery",
+     "retry"
+    ],
+    [
+     "s_recovery",
+     "db_reset",
+     "preview"
+    ],
+    [
+     "v_blocked",
+     "v_life",
+     "End()"
+    ],
+    [
+     "v_life",
+     "db_log",
+     "flush"
+    ],
+    [
+     "s_pics",
+     "s_feed",
+     "line",
+     "dash"
+    ],
+    [
+     "s_priming",
+     "s_feed",
+     "line",
+     "dash"
+    ],
+    [
+     "s_recovery",
+     "db_log",
+     "fault",
+     "link"
+    ]
+   ]
+  }
+ ]
+}

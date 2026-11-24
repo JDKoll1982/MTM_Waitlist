@@ -63,7 +63,7 @@ Record before drawing:
 4. In the proposal, say whether the app moves focus to the first invalid control, and draw the focus only
    if it does.
 5. Render:
-   `python docs\ui-designs\tools\render_mockup.py --design "<absolute path>\<refactor>-design.json"`.
+   `python docs\ui-designs\tools\render_mockup.py --design "<absolute path>\<refactor>\<refactor>-design.json"`.
 6. Confirm `<refactor>-after-state-error-wide.png` differs from the default and from `state-empty`.
 
 No modal dialog for a field-level rule, no toast for something the person must fix, no `TeachingTip` for
@@ -120,7 +120,7 @@ an error.
 5. **Correction path.** A reader can state what to change to clear it.
 6. **Scope.** Only the failing element is marked.
 7. **Category.** This is a validation error, not an unavailable store or a cached-data notice.
-8. **Verify.** `verify_designs.py --design "<absolute path>\<refactor>-design.json"` is clean.
+8. **Verify.** `verify_designs.py --design "<absolute path>\<refactor>\<refactor>-design.json"` is clean.
 
 ## 10. Acceptance criteria
 
