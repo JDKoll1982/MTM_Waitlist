@@ -14,6 +14,8 @@ than by character count, and never scales type below the floor.
     python docs/diagrams/tools/render_sheets.py docs/diagrams/tools/manifest.json
     python docs/diagrams/tools/verify_pdfs.py
 
+The PDFs are written to `docs/diagrams/pdf/`; edit `manifest.json` only to add or remove a document.
+
 Requires PyMuPDF (`pip install pymupdf`) and the Segoe UI face that ships with Windows.
 """
 import json
@@ -29,7 +31,7 @@ HEADER_H = 15.0
 LEGEND_H = 19.0
 LIVE = fitz.Rect(MARGIN, MARGIN + HEADER_H, PAGE_W - MARGIN, PAGE_H - MARGIN - LEGEND_H)
 
-OUT = pathlib.Path(__file__).resolve().parent.parent
+PDF_DIR = pathlib.Path(__file__).resolve().parent.parent / "pdf"
 FONT_DIR = pathlib.Path(r"C:\Windows\Fonts")
 FONT, FONT_FILE = "SegoeUI", FONT_DIR / "segoeui.ttf"
 FONT_B, FONT_B_FILE = "SegoeUI-Bold", FONT_DIR / "segoeuib.ttf"
@@ -232,10 +234,6 @@ class Sheet:
             dashed = "[3 2] 0" if kind in ("note", "refactor", "conn") else None
             page.draw_rect(box, color=rgb(BORDER[kind]), fill=rgb(FILL[kind]),
                            width=1.5, dashes=dashed, radius=0.18)
-            if kind == "db":
-                page.draw_line(fitz.Point(box.x0 + 3, box.y0 + 7),
-                               fitz.Point(box.x1 - 3, box.y0 + 7),
-                               color=rgb(BORDER[kind]), width=0.9)
 
         text_y = box.y0 + (box.height - len(lines) * line_h) / 2 + line_h * 0.76
         for line in lines:
@@ -332,6 +330,7 @@ def legend(page):
 def build(manifest_path):
     manifest_path = pathlib.Path(manifest_path)
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    PDF_DIR.mkdir(parents=True, exist_ok=True)
     written = []
     for document in manifest["documents"]:
         spec = json.loads((manifest_path.parent / document["spec"]).read_text(encoding="utf-8"))
@@ -345,7 +344,7 @@ def build(manifest_path):
             drawing = Sheet(sheet)
             drawing.draw(page, drawing.fit())
             legend(page)
-        target = OUT / document["output"]
+        target = PDF_DIR / document["output"]
         pdf.save(str(target), garbage=4, deflate=True)
         pdf.close()
         written.append((target.name, len(sheets)))

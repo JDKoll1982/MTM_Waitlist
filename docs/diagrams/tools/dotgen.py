@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """Generate the Graphviz sources behind the MTM_Waitlist workflow diagrams.
 
-Each sheet is one JSON spec; this script turns it into a `.dot` file beside its PDF in
-`docs/diagrams/`. Style is fixed here so every sheet matches: landscape, pure white canvas,
-pastel swimlane fills, 1.5 pt borders, 11 pt labels, explicit line breaks so nothing clips.
+Each sheet is one JSON spec; this script turns it into a `.dot` file in `docs/diagrams/dot/`,
+alongside the print-ready PDFs in `docs/diagrams/pdf/`. Style is fixed here so every sheet
+matches: landscape, pure white canvas, pastel swimlane fills, 1.5 pt borders, 11 pt labels,
+explicit line breaks so nothing clips.
 
-    python docs/diagrams/tools/dotgen.py docs/diagrams/tools/spec-workorder-new-request.json
+    python docs/diagrams/tools/dotgen.py docs/diagrams/tools/spec-diagram-workorder-new-request.json
 
 Render a single sheet for a quick look (Graphviz lays the graph out afresh):
 
-    "%ProgramFiles%\\Graphviz\\bin\\dot.exe" -Tpdf -Gmargin=0 -o sheet.pdf docs/diagrams/x.dot
+    "%ProgramFiles%\\Graphviz\\bin\\dot.exe" -Tpdf -Gmargin=0 -o sheet.pdf docs/diagrams/dot/x.dot
 
 For the paged, print-ready PDFs see `render_sheets.py`.
 """
@@ -17,7 +18,7 @@ import json
 import pathlib
 import sys
 
-OUT = pathlib.Path(__file__).resolve().parent.parent
+DOT_DIR = pathlib.Path(__file__).resolve().parent.parent / "dot"
 
 FILL = {
     "ui": ("#DCE9FF", "#111111"),
@@ -134,7 +135,8 @@ def emit(sheet):
 
 
 def write(sheet):
-    path = OUT / (sheet["file"] + ".dot")
+    DOT_DIR.mkdir(parents=True, exist_ok=True)
+    path = DOT_DIR / (sheet["file"] + ".dot")
     path.write_text(emit(sheet), encoding="utf-8")
     return path.name
 

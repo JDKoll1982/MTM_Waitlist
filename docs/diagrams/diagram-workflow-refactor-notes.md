@@ -16,14 +16,15 @@ Source revision: `main` working tree at time of writing. Diagrams verified at US
 
 | # | Flow | Technical (engineer) | Plain-language (stakeholder) | Sheets |
 | --- | --- | --- | --- | --- |
-| 1 | Work Order — New Request | [diagram-workorder-new-request.pdf](./diagram-workorder-new-request.pdf) | [diagram-workorder-new-request-friendly.pdf](./diagram-workorder-new-request-friendly.pdf) | 5 / 2 |
-| 2 | Work Order — Work Center Setup | [diagram-workorder-workcenter-setup.pdf](./diagram-workorder-workcenter-setup.pdf) | [diagram-workorder-workcenter-setup-friendly.pdf](./diagram-workorder-workcenter-setup-friendly.pdf) | 5 / 2 |
-| 3 | Generic Request — New Request | [diagram-generic-new-request.pdf](./diagram-generic-new-request.pdf) | [diagram-generic-new-request-friendly.pdf](./diagram-generic-new-request-friendly.pdf) | 4 / 2 |
-| 4 | Generic Request — Work Center Setup | [diagram-generic-workcenter-setup.pdf](./diagram-generic-workcenter-setup.pdf) | [diagram-generic-workcenter-setup-friendly.pdf](./diagram-generic-workcenter-setup-friendly.pdf) | 2 / 2 |
+| 1 | Work Order — New Request | [diagram-workorder-new-request.pdf](./pdf/diagram-workorder-new-request.pdf) | [diagram-workorder-new-request-friendly.pdf](./pdf/diagram-workorder-new-request-friendly.pdf) | 5 / 2 |
+| 2 | Work Order — Work Center Setup | [diagram-workorder-workcenter-setup.pdf](./pdf/diagram-workorder-workcenter-setup.pdf) | [diagram-workorder-workcenter-setup-friendly.pdf](./pdf/diagram-workorder-workcenter-setup-friendly.pdf) | 5 / 2 |
+| 3 | Generic Request — New Request | [diagram-generic-new-request.pdf](./pdf/diagram-generic-new-request.pdf) | [diagram-generic-new-request-friendly.pdf](./pdf/diagram-generic-new-request-friendly.pdf) | 4 / 2 |
+| 4 | Generic Request — Work Center Setup | [diagram-generic-workcenter-setup.pdf](./pdf/diagram-generic-workcenter-setup.pdf) | [diagram-generic-workcenter-setup-friendly.pdf](./pdf/diagram-generic-workcenter-setup-friendly.pdf) | 2 / 2 |
 
-Each PDF is generated from a `<diagram>-<sheet>.dot` Graphviz source beside it. The `.dot` files are the
-canonical, editable description of each sheet; the PDFs are build output. Both are generated from the JSON
-specs in [tools/](./tools/) — edit a spec there, then rebuild:
+Each PDF in [`pdf/`](./pdf/) is generated from a `<diagram>-<sheet>.dot` Graphviz source in
+[`dot/`](./dot/). The `.dot` files are the canonical, editable description of each sheet; the PDFs are
+build output. Both are generated from the JSON specs in [tools/](./tools/) — edit a spec there, then
+rebuild:
 
 ```powershell
 python docs\diagrams\tools\render_sheets.py docs\diagrams\tools\manifest.json

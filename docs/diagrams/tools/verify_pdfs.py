@@ -9,6 +9,8 @@ Asserts, for every page:
 Then writes a 300 DPI PNG of every page to a scratch folder for a visual look.
 
     python docs/diagrams/tools/verify_pdfs.py
+
+PDFs are read from `docs/diagrams/pdf/`.
 """
 import pathlib
 import sys
@@ -19,7 +21,7 @@ PAGE_W, PAGE_H = 792.0, 612.0
 MARGIN = 36.0
 MIN_TEXT = 9.4          # the floor is 9.5 pt; the tolerance absorbs float rounding in the PDF
 
-OUT = pathlib.Path(__file__).resolve().parent.parent
+PDF_DIR = pathlib.Path(__file__).resolve().parent.parent / "pdf"
 PNG = pathlib.Path.home() / "AppData/Local/Temp/mtm-diagrams/png"
 
 
@@ -56,7 +58,10 @@ def check(path, png_dir):
 def main():
     png_dir = None if "--no-png" in sys.argv else PNG
     failed = 0
-    for path in sorted(OUT.glob("*.pdf")):
+    pdfs = sorted(PDF_DIR.glob("*.pdf"))
+    if not pdfs:
+        sys.exit(f"no PDFs in {PDF_DIR}")
+    for path in pdfs:
         problems, smallest, largest = check(path, png_dir)
         status = "OK" if not problems else "FAIL"
         print(f"{path.name:48s} {status:4s} text {smallest:.1f}-{largest:.1f} pt")

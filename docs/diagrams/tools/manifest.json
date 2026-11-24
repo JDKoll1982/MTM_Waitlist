@@ -1,34 +1,58 @@
 {
  "documents": [
   {
+   "workflow": "workorder-new-request",
+   "variant": "engineer",
+   "title": "Work Order — New Request",
    "output": "diagram-workorder-new-request.pdf",
    "spec": "spec-diagram-workorder-new-request.json"
   },
   {
+   "workflow": "workorder-workcenter-setup",
+   "variant": "engineer",
+   "title": "Work Order — Work Center Setup",
    "output": "diagram-workorder-workcenter-setup.pdf",
    "spec": "spec-diagram-workorder-workcenter-setup.json"
   },
   {
+   "workflow": "generic-new-request",
+   "variant": "engineer",
+   "title": "Generic Request — New Request",
    "output": "diagram-generic-new-request.pdf",
    "spec": "spec-diagram-generic-new-request.json"
   },
   {
+   "workflow": "generic-workcenter-setup",
+   "variant": "engineer",
+   "title": "Generic Request — Work Center Setup",
    "output": "diagram-generic-workcenter-setup.pdf",
    "spec": "spec-diagram-generic-workcenter-setup.json"
   },
   {
+   "workflow": "workorder-new-request",
+   "variant": "friendly",
+   "title": "Work Order — New Request (plain language)",
    "output": "diagram-workorder-new-request-friendly.pdf",
    "spec": "spec-diagram-workorder-new-request-friendly.json"
   },
   {
+   "workflow": "workorder-workcenter-setup",
+   "variant": "friendly",
+   "title": "Work Order — Work Center Setup (plain language)",
    "output": "diagram-workorder-workcenter-setup-friendly.pdf",
    "spec": "spec-diagram-workorder-workcenter-setup-friendly.json"
   },
   {
+   "workflow": "generic-new-request",
+   "variant": "friendly",
+   "title": "Generic Request — New Request (plain language)",
    "output": "diagram-generic-new-request-friendly.pdf",
    "spec": "spec-diagram-generic-new-request-friendly.json"
   },
   {
+   "workflow": "generic-workcenter-setup",
+   "variant": "friendly",
+   "title": "Generic Request — Work Center Setup (plain language)",
    "output": "diagram-generic-workcenter-setup-friendly.pdf",
    "spec": "spec-diagram-generic-workcenter-setup-friendly.json"
   }

@@ -36,10 +36,13 @@ that were tried through `dot` failed on this material:
 So `tools/render_sheets.py` draws the swimlane grid itself: lanes are columns, array index is the row.
 Labels are wrapped by measured width (`fitz.Font.text_length` against the embedded Segoe UI face), the
 type size is chosen per sheet from 11 pt down to 9.5 pt and never below it, and arrows are elbows routed
-through the column gutter. The `.dot` files are still emitted — they are the canonical graph description
-and are useful for inspecting one sheet — but they are not what produces the PDF.
+through the column gutter.
 
 `dot` needs `-Gmargin=0`, otherwise it reserves its own 0.5 in page margin on top of the content.
+
+Build output is split by type: the PDFs live in `docs/diagrams/pdf/` and the Graphviz sources in
+`docs/diagrams/dot/`. The `.dot` files are still emitted — they are the canonical graph description and
+are useful for inspecting one sheet — but they are not what produces the PDF.
 
 ## Page geometry
 
@@ -55,16 +58,21 @@ rows   gap starts at max(14, size * 1.7) and is stretched by up to 60 pt to fill
 Body type is 11 pt with `line_h = size * 1.26`, box padding `7 x 4`, node border 1.5 pt, edge stroke
 1.2 pt (2.0 pt for the red write path), arrow head arms 6.5 pt at ±0.42 rad.
 
-## Two bugs worth not repeating
+## Bugs worth not repeating
 
 1. **A manifest that duplicated sheet content went stale.** The first build kept full sheet data in
    `manifest.json` alongside the specs, so edits to a spec silently rendered from the old copy — a
    regenerated page still showed a node that had been deleted 40 minutes earlier. `manifest.json` now
-   maps only `output → spec`; `Sheet X of Y` is computed at build time from spec order. There is exactly
-   one place a sheet is described.
+   maps `output → spec` plus the workflow identity; `Sheet X of Y` is computed at build time from spec
+   order. There is exactly one place a sheet is described.
 2. **Edge labels landed on top of node text.** Label collision avoidance only checked other labels, so a
    short annotation beside a tall node was drawn across its third line. `_label` now tests the node rects
    too (`self.boxes`) and pushes the label out through a wider nudge sequence (0, ±11, ±22, ±33, ±44).
+3. **A decorative rule on the procedure boxes read as a defect.** `_box` drew a thin horizontal line
+   across every `db` card, 7 pt below its top edge, to echo a datastore. On a page it looks like a rule
+   cutting through the card's label, and a reader reports it as a broken box. Procedure cards are now
+   plain rounded rectangles, distinguished by the grey fill alone — the legend swatch never had the
+   rule either, so nothing else changes.
 
 ## Verifying fidelity, not just size
 
@@ -81,8 +89,23 @@ PyMuPDF (`import pymupdf`; the `fitz` alias is deprecated and warns), Segoe UI a
 glyphs and renders tofu — and Graphviz at `%ProgramFiles%\Graphviz\bin\dot.exe` only for inspecting a
 single `.dot`. `mmdc` is not installed.
 
-## What the diagrams were built to answer
+## Consuming the set (agent context)
 
+The set is an input, not only an output. `tools/diagram_context.py` prints a workflow's sheets, lanes,
+nodes, edges, findings and cross-sheet connectors as a digest, from `manifest.json` — which carries
+`workflow`, `variant` and `title` per document alongside `output` and `spec`. The spec is treated as
+authoritative: the `.dot` file is diffed against it and a disagreement is reported, never repaired
+silently. Missing spec, `.dot` or PDF is a warning, and a PDF-only set says the graph structure is
+unavailable.
+
+PDF reading is PyMuPDF (`--inspect-pdf`), and `--png` writes page images to
+`%TEMP%\mtm-diagrams\context` for a visual look — the same trap as the print check: the generator
+succeeding is not evidence the page reads correctly. Tests are stdlib `unittest`
+(`python -m unittest discover -s docs\diagrams\tools -p "test_*.py"`), not the .NET suite, because
+diagram work may not add code to the solution. The procedure an agent follows around the digest lives
+in `.github/skills/workflow-diagram-context/SKILL.md`.
+
+## What the diagrams were built to answer
 The refactor note is the payload; the diagrams are how it was established. The findings that matter most:
 
 - `NewRequestSummaryViewModel.SubmitAsync` calls

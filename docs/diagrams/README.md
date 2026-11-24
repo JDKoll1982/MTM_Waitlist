@@ -13,10 +13,13 @@ turns that into something `/speckit.specify` can consume.
 
 | # | Workflow | Engineer | Plain language | Sheets |
 | --- | --- | --- | --- | --- |
-| 1 | Work Order — New Request | [PDF](./diagram-workorder-new-request.pdf) | [PDF](./diagram-workorder-new-request-friendly.pdf) | 5 / 2 |
-| 2 | Work Order — Work Center Setup | [PDF](./diagram-workorder-workcenter-setup.pdf) | [PDF](./diagram-workorder-workcenter-setup-friendly.pdf) | 5 / 2 |
-| 3 | Generic Request — New Request | [PDF](./diagram-generic-new-request.pdf) | [PDF](./diagram-generic-new-request-friendly.pdf) | 4 / 2 |
-| 4 | Generic Request — Work Center Setup | [PDF](./diagram-generic-workcenter-setup.pdf) | [PDF](./diagram-generic-workcenter-setup-friendly.pdf) | 2 / 2 |
+| 1 | Work Order — New Request | [PDF](./pdf/diagram-workorder-new-request.pdf) | [PDF](./pdf/diagram-workorder-new-request-friendly.pdf) | 5 / 2 |
+| 2 | Work Order — Work Center Setup | [PDF](./pdf/diagram-workorder-workcenter-setup.pdf) | [PDF](./pdf/diagram-workorder-workcenter-setup-friendly.pdf) | 5 / 2 |
+| 3 | Generic Request — New Request | [PDF](./pdf/diagram-generic-new-request.pdf) | [PDF](./pdf/diagram-generic-new-request-friendly.pdf) | 4 / 2 |
+| 4 | Generic Request — Work Center Setup | [PDF](./pdf/diagram-generic-workcenter-setup.pdf) | [PDF](./pdf/diagram-generic-workcenter-setup-friendly.pdf) | 2 / 2 |
+
+The finished documents are in [`pdf/`](./pdf/); the Graphviz sources they are described by are in
+[`dot/`](./dot/); the specs that generate both are in [`tools/`](./tools/README.md).
 
 ## How to read a page
 
@@ -56,8 +59,8 @@ seven high-severity, ten moderate and four low. The ones that change behaviour t
 
 ## Rebuilding
 
-The PDFs and the `.dot` files beside them are build output. The source is a JSON spec per document in
-[tools/](./tools/README.md).
+The PDFs in `pdf/` and the `.dot` files in `dot/` are build output. The source is a JSON spec per
+document in [tools/](./tools/README.md).
 
 ```powershell
 python docs\diagrams\tools\dotgen.py docs\diagrams\tools\spec-diagram-workorder-new-request.json
@@ -67,6 +70,25 @@ python docs\diagrams\tools\verify_pdfs.py
 
 Needs PyMuPDF (`pip install pymupdf`) and the Segoe UI face that ships with Windows. Graphviz is only
 needed to inspect a single `.dot` file — it does not produce these PDFs.
+
+## Using a diagram as context for a change
+
+The set is also an input to UI/UX work. Before proposing a change to a mapped workflow, print its
+digest — sheets, lanes, nodes, edges, findings and cross-sheet connectors — instead of describing the
+flow from memory:
+
+```powershell
+python docs\diagrams\tools\diagram_context.py --list
+python docs\diagrams\tools\diagram_context.py --workflow workorder-new-request --sheet 3
+```
+
+Add `--inspect-pdf --png` to read the rendered pages and write them to `%TEMP%` for a look. The command
+is read-only and reports a missing spec, `.dot` or PDF rather than glossing over it. The full
+procedure — correlate with the code, scope the change, report a diagram/code disagreement — is the
+`workflow-diagram-context` skill.
+
+A change that alters what a person sees also needs a rendered BEFORE and AFTER design, not just the
+flow: see [`../ui-designs/`](../ui-designs/README.md).
 
 ## Print contract
 
