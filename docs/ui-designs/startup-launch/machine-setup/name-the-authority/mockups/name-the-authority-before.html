@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>BEFORE — machine setup asks for an Administrator</title>
+  <link rel="stylesheet" href="../../../../tools/mockup/mockup.css">
+  <style>
+    .strip { display: none; }
+    body:has(#state-error:target) .strip { display: block; }
+    .field-label { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .input-box {
+      height: 32px; display: flex; align-items: center; padding: 0 12px;
+      font-size: 14px; color: var(--text-tertiary, #9a9a9a);
+      background: var(--card-bg); border: 1px solid var(--card-stroke);
+      border-bottom: 2px solid var(--text-secondary); border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="mockup" data-variant="before">
+  <span class="state" id="state-error"></span>
+
+  <div class="variant-banner">
+    BEFORE — CURRENT IMPLEMENTATION
+    <span class="provenance">reconstruction</span>
+  </div>
+
+  <div class="titlebar">
+    <span class="caption">MTM Waitlist</span>
+    <span class="glyph">— □ ✕</span>
+  </div>
+
+  <main class="page" style="height: calc(100vh - 33px - 32px); padding: 32px; row-gap: 16px;">
+    <div class="page-header" style="gap: 4px;">
+      <h1 class="page-title" style="font-size: 24px;">Set up this computer</h1>
+      <p class="page-subtitle" style="font-size: 14px;">This computer has not been set up yet. A Developer or an Admin has to tell it where it stands.</p>
+    </div>
+
+    <div style="flex: 1 1 auto; min-height: 0; overflow: auto;">
+      <div style="font-weight: 600; margin-bottom: 8px;">Sign in to set this computer up</div>
+      <div style="margin-bottom: 8px;">
+        <div class="field-label">Developer / Admin user name</div>
+        <div class="input-box">The user name of a Developer or Admin account</div>
+      </div>
+      <div style="margin-bottom: 8px;">
+        <div class="field-label">PIN</div>
+        <div class="input-box">That account's PIN</div>
+      </div>
+      <button class="button primary" style="min-width: 180px;">Sign in and unlock setup</button>
+    </div>
+
+    <div class="strip infobar error" style="margin: 0;">
+      <span>⛔</span>
+      <div>Type a Developer or Admin user name and PIN before unlocking setup.</div>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end;">
+      <button class="button">Close setup</button>
+    </div>
+
+    <p class="stamp" style="margin: 0;">Sheet 1 of 1 · startup-launch · screen: machine setup · 520 × 560 window</p>
+  </main>
+</body>
+</html>
+

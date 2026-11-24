@@ -1,0 +1,111 @@
+{
+  "workflow": "startup-launch",
+  "workflow_variant": "engineer",
+  "screen": "sign-in",
+  "refactor": "terminal-aware-offer",
+  "title": "Say what kind of computer this is",
+  "audience": "developer",
+  "window": {
+    "kind": "stage",
+    "stage": "sign-in",
+    "viewports": [
+      { "name": "stage", "width": 780, "height": 640, "scale": 1 }
+    ]
+  },
+  "before": {
+    "kind": "reconstruction",
+    "mockup": "mockups/terminal-aware-offer-before.html",
+    "captured_at": null,
+    "capture_command": null,
+    "source_xaml": [
+      "Module_Startup/Views/SignInPage.xaml",
+      "MTM_Waitlist.Startup/ViewModels/SignInViewModel.cs",
+      "MTM_Waitlist.Startup/Services/PreviousSignInService.cs",
+      "Database/StoredProcedures/sp_auth_user_previous_sign_ins_list/create.sql"
+    ]
+  },
+  "after": {
+    "mockup": "mockups/terminal-aware-offer-after.html"
+  },
+  "states": [
+    { "name": "default", "applies_to": ["before", "after"] },
+    { "name": "state-few", "applies_to": ["before", "after"] },
+    { "name": "state-solo", "applies_to": ["before", "after"] }
+  ],
+  "callouts": [
+    "The column now says whether one person or many have signed in on this computer, from the rows the read already returns.",
+    "A person who can no longer sign in is no longer offered: the read filters on the account being active, as the other two account reads do.",
+    "Sign-in itself is unchanged: the name is still typed or picked, and the PIN is still required."
+  ],
+  "elements": [
+    {
+      "design": "The line under the offer heading that states how many people use this computer",
+      "winui": "TextBlock (TextFillColorSecondaryBrush, 12)",
+      "code": [
+        "Module_Startup/Views/SignInPage.xaml",
+        "MTM_Waitlist.Startup/ViewModels/SignInViewModel.cs"
+      ],
+      "note": "three new properties, one per band: one person, several, six or more"
+    },
+    {
+      "design": "The three wordings the line can show",
+      "winui": "Resource strings Startup_SignIn.PreviousPeopleScopeOne / ScopeFew / ScopeMany",
+      "code": [
+        "Strings/en-us/Resources.resw"
+      ],
+      "note": "new keys; the heading keeps Startup_SignIn.PreviousPeopleHeading"
+    },
+    {
+      "design": "The offer itself: one card per person",
+      "winui": "ItemsControl with a Button per item",
+      "code": [
+        "Module_Startup/Views/SignInPage.xaml"
+      ],
+      "note": "unchanged"
+    },
+    {
+      "design": "The divider and the offer column",
+      "winui": "Border width 1 and a ScrollViewer, MaxWidth 300",
+      "code": [
+        "Module_Startup/Views/SignInPage.xaml"
+      ],
+      "note": "unchanged: still shown only while the read answered with people"
+    },
+    {
+      "design": "Who is offered",
+      "winui": "Stored procedure result set",
+      "code": [
+        "Database/StoredProcedures/sp_auth_user_previous_sign_ins_list/create.sql"
+      ],
+      "note": "adds the u.is_active = 1 filter the other two account reads already carry"
+    },
+    {
+      "design": "The count the line is drawn from",
+      "winui": "IReadOnlyList<PreviousSignIn> returned by the read",
+      "code": [
+        "MTM_Waitlist.Startup/Services/PreviousSignInService.cs",
+        "MTM_Waitlist.Startup/ViewModels/SignInViewModel.cs"
+      ],
+      "note": "the read caps at six, so fewer than six is exact and six means six or more"
+    }
+  ],
+  "workflow_refs": [
+    { "sheet": 2, "nodes": ["v_signin", "s_people", "x_offer"] }
+  ],
+  "design_system": {
+    "resources": [
+      "Styles/FontSizes.xaml",
+      "Styles/Thickness.xaml",
+      "Styles/TextBlock.xaml",
+      "Styles/ModuleSetup.xaml",
+      "Styles/Dialogs.xaml"
+    ]
+  },
+  "approval": {
+    "approved_at": null,
+    "approved_by": null,
+    "sources_sha256": null,
+    "rendered_sha256": null,
+    "design_system_sha256": null
+  }
+}

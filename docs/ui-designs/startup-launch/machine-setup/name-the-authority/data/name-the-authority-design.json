@@ -1,0 +1,111 @@
+{
+  "workflow": "startup-launch",
+  "workflow_variant": "engineer",
+  "screen": "machine-setup",
+  "refactor": "name-the-authority",
+  "title": "Ask for the role the gate actually checks",
+  "audience": "developer",
+  "window": {
+    "kind": "stage",
+    "stage": "machine-setup",
+    "viewports": [
+      { "name": "stage", "width": 520, "height": 560, "scale": 1 }
+    ]
+  },
+  "before": {
+    "kind": "reconstruction",
+    "mockup": "mockups/name-the-authority-before.html",
+    "captured_at": null,
+    "capture_command": null,
+    "source_xaml": [
+      "Module_Startup/Views/MachineSetupPage.xaml",
+      "MTM_Waitlist.Startup/ViewModels/MachineSetupViewModel.cs",
+      "MTM_Waitlist.Startup/Services/MachineSetupGate.cs"
+    ]
+  },
+  "after": {
+    "mockup": "mockups/name-the-authority-after.html"
+  },
+  "states": [
+    { "name": "default", "applies_to": ["before", "after"] },
+    { "name": "state-error", "applies_to": ["before", "after"] }
+  ],
+  "callouts": [
+    "The stage asks for a Developer or an IT Department account, which are the two roles the gate checks.",
+    "The subtitle, the field label, the placeholder and both refusals now use the same role names.",
+    "The form, the gate, the save and every abort route are unchanged."
+  ],
+  "elements": [
+    {
+      "design": "The stage subtitle",
+      "winui": "TextBlock bound to ViewModel.SubtitleText",
+      "code": [
+        "Module_Startup/Views/MachineSetupPage.xaml",
+        "MTM_Waitlist.Startup/ViewModels/MachineSetupViewModel.cs"
+      ],
+      "note": "value of Startup_MachineSetup.Subtitle"
+    },
+    {
+      "design": "The sign-in name label and its hint",
+      "winui": "TextBox Header and PlaceholderText",
+      "code": [
+        "Module_Startup/Views/MachineSetupPage.xaml",
+        "MTM_Waitlist.Startup/ViewModels/MachineSetupViewModel.cs"
+      ],
+      "note": "values of Startup_MachineSetup.SignInNameLabel and .SignInNameHint"
+    },
+    {
+      "design": "The empty-field refusal",
+      "winui": "Border with a TextBlock (SystemFillColorCriticalBackgroundBrush)",
+      "code": [
+        "Module_Startup/Views/MachineSetupPage.xaml",
+        "MTM_Waitlist.Startup/ViewModels/MachineSetupViewModel.cs"
+      ],
+      "note": "value of Startup_MachineSetup.RefusedSignInRequired; the strip is unchanged"
+    },
+    {
+      "design": "The other refusals on the same stage",
+      "winui": "Message strip text",
+      "code": [
+        "MTM_Waitlist.Startup/ViewModels/MachineSetupViewModel.cs",
+        "Strings/en-us/Resources.resw"
+      ],
+      "note": "Startup_MachineSetup.NotAuthorized and .RefusedSignInRequired also say 'Admin' and change with the same edit"
+    },
+    {
+      "design": "Who may configure this computer",
+      "winui": "Permission key permission.settings.machine_configuration",
+      "code": [
+        "MTM_Waitlist.Startup/Services/MachineSetupGate.cs"
+      ],
+      "note": "baseline role:it_department and role:developer; the screen's wording follows the gate"
+    },
+    {
+      "design": "The role names the catalogue holds",
+      "winui": "Resource values",
+      "code": [
+        "Strings/en-us/Resources.resw"
+      ],
+      "note": "Role_it_department.Text is 'IT Department'; the retired code 'admin' is not in the catalogue"
+    }
+  ],
+  "workflow_refs": [
+    { "sheet": 1, "nodes": ["u_setup", "s_cfg", "x_authority"] }
+  ],
+  "design_system": {
+    "resources": [
+      "Styles/FontSizes.xaml",
+      "Styles/Thickness.xaml",
+      "Styles/TextBlock.xaml",
+      "Styles/ModuleSetup.xaml",
+      "Styles/Dialogs.xaml"
+    ]
+  },
+  "approval": {
+    "approved_at": null,
+    "approved_by": null,
+    "sources_sha256": null,
+    "rendered_sha256": null,
+    "design_system_sha256": null
+  }
+}

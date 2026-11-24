@@ -158,7 +158,7 @@ def check_unmapped_flow(design, report, reason):
                 f"source is recorded instead ({', '.join(sources)})")
 
 
-def check_before(design, design_dir, declared, report):
+def check_before(design, run, declared, report):
     before = design.get("before") or {}
     kind = before.get("kind")
     if kind == "capture":
@@ -168,9 +168,9 @@ def check_before(design, design_dir, declared, report):
             report.error("a captured BEFORE needs before.captured_at")
         if not before.get("capture_command"):
             report.warn("before.capture_command is empty; record how the capture was taken")
-        canonical = design_dir / f"{design['refactor']}-before.png"
+        canonical = run / render.PNGS_DIR / f"{design['refactor']}-before.png"
         if not canonical.is_file():
-            report.error(f"the captured BEFORE is missing: {canonical.name}")
+            report.error(f"the captured BEFORE is missing: {render.PNGS_DIR}/{canonical.name}")
         else:
             width, height = render.png_size(canonical)
             if width < 900 or height < 500:
@@ -184,7 +184,7 @@ def check_before(design, design_dir, declared, report):
         if not before.get("mockup"):
             report.error("a reconstructed BEFORE needs before.mockup")
         else:
-            mockup = design_dir / before["mockup"]
+            mockup = run / before["mockup"]
             if not mockup.is_file():
                 report.error(f"the BEFORE mockup is missing: {before['mockup']}")
             elif "reconstruction" not in mockup.read_text(encoding="utf-8", errors="replace"):
@@ -200,11 +200,15 @@ def check_before(design, design_dir, declared, report):
         report.error("before.kind must be 'capture' or 'reconstruction'")
 
 
-def check_images(design, design_dir, declared, canonical, report):
+def check_images(design, run, declared, canonical, report):
     refactor = design["refactor"]
+    pngs = run / render.PNGS_DIR
     states = design.get("states") or []
     if not states:
         report.error("the design declares no states")
+    if not pngs.is_dir():
+        report.error(f"the renders are missing: no {render.PNGS_DIR}/ folder in this run")
+        return
     variants = ["after"]
     if (design.get("before") or {}).get("kind") == "reconstruction":
         variants.append("before")
@@ -217,9 +221,9 @@ def check_images(design, design_dir, declared, canonical, report):
             width, height, scale = declared[viewport]
             for state in applicable:
                 name = f"{refactor}-{variant}-{state}-{viewport}.png"
-                path = design_dir / name
+                path = pngs / name
                 if not path.is_file():
-                    report.error(f"missing render: {name}")
+                    report.error(f"missing render: {render.PNGS_DIR}/{name}")
                     continue
                 actual = render.png_size(path)
                 expected = (int(width * scale), int(height * scale))
@@ -228,9 +232,9 @@ def check_images(design, design_dir, declared, canonical, report):
                                  f"{expected[0]}x{expected[1]}")
     for variant in variants:
         name = f"{refactor}-{variant}.png"
-        if not (design_dir / name).is_file():
-            report.error(f"missing canonical image: {name}")
-    comparison = design_dir / f"{refactor}-comparison.png"
+        if not (pngs / name).is_file():
+            report.error(f"missing canonical image: {render.PNGS_DIR}/{name}")
+    comparison = run / f"{refactor}-comparison.png"
     if not comparison.is_file():
         report.error(f"missing comparison image: {comparison.name}")
     elif canonical in declared:
@@ -239,6 +243,61 @@ def check_images(design, design_dir, declared, canonical, report):
         if actual[0] < int(width * scale * 2) or actual[1] < int(height * scale):
             report.error(f"{comparison.name} is {actual[0]}x{actual[1]}; it must hold two "
                          f"{int(width * scale)}x{int(height * scale)} images side by side")
+
+
+def check_comparison_pdf(design, run, pair_count, report):
+    """The comparison PDF: landscape, one page per grouping, image on top and real text below."""
+    refactor = design["refactor"]
+    path = run / f"{refactor}-comparison.pdf"
+    if not path.is_file():
+        report.error(f"missing comparison PDF: {path.name}; run render_mockup.py")
+        return
+    try:
+        document = render.pdf_document(path)
+    except render.RenderError as error:
+        report.error(str(error))
+        return
+    if document.page_count != pair_count:
+        report.error(f"{path.name} has {document.page_count} page(s); this design has "
+                     f"{pair_count} before/after grouping(s), one page each")
+    needles = [change[:32] for change in (design.get("callouts") or []) if change]
+    whole = ""
+    for number, page in enumerate(document, 1):
+        box = page.rect
+        if abs(box.width - render.PDF_PAGE_W) > 0.5 or abs(box.height - render.PDF_PAGE_H) > 0.5:
+            report.error(f"{path.name} page {number} is {box.width:.0f}x{box.height:.0f} pt; the "
+                         "comparison is US Letter landscape, 792x612 pt")
+        if not page.get_images():
+            report.error(f"{path.name} page {number} carries no image")
+        text = page.get_text()
+        whole += text
+        if len(text.strip()) < 60:
+            report.error(f"{path.name} page {number} carries no readable text; the change must be "
+                         "real text below the image, not part of the picture")
+        for block in page.get_text("dict")["blocks"]:
+            for line in block.get("lines", []):
+                for span in line["spans"]:
+                    if span["text"].strip() and span["size"] < render.PDF_MIN_TEXT - 0.1:
+                        report.error(f"{path.name} page {number} has text at "
+                                     f"{span['size']:.1f} pt, below the {render.PDF_MIN_TEXT} pt "
+                                     "floor")
+    document.close()
+    squashed = squash_text(whole)
+    for needle in needles:
+        if squash_text(needle) not in squashed:
+            report.error(f"{path.name} does not state the change '{needle}…' on any page")
+
+
+def squash_text(text):
+    """Text as it can be compared: one line, and the dashes the font's ToUnicode map emits folded back.
+
+    Segoe UI extracts its hyphen as U+2010, so `Sign-in` comes back as `Sign‑in` and a plain substring
+    test fails on a PDF that plainly contains the words.
+    """
+    for source, target in (("\u2010", "-"), ("\u2011", "-"), ("\u2012", "-"), ("\u2013", "-"),
+                           ("\u2014", "-"), ("\u00a0", " ")):
+        text = text.replace(source, target)
+    return " ".join(text.split())
 
 
 def check_elements(design, report):
@@ -259,9 +318,9 @@ def check_elements(design, report):
                 report.error(f"'{label}' names a path that does not exist: {path}")
 
 
-def check_proposal(design, design_dir, report):
+def check_proposal(design, run, report):
     refactor = design["refactor"]
-    proposal = design_dir / f"{refactor}-proposal.md"
+    proposal = run / f"{refactor}-proposal.md"
     if not proposal.is_file():
         report.error(f"missing proposal: {proposal.name}")
         return
@@ -275,15 +334,16 @@ def check_proposal(design, design_dir, report):
 
 
 def check_render_and_approval(design, design_path, report, require_approval):
-    design_dir = design_path.parent
+    run = render.run_dir(design_path)
     refactor = design["refactor"]
-    render_path = design_dir / f"{refactor}-render.json"
+    render_path = run / render.DATA_DIR / f"{refactor}-render.json"
     if not render_path.is_file():
-        report.error(f"missing render record: {render_path.name}; run render_mockup.py")
+        report.error(f"missing render record: {render.DATA_DIR}/{render_path.name}; "
+                     "run render_mockup.py")
         return
     record = json.loads(render_path.read_text(encoding="utf-8"))
 
-    current_sources = render.source_snapshot(design, design_dir)
+    current_sources = render.source_snapshot(design, run)
     if render.combined_hash(current_sources) != record.get("sources_sha256"):
         report.warn("the mockups changed after the last render; render again")
     try:
@@ -295,7 +355,7 @@ def check_render_and_approval(design, design_path, report, require_approval):
         report.warn("the design-system XAML changed after the last render; render again")
 
     for name, image in (record.get("images") or {}).items():
-        path = design_dir / name
+        path = run / name
         if not path.is_file():
             report.error(f"the render record lists {name}, which is gone")
         elif render.sha256_file(path) != image.get("sha256"):
@@ -335,16 +395,32 @@ def check(design_path, diagrams, require_approval=False):
         return report, design
     if design_path.name != f"{design['refactor']}-design.json":
         report.error(f"the design file must be named {design['refactor']}-design.json")
-    if design_path.parent.name != design["refactor"]:
+    run = render.run_dir(design_path)
+    if run.name != design["refactor"]:
         report.error(f"each run lives in its own folder: move this design to "
-                     f".../{design['screen']}/{design['refactor']}/ (the folder must be named "
-                     f"'{design['refactor']}')")
+                     f".../{design['screen']}/{design['refactor']}/"
+                     f"{render.DATA_DIR}/ (the run folder must be named '{design['refactor']}')")
+    try:
+        design_path.resolve().relative_to(REPO / "docs" / "ui-designs")
+    except ValueError:
+        pass
+    else:
+        flow = run.parent.parent
+        if flow.name != design.get("workflow"):
+            report.error(f"this design sits under '{flow.name}', but declares workflow "
+                         f"'{design.get('workflow')}'; a workflow is its own folder directly "
+                         "under docs/ui-designs")
+        elif flow.parent.name != "ui-designs":
+            report.error(f"'{flow.name}' is nested inside '{flow.parent.name}'; every workflow "
+                         "is its own folder directly under docs/ui-designs, and workflows are "
+                         "never nested")
     declared, canonical = check_viewports(design, report)
     check_workflow(design, report, diagrams)
-    check_before(design, design_path.parent, declared, report)
-    check_images(design, design_path.parent, declared, canonical, report)
+    check_before(design, run, declared, report)
+    check_images(design, run, declared, canonical, report)
+    check_comparison_pdf(design, run, len(render.comparison_pairs(design)), report)
     check_elements(design, report)
-    check_proposal(design, design_path.parent, report)
+    check_proposal(design, run, report)
     check_render_and_approval(design, design_path, report, require_approval)
     return report, design
 
@@ -352,6 +428,102 @@ def check(design_path, diagrams, require_approval=False):
 def discover():
     return sorted(path for path in (REPO / "docs" / "ui-designs").rglob("*-design.json")
                   if "tools" not in path.parts)
+
+
+def workflow_folders(design_paths):
+    """Group design records by the workflow folder that holds them."""
+    groups = {}
+    root = REPO / "docs" / "ui-designs"
+    for path in design_paths:
+        path = pathlib.Path(path).resolve()
+        try:
+            path.relative_to(root)
+        except ValueError:
+            continue
+        groups.setdefault(render.run_dir(path).parent.parent, []).append(path)
+    return groups
+
+
+def check_workflow_comparisons(design_paths):
+    """A workflow holding more than one design needs its one-sheet comparison, and it must be current.
+
+    Each design is approved on its own; this sheet exists so a reader can see the whole workflow's
+    proposals at once, and it is only as trustworthy as the design PNGs it was composed from.
+    """
+    reports = []
+    for folder, paths in sorted(workflow_folders(design_paths).items()):
+        report = {"workflow": folder.name, "designs": len(paths), "errors": []}
+        if len(paths) < 2:
+            reports.append(report)
+            continue
+        image = folder / f"{folder.name}-comparison.png"
+        pdf = folder / f"{folder.name}-comparison.pdf"
+        record_path = folder / render.DATA_DIR / f"{folder.name}-comparison.json"
+        if not image.is_file() or not record_path.is_file():
+            report["errors"].append(
+                f"this workflow holds {len(paths)} design(s), so it needs one comparison sheet "
+                f"holding all of them: run render_mockup.py --workflow \"{folder}\"")
+            reports.append(report)
+            continue
+        if not pdf.is_file():
+            report["errors"].append(
+                f"missing {pdf.name}; run --workflow again to write the landscape PDF")
+        try:
+            record = json.loads(record_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as error:
+            report["errors"].append(f"{record_path.name} is not valid JSON: {error}")
+            reports.append(report)
+            continue
+        recorded = (record.get("image") or {}).get("sha256")
+        if render.sha256_file(image) != recorded:
+            report["errors"].append(
+                f"{image.name} changed after it was composed; run --workflow again")
+        listed = set()
+        for design in record.get("designs") or []:
+            design_path = folder / design.get("design", "")
+            listed.add(design_path.resolve())
+            if not design_path.is_file():
+                report["errors"].append(
+                    f"{record_path.name} names {design.get('design')}, which does not exist")
+                continue
+            run = render.run_dir(design_path)
+            for name, digest in (design.get("sources") or {}).items():
+                source = run / name
+                if not source.is_file():
+                    report["errors"].append(f"{record_path.name} names {name}, which is gone")
+                elif render.sha256_file(source) != digest:
+                    report["errors"].append(
+                        f"{name} was re-rendered after the workflow sheet was composed; "
+                        f"run --workflow again")
+        for path in paths:
+            if path.resolve() not in listed:
+                report["errors"].append(
+                    f"{render.run_dir(path).name} is not on {image.name}; run --workflow again")
+        if pdf.is_file():
+            try:
+                document = render.pdf_document(pdf)
+            except render.RenderError as error:
+                report["errors"].append(str(error))
+            else:
+                if document.page_count != len(paths):
+                    report["errors"].append(
+                        f"{pdf.name} has {document.page_count} page(s); it needs one page per "
+                        f"design ({len(paths)})")
+                for number, page in enumerate(document, 1):
+                    box = page.rect
+                    if (abs(box.width - render.PDF_PAGE_W) > 0.5
+                            or abs(box.height - render.PDF_PAGE_H) > 0.5):
+                        report["errors"].append(
+                            f"{pdf.name} page {number} is {box.width:.0f}x{box.height:.0f} pt; "
+                            "it must be 792x612 pt")
+                    if not page.get_images():
+                        report["errors"].append(f"{pdf.name} page {number} carries no image")
+                    if len(page.get_text().strip()) < 60:
+                        report["errors"].append(
+                            f"{pdf.name} page {number} carries no readable text")
+                document.close()
+        reports.append(report)
+    return reports
 
 
 def main(argv=None):
@@ -390,8 +562,12 @@ def main(argv=None):
                         "refactor": (design or {}).get("refactor"),
                         "errors": report.errors, "warnings": report.warnings})
 
+    workflows = check_workflow_comparisons(targets)
+    failed += sum(1 for entry in workflows if entry["errors"])
+
     if args.json:
-        sys.stdout.write(json.dumps({"reports": reports}, indent=1, ensure_ascii=False) + "\n")
+        sys.stdout.write(json.dumps({"reports": reports, "workflows": workflows},
+                                    indent=1, ensure_ascii=False) + "\n")
     else:
         for entry in reports:
             name = pathlib.Path(entry["design"]).name
@@ -401,6 +577,13 @@ def main(argv=None):
                 print(f"   error: {error}")
             for warning in entry["warnings"]:
                 print(f"   note:  {warning}")
+        for entry in workflows:
+            if entry["designs"] < 2:
+                continue
+            status = "OK" if not entry["errors"] else "FAIL"
+            print(f"{entry['workflow'] + ' (workflow, ' + str(entry['designs']) + ' designs)':48s} {status}")
+            for error in entry["errors"]:
+                print(f"   error: {error}")
         print(f"\n{len(reports)} design(s) checked, {failed} with errors.")
     return 1 if failed else 0
 

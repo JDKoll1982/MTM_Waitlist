@@ -35,6 +35,17 @@ python docs\diagrams\tools\render_sheets.py docs\diagrams\tools\manifest.json
 python docs\diagrams\tools\verify_pdfs.py
 ```
 
+The build has three traps worth knowing before the first run:
+
+- **The manifest path is the only argument `render_sheets.py` takes.** It has no argument parser, so
+  `--help` is read as a file name. Read this page instead.
+- **Each `spec` is resolved relative to the manifest's own folder.** A subset manifest written somewhere
+  else must carry absolute `spec` paths, or `render_sheets.py` looks for the spec under its own folder and
+  fails. That is the supported way to rebuild one workflow while other specs are absent from the checkout.
+- **`verify_pdfs.py` checks the page, not the sheet's shape count.** Page size, margin and type size are
+  asserted; 12–16 shapes per sheet is not. Count nodes in the spec after adding a finding, and fold related
+  findings into one flag when a sheet is at 16.
+
 ## Consume
 
 ```powershell
@@ -67,7 +78,7 @@ a spec: the wording of a label, a note or a lane choice stays an authoring decis
 python -m unittest discover -s docs\diagrams\tools -p "test_*.py"
 ```
 
-`dotgen.py` takes any number of spec files. `verify_pdfs.py` writes PNGs to
+`dotgen.py` accepts any number of spec files. `verify_pdfs.py` writes PNGs to
 `%TEMP%\mtm-diagrams\png`; pass `--no-png` to skip that.
 
 Build output is split by type: `dotgen.py` writes `docs/diagrams/dot/<workflow>/*.dot` and `render_sheets.py`
@@ -86,3 +97,7 @@ for inspection, not for the deliverable.
 - Title header, `Sheet X of Y` marker and the shape legend on every page.
 - 12–16 shapes per sheet. A flow too large for one sheet is split at an architectural seam
   (UI and validation, then services and stores) and joined with `conn` off-page badges.
+
+The first three are asserted by the script. The fourth is an authoring rule it does not check: count the
+nodes in the spec, and fold a second finding into an existing `refactor` node when the sheet is already at
+16.

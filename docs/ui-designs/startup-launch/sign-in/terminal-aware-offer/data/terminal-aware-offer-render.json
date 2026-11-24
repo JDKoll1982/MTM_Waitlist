@@ -1,0 +1,104 @@
+{
+ "renderer": "headless Microsoft Edge",
+ "edge": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+ "rendered_at": "2026-11-24T15:11:31-06:00",
+ "viewports": [
+  {
+   "name": "stage",
+   "width": 780,
+   "height": 640,
+   "scale": 1.0
+  }
+ ],
+ "states": [
+  {
+   "name": "default",
+   "applies_to": [
+    "before",
+    "after"
+   ]
+  },
+  {
+   "name": "state-few",
+   "applies_to": [
+    "before",
+    "after"
+   ]
+  },
+  {
+   "name": "state-solo",
+   "applies_to": [
+    "before",
+    "after"
+   ]
+  }
+ ],
+ "sources": {
+  "docs/ui-designs/startup-launch/sign-in/terminal-aware-offer/mockups/terminal-aware-offer-after.html": "d1c4ea0955037d615ad3bf25b02e379b74ff4d0d39e3e3de4e4e60dbabbc268a",
+  "docs/ui-designs/startup-launch/sign-in/terminal-aware-offer/mockups/terminal-aware-offer-before.html": "537f6a9959835d1086713027182e46c63db4d09840b2c3d2587f31d55b3f7b9c",
+  "docs/ui-designs/tools/mockup/mockup.css": "748fdf8c9837c2a101609e8ce5d44cd9b76f0d7d7378f04f17306a79c03d671c"
+ },
+ "sources_sha256": "b5a510e686a0bc9d02fab20d069a871ab463b572ecfc1d9de46453afc68d0388",
+ "design_system": {
+  "Styles/FontSizes.xaml": "7f0ec01791e19f5e875a28b89dc98e779b46fb8be8d671c053ab34f82b1beeac",
+  "Styles/Thickness.xaml": "02724f1114ce07b7ad88a53d7dd6bcc2b4cf5262313c79475f8f654edb36acf0",
+  "Styles/TextBlock.xaml": "6c012953d5f8a48e0382d178d091b3d38b03799981ce1c4797299650b17743ab",
+  "Styles/ModuleSetup.xaml": "03d42ac9cad7d0a39e84c6ad29f2df71288d21d288b3b910f1bdf7c51e400341",
+  "Styles/Dialogs.xaml": "0d81d35f05aac5b649b081ac55270cbf544bffb0ff13966de0cfe42895600834"
+ },
+ "design_system_sha256": "6cc10e88fd5302d8a734cb06a4fa072cdf1969c9038d4156d725c818e9dbc30a",
+ "images": {
+  "pngs/terminal-aware-offer-after-default-stage.png": {
+   "width": 780,
+   "height": 640,
+   "sha256": "65b13eeb3d3adc0c28b3021d14b09f35ab467b35c471cb44bc9efc69ea572aa7"
+  },
+  "pngs/terminal-aware-offer-after-state-few-stage.png": {
+   "width": 780,
+   "height": 640,
+   "sha256": "a6889a63c8879bb9cc2e132e101521934b2820b285be243166663850112d897c"
+  },
+  "pngs/terminal-aware-offer-after-state-solo-stage.png": {
+   "width": 780,
+   "height": 640,
+   "sha256": "c7ecf2fc2bba02de408b465b29c957887ec147ff65b683c63395b5acefd1c0b5"
+  },
+  "pngs/terminal-aware-offer-after.png": {
+   "width": 780,
+   "height": 640,
+   "sha256": "65b13eeb3d3adc0c28b3021d14b09f35ab467b35c471cb44bc9efc69ea572aa7"
+  },
+  "pngs/terminal-aware-offer-before-default-stage.png": {
+   "width": 780,
+   "height": 640,
+   "sha256": "540edeae5aaf0b2c995b057794e0bebfb905d17b7ee2a232d0bcdb5012b935ff"
+  },
+  "pngs/terminal-aware-offer-before-state-few-stage.png": {
+   "width": 780,
+   "height": 640,
+   "sha256": "0c75c1c3f0f76c28fef7527405917faf5d948a469e057b246cf3deb50aef13fe"
+  },
+  "pngs/terminal-aware-offer-before-state-solo-stage.png": {
+   "width": 780,
+   "height": 640,
+   "sha256": "4ac331d6ab816fd18ffe17e4b3bad8e3bd4125656e20fc27459cba0cf60b879d"
+  },
+  "pngs/terminal-aware-offer-before.png": {
+   "width": 780,
+   "height": 640,
+   "sha256": "540edeae5aaf0b2c995b057794e0bebfb905d17b7ee2a232d0bcdb5012b935ff"
+  },
+  "terminal-aware-offer-comparison.pdf": {
+   "width": 792,
+   "height": 612,
+   "sha256": "c37f94a57d217d82f302934fc0572c2118aad8aee6f4ce7022543afd6abbbb09",
+   "pages": 3
+  },
+  "terminal-aware-offer-comparison.png": {
+   "width": 1656,
+   "height": 2362,
+   "sha256": "ec483ab6dca7e15795ab04ee1d81f9c47c26ff25a6a3eefcb4c5ad5f116ba062",
+   "rows": 3
+  }
+ }
+}

@@ -40,6 +40,11 @@
       "d_conf",
       "configured?",
       "dec"
+     ],
+     [
+      "x_authority",
+      "[REFACTOR] setup asks for an\\nAdministrator; the gate\\nchecks IT Department",
+      "refactor"
      ]
     ],
     "svc": [
@@ -170,6 +175,11 @@
     ],
     [
      "u_setup",
+     "x_authority",
+     "says"
+    ],
+    [
+     "u_setup",
      "db_save",
      "writes"
     ],
@@ -273,7 +283,7 @@
      ],
      [
       "x_offer",
-      "[REFACTOR] a failed offer\\nread returns [] and the\\ncolumn vanishes",
+      "[REFACTOR] the offer vanishes\\nwhen unread, offers people\\nwho cannot sign in, and\\nnever says how many\\npeople use this computer",
       "refactor"
      ],
      [

@@ -66,32 +66,49 @@ leaving a prompt that names a tool this machine no longer has.
 
 ## 2. The pipeline in one page
 
-A design is one JSON record plus one HTML mockup per variant, in its own folder:
+A design is one JSON record plus one HTML mockup per variant, in its own folder. The run folder keeps
+only two things of its own — the proposal and the comparison sheets — and holds its sources, its renders
+and its records in three subfolders:
 
 ```
-docs/ui-designs/<workflow>/<screen>/<refactor>/
-  <refactor>-design.json          the record: variants, states, mappings, approval
-  mockups/<refactor>-before.html  the before mockup, when the before is a reconstruction
-  mockups/<refactor>-after.html   the after mockup
-  <refactor>-before.png           canonical before, rendered (or the capture)
-  <refactor>-after.png            canonical after
-  <refactor>-comparison.png       before and after side by side
-  <refactor>-<variant>-<state>-<viewport>.png
-  <refactor>-render.json          what was rendered, from which sources, with hashes
-  <refactor>-proposal.md          sections A–E, embedding the three canonical images
+docs/ui-designs/<workflow>/
+  <workflow>-comparison.png       every design in the workflow, one row each
+  <workflow>-comparison.pdf       one page per design: the pair on top, the change in text below
+  mockups/<workflow>-compare.html the sheet the PNG is drawn from
+  data/<workflow>-comparison.json which design PNGs went into it, with hashes
+  <screen>/<refactor>/
+    <refactor>-proposal.md        sections A–E, embedding the before, after and comparison
+    <refactor>-comparison.png     one row per before/after grouping (default, then each state)
+    <refactor>-comparison.pdf     one page per grouping: the pair on top, the change in text below
+    mockups/<refactor>-before.html   the before mockup, when the before is a reconstruction
+    mockups/<refactor>-after.html    the after mockup
+    mockups/<refactor>-compare.html  the sheet the PNG is drawn from
+    pngs/<refactor>-before.png       canonical before, rendered (or the capture)
+    pngs/<refactor>-after.png        canonical after
+    pngs/<refactor>-<variant>-<state>-<viewport>.png
+    data/<refactor>-design.json      the record: variants, states, mappings, approval
+    data/<refactor>-render.json      what was rendered, from which sources, with hashes
 ```
 
 Each run of the skill gets its own folder under the screen, named for the refactor, so two refactors on
 one screen never share a file. For a work-centre selection refactor that is
-`docs/ui-designs/workorder-new-request/work-center-selection/fewer-clicks/`, holding
-`fewer-clicks-design.json`, `mockups/fewer-clicks-before.html` and `mockups/fewer-clicks-after.html`.
-The copy shipped with the repository is `tools/template/`; copy it to that folder and rename the files.
-The verifier refuses a design record that does not sit in a folder named after its refactor.
+`docs/ui-designs/workorder-new-request/work-center-selection/fewer-clicks/`. The copy shipped with the
+repository is `tools/template/`; copy it to that folder and rename the files. The verifier refuses a
+design record that does not sit in `<refactor>/data/`, and it refuses a workflow that is not its own
+folder directly under `docs/ui-designs/`.
+
+**A workflow is never nested inside another.** Every workflow is its own folder beside the others, and
+every design under it declares that workflow's name. `--workflow` refuses a folder holding a design that
+declares a different workflow, and the verifier reports the mismatch, so a flow cannot be tucked inside a
+neighbour by accident.
 
 ```powershell
-# Render every state at every declared window size.
+# Render every state at every declared window size, one comparison per grouping, and the PDF.
 # Relative or absolute: the renderer resolves every image path before Edge sees it.
-python docs\ui-designs\tools\render_mockup.py --design "C:\Users\<you>\source\repos\MTM_Waitlist\docs\ui-designs\<workflow>\<screen>\<refactor>\<refactor>-design.json"
+python docs\ui-designs\tools\render_mockup.py --design "C:\Users\<you>\source\repos\MTM_Waitlist\docs\ui-designs\<workflow>\<screen>\<refactor>\data\<refactor>-design.json"
+
+# One sheet and one PDF holding every design in the workflow. Run it after the designs are rendered.
+python docs\ui-designs\tools\render_mockup.py --workflow "docs\ui-designs\<workflow>"
 
 # Check the record, the renders and the proposal.
 python docs\ui-designs\tools\verify_designs.py --design "C:\...\<refactor>-design.json"
@@ -103,12 +120,39 @@ python docs\ui-designs\tools\render_mockup.py --design "C:\...\<refactor>-design
 python docs\ui-designs\tools\verify_designs.py --all --require-approval
 ```
 
+**Looking at a mockup in a browser.** Open it over HTTP from the repository root
+(`python -m http.server`, then `http://127.0.0.1:8000/docs/ui-designs/...`). `file:` URLs are refused by
+Playwright MCP, and serving the mockup's own folder leaves every `../../../../tools/mockup/…` reference
+outside the served root, so the page renders unstyled and reads as a design fault. To prove the stylesheet
+loaded, ask the page for a computed value: `getComputedStyle(document.querySelector('.page')).fontFamily`
+should name Segoe UI; `"Times New Roman"` means no stylesheet arrived.
+
 **The record** (`<refactor>-design.json`) carries: `workflow`, `workflow_variant`, `screen`, `refactor`,
 `title`, `audience`, `window.viewports`, `before`, `after`, `states`, `callouts`, `elements`,
 `workflow_refs`, `design_system.resources`, `approval`. The verifier requires `workflow`, `screen`,
 `refactor`, `window`, `before`, `after`, `states`, `elements`, `workflow_refs`, `design_system` and
 `approval`; `title`, `audience`, `callouts`, `workflow_variant`, `flow_source` and `window.kind` /
 `window.stage` are optional but used when present.
+
+**The comparisons are drawings and documents.** Each run writes two of them, and a workflow with more
+than one design writes a third:
+
+- `<refactor>-comparison.png` — **one row per before/after grouping**, so a design that has a default, an
+  error and a solo state gets three rows rather than one. A captured BEFORE has no states, so it is one
+  row.
+- `<refactor>-comparison.pdf` — **one landscape page (792 × 612 pt, 11 × 8.5 in) per grouping**, with the
+  pair at the top and the proposed change as **real text** at the bottom: a "What changes" heading, the
+  numbered `callouts[]`, and a note naming the before kind and the grouping. The text is drawn, not
+  rasterised, so it can be searched, copied and checked with `page.get_text()`; nothing in it is below
+  9.4 pt.
+- `<workflow>-comparison.png` and `.pdf` — composed by `--workflow`, one row and one page per design, for
+  the reader who wants the whole proposal for a flow in one place. They read the canonical PNGs the
+  designs already produced, so every design must be rendered first. They are not approved and carry no
+  approval of their own.
+
+**A long list of callouts shrinks the picture.** The PDF gives the text block what it needs and fits the
+pair into what is left, so ten callouts on one page leave a small image. Keep `callouts[]` to the changes a
+reader must see; move the rest into the proposal.
 
 **Window sizes depend on the surface.**
 
@@ -120,6 +164,29 @@ python docs\ui-designs\tools\verify_designs.py --all --require-approval
   against the `new SizeInt32(...)` values in `MainWindow.xaml.cs`. Rendering a fixed stage at the desk
   sizes would not be the window a person sees.
 
+**A wording change with no control change is a document, not a picture.** When the only files to change
+are `Resources.resw`, a string constant, or a resource key literal in a view model — same controls, same
+order, same size, same visibility — the change is recorded in
+`docs/ui-designs/<workflow>/<screen>/<refactor>/<refactor>-text-change.md` and this pipeline is not run:
+no design record, no mockups, no renders, no comparison PNG or PDF, and no approval hash. Approval is the
+ordinary review of that Markdown file.
+
+The file carries the same A–E sections, in text:
+
+| Section | What it holds |
+| --- | --- |
+| A. Current wording | resource key, the current value quoted verbatim from `Resources.resw`, and the control it shows on |
+| B. Proposed wording | the new value per key, with any new key marked as new |
+| C. Why no picture is needed | which files change, and that no element is added, removed, moved, reordered, hidden or resized |
+| D. Expected user benefits | observable outcomes, not measurements |
+| E. Impact | keys added or replaced, the files they live in, any test that asserts the wording, and the measured width of the longest new value against the width the control has today |
+
+The line is drawn on the XAML and the code-behind, not on how big the change feels. A control added,
+removed, moved, reordered, hidden or resized; a `Visibility`, bind or command change; a change in the
+number of clicks or steps; or new wording that **reflows** at the surface's own width — each of those is
+an image design. Measure the longest new string before deciding: a sentence that wraps where the old one
+did not has changed the layout, whatever the diff says.
+
 **A workflow outside the diagram set** names its own source. If `workflow` is not a manifest workflow,
 the record carries `flow_source` — existing files that describe the flow — and `workflow_refs` must be
 empty; the verifier reports a note that the flow is not mapped rather than pretending it cited a sheet.
@@ -127,20 +194,59 @@ Once a flow is mapped, the same record cites its sheets and nodes instead. `star
 unmapped flow until Diagram 5 was added; the mechanism stays for a flow the set has not reached.
 
 **States** are rendered without script: the mockup contains a hidden anchor whose id is the state name,
-and the shared stylesheet reveals `.when-<word>` when that anchor is the URL target. The renderer loads the
-page at `#<name>`, so the `states[].name` in the record must be **the anchor id itself** — `state-empty`,
-`state-error`, `state-loading`, `state-success`, `state-no-job`, `state-disabled` — because the renderer
-rejects a name that is not an anchor id. `default` is the page with no anchor targeted and is required for
-every variant.
+and a stylesheet rule reveals the state's content when that anchor is the URL target. The renderer loads
+the page at `#<name>`, so the `states[].name` in the record must be **the anchor id itself** —
+`state-empty`, `state-error`, `state-loading`, `state-success`, `state-no-job`, `state-disabled` — because
+the renderer rejects a name that is not an anchor id. `default` is the page with no anchor targeted and is
+required for every variant.
 
-> The renderer refuses two states that would render identically: a state whose PNG matches `default`
-> byte for byte stops the run with the state's name, so a fragment that no anchor matches cannot ship as a
-> duplicate of the default page. The shipped `template/design.json` and both template mockups use the
-> prefixed names.
+The shared stylesheet carries rules for those six words only. A state of your own (`state-few`,
+`state-solo`, `state-overdue`) needs its own rule **in the mockup**, in the same form:
+
+```html
+<span class="state" id="state-few"></span>
+<style>
+  .when-few { display: none; }
+  body:has(#state-few:target) .when-few { display: block; }
+</style>
+```
+
+Two traps follow from that mechanism, and both produce a picture that looks plausible:
+
+- **An inline `display` wins.** If the element a state toggles carries `style="display:flex"`, the class
+  rule never takes effect and the state renders as the default page. Toggle `display` from a class only.
+- **The duplicate check only compares a state with `default`.** When the state rule never applied, the
+  state's PNG matches `default` and the run stops with the state's name. When the *inline style* kept the
+  state's content visible in `default`, every file differs and the run passes — while the default image is
+  wrong. Inspect the `default` render with the same care as the states.
+
+The rule has one consequence worth stating twice: a fragment that no anchor matches cannot ship as a
+duplicate of the default page, because the run stops on it. The shipped `template/design.json` and both
+template mockups use the prefixed names.
 
 **Nothing is approved by rendering.** `--approve` writes a hash of the mockups, the shared assets and
 the design-system XAML into the record; the verifier then fails if any of them changes without a
 re-render and re-approval. Present the proposal first.
+
+**The proposal is outside that hash.** `<refactor>-proposal.md` is checked for its headings and its
+embedded images but not hashed, so editing it alone leaves an approval standing. Treat a changed proposal
+as a changed design: re-read it against the approved PNGs, and re-render and re-approve if the wording now
+describes something the images do not show.
+
+**A long banner costs a row.** At a stage width the `.provenance` line beside the BEFORE/AFTER banner wraps
+to two lines and pushes the page down, so the surfaces no longer line up between the before and the after.
+Keep it short (the word the verifier needs, plus one file). The same applies to any long sentence in a
+narrow column: measure it before choosing it rather than discovering it in the PNG —
+
+```powershell
+python -c "from PIL import ImageFont; import os; f=ImageFont.truetype(os.path.join(os.environ['WINDIR'],'Fonts','segoeui.ttf'),14); print(f.getlength('your candidate sentence'))"
+```
+
+At 780 px the form column is about 456 px wide; a sentence wider than that wraps.
+
+**Where the directory and the guide disagree, the tooling wins.** `verify_designs.py` is the arbiter of
+what a record must carry, and its messages name the rule. This guide is kept in step with it; when a rule
+below is contradicted by an error from the script, the script is right and this page needs the fix.
 
 ---
 
@@ -209,6 +315,10 @@ adopts the new ramp says so explicitly.
 | Record and renders agree | `verify_designs.py --design "<path>"` — every state at every viewport, canonical images present, correct dimensions |
 | The before is honest | `before.kind` matches reality; a reconstruction names its `source_xaml`, a capture names `captured_at` and `capture_command` |
 | Design maps to code | `elements[]` names an existing WinUI control and an existing file; `workflow_refs` resolve to real sheets and nodes |
+| The comparison PDF is a document | one page per grouping at 792 × 612 pt, an image on each page, the callouts readable as text at or above 9.4 pt |
+| The workflow sheet is current | a workflow with more than one design carries `<workflow>-comparison.png` and `.pdf` whose recorded hashes still match the design PNGs |
+| The tree is not nested | each workflow is a folder directly under `docs/ui-designs/`; no workflow contains another |
+| A text-only change stayed text-only | `<refactor>-text-change.md` exists, its C section states no element moved, and the longest new value was measured against the control's width |
 | Text is exactly the application's | `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\ui-automation\ocr_png.ps1 -Path <png>` over the canonical PNG, compared with `Resources.resw`. It needs Windows PowerShell 5.1 — under `pwsh` 7 the WinRT types do not resolve. Expect punctuation-only differences (`·`, `1` read as `I`); a word difference is a failure. |
 | Nothing invented | walk every visible element back to a file, string or procedure |
 | The proposal is complete | `<refactor>-proposal.md` carries A–E and embeds the three canonical PNGs |

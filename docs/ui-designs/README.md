@@ -15,7 +15,12 @@ proposal is read from, and the approval record that ties a decision to the image
 - **[ui-designs-method-check.md](./ui-designs-method-check.md)** — what was run end to end, and the two
   constraints that run exposed.
 
-A design lives in its own folder, `docs/ui-designs/<workflow>/<screen>/<refactor>/`. Workflow structure is not
+A design lives in its own folder, `docs/ui-designs/<workflow>/<screen>/<refactor>/`, holding its proposal
+and its two comparison documents at the top and everything else in `mockups/`, `pngs/` and `data/`. A
+workflow is its own folder directly under `docs/ui-designs/` and is never nested in another; when it holds
+more than one design it also carries `<workflow>-comparison.png` and `.pdf`. A wording-only change with no
+control change is recorded as `<refactor>-text-change.md` in the same folder instead of a design: no
+mockup, no render, no approval hash. Workflow structure is not
 duplicated here: the diagram set in [`../diagrams/`](../diagrams/README.md) remains the source for the
 flow, and a design cites its sheets and node ids.
 

@@ -1,11 +1,11 @@
 ---
 name: workflow-diagram-context
-description: Use an existing workflow diagram as implementation context when planning or implementing a UI/UX quality-of-life change. Covers the work order and generic request new-request and work-center-setup flows in docs/diagrams. Use when a request names one of those workflows or a screen in one, asks to improve a step, or needs the current navigation and validation explained before changing it.
+description: Use an existing workflow diagram as implementation context when planning or implementing a UI/UX quality-of-life change. Covers the work order, generic request and application startup flows in docs/diagrams. Use when a request names one of those workflows or a screen in one, asks to improve a step, or needs the current navigation and validation explained before changing it.
 ---
 
 # Workflow diagram context
 
-`docs/diagrams/` maps four workflows, each in an engineer version and a plain-language version. The
+`docs/diagrams/` maps five workflows, each in an engineer version and a plain-language version. The
 engineer version names the views, view models, commands, services and stored procedures behind each
 step. Use it to understand the current behaviour of a workflow before proposing or making a UI/UX
 change to it.
@@ -23,10 +23,11 @@ python docs\diagrams\tools\diagram_context.py --list
 
 | Workflow | Covers |
 | --- | --- |
-| `workorder-new-request` | raising a work-order request: work centre → category → item → answer steps → submit |
-| `workorder-workcenter-setup` | configuring a work centre: selection, work order, part/sequence, dunnage, save |
-| `generic-new-request` | raising a request against a press marked generic, without a work order |
-| `generic-workcenter-setup` | the configuration paths a generic request depends on |
+| `startup-launch` | turning the application on: the launch steps, this computer, sign-in, set-up, and the hand-over to the first screen |
+
+`--list` is the authority, not this table: a flow added since this file was written appears there first.
+A flow that is genuinely unmapped is recorded by the design's `flow_source` (see the `qol-ui-design`
+skill) rather than left unmentioned.
 
 Print the engineer version by default. Add `--variant friendly` when the audience is the person using
 the screen, not a developer.
@@ -118,5 +119,14 @@ touches.
 - Never claim to have read a source you could not read. If only a PDF exists, say the graph structure
   is unavailable; if a PDF is missing, say there is no visual reference.
 - A `[REFACTOR]` node is a recorded finding, not a finished requirement. Check
-  `docs/diagrams/diagram-workflow-refactor-notes.md` for the class and method behind it.
+  `docs/diagrams/diagram-workflow-refactor-notes.md` for the class and method behind it. The startup
+  flow's findings are in §6 of that file, because the flow was mapped after the hotspot list was written.
+- The digest reads the spec and checks the `.dot` against it. It reports a missing spec, `.dot` or PDF
+  rather than implying it read one; when a spec is absent from the checkout, cite the PDF and say the
+  structure is unavailable.
+- `dotgen.py` accepts one or more spec files; `render_sheets.py` takes a **manifest** and resolves each
+  `spec` relative to that manifest's own folder. To rebuild one workflow when other specs are absent,
+  write a subset manifest with absolute `spec` paths — never edit another workflow out of `manifest.json`.
+- `verify_pdfs.py` enforces page size, margins and type size, not the 12–16 shape ceiling on a sheet.
+  Count nodes when you add a finding; at 16, fold the new defect into the existing flag.
 - No demo, sample or mock mode may be introduced, and no diagram work adds `.cs`, tests or inline SQL.

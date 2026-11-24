@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AFTER — sign-in help text names the IT Department</title>
+  <link rel="stylesheet" href="../../../../tools/mockup/mockup.css">
+  <style>
+    .form-view, .strip { display: none; }
+    .panel-view { display: flex; flex-direction: column; gap: 8px; }
+    body:has(#state-error:target) .form-view { display: block; }
+    body:has(#state-error:target) .panel-view { display: none; }
+    body:has(#state-error:target) .strip { display: flex; }
+    .panel-label { font-size: 14px; font-weight: 600; }
+    .panel-input { height: 32px; border: 1px solid var(--card-stroke); border-bottom: 2px solid var(--text-secondary); border-radius: 4px; background: var(--card-bg); }
+    .panel-note { margin: 0; font-size: 14px; color: var(--text-secondary); }
+    .panel-row { display: flex; gap: 4px; font-size: 14px; color: var(--text-secondary); }
+    .offer-card { display: flex; flex-direction: column; align-items: flex-start; width: 100%; min-height: 40px; margin-bottom: 4px; padding: 4px 12px; }
+    .person-name { font-weight: 600; font-size: 14px; line-height: 1.2; }
+    .person-login { font-size: 12px; line-height: 1.2; color: var(--text-secondary); }
+  </style>
+</head>
+<body class="mockup" data-variant="after">
+  <span class="state" id="state-error"></span>
+
+  <div class="variant-banner">
+    AFTER — PROPOSED QOL IMPROVEMENT
+    <span class="provenance">mockup, not a screenshot</span>
+  </div>
+
+  <div class="titlebar">
+    <span class="caption">MTM Waitlist</span>
+    <span class="glyph">— □ ✕</span>
+  </div>
+
+  <main class="page" style="height: calc(100vh - 33px - 32px); padding: 32px; row-gap: 16px;">
+    <div class="page-header" style="gap: 4px;">
+      <h1 class="page-title" style="font-size: 28px;">Sign in</h1>
+      <p class="page-subtitle" style="font-size: 14px;">Sign in to carry on. Your session and this computer are checked against the store.</p>
+    </div>
+
+    <div style="display: flex; flex: 1 1 auto; min-height: 0;">
+      <div style="flex: 1 1 auto; min-width: 0; overflow: auto;">
+
+        <div class="panel-view">
+          <div style="font-weight: 600;">You are not set up for the waitlist yet</div>
+          <div class="panel-row"><span>Employee number</span><span>1088</span></div>
+          <p class="panel-note">Your account starts at the lowest level. Ask IT Department.</p>
+          <p style="margin: 0; font-size: 14px;">Your name from the plant system, which you can correct:</p>
+            <div><div class="panel-label">First name</div><div class="panel-input"></div></div>
+            <div><div class="panel-label">Last name</div><div class="panel-input"></div></div>
+            <div><div class="panel-label">Choose a PIN</div><div class="panel-input"></div></div>
+            <div><div class="panel-label">Type the PIN again</div><div class="panel-input"></div></div>
+          <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px;">
+            <button class="button">Back</button>
+            <button class="button primary">Create my account</button>
+          </div>
+        </div>
+
+        <div class="form-view">
+          <div class="field" style="margin-bottom: 8px;">
+            <div class="label">User name or employee number</div>
+            <div class="input" style="min-height: 32px;"></div>
+          </div>
+          <p style="margin: 0 0 8px; font-size: 14px; color: var(--text-secondary);">
+            Type your user name, or your four-digit employee number. A number is looked up in the plant
+            system if the store does not hold it.
+          </p>
+          <button class="button primary" style="min-height: 32px;">Continue</button>
+        </div>
+      </div>
+
+      <div style="width: 1px; margin: 0 20px; background: var(--card-stroke);"></div>
+
+      <div style="width: 280px; flex: 0 0 280px; overflow: auto;">
+        <div style="font-weight: 600; margin-bottom: 8px;">Signed in here before</div>
+          <button class="button offer-card"><span class="person-name">Dana Whitfield</span><span class="person-login">1042</span></button>
+          <button class="button offer-card"><span class="person-name">Luis Ortega</span><span class="person-login">1187</span></button>
+          <button class="button offer-card"><span class="person-name">Priya Raman</span><span class="person-login">1203</span></button>
+          <button class="button offer-card"><span class="person-name">Todd Bergman</span><span class="person-login">1266</span></button>
+          <button class="button offer-card"><span class="person-name">Alicia Grant</span><span class="person-login">1301</span></button>
+          <button class="button offer-card"><span class="person-name">Marcus Bell</span><span class="person-login">1344</span></button>
+      </div>
+    </div>
+
+    <div class="strip infobar error" style="margin: 0;">
+      <span>⛔</span>
+      <div>This account's temporary PIN has been refused five times, so it is refused until a new PIN is set. Ask your lead or the IT Department to issue a new temporary PIN.</div>
+    </div>
+
+    <p class="stamp" style="margin: 0;">Sheet 1 of 1 · startup-launch · screen: sign in · 780 × 640 window</p>
+  </main>
+</body>
+</html>
+

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AFTER — sign-in offer says what kind of computer this is</title>
+  <link rel="stylesheet" href="../../../../tools/mockup/mockup.css">
+  <style>
+    .when-solo, .when-few { display: none; }
+    body:has(#state-solo:target) .when-solo { display: block; }
+    body:has(#state-few:target) .when-few { display: block; }
+    body:has(#state-solo:target) .when-many,
+    body:has(#state-few:target) .when-many { display: none; }
+    .scope-one, .scope-few { display: none; }
+    body:has(#state-solo:target) .scope-one { display: block; }
+    body:has(#state-few:target) .scope-few { display: block; }
+    body:has(#state-solo:target) .scope-many,
+    body:has(#state-few:target) .scope-many { display: none; }
+    .offer-card {
+      display: flex; flex-direction: column; align-items: flex-start;
+      width: 100%; min-height: 44px; margin-bottom: 4px; padding: 4px 12px;
+    }
+    .person-name { font-weight: 600; font-size: 14px; line-height: 1.2; }
+    .person-login { font-size: 12px; line-height: 1.2; color: var(--text-secondary); }
+    .offer-scope { margin: 0 0 8px; font-size: 12px; font-weight: 400; color: var(--text-secondary); }
+  </style>
+</head>
+<body class="mockup" data-variant="after">
+  <span class="state" id="state-solo"></span>
+  <span class="state" id="state-few"></span>
+
+  <div class="variant-banner">
+    AFTER — PROPOSED QOL IMPROVEMENT
+    <span class="provenance">mockup, not a screenshot</span>
+  </div>
+
+  <div class="titlebar">
+    <span class="caption">MTM Waitlist</span>
+    <span class="glyph">— □ ✕</span>
+  </div>
+
+  <main class="page" style="height: calc(100vh - 33px - 32px); padding: 32px; row-gap: 16px;">
+    <div class="page-header" style="gap: 4px;">
+      <h1 class="page-title" style="font-size: 28px;">Sign in</h1>
+      <p class="page-subtitle" style="font-size: 14px;">Sign in to carry on. Your session and this computer are checked against the store.</p>
+    </div>
+
+    <div style="display: flex; flex: 1 1 auto; min-height: 0;">
+      <div style="flex: 1 1 auto; min-width: 0; overflow: auto;">
+        <div class="field" style="margin-bottom: 8px;">
+          <div class="label">User name or employee number</div>
+          <div class="input" style="min-height: 32px;"></div>
+        </div>
+        <p style="margin: 0 0 8px; font-size: 14px; color: var(--text-secondary);">
+          Type your user name, or your four-digit employee number. A number is looked up in the plant
+          system if the store does not hold it.
+        </p>
+        <button class="button primary" style="min-height: 32px;">Continue</button>
+      </div>
+
+      <div style="width: 1px; margin: 0 20px; background: var(--card-stroke);"></div>
+
+      <div style="width: 280px; flex: 0 0 280px; overflow: auto;">
+        <div style="font-weight: 600; margin-bottom: 2px;">Signed in here before <span class="callout">1</span></div>
+        <p class="offer-scope">
+          <span class="scope-many">Six or more people have signed in on this computer. Most recent first.</span>
+          <span class="scope-few">Several people have signed in on this computer. Most recent first.</span>
+          <span class="scope-one">One person has signed in on this computer.</span>
+        </p>
+        <div class="when-many">
+          <button class="button offer-card"><span class="person-name">Dana Whitfield</span><span class="person-login">1042</span></button>
+          <button class="button offer-card"><span class="person-name">Luis Ortega</span><span class="person-login">1187</span></button>
+          <button class="button offer-card"><span class="person-name">Priya Raman</span><span class="person-login">1203</span></button>
+          <button class="button offer-card"><span class="person-name">Todd Bergman</span><span class="person-login">1266</span></button>
+          <button class="button offer-card"><span class="person-name">Alicia Grant</span><span class="person-login">1301</span></button>
+          <button class="button offer-card"><span class="person-name">Marcus Bell</span><span class="person-login">1344</span></button>
+        </div>
+
+        <div class="when-few">
+          <button class="button offer-card"><span class="person-name">Dana Whitfield</span><span class="person-login">1042</span></button>
+          <button class="button offer-card"><span class="person-name">Luis Ortega</span><span class="person-login">1187</span></button>
+          <button class="button offer-card"><span class="person-name">Priya Raman</span><span class="person-login">1203</span></button>
+        </div>
+
+        <div class="when-solo">
+          <button class="button offer-card"><span class="person-name">Dana Whitfield</span><span class="person-login">1042</span></button>
+        </div>
+      </div>
+    </div>
+
+    <p class="stamp" style="margin: 0;">Sheet 1 of 1 · startup-launch · screen: sign in · 780 × 640 window</p>
+  </main>
+</body>
+</html>

@@ -9,12 +9,21 @@ Proposed by: GitHub Copilot (proposal only) · Date: 2026-11-24 · Design record
 [`../../../diagrams/pdf/startup-launch/diagram-startup-launch.pdf`](../../../diagrams/pdf/startup-launch/diagram-startup-launch.pdf):
 sheet 1 is the entry and this computer, sheet 2 is signing in, sheet 3 is the stops and the hand-over.
 This design cites sheet 2 (`v_signin`, `s_people`, `x_offer`) in `workflow_refs`; `x_offer` is the
-finding this proposal answers.
+finding this proposal answers. That flag now also records two neighbours found in the same read — an
+offer that keeps a deactivated account, and one that never says how many people use the computer — which
+`terminal-aware-offer` answers instead; the detail is in §6 of
+[`../../../diagrams/diagram-workflow-refactor-notes.md`](../../../diagrams/diagram-workflow-refactor-notes.md).
 
 **BEFORE is a reconstruction.** The application was not driven for this proposal: the stage needs a
 configured machine and a store that fails in a specific way. The mockup is built from
 `Module_Startup/Views/SignInPage.xaml`, `SignInViewModel.LoadPreviousPeopleAsync` and
 `PreviousSignInService.ReadAsync`. The real screen has not been captured.
+
+**Two sibling refactors sit on this same column.** `terminal-aware-offer` answers what the column says
+about the computer it is on and stops offering accounts that can no longer sign in; `name-the-authority`
+answers the stage's help text. This proposal answers what the column says when the read fails. They
+compose: the note described here appears in the column that the other proposal describes, and neither
+changes the other's wording.
 
 ## A. Current State
 

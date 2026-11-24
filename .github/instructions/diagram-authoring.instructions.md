@@ -29,8 +29,33 @@ python docs\diagrams\tools\render_sheets.py docs\diagrams\tools\manifest.json
 python docs\diagrams\tools\verify_pdfs.py
 ```
 
-`dotgen.py` accepts any number of spec files; the loop over `tools\spec-*.json` rebuilds all 29 sources.
-`verify_pdfs.py --no-png` skips the 300 DPI export when you only want the assertions.
+`dotgen.py` accepts any number of spec files; rebuilding every source is a loop over
+`tools\spec-*.json`. A checkout may carry only some of the specs the manifest lists, so a loop over what is
+present is the safe form. `verify_pdfs.py --no-png` skips the 300 DPI export when you only want the
+assertions.
+
+## Pitfalls in the build
+
+- **`render_sheets.py` resolves each `spec` relative to the manifest's own folder.** Building a subset
+  manifest in `%TEMP%` and leaving the bare file names in it fails with `FileNotFoundError` naming a path
+  under `docs\diagrams\tools\`. Write absolute `spec` paths into a subset manifest.
+- **`render_sheets.py` has no argument parser.** It takes the manifest path as `sys.argv[1]`, so `--help`
+  is treated as a file name and raises `FileNotFoundError: '--help'`. Read this file instead.
+- **The whole-manifest build needs every spec present.** `manifest.json` lists all ten documents, so
+  `render_sheets.py docs\diagrams\tools\manifest.json` stops on the first spec this checkout does not have
+  and writes nothing. Render only the workflow you changed, with a subset manifest, and say so; do not
+  "fix" it by deleting other documents from `manifest.json`.
+- **`verify_pdfs.py` does not count shapes.** It checks page size, margins and type size only, so a sheet
+  that has grown to 17 nodes passes. Count the nodes yourself; when a finding would take a sheet past 16,
+  fold related findings into the existing flag and re-word it rather than adding a box.
+- **A `refactor` or `note` node must be attached.** `dotgen.py` warns when no edge touches a node, and an
+  unattached finding has no place in the flow. Give it a plain edge from the element that shows the fault.
+- **Lane placement decides the layout, not the node's meaning.** A finding put in the `ui` lane takes that
+  lane's rank, stretches the row and drags edges across the sheet; the same finding in the lane that owns
+  the code (`vm` for a view-model sentence, `data` for a read) settles the page. Render the page and look
+  before believing a placement is fine.
+- **`.dot` files are tracked but are build output.** Regenerating one is expected; a hand edit is lost on
+  the next `dotgen.py` run.
 
 ## Consuming a diagram as implementation context
 
@@ -89,6 +114,18 @@ A finding goes in a `refactor` node on the sheet that shows the code, and gets t
 words on the matching friendly sheet. Keep the wording user-facing there — "Worth fixing: four saves
 happen with no single undo if one fails", not a method name. Every flagged finding also belongs in
 `docs/diagrams/diagram-workflow-refactor-notes.md`, which is the list a `/speckit.specify` run consumes.
+
+- **Attach every flag.** Give the finding a plain edge from the node that shows the fault; `dotgen.py`
+  warns about a node no edge touches, and an unattached finding has no place in the flow.
+- **Put it in the lane that owns the code**, not the lane where the symptom is seen: a sentence written in
+  a view model goes in `vm`, a bad read goes in `data`. A flag parked in `ui` takes that lane's rank,
+  stretches the row and drags edges across the sheet.
+- **One flag may carry related findings.** When a sheet is at the 12–16 shape ceiling, add the new defects
+  to the existing flag's wording (four or five short lines) rather than adding a second box, and keep the
+  friendly sheet's wording equivalent. Write each defect up separately in the notes file, as its own
+  numbered section.
+- **A flag's notes section is part of the change.** A finding that is only in a spec is a picture of a
+  problem nobody can act on.
 
 ## Prohibited
 

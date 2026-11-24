@@ -1,6 +1,6 @@
 # Workflow Refactor Notes — Work Order vs Generic Request
 
-Companion to the four print-ready flowchart PDFs in this folder. Everything here is written to be
+Companion to the five print-ready flowchart PDFs in this folder. Everything here is written to be
 lifted straight into `/speckit.specify`: the comparison matrix supplies the *current state*, the hotspot
 list supplies the *why*, and the Spec Kit inputs supply the *what*.
 
@@ -20,6 +20,7 @@ Source revision: `main` working tree at time of writing. Diagrams verified at US
 | 2 | Work Order — Work Center Setup | [diagram-workorder-workcenter-setup.pdf](./pdf/diagram-workorder-workcenter-setup.pdf) | [diagram-workorder-workcenter-setup-friendly.pdf](./pdf/diagram-workorder-workcenter-setup-friendly.pdf) | 5 / 2 |
 | 3 | Generic Request — New Request | [diagram-generic-new-request.pdf](./pdf/diagram-generic-new-request.pdf) | [diagram-generic-new-request-friendly.pdf](./pdf/diagram-generic-new-request-friendly.pdf) | 4 / 2 |
 | 4 | Generic Request — Work Center Setup | [diagram-generic-workcenter-setup.pdf](./pdf/diagram-generic-workcenter-setup.pdf) | [diagram-generic-workcenter-setup-friendly.pdf](./pdf/diagram-generic-workcenter-setup-friendly.pdf) | 2 / 2 |
+| 5 | Startup — launch, sign-in and hand-over | [diagram-startup-launch.pdf](./pdf/startup-launch/diagram-startup-launch.pdf) | [diagram-startup-launch-friendly.pdf](./pdf/startup-launch/diagram-startup-launch-friendly.pdf) | 3 / 2 |
 
 Each PDF in [`pdf/`](./pdf/) is generated from a `<diagram>-<sheet>.dot` Graphviz source in
 [`dot/`](./dot/). The `.dot` files are the canonical, editable description of each sheet; the PDFs are
@@ -369,3 +370,72 @@ Every PDF was checked programmatically before this file was written:
 
 No `.cs` file, test, or inline SQL was added to the solution for this work; `InlineSqlAuditTests` and
 `RetiredSymbolAuditTests` are unaffected.
+
+---
+
+## 6. Startup launch — findings recorded on Diagram 5
+
+Diagram 5 was added after this document's hotspots were written, so its findings are recorded here.
+Two `[REFACTOR]` flags carry them: `x_authority` on sheet 1 (the words the setup stage uses) and
+`x_offer` on sheet 2 (the people offered on the sign-in stage, which now carries three related defects
+in one flag because the sheet is at its shape ceiling). The plain-language sheets carry the same two
+flags.
+
+### S1 — The startup screens name an Administrator the catalogue retired
+
+`Strings/en-us/Resources.resw` on the machine-setup stage: `Startup_MachineSetup.Subtitle`
+("A Developer or an Admin has to tell it where it stands"), `.SignInNameLabel`
+("Developer / Admin user name"), `.SignInNameHint` ("The user name of a Developer or Admin account"),
+`.NotAuthorized` ("Sign in with a Developer or Admin account to set this computer up") and
+`.RefusedSignInRequired` ("Type a Developer or Admin user name and PIN …").
+
+Two other strings on the same stage say something different: `.RefusedNotPermitted` ("Use an account
+with Developer or IT Department authority") and `.AbortSignInDeclined` ("Nobody with IT Department or
+Developer authority signed in"). `Startup_SignIn.RefusedAttemptsExhausted` adds a third vocabulary —
+"Ask an administrator to issue a new temporary PIN."
+
+The gate is `MachineSetupGate`, which authorises on `permission.settings.machine_configuration`; the
+baseline for that key is `role:it_department` and `role:developer`. The permission contract retires the
+old name outright: "The retired code that must not remain in the catalogue is `admin`. The display name
+that replaces it is `IT Department`." Issuing a temporary PIN is `permission.admin.reset_password`,
+held by Production Lead, Setup Lead, Material Handler Lead, Plant Manager, IT Department and Developer.
+
+A person following the label looks for an account type that no longer exists, and the same screen tells
+them a different one in its refusal. The sign-in stage's "an administrator" is the same drift.
+
+### S2 — The set-up panel writes its own English beside localised labels
+
+`MTM_Waitlist.Startup/ViewModels/SetUpPanelViewModel.cs` holds `HeadingText`, `NamePromptText` and
+`PermissionNoteText` as literal strings, while the seven field labels beside them resolve
+`Startup_SetUp.*` keys in `SetUpPanel.xaml.cs`. The panel is therefore half-translated by construction.
+
+`PermissionNoteText` reads "A higher permission level must be requested from IT." "IT" is not a role
+in the catalogue (`IT Department` is), and the sentence leaves out the fact that matters to the person:
+`sp_core_account_setup_create` assigns the lowest rung of `auth_roles_catalog`
+(`ORDER BY role_rank ASC`), and `AccountSetupResult.RoleCode` is returned to the panel and never shown.
+
+### S3 — The offer keeps a person who can no longer sign in
+
+`Database/StoredProcedures/sp_auth_user_previous_sign_ins_list/create.sql` joins
+`core_users_profiles` without an `is_active` filter. The two other account reads —
+`sp_auth_user_credential_get` and `sp_auth_user_row_get` — both carry `u.is_active = 1`. A deactivated
+account therefore stays in "Signed in here before" on every computer it once used, and the credential
+stage refuses it immediately afterwards.
+
+### S4 — Nothing says whether this is one person's computer or a shared terminal
+
+`core_computers_registry` holds `computer_name`, `hostname_normalized`, `mac_address_normalized`,
+`display_name`, `location` and `is_registered`. There is no assigned user and no terminal kind, so the
+application cannot tell a desk that one person uses from a terminal that a shift shares.
+
+The read that fills the offer returns at most six rows ordered by `issued_utc DESC` and returns no
+time at all. `user_active_sessions` is one row per person per machine and is never hard-deleted, so the
+number of rows for one computer is the number of people who have signed in there. A capped read of that
+table therefore says "fewer than six" exactly, and six rows means six or more people. That is the only
+signal the stage has today, and it is not used.
+
+The effect is the same column on two very different machines. On a dedicated computer it holds one name
+beside a form that already asks for a name. On a shared terminal it holds the six most recent of dozens,
+with nothing saying when any of them signed in, so the six may all be the previous shift — and the
+person who is not among them still has to type. Nothing on the stage distinguishes the two cases.
+

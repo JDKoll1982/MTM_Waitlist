@@ -42,7 +42,7 @@ digraph StartupFriendly2 {
     d_accounts [shape=cylinder, label="Accounts\nand roles", fillcolor="#EDEDED", fontname="Consolas"];
     d_pins [shape=cylinder, label="PINs, never shown", fillcolor="#EDEDED", fontname="Consolas"];
     d_recent [shape=cylinder, label="People who signed\nin here before", fillcolor="#EDEDED", fontname="Consolas"];
-    n_offer [shape=note, label="Worth fixing: when that\nlist cannot be read, it\nvanishes without a word.", fillcolor="#FFD6D6", color="#C62828", style="filled,dashed"];
+    n_offer [shape=note, label="Worth fixing: the list can vanish,\noffer someone who cannot sign in,\nand never say how many people\nuse this computer.", fillcolor="#FFD6D6", color="#C62828", style="filled,dashed"];
   }
   { rank=same; u_signin; x_back; s_name; d_people; }
   u_signin -> x_back -> s_name -> d_people [style=invis, constraint=false];

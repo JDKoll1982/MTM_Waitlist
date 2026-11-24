@@ -1,0 +1,113 @@
+{
+  "workflow": "startup-launch",
+  "workflow_variant": "engineer",
+  "screen": "sign-in",
+  "refactor": "name-the-authority",
+  "title": "Name the authority that can actually help",
+  "audience": "developer",
+  "window": {
+    "kind": "stage",
+    "stage": "sign-in",
+    "viewports": [
+      { "name": "stage", "width": 780, "height": 640, "scale": 1 }
+    ]
+  },
+  "before": {
+    "kind": "reconstruction",
+    "mockup": "mockups/name-the-authority-before.html",
+    "captured_at": null,
+    "capture_command": null,
+    "source_xaml": [
+      "Module_Startup/Views/SignInPage.xaml",
+      "Module_Startup/Views/SetUpPanel.xaml",
+      "MTM_Waitlist.Startup/ViewModels/SignInViewModel.cs",
+      "MTM_Waitlist.Startup/ViewModels/SetUpPanelViewModel.cs",
+      "MTM_Waitlist.Startup/Services/AccountCreationService.cs"
+    ]
+  },
+  "after": {
+    "mockup": "mockups/name-the-authority-after.html"
+  },
+  "states": [
+    { "name": "default", "applies_to": ["before", "after"] },
+    { "name": "state-error", "applies_to": ["before", "after"] }
+  ],
+  "callouts": [
+    "The set-up note names the level the account starts at and the role that can raise it, instead of 'IT'.",
+    "The exhausted-attempts refusal names who can issue a new temporary PIN, instead of 'an administrator'.",
+    "The panel's own sentences become resource strings, so the panel is translated like the labels beside it."
+  ],
+  "elements": [
+    {
+      "design": "The set-up panel's permission note",
+      "winui": "TextBlock (TextFillColorSecondaryBrush)",
+      "code": [
+        "Module_Startup/Views/SetUpPanel.xaml",
+        "MTM_Waitlist.Startup/ViewModels/SetUpPanelViewModel.cs"
+      ],
+      "note": "currently a literal string in the view model"
+    },
+    {
+      "design": "The set-up panel's heading and name prompt",
+      "winui": "TextBlock",
+      "code": [
+        "Module_Startup/Views/SetUpPanel.xaml",
+        "MTM_Waitlist.Startup/ViewModels/SetUpPanelViewModel.cs"
+      ],
+      "note": "also literal strings; the labels beside them already resolve Startup_SetUp.* keys"
+    },
+    {
+      "design": "The new panel strings",
+      "winui": "Resource keys Startup_SetUp.Heading / NamePrompt / PermissionNote",
+      "code": [
+        "Strings/en-us/Resources.resw"
+      ],
+      "note": "new keys, beside the eight Startup_SetUp.* keys the panel already resolves"
+    },
+    {
+      "design": "The exhausted-attempts refusal",
+      "winui": "Border with a TextBlock (SystemFillColorCriticalBackgroundBrush)",
+      "code": [
+        "Module_Startup/Views/SignInPage.xaml",
+        "MTM_Waitlist.Startup/ViewModels/SignInViewModel.cs"
+      ],
+      "note": "the strip itself is unchanged; only its wording changes"
+    },
+    {
+      "design": "Who may issue a new temporary PIN",
+      "winui": "Resource value Startup_SignIn.RefusedAttemptsExhausted",
+      "code": [
+        "Strings/en-us/Resources.resw"
+      ],
+      "note": "permission.admin.reset_password is held by Production Lead, Setup Lead, Material Handler Lead, Plant Manager, IT Department and Developer"
+    },
+    {
+      "design": "The rank a self set-up account receives",
+      "winui": "Stored procedure transaction",
+      "code": [
+        "Database/StoredProcedures/sp_core_account_setup_create/create.sql",
+        "MTM_Waitlist.Startup/Services/AccountCreationService.cs"
+      ],
+      "note": "the lowest rung of auth_roles_catalog; the note now says so"
+    }
+  ],
+  "workflow_refs": [
+    { "sheet": 2, "nodes": ["v_signin", "v_setup"] }
+  ],
+  "design_system": {
+    "resources": [
+      "Styles/FontSizes.xaml",
+      "Styles/Thickness.xaml",
+      "Styles/TextBlock.xaml",
+      "Styles/ModuleSetup.xaml",
+      "Styles/Dialogs.xaml"
+    ]
+  },
+  "approval": {
+    "approved_at": null,
+    "approved_by": null,
+    "sources_sha256": null,
+    "rendered_sha256": null,
+    "design_system_sha256": null
+  }
+}

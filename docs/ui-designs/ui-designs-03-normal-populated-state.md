@@ -24,7 +24,7 @@ states are compared against, and the one the implementation will be judged by.
 
 Read before generating:
 
-1. The record `<refactor>-design.json` and the mockup `mockups/<refactor>-after.html`.
+1. The record `data/<refactor>-design.json` and the mockup `mockups/<refactor>-after.html`.
 2. The XAML templates and the model types the rows bind to.
 3. The view model's load path and the read procedures behind each field.
 4. `Strings/en-us/Resources.resw` for every label and status word.
@@ -56,11 +56,12 @@ Record before drawing:
 3. If the same state also appears in the before reconstruction, put the matching content in
    `mockups/<refactor>-before.html` so the comparison isolates the design change rather than the data.
 4. Render:
-   `python docs\ui-designs\tools\render_mockup.py --design "<absolute path>\<refactor>\<refactor>-design.json"`.
+   `python docs\ui-designs\tools\render_mockup.py --design "<absolute path>\<refactor>\data\<refactor>-design.json"`.
    Any path works: the renderer resolves the output path before Edge sees it.
 5. The renderer writes `<refactor>-after.png` from the `default` state at `wide`, and every
    `default`/viewport combination.
-6. Inspect `<refactor>-after.png` and `<refactor>-comparison.png` for a misaligned column, a clipped value
+6. Inspect `pngs/<refactor>-after.png`, `<refactor>-comparison.png` and the pages of
+   `<refactor>-comparison.pdf` for a misaligned column, a clipped value
    or a wrapped label the control would not wrap.
 
 Do not annotate, do not add a callout for data, and do not show a spinner, focus ring or hover state that
@@ -104,8 +105,8 @@ nobody triggered.
 | Item | Requirement |
 | --- | --- |
 | Format | PNG, 8-bit, sRGB |
-| Sizes | every declared viewport: 1600 × 1000, 1280 × 800, 900 × 500 at scale 1 |
-| Canonical | `<refactor>-after.png` = `default` at `wide` |
+| Sizes | every declared viewport: 1600 × 1000, 1280 × 800, 900 × 500 at scale 1 — or the single `stage` viewport for a launch stage |
+| Canonical | `<refactor>-after.png` = `default` at `wide`, or at `stage` for a launch stage |
 | Renderer | `render_mockup.py` (any `--design` path) |
 | Record | `default` listed in `states[]` with `applies_to` including `after` |
 | Content | one screen, one state, no montage |
@@ -115,18 +116,25 @@ nobody triggered.
 The renderer writes these names in the design folder; do not rename them.
 
 ```
-<refactor>-after.png                    default at wide, the canonical image
-<refactor>-after-default-wide.png
-<refactor>-after-default-medium.png
-<refactor>-after-default-minimum.png
-<refactor>-comparison.png
+pngs/<refactor>-after.png                    default at wide, the canonical image
+pngs/<refactor>-after-default-wide.png
+pngs/<refactor>-after-default-medium.png
+pngs/<refactor>-after-default-minimum.png
+<refactor>-comparison.png                    one row per state
+<refactor>-comparison.pdf                    one page per state
 ```
+
+A launch stage writes one default file per state instead — `pngs/<refactor>-after-default-stage.png` and
+`pngs/<refactor>-after-<state>-stage.png` — and its canonical image, comparison and PDF page are drawn from
+`stage`.
 
 ## 9. Validation checklist
 
 1. **Bytes differ.** `default` must differ from every other state's file. If it matches `state-empty`
-   byte for byte, the state anchors are wrong.
-2. **Verify.** `python docs\ui-designs\tools\verify_designs.py --design "<absolute path>\<refactor>\<refactor>-design.json"`.
+   byte for byte, the state anchors are wrong. Also open `default` on its own: state-only content that
+   still shows there means an inline `display` beat the state rule, and every file differs while the
+   default image is wrong.
+2. **Verify.** `python docs\ui-designs\tools\verify_designs.py --design "<absolute path>\<refactor>\data\<refactor>-design.json"`.
 3. **Text.** `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\ui-automation\ocr_png.ps1 -Path <png>`
    over `<refactor>-after.png`, compared with `Resources.resw`.
 4. **Field set.** Against the XAML: no field added, none missing, none reordered.

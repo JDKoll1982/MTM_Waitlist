@@ -65,7 +65,8 @@ Establish and write down:
 3. Capture: `pwsh -File scripts\ui-automation\capture_app_window.ps1 -Maximize`. It polls for a non-zero
    main window handle, because the shell appears only after startup validation against the store, which
    has measured longer than nine seconds.
-4. Save the capture as `docs/ui-designs/<<WORKFLOW>>/<<SCREEN>>/<<REFACTOR>>/<<REFACTOR>>-before.png`. It must be at
+4. Save the capture as
+   `docs/ui-designs/<<WORKFLOW>>/<<SCREEN>>/<<REFACTOR>>/pngs/<<REFACTOR>>-before.png`. It must be at
    least 900 × 500; do not upscale it to 1600 × 1000 to match the mockups — the verifier accepts the
    real capture size.
 5. In the design record set `before.kind` to `"capture"`, `captured_at` to the ISO timestamp from the
@@ -79,19 +80,24 @@ Use only when the application cannot run. It is a reconstruction and says so.
 
 1. Copy the template shape: `before.mockup` is
    `mockups/<<REFACTOR>>-before.html`, and that file lives beside the record.
-2. Build the mockup from the XAML using the shared stylesheet
-   (`<link rel="stylesheet" href="../../../tools/mockup/mockup.css">`) and the classes it already
-   provides — `.titlebar`, `.shell`, `.nav`, `.page`, `.page-header`, `.page-title`, `.card`, `.field`,
-   `.input`, `.hint`, `.action-bar`, `.button`, `.infobar`, `.tile`, `.stamp`.
+2. Build the mockup from the XAML using the shared stylesheet. The mockup sits in the run's
+   `mockups/` subfolder, so the path is **four** levels up:
+   `<link rel="stylesheet" href="../../../../tools/mockup/mockup.css">`. Three levels (`../../../tools/…`)
+   looks right and silently loads nothing, which renders the page unstyled and reads as a design fault.
+   Use the classes the stylesheet provides — `.titlebar`, `.shell`, `.nav`, `.page`, `.page-header`,
+   `.page-title`, `.card`, `.field`, `.input`, `.hint`, `.action-bar`, `.button`, `.infobar`, `.tile`,
+   `.stamp`.
 3. Keep the required banner in the mockup: `BEFORE — CURRENT IMPLEMENTATION`, with a `.provenance` line
    that literally contains the word **reconstruction** and names the XAML — for example
    `reconstruction from Module_Waitlist/Views/WaitlistViewPage.xaml`. The verifier warns when that word is
-   absent, because a reader must not mistake the image for a screenshot.
+   absent, because a reader must not mistake the image for a screenshot. Keep it to one line: at a launch
+   stage's own width (520–780 px) a longer provenance wraps to two lines and pushes the whole page down,
+   so the before and the after no longer line up in the comparison.
 4. Reproduce existing faults faithfully — a clipped label stays clipped, a misaligned row stays
    misaligned. A tidy reconstruction is a false before.
 5. Fill `before.source_xaml` with the files you drew from; every path must exist.
 6. Render:
-   `python docs\ui-designs\tools\render_mockup.py --design "<absolute path>\<<REFACTOR>>\<<REFACTOR>>-design.json"`.
+   `python docs\ui-designs\tools\render_mockup.py --design "<absolute path>\<<REFACTOR>>\data\<<REFACTOR>>-design.json"`.
    The renderer resolves every output path itself, so a relative design path works; an absolute path is
    still the clearest in a script.
 
@@ -132,9 +138,9 @@ Use only when the application cannot run. It is a reconstruction and says so.
 | --- | --- |
 | Format | PNG, 8-bit, sRGB |
 | Capture size | its own pixels, at least 900 × 500, never upscaled |
-| Reconstruction size | 1600 × 1000 (`wide`), plus 1280 × 800 and 900 × 500, produced by the renderer at scale 1 |
-| Outputs | `<<REFACTOR>>-before.png`, and for a reconstruction the per-state, per-viewport files the renderer writes |
-| Record | `<<REFACTOR>>-design.json` with `before`, `after`, `states`, `elements`, `workflow_refs`, `design_system` |
+| Reconstruction size | 1600 × 1000 (`wide`), plus 1280 × 800 and 900 × 500, produced by the renderer at scale 1 — or the single `stage` viewport when the surface is a launch stage |
+| Outputs | `pngs/<<REFACTOR>>-before.png`, and for a reconstruction the per-state, per-viewport files the renderer writes |
+| Record | `data/<<REFACTOR>>-design.json` with `before`, `after`, `states`, `elements`, `workflow_refs`, `design_system` |
 | Renderer | `docs/ui-designs/tools/render_mockup.py` (any `--design` path) |
 
 ## 8. File naming
@@ -142,18 +148,18 @@ Use only when the application cannot run. It is a reconstruction and says so.
 Given `docs/ui-designs/<<WORKFLOW>>/<<SCREEN>>/<<REFACTOR>>/`:
 
 ```
-<<REFACTOR>>-design.json
-mockups/<<REFACTOR>>-before.html        (reconstruction only)
-<<REFACTOR>>-before.png                 canonical before
-<<REFACTOR>>-before-default-wide.png    etc., written by the renderer
-<<REFACTOR>>-render.json
+data/<<REFACTOR>>-design.json            the record this image belongs to
+data/<<REFACTOR>>-render.json            what the renderer read and wrote
+mockups/<<REFACTOR>>-before.html         (reconstruction only)
+pngs/<<REFACTOR>>-before.png             canonical before
+pngs/<<REFACTOR>>-before-default-wide.png  etc., written by the renderer
 ```
 
 The renderer names the files; do not rename them afterwards, and do not hand-write a PNG.
 
 ## 9. Validation checklist
 
-1. **Record.** `python docs\ui-designs\tools\verify_designs.py --design "<absolute path>\<<REFACTOR>>\<<REFACTOR>>-design.json"`
+1. **Record.** `python docs\ui-designs\tools\verify_designs.py --design "<absolute path>\<<REFACTOR>>\data\<<REFACTOR>>-design.json"`
    reports no error about `before`.
 2. **Kind.** A capture has `captured_at`, a `capture_command` and no `mockup`; a reconstruction has a
    mockup, `source_xaml` entries that exist, and the word "reconstruction" in the banner.
@@ -171,6 +177,6 @@ The renderer names the files; do not rename them afterwards, and do not hand-wri
 - The image is a capture of the running application, or a reconstruction that says it is one.
 - Every visible string and control traces to a file in this repository.
 - The current defects the proposal is about are visible, not hidden.
-- The record validates, and the canonical `<<REFACTOR>>-before.png` exists at a legal size.
+- The record validates, and the canonical `pngs/<<REFACTOR>>-before.png` exists at a legal size.
 - A reviewer can open the XAML and the image side by side and find nothing in one that is not in the
   other, except what the caption explains.

@@ -82,3 +82,112 @@ Under `pwsh` 7 the script fails before recognition: the WinRT types (`Windows.Me
 
 `docs/ui-designs/tools/check/` and the temporary Edge profiles were deleted after the run. Nothing from
 this check is committed.
+
+---
+
+# Second run — startup QOL designs and the diagram rebuild
+
+**Date:** 2026-11-24, same day, after the first check.
+**What was run:** three design runs under `docs/ui-designs/startup-launch/` (two reusing the sign-in
+stage, one on the machine-setup stage) and a rebuild of Diagram 5 in both variants.
+
+## The design pipeline
+
+| What | Result |
+| --- | --- |
+| `render_mockup.py` on a stage design | Rendered one viewport (`stage`) instead of three, and wrote `<refactor>-before/after.png` from that viewport — the canonical image of a launch stage is the stage size |
+| `verify_designs.py --design` on each run | Clean for all three; each reported the expected "not approved yet" note |
+| `verify_designs.py --all` | Clean for all four records, but the two `name-the-authority` runs print identical lines because only the file name is shown. Use `--json` when the report matters |
+
+## What this run exposed, now written into the guide and the prompts
+
+1. **The shared stylesheet knows six state words.** `state-few` and `state-solo` rendered nothing until the
+   mockup carried its own `:has(#state-…:target)` rules. The guide's state section said the stylesheet
+   "reveals `.when-<word>`", which is true only for the six.
+2. **An inline `display` beat the state rule.** The set-up panel's wrapper carried `style="display:flex"`,
+   so the panel showed in `default` as well as in the state, and the run still passed every duplicate
+   check. Fixed by moving `display` into a class. The verifier compares states to `default`; it cannot
+   tell that the default itself is wrong.
+3. **The stylesheet path is four levels, not three.** `../../../tools/mockup/mockup.css` loads nothing from
+   `mockups/`; prompt 01 carried the three-level path. A served page proved it: `fontFamily` came back as
+   `"Times New Roman"`.
+4. **`file:` is not available for inspection.** Playwright MCP refuses it, and serving the mockup's own
+   folder leaves `../../../../tools/…` outside the served root. Serving the repository root works.
+5. **A long banner costs a row.** At 780 px and again at 520 px the provenance line wrapped and pushed the
+   page down, misaligning the before from the after.
+6. **Wording has to be measured at stage widths.** A 513 px note in a 456 px column wrapped; candidates
+   were measured with `PIL.ImageFont.truetype(<windir>\Fonts\segoeui.ttf, 14).getlength(text)` before one
+   was chosen.
+
+## The diagram rebuild
+
+| What | Result |
+| --- | --- |
+| `dotgen.py <spec> <spec>` | Rebuilt both variants; no warnings once every flag had an edge |
+| `render_sheets.py docs\diagrams\tools\manifest.json` | **Failed**: four non-startup specs are absent from this checkout, so the loop stopped on the first missing one |
+| `render_sheets.py <subset manifest in %TEMP%>` | **Failed second**: spec paths are resolved against the manifest's folder, so bare names were looked for under `%TEMP%` |
+| `render_sheets.py <subset manifest with absolute spec paths>` | **Succeeded** — `diagram-startup-launch.pdf` 3 pages, `-friendly.pdf` 2 pages |
+| `verify_pdfs.py` | Every page 792 × 612 pt, nothing in the margin band, text 9.5–11.0 pt |
+| `diagram_context.py --workflow startup-launch --strict` | Clean, and names both flags |
+| `python -m unittest discover -s docs\diagrams\tools` | Fails in this checkout for the same missing specs; `test_diagram_context.py` asserts against the full set |
+
+Layout findings from this run, now written into the instruction file: a `refactor` node needs an edge; its
+lane decides the layout, because a flag in `ui` takes that lane's rank and drags edges across the sheet;
+and `verify_pdfs.py` does not enforce the 12–16 shape ceiling, so the count is the author's to keep —
+sheet 2 reached 17 nodes with a second flag and the two were folded into one.
+
+## What this run does not prove
+
+- **The capture path** was still not exercised; every BEFORE in these runs is a reconstruction.
+- **Approval** was not recorded: all four records are deliberately unapproved.
+- **The other four workflow diagrams** were not rebuilt, because their specs are not in this checkout.
+
+---
+
+# Third run — comparisons as documents, and a tree that cannot be nested
+
+**Date:** 2026-11-24, after the second run.
+**Why:** the comparison was one image showing `default` only, which hid every other before/after
+grouping a design had; nothing produced a printable document; and the run folders had grown a pile of
+loose records and renders at their top level.
+
+## What changed in the tooling
+
+| Change | Where |
+| --- | --- |
+| One comparison row per before/after grouping, not one row for `default` | `render_mockup.comparison_pairs` |
+| `<refactor>-comparison.pdf`: 792 × 612 pt landscape, one page per grouping, the pair on top and the change as real text below | `render_mockup.write_comparison_pdf` |
+| `--workflow <folder>`: one PNG and one PDF holding every design in a workflow, one row and one page each | `render_mockup.build_workflow` |
+| The run folder keeps only the proposal, the comparison PNG and the comparison PDF at its top; mockups, PNGs and JSON records live in `mockups/`, `pngs/` and `data/` | `render_mockup.run_dir`, `PNGS_DIR`, `DATA_DIR` |
+| A workflow is its own folder directly under `docs/ui-designs/` and is never nested; a design whose `workflow` disagrees with its folder is refused, by both tools | `build_workflow`, `verify.check` |
+| The verifier reads the PDF back: page count, page size, an image on every page, the callouts present as text, and nothing below 9.4 pt | `verify.check_comparison_pdf` |
+
+## What the run exposed, now written into the guide and the skill
+
+1. **The comparison compared one state.** A three-state design produced a single row; the other two
+   groupings existed only as loose per-state PNGs. Both the per-design sheet and the PDF now carry one row
+   and one page per grouping.
+2. **The hyphen is not the hyphen.** Segoe UI's ToUnicode map returns `-` as `U+2010`, so `Sign-in`
+   extracts as `Sign‑in` and a plain substring test said the PDF was missing a change it plainly held. The
+   verifier folds the dashes before comparing.
+3. **The `file://` page and the served page disagree.** Already recorded in the second run; the mockup
+   paths now sit one level deeper, so the stylesheet reference is still four levels up and a served page
+   is the only honest way to look at one.
+4. **The unit tests depended on a checkout this machine does not have.** The fixtures named
+   `workorder-new-request`, whose spec is absent, so 17 cases failed on a missing spec rather than on the
+   rule they test. They now use `startup-launch`, whose spec is present, and all 29 pass.
+
+## Verified
+
+- `render_mockup.py --design` for all four runs: every state rendered, one comparison row per grouping,
+  one PDF page per grouping.
+- `render_mockup.py --workflow docs\ui-designs\startup-launch`: one PNG with four rows, one PDF with four
+  pages, `data/startup-launch-comparison.json` recording the PNG hashes it was composed from.
+- `verify_designs.py --all`: four designs and the workflow sheet reported OK.
+- `python -m unittest docs.ui-designs.tools.test_designs`: 29 tests pass.
+
+## What this run does not prove
+
+- **The other four workflow diagrams** are still absent from this checkout, so
+  `test_diagram_context.py` still fails on missing specs — pre-existing, and untouched by these changes.
+- **Approval** is still unrecorded for all four designs.

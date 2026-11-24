@@ -25,7 +25,8 @@ import diagram_context  # noqa: E402
 import render_mockup as render  # noqa: E402
 import verify_designs as verify  # noqa: E402
 
-WORKFLOW = "workorder-new-request"
+# A workflow whose spec is in every checkout, so the fixture does not depend on the others.
+WORKFLOW = "startup-launch"
 REFACTOR = "fixture-change"
 VIEWPORTS = [{"name": "wide", "width": 1600, "height": 1000, "scale": 1},
              {"name": "medium", "width": 1280, "height": 800, "scale": 1},
@@ -53,10 +54,16 @@ def write_png(path, width, height, rgb=(255, 255, 255)):
 
 def write_render_record(design_path, design, design_dir):
     images = {}
-    for png in sorted(design_dir.glob("*.png")):
+    for png in sorted((design_dir / "pngs").glob("*.png")):
         width, height = render.png_size(png)
-        images[png.name] = {"width": width, "height": height,
-                            "sha256": render.sha256_file(png)}
+        images[f"pngs/{png.name}"] = {"width": width, "height": height,
+                                      "sha256": render.sha256_file(png)}
+    for name in (f"{design['refactor']}-comparison.png", f"{design['refactor']}-comparison.pdf"):
+        image = design_dir / name
+        width, height = ((3296, 1260) if image.suffix == ".png"
+                         else (int(render.PDF_PAGE_W), int(render.PDF_PAGE_H)))
+        images[name] = {"width": width, "height": height,
+                        "sha256": render.sha256_file(image)}
     sources = render.source_snapshot(design, design_dir)
     system = render.design_system_snapshot(design)
     record = {
@@ -71,7 +78,7 @@ def write_render_record(design_path, design, design_dir):
         "design_system_sha256": render.combined_hash(system),
         "images": images,
     }
-    path = design_dir / f"{design['refactor']}-render.json"
+    path = design_dir / "data" / f"{design['refactor']}-render.json"
     path.write_text(json.dumps(record, indent=1), encoding="utf-8")
     return record
 
@@ -107,6 +114,8 @@ def make_design(root, *, approved=False, before_kind="reconstruction", states=No
                 window=None, flow_source=None, workflow_refs=None):
     design_dir = pathlib.Path(root) / WORKFLOW / "fixture-screen" / refactor
     (design_dir / "mockups").mkdir(parents=True)
+    (design_dir / "pngs").mkdir()
+    (design_dir / "data").mkdir()
     (design_dir / "mockups" / "mockup.css").write_text(".mockup { color: #1b1b1b; }\n",
                                                        encoding="utf-8")
     variants = ["before", "after"] if before_kind == "reconstruction" else ["after"]
@@ -154,14 +163,14 @@ def make_design(root, *, approved=False, before_kind="reconstruction", states=No
                       "code": ["Module_Waitlist/Views/WaitlistViewPage.xaml"],
                       "note": None}],
         "workflow_refs": workflow_refs if workflow_refs is not None else [
-            {"sheet": 1, "nodes": ["v_wc", "d_gate"]}],
+            {"sheet": 1, "nodes": ["v_pipe", "d_conf"]}],
         "design_system": {"resources": ["Styles/FontSizes.xaml", "Styles/Thickness.xaml"]},
         "approval": {"approved_at": None, "approved_by": None, "sources_sha256": None,
                      "rendered_sha256": None, "design_system_sha256": None},
     }
     if flow_source is not None:
         design["flow_source"] = flow_source
-    design_path = design_dir / f"{refactor}-design.json"
+    design_path = design_dir / "data" / f"{refactor}-design.json"
     design_path.write_text(json.dumps(design, indent=1), encoding="utf-8")
 
     sizes = design["window"]["viewports"]
@@ -170,15 +179,30 @@ def make_design(root, *, approved=False, before_kind="reconstruction", states=No
             if variant not in (state.get("applies_to") or ["before", "after"]):
                 continue
             for viewport in sizes:
-                write_png(design_dir / f"{refactor}-{variant}-{state['name']}-{viewport['name']}.png",
+                write_png(design_dir / "pngs" / f"{refactor}-{variant}-{state['name']}-{viewport['name']}.png",
                           int(viewport["width"] * viewport.get("scale", 1)),
                           int(viewport["height"] * viewport.get("scale", 1)))
         wide = next((viewport for viewport in sizes if viewport["name"] == canonical), sizes[0])
-        shutil.copyfile(design_dir / f"{refactor}-{variant}-default-{wide['name']}.png",
-                        design_dir / f"{refactor}-{variant}.png")
+        shutil.copyfile(design_dir / "pngs" / f"{refactor}-{variant}-default-{wide['name']}.png",
+                        design_dir / "pngs" / f"{refactor}-{variant}.png")
     if before_kind == "capture":
-        write_png(design_dir / f"{refactor}-before.png", 1600, 1000)
+        write_png(design_dir / "pngs" / f"{refactor}-before.png", 1600, 1000)
     write_png(design_dir / f"{refactor}-comparison.png", 3296, 1260)
+    pairs = [state["name"] for state in design["states"]
+             if "after" in (state.get("applies_to") or ["before", "after"])
+             and (before_kind == "capture" and state["name"] == "default"
+                  or before_kind == "reconstruction"
+                  and "before" in (state.get("applies_to") or ["before", "after"]))]
+    render.write_comparison_pdf(design_dir / f"{refactor}-comparison.pdf", [
+        {"heading": design["title"],
+         "subheading": f"{design['workflow']} · {design['screen']} · {state}",
+         "before": design_dir / "pngs" / f"{refactor}-before-{state}-{canonical}.png"
+                   if before_kind == "reconstruction"
+                   else design_dir / "pngs" / f"{refactor}-before.png",
+         "after": design_dir / "pngs" / f"{refactor}-after-{state}-{canonical}.png",
+         "changes": design["callouts"],
+         "note": f"The BEFORE image is a {before_kind}."}
+        for state in pairs])
     (design_dir / f"{refactor}-proposal.md").write_text(proposal, encoding="utf-8")
     write_render_record(design_path, design, design_dir)
     if approved:
@@ -234,14 +258,14 @@ class Verification(unittest.TestCase):
     def test_missing_state_image_fails(self):
         with tempfile.TemporaryDirectory() as folder:
             design_dir, path = make_design(folder)
-            (design_dir / f"{REFACTOR}-after-state-error-medium.png").unlink()
+            (design_dir / "pngs" / f"{REFACTOR}-after-state-error-medium.png").unlink()
             report, _ = self.check(path)
             self.assertTrue(any("missing render" in error for error in report.errors))
 
     def test_wrong_image_dimensions_fail(self):
         with tempfile.TemporaryDirectory() as folder:
             design_dir, path = make_design(folder)
-            write_png(design_dir / f"{REFACTOR}-after-state-error-medium.png", 100, 100)
+            write_png(design_dir / "pngs" / f"{REFACTOR}-after-state-error-medium.png", 100, 100)
             report, _ = self.check(path)
             self.assertTrue(any("not " in error and "1280x800" in error for error in report.errors))
 
@@ -297,7 +321,7 @@ class Verification(unittest.TestCase):
     def test_image_changed_after_render_fails(self):
         with tempfile.TemporaryDirectory() as folder:
             design_dir, path = make_design(folder)
-            write_png(design_dir / f"{REFACTOR}-after-default-wide.png", 1600, 1000,
+            write_png(design_dir / "pngs" / f"{REFACTOR}-after-default-wide.png", 1600, 1000,
                       rgb=(200, 200, 200))
             report, _ = self.check(path)
             self.assertTrue(any("changed after it was rendered" in error
@@ -385,9 +409,10 @@ except render.RenderError:
 @unittest.skipUnless(EDGE, "Microsoft Edge is not available")
 class Rendering(unittest.TestCase):
     def make_mockup_design(self, root):
-        design_dir = pathlib.Path(root) / "wf" / "screen"
+        design_dir = pathlib.Path(root) / "wf" / "screen" / "tiny"
         mockups = design_dir / "mockups"
         mockups.mkdir(parents=True)
+        (design_dir / "data").mkdir()
         shutil.copy(TOOLS / "mockup" / "mockup.css", mockups / "mockup.css")
         shutil.copy(TOOLS / "mockup" / "tokens.css", mockups / "tokens.css")
         body = ("<span class=\"state\" id=\"state-default\"></span>"
@@ -413,12 +438,12 @@ class Rendering(unittest.TestCase):
             "callouts": ["First change."],
             "elements": [{"design": "Card", "winui": "Border",
                           "code": ["Module_Waitlist/Views/WaitlistViewPage.xaml"], "note": None}],
-            "workflow_refs": [{"sheet": 1, "nodes": ["v_wc"]}],
+            "workflow_refs": [{"sheet": 1, "nodes": ["v_pipe"]}],
             "design_system": {"resources": ["Styles/FontSizes.xaml"]},
             "approval": {"approved_at": None, "approved_by": None, "sources_sha256": None,
                          "rendered_sha256": None, "design_system_sha256": None},
         }
-        path = design_dir / "tiny-design.json"
+        path = design_dir / "data" / "tiny-design.json"
         path.write_text(json.dumps(design, indent=1), encoding="utf-8")
         return design_dir, path
 
@@ -429,19 +454,28 @@ class Rendering(unittest.TestCase):
             self.assertTrue(render_path.is_file())
             for variant in ("before", "after"):
                 for state in ("default", "state-error"):
-                    png = design_dir / f"tiny-{variant}-{state}-wide.png"
+                    png = design_dir / "pngs" / f"tiny-{variant}-{state}-wide.png"
                     self.assertTrue(png.is_file(), png.name)
                     self.assertEqual(render.png_size(png), (700, 500))
-                self.assertTrue((design_dir / f"tiny-{variant}.png").is_file())
+                self.assertTrue((design_dir / "pngs" / f"tiny-{variant}.png").is_file())
                 self.assertNotEqual(
-                    render.sha256_file(design_dir / f"tiny-{variant}-default-wide.png"),
-                    render.sha256_file(design_dir / f"tiny-{variant}-state-error-wide.png"),
+                    render.sha256_file(design_dir / "pngs" / f"tiny-{variant}-default-wide.png"),
+                    render.sha256_file(design_dir / "pngs" / f"tiny-{variant}-state-error-wide.png"),
                     "the error state must render differently from the default state")
             comparison = design_dir / "tiny-comparison.png"
             self.assertTrue(comparison.is_file())
             width, height = render.png_size(comparison)
             self.assertGreaterEqual(width, 1400)
             self.assertGreaterEqual(height, 500)
+            pdf = design_dir / "tiny-comparison.pdf"
+            self.assertTrue(pdf.is_file())
+            document = render.pdf_document(pdf)
+            self.assertEqual(document.page_count, 2,
+                             "one page per before/after grouping")
+            self.assertAlmostEqual(document[0].rect.width, 792.0, places=0)
+            self.assertAlmostEqual(document[0].rect.height, 612.0, places=0)
+            self.assertIn("First change.", " ".join(document[0].get_text().split()))
+            document.close()
             self.assertEqual(len(record["sources"]), len(record["sources"]))
             self.assertTrue(record["sources_sha256"])
             self.assertTrue(record["design_system_sha256"])

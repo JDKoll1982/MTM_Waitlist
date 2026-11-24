@@ -41,7 +41,7 @@ digraph StartupLaunch2 {
     style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
     db_employee [shape=cylinder, label="sp_core_employee_\nby_identifier_get", fillcolor="#EDEDED", fontname="Consolas"];
     db_prev [shape=cylinder, label="sp_auth_user_\nprevious_sign_ins", fillcolor="#EDEDED", fontname="Consolas"];
-    x_offer [shape=note, label="[REFACTOR] a failed offer\nread returns [] and the\ncolumn vanishes", fillcolor="#FFD6D6", color="#C62828", style="filled,dashed"];
+    x_offer [shape=note, label="[REFACTOR] the offer vanishes\nwhen unread, offers people\nwho cannot sign in, and\nnever says how many\npeople use this computer", fillcolor="#FFD6D6", color="#C62828", style="filled,dashed"];
     db_cred [shape=cylinder, label="sp_auth_user_\ncredential_get", fillcolor="#EDEDED", fontname="Consolas"];
     db_user [shape=cylinder, label="sp_auth_user_row_get\nsp_core_account_\nsetup_create", fillcolor="#EDEDED", fontname="Consolas"];
   }

@@ -45,7 +45,8 @@ Two conventions matter when following a flow:
 ## What the diagrams found
 
 The full list is in [the refactor notes](./diagram-workflow-refactor-notes.md) — 21 hotspots across
-seven high-severity, ten moderate and four low. The ones that change behaviour today:
+seven high-severity, ten moderate and four low. Diagram 5 (startup) was mapped later, so its findings
+are recorded separately in §6 of the same file. The ones that change behaviour today:
 
 - The submit guard compares the work centre with itself, so it cannot fail
   (`NewRequestSummaryViewModel.SubmitAsync`).

@@ -36,7 +36,16 @@ missing and one for what it is needed for, at most three choices when a choice i
 tool output, no JSON, no jargon. When the answer is not available, stop and wait; never invent a value, a
 screenshot, an approval or a decision to keep the run moving.
 
-## Phase 0 - designate the flow, and map it if it is missing
+## Phase 0 - classify the change, then designate the flow
+
+**First, decide whether this needs a picture at all.** If the change replaces wording and nothing else —
+a `Resources.resw` value, a new key on a control that already exists, or a string in a view model — with
+no element added, removed, moved, reordered, hidden or resized, and the longest new value still fits the
+control at its current width, then this is a **text-only change**. Write
+`docs/ui-designs/<<WORKFLOW>>/<<SCREEN>>/<<REFACTOR>>/<<REFACTOR>>-text-change.md` with sections A–E in
+text (see `ui-designs-guide.md` §2), skip every phase below, and stop after presenting it for review.
+Nothing is rendered, nothing is approved by hash, and no diagram changes. If any element moves, or the
+new wording reflows, continue here and run the image workflow.
 
 ```powershell
 python docs\diagrams\tools\diagram_context.py --list
@@ -54,6 +63,10 @@ python docs\diagrams\tools\dotgen.py docs\diagrams\tools\spec-diagram-<<WORKFLOW
 python docs\diagrams\tools\render_sheets.py docs\diagrams\tools\manifest.json
 python docs\diagrams\tools\verify_pdfs.py
 ```
+
+If `render_sheets.py` with the full manifest fails on a spec this checkout does not have, rebuild only this
+workflow: write a subset manifest with **absolute** `spec` paths (they resolve against the manifest's own
+folder) and pass that instead. Never edit another workflow out of `manifest.json` to make the build pass.
 
 Update `docs/diagrams/README.md`, the memory note and the diagram tests in the same change. A map that
 is added but not listed in the README and the tests is incomplete.
@@ -109,7 +122,11 @@ docs/ui-designs/<<WORKFLOW>>/<<SCREEN>>/<<REFACTOR>>/
 
 Use only the shared mockup classes and tokens, and only WinUI 3 controls the project already has. Give
 every element of the change a numbered callout and list each one in `callouts[]`. Declare each state the
-change touches as a `state-*` anchor; a state that renders the same as `default` stops the run.
+change touches as a `state-*` anchor; a state that renders the same as `default` stops the run. That check
+only proves a state differs: the shared stylesheet knows six state words (`no-job`, `error`, `loading`,
+`success`, `empty`, `disabled`) and any other needs its own `:has(#state-…)` rule in the mockup, and an
+inline `style="display:…"` on a state-toggled element hides state content from nobody — it stays visible
+in `default` and every state still differs, so open `default` yourself before calling it done.
 
 Preserve the existing functionality: fields, buttons, validation, navigation and store writes. Anything
 moved, merged or removed is stated in the proposal and justified.

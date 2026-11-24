@@ -95,8 +95,16 @@ python docs\diagrams\tools\render_sheets.py docs\diagrams\tools\manifest.json
 python docs\diagrams\tools\verify_pdfs.py
 ```
 
-`dotgen.py` accepts any number of specs; rebuilding all 24 sources is a loop over `tools\spec-*.json`.
+`dotgen.py` accepts any number of specs; rebuilding every source is a loop over `tools\spec-*.json`.
 `verify_pdfs.py --no-png` skips the 300 DPI export when only the assertions are needed.
+
+Two things about that second command are not obvious. It resolves every `spec` **relative to
+`manifest.json`'s own folder**, so a subset manifest written elsewhere needs absolute `spec` paths; and it
+builds **every** document in the manifest, so in a checkout missing other workflows it stops on the first
+absent spec and writes nothing. Rebuild the workflow you touched with a subset manifest that names absolute
+spec paths, leave `manifest.json` alone, and say in the chat reply that the others were not rebuilt.
+`verify_pdfs.py` asserts page size, margin and type size — not the 12–16 shape count, which stays yours to
+keep.
 
 ### Tying it to a QOL design record
 

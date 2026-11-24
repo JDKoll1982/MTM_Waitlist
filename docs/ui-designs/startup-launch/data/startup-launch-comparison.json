@@ -1,0 +1,56 @@
+{
+ "renderer": "headless Microsoft Edge",
+ "edge": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+ "rendered_at": "2026-11-24T15:16:25-06:00",
+ "workflow": "startup-launch",
+ "column": 780,
+ "designs": [
+  {
+   "design": "machine-setup/name-the-authority/data/name-the-authority-design.json",
+   "refactor": "name-the-authority",
+   "screen": "machine-setup",
+   "sources": {
+    "pngs/name-the-authority-before.png": "fd35cc1a04afe9f1b548c4eaff94b9b334968334a294aad5f1cfdfb91fc95dc6",
+    "pngs/name-the-authority-after.png": "dc72fc5f66a1969d43d34a0885c654993f2202099142f9ecfc7d7f154948d9d7"
+   }
+  },
+  {
+   "design": "sign-in/name-the-authority/data/name-the-authority-design.json",
+   "refactor": "name-the-authority",
+   "screen": "sign-in",
+   "sources": {
+    "pngs/name-the-authority-before.png": "2f3aac0e88d3fa556de104a5724e5de034bf5f030fad2d60df8a79a6a2589e44",
+    "pngs/name-the-authority-after.png": "7fa8f9781270782bc9226c0e13e71366427b7378c0524502293f6040cc0101fa"
+   }
+  },
+  {
+   "design": "sign-in/no-offer-explained/data/no-offer-explained-design.json",
+   "refactor": "no-offer-explained",
+   "screen": "sign-in",
+   "sources": {
+    "pngs/no-offer-explained-before.png": "1a435f2de02c5c32863d0c42d0658827d380a9fbac5092095a10a5100826fcdc",
+    "pngs/no-offer-explained-after.png": "555f0e80c25f036b2a7efd9d9872857a6e15a641df7acf4ae28e0ed6584378a4"
+   }
+  },
+  {
+   "design": "sign-in/terminal-aware-offer/data/terminal-aware-offer-design.json",
+   "refactor": "terminal-aware-offer",
+   "screen": "sign-in",
+   "sources": {
+    "pngs/terminal-aware-offer-before.png": "540edeae5aaf0b2c995b057794e0bebfb905d17b7ee2a232d0bcdb5012b935ff",
+    "pngs/terminal-aware-offer-after.png": "65b13eeb3d3adc0c28b3021d14b09f35ab467b35c471cb44bc9efc69ea572aa7"
+   }
+  }
+ ],
+ "image": {
+  "name": "startup-launch-comparison.png",
+  "width": 1656,
+  "height": 3174,
+  "sha256": "3917e7013bdad111ee2f471717a11a20ef7a94237990e7855616532362a56338"
+ },
+ "pdf": {
+  "name": "startup-launch-comparison.pdf",
+  "pages": 4,
+  "sha256": "a1aafbd5c2659c2f59203bffabf6bcf934f04ee98e796f998d271dfab323ba12"
+ }
+}

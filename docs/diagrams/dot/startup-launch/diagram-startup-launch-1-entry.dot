@@ -26,6 +26,7 @@ digraph StartupLaunch1 {
     v_pipe [shape=box, label="LaunchPipeline\nRunAsync", fillcolor="#EFE3FF"];
     v_feed [shape=box, label="SplashViewModel\nfeed", fillcolor="#EFE3FF"];
     d_conf [shape=diamond, label="configured?", fillcolor="#FFF1C9", color="#B7791F", margin="0.01,0.01"];
+    x_authority [shape=note, label="[REFACTOR] setup asks for an\nAdministrator; the gate\nchecks IT Department", fillcolor="#FFD6D6", color="#C62828", style="filled,dashed"];
   }
   subgraph cluster_svc {
     label="3 · Services (DI)"; fontcolor="#0A5A4F"; color="#0F7B6C";
@@ -53,10 +54,10 @@ digraph StartupLaunch1 {
   v_feed -> s_reach -> db_config [style=invis, constraint=false];
   { rank=same; d_conf; s_ready; db_save; }
   d_conf -> s_ready -> db_save [style=invis, constraint=false];
-  { rank=same; x_block; x_signin; }
-  x_block -> x_signin [style=invis, constraint=false];
+  { rank=same; x_authority; x_block; x_signin; }
+  x_authority -> x_block -> x_signin [style=invis, constraint=false];
   u_splash -> u_setup [style=invis, constraint=true];
-  v_app -> v_pipe -> v_feed -> d_conf [style=invis, constraint=true];
+  v_app -> v_pipe -> v_feed -> d_conf -> x_authority [style=invis, constraint=true];
   s_budget -> s_cfg -> s_reach -> s_ready -> x_block [style=invis, constraint=true];
   db_settings -> db_lookup -> db_config -> db_save -> x_signin [style=invis, constraint=true];
   v_app -> v_pipe [label="RunAsync"];
@@ -72,6 +73,7 @@ digraph StartupLaunch1 {
   s_ready -> db_config;
   s_ready -> d_conf;
   d_conf -> u_setup [label="no"];
+  u_setup -> x_authority [label="says"];
   u_setup -> db_save [label="writes"];
   d_conf -> x_signin [label="yes"];
   v_pipe -> x_block [label="fails", color="#C62828", penwidth=2.0];
