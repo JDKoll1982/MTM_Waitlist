@@ -1,0 +1,73 @@
+{
+  "workflow": "workorder-new-request",
+  "workflow_variant": "engineer",
+  "screen": "work-center-selection",
+  "refactor": "fewer-clicks",
+  "title": "Choose a work centre in one tap",
+  "audience": "developer",
+  "window": {
+    "viewports": [
+      { "name": "wide", "width": 1600, "height": 1000, "scale": 1 },
+      { "name": "medium", "width": 1280, "height": 800, "scale": 1 },
+      { "name": "minimum", "width": 900, "height": 500, "scale": 1 }
+    ]
+  },
+  "before": {
+    "kind": "reconstruction",
+    "mockup": "mockups/<refactor>-before.html",
+    "captured_at": null,
+    "capture_command": null,
+    "source_xaml": [
+      "Module_Waitlist/Views/WaitlistViewPage.xaml"
+    ]
+  },
+  "after": {
+    "mockup": "mockups/<refactor>-after.html"
+  },
+  "states": [
+    { "name": "default", "applies_to": ["before", "after"] },
+    { "name": "state-no-job", "applies_to": ["after"] },
+    { "name": "state-error", "applies_to": ["after"] }
+  ],
+  "callouts": [
+    "Press cards replace the picker flyout.",
+    "The running job is shown on the card that already holds it."
+  ],
+  "elements": [
+    {
+      "design": "Press card grid",
+      "winui": "GridView with ItemTemplate (Border + Button)",
+      "code": [
+        "Module_Waitlist/Views/WaitlistViewPage.xaml"
+      ],
+      "note": "reuses the existing card template"
+    },
+    {
+      "design": "Primary action",
+      "winui": "Button (AccentButtonStyle)",
+      "code": [
+        "Module_Waitlist/Views/WaitlistViewPage.xaml"
+      ],
+      "note": null
+    }
+  ],
+  "workflow_refs": [
+    { "sheet": 1, "nodes": ["v_wc", "d_gate"] }
+  ],
+  "design_system": {
+    "resources": [
+      "Styles/FontSizes.xaml",
+      "Styles/Thickness.xaml",
+      "Styles/TextBlock.xaml",
+      "Styles/ModuleSetup.xaml",
+      "Styles/Dialogs.xaml"
+    ]
+  },
+  "approval": {
+    "approved_at": null,
+    "approved_by": null,
+    "sources_sha256": null,
+    "rendered_sha256": null,
+    "design_system_sha256": null
+  }
+}

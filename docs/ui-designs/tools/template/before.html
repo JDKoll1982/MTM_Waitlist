@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>BEFORE — current implementation</title>
+  <link rel="stylesheet" href="../../../tools/mockup/mockup.css">
+</head>
+<body class="mockup" data-variant="before">
+  <span class="state" id="state-default"></span>
+  <span class="state" id="state-no-job"></span>
+  <span class="state" id="state-error"></span>
+
+  <div class="variant-banner">
+    BEFORE — CURRENT IMPLEMENTATION
+    <span class="provenance">reconstruction from Module_Waitlist/Views/WaitlistViewPage.xaml</span>
+  </div>
+
+  <div class="titlebar">
+    <span class="caption">MTM Waitlist</span>
+    <span class="glyph">— □ ✕</span>
+  </div>
+
+  <div class="shell" style="height: calc(100vh - 32px - 62px);">
+    <nav class="nav">
+      <div class="item selected"><span class="icon">▤</span> Waitlist</div>
+      <div class="item"><span class="icon">▦</span> Setup</div>
+      <div class="item"><span class="icon">⚙</span> Settings</div>
+    </nav>
+
+    <main class="page">
+      <div class="page-header">
+        <h1 class="page-title">New request</h1>
+        <p class="page-subtitle">Choose the press you are working at.</p>
+      </div>
+
+      <div class="row">
+        <div class="card secondary" style="width: 420px;">
+          <h2>Work centre</h2>
+          <div class="field">
+            <div class="input">Select a press <span class="spacer"></span>⌄</div>
+            <div class="hint">Opens a list of the presses for this computer.</div>
+          </div>
+          <div class="action-bar" style="margin-top: 16px;">
+            <button class="button">Cancel</button>
+            <button class="button primary" disabled>Continue</button>
+          </div>
+        </div>
+
+        <div class="card" style="flex: 1;">
+          <h2>Waiting line</h2>
+          <p>Requests appear here once they are submitted.</p>
+        </div>
+      </div>
+
+      <p class="stamp">Sheet 1 of 5 · workorder-new-request · screen: work-centre selection</p>
+    </main>
+  </div>
+</body>
+</html>

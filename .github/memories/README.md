@@ -45,10 +45,16 @@ so those are machine-local and will NOT be committed when you push.
   the PIN, which MySQL to read the store from, walk steps that legitimately report `NOT REACHED`, and XamlMcp still
   unwired) with the fix for each.
 - `repo/workflow-diagrams.md` — the four workflow flowcharts in `docs/diagrams/` (engineer and
-  plain-language variants), why a custom renderer replaced Graphviz, the page geometry, the two build
+  plain-language variants), why a custom renderer replaced Graphviz, the page geometry, the three build
   mistakes worth not repeating (a manifest that duplicated sheet content and went stale; edge labels
-  drawn over node text), and how the 18 engineer / 8 friendly refactor flags map to the 21 hotspots in
-  `docs/diagrams/diagram-workflow-refactor-notes.md`.
+  drawn over node text; a decorative rule cutting across the procedure cards), how the 18 engineer /
+  8 friendly refactor flags map to the 21 hotspots in
+  `docs/diagrams/diagram-workflow-refactor-notes.md`, and how an agent consumes the set through
+  `tools/diagram_context.py`.
+- `repo/ui-designs.md` — the rendered BEFORE/AFTER UI design pipeline in `docs/ui-designs/`: the
+  renderer's two hard-won constraints (Edge resolves `--screenshot` relative to its own directory; a
+  state name must be the mockup's anchor id or it renders `default` silently), how approval hashes
+  invalidate, the OCR rules, and what the tests cover.
 - `repo/workstation-elevation.md` — which account to use when administrator rights are needed on this
   workstation, when elevation is *not* needed, and the owner-approved exception that lets it name a password.
 - `repo/workstation-secrets.md` — the `MTM_Waitlist.Mock.Service` host's per-user environment variables,

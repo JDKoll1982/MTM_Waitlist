@@ -1,0 +1,96 @@
+/* Design tokens for the UI mockups.
+ *
+ * Every value names the resource that owns it in the application. The XAML files listed in
+ * a design's `design_system.resources` are hashed at render time and checked again at
+ * verification time, so a token that drifts from its XAML source is reported rather than
+ * silently copied into a mockup.
+ *
+ * The WinUI brushes are translucent theme resources resolved at run time. The values below
+ * are those brushes flattened over the layer they sit on, for a static image; the XAML name
+ * stays the source of truth.
+ */
+:root {
+  /* Styles/FontSizes.xaml */
+  --font-large: 24px;       /* LargeFontSize */
+  --font-medium: 16px;      /* MediumFontSize */
+  --font-small: 12px;
+
+  /* Spacing scale used by Styles/Thickness.xaml and the page styles */
+  --space-2: 2px;
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-36: 36px;
+
+  /* Styles/ModuleSetup.xaml: SetupSectionCardStyle, SetupItemCardStyle, SetupPageGridStyle */
+  --radius-card: 12px;
+  --stroke: 1px;
+  --page-padding: 24px 32px 20px 32px; /* Padding="32,24,32,20" */
+  --page-row: 20px;                   /* RowSpacing="20" */
+  --header-gap: 10px;                 /* SetupPageHeaderStyle Spacing="10" */
+  --action-gap: 12px;                 /* SetupActionBarStyle Spacing="12" */
+
+  /* Styles/Dialogs.xaml */
+  --dialog-min: 480px;
+  --dialog-width: 720px;
+  --dialog-max: 880px;
+
+  /* Shell and control contract: MainWindow.xaml minimum, FR-065 hit target */
+  --window-min-width: 900px;
+  --window-min-height: 500px;
+  --hit-target: 44px;
+  --titlebar: 32px;
+  --nav-width: 320px;
+  --nav-compact: 48px;
+
+  /* Flattened WinUI light-theme brushes. The XAML resource is the source of truth. */
+  --text-primary: #1b1b1b;    /* TextFillColorPrimary */
+  --text-secondary: #5d5d5d;  /* TextFillColorSecondary */
+  --text-disabled: #9a9a9a;   /* TextFillColorDisabled */
+  --card-bg: #ffffff;         /* CardBackgroundFillColorDefault */
+  --card-bg-secondary: #f7f7f7; /* CardBackgroundFillColorSecondary */
+  --card-stroke: #e3e3e3;     /* CardStrokeColorDefault */
+  --divider: #e8e8e8;         /* DividerStrokeColorDefault */
+  --layer: #f3f3f3;           /* LayerFillColorDefault */
+  --accent: #005fb8;          /* AccentFillColorDefault */
+  --accent-text: #ffffff;     /* TextOnAccentFillColorPrimary */
+  --accent-hover: #1a6fc4;
+  --caution-bg: #fff4ce;      /* SystemFillColorCautionBackground */
+  --caution-stroke: #e9c46a;
+  --caution-text: #6a5300;
+  --error-bg: #fde7e9;        /* SystemFillColorCriticalBackground */
+  --error-stroke: #c42b1c;
+  --error-text: #8e1b10;
+  --success-bg: #dff6dd;      /* SystemFillColorSuccessBackground */
+  --success-stroke: #0f7b0f;
+  --success-text: #0b5a0b;
+}
+
+/* WinUI dark theme, for a design that has to be checked in both. Mockups are light by default. */
+html[data-theme="dark"] {
+  --text-primary: #f2f2f2;
+  --text-secondary: #b8b8b8;
+  --text-disabled: #6b6b6b;
+  --card-bg: #2b2b2b;
+  --card-bg-secondary: #323232;
+  --card-stroke: #3d3d3d;
+  --divider: #3a3a3a;
+  --layer: #202020;
+  --accent: #4cc2ff;
+  --accent-text: #0a0a0a;
+  --accent-hover: #6fd0ff;
+  --caution-bg: #433519;
+  --caution-stroke: #7a6427;
+  --caution-text: #f5e6b8;
+  --error-bg: #442726;
+  --error-stroke: #8e3a34;
+  --error-text: #f6c6c2;
+  --success-bg: #1e3a1e;
+  --success-stroke: #2f6b2f;
+  --success-text: #c9e8c6;
+}

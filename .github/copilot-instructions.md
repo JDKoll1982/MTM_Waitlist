@@ -17,6 +17,11 @@ for tool names and server roles. Do not restate it here.
   with the single line `Nothing needed from you.`
 - Inside any `/speckit.*` step, `.github/instructions/response-format.instructions.md` (constitution
   Principle VII) governs the reply: plain English, end-user facing, no raw machine output.
+# Document Authoring
+Any document the agent produces (guide, report, summary, procedure, proposal, reference) follows
+`.github/instructions/document-authoring.instructions.md`: identify the reader first, choose the shape
+and output format from that reader, and verify the rendered result before calling it done. That file
+governs documents; the invariants above govern the chat reply.
 ## Repo-Specific Focus
 For this repository, prioritize MCP-backed validation for:
 - WinUI 3 and Windows App SDK APIs
