@@ -1,0 +1,67 @@
+// Generic Work Centres — made simple · Sheet 1 of 2: turning it on — Sheet 1 of 2
+// Source of truth: Plain-language view of the generic work-centre configuration
+digraph FriendlyGenSetup1 {
+  graph [
+    rankdir=LR, splines=polyline, overlap=false, nodesep=0.45, ranksep=0.55,
+    newrank=true, fontname="Segoe UI", fontsize=11, bgcolor="#FFFFFF", pad=0.02
+  ];
+  node [
+    shape=box, style="rounded,filled", fontname="Segoe UI", fontsize=11,
+    margin="0.10,0.05", penwidth=1.5, color="#111111", fillcolor="#FFFFFF"
+  ];
+  edge [
+    fontname="Segoe UI", fontsize=11, color="#111111", arrowsize=0.6,
+    penwidth=1.5, fontcolor="#111111"
+  ];
+  subgraph cluster_ui {
+    label="1 · What a lead does"; fontcolor="#0B3D91"; color="#1F6FEB";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    a1 [shape=box, label="A setup lead opens\nWork Centre Setup", fillcolor="#DCE9FF"];
+    a2 [shape=box, label="Ticks 「generic」\nfor that press", fillcolor="#DCE9FF"];
+    a3 [shape=box, label="A lead sets the\nsettings that shape\nthe request", fillcolor="#DCE9FF"];
+  }
+  subgraph cluster_vm {
+    label="2 · What the app checks"; fontcolor="#4B2A8A"; color="#8250DF";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    b1 [shape=box, label="You need the work\ncentre permission", fillcolor="#EFE3FF"];
+    b2 [shape=box, label="The tick is saved\non its own, after\nthe press is saved", fillcolor="#EFE3FF"];
+    b3 [shape=box, label="Each settings panel\nhas its own\npermission", fillcolor="#EFE3FF"];
+  }
+  subgraph cluster_svc {
+    label="3 · What it saves"; fontcolor="#0A5A4F"; color="#0F7B6C";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    c1 [shape=box, label="Opens the press\neditor", fillcolor="#D6F5F0"];
+    c2 [shape=box, label="Saves the generic\ntick", fillcolor="#D6F5F0"];
+    c3 [shape=box, label="Saves the settings", fillcolor="#D6F5F0"];
+  }
+  subgraph cluster_data {
+    label="4 · Where it goes"; fontcolor="#5A4300"; color="#8A6D3B";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    d1 [shape=cylinder, label="Press list", fillcolor="#EDEDED", fontname="Consolas"];
+    d2 [shape=cylinder, label="Generic flag", fillcolor="#EDEDED", fontname="Consolas"];
+    d3 [shape=cylinder, label="Settings values", fillcolor="#EDEDED", fontname="Consolas"];
+    d4 [shape=note, label="Turning it off hides\nthe press from the\ngeneric list only.", fillcolor="#FFF1C9", color="#B7791F", style="filled,dashed"];
+    d5 [shape=note, label="Worth fixing: nothing\nwarns anyone when a\npress stops being\ngeneric", fillcolor="#FFD6D6", color="#C62828", style="filled,dashed"];
+  }
+  { rank=same; a1; b1; c1; d1; }
+  a1 -> b1 -> c1 -> d1 [style=invis, constraint=false];
+  { rank=same; a2; b2; c2; d2; }
+  a2 -> b2 -> c2 -> d2 [style=invis, constraint=false];
+  { rank=same; a3; b3; c3; d3; }
+  a3 -> b3 -> c3 -> d3 [style=invis, constraint=false];
+  a1 -> a2 -> a3 [style=invis, constraint=true];
+  b1 -> b2 -> b3 [style=invis, constraint=true];
+  c1 -> c2 -> c3 [style=invis, constraint=true];
+  d1 -> d2 -> d3 -> d4 -> d5 [style=invis, constraint=true];
+  a1 -> b1 [label="open"];
+  a2 -> b2 [label="tick"];
+  a3 -> b3 [label="set"];
+  b1 -> c1;
+  b2 -> c2;
+  b3 -> c3;
+  c1 -> d1;
+  c2 -> d2;
+  c3 -> d3;
+  d4 -> d2 [style=dashed, color="#B7791F", arrowhead=none, constraint=false];
+  d5 -> c2 [style=dashed, color="#C62828", arrowhead=none, constraint=false];
+}

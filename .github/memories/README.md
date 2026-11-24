@@ -44,6 +44,11 @@ so those are machine-local and will NOT be committed when you push.
   hardcoded sign-in account, missing `TogglePattern`, single-look finds, a `NumberBox` that ignored `ValuePattern`,
   the PIN, which MySQL to read the store from, walk steps that legitimately report `NOT REACHED`, and XamlMcp still
   unwired) with the fix for each.
+- `repo/workflow-diagrams.md` — the four workflow flowcharts in `docs/diagrams/` (engineer and
+  plain-language variants), why a custom renderer replaced Graphviz, the page geometry, the two build
+  mistakes worth not repeating (a manifest that duplicated sheet content and went stale; edge labels
+  drawn over node text), and how the 18 engineer / 8 friendly refactor flags map to the 21 hotspots in
+  `docs/diagrams/diagram-workflow-refactor-notes.md`.
 - `repo/workstation-elevation.md` — which account to use when administrator rights are needed on this
   workstation, when elevation is *not* needed, and the owner-approved exception that lets it name a password.
 - `repo/workstation-secrets.md` — the `MTM_Waitlist.Mock.Service` host's per-user environment variables,

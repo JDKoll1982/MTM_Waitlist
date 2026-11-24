@@ -1,0 +1,754 @@
+{
+ "sheets": [
+  {
+   "file": "diagram-workorder-workcenter-setup-1-select",
+   "name": "WorkOrderSetup1",
+   "title": "Diagram 2 / Sheet 1 of 5 — Work Center Setup: choose and manage a work center",
+   "sheet": "Sheet 1 of 5",
+   "source": "SetupWorkCenterViewModel, ISetupWorkCenterService, PermissionKeys.SetupWorkCenters",
+   "lanes": {
+    "ui": [
+     [
+      "u_wc",
+      "SetupWorkCenterPage\\ncards · filter\\nbuilding from shell",
+      "ui"
+     ],
+     [
+      "u_hist",
+      "SetupWorkCenter\\nHistoryPage.xaml",
+      "ui"
+     ],
+     [
+      "x_perm",
+      "manage controls\\nhidden without\\npermission",
+      "note"
+     ]
+    ],
+    "vm": [
+     [
+      "v_wc",
+      "SetupWorkCenter\\nViewModel\\nContinueCommand\\nRefreshCommand",
+      "vm"
+     ],
+     [
+      "x_mgr",
+      "AddWorkCenter\\nUpdateWorkCenter\\nRemoveWorkCenter",
+      "vm"
+     ],
+     [
+      "v_hist",
+      "SetupWorkCenter\\nHistoryViewModel\\nBackCommand",
+      "vm"
+     ]
+    ],
+    "svc": [
+     [
+      "s_perm",
+      "IPermissionService\\nsetup.work_centers",
+      "svc"
+     ],
+     [
+      "s_wcs",
+      "ISetupWorkCenter\\nService",
+      "svc"
+     ],
+     [
+      "s_cat",
+      "IWorkCenterCatalog\\nService\\nGetCatalogAsync()",
+      "svc"
+     ],
+     [
+      "s_img",
+      "IWorkCenterImage\\nService",
+      "svc"
+     ]
+    ],
+    "data": [
+     [
+      "d_wc",
+      "sp_setup_work_centers_\\nget_all\\nupsert · delete",
+      "db"
+     ],
+     [
+      "d_gen",
+      "sp_setup_work_centers_\\ngeneric_set",
+      "db"
+     ],
+     [
+      "d_hot",
+      "sp_config_hot_\\nworkcenters_get_\\nfor_computer",
+      "db"
+     ],
+     [
+      "x_n",
+      "[REFACTOR] the generic\\nflag is a second write,\\nnot part of the upsert",
+      "refactor"
+     ]
+    ]
+   },
+   "lane_titles": {
+    "ui": "1 · UI — XAML Views",
+    "vm": "2 · ViewModels and commands",
+    "svc": "3 · Services (DI)",
+    "data": "4 · Store"
+   },
+   "edges": [
+    [
+     "u_wc",
+     "v_wc",
+     "pick",
+     ""
+    ],
+    [
+     "u_hist",
+     "v_hist",
+     "open",
+     ""
+    ],
+    [
+     "v_wc",
+     "s_perm",
+     "gate",
+     ""
+    ],
+    [
+     "v_wc",
+     "s_wcs",
+     "save",
+     ""
+    ],
+    [
+     "v_wc",
+     "s_cat",
+     "local",
+     ""
+    ],
+    [
+     "v_wc",
+     "s_img",
+     "photo",
+     ""
+    ],
+    [
+     "s_wcs",
+     "d_wc",
+     "",
+     ""
+    ],
+    [
+     "s_wcs",
+     "d_gen",
+     "",
+     "dots"
+    ],
+    [
+     "s_cat",
+     "d_hot",
+     "",
+     ""
+    ],
+    [
+     "x_mgr",
+     "s_wcs",
+     "",
+     ""
+    ],
+    [
+     "v_hist",
+     "s_wcs",
+     "log",
+     ""
+    ],
+    [
+     "x_perm",
+     "v_wc",
+     "",
+     "warnlink"
+    ],
+    [
+     "x_n",
+     "s_wcs",
+     "",
+     "link"
+    ]
+   ]
+  },
+  {
+   "file": "diagram-workorder-workcenter-setup-2-workorder",
+   "name": "WorkOrderSetup2",
+   "title": "Diagram 2 / Sheet 2 of 5 — Work Center Setup: entering the work order",
+   "sheet": "Sheet 2 of 5",
+   "source": "SetupWorkOrderViewModel.ExecuteSearchAsync, WorkOrderValidationService, SetupLookupService",
+   "lanes": {
+    "ui": [
+     [
+      "u_wo",
+      "SetupWorkOrderPage\\nwork order box",
+      "ui"
+     ],
+     [
+      "u_dlg",
+      "SetupWorkOrder\\nSearchDialog.xaml",
+      "ui"
+     ],
+     [
+      "x_err",
+      "StatusMessage\\n「lookup\\nunavailable」",
+      "note"
+     ]
+    ],
+    "vm": [
+     [
+      "v_wo",
+      "SetupWorkOrder\\nViewModel\\nSearchCommand",
+      "vm"
+     ],
+     [
+      "x_norm",
+      "IWorkOrderValidation\\nService.TryNormalize",
+      "vm"
+     ],
+     [
+      "x_next",
+      "[To Sheet 3]\\nSelectPart",
+      "conn"
+     ]
+    ],
+    "svc": [
+     [
+      "s_wf",
+      "ISetupWorkflowService\\nSearchWorkOrderAsync",
+      "svc"
+     ],
+     [
+      "s_lk",
+      "IInforVisualLookup\\nService\\nSetupLookupService",
+      "svc"
+     ],
+     [
+      "s_dlg",
+      "ISetupDialogService\\nShowWorkOrder\\nSearchDialog",
+      "svc"
+     ]
+    ],
+    "data": [
+     [
+      "d_v1",
+      "shape 1\\nLookupWorkOrder.sql",
+      "erp"
+     ],
+     [
+      "d_v8",
+      "shape 8\\nGetWorkOrderSearch",
+      "erp"
+     ],
+     [
+      "d_mock",
+      "mtm_mock\\nsp_visual_<key>\\n_get",
+      "mirror"
+     ],
+     [
+      "x_fb",
+      "[REFACTOR] the mirror is\\nread only on a Cached\\nverdict",
+      "refactor"
+     ]
+    ]
+   },
+   "lane_titles": {
+    "ui": "1 · UI — XAML Views and dialogs",
+    "vm": "2 · ViewModels and validation",
+    "svc": "3 · Services (DI)",
+    "data": "4 · Infor Visual / mirror"
+   },
+   "edges": [
+    [
+     "u_wo",
+     "v_wo",
+     "search",
+     ""
+    ],
+    [
+     "u_dlg",
+     "v_wo",
+     "chosen",
+     ""
+    ],
+    [
+     "v_wo",
+     "s_wf",
+     "lookup",
+     ""
+    ],
+    [
+     "v_wo",
+     "s_dlg",
+     "find",
+     ""
+    ],
+    [
+     "s_dlg",
+     "u_dlg",
+     "dialog",
+     ""
+    ],
+    [
+     "s_wf",
+     "s_lk",
+     "",
+     ""
+    ],
+    [
+     "s_lk",
+     "d_v1",
+     "",
+     ""
+    ],
+    [
+     "s_lk",
+     "d_v8",
+     "",
+     ""
+    ],
+    [
+     "d_v1",
+     "d_mock",
+     "",
+     "mirror"
+    ],
+    [
+     "v_wo",
+     "x_next",
+     "next",
+     ""
+    ],
+    [
+     "s_wf",
+     "x_err",
+     "fail",
+     "dash"
+    ],
+    [
+     "x_norm",
+     "s_wf",
+     "",
+     "connlink"
+    ],
+    [
+     "x_fb",
+     "d_mock",
+     "",
+     "link"
+    ]
+   ]
+  },
+  {
+   "file": "diagram-workorder-workcenter-setup-3-part-sequence",
+   "name": "WorkOrderSetup3",
+   "title": "Diagram 2 / Sheet 3 of 5 — Work Center Setup: part and operation selection",
+   "sheet": "Sheet 3 of 5",
+   "source": "SetupWorkOrderViewModel.SelectPartAsync/SelectSequenceAsync, SetupWorkflowService",
+   "lanes": {
+    "ui": [
+     [
+      "u_wo",
+      "SetupWorkOrderPage\\npart grid · sequence\\ngrid (inline)",
+      "ui"
+     ],
+     [
+      "x_legacy",
+      "legacy Part and\\nSequence pages:\\nregistered but not\\nreachable",
+      "note"
+     ],
+     [
+      "x_dead",
+      "Two part/sequence\\npages are registered\\nbut nothing in the\\nflow opens them",
+      "refactor"
+     ]
+    ],
+    "vm": [
+     [
+      "v_sel",
+      "SetupWorkOrder\\nViewModel\\nSelectPartCommand\\nSelectSequenceCommand",
+      "vm"
+     ],
+     [
+      "x_back",
+      "CancelCommand\\nBackToWorkCenters\\nCommand",
+      "vm"
+     ],
+     [
+      "x_next",
+      "[To Sheet 4]\\nDunnageTypeVM",
+      "conn"
+     ]
+    ],
+    "svc": [
+     [
+      "s_wf",
+      "ISetupWorkflowService\\nSelectPartAsync\\nSelectSequenceAsync",
+      "svc"
+     ],
+     [
+      "s_lk",
+      "IInforVisualLookup\\nService\\nGetSequences · Parts",
+      "svc"
+     ]
+    ],
+    "data": [
+     [
+      "d_v2",
+      "shape 2\\nGetSequences.sql",
+      "erp"
+     ],
+     [
+      "d_v3",
+      "shape 3\\nGetSubordinateParts",
+      "erp"
+     ],
+     [
+      "d_mock",
+      "mtm_mock\\nsp_visual_<key>\\n_get",
+      "mirror"
+     ]
+    ]
+   },
+   "lane_titles": {
+    "ui": "1 · UI — XAML Views",
+    "vm": "2 · ViewModels and commands",
+    "svc": "3 · Services (DI)",
+    "data": "4 · Infor Visual / mirror"
+   },
+   "edges": [
+    [
+     "u_wo",
+     "v_sel",
+     "pick",
+     ""
+    ],
+    [
+     "v_sel",
+     "s_wf",
+     "select",
+     ""
+    ],
+    [
+     "s_wf",
+     "s_lk",
+     "",
+     ""
+    ],
+    [
+     "s_lk",
+     "d_v2",
+     "",
+     ""
+    ],
+    [
+     "s_lk",
+     "d_v3",
+     "",
+     ""
+    ],
+    [
+     "d_v2",
+     "d_mock",
+     "",
+     "mirror"
+    ],
+    [
+     "v_sel",
+     "x_next",
+     "next",
+     ""
+    ],
+    [
+     "x_back",
+     "s_wf",
+     "reset",
+     ""
+    ],
+    [
+     "x_legacy",
+     "u_wo",
+     "",
+     "warnlink"
+    ],
+    [
+     "x_dead",
+     "u_wo",
+     "",
+     "link"
+    ]
+   ]
+  },
+  {
+   "file": "diagram-workorder-workcenter-setup-4-dunnage",
+   "name": "WorkOrderSetup4",
+   "title": "Diagram 2 / Sheet 4 of 5 — Work Center Setup: dunnage, scrap and history",
+   "sheet": "Sheet 4 of 5",
+   "source": "SetupDunnageTypeViewModel, DunnageWorkflowService, SetupPersistenceService",
+   "lanes": {
+    "ui": [
+     [
+      "u_dun",
+      "SetupDunnageTypePage\\ntype + part tabs\\nscrap type",
+      "ui"
+     ],
+     [
+      "u_img",
+      "SetupDunnageImage\\nSearchDialog.xaml",
+      "ui"
+     ],
+     [
+      "x_scr",
+      "scrap type prefilled\\nfrom the saved pair",
+      "note"
+     ]
+    ],
+    "vm": [
+     [
+      "v_dun",
+      "SetupDunnageType\\nViewModel\\nAddDunnageCommand\\nContinueToReview",
+      "vm"
+     ],
+     [
+      "x_q",
+      "Quick Add needs\\nsetup.dunnage_\\nquick_add",
+      "refactor"
+     ],
+     [
+      "x_next",
+      "[To Sheet 5]\\nReviewVM",
+      "conn"
+     ]
+    ],
+    "svc": [
+     [
+      "s_dw",
+      "IDunnageWorkflow\\nService\\n+ IDunnageCatalogue",
+      "svc"
+     ],
+     [
+      "s_p",
+      "ISetupPersistence\\nService\\nLoadSavedScrapType",
+      "svc"
+     ]
+    ],
+    "data": [
+     [
+      "d_load",
+      "sp_setup_active_job_\\ndunnage_assign_\\nments_get",
+      "db"
+     ],
+     [
+      "d_scr",
+      "sp_setup_job_history_\\nscrap_type_get",
+      "db"
+     ],
+     [
+      "x_n",
+      "[REFACTOR] the scrap type\\nis loaded from two\\nsources and merged\\nin the view model",
+      "refactor"
+     ]
+    ]
+   },
+   "lane_titles": {
+    "ui": "1 · UI — XAML Views and dialogs",
+    "vm": "2 · ViewModels and commands",
+    "svc": "3 · Services (DI)",
+    "data": "4 · Store"
+   },
+   "edges": [
+    [
+     "u_dun",
+     "v_dun",
+     "add",
+     ""
+    ],
+    [
+     "v_dun",
+     "s_dw",
+     "pick",
+     ""
+    ],
+    [
+     "s_dw",
+     "u_img",
+     "dialog",
+     ""
+    ],
+    [
+     "s_dw",
+     "d_load",
+     "load",
+     ""
+    ],
+    [
+     "v_dun",
+     "s_p",
+     "scrap",
+     ""
+    ],
+    [
+     "s_p",
+     "d_scr",
+     "",
+     ""
+    ],
+    [
+     "v_dun",
+     "x_next",
+     "next",
+     ""
+    ],
+    [
+     "x_q",
+     "s_dw",
+     "",
+     "link"
+    ],
+    [
+     "x_n",
+     "s_p",
+     "",
+     "link"
+    ],
+    [
+     "x_scr",
+     "v_dun",
+     "",
+     "warnlink"
+    ]
+   ]
+  },
+  {
+   "file": "diagram-workorder-workcenter-setup-5-save",
+   "name": "WorkOrderSetup5",
+   "title": "Diagram 2 / Sheet 5 of 5 — Work Center Setup: review, save and completion",
+   "sheet": "Sheet 5 of 5",
+   "source": "SetupReviewViewModel, SetupCompletionViewModel, SetupPersistenceService.SaveAsync",
+   "lanes": {
+    "ui": [
+     [
+      "u_rev",
+      "SetupReviewPage\\nreplace prompt",
+      "ui"
+     ],
+     [
+      "u_done",
+      "SetupCompletionPage\\nresult · back",
+      "ui"
+     ],
+     [
+      "x_replace",
+      "「press already has\\na job — replace?」",
+      "note"
+     ]
+    ],
+    "vm": [
+     [
+      "v_rev",
+      "SetupReviewViewModel\\nConfirmCommand\\nReplaceCommand",
+      "vm"
+     ],
+     [
+      "v_done",
+      "SetupCompletion\\nViewModel\\nBackToWorkCenters",
+      "vm"
+     ]
+    ],
+    "svc": [
+     [
+      "s_p",
+      "ISetupPersistence\\nService\\nSaveAsync(force)",
+      "svc"
+     ],
+     [
+      "s_co",
+      "IActiveJobCoordinator\\nService\\nHasActiveJobAsync()",
+      "svc"
+     ]
+    ],
+    "data": [
+     [
+      "d_save",
+      "sp_setup_save_setup\\nsp_setup_part_sequence_\\ncustom_data_upsert",
+      "db"
+     ],
+     [
+      "d_hist",
+      "sp_setup_job_history_\\ninsert_for_pair\\nsp_setup_work_centers_\\ntouch",
+      "db"
+     ],
+     [
+      "x_n",
+      "[REFACTOR] four procedures\\nrun in sequence with no\\ntransaction around them",
+      "refactor"
+     ]
+    ]
+   },
+   "lane_titles": {
+    "ui": "1 · UI — XAML Views",
+    "vm": "2 · ViewModels and commands",
+    "svc": "3 · Services (DI)",
+    "data": "4 · Store"
+   },
+   "edges": [
+    [
+     "u_rev",
+     "v_rev",
+     "confirm",
+     ""
+    ],
+    [
+     "u_done",
+     "v_done",
+     "back",
+     ""
+    ],
+    [
+     "v_rev",
+     "s_co",
+     "exists?",
+     ""
+    ],
+    [
+     "v_rev",
+     "s_p",
+     "save",
+     ""
+    ],
+    [
+     "s_p",
+     "d_save",
+     "write",
+     "red"
+    ],
+    [
+     "s_p",
+     "d_hist",
+     "",
+     ""
+    ],
+    [
+     "v_rev",
+     "v_done",
+     "result",
+     ""
+    ],
+    [
+     "x_replace",
+     "v_rev",
+     "",
+     "warnlink"
+    ],
+    [
+     "x_n",
+     "s_p",
+     "",
+     "link"
+    ]
+   ]
+  }
+ ]
+}

@@ -1,0 +1,68 @@
+// Diagram 3 / Sheet 4 of 4 — Generic New Request: details, summary and result — Sheet 4 of 4
+// Source of truth: GenericRequestDetailsViewModel, GenericRequestSummaryViewModel, GenericRequestLiveStepData.SubmitAsync
+digraph GenericNewRequest4 {
+  graph [
+    rankdir=LR, splines=polyline, overlap=false, nodesep=0.45, ranksep=0.55,
+    newrank=true, fontname="Segoe UI", fontsize=11, bgcolor="#FFFFFF", pad=0.02
+  ];
+  node [
+    shape=box, style="rounded,filled", fontname="Segoe UI", fontsize=11,
+    margin="0.10,0.05", penwidth=1.5, color="#111111", fillcolor="#FFFFFF"
+  ];
+  edge [
+    fontname="Segoe UI", fontsize=11, color="#111111", arrowsize=0.6,
+    penwidth=1.5, fontcolor="#111111"
+  ];
+  subgraph cluster_ui {
+    label="1 · UI — XAML Views"; fontcolor="#0B3D91"; color="#1F6FEB";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    u_det [shape=box, label="GenericRequest\nDetailsPage\nquantity + text", fillcolor="#DCE9FF"];
+    u_sum [shape=box, label="GenericRequest\nSummaryPage\nreview rows", fillcolor="#DCE9FF"];
+    u_res [shape=box, label="GenericRequest\nResultPage\nsuccess · dup · fail", fillcolor="#DCE9FF"];
+  }
+  subgraph cluster_vm {
+    label="2 · ViewModels and commands"; fontcolor="#4B2A8A"; color="#8250DF";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    v_det [shape=box, label="GenericRequest\nDetailsViewModel\nContinueCommand", fillcolor="#EFE3FF"];
+    v_sum [shape=box, label="GenericRequest\nSummaryViewModel\nContinueCommand", fillcolor="#EFE3FF"];
+    v_res [shape=box, label="GenericRequestResult\nViewModel\nResubmit · Return · New", fillcolor="#EFE3FF"];
+  }
+  subgraph cluster_svc {
+    label="3 · Services (DI)"; fontcolor="#0A5A4F"; color="#0F7B6C";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    s_data [shape=box, label="IGenericRequestStepData\nSubmitAsync(draft)\n(re-reads employee)", fillcolor="#D6F5F0"];
+    s_req [shape=box, label="IWaitlistRequestService\nSubmitAsync(draft)", fillcolor="#D6F5F0"];
+    s_ver [shape=box, label="IPersonIdentity\n+ EmployeeDirectory", fillcolor="#D6F5F0"];
+  }
+  subgraph cluster_data {
+    label="4 · Store"; fontcolor="#5A4300"; color="#8A6D3B";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    d_list [shape=cylinder, label="sp_waitlist_request_\nlist", fillcolor="#EDEDED", fontname="Consolas"];
+    d_write [shape=cylinder, label="sp_waitlist_request_\ninsert\naudit_insert", fillcolor="#EDEDED", fontname="Consolas"];
+    d_emp [shape=cylinder, label="sp_core_employee_by_\nidentifier_get", fillcolor="#EDEDED", fontname="Consolas"];
+    x_n [shape=note, label="[REFACTOR] the generic\npath repeats work-order\nvalidations", fillcolor="#FFD6D6", color="#C62828", style="filled,dashed"];
+  }
+  { rank=same; u_det; v_det; s_data; d_list; }
+  u_det -> v_det -> s_data -> d_list [style=invis, constraint=false];
+  { rank=same; u_sum; v_sum; s_req; d_write; }
+  u_sum -> v_sum -> s_req -> d_write [style=invis, constraint=false];
+  { rank=same; u_res; v_res; s_ver; d_emp; }
+  u_res -> v_res -> s_ver -> d_emp [style=invis, constraint=false];
+  u_det -> u_sum -> u_res [style=invis, constraint=true];
+  v_det -> v_sum -> v_res [style=invis, constraint=true];
+  s_data -> s_req -> s_ver [style=invis, constraint=true];
+  d_list -> d_write -> d_emp -> x_n [style=invis, constraint=true];
+  u_det -> v_det [label="answer"];
+  u_sum -> v_sum [label="raise"];
+  u_res -> v_res [label="again"];
+  v_det -> v_sum [label="next"];
+  v_sum -> s_data [label="submit"];
+  s_data -> s_ver [label="verify"];
+  s_ver -> d_emp;
+  s_data -> s_req [label="raise"];
+  s_req -> d_list [label="check"];
+  s_req -> d_write [label="write", color="#C62828", penwidth=2.0];
+  v_sum -> v_res [label="result"];
+  v_res -> s_req [label="retry", style=dotted];
+  x_n -> s_data [style=dashed, color="#C62828", arrowhead=none, constraint=false];
+}

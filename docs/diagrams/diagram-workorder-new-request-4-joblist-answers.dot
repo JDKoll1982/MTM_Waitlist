@@ -1,0 +1,69 @@
+// Diagram 1 / Sheet 4 of 5 — Work Order New Request: job-list answer steps — Sheet 4 of 5
+// Source of truth: NewRequestDieViewModel, NewRequestComponentViewModel, NewRequestDetailsViewModel, IDunnageSubstitutePicker
+digraph WorkOrderNewRequest4 {
+  graph [
+    rankdir=LR, splines=polyline, overlap=false, nodesep=0.45, ranksep=0.55,
+    newrank=true, fontname="Segoe UI", fontsize=11, bgcolor="#FFFFFF", pad=0.02
+  ];
+  node [
+    shape=box, style="rounded,filled", fontname="Segoe UI", fontsize=11,
+    margin="0.10,0.05", penwidth=1.5, color="#111111", fillcolor="#FFFFFF"
+  ];
+  edge [
+    fontname="Segoe UI", fontsize=11, color="#111111", arrowsize=0.6,
+    penwidth=1.5, fontcolor="#111111"
+  ];
+  subgraph cluster_ui {
+    label="1 · UI — XAML Views and dialogs"; fontcolor="#0B3D91"; color="#1F6FEB";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    u_dun [shape=box, label="NewRequestDunnagePage\n+ ImageSearchDialog", fillcolor="#DCE9FF"];
+    u_die [shape=box, label="NewRequest\nDiePage\nmulti-select", fillcolor="#DCE9FF"];
+    u_cmp [shape=box, label="NewRequest\nComponentPage\ncards", fillcolor="#DCE9FF"];
+    u_det [shape=box, label="NewRequest\nDetailsPage\nfree text", fillcolor="#DCE9FF"];
+  }
+  subgraph cluster_vm {
+    label="2 · ViewModels and flow rules"; fontcolor="#4B2A8A"; color="#8250DF";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    d_ans [shape=diamond, label="which job\nlist?", fillcolor="#FFF1C9", color="#B7791F", margin="0.01,0.01"];
+    v_dun [shape=box, label="NewRequest\nDunnageViewModel", fillcolor="#EFE3FF"];
+    v_die [shape=box, label="NewRequest\nDieViewModel\nSelectedDies[]", fillcolor="#EFE3FF"];
+    v_cmp [shape=box, label="NewRequest\nComponentViewModel\n(+ DetailsViewModel)", fillcolor="#EFE3FF"];
+  }
+  subgraph cluster_svc {
+    label="3 · Services (DI)"; fontcolor="#0A5A4F"; color="#0F7B6C";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    s_subs [shape=box, label="IDunnage\nSubstitutePicker", fillcolor="#D6F5F0"];
+    s_pic [shape=box, label="IPartPicture\nResolver", fillcolor="#D6F5F0"];
+    s_vis [shape=box, label="INewRequestFlow\nService\nGetVisibleItems()", fillcolor="#D6F5F0"];
+  }
+  subgraph cluster_data {
+    label="4 · Store / ERP"; fontcolor="#5A4300"; color="#8A6D3B";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    d_jobs [shape=cylinder, label="sp_setup_active_jobs_\nlatest_by_work_center_get", fillcolor="#EDEDED", fontname="Consolas"];
+    d_img [shape=component, label="picture cache", fillcolor="#FFE0E3", color="#B02A37"];
+    x_n [shape=note, label="[REFACTOR] the list is\nchosen in three places", fillcolor="#FFD6D6", color="#C62828", style="filled,dashed"];
+  }
+  { rank=same; u_dun; d_ans; s_subs; d_jobs; }
+  u_dun -> d_ans -> s_subs -> d_jobs [style=invis, constraint=false];
+  { rank=same; u_die; v_dun; s_pic; d_img; }
+  u_die -> v_dun -> s_pic -> d_img [style=invis, constraint=false];
+  { rank=same; u_cmp; v_die; s_vis; x_n; }
+  u_cmp -> v_die -> s_vis -> x_n [style=invis, constraint=false];
+  { rank=same; u_det; v_cmp; }
+  u_det -> v_cmp [style=invis, constraint=false];
+  u_dun -> u_die -> u_cmp -> u_det [style=invis, constraint=true];
+  d_ans -> v_dun -> v_die -> v_cmp [style=invis, constraint=true];
+  s_subs -> s_pic -> s_vis [style=invis, constraint=true];
+  d_jobs -> d_img -> x_n [style=invis, constraint=true];
+  u_dun -> v_dun [label="pick"];
+  u_die -> v_die [label="mark"];
+  u_cmp -> v_cmp [label="pick"];
+  u_det -> v_cmp [label="text"];
+  v_dun -> s_subs [label="sub"];
+  s_subs -> u_dun [label="dialog"];
+  v_die -> s_pic [label="picture"];
+  v_die -> s_vis [label="job list"];
+  s_vis -> d_jobs;
+  s_pic -> d_img;
+  x_n -> d_ans [style=dashed, color="#C62828", arrowhead=none, constraint=false];
+}

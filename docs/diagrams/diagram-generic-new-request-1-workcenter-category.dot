@@ -1,0 +1,71 @@
+// Diagram 3 / Sheet 1 of 4 — Generic New Request: work center, category and job fill — Sheet 1 of 4
+// Source of truth: GenericRequestWorkCenterViewModel, GenericRequestCategoryViewModel, GenericRequestLiveStepData
+digraph GenericNewRequest1 {
+  graph [
+    rankdir=LR, splines=polyline, overlap=false, nodesep=0.45, ranksep=0.55,
+    newrank=true, fontname="Segoe UI", fontsize=11, bgcolor="#FFFFFF", pad=0.02
+  ];
+  node [
+    shape=box, style="rounded,filled", fontname="Segoe UI", fontsize=11,
+    margin="0.10,0.05", penwidth=1.5, color="#111111", fillcolor="#FFFFFF"
+  ];
+  edge [
+    fontname="Segoe UI", fontsize=11, color="#111111", arrowsize=0.6,
+    penwidth=1.5, fontcolor="#111111"
+  ];
+  subgraph cluster_ui {
+    label="1 · UI — XAML Views"; fontcolor="#0B3D91"; color="#1F6FEB";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    u_wc [shape=box, label="GenericRequest\nWorkCenterPage\ngeneric cards only", fillcolor="#DCE9FF"];
+    u_cat [shape=box, label="GenericRequest\nCategoryPage\ncategory cards", fillcolor="#DCE9FF"];
+    x_offer [shape=note, label="job fill offer\n「fill from WO-…」", fillcolor="#FFF1C9", color="#B7791F", style="filled,dashed"];
+    x_fillfail [shape=note, label="fill unavailable\n+ retry", fillcolor="#FFF1C9", color="#B7791F", style="filled,dashed"];
+  }
+  subgraph cluster_vm {
+    label="2 · ViewModels and commands"; fontcolor="#4B2A8A"; color="#8250DF";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    v_wc [shape=box, label="GenericRequest\nWorkCenterViewModel\nContinueCommand\nBackCommand", fillcolor="#EFE3FF"];
+    x_conn [shape=cds, label="[From Diagram 1]\nLaunch(wc, bldg)", fillcolor="#E8F0FF", color="#1F6FEB", style="filled,dashed"];
+    v_cat [shape=box, label="GenericRequestCategory\nViewModel\nSelectCategoryCommand\nAccept · Decline · Retry", fillcolor="#EFE3FF"];
+    x_next [shape=cds, label="[To Sheet 2]\nItemVM", fillcolor="#E8F0FF", color="#1F6FEB", style="filled,dashed"];
+  }
+  subgraph cluster_svc {
+    label="3 · Services (DI)"; fontcolor="#0A5A4F"; color="#0F7B6C";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    s_data [shape=box, label="IGenericRequestStepData\nReadWorkCenters\nReadCategories()", fillcolor="#D6F5F0"];
+    s_fill [shape=box, label="IGenericRequestJobFill\nData\nProbeAsync · ReadAsync", fillcolor="#D6F5F0"];
+    s_nav [shape=box, label="IGenericRequest\nNavigator\nGoTo(step)", fillcolor="#D6F5F0"];
+  }
+  subgraph cluster_data {
+    label="4 · Store / ERP"; fontcolor="#5A4300"; color="#8A6D3B";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    d_cat [shape=cylinder, label="sp_setup_work_centers_\nget_all\nsp_config_hot_workcenters\n_get_for_computer", fillcolor="#EDEDED", fontname="Consolas"];
+    d_jobs [shape=cylinder, label="sp_setup_active_jobs_\nlatest_by_work_\ncenter_get()", fillcolor="#EDEDED", fontname="Consolas"];
+    d_cfg [shape=cylinder, label="sp_waitlist_request_\nitem_configs_get()", fillcolor="#EDEDED", fontname="Consolas"];
+    x_n [shape=note, label="[REFACTOR] the generic\npath repeats work-order\nvalidations", fillcolor="#FFD6D6", color="#C62828", style="filled,dashed"];
+  }
+  { rank=same; u_wc; v_wc; s_data; d_cat; }
+  u_wc -> v_wc -> s_data -> d_cat [style=invis, constraint=false];
+  { rank=same; u_cat; x_conn; s_fill; d_jobs; }
+  u_cat -> x_conn -> s_fill -> d_jobs [style=invis, constraint=false];
+  { rank=same; x_offer; v_cat; s_nav; d_cfg; }
+  x_offer -> v_cat -> s_nav -> d_cfg [style=invis, constraint=false];
+  { rank=same; x_fillfail; x_next; x_n; }
+  x_fillfail -> x_next -> x_n [style=invis, constraint=false];
+  u_wc -> u_cat -> x_offer -> x_fillfail [style=invis, constraint=true];
+  v_wc -> x_conn -> v_cat -> x_next [style=invis, constraint=true];
+  s_data -> s_fill -> s_nav [style=invis, constraint=true];
+  d_cat -> d_jobs -> d_cfg -> x_n [style=invis, constraint=true];
+  u_wc -> v_wc [label="pick"];
+  u_cat -> v_cat [label="pick"];
+  v_wc -> s_data [label="read"];
+  s_data -> d_cat;
+  s_data -> d_cfg;
+  v_cat -> s_fill [label="probe"];
+  s_fill -> d_jobs;
+  v_cat -> s_nav [label="goto"];
+  x_conn -> v_cat [style=dashed, color="#1F6FEB", arrowhead=none, constraint=false];
+  x_offer -> v_cat [style=dashed, color="#B7791F", arrowhead=none, constraint=false];
+  x_fillfail -> s_fill [style=dashed, color="#B7791F", arrowhead=none, constraint=false];
+  v_cat -> x_next [label="next"];
+}

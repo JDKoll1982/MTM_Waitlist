@@ -82,7 +82,8 @@ Six files exceed 1000 lines (`SettingsHub/ViewModels/SettingsViewModel.cs` is 26
 Always applied: `.github/copilot-instructions.md`, plus
 `.github/instructions/{mcp-doc-research,response-format,spec-kit}.instructions.md`. Scoped by glob:
 `test-conventions`, `database-schema-rules`, `startup-rebuild`, `winui3-adoption`,
-`winui3-api-rules`, `winui3-ui-automation`, `csharp-xaml-naming-rules`, `packaging`.
+`winui3-api-rules`, `winui3-ui-automation`, `csharp-xaml-naming-rules`, `packaging`,
+`diagram-authoring`.
 
 ## Before editing
 

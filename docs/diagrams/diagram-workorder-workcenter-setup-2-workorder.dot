@@ -1,0 +1,68 @@
+// Diagram 2 / Sheet 2 of 5 — Work Center Setup: entering the work order — Sheet 2 of 5
+// Source of truth: SetupWorkOrderViewModel.ExecuteSearchAsync, WorkOrderValidationService, SetupLookupService
+digraph WorkOrderSetup2 {
+  graph [
+    rankdir=LR, splines=polyline, overlap=false, nodesep=0.45, ranksep=0.55,
+    newrank=true, fontname="Segoe UI", fontsize=11, bgcolor="#FFFFFF", pad=0.02
+  ];
+  node [
+    shape=box, style="rounded,filled", fontname="Segoe UI", fontsize=11,
+    margin="0.10,0.05", penwidth=1.5, color="#111111", fillcolor="#FFFFFF"
+  ];
+  edge [
+    fontname="Segoe UI", fontsize=11, color="#111111", arrowsize=0.6,
+    penwidth=1.5, fontcolor="#111111"
+  ];
+  subgraph cluster_ui {
+    label="1 · UI — XAML Views and dialogs"; fontcolor="#0B3D91"; color="#1F6FEB";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    u_wo [shape=box, label="SetupWorkOrderPage\nwork order box", fillcolor="#DCE9FF"];
+    u_dlg [shape=box, label="SetupWorkOrder\nSearchDialog.xaml", fillcolor="#DCE9FF"];
+    x_err [shape=note, label="StatusMessage\n「lookup\nunavailable」", fillcolor="#FFF1C9", color="#B7791F", style="filled,dashed"];
+  }
+  subgraph cluster_vm {
+    label="2 · ViewModels and validation"; fontcolor="#4B2A8A"; color="#8250DF";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    v_wo [shape=box, label="SetupWorkOrder\nViewModel\nSearchCommand", fillcolor="#EFE3FF"];
+    x_norm [shape=box, label="IWorkOrderValidation\nService.TryNormalize", fillcolor="#EFE3FF"];
+    x_next [shape=cds, label="[To Sheet 3]\nSelectPart", fillcolor="#E8F0FF", color="#1F6FEB", style="filled,dashed"];
+  }
+  subgraph cluster_svc {
+    label="3 · Services (DI)"; fontcolor="#0A5A4F"; color="#0F7B6C";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    s_wf [shape=box, label="ISetupWorkflowService\nSearchWorkOrderAsync", fillcolor="#D6F5F0"];
+    s_lk [shape=box, label="IInforVisualLookup\nService\nSetupLookupService", fillcolor="#D6F5F0"];
+    s_dlg [shape=box, label="ISetupDialogService\nShowWorkOrder\nSearchDialog", fillcolor="#D6F5F0"];
+  }
+  subgraph cluster_data {
+    label="4 · Infor Visual / mirror"; fontcolor="#5A4300"; color="#8A6D3B";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    d_v1 [shape=box, label="shape 1\nLookupWorkOrder.sql", fillcolor="#F2E8D5", color="#8A6D3B"];
+    d_v8 [shape=box, label="shape 8\nGetWorkOrderSearch", fillcolor="#F2E8D5", color="#8A6D3B"];
+    d_mock [shape=component, label="mtm_mock\nsp_visual_<key>\n_get", fillcolor="#FFE0E3", color="#B02A37"];
+    x_fb [shape=note, label="[REFACTOR] the mirror is\nread only on a Cached\nverdict", fillcolor="#FFD6D6", color="#C62828", style="filled,dashed"];
+  }
+  { rank=same; u_wo; v_wo; s_wf; d_v1; }
+  u_wo -> v_wo -> s_wf -> d_v1 [style=invis, constraint=false];
+  { rank=same; u_dlg; x_norm; s_lk; d_v8; }
+  u_dlg -> x_norm -> s_lk -> d_v8 [style=invis, constraint=false];
+  { rank=same; x_err; x_next; s_dlg; d_mock; }
+  x_err -> x_next -> s_dlg -> d_mock [style=invis, constraint=false];
+  u_wo -> u_dlg -> x_err [style=invis, constraint=true];
+  v_wo -> x_norm -> x_next [style=invis, constraint=true];
+  s_wf -> s_lk -> s_dlg [style=invis, constraint=true];
+  d_v1 -> d_v8 -> d_mock -> x_fb [style=invis, constraint=true];
+  u_wo -> v_wo [label="search"];
+  u_dlg -> v_wo [label="chosen"];
+  v_wo -> s_wf [label="lookup"];
+  v_wo -> s_dlg [label="find"];
+  s_dlg -> u_dlg [label="dialog"];
+  s_wf -> s_lk;
+  s_lk -> d_v1;
+  s_lk -> d_v8;
+  d_v1 -> d_mock [style=dashed, color="#B02A37", constraint=false];
+  v_wo -> x_next [label="next"];
+  s_wf -> x_err [label="fail", style=dashed, color="#B7791F"];
+  x_norm -> s_wf [style=dashed, color="#1F6FEB", arrowhead=none, constraint=false];
+  x_fb -> d_mock [style=dashed, color="#C62828", arrowhead=none, constraint=false];
+}

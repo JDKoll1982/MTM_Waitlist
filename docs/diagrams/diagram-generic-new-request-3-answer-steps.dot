@@ -1,0 +1,71 @@
+// Diagram 3 / Sheet 3 of 4 — Generic New Request: part, dunnage, scrap and die steps — Sheet 3 of 4
+// Source of truth: GenericRequestPartViewModel, GenericRequestDunnageViewModel, GenericRequestScrapTypeViewModel, GenericRequestDieViewModel
+digraph GenericNewRequest3 {
+  graph [
+    rankdir=LR, splines=polyline, overlap=false, nodesep=0.45, ranksep=0.55,
+    newrank=true, fontname="Segoe UI", fontsize=11, bgcolor="#FFFFFF", pad=0.02
+  ];
+  node [
+    shape=box, style="rounded,filled", fontname="Segoe UI", fontsize=11,
+    margin="0.10,0.05", penwidth=1.5, color="#111111", fillcolor="#FFFFFF"
+  ];
+  edge [
+    fontname="Segoe UI", fontsize=11, color="#111111", arrowsize=0.6,
+    penwidth=1.5, fontcolor="#111111"
+  ];
+  subgraph cluster_ui {
+    label="1 · UI — XAML Views"; fontcolor="#0B3D91"; color="#1F6FEB";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    u_part [shape=box, label="GenericRequest\nPartPage\nsearch + quantity", fillcolor="#DCE9FF"];
+    u_dun [shape=box, label="GenericRequest\nDunnagePage", fillcolor="#DCE9FF"];
+    u_scrap [shape=box, label="GenericRequest\nScrapTypePage", fillcolor="#DCE9FF"];
+    u_die [shape=box, label="GenericRequest\nDiePage\nmulti-select", fillcolor="#DCE9FF"];
+  }
+  subgraph cluster_vm {
+    label="2 · ViewModels and commands"; fontcolor="#4B2A8A"; color="#8250DF";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    v_part [shape=box, label="GenericRequestPart\nViewModel\nSearchCommand\nRetryQuantityCommand", fillcolor="#EFE3FF"];
+    v_dun [shape=box, label="GenericRequest\nDunnageViewModel\nContinueCommand", fillcolor="#EFE3FF"];
+    v_scrap [shape=box, label="GenericRequest\nScrapTypeViewModel", fillcolor="#EFE3FF"];
+    v_die [shape=box, label="GenericRequest\nDieViewModel\nToggleDieCommand", fillcolor="#EFE3FF"];
+  }
+  subgraph cluster_svc {
+    label="3 · Services (DI)"; fontcolor="#0A5A4F"; color="#0F7B6C";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    s_part [shape=box, label="IGenericRequestPart\nData\nMatches · Sequences\nState · Quantity", fillcolor="#D6F5F0"];
+    s_die [shape=box, label="IGenericRequestDie\nData\nSearchAsync()", fillcolor="#D6F5F0"];
+    s_cat [shape=box, label="IDunnageCatalogue\nReader\n+ ILuggerArrangement", fillcolor="#D6F5F0"];
+  }
+  subgraph cluster_data {
+    label="4 · Infor Visual / mirror"; fontcolor="#5A4300"; color="#8A6D3B";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    d_sh [shape=box, label="shapes 9 / 10 / 11 / 7\npart matches\nsequences · state\nwarehouse qty", fillcolor="#F2E8D5", color="#8A6D3B"];
+    d_die [shape=box, label="shape 12\ndie_search", fillcolor="#F2E8D5", color="#8A6D3B"];
+    d_mock [shape=component, label="mtm_mock\nsp_visual_<key>_get", fillcolor="#FFE0E3", color="#B02A37"];
+    x_n [shape=note, label="[REFACTOR] the generic\npath repeats work-order\nvalidations", fillcolor="#FFD6D6", color="#C62828", style="filled,dashed"];
+  }
+  { rank=same; u_part; v_part; s_part; d_sh; }
+  u_part -> v_part -> s_part -> d_sh [style=invis, constraint=false];
+  { rank=same; u_dun; v_dun; s_die; d_die; }
+  u_dun -> v_dun -> s_die -> d_die [style=invis, constraint=false];
+  { rank=same; u_scrap; v_scrap; s_cat; d_mock; }
+  u_scrap -> v_scrap -> s_cat -> d_mock [style=invis, constraint=false];
+  { rank=same; u_die; v_die; x_n; }
+  u_die -> v_die -> x_n [style=invis, constraint=false];
+  u_part -> u_dun -> u_scrap -> u_die [style=invis, constraint=true];
+  v_part -> v_dun -> v_scrap -> v_die [style=invis, constraint=true];
+  s_part -> s_die -> s_cat [style=invis, constraint=true];
+  d_sh -> d_die -> d_mock -> x_n [style=invis, constraint=true];
+  u_part -> v_part [label="search"];
+  u_dun -> v_dun [label="pick"];
+  u_scrap -> v_scrap [label="pick"];
+  u_die -> v_die [label="mark"];
+  v_part -> s_part;
+  s_part -> d_sh;
+  v_die -> s_die;
+  s_die -> d_die;
+  v_dun -> s_cat;
+  v_scrap -> s_cat;
+  d_sh -> d_mock [style=dashed, color="#B02A37", constraint=false];
+  x_n -> s_part [style=dashed, color="#C62828", arrowhead=none, constraint=false];
+}

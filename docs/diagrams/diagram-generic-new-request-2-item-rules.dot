@@ -1,0 +1,66 @@
+// Diagram 3 / Sheet 2 of 4 — Generic New Request: item, product pickup and step order — Sheet 2 of 4
+// Source of truth: GenericRequestItemViewModel, GenericRequestProductPickupViewModel, GenericRequestFlowRules
+digraph GenericNewRequest2 {
+  graph [
+    rankdir=LR, splines=polyline, overlap=false, nodesep=0.45, ranksep=0.55,
+    newrank=true, fontname="Segoe UI", fontsize=11, bgcolor="#FFFFFF", pad=0.02
+  ];
+  node [
+    shape=box, style="rounded,filled", fontname="Segoe UI", fontsize=11,
+    margin="0.10,0.05", penwidth=1.5, color="#111111", fillcolor="#FFFFFF"
+  ];
+  edge [
+    fontname="Segoe UI", fontsize=11, color="#111111", arrowsize=0.6,
+    penwidth=1.5, fontcolor="#111111"
+  ];
+  subgraph cluster_ui {
+    label="1 · UI — XAML Views"; fontcolor="#0B3D91"; color="#1F6FEB";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    u_item [shape=box, label="GenericRequest\nItemPage\ncards + question", fillcolor="#DCE9FF"];
+    u_pick [shape=box, label="GenericRequest\nProductPickupPage\nFG · NCM · WIP · O-S", fillcolor="#DCE9FF"];
+    x_inc [shape=note, label="note: answer\nincomplete", fillcolor="#FFF1C9", color="#B7791F", style="filled,dashed"];
+  }
+  subgraph cluster_vm {
+    label="2 · ViewModels and rules"; fontcolor="#4B2A8A"; color="#8250DF";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    v_item [shape=box, label="GenericRequestItem\nViewModel\nSelectItemCommand\nOpenChooserCommand", fillcolor="#EFE3FF"];
+    v_pick [shape=box, label="GenericRequestProduct\nPickupViewModel\nContinueCommand", fillcolor="#EFE3FF"];
+    x_rule [shape=box, label="GenericRequestFlow\nRules\nOrder() · NextStep()", fillcolor="#EFE3FF"];
+    x_next [shape=cds, label="[To Sheet 3]\nanswer steps", fillcolor="#E8F0FF", color="#1F6FEB", style="filled,dashed"];
+  }
+  subgraph cluster_svc {
+    label="3 · Services (DI)"; fontcolor="#0A5A4F"; color="#0F7B6C";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    s_data [shape=box, label="IGenericRequestStepData\nReadItemsAsync()", fillcolor="#D6F5F0"];
+    s_nav [shape=box, label="IGenericRequest\nNavigator\nShowFinishedProduct\nChooser()", fillcolor="#D6F5F0"];
+  }
+  subgraph cluster_data {
+    label="4 · Store"; fontcolor="#5A4300"; color="#8A6D3B";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    d_cfg [shape=cylinder, label="sp_waitlist_request_\nitem_configs_get()", fillcolor="#EDEDED", fontname="Consolas"];
+    d_cat [shape=cylinder, label="RequestItemCatalog\nfinished-product rows", fillcolor="#EDEDED", fontname="Consolas"];
+    x_n [shape=note, label="[REFACTOR] the generic\npath repeats work-order\nvalidations", fillcolor="#FFD6D6", color="#C62828", style="filled,dashed"];
+  }
+  { rank=same; u_item; v_item; s_data; d_cfg; }
+  u_item -> v_item -> s_data -> d_cfg [style=invis, constraint=false];
+  { rank=same; u_pick; v_pick; s_nav; d_cat; }
+  u_pick -> v_pick -> s_nav -> d_cat [style=invis, constraint=false];
+  { rank=same; x_inc; x_rule; x_n; }
+  x_inc -> x_rule -> x_n [style=invis, constraint=false];
+  u_item -> u_pick -> x_inc [style=invis, constraint=true];
+  v_item -> v_pick -> x_rule -> x_next [style=invis, constraint=true];
+  s_data -> s_nav [style=invis, constraint=true];
+  d_cfg -> d_cat -> x_n [style=invis, constraint=true];
+  u_item -> v_item [label="pick"];
+  u_pick -> v_pick [label="pick"];
+  v_item -> s_data [label="read"];
+  s_data -> d_cfg;
+  s_data -> d_cat;
+  v_item -> s_nav [label="chooser"];
+  s_nav -> v_pick [label="goto"];
+  v_pick -> v_item [label="back", style=dashed, color="#8250DF"];
+  x_rule -> v_item [style=dashed, color="#1F6FEB", arrowhead=none, constraint=false];
+  x_inc -> v_item [style=dashed, color="#B7791F", arrowhead=none, constraint=false];
+  v_item -> x_next [label="next"];
+  x_n -> x_rule [style=dashed, color="#C62828", arrowhead=none, constraint=false];
+}

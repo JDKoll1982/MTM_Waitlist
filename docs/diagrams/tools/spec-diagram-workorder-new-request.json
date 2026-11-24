@@ -1,0 +1,878 @@
+{
+ "sheets": [
+  {
+   "file": "diagram-workorder-new-request-1-entry",
+   "name": "WorkOrderNewRequest1",
+   "title": "Diagram 1 / Sheet 1 of 5 — Work Order New Request: entry and work-center step",
+   "sheet": "Sheet 1 of 5",
+   "source": "MTM_Waitlist.Waitlist.NewRequest/ViewModels, Module_Waitlist/Views, ServiceRegistrationExtensions",
+   "lanes": {
+    "ui": [
+     [
+      "u_wl",
+      "WaitlistViewPage\\n「＋」 add request",
+      "ui"
+     ],
+     [
+      "u_wc",
+      "NewRequest\\nWorkCenterPage.xaml\\ncards · filter",
+      "ui"
+     ],
+     [
+      "x_job",
+      "banner: no\\nactive job",
+      "note"
+     ],
+     [
+      "x_emp",
+      "banner: not\\nattributable",
+      "note"
+     ]
+    ],
+    "vm": [
+     [
+      "v_wc",
+      "NewRequest\\nWorkCenterViewModel\\nSelectWorkCenterCommand",
+      "vm"
+     ],
+     [
+      "x_next",
+      "[To Sheet 2]\\nCategoryVM",
+      "conn"
+     ],
+     [
+      "d_gate",
+      "select\\nallowed?",
+      "dec"
+     ],
+     [
+      "x_gen",
+      "[IsGeneric]\\n→ Diagram 3",
+      "conn"
+     ]
+    ],
+    "svc": [
+     [
+      "s_wcs",
+      "IWorkCenterCatalog\\nService\\nGetCatalogAsync()",
+      "svc"
+     ],
+     [
+      "s_emp",
+      "IEmployeeDirectory\\nService\\n+ IPersonIdentity",
+      "svc"
+     ],
+     [
+      "s_lau",
+      "IGenericRequest\\nLauncher\\nLaunch(wc, bldg)",
+      "svc"
+     ]
+    ],
+    "data": [
+     [
+      "d_hot",
+      "sp_config_hot_\\nworkcenters_get_\\nfor_computer",
+      "db"
+     ],
+     [
+      "d_wcs",
+      "sp_setup_work_\\ncenters_get_all()",
+      "db"
+     ],
+     [
+      "d_jobs",
+      "sp_setup_active_jobs_\\nlatest_by_work_center_get",
+      "db"
+     ],
+     [
+      "d_emp",
+      "sp_core_employee_\\nby_identifier_get\\n(p_employee_id)",
+      "db"
+     ],
+     [
+      "x_role",
+      "[REFACTOR] no role\\ngate: the employee\\nrecord is the only\\ncheck (FR-046)",
+      "refactor"
+     ]
+    ]
+   },
+   "lane_titles": {
+    "ui": "1 · UI — XAML Views",
+    "vm": "2 · ViewModels and flow rules",
+    "svc": "3 · Services (DI)",
+    "data": "4 · Store / ERP"
+   },
+   "edges": [
+    [
+     "u_wl",
+     "v_wc",
+     "open",
+     ""
+    ],
+    [
+     "u_wc",
+     "v_wc",
+     "click",
+     ""
+    ],
+    [
+     "v_wc",
+     "s_wcs",
+     "",
+     ""
+    ],
+    [
+     "s_wcs",
+     "d_hot",
+     "",
+     ""
+    ],
+    [
+     "s_wcs",
+     "d_wcs",
+     "",
+     "dots"
+    ],
+    [
+     "s_wcs",
+     "d_jobs",
+     "",
+     "dots"
+    ],
+    [
+     "v_wc",
+     "d_gate",
+     "",
+     ""
+    ],
+    [
+     "d_gate",
+     "x_job",
+     "no job",
+     "dash"
+    ],
+    [
+     "d_gate",
+     "x_emp",
+     "no emp",
+     "dash"
+    ],
+    [
+     "d_gate",
+     "s_emp",
+     "",
+     ""
+    ],
+    [
+     "s_emp",
+     "d_emp",
+     "",
+     ""
+    ],
+    [
+     "d_gate",
+     "s_lau",
+     "generic",
+     ""
+    ],
+    [
+     "s_lau",
+     "x_gen",
+     "",
+     ""
+    ],
+    [
+     "d_gate",
+     "x_next",
+     "valid",
+     ""
+    ],
+    [
+     "x_role",
+     "s_emp",
+     "",
+     "link"
+    ],
+    [
+     "x_job",
+     "d_gate",
+     "",
+     "warnlink"
+    ],
+    [
+     "x_emp",
+     "d_gate",
+     "",
+     "warnlink"
+    ]
+   ]
+  },
+  {
+   "file": "diagram-workorder-new-request-2-category-item",
+   "name": "WorkOrderNewRequest2",
+   "title": "Diagram 1 / Sheet 2 of 5 — Work Order New Request: category and item",
+   "sheet": "Sheet 2 of 5",
+   "source": "NewRequestJobTypeViewModel, NewRequestItemViewModel, NewRequestFlowService, RequestJobAvailabilityProvider",
+   "lanes": {
+    "ui": [
+     [
+      "u_cat",
+      "NewRequestJobType\\nPage.xaml\\ncategory cards",
+      "ui"
+     ],
+     [
+      "u_item",
+      "NewRequestItemPage\\n.xaml\\nitem cards",
+      "ui"
+     ],
+     [
+      "x_coil",
+      "coil banner\\n「current coil …」",
+      "note"
+     ]
+    ],
+    "vm": [
+     [
+      "v_cat",
+      "NewRequestJobType\\nViewModel\\nSelectOptionCommand\\nBackCommand",
+      "vm"
+     ],
+     [
+      "x_prev",
+      "[From Sheet 1]\\nCategoryVM",
+      "conn"
+     ],
+     [
+      "v_item",
+      "NewRequestItem\\nViewModel\\nSelectItemCommand\\nAdvanceAsync()",
+      "vm"
+     ],
+     [
+      "x_next",
+      "[To Sheet 3]\\nGetNextStepType()",
+      "conn"
+     ],
+     [
+      "x_lbl",
+      "Answers are matched\\nby their label text:\\na renamed label\\nquietly hides the\\nquestion",
+      "refactor"
+     ]
+    ],
+    "svc": [
+     [
+      "s_flow",
+      "INewRequestFlow\\nService\\nResolveAvailability()",
+      "svc"
+     ],
+     [
+      "s_avail",
+      "IRequestJobPart\\nAvailabilityProvider",
+      "svc"
+     ],
+     [
+      "s_pick",
+      "INewRequestPicker\\nService\\nGetVisibleCategories()",
+      "svc"
+     ],
+     [
+      "s_cfg",
+      "IRequestItem\\nConfigurationService\\nGetConfigurations()",
+      "svc"
+     ]
+    ],
+    "data": [
+     [
+      "d_jobs",
+      "sp_setup_active_jobs_\\nlatest_by_work_center_get",
+      "db"
+     ],
+     [
+      "d_avg",
+      "sp_receiving_history_\\naverage_coil_weight\\n(p_part_number)",
+      "db"
+     ],
+     [
+      "d_cfg",
+      "sp_waitlist_request_\\nitem_configs_get()",
+      "db"
+     ]
+    ]
+   },
+   "lane_titles": {
+    "ui": "1 · UI — XAML Views",
+    "vm": "2 · ViewModels and flow rules",
+    "svc": "3 · Services (DI)",
+    "data": "4 · Store / ERP"
+   },
+   "edges": [
+    [
+     "u_cat",
+     "v_cat",
+     "click",
+     ""
+    ],
+    [
+     "u_item",
+     "v_item",
+     "click",
+     ""
+    ],
+    [
+     "v_cat",
+     "s_flow",
+     "read",
+     ""
+    ],
+    [
+     "s_flow",
+     "s_avail",
+     "",
+     ""
+    ],
+    [
+     "s_avail",
+     "d_jobs",
+     "",
+     ""
+    ],
+    [
+     "s_avail",
+     "d_avg",
+     "",
+     ""
+    ],
+    [
+     "v_cat",
+     "s_pick",
+     "",
+     ""
+    ],
+    [
+     "v_item",
+     "s_cfg",
+     "once",
+     ""
+    ],
+    [
+     "s_cfg",
+     "d_cfg",
+     "",
+     ""
+    ],
+    [
+     "v_cat",
+     "v_item",
+     "next",
+     ""
+    ],
+    [
+     "v_item",
+     "x_next",
+     "advance",
+     ""
+    ],
+    [
+     "x_prev",
+     "v_cat",
+     "",
+     "connlink"
+    ],
+    [
+     "x_coil",
+     "v_cat",
+     "",
+     "warnlink"
+    ],
+    [
+     "x_lbl",
+     "s_cfg",
+     "",
+     "link"
+    ]
+   ]
+  },
+  {
+   "file": "diagram-workorder-new-request-3-literal-answers",
+   "name": "WorkOrderNewRequest3",
+   "title": "Diagram 1 / Sheet 3 of 5 — Work Order New Request: literal answer steps",
+   "sheet": "Sheet 3 of 5",
+   "source": "NewRequestFlowRules.GetNextStepType, NewRequest{Hopper,CoilTurn,SkidCount,PartSearch}ViewModel",
+   "lanes": {
+    "ui": [
+     [
+      "u_hop",
+      "NewRequest\\nHopperPage\\n「Size」",
+      "ui"
+     ],
+     [
+      "u_coil",
+      "NewRequest\\nCoilTurnPage\\n「Weight of Coil」",
+      "ui"
+     ],
+     [
+      "u_skid",
+      "NewRequest\\nSkidCountPage\\n「# of Skids」",
+      "ui"
+     ],
+     [
+      "u_part",
+      "NewRequest\\nPartSearchPage\\n+ PartStockDialog",
+      "ui"
+     ]
+    ],
+    "vm": [
+     [
+      "d_pend",
+      "Hopper · Coil\\nSkid · Part",
+      "dec"
+     ],
+     [
+      "x_from",
+      "[From Sheet 2]\\nGetNextStepType()",
+      "conn"
+     ],
+     [
+      "v_coil",
+      "NewRequestCoilTurn\\nViewModel",
+      "vm"
+     ],
+     [
+      "v_skid",
+      "NewRequestSkid\\nCountViewModel",
+      "vm"
+     ],
+     [
+      "v_part",
+      "NewRequestPart\\nSearchViewModel",
+      "vm"
+     ]
+    ],
+    "svc": [
+     [
+      "s_match",
+      "IPartMatch\\nSearchService\\nLIVE ONLY",
+      "svc"
+     ],
+     [
+      "s_stock",
+      "IPartStockService\\nWIP first, then\\nVisual",
+      "svc"
+     ],
+     [
+      "s_coil",
+      "ICoilAvailability\\nService",
+      "svc"
+     ]
+    ],
+    "data": [
+     [
+      "d_vm",
+      "Infor Visual\\nGetPartMatches.sql",
+      "erp"
+     ],
+     [
+      "d_vs",
+      "Infor Visual\\nshapes 4 / 7",
+      "erp"
+     ],
+     [
+      "d_mir",
+      "mtm_mock\\nsp_visual_<k>_get",
+      "mirror"
+     ],
+     [
+      "x_n",
+      "[REFACTOR] no mirror\\nfor part search",
+      "refactor"
+     ]
+    ]
+   },
+   "lane_titles": {
+    "ui": "1 · UI — XAML Views",
+    "vm": "2 · ViewModels and flow rules",
+    "svc": "3 · Services (DI)",
+    "data": "4 · Store / ERP"
+   },
+   "edges": [
+    [
+     "u_coil",
+     "v_coil",
+     "Continue",
+     ""
+    ],
+    [
+     "u_skid",
+     "v_skid",
+     "Continue",
+     ""
+    ],
+    [
+     "u_part",
+     "v_part",
+     "Search",
+     ""
+    ],
+    [
+     "v_part",
+     "s_match",
+     "search",
+     ""
+    ],
+    [
+     "s_match",
+     "d_vm",
+     "",
+     ""
+    ],
+    [
+     "v_part",
+     "s_stock",
+     "stock",
+     ""
+    ],
+    [
+     "s_stock",
+     "d_vs",
+     "",
+     ""
+    ],
+    [
+     "d_vs",
+     "d_mir",
+     "",
+     "mirror"
+    ],
+    [
+     "v_coil",
+     "s_coil",
+     "avg wt",
+     ""
+    ],
+    [
+     "x_from",
+     "d_pend",
+     "",
+     "connlink"
+    ],
+    [
+     "x_n",
+     "s_match",
+     "",
+     "link"
+    ]
+   ]
+  },
+  {
+   "file": "diagram-workorder-new-request-4-joblist-answers",
+   "name": "WorkOrderNewRequest4",
+   "title": "Diagram 1 / Sheet 4 of 5 — Work Order New Request: job-list answer steps",
+   "sheet": "Sheet 4 of 5",
+   "source": "NewRequestDieViewModel, NewRequestComponentViewModel, NewRequestDetailsViewModel, IDunnageSubstitutePicker",
+   "lanes": {
+    "ui": [
+     [
+      "u_dun",
+      "NewRequestDunnagePage\\n+ ImageSearchDialog",
+      "ui"
+     ],
+     [
+      "u_die",
+      "NewRequest\\nDiePage\\nmulti-select",
+      "ui"
+     ],
+     [
+      "u_cmp",
+      "NewRequest\\nComponentPage\\ncards",
+      "ui"
+     ],
+     [
+      "u_det",
+      "NewRequest\\nDetailsPage\\nfree text",
+      "ui"
+     ]
+    ],
+    "vm": [
+     [
+      "d_ans",
+      "which job\\nlist?",
+      "dec"
+     ],
+     [
+      "v_dun",
+      "NewRequest\\nDunnageViewModel",
+      "vm"
+     ],
+     [
+      "v_die",
+      "NewRequest\\nDieViewModel\\nSelectedDies[]",
+      "vm"
+     ],
+     [
+      "v_cmp",
+      "NewRequest\\nComponentViewModel\\n(+ DetailsViewModel)",
+      "vm"
+     ]
+    ],
+    "svc": [
+     [
+      "s_subs",
+      "IDunnage\\nSubstitutePicker",
+      "svc"
+     ],
+     [
+      "s_pic",
+      "IPartPicture\\nResolver",
+      "svc"
+     ],
+     [
+      "s_vis",
+      "INewRequestFlow\\nService\\nGetVisibleItems()",
+      "svc"
+     ]
+    ],
+    "data": [
+     [
+      "d_jobs",
+      "sp_setup_active_jobs_\\nlatest_by_work_center_get",
+      "db"
+     ],
+     [
+      "d_img",
+      "picture cache",
+      "mirror"
+     ],
+     [
+      "x_n",
+      "[REFACTOR] the list is\\nchosen in three places",
+      "refactor"
+     ]
+    ]
+   },
+   "lane_titles": {
+    "ui": "1 · UI — XAML Views and dialogs",
+    "vm": "2 · ViewModels and flow rules",
+    "svc": "3 · Services (DI)",
+    "data": "4 · Store / ERP"
+   },
+   "edges": [
+    [
+     "u_dun",
+     "v_dun",
+     "pick",
+     ""
+    ],
+    [
+     "u_die",
+     "v_die",
+     "mark",
+     ""
+    ],
+    [
+     "u_cmp",
+     "v_cmp",
+     "pick",
+     ""
+    ],
+    [
+     "u_det",
+     "v_cmp",
+     "text",
+     ""
+    ],
+    [
+     "v_dun",
+     "s_subs",
+     "sub",
+     ""
+    ],
+    [
+     "s_subs",
+     "u_dun",
+     "dialog",
+     ""
+    ],
+    [
+     "v_die",
+     "s_pic",
+     "picture",
+     ""
+    ],
+    [
+     "v_die",
+     "s_vis",
+     "job list",
+     ""
+    ],
+    [
+     "s_vis",
+     "d_jobs",
+     "",
+     ""
+    ],
+    [
+     "s_pic",
+     "d_img",
+     "",
+     ""
+    ],
+    [
+     "x_n",
+     "d_ans",
+     "",
+     "link"
+    ]
+   ]
+  },
+  {
+   "file": "diagram-workorder-new-request-5-submit-result",
+   "name": "WorkOrderNewRequest5",
+   "title": "Diagram 1 / Sheet 5 of 5 — Work Order New Request: confirm, submit, result",
+   "sheet": "Sheet 5 of 5",
+   "source": "NewRequestSummaryViewModel.SubmitAsync, WaitlistRequestService.SubmitAsync, NewRequestResultViewModel",
+   "lanes": {
+    "ui": [
+     [
+      "u_sum",
+      "NewRequest\\nSummaryPage.xaml\\nconfirm · coil",
+      "ui"
+     ],
+     [
+      "x_err",
+      "error strip\\n「could not be\\nsubmitted」",
+      "note"
+     ],
+     [
+      "u_res",
+      "NewRequest\\nResultPage.xaml\\nsuccess · duplicate",
+      "ui"
+     ]
+    ],
+    "vm": [
+     [
+      "v_sum",
+      "NewRequestSummary\\nViewModel\\nSubmitCommand",
+      "vm"
+     ],
+     [
+      "x_g",
+      "[REFACTOR] job guard\\npasses the work centre\\ntwice: it compares a\\nvalue with itself",
+      "refactor"
+     ],
+     [
+      "v_res",
+      "NewRequestResult\\nViewModel\\nRetry · Return · New",
+      "vm"
+     ]
+    ],
+    "svc": [
+     [
+      "s_req",
+      "IWaitlistRequestService\\nSubmitAsync(draft)\\n+ INewRequestAlert",
+      "svc"
+     ],
+     [
+      "s_urg",
+      "IUrgencyDeadlineService\\nComputeAsync()",
+      "svc"
+     ],
+     [
+      "s_nav",
+      "INavigationService\\nIPageService",
+      "svc"
+     ]
+    ],
+    "data": [
+     [
+      "d_list",
+      "sp_waitlist_request_\\nlist\\n(p_building)",
+      "db"
+     ],
+     [
+      "d_write",
+      "sp_waitlist_request_\\ninsert\\nsp_waitlist_request_\\naudit_insert",
+      "db"
+     ],
+     [
+      "x_d",
+      "[REFACTOR] duplicate\\ncheck reads the\\nin-memory snapshot",
+      "refactor"
+     ]
+    ]
+   },
+   "lane_titles": {
+    "ui": "1 · UI — XAML Views",
+    "vm": "2 · ViewModels and flow rules",
+    "svc": "3 · Services (DI)",
+    "data": "4 · Store / ERP"
+   },
+   "edges": [
+    [
+     "u_sum",
+     "v_sum",
+     "submit",
+     ""
+    ],
+    [
+     "v_sum",
+     "s_req",
+     "submit",
+     ""
+    ],
+    [
+     "s_req",
+     "s_urg",
+     "due time",
+     ""
+    ],
+    [
+     "s_req",
+     "d_list",
+     "check",
+     ""
+    ],
+    [
+     "s_req",
+     "d_write",
+     "write",
+     "red"
+    ],
+    [
+     "v_sum",
+     "v_res",
+     "result",
+     ""
+    ],
+    [
+     "v_sum",
+     "x_err",
+     "failure",
+     "dash"
+    ],
+    [
+     "x_g",
+     "v_sum",
+     "",
+     "link"
+    ],
+    [
+     "x_d",
+     "s_req",
+     "",
+     "link"
+    ],
+    [
+     "v_res",
+     "s_nav",
+     "leave",
+     ""
+    ],
+    [
+     "s_nav",
+     "u_res",
+     "",
+     "vdash"
+    ]
+   ]
+  }
+ ]
+}

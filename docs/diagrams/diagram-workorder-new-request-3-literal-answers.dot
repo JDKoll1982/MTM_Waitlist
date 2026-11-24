@@ -1,0 +1,71 @@
+// Diagram 1 / Sheet 3 of 5 — Work Order New Request: literal answer steps — Sheet 3 of 5
+// Source of truth: NewRequestFlowRules.GetNextStepType, NewRequest{Hopper,CoilTurn,SkidCount,PartSearch}ViewModel
+digraph WorkOrderNewRequest3 {
+  graph [
+    rankdir=LR, splines=polyline, overlap=false, nodesep=0.45, ranksep=0.55,
+    newrank=true, fontname="Segoe UI", fontsize=11, bgcolor="#FFFFFF", pad=0.02
+  ];
+  node [
+    shape=box, style="rounded,filled", fontname="Segoe UI", fontsize=11,
+    margin="0.10,0.05", penwidth=1.5, color="#111111", fillcolor="#FFFFFF"
+  ];
+  edge [
+    fontname="Segoe UI", fontsize=11, color="#111111", arrowsize=0.6,
+    penwidth=1.5, fontcolor="#111111"
+  ];
+  subgraph cluster_ui {
+    label="1 · UI — XAML Views"; fontcolor="#0B3D91"; color="#1F6FEB";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    u_hop [shape=box, label="NewRequest\nHopperPage\n「Size」", fillcolor="#DCE9FF"];
+    u_coil [shape=box, label="NewRequest\nCoilTurnPage\n「Weight of Coil」", fillcolor="#DCE9FF"];
+    u_skid [shape=box, label="NewRequest\nSkidCountPage\n「# of Skids」", fillcolor="#DCE9FF"];
+    u_part [shape=box, label="NewRequest\nPartSearchPage\n+ PartStockDialog", fillcolor="#DCE9FF"];
+  }
+  subgraph cluster_vm {
+    label="2 · ViewModels and flow rules"; fontcolor="#4B2A8A"; color="#8250DF";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    d_pend [shape=diamond, label="Hopper · Coil\nSkid · Part", fillcolor="#FFF1C9", color="#B7791F", margin="0.01,0.01"];
+    x_from [shape=cds, label="[From Sheet 2]\nGetNextStepType()", fillcolor="#E8F0FF", color="#1F6FEB", style="filled,dashed"];
+    v_coil [shape=box, label="NewRequestCoilTurn\nViewModel", fillcolor="#EFE3FF"];
+    v_skid [shape=box, label="NewRequestSkid\nCountViewModel", fillcolor="#EFE3FF"];
+    v_part [shape=box, label="NewRequestPart\nSearchViewModel", fillcolor="#EFE3FF"];
+  }
+  subgraph cluster_svc {
+    label="3 · Services (DI)"; fontcolor="#0A5A4F"; color="#0F7B6C";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    s_match [shape=box, label="IPartMatch\nSearchService\nLIVE ONLY", fillcolor="#D6F5F0"];
+    s_stock [shape=box, label="IPartStockService\nWIP first, then\nVisual", fillcolor="#D6F5F0"];
+    s_coil [shape=box, label="ICoilAvailability\nService", fillcolor="#D6F5F0"];
+  }
+  subgraph cluster_data {
+    label="4 · Store / ERP"; fontcolor="#5A4300"; color="#8A6D3B";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    d_vm [shape=box, label="Infor Visual\nGetPartMatches.sql", fillcolor="#F2E8D5", color="#8A6D3B"];
+    d_vs [shape=box, label="Infor Visual\nshapes 4 / 7", fillcolor="#F2E8D5", color="#8A6D3B"];
+    d_mir [shape=component, label="mtm_mock\nsp_visual_<k>_get", fillcolor="#FFE0E3", color="#B02A37"];
+    x_n [shape=note, label="[REFACTOR] no mirror\nfor part search", fillcolor="#FFD6D6", color="#C62828", style="filled,dashed"];
+  }
+  { rank=same; u_hop; d_pend; s_match; d_vm; }
+  u_hop -> d_pend -> s_match -> d_vm [style=invis, constraint=false];
+  { rank=same; u_coil; x_from; s_stock; d_vs; }
+  u_coil -> x_from -> s_stock -> d_vs [style=invis, constraint=false];
+  { rank=same; u_skid; v_coil; s_coil; d_mir; }
+  u_skid -> v_coil -> s_coil -> d_mir [style=invis, constraint=false];
+  { rank=same; u_part; v_skid; x_n; }
+  u_part -> v_skid -> x_n [style=invis, constraint=false];
+  u_hop -> u_coil -> u_skid -> u_part [style=invis, constraint=true];
+  d_pend -> x_from -> v_coil -> v_skid -> v_part [style=invis, constraint=true];
+  s_match -> s_stock -> s_coil [style=invis, constraint=true];
+  d_vm -> d_vs -> d_mir -> x_n [style=invis, constraint=true];
+  u_coil -> v_coil [label="Continue"];
+  u_skid -> v_skid [label="Continue"];
+  u_part -> v_part [label="Search"];
+  v_part -> s_match [label="search"];
+  s_match -> d_vm;
+  v_part -> s_stock [label="stock"];
+  s_stock -> d_vs;
+  d_vs -> d_mir [style=dashed, color="#B02A37", constraint=false];
+  v_coil -> s_coil [label="avg wt"];
+  x_from -> d_pend [style=dashed, color="#1F6FEB", arrowhead=none, constraint=false];
+  x_n -> s_match [style=dashed, color="#C62828", arrowhead=none, constraint=false];
+}

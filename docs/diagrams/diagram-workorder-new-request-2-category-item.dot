@@ -1,0 +1,73 @@
+// Diagram 1 / Sheet 2 of 5 — Work Order New Request: category and item — Sheet 2 of 5
+// Source of truth: NewRequestJobTypeViewModel, NewRequestItemViewModel, NewRequestFlowService, RequestJobAvailabilityProvider
+digraph WorkOrderNewRequest2 {
+  graph [
+    rankdir=LR, splines=polyline, overlap=false, nodesep=0.45, ranksep=0.55,
+    newrank=true, fontname="Segoe UI", fontsize=11, bgcolor="#FFFFFF", pad=0.02
+  ];
+  node [
+    shape=box, style="rounded,filled", fontname="Segoe UI", fontsize=11,
+    margin="0.10,0.05", penwidth=1.5, color="#111111", fillcolor="#FFFFFF"
+  ];
+  edge [
+    fontname="Segoe UI", fontsize=11, color="#111111", arrowsize=0.6,
+    penwidth=1.5, fontcolor="#111111"
+  ];
+  subgraph cluster_ui {
+    label="1 · UI — XAML Views"; fontcolor="#0B3D91"; color="#1F6FEB";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    u_cat [shape=box, label="NewRequestJobType\nPage.xaml\ncategory cards", fillcolor="#DCE9FF"];
+    u_item [shape=box, label="NewRequestItemPage\n.xaml\nitem cards", fillcolor="#DCE9FF"];
+    x_coil [shape=note, label="coil banner\n「current coil …」", fillcolor="#FFF1C9", color="#B7791F", style="filled,dashed"];
+  }
+  subgraph cluster_vm {
+    label="2 · ViewModels and flow rules"; fontcolor="#4B2A8A"; color="#8250DF";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    v_cat [shape=box, label="NewRequestJobType\nViewModel\nSelectOptionCommand\nBackCommand", fillcolor="#EFE3FF"];
+    x_prev [shape=cds, label="[From Sheet 1]\nCategoryVM", fillcolor="#E8F0FF", color="#1F6FEB", style="filled,dashed"];
+    v_item [shape=box, label="NewRequestItem\nViewModel\nSelectItemCommand\nAdvanceAsync()", fillcolor="#EFE3FF"];
+    x_next [shape=cds, label="[To Sheet 3]\nGetNextStepType()", fillcolor="#E8F0FF", color="#1F6FEB", style="filled,dashed"];
+    x_lbl [shape=note, label="Answers are matched\nby their label text:\na renamed label\nquietly hides the\nquestion", fillcolor="#FFD6D6", color="#C62828", style="filled,dashed"];
+  }
+  subgraph cluster_svc {
+    label="3 · Services (DI)"; fontcolor="#0A5A4F"; color="#0F7B6C";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    s_flow [shape=box, label="INewRequestFlow\nService\nResolveAvailability()", fillcolor="#D6F5F0"];
+    s_avail [shape=box, label="IRequestJobPart\nAvailabilityProvider", fillcolor="#D6F5F0"];
+    s_pick [shape=box, label="INewRequestPicker\nService\nGetVisibleCategories()", fillcolor="#D6F5F0"];
+    s_cfg [shape=box, label="IRequestItem\nConfigurationService\nGetConfigurations()", fillcolor="#D6F5F0"];
+  }
+  subgraph cluster_data {
+    label="4 · Store / ERP"; fontcolor="#5A4300"; color="#8A6D3B";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    d_jobs [shape=cylinder, label="sp_setup_active_jobs_\nlatest_by_work_center_get", fillcolor="#EDEDED", fontname="Consolas"];
+    d_avg [shape=cylinder, label="sp_receiving_history_\naverage_coil_weight\n(p_part_number)", fillcolor="#EDEDED", fontname="Consolas"];
+    d_cfg [shape=cylinder, label="sp_waitlist_request_\nitem_configs_get()", fillcolor="#EDEDED", fontname="Consolas"];
+  }
+  { rank=same; u_cat; v_cat; s_flow; d_jobs; }
+  u_cat -> v_cat -> s_flow -> d_jobs [style=invis, constraint=false];
+  { rank=same; u_item; x_prev; s_avail; d_avg; }
+  u_item -> x_prev -> s_avail -> d_avg [style=invis, constraint=false];
+  { rank=same; x_coil; v_item; s_pick; d_cfg; }
+  x_coil -> v_item -> s_pick -> d_cfg [style=invis, constraint=false];
+  { rank=same; x_next; s_cfg; }
+  x_next -> s_cfg [style=invis, constraint=false];
+  u_cat -> u_item -> x_coil [style=invis, constraint=true];
+  v_cat -> x_prev -> v_item -> x_next -> x_lbl [style=invis, constraint=true];
+  s_flow -> s_avail -> s_pick -> s_cfg [style=invis, constraint=true];
+  d_jobs -> d_avg -> d_cfg [style=invis, constraint=true];
+  u_cat -> v_cat [label="click"];
+  u_item -> v_item [label="click"];
+  v_cat -> s_flow [label="read"];
+  s_flow -> s_avail;
+  s_avail -> d_jobs;
+  s_avail -> d_avg;
+  v_cat -> s_pick;
+  v_item -> s_cfg [label="once"];
+  s_cfg -> d_cfg;
+  v_cat -> v_item [label="next"];
+  v_item -> x_next [label="advance"];
+  x_prev -> v_cat [style=dashed, color="#1F6FEB", arrowhead=none, constraint=false];
+  x_coil -> v_cat [style=dashed, color="#B7791F", arrowhead=none, constraint=false];
+  x_lbl -> s_cfg [style=dashed, color="#C62828", arrowhead=none, constraint=false];
+}

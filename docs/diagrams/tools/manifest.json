@@ -1,0 +1,36 @@
+{
+ "documents": [
+  {
+   "output": "diagram-workorder-new-request.pdf",
+   "spec": "spec-diagram-workorder-new-request.json"
+  },
+  {
+   "output": "diagram-workorder-workcenter-setup.pdf",
+   "spec": "spec-diagram-workorder-workcenter-setup.json"
+  },
+  {
+   "output": "diagram-generic-new-request.pdf",
+   "spec": "spec-diagram-generic-new-request.json"
+  },
+  {
+   "output": "diagram-generic-workcenter-setup.pdf",
+   "spec": "spec-diagram-generic-workcenter-setup.json"
+  },
+  {
+   "output": "diagram-workorder-new-request-friendly.pdf",
+   "spec": "spec-diagram-workorder-new-request-friendly.json"
+  },
+  {
+   "output": "diagram-workorder-workcenter-setup-friendly.pdf",
+   "spec": "spec-diagram-workorder-workcenter-setup-friendly.json"
+  },
+  {
+   "output": "diagram-generic-new-request-friendly.pdf",
+   "spec": "spec-diagram-generic-new-request-friendly.json"
+  },
+  {
+   "output": "diagram-generic-workcenter-setup-friendly.pdf",
+   "spec": "spec-diagram-generic-workcenter-setup-friendly.json"
+  }
+ ]
+}

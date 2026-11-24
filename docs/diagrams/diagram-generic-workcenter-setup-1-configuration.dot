@@ -1,0 +1,74 @@
+// Diagram 4 / Sheet 1 of 2 — Generic work centers: who writes the configuration — Sheet 1 of 2
+// Source of truth: SetupWorkCenterViewModel, SettingsViewModel, MachineSetupViewModel, SetupWorkCenterService
+digraph GenericSetup1 {
+  graph [
+    rankdir=LR, splines=polyline, overlap=false, nodesep=0.45, ranksep=0.55,
+    newrank=true, fontname="Segoe UI", fontsize=11, bgcolor="#FFFFFF", pad=0.02
+  ];
+  node [
+    shape=box, style="rounded,filled", fontname="Segoe UI", fontsize=11,
+    margin="0.10,0.05", penwidth=1.5, color="#111111", fillcolor="#FFFFFF"
+  ];
+  edge [
+    fontname="Segoe UI", fontsize=11, color="#111111", arrowsize=0.6,
+    penwidth=1.5, fontcolor="#111111"
+  ];
+  subgraph cluster_ui {
+    label="1 · UI — where it is set"; fontcolor="#0B3D91"; color="#1F6FEB";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    u_setup [shape=box, label="SetupWorkCenterPage\nadd · edit · designate\ngeneric", fillcolor="#DCE9FF"];
+    u_set [shape=box, label="SettingsPage\nhot centers · urgency\ndunnage visibility", fillcolor="#DCE9FF"];
+    u_start [shape=box, label="MachineSetupPage\ncomputer name +\nhot centers", fillcolor="#DCE9FF"];
+    x_perm [shape=note, label="permission gates:\nsetup.work_centers\nsettings.*", fillcolor="#FFF1C9", color="#B7791F", style="filled,dashed"];
+  }
+  subgraph cluster_vm {
+    label="2 · ViewModels and commands"; fontcolor="#4B2A8A"; color="#8250DF";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    v_setup [shape=box, label="SetupWorkCenter\nViewModel\nWorkCenterIsGeneric\nInput", fillcolor="#EFE3FF"];
+    v_set [shape=box, label="SettingsViewModel\nAddHotWorkCenter\nUrgencyAllotments", fillcolor="#EFE3FF"];
+    v_start [shape=box, label="MachineSetupViewModel\nSaveCommand", fillcolor="#EFE3FF"];
+    x_gw [shape=note, label="The generic flag is\nwritten only after\nthe save returns:\na failure loses it", fillcolor="#FFD6D6", color="#C62828", style="filled,dashed"];
+  }
+  subgraph cluster_svc {
+    label="3 · Services (DI)"; fontcolor="#0A5A4F"; color="#0F7B6C";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    s_wcs [shape=box, label="ISetupWorkCenter\nService\nSetWorkCenterGeneric", fillcolor="#D6F5F0"];
+    s_hot [shape=box, label="IWorkCenterCatalog\nService\nSaveHotWorkCenters", fillcolor="#D6F5F0"];
+    s_cfg [shape=box, label="IConfigSettingsValue\nService\nUpsert", fillcolor="#D6F5F0"];
+    s_perm [shape=box, label="IPermissionService\nHasPermissionAsync()", fillcolor="#D6F5F0"];
+  }
+  subgraph cluster_data {
+    label="4 · Store"; fontcolor="#5A4300"; color="#8A6D3B";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    d_gen [shape=cylinder, label="sp_setup_work_centers_\ngeneric_set", fillcolor="#EDEDED", fontname="Consolas"];
+    d_hot [shape=cylinder, label="sp_config_hot_workcenters_\nupsert\ndelete_for_computer", fillcolor="#EDEDED", fontname="Consolas"];
+    d_cfg [shape=cylinder, label="sp_config_settings_upsert\nsp_waitlist_request_item_\nallotted_minutes_update", fillcolor="#EDEDED", fontname="Consolas"];
+    d_perm [shape=cylinder, label="config_settings_values_get\n(permission.* rows)", fillcolor="#EDEDED", fontname="Consolas"];
+  }
+  { rank=same; u_setup; v_setup; s_wcs; d_gen; }
+  u_setup -> v_setup -> s_wcs -> d_gen [style=invis, constraint=false];
+  { rank=same; u_set; v_set; s_hot; d_hot; }
+  u_set -> v_set -> s_hot -> d_hot [style=invis, constraint=false];
+  { rank=same; u_start; v_start; s_cfg; d_cfg; }
+  u_start -> v_start -> s_cfg -> d_cfg [style=invis, constraint=false];
+  { rank=same; x_perm; x_gw; s_perm; d_perm; }
+  x_perm -> x_gw -> s_perm -> d_perm [style=invis, constraint=false];
+  u_setup -> u_set -> u_start -> x_perm [style=invis, constraint=true];
+  v_setup -> v_set -> v_start -> x_gw [style=invis, constraint=true];
+  s_wcs -> s_hot -> s_cfg -> s_perm [style=invis, constraint=true];
+  d_gen -> d_hot -> d_cfg -> d_perm [style=invis, constraint=true];
+  u_setup -> v_setup [label="designate"];
+  u_set -> v_set [label="edit"];
+  u_start -> v_start [label="save"];
+  v_setup -> s_wcs [label="write"];
+  s_wcs -> d_gen;
+  v_set -> s_hot;
+  s_hot -> d_hot;
+  v_set -> s_cfg;
+  s_cfg -> d_cfg;
+  v_start -> s_hot [label="save"];
+  s_perm -> d_perm;
+  v_setup -> s_perm [label="gate"];
+  x_perm -> s_perm [style=dashed, color="#B7791F", arrowhead=none, constraint=false];
+  x_gw -> d_gen [style=dashed, color="#C62828", arrowhead=none, constraint=false];
+}

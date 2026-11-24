@@ -1,0 +1,61 @@
+// Diagram 2 / Sheet 5 of 5 — Work Center Setup: review, save and completion — Sheet 5 of 5
+// Source of truth: SetupReviewViewModel, SetupCompletionViewModel, SetupPersistenceService.SaveAsync
+digraph WorkOrderSetup5 {
+  graph [
+    rankdir=LR, splines=polyline, overlap=false, nodesep=0.45, ranksep=0.55,
+    newrank=true, fontname="Segoe UI", fontsize=11, bgcolor="#FFFFFF", pad=0.02
+  ];
+  node [
+    shape=box, style="rounded,filled", fontname="Segoe UI", fontsize=11,
+    margin="0.10,0.05", penwidth=1.5, color="#111111", fillcolor="#FFFFFF"
+  ];
+  edge [
+    fontname="Segoe UI", fontsize=11, color="#111111", arrowsize=0.6,
+    penwidth=1.5, fontcolor="#111111"
+  ];
+  subgraph cluster_ui {
+    label="1 · UI — XAML Views"; fontcolor="#0B3D91"; color="#1F6FEB";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    u_rev [shape=box, label="SetupReviewPage\nreplace prompt", fillcolor="#DCE9FF"];
+    u_done [shape=box, label="SetupCompletionPage\nresult · back", fillcolor="#DCE9FF"];
+    x_replace [shape=note, label="「press already has\na job — replace?」", fillcolor="#FFF1C9", color="#B7791F", style="filled,dashed"];
+  }
+  subgraph cluster_vm {
+    label="2 · ViewModels and commands"; fontcolor="#4B2A8A"; color="#8250DF";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    v_rev [shape=box, label="SetupReviewViewModel\nConfirmCommand\nReplaceCommand", fillcolor="#EFE3FF"];
+    v_done [shape=box, label="SetupCompletion\nViewModel\nBackToWorkCenters", fillcolor="#EFE3FF"];
+  }
+  subgraph cluster_svc {
+    label="3 · Services (DI)"; fontcolor="#0A5A4F"; color="#0F7B6C";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    s_p [shape=box, label="ISetupPersistence\nService\nSaveAsync(force)", fillcolor="#D6F5F0"];
+    s_co [shape=box, label="IActiveJobCoordinator\nService\nHasActiveJobAsync()", fillcolor="#D6F5F0"];
+  }
+  subgraph cluster_data {
+    label="4 · Store"; fontcolor="#5A4300"; color="#8A6D3B";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    d_save [shape=cylinder, label="sp_setup_save_setup\nsp_setup_part_sequence_\ncustom_data_upsert", fillcolor="#EDEDED", fontname="Consolas"];
+    d_hist [shape=cylinder, label="sp_setup_job_history_\ninsert_for_pair\nsp_setup_work_centers_\ntouch", fillcolor="#EDEDED", fontname="Consolas"];
+    x_n [shape=note, label="[REFACTOR] four procedures\nrun in sequence with no\ntransaction around them", fillcolor="#FFD6D6", color="#C62828", style="filled,dashed"];
+  }
+  { rank=same; u_rev; v_rev; s_p; d_save; }
+  u_rev -> v_rev -> s_p -> d_save [style=invis, constraint=false];
+  { rank=same; u_done; v_done; s_co; d_hist; }
+  u_done -> v_done -> s_co -> d_hist [style=invis, constraint=false];
+  { rank=same; x_replace; x_n; }
+  x_replace -> x_n [style=invis, constraint=false];
+  u_rev -> u_done -> x_replace [style=invis, constraint=true];
+  v_rev -> v_done [style=invis, constraint=true];
+  s_p -> s_co [style=invis, constraint=true];
+  d_save -> d_hist -> x_n [style=invis, constraint=true];
+  u_rev -> v_rev [label="confirm"];
+  u_done -> v_done [label="back"];
+  v_rev -> s_co [label="exists?"];
+  v_rev -> s_p [label="save"];
+  s_p -> d_save [label="write", color="#C62828", penwidth=2.0];
+  s_p -> d_hist;
+  v_rev -> v_done [label="result"];
+  x_replace -> v_rev [style=dashed, color="#B7791F", arrowhead=none, constraint=false];
+  x_n -> s_p [style=dashed, color="#C62828", arrowhead=none, constraint=false];
+}

@@ -1,0 +1,66 @@
+// Work Order Request — made simple · Sheet 2 of 2: checking and sending — Sheet 2 of 2
+// Source of truth: Plain-language view of the work-order request flow
+digraph FriendlyWO2 {
+  graph [
+    rankdir=LR, splines=polyline, overlap=false, nodesep=0.45, ranksep=0.55,
+    newrank=true, fontname="Segoe UI", fontsize=11, bgcolor="#FFFFFF", pad=0.02
+  ];
+  node [
+    shape=box, style="rounded,filled", fontname="Segoe UI", fontsize=11,
+    margin="0.10,0.05", penwidth=1.5, color="#111111", fillcolor="#FFFFFF"
+  ];
+  edge [
+    fontname="Segoe UI", fontsize=11, color="#111111", arrowsize=0.6,
+    penwidth=1.5, fontcolor="#111111"
+  ];
+  subgraph cluster_ui {
+    label="1 · What you do"; fontcolor="#0B3D91"; color="#1F6FEB";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    a1 [shape=box, label="Check the summary", fillcolor="#DCE9FF"];
+    a2 [shape=box, label="Press Submit", fillcolor="#DCE9FF"];
+    a3 [shape=box, label="Read the result", fillcolor="#DCE9FF"];
+  }
+  subgraph cluster_vm {
+    label="2 · What the app does"; fontcolor="#4B2A8A"; color="#8250DF";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    b1 [shape=box, label="Nothing is sent\nuntil you confirm", fillcolor="#EFE3FF"];
+    b2 [shape=box, label="One request per\ndie is raised", fillcolor="#EFE3FF"];
+    b3 [shape=box, label="Try again, or go\nback to the list", fillcolor="#EFE3FF"];
+  }
+  subgraph cluster_svc {
+    label="3 · What it saves"; fontcolor="#0A5A4F"; color="#0F7B6C";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    c1 [shape=box, label="Prepares the\nrequest", fillcolor="#D6F5F0"];
+    c2 [shape=box, label="Saves it and tells\nthe floor", fillcolor="#D6F5F0"];
+    c3 [shape=box, label="Returns you to\nthe waitlist", fillcolor="#D6F5F0"];
+  }
+  subgraph cluster_data {
+    label="4 · Where it goes"; fontcolor="#5A4300"; color="#8A6D3B";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    d1 [shape=cylinder, label="Request queue", fillcolor="#EDEDED", fontname="Consolas"];
+    d2 [shape=cylinder, label="Audit history", fillcolor="#EDEDED", fontname="Consolas"];
+    d3 [shape=note, label="Same request\nalready open? It\nis refused.", fillcolor="#FFF1C9", color="#B7791F", style="filled,dashed"];
+    d4 [shape=note, label="Worth fixing: a\nduplicate is only\nseen in the list this\nPC has loaded", fillcolor="#FFD6D6", color="#C62828", style="filled,dashed"];
+  }
+  { rank=same; a1; b1; c1; d1; }
+  a1 -> b1 -> c1 -> d1 [style=invis, constraint=false];
+  { rank=same; a2; b2; c2; d2; }
+  a2 -> b2 -> c2 -> d2 [style=invis, constraint=false];
+  { rank=same; a3; b3; c3; d3; }
+  a3 -> b3 -> c3 -> d3 [style=invis, constraint=false];
+  a1 -> a2 -> a3 [style=invis, constraint=true];
+  b1 -> b2 -> b3 [style=invis, constraint=true];
+  c1 -> c2 -> c3 [style=invis, constraint=true];
+  d1 -> d2 -> d3 -> d4 [style=invis, constraint=true];
+  a1 -> b1 [label="check"];
+  a2 -> b2 [label="submit"];
+  a3 -> b3 [label="see"];
+  b1 -> c1;
+  b2 -> c2;
+  b3 -> c3;
+  c2 -> d1;
+  c2 -> d2;
+  c3 -> a1 [style=dashed, color="#8250DF"];
+  d3 -> d1 [style=dashed, color="#B7791F", arrowhead=none, constraint=false];
+  d4 -> c2 [style=dashed, color="#C62828", arrowhead=none, constraint=false];
+}

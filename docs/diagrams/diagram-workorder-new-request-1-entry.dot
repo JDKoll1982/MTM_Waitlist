@@ -1,0 +1,77 @@
+// Diagram 1 / Sheet 1 of 5 — Work Order New Request: entry and work-center step — Sheet 1 of 5
+// Source of truth: MTM_Waitlist.Waitlist.NewRequest/ViewModels, Module_Waitlist/Views, ServiceRegistrationExtensions
+digraph WorkOrderNewRequest1 {
+  graph [
+    rankdir=LR, splines=polyline, overlap=false, nodesep=0.45, ranksep=0.55,
+    newrank=true, fontname="Segoe UI", fontsize=11, bgcolor="#FFFFFF", pad=0.02
+  ];
+  node [
+    shape=box, style="rounded,filled", fontname="Segoe UI", fontsize=11,
+    margin="0.10,0.05", penwidth=1.5, color="#111111", fillcolor="#FFFFFF"
+  ];
+  edge [
+    fontname="Segoe UI", fontsize=11, color="#111111", arrowsize=0.6,
+    penwidth=1.5, fontcolor="#111111"
+  ];
+  subgraph cluster_ui {
+    label="1 · UI — XAML Views"; fontcolor="#0B3D91"; color="#1F6FEB";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    u_wl [shape=box, label="WaitlistViewPage\n「＋」 add request", fillcolor="#DCE9FF"];
+    u_wc [shape=box, label="NewRequest\nWorkCenterPage.xaml\ncards · filter", fillcolor="#DCE9FF"];
+    x_job [shape=note, label="banner: no\nactive job", fillcolor="#FFF1C9", color="#B7791F", style="filled,dashed"];
+    x_emp [shape=note, label="banner: not\nattributable", fillcolor="#FFF1C9", color="#B7791F", style="filled,dashed"];
+  }
+  subgraph cluster_vm {
+    label="2 · ViewModels and flow rules"; fontcolor="#4B2A8A"; color="#8250DF";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    v_wc [shape=box, label="NewRequest\nWorkCenterViewModel\nSelectWorkCenterCommand", fillcolor="#EFE3FF"];
+    x_next [shape=cds, label="[To Sheet 2]\nCategoryVM", fillcolor="#E8F0FF", color="#1F6FEB", style="filled,dashed"];
+    d_gate [shape=diamond, label="select\nallowed?", fillcolor="#FFF1C9", color="#B7791F", margin="0.01,0.01"];
+    x_gen [shape=cds, label="[IsGeneric]\n→ Diagram 3", fillcolor="#E8F0FF", color="#1F6FEB", style="filled,dashed"];
+  }
+  subgraph cluster_svc {
+    label="3 · Services (DI)"; fontcolor="#0A5A4F"; color="#0F7B6C";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    s_wcs [shape=box, label="IWorkCenterCatalog\nService\nGetCatalogAsync()", fillcolor="#D6F5F0"];
+    s_emp [shape=box, label="IEmployeeDirectory\nService\n+ IPersonIdentity", fillcolor="#D6F5F0"];
+    s_lau [shape=box, label="IGenericRequest\nLauncher\nLaunch(wc, bldg)", fillcolor="#D6F5F0"];
+  }
+  subgraph cluster_data {
+    label="4 · Store / ERP"; fontcolor="#5A4300"; color="#8A6D3B";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    d_hot [shape=cylinder, label="sp_config_hot_\nworkcenters_get_\nfor_computer", fillcolor="#EDEDED", fontname="Consolas"];
+    d_wcs [shape=cylinder, label="sp_setup_work_\ncenters_get_all()", fillcolor="#EDEDED", fontname="Consolas"];
+    d_jobs [shape=cylinder, label="sp_setup_active_jobs_\nlatest_by_work_center_get", fillcolor="#EDEDED", fontname="Consolas"];
+    d_emp [shape=cylinder, label="sp_core_employee_\nby_identifier_get\n(p_employee_id)", fillcolor="#EDEDED", fontname="Consolas"];
+    x_role [shape=note, label="[REFACTOR] no role\ngate: the employee\nrecord is the only\ncheck (FR-046)", fillcolor="#FFD6D6", color="#C62828", style="filled,dashed"];
+  }
+  { rank=same; u_wl; v_wc; s_wcs; d_hot; }
+  u_wl -> v_wc -> s_wcs -> d_hot [style=invis, constraint=false];
+  { rank=same; u_wc; x_next; s_emp; d_wcs; }
+  u_wc -> x_next -> s_emp -> d_wcs [style=invis, constraint=false];
+  { rank=same; x_job; d_gate; s_lau; d_jobs; }
+  x_job -> d_gate -> s_lau -> d_jobs [style=invis, constraint=false];
+  { rank=same; x_emp; x_gen; d_emp; }
+  x_emp -> x_gen -> d_emp [style=invis, constraint=false];
+  u_wl -> u_wc -> x_job -> x_emp [style=invis, constraint=true];
+  v_wc -> x_next -> d_gate -> x_gen [style=invis, constraint=true];
+  s_wcs -> s_emp -> s_lau [style=invis, constraint=true];
+  d_hot -> d_wcs -> d_jobs -> d_emp -> x_role [style=invis, constraint=true];
+  u_wl -> v_wc [label="open"];
+  u_wc -> v_wc [label="click"];
+  v_wc -> s_wcs;
+  s_wcs -> d_hot;
+  s_wcs -> d_wcs [style=dotted];
+  s_wcs -> d_jobs [style=dotted];
+  v_wc -> d_gate;
+  d_gate -> x_job [label="no job", style=dashed, color="#B7791F"];
+  d_gate -> x_emp [label="no emp", style=dashed, color="#B7791F"];
+  d_gate -> s_emp;
+  s_emp -> d_emp;
+  d_gate -> s_lau [label="generic"];
+  s_lau -> x_gen;
+  d_gate -> x_next [label="valid"];
+  x_role -> s_emp [style=dashed, color="#C62828", arrowhead=none, constraint=false];
+  x_job -> d_gate [style=dashed, color="#B7791F", arrowhead=none, constraint=false];
+  x_emp -> d_gate [style=dashed, color="#B7791F", arrowhead=none, constraint=false];
+}

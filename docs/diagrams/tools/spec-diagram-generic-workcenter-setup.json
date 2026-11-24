@@ -1,0 +1,360 @@
+{
+ "sheets": [
+  {
+   "file": "diagram-generic-workcenter-setup-1-configuration",
+   "name": "GenericSetup1",
+   "title": "Diagram 4 / Sheet 1 of 2 — Generic work centers: who writes the configuration",
+   "sheet": "Sheet 1 of 2",
+   "source": "SetupWorkCenterViewModel, SettingsViewModel, MachineSetupViewModel, SetupWorkCenterService",
+   "lanes": {
+    "ui": [
+     [
+      "u_setup",
+      "SetupWorkCenterPage\\nadd · edit · designate\\ngeneric",
+      "ui"
+     ],
+     [
+      "u_set",
+      "SettingsPage\\nhot centers · urgency\\ndunnage visibility",
+      "ui"
+     ],
+     [
+      "u_start",
+      "MachineSetupPage\\ncomputer name +\\nhot centers",
+      "ui"
+     ],
+     [
+      "x_perm",
+      "permission gates:\\nsetup.work_centers\\nsettings.*",
+      "note"
+     ]
+    ],
+    "vm": [
+     [
+      "v_setup",
+      "SetupWorkCenter\\nViewModel\\nWorkCenterIsGeneric\\nInput",
+      "vm"
+     ],
+     [
+      "v_set",
+      "SettingsViewModel\\nAddHotWorkCenter\\nUrgencyAllotments",
+      "vm"
+     ],
+     [
+      "v_start",
+      "MachineSetupViewModel\\nSaveCommand",
+      "vm"
+     ],
+     [
+      "x_gw",
+      "The generic flag is\\nwritten only after\\nthe save returns:\\na failure loses it",
+      "refactor"
+     ]
+    ],
+    "svc": [
+     [
+      "s_wcs",
+      "ISetupWorkCenter\\nService\\nSetWorkCenterGeneric",
+      "svc"
+     ],
+     [
+      "s_hot",
+      "IWorkCenterCatalog\\nService\\nSaveHotWorkCenters",
+      "svc"
+     ],
+     [
+      "s_cfg",
+      "IConfigSettingsValue\\nService\\nUpsert",
+      "svc"
+     ],
+     [
+      "s_perm",
+      "IPermissionService\\nHasPermissionAsync()",
+      "svc"
+     ]
+    ],
+    "data": [
+     [
+      "d_gen",
+      "sp_setup_work_centers_\\ngeneric_set",
+      "db"
+     ],
+     [
+      "d_hot",
+      "sp_config_hot_workcenters_\\nupsert\\ndelete_for_computer",
+      "db"
+     ],
+     [
+      "d_cfg",
+      "sp_config_settings_upsert\\nsp_waitlist_request_item_\\nallotted_minutes_update",
+      "db"
+     ],
+     [
+      "d_perm",
+      "config_settings_values_get\\n(permission.* rows)",
+      "db"
+     ]
+    ]
+   },
+   "lane_titles": {
+    "ui": "1 · UI — where it is set",
+    "vm": "2 · ViewModels and commands",
+    "svc": "3 · Services (DI)",
+    "data": "4 · Store"
+   },
+   "edges": [
+    [
+     "u_setup",
+     "v_setup",
+     "designate",
+     ""
+    ],
+    [
+     "u_set",
+     "v_set",
+     "edit",
+     ""
+    ],
+    [
+     "u_start",
+     "v_start",
+     "save",
+     ""
+    ],
+    [
+     "v_setup",
+     "s_wcs",
+     "write",
+     ""
+    ],
+    [
+     "s_wcs",
+     "d_gen",
+     "",
+     ""
+    ],
+    [
+     "v_set",
+     "s_hot",
+     "",
+     ""
+    ],
+    [
+     "s_hot",
+     "d_hot",
+     "",
+     ""
+    ],
+    [
+     "v_set",
+     "s_cfg",
+     "",
+     ""
+    ],
+    [
+     "s_cfg",
+     "d_cfg",
+     "",
+     ""
+    ],
+    [
+     "v_start",
+     "s_hot",
+     "save",
+     ""
+    ],
+    [
+     "s_perm",
+     "d_perm",
+     "",
+     ""
+    ],
+    [
+     "v_setup",
+     "s_perm",
+     "gate",
+     ""
+    ],
+    [
+     "x_perm",
+     "s_perm",
+     "",
+     "warnlink"
+    ],
+    [
+     "x_gw",
+     "d_gen",
+     "",
+     "link"
+    ]
+   ]
+  },
+  {
+   "file": "diagram-generic-workcenter-setup-2-read-paths",
+   "name": "GenericSetup2",
+   "title": "Diagram 4 / Sheet 2 of 2 — Generic work centers: how the request flow reads that configuration",
+   "sheet": "Sheet 2 of 2",
+   "source": "GenericRequestLiveStepData, GenericRequestPartData, WorkCenterCatalogService, RequestItemConfigurationService",
+   "lanes": {
+    "ui": [
+     [
+      "u_wc",
+      "GenericRequest\\nWorkCenterPage",
+      "ui"
+     ],
+     [
+      "u_cat",
+      "GenericRequest\\nCategoryPage",
+      "ui"
+     ],
+     [
+      "u_item",
+      "GenericRequest\\nItemPage",
+      "ui"
+     ],
+     [
+      "u_part",
+      "GenericRequest\\nPartPage",
+      "ui"
+     ]
+    ],
+    "vm": [
+     [
+      "v_live",
+      "GenericRequestLive\\nStepData\\nReadWorkCenters\\nReadCategories",
+      "vm"
+     ],
+     [
+      "v_pick",
+      "GenericRequest\\nItem + Part\\nViewModels",
+      "vm"
+     ],
+     [
+      "x_n2",
+      "[REFACTOR] the IsGeneric\\nflag is read per visit\\nand is not cached",
+      "refactor"
+     ]
+    ],
+    "svc": [
+     [
+      "s_cat",
+      "IWorkCenterCatalog\\nService\\nGetCatalogAsync()",
+      "svc"
+     ],
+     [
+      "s_cfg",
+      "IRequestItem\\nConfigurationService\\n+ Picker",
+      "svc"
+     ],
+     [
+      "s_part",
+      "IGenericRequestPart\\nData\\nIVisualReadFallback",
+      "svc"
+     ]
+    ],
+    "data": [
+     [
+      "d_cat",
+      "sp_setup_work_centers_\\nget_all\\nsp_config_hot_workcenters\\n_get_for_computer",
+      "db"
+     ],
+     [
+      "d_cfg",
+      "sp_waitlist_request_\\nitem_configs_get()",
+      "db"
+     ],
+     [
+      "d_vis",
+      "Infor Visual shapes\\n9 / 10 / 11 / 7 / 12",
+      "erp"
+     ],
+     [
+      "d_mock",
+      "mtm_mock\\nsp_visual_<key>_get",
+      "mirror"
+     ]
+    ]
+   },
+   "lane_titles": {
+    "ui": "1 · UI — where it is used",
+    "vm": "2 · ViewModels and read seam",
+    "svc": "3 · Services (DI)",
+    "data": "4 · Store / ERP"
+   },
+   "edges": [
+    [
+     "u_wc",
+     "v_live",
+     "read",
+     ""
+    ],
+    [
+     "u_cat",
+     "v_live",
+     "read",
+     ""
+    ],
+    [
+     "u_item",
+     "v_pick",
+     "read",
+     ""
+    ],
+    [
+     "u_part",
+     "v_pick",
+     "read",
+     ""
+    ],
+    [
+     "v_live",
+     "s_cat",
+     "",
+     ""
+    ],
+    [
+     "s_cat",
+     "d_cat",
+     "",
+     ""
+    ],
+    [
+     "v_pick",
+     "s_cfg",
+     "",
+     ""
+    ],
+    [
+     "s_cfg",
+     "d_cfg",
+     "",
+     ""
+    ],
+    [
+     "v_pick",
+     "s_part",
+     "",
+     ""
+    ],
+    [
+     "s_part",
+     "d_vis",
+     "",
+     ""
+    ],
+    [
+     "d_vis",
+     "d_mock",
+     "",
+     "mirror"
+    ],
+    [
+     "x_n2",
+     "s_cat",
+     "",
+     "link"
+    ]
+   ]
+  }
+ ]
+}

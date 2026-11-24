@@ -1,0 +1,63 @@
+// Diagram 2 / Sheet 3 of 5 — Work Center Setup: part and operation selection — Sheet 3 of 5
+// Source of truth: SetupWorkOrderViewModel.SelectPartAsync/SelectSequenceAsync, SetupWorkflowService
+digraph WorkOrderSetup3 {
+  graph [
+    rankdir=LR, splines=polyline, overlap=false, nodesep=0.45, ranksep=0.55,
+    newrank=true, fontname="Segoe UI", fontsize=11, bgcolor="#FFFFFF", pad=0.02
+  ];
+  node [
+    shape=box, style="rounded,filled", fontname="Segoe UI", fontsize=11,
+    margin="0.10,0.05", penwidth=1.5, color="#111111", fillcolor="#FFFFFF"
+  ];
+  edge [
+    fontname="Segoe UI", fontsize=11, color="#111111", arrowsize=0.6,
+    penwidth=1.5, fontcolor="#111111"
+  ];
+  subgraph cluster_ui {
+    label="1 · UI — XAML Views"; fontcolor="#0B3D91"; color="#1F6FEB";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    u_wo [shape=box, label="SetupWorkOrderPage\npart grid · sequence\ngrid (inline)", fillcolor="#DCE9FF"];
+    x_legacy [shape=note, label="legacy Part and\nSequence pages:\nregistered but not\nreachable", fillcolor="#FFF1C9", color="#B7791F", style="filled,dashed"];
+    x_dead [shape=note, label="Two part/sequence\npages are registered\nbut nothing in the\nflow opens them", fillcolor="#FFD6D6", color="#C62828", style="filled,dashed"];
+  }
+  subgraph cluster_vm {
+    label="2 · ViewModels and commands"; fontcolor="#4B2A8A"; color="#8250DF";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    v_sel [shape=box, label="SetupWorkOrder\nViewModel\nSelectPartCommand\nSelectSequenceCommand", fillcolor="#EFE3FF"];
+    x_back [shape=box, label="CancelCommand\nBackToWorkCenters\nCommand", fillcolor="#EFE3FF"];
+    x_next [shape=cds, label="[To Sheet 4]\nDunnageTypeVM", fillcolor="#E8F0FF", color="#1F6FEB", style="filled,dashed"];
+  }
+  subgraph cluster_svc {
+    label="3 · Services (DI)"; fontcolor="#0A5A4F"; color="#0F7B6C";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    s_wf [shape=box, label="ISetupWorkflowService\nSelectPartAsync\nSelectSequenceAsync", fillcolor="#D6F5F0"];
+    s_lk [shape=box, label="IInforVisualLookup\nService\nGetSequences · Parts", fillcolor="#D6F5F0"];
+  }
+  subgraph cluster_data {
+    label="4 · Infor Visual / mirror"; fontcolor="#5A4300"; color="#8A6D3B";
+    style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
+    d_v2 [shape=box, label="shape 2\nGetSequences.sql", fillcolor="#F2E8D5", color="#8A6D3B"];
+    d_v3 [shape=box, label="shape 3\nGetSubordinateParts", fillcolor="#F2E8D5", color="#8A6D3B"];
+    d_mock [shape=component, label="mtm_mock\nsp_visual_<key>\n_get", fillcolor="#FFE0E3", color="#B02A37"];
+  }
+  { rank=same; u_wo; v_sel; s_wf; d_v2; }
+  u_wo -> v_sel -> s_wf -> d_v2 [style=invis, constraint=false];
+  { rank=same; x_legacy; x_back; s_lk; d_v3; }
+  x_legacy -> x_back -> s_lk -> d_v3 [style=invis, constraint=false];
+  { rank=same; x_dead; x_next; d_mock; }
+  x_dead -> x_next -> d_mock [style=invis, constraint=false];
+  u_wo -> x_legacy -> x_dead [style=invis, constraint=true];
+  v_sel -> x_back -> x_next [style=invis, constraint=true];
+  s_wf -> s_lk [style=invis, constraint=true];
+  d_v2 -> d_v3 -> d_mock [style=invis, constraint=true];
+  u_wo -> v_sel [label="pick"];
+  v_sel -> s_wf [label="select"];
+  s_wf -> s_lk;
+  s_lk -> d_v2;
+  s_lk -> d_v3;
+  d_v2 -> d_mock [style=dashed, color="#B02A37", constraint=false];
+  v_sel -> x_next [label="next"];
+  x_back -> s_wf [label="reset"];
+  x_legacy -> u_wo [style=dashed, color="#B7791F", arrowhead=none, constraint=false];
+  x_dead -> u_wo [style=dashed, color="#C62828", arrowhead=none, constraint=false];
+}
