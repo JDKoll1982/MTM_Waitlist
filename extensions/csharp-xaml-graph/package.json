@@ -2,7 +2,7 @@
   "name": "csharp-xaml-graph",
   "displayName": "C# / XAML Dependency Graph",
   "description": "Interactive dependency graph of C# class relationships and XAML View-to-ViewModel bindings for a WinUI 3 workspace.",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "publisher": "mtm-local",
   "license": "UNLICENSED",
   "private": true,
@@ -13,7 +13,11 @@
     "Visualization",
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onCommand:csharpXamlGraph.show",
+    "onCommand:csharpXamlGraph.debug",
+    "onView:csharpXamlGraph.menu"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
@@ -26,8 +30,77 @@
         "command": "csharpXamlGraph.refresh",
         "title": "Refresh Dependency Graph",
         "category": "C#/XAML Graph"
+      },
+      {
+        "command": "csharpXamlGraph.showForSelection",
+        "title": "Show Dependency Graph for Selection",
+        "category": "C#/XAML Graph"
+      },
+      {
+        "command": "csharpXamlGraph.showForFile",
+        "title": "Show Dependency Graph for File",
+        "category": "C#/XAML Graph"
+      },
+      {
+        "command": "csharpXamlGraph.export",
+        "title": "Export Dependency Graph as JSON",
+        "category": "C#/XAML Graph"
+      },
+      {
+        "command": "csharpXamlGraph.openSettings",
+        "title": "Open Settings",
+        "category": "C#/XAML Graph"
+      },
+      {
+        "command": "csharpXamlGraph.openMenu",
+        "title": "Open Commands and Settings Panel",
+        "category": "C#/XAML Graph"
+      },
+      {
+        "command": "csharpXamlGraph.debug",
+        "title": "Open Debug Report",
+        "category": "C#/XAML Graph"
       }
     ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "csharpXamlGraph.showForSelection",
+          "when": "resourceExtname == .cs || resourceExtname == .xaml",
+          "group": "navigation@9"
+        },
+        {
+          "command": "csharpXamlGraph.showForFile",
+          "when": "resourceExtname == .cs || resourceExtname == .xaml",
+          "group": "navigation@10"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "csharpXamlGraph.showForFile",
+          "when": "resourceExtname == .cs || resourceExtname == .xaml",
+          "group": "navigation@9"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "panel": [
+        {
+          "id": "csharpXamlGraphPanel",
+          "title": "C#/XAML Graph",
+          "icon": "assets/graph.svg"
+        }
+      ]
+    },
+    "views": {
+      "csharpXamlGraphPanel": [
+        {
+          "id": "csharpXamlGraph.menu",
+          "name": "Commands and settings",
+          "type": "webview"
+        }
+      ]
+    },
     "configuration": {
       "title": "C#/XAML Dependency Graph",
       "properties": {
@@ -51,7 +124,9 @@
             "**/bin/**",
             "**/obj/**",
             "**/node_modules/**",
-            "**/*.Tests/**"
+            "**/*.Tests/**",
+            "**/.github/**",
+            "**/.specify/**"
           ],
           "description": "Glob patterns excluded from analysis."
         },
@@ -64,6 +139,27 @@
           "type": "number",
           "default": 4000,
           "description": "Safety cap on the number of nodes sent to the webview."
+        },
+        "csharpXamlGraph.unpackedLayout": {
+          "type": "string",
+          "enum": [
+            "layered-tb",
+            "layered-lr",
+            "force",
+            "radial",
+            "grid",
+            "circle"
+          ],
+          "enumDescriptions": [
+            "Layered Down — each type above the types it depends on. The default, because a chain of types reads top to bottom.",
+            "Layered Right — each type to the left of the types it depends on.",
+            "Force — nodes push apart until the springs settle.",
+            "Radial — views near the middle, models further out.",
+            "Grid — an even grid with no dependency shape.",
+            "Circle — one ring. Only legible for a small group."
+          ],
+          "default": "layered-tb",
+          "markdownDescription": "Layout applied to a shape when it is unpacked from the packed tiles. Packed tiles are always drawn compressed; an unpacked shape is redrawn in this layout, from its starting root to the end of the group."
         }
       }
     }
