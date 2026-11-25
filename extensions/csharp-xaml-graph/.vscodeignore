@@ -1,0 +1,14 @@
+src/**
+scripts/**
+tsconfig.json
+.gitignore
+.vscode/**
+**/*.ts
+**/*.d.cts
+**/*.map
+node_modules/web-tree-sitter/debug/**
+out/selftest.js
+out/preview-*
+out/probe-*
+out/dump-*
+out/model-dump.json

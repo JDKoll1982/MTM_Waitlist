@@ -1,0 +1,94 @@
+{
+  "name": "csharp-xaml-graph",
+  "displayName": "C# / XAML Dependency Graph",
+  "description": "Interactive dependency graph of C# class relationships and XAML View-to-ViewModel bindings for a WinUI 3 workspace.",
+  "version": "0.1.0",
+  "publisher": "mtm-local",
+  "license": "UNLICENSED",
+  "private": true,
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Visualization",
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "csharpXamlGraph.show",
+        "title": "Show Dependency Graph",
+        "category": "C#/XAML Graph"
+      },
+      {
+        "command": "csharpXamlGraph.refresh",
+        "title": "Refresh Dependency Graph",
+        "category": "C#/XAML Graph"
+      }
+    ],
+    "configuration": {
+      "title": "C#/XAML Dependency Graph",
+      "properties": {
+        "csharpXamlGraph.include": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "**/*.cs",
+            "**/*.xaml"
+          ],
+          "description": "Glob patterns, relative to the workspace folder, describing the files to analyse."
+        },
+        "csharpXamlGraph.exclude": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "**/bin/**",
+            "**/obj/**",
+            "**/node_modules/**",
+            "**/*.Tests/**"
+          ],
+          "description": "Glob patterns excluded from analysis."
+        },
+        "csharpXamlGraph.includeExternalTypes": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show types that are referenced but not declared in the workspace (framework base classes, package interfaces)."
+        },
+        "csharpXamlGraph.maxNodes": {
+          "type": "number",
+          "default": 4000,
+          "description": "Safety cap on the number of nodes sent to the webview."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "build": "npm run typecheck && npm run compile",
+    "selftest": "npm run build && node out/selftest.js",
+    "package:vsix": "npm run build && vsce package --allow-missing-repository --out csharp-xaml-graph.vsix"
+  },
+  "dependencies": {
+    "web-tree-sitter": "0.27.2"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.7",
+    "@types/vscode": "1.90.0",
+    "@vscode/vsce": "4.1.1",
+    "cytoscape": "3.35.0",
+    "cytoscape-dagre": "4.1.0",
+    "dagre": "0.8.5",
+    "esbuild": "0.28.2",
+    "htmlparser2": "10.0.0",
+    "tree-sitter-c-sharp": "0.24.0",
+    "typescript": "5.9.3"
+  }
+}
