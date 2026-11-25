@@ -16,6 +16,8 @@ export interface ParamDecl {
 export interface ConstructorDecl {
   params: ParamDecl[];
   line: number;
+  /** The file this record was parsed from. A partial type merges records from several files. */
+  file?: string;
 }
 
 export interface PropertyDecl {
@@ -29,6 +31,8 @@ export interface PropertyDecl {
   visibility: Visibility;
   /** Attribute names, without the trailing `Attribute`, e.g. ["RelayCommand"], ["JsonIgnore"]. */
   attributes: string[];
+  /** The file this record was parsed from. */
+  file?: string;
 }
 
 export interface FieldDecl {
@@ -39,6 +43,8 @@ export interface FieldDecl {
   isReadonly: boolean;
   visibility: Visibility;
   attributes: string[];
+  /** The file this record was parsed from. */
+  file?: string;
 }
 
 export interface MethodDecl {
@@ -55,6 +61,8 @@ export interface MethodDecl {
   isPartial: boolean;
   /** True when the first parameter carries `this`; the method is called on a receiver, not through its type. */
   isExtension: boolean;
+  /** The file this record was parsed from. */
+  file?: string;
 }
 
 export type AssignedValue =
@@ -67,6 +75,8 @@ export interface AssignmentSite {
   target: string;
   value: AssignedValue;
   line: number;
+  /** The file this record was parsed from. */
+  file?: string;
 }
 
 export interface CallSite {
@@ -74,6 +84,8 @@ export interface CallSite {
   method: string;
   typeArgs: string[];
   line: number;
+  /** The file this record was parsed from. */
+  file?: string;
 }
 
 export interface TypeMention {
@@ -82,6 +94,8 @@ export interface TypeMention {
   /** The construct that mentioned it, for the edge label: 'local', 'cast', 'typeof', 'attribute', … */
   via: string;
   line: number;
+  /** The file this record was parsed from. */
+  file?: string;
 }
 
 export interface TypeDecl {
@@ -99,7 +113,7 @@ export interface TypeDecl {
   methods: MethodDecl[];
   assignments: AssignmentSite[];
   calls: CallSite[];
-  creations: { typeName: string; line: number }[];
+  creations: { typeName: string; line: number; file?: string }[];
   /** Types named in a `typeof(X)` expression; a runtime reference the graph cannot draw as an edge. */
   typeofRefs: string[];
   /** Every type named anywhere in this declaration, with the construct that named it. */
@@ -142,14 +156,14 @@ function text(node: any): string {
   return node ? String(node.text) : '';
 }
 
-/** Strips generics, nullability, arrays and the `global::` prefix so a name can be resolved. */
+/** Strips generics, nullability, array bounds and the `global::` prefix so a name can be resolved. */
 export function normalizeTypeText(raw: string): string {
   let value = (raw ?? '').trim().replace(/^global::/, '');
   const angle = value.indexOf('<');
   if (angle > 0) {
     value = value.slice(0, angle);
   }
-  return value.replace(/\?+$/, '').replace(/\[\s*,?\s*\]/g, '').trim();
+  return value.replace(/\?+$/, '').replace(/\s*\[[^\]]*\]/g, '').trim();
 }
 
 function genericArgumentTexts(genericName: any): string[] {
@@ -417,11 +431,24 @@ function collectTypeMentions(node: any): TypeMention[] {
       }
     }
 
-    // `x as T` and `x is T`
-    if (current.type === 'as_expression' || current.type === 'is_expression') {
+    // `x as T`
+    if (current.type === 'as_expression') {
       const right = current.childForFieldName?.('right') ?? named(current)[1];
       if (right) {
-        push(text(right), current.type === 'as_expression' ? 'as' : 'is', lineOf(current));
+        push(text(right), 'as', lineOf(current));
+      }
+    }
+
+    // `x is T` and `x is T t`. This grammar wraps both in an `is_pattern_expression` whose pattern
+    // carries the type as its first child — a `declaration_pattern` for the typed form and a
+    // `constant_pattern` for a plain test. Reading only `is_expression` missed every one of them.
+    if (current.type === 'is_expression' || current.type === 'is_pattern_expression') {
+      const pattern = named(current).find((child: any) => child.type.endsWith('_pattern'));
+      const typeNode = pattern ? named(pattern)[0] : (current.childForFieldName?.('right') ?? named(current)[1]);
+      const isNameNode = typeNode && ['identifier', 'qualified_name', 'generic_name', 'predefined_type',
+        'nullable_type', 'array_type'].includes(typeNode.type);
+      if (typeNode && isNameNode) {
+        push(text(typeNode), 'is', lineOf(current));
       }
     }
 
@@ -506,7 +533,6 @@ function readRecordParameters(body: any, child: any, decl: TypeDecl): void {
   if (child.type !== 'record_declaration' && child.type !== 'record_struct_declaration') {
     return;
   }
-  void body;
   const parameterList = child.childForFieldName?.('parameters')
     ?? named(child).find((inner: any) => inner.type === 'parameter_list');
   for (const param of readParameters(parameterList)) {
@@ -569,8 +595,13 @@ function readMembers(body: any, decl: TypeDecl): void {
           child.type !== 'modifier'
           && child.type !== 'attribute_list'
           && child.type !== 'equals_value_clause');
-        const typeNode = member.childForFieldName?.('type') ?? positional[0];
+        // The grammar keeps a field's type inside its `variable_declaration`, not on the
+        // `field_declaration` itself, so reading a `type` field here yields the whole
+        // declaration text — which then resolves to nothing and silently drops every
+        // field-typed reference.
         const variablesNode = positional.find((child: any) => child.type === 'variable_declaration');
+        const typeNode = variablesNode?.childForFieldName?.('type')
+          ?? (variablesNode ? named(variablesNode)[0] : undefined);
         const declarators = variablesNode
           ? named(variablesNode).filter((child: any) => child.type === 'variable_declarator')
           : [];
@@ -591,7 +622,9 @@ function readMembers(body: any, decl: TypeDecl): void {
       case 'method_declaration': {
         const nameNode = member.childForFieldName?.('name')
           ?? named(member).find((child: any) => child.type === 'identifier');
-        const typeNode = member.childForFieldName?.('type');
+        // A method's return type is the `returns` field; `type` is used by properties.
+        const typeNode = member.childForFieldName?.('type')
+          ?? member.childForFieldName?.('returns');
         const parameterList = member.childForFieldName?.('parameters')
           ?? named(member).find((child: any) => child.type === 'parameter_list');
         decl.methods.push({
@@ -656,7 +689,10 @@ function visitChildren(children: any[], file: CSharpFile, prefix: string): void 
     }
 
     if (child.type === 'using_directive') {
-      const alias = child.childForFieldName?.('alias');
+      // `using Alias = Some.Thing;` names the alias in a `name` field; the namespace is the
+      // qualified name beside it. Without this check the alias itself is recorded as a
+      // namespace and every `Alias.Thing` reference then resolves through it.
+      const alias = child.childForFieldName?.('alias') ?? child.childForFieldName?.('name');
       const target = named(child).find(
         (inner: any) => inner.type === 'qualified_name' || inner.type === 'identifier');
       if (target && !alias) {
@@ -706,6 +742,15 @@ function visitChildren(children: any[], file: CSharpFile, prefix: string): void 
 
       readMembers(body, decl);
       readRecordParameters(body, child, decl);
+
+      // A type's own attributes and generic constraints sit beside its body, not inside it, so the
+      // member walk never sees them. `[Serializable]`, a routing attribute, a JSON converter or a
+      // `where T : SomeBase` constraint is a real dependency that would otherwise vanish.
+      for (const outside of named(child).filter((inner: any) =>
+        inner.type === 'attribute_list' || inner.type === 'type_parameter_constraints_clause')) {
+        decl.mentions.push(...collectTypeMentions(outside));
+      }
+
       file.types.push(decl);
 
       const nested = named(body).filter((inner: any) => isTypeDeclaration(inner.type));
@@ -737,3 +782,4 @@ export function parseCSharpFile(relativePath: string, source: string): CSharpFil
   tree.delete();
   return file;
 }
+

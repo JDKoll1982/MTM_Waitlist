@@ -1,8 +1,8 @@
-import type { EdgeConfidence, Finding, GraphEdge, GraphModel, GraphNode, NodeLayer } from './model';
+import type { EdgeConfidence, Finding, GraphEdge, GraphModel, GraphNode } from './model';
 import type { CSharpFile, TypeDecl } from './csharp/parser';
 import { initCSharpGrammar, parseCSharpFile } from './csharp/parser';
 import { TypeIndex, moduleOf } from './csharp/symbols';
-import { classifyType } from './layers';
+import { classifyType, isViewModelName } from './layers';
 import { computeFindings } from './findings';
 import type { XamlFile } from './xaml/parser';
 import { parseXamlFile } from './xaml/parser';
@@ -20,6 +20,12 @@ export interface AnalyzeOptions {
   grammarWasmPath: string;
   includeExternalTypes?: boolean;
   maxNodes?: number;
+  /**
+   * Called as the analysis advances. `completed` and `total` count files, so a caller can show a real
+   * bar rather than an indeterminate spinner: parsing dominates the elapsed time, and it is the part
+   * a reader waits on.
+   */
+  progress?: (phase: string, completed: number, total: number) => void;
 }
 
 interface Entry {
@@ -35,12 +41,37 @@ const VIEW_ROOT_KIND: Record<string, string> = {
   windowex: 'window',
 };
 
+/**
+ * Stamps the origin file onto every record a declaration produced.
+ *
+ * A partial type merges records from several files, and each record's line number is only meaningful
+ * against the file it was parsed from. Without this, an evidence location for a member declared in a
+ * later partial names the first partial's file and points at the wrong line.
+ */
+function stampOrigin(decl: TypeDecl, file: string): void {
+  const mark = (record: { file?: string }): void => {
+    if (!record.file) {
+      record.file = file;
+    }
+  };
+  decl.constructors.forEach(mark);
+  decl.properties.forEach(mark);
+  decl.fields.forEach(mark);
+  decl.methods.forEach(mark);
+  decl.assignments.forEach(mark);
+  decl.calls.forEach(mark);
+  decl.creations.forEach(mark);
+  decl.mentions.forEach(mark);
+}
+
 /** Merges every declaration of a partial type into one record. */
 function mergeDeclarations(files: CSharpFile[]): Map<string, Entry> {
   const merged = new Map<string, Entry>();
 
   for (const file of files) {
     for (const decl of file.types) {
+      stampOrigin(decl, file.path);
+
       const existing = merged.get(decl.fullName);
       if (!existing) {
         merged.set(decl.fullName, {
@@ -49,9 +80,12 @@ function mergeDeclarations(files: CSharpFile[]): Map<string, Entry> {
             constructors: [...decl.constructors],
             properties: [...decl.properties],
             fields: [...decl.fields],
+            methods: [...decl.methods],
             assignments: [...decl.assignments],
             calls: [...decl.calls],
             creations: [...decl.creations],
+            mentions: [...decl.mentions],
+            typeofRefs: [...decl.typeofRefs],
             bases: [...decl.bases],
           },
           file: file.path,
@@ -59,13 +93,19 @@ function mergeDeclarations(files: CSharpFile[]): Map<string, Entry> {
         continue;
       }
 
+      // Every member list has to be merged. Dropping one here silently loses that whole kind of
+      // evidence for the rest of the type — which is what made commands declared in a second partial
+      // read as dead bindings.
       const target = existing.decl;
       target.constructors.push(...decl.constructors);
       target.properties.push(...decl.properties);
       target.fields.push(...decl.fields);
+      target.methods.push(...decl.methods);
       target.assignments.push(...decl.assignments);
       target.calls.push(...decl.calls);
       target.creations.push(...decl.creations);
+      target.mentions.push(...decl.mentions);
+      target.typeofRefs.push(...decl.typeofRefs);
       for (const base of decl.bases) {
         if (!target.bases.includes(base)) {
           target.bases.push(base);
@@ -104,13 +144,35 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
   const includeExternalTypes = options.includeExternalTypes !== false;
   const maxNodes = options.maxNodes && options.maxNodes > 0 ? options.maxNodes : 4000;
 
+  /**
+   * Parsing is synchronous, so the extension host cannot repaint while a loop of 900 files runs.
+   * Yielding every so often lets the progress bar actually move — and costs nothing measurable.
+   */
+  const YIELD_EVERY = 40;
+  const yieldToHost = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 0));
+
+  const total = options.csharp.length + options.xaml.length;
+  let completed = 0;
+  const report = (phase: string): void => {
+    if (!options.progress) {
+      return;
+    }
+    try {
+      options.progress(phase, completed, total);
+    } catch {
+      // A failing progress listener must never abort an analysis.
+    }
+  };
+
+  report('Reading the C# grammar');
   await initCSharpGrammar(options.grammarWasmPath);
 
   const warnings: string[] = [];
   const csharpFiles: CSharpFile[] = [];
   let parseErrors = 0;
 
-  for (const file of options.csharp) {
+  for (let index = 0; index < options.csharp.length; index += 1) {
+    const file = options.csharp[index];
     try {
       const parsed = parseCSharpFile(file.path, file.text);
       if (parsed.hasSyntaxError) {
@@ -120,16 +182,34 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
     } catch (error) {
       warnings.push(`${file.path}: ${(error as Error).message}`);
     }
+
+    completed += 1;
+    if (index % YIELD_EVERY === 0) {
+      report(`Parsing C# — ${index + 1} of ${options.csharp.length}`);
+      await yieldToHost();
+    }
   }
 
   const xamlFiles: XamlFile[] = [];
-  for (const file of options.xaml) {
+  for (let index = 0; index < options.xaml.length; index += 1) {
+    const file = options.xaml[index];
     try {
       xamlFiles.push(parseXamlFile(file.path, file.text));
     } catch (error) {
       warnings.push(`${file.path}: ${(error as Error).message}`);
     }
+
+    completed += 1;
+    if (index % YIELD_EVERY === 0) {
+      report(`Parsing XAML — ${index + 1} of ${options.xaml.length}`);
+      await yieldToHost();
+    }
   }
+
+  // Parsing is the bulk of the work; the graph build and the findings rules are comparatively quick,
+  // but they still get a message so a very large workspace does not appear to have stalled.
+  report('Building the graph');
+  await yieldToHost();
 
   const entries = mergeDeclarations(csharpFiles);
   const index = new TypeIndex();
@@ -158,20 +238,18 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
   const nodes = new Map<string, GraphNode>();
   const edges: GraphEdge[] = [];
   const edgeKeys = new Set<string>();
+  let edgesDropped = 0;
 
-  const ensureTypeNode = (decl: TypeDecl, file: string, layer?: NodeLayer): GraphNode => {
+  const ensureTypeNode = (decl: TypeDecl, file: string): GraphNode => {
     const existing = nodes.get(decl.fullName);
     if (existing) {
-      if (layer) {
-        existing.layer = layer;
-      }
       return existing;
     }
     const node: GraphNode = {
       id: decl.fullName,
       label: decl.name,
       fullName: decl.fullName,
-      layer: layer ?? classifyType(decl),
+      layer: classifyType(decl),
       module: moduleOf(file),
       kind: decl.kind,
       location: { file, line: decl.line },
@@ -211,10 +289,12 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
     label?: string,
   ): void => {
     if (!source || !target || source === target) {
+      edgesDropped += 1;
       return;
     }
     const key = `${source}|${target}|${kind}`;
     if (edgeKeys.has(key)) {
+      edgesDropped += 1;
       return;
     }
     edgeKeys.add(key);
@@ -260,14 +340,60 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
     const usings = usingsFor(decl);
     const self = decl.fullName;
 
+    // A route registration pairs a page with its view model through `typeof`:
+    // `navigation.RegisterRoute(typeof(ViewModel_X), typeof(View_X))`, or the same pair inside a tuple
+    // of navigation entries. This repository states the relationship nowhere else — the page's
+    // constructor takes nothing and the markup binds with `{Binding}` — so without reading the pair
+    // the view and its view model reach the canvas unconnected. One pair per line is the convention,
+    // which is why the mentions are grouped by line rather than by declaration.
+    const mentionsByLine = new Map<number, { id: string; layer: string; via: string }[]>();
+    for (const mention of decl.mentions) {
+      const target = index.resolve(mention.name, usings, decl.namespace);
+      if (!target) {
+        continue;
+      }
+      const layer = nodes.get(target.fullName)?.layer;
+      if (layer !== 'view' && layer !== 'viewmodel') {
+        continue;
+      }
+      const list = mentionsByLine.get(mention.line) ?? [];
+      list.push({ id: target.fullName, layer, via: mention.via });
+      mentionsByLine.set(mention.line, list);
+    }
+
+    for (const [line, group] of mentionsByLine) {
+      const views = group.filter((mention) => mention.layer === 'view');
+      const viewModels = group.filter((mention) => mention.layer === 'viewmodel');
+      // Only a `typeof` on one side makes this a registration rather than two names that happen to
+      // share a line: `typeof(ViewModel_X), typeof(View_X)` is a table, `new View_X()` is not.
+      if (views.length === 0 || viewModels.length === 0
+        || !group.some((mention) => mention.via === 'typeof')) {
+        continue;
+      }
+      for (const view of views) {
+        for (const viewModel of viewModels) {
+          addEdge(view.id, viewModel.id, 'resolves', 'medium',
+            { file, line }, 'route registration');
+        }
+      }
+    }
+
     for (const call of decl.calls) {
-      // pageService.Configure<TViewModel, TPage>()
+      // pageService.Configure<TFirst, TSecond>() registers the page against what it resolves.
+      // The first argument is usually a view model, but this codebase also registers a page against a
+      // route type, so both sides count as container-registered — otherwise every route-registered
+      // page looks dead to the unused-type rule.
       if (call.method === 'Configure' && call.typeArgs.length >= 2) {
         const viewModel = index.resolve(call.typeArgs[0], usings, decl.namespace);
         const page = index.resolve(call.typeArgs[1], usings, decl.namespace);
-        if (viewModel && page) {
+        if (viewModel) {
           diRegistered.add(viewModel.fullName);
-          addEdge(page.fullName, viewModel.fullName, 'resolves', 'high', { file, line: call.line });
+        }
+        if (page) {
+          diRegistered.add(page.fullName);
+        }
+        if (viewModel && page) {
+          addEdge(page.fullName, viewModel.fullName, 'resolves', 'high', { file: call.file ?? file, line: call.line });
         }
         continue;
       }
@@ -295,7 +421,7 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
         if (service && implementation && service.fullName !== implementation.fullName) {
           addEdge(implementation.fullName, service.fullName,
             service.kind === 'interface' ? 'implements' : 'inherits',
-            'medium', { file, line: call.line }, 'container registration');
+            'medium', { file: call.file ?? file, line: call.line }, 'container registration');
         }
       }
     }
@@ -305,11 +431,11 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
       for (const parameter of constructor.params) {
         const target = index.resolve(parameter.type, usings, decl.namespace);
         if (target) {
-          addEdge(self, target.fullName, 'injects', 'high', { file, line: constructor.line });
+          addEdge(self, target.fullName, 'injects', 'high', { file: constructor.file ?? file, line: constructor.line });
         } else {
           const external = ensureExternalNode(parameter.type);
           if (external) {
-            addEdge(self, external.id, 'injects', 'low', { file, line: constructor.line });
+            addEdge(self, external.id, 'injects', 'low', { file: constructor.file ?? file, line: constructor.line });
           }
         }
       }
@@ -327,8 +453,8 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
           ?? (field ? index.resolve(field.type, usings, decl.namespace) : undefined);
         if (target) {
           addEdge(self, target.fullName, 'getservice', 'high',
-            { file, line: assignment.line }, assignment.target);
-          if (target.name.endsWith('ViewModel')) {
+            { file: assignment.file ?? file, line: assignment.line }, assignment.target);
+          if (isViewModelName(target.name)) {
             diRegistered.add(target.fullName);
           }
         }
@@ -339,7 +465,7 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
         const target = index.resolve(value.typeName, usings, decl.namespace);
         if (target) {
           addEdge(self, target.fullName, 'constructs', 'high',
-            { file, line: assignment.line }, assignment.target);
+            { file: assignment.file ?? file, line: assignment.line }, assignment.target);
         }
         continue;
       }
@@ -353,7 +479,7 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
           ?? (parameter ? index.resolve(parameter.type, usings, decl.namespace) : undefined);
         if (target) {
           addEdge(self, target.fullName, 'field', 'high',
-            { file, line: assignment.line }, assignment.target);
+            { file: assignment.file ?? file, line: assignment.line }, assignment.target);
         }
       }
     }
@@ -363,7 +489,7 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
       const layer = target ? nodes.get(target.fullName)?.layer : undefined;
       // Only composed view models and services are interesting; `new List<T>()` and row models are noise.
       if (target && (layer === 'viewmodel' || layer === 'service')) {
-        addEdge(self, target.fullName, 'composes', 'medium', { file, line: creation.line });
+        addEdge(self, target.fullName, 'composes', 'medium', { file: creation.file ?? file, line: creation.line });
       }
     }
 
@@ -380,7 +506,10 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
       }
       const external = ensureExternalNode(base);
       if (external) {
-        addEdge(self, external.id, /^I[A-Z]/.test(base) ? 'implements' : 'inherits',
+        // Decide from the simple name: `System.Collections.IEnumerable` is an interface even though
+        // the qualified name it was written as begins with `S`.
+        const simpleBase = base.slice(base.lastIndexOf('.') + 1);
+        addEdge(self, external.id, /^I[A-Z]/.test(simpleBase) ? 'implements' : 'inherits',
           'low', { file, line: decl.line }, base);
       }
     }
@@ -388,7 +517,8 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
     /* Plain type references. A property, field, return type or parameter typed as another workspace
        type is a dependency even though it carries no DI meaning — and it is what makes structural
        cycles visible. Self-references are skipped: a tree node holding its parent is not a cycle. */
-    const emitReference = (rawType: string, memberName: string, line: number): void => {      for (const name of typeNamesIn(rawType)) {
+    const emitReference = (rawType: string, memberName: string, line: number, origin: string): void => {
+      for (const name of typeNamesIn(rawType)) {
         if (name === decl.name) {
           continue;
         }
@@ -396,20 +526,20 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
         if (!target || target.fullName === self) {
           continue;
         }
-        addEdge(self, target.fullName, 'reference', 'medium', { file, line }, memberName);
+        addEdge(self, target.fullName, 'reference', 'medium', { file: origin, line }, memberName);
       }
     };
 
     for (const property of decl.properties) {
-      emitReference(property.rawType, property.name, property.line);
+      emitReference(property.rawType, property.name, property.line, property.file ?? file);
     }
     for (const field of decl.fields) {
-      emitReference(field.rawType, field.name, field.line);
+      emitReference(field.rawType, field.name, field.line, field.file ?? file);
     }
     for (const method of decl.methods) {
-      emitReference(method.rawReturnType, method.name, method.line);
+      emitReference(method.rawReturnType, method.name, method.line, method.file ?? file);
       for (const parameterType of method.rawParamTypes) {
-        emitReference(parameterType, method.name, method.line);
+        emitReference(parameterType, method.name, method.line, method.file ?? file);
       }
     }
 
@@ -425,7 +555,7 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
         continue;
       }
       addEdge(self, target.fullName, 'reference', 'low',
-        { file, line: mention.line }, `${mention.via} ${mention.name}`);
+        { file: mention.file ?? file, line: mention.line }, `${mention.via} ${mention.name}`);
     }
   }
 
@@ -482,8 +612,25 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
     }
 
     viewNode.viewModelProperties = decl.properties
-      .filter((property) => property.type.endsWith('ViewModel'))
+      .filter((property) => isViewModelName(property.type))
       .map((property) => property.name);
+
+    // A view that exposes its view model as a property is bound to it even when the markup carries no
+    // `x:Bind`: `public ViewModel_X? ViewModel { get => DataContext as ...; }` *is* the binding, and in
+    // a repository that binds with `{Binding}` it is the only place the relationship is written down.
+    // Without this the pair existed only as a low-confidence type reference, and the canvas hides
+    // those by default — so the view and its view model arrived unconnected.
+    for (const property of decl.properties) {
+      if (!isViewModelName(property.type)) {
+        continue;
+      }
+      const target = index.resolve(property.type, usings, decl.namespace);
+      if (!target) {
+        continue;
+      }
+      addEdge(xaml.className, target.fullName, 'binds', 'high',
+        { file: property.file ?? xaml.path, line: property.line }, property.name);
+    }
 
     if (boundProperties.size > 0) {
       viewNode.boundViewModelProperties = [...boundProperties];
@@ -497,6 +644,7 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
     }
   }
 
+  report('Running the cleanup rules');
   const cleanup = computeFindings({
     nodes: [...nodes.values()],
     edges,
@@ -568,6 +716,42 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
   const count = (kind: Finding['kind']): number =>
     cleanup.findings.filter((finding) => finding.kind === kind).length;
 
+  const simpleNames = new Map<string, Set<string>>();
+  const namespaces = new Set<string>();
+  const modules = new Set<string>();
+  let typesDeclared = 0;
+  for (const entry of entries.values()) {
+    typesDeclared += declarationCounts.get(entry.decl.fullName) ?? 1;
+    namespaces.add(entry.decl.namespace);
+    modules.add(moduleOf(entry.file));
+    const seen = simpleNames.get(entry.decl.name) ?? new Set<string>();
+    seen.add(entry.decl.fullName);
+    simpleNames.set(entry.decl.name, seen);
+  }
+
+  const parser = {
+    typesDeclared,
+    partialTypes: [...declarationCounts.values()].filter((declarations) => declarations > 1).length,
+    ambiguousSimpleNames: [...simpleNames.values()].filter((names) => names.size > 1).length,
+    namespaces: namespaces.size,
+    modules: modules.size,
+    xamlWithClass: xamlFiles.filter((file) => file.className !== null).length,
+    xamlWithoutClass: xamlFiles.filter((file) => file.className === null).length,
+    bindings: xamlFiles.reduce((sum, file) => sum + file.bindings.length, 0),
+    templateBindings: xamlFiles.reduce(
+      (sum, file) => sum + file.bindings.filter((binding) => binding.inTemplate).length,
+      0,
+    ),
+    classicBindings: xamlFiles.reduce(
+      (sum, file) => sum + file.bindings.filter((binding) => binding.dialect !== 'x:Bind').length,
+      0,
+    ),
+    elementTags: xamlFiles.reduce((sum, file) => sum + file.elementTags.length, 0),
+    handlerNames: xamlFiles.reduce((sum, file) => sum + file.handlerNames.length, 0),
+    dataTypes: xamlFiles.reduce((sum, file) => sum + file.dataTypes.length, 0),
+    edgesDropped,
+  };
+
   return {
     workspace: options.workspaceRoot,
     generatedAt: new Date().toISOString(),
@@ -589,6 +773,7 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
       parseWarnings: warnings.length,
       elapsedMs: Date.now() - started,
       truncated: Boolean(kept),
+      parser,
     },
     warnings,
   };

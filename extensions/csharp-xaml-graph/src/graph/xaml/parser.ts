@@ -1,8 +1,14 @@
 import { Parser } from 'htmlparser2';
 
 export interface XamlBinding {
-  /** Raw binding expression, e.g. `ViewModel.StatusMessage`. */
+  /** Raw binding expression, e.g. `ViewModel.StatusMessage` or `Path=Status`. */
   expression: string;
+  /**
+   * Which markup extension produced it. `x:Bind` is compile-checked against the page class;
+   * `Binding`/`TemplateBinding` are the WPF, MAUI and UWP forms, which resolve against a
+   * `DataContext` at run time and therefore cannot be checked the same way.
+   */
+  dialect: 'x:Bind' | 'Binding' | 'TemplateBinding';
   /** Leading identifier of the expression, or null when the expression does not start with one. */
   root: string | null;
   /** Member segments after the root, e.g. `["StatusMessage"]`. */
@@ -30,6 +36,12 @@ export interface XamlFile {
   rootTag: string;
   /** Every `x:Name` declared in the file. */
   elementNames: string[];
+  /**
+   * Local names of every element the document instantiates, e.g. `ReadStatusIndicator` from
+   * `<mock:ReadStatusIndicator />`. A UserControl is used through markup like this, so a view that
+   * appears here in another file is genuinely used even though no C# names it.
+   */
+  elementTags: string[];
   dataTypes: XamlDataType[];
   bindings: XamlBinding[];
   /** Prefix declared on any element, mapped to the CLR namespace from its `using:` URI. */
@@ -95,13 +107,15 @@ function firstArgument(raw: string): string {
 }
 
 /**
- * Pulls every `{x:Bind …}` markup extension out of an attribute value.
+ * Pulls every binding markup extension out of an attribute value.
  *
- * `x:Bind` is not an attribute of its own — it is the value of whichever property it feeds
- * (`Text="{x:Bind ViewModel.Status}"`), so the attribute loop has to look inside values.
+ * A binding is not an attribute of its own — it is the value of whichever property it feeds
+ * (`Text="{x:Bind ViewModel.Status}"`), so the attribute loop has to look inside values. Both the
+ * compile-checked `x:Bind` form and the run-time `Binding` / `TemplateBinding` forms are read, because
+ * a WPF or MAUI repository would otherwise report zero bindings and every view would look unbound.
  */
-export function extractBindings(value: string): string[] {
-  const found: string[] = [];
+export function extractBindingExtensions(value: string): { expression: string; dialect: XamlBinding['dialect'] }[] {
+  const found: { expression: string; dialect: XamlBinding['dialect'] }[] = [];
   let index = 0;
 
   while (index < value.length) {
@@ -110,7 +124,8 @@ export function extractBindings(value: string): string[] {
       break;
     }
 
-    const head = /^\{\s*x:Bind\b/i.exec(value.slice(start));
+    const slice = value.slice(start);
+    const head = /^\{\s*(x:Bind|TemplateBinding|Binding)\b/i.exec(slice);
     if (!head) {
       index = start + 1;
       continue;
@@ -129,11 +144,27 @@ export function extractBindings(value: string): string[] {
     }
 
     const body = value.slice(start + head[0].length, depth === 0 ? cursor - 1 : value.length);
-    found.push(firstArgument(body));
+    const keyword = head[1].toLowerCase();
+    const dialect: XamlBinding['dialect'] = keyword === 'x:bind'
+      ? 'x:Bind'
+      : keyword === 'templatebinding' ? 'TemplateBinding' : 'Binding';
+
+    // `{Binding Path=Status, Mode=OneWay}` names its path explicitly; `{Binding Status}` is shorthand.
+    const pathMatch = /(?:^|,)\s*Path\s*=\s*([^,}]+)/i.exec(body);
+    const expression = dialect === 'x:Bind'
+      ? firstArgument(body)
+      : (pathMatch ? pathMatch[1].trim() : firstArgument(body));
+
+    found.push({ expression, dialect });
     index = cursor;
   }
 
   return found;
+}
+
+/** Expressions only, in source order, for callers that do not care which dialect produced them. */
+export function extractBindings(value: string): string[] {
+  return extractBindingExtensions(value).map((entry) => entry.expression);
 }
 
 /** Resolves an `x:DataType` value through the file's `using:` prefixes. */
@@ -180,6 +211,7 @@ export function parseXamlFile(relativePath: string, source: string): XamlFile {
     className: null,
     rootTag: '',
     elementNames: [],
+    elementTags: [],
     dataTypes: [],
     bindings: [],
     xmlnsUsing: {},
@@ -203,7 +235,26 @@ export function parseXamlFile(relativePath: string, source: string): XamlFile {
   const parser = new Parser(
     {
       onopentag(name, attributes) {
-        const line = lineOf(parser.startIndex);
+            const elementLine = lineOf(parser.startIndex);
+
+            // An attribute on a multi-line element sits on its own line, and a finding that points at the
+            // element's first line sends the reader to the wrong place. Locate the attribute within the
+            // open tag once and reuse it.
+            const attributeLines = new Map<string, number>();
+            const attributeLine = (attributeName: string): number => {
+              const cached = attributeLines.get(attributeName);
+              if (cached !== undefined) {
+                return cached;
+              }
+              const close = source.indexOf('>', parser.startIndex);
+              const end = close > 0 ? Math.min(source.length, close + 1) : Math.min(source.length, parser.startIndex + 4000);
+              const tagSlice = source.slice(parser.startIndex, end);
+              const escaped = attributeName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              const match = new RegExp(`(?:^|\\s)${escaped}\\s*=`).exec(tagSlice);
+              const found = match ? lineOf(parser.startIndex + match.index) : elementLine;
+              attributeLines.set(attributeName, found);
+              return found;
+            };
 
         if (!sawRoot) {
           file.rootTag = name;
@@ -211,6 +262,13 @@ export function parseXamlFile(relativePath: string, source: string): XamlFile {
         }
 
         const isTemplate = name === 'DataTemplate' || name === 'ItemsPanelTemplate';
+
+        // A property element (`Page.Resources`, `Grid.RowDefinitions`) is not an instantiated type;
+        // only a plain element name is. Dot-bearing names would otherwise pollute the tag list.
+        if (!name.includes('.')) {
+          const local = name.includes(':') ? name.slice(name.indexOf(':') + 1) : name;
+          file.elementTags.push(local);
+        }
         // The template's own x:DataType scopes its children, so it goes on the stack before the
         // attribute loop reads any binding on this element.
         stack.push({
@@ -244,7 +302,7 @@ export function parseXamlFile(relativePath: string, source: string): XamlFile {
               }
               break;
             case 'x:DataType':
-              file.dataTypes.push({ value: value.trim(), line });
+              file.dataTypes.push({ value: value.trim(), line: attributeLine(attributeName) });
               break;
             default:
               // An event handler is a code-behind member named by the markup.
@@ -257,15 +315,22 @@ export function parseXamlFile(relativePath: string, source: string): XamlFile {
               break;
           }
 
-          // `x:Bind` lives inside the value of the property it feeds, not as its own attribute.
-          for (const expression of extractBindings(value)) {
-            const root = bindingRoot(expression);
+          // A binding lives inside the value of the property it feeds, not as its own attribute.
+          for (const entry of extractBindingExtensions(value)) {
+            const compiled = entry.dialect === 'x:Bind';
+            // Only `x:Bind` names its root in the markup: it binds against the page class. The other
+            // dialects bind against a run-time DataContext this extension does not model, so their
+            // root stays null and they are never judged as dead bindings.
+            const root = compiled ? bindingRoot(entry.expression) : null;
             const scope = templateDepth > 0 ? currentTemplateDataType() : null;
             file.bindings.push({
-              expression,
+              expression: entry.expression,
+              dialect: entry.dialect,
               root,
-              path: bindingPath(expression, root),
-              line,
+              path: compiled
+                ? bindingPath(entry.expression, root)
+                : entry.expression.split('.').map((segment) => segment.trim()).filter(Boolean),
+              line: attributeLine(attributeName),
               inTemplate: templateDepth > 0,
               templateDataType: scope,
               templateTypeNamespace: scope ? resolveDataType(scope, file) : null,

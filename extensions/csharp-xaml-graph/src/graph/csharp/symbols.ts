@@ -80,11 +80,24 @@ export class TypeIndex {
   }
 }
 
-/** Derives the compound-group bucket from a workspace-relative path. */
+/** Path segments that group code rather than name a module. */
+const CONTAINER_SEGMENTS = new Set(['src', 'source', 'lib', 'app', 'tests', 'test', 'samples', 'tools']);
+
+/**
+ * Derives the compound-group bucket from a workspace-relative path.
+ *
+ * The first segment is the module in a repository that keeps modules at the root, but a `src/`
+ * layout would put every node in one bucket called `src`. Container segments are therefore skipped,
+ * and the project directory that follows is used instead.
+ */
 export function moduleOf(relativePath: string): string {
   const segments = relativePath.split('/').filter(Boolean);
   if (segments.length <= 1) {
     return '(root)';
   }
-  return segments[0];
+
+  // The last segment is the file name, so only directories are candidates.
+  const directories = segments.slice(0, -1);
+  const first = directories.find((segment) => !CONTAINER_SEGMENTS.has(segment.toLowerCase()));
+  return first ?? '(root)';
 }

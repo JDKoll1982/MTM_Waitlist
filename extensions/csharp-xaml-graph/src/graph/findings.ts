@@ -8,9 +8,19 @@ const CYCLE_EDGE_KINDS = new Set<EdgeKind>([
   'injects', 'getservice', 'resolves', 'binds', 'field', 'constructs', 'composes', 'reference',
 ]);
 
-/** Base types known to add no bindable members, so a missing member is genuinely missing. */
+/**
+ * Base types known to add no bindable members, so a missing member is genuinely missing.
+ *
+ * Framework bases matter here: a WinUI page derives from `Page`, a WPF page from `Page` or
+ * `UserControl`, a MAUI page from `ContentPage`. None of them declares application members, and none
+ * of them is declared in the workspace, so without this list every view would look like it had an
+ * unresolvable base and no dead binding could ever be reported.
+ */
 const TRANSPARENT_BASES = new Set([
   'ObservableObject', 'ObservableRecipient', 'ObservableValidator', 'ObservableMessage',
+  'BindableBase', 'ViewModelBase',
+  'Page', 'UserControl', 'Window', 'WindowEx', 'Application', 'ContentPage', 'ContentView',
+  'ContentDialog', 'Form', 'Control', 'FrameworkElement', 'Component', 'UserControlBase',
 ]);
 
 const ENTRY_POINT_NAMES = new Set(['App', 'Program', 'Startup', 'Main']);
@@ -221,6 +231,50 @@ function locationOf(files: Map<string, string>, fullName: string, decls: Map<str
   return { file, line: decl.line };
 }
 
+/**
+ * True when the given edges form a cycle inside this component. Used to tell a real construction
+ * loop (nothing in it can be built first) from a group that merely contains a few construction
+ * edges alongside references.
+ */
+function hasCycleWithin(component: string[], edges: GraphEdge[]): boolean {
+  if (edges.length === 0) {
+    return false;
+  }
+  const adjacency = new Map<string, string[]>();
+  for (const edge of edges) {
+    const list = adjacency.get(edge.source);
+    if (list) {
+      list.push(edge.target);
+    } else {
+      adjacency.set(edge.source, [edge.target]);
+    }
+  }
+
+  // 0 = unseen, 1 = on the current path, 2 = finished.
+  const state = new Map<string, number>();
+  const visit = (id: string): boolean => {
+    state.set(id, 1);
+    for (const next of adjacency.get(id) ?? []) {
+      const seen = state.get(next) ?? 0;
+      if (seen === 1) {
+        return true;
+      }
+      if (seen === 0 && visit(next)) {
+        return true;
+      }
+    }
+    state.set(id, 2);
+    return false;
+  };
+
+  for (const id of component) {
+    if ((state.get(id) ?? 0) === 0 && visit(id)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /** Builds every cleanup finding the graph can support. */
 export function computeFindings(input: FindingInput): FindingResult {
   const { nodes, edges, decls, files, declarationCounts, index, usingsFor, xamlFiles, sources } = input;
@@ -232,9 +286,46 @@ export function computeFindings(input: FindingInput): FindingResult {
     return `f${sequence}_${kind}`;
   };
 
+  /**
+   * The declared type of a member, walking the base chain so an inherited property still resolves.
+   * Used to follow a binding path one segment at a time.
+   */
+  const memberType = (member: string, typeFullName: string, depth = 0): TypeDecl | undefined => {
+    const decl = decls.get(typeFullName);
+    if (!decl || depth > MAX_BASE_DEPTH) {
+      return undefined;
+    }
+    const property = decl.properties.find((candidate) => candidate.name === member);
+    const field = decl.fields.find((candidate) => candidate.name === member);
+    const rawType = property?.type ?? field?.type;
+    if (rawType) {
+      return index.resolve(rawType, usingsFor(typeFullName), decl.namespace);
+    }
+    for (const base of decl.bases) {
+      const simple = base.slice(base.lastIndexOf('.') + 1);
+      if (TRANSPARENT_BASES.has(simple)) {
+        continue;
+      }
+      const resolved = index.resolve(base, usingsFor(typeFullName), decl.namespace);
+      if (resolved) {
+        const inherited = memberType(member, resolved.fullName, depth + 1);
+        if (inherited) {
+          return inherited;
+        }
+      }
+    }
+    return undefined;
+  };
+
   /* ------------------------------------------------------------ cycles */
 
-  const cycleEdges = edges.filter((edge) => CYCLE_EDGE_KINDS.has(edge.kind));
+  // Low-confidence references — `static access`, `typeof`, an attribute — are emitted for the
+  // commonest idioms in MVVM code (`App.Current`, `Settings.Default`). Feeding them into the
+  // strongly-connected-component pass merges half an application into one unusable cycle, so they
+  // stay out of it. Declared member types (medium confidence) still count: those are real structure.
+  const cycleEdges = edges.filter((edge) =>
+    CYCLE_EDGE_KINDS.has(edge.kind)
+    && !(edge.kind === 'reference' && edge.confidence === 'low'));
   const adjacency = new Map<string, string[]>();
   for (const edge of cycleEdges) {
     if (!nodeById.has(edge.source) || !nodeById.has(edge.target)) {
@@ -268,18 +359,99 @@ export function computeFindings(input: FindingInput): FindingResult {
       .map((id) => nodeById.get(id)?.label ?? id)
       .sort((left, right) => left.localeCompare(right));
 
+    // A cycle of `injects`/`constructs` edges really does prevent independent construction. A cycle
+    // made only of `reference` edges — static access, `typeof`, a member's type — is a mutual
+    // dependency but nothing stops either side being built, so it must not claim otherwise.
+    const constructionKinds = new Set(['injects', 'constructs', 'composes', 'resolves', 'getservice', 'field', 'binds']);
+    const constructionEdges = loopEdges.filter((edge) => constructionKinds.has(edge.kind));
+    const isConstructionLoop = hasCycleWithin(component, constructionEdges);
+
+    const edgeWord = (count: number): string => `${count} ${count === 1 ? 'edge' : 'edges'}`;
+    const loopText = isConstructionLoop
+      ? `${edgeWord(loopEdges.length)} form a loop, ${constructionEdges.length} of them binding construction or`
+        + ' resolution, and those construction edges form a loop of their own — so none of these types can be'
+        + ' built first. Break it by extracting the shared part into a type the loop can point at.'
+      : constructionEdges.length > 0
+        ? `${edgeWord(loopEdges.length)} form a loop, ${constructionEdges.length} of them binding construction or`
+          + ' resolution. Those construction edges do not themselves form a loop, so no type here is blocked from'
+          + ' being built; the loop closes through a reference back, and that is what to unpick.'
+        : `${edgeWord(loopEdges.length)} — all type references — form a loop: static access, \`typeof\`, or a member`
+          + ' typed as the other side. Nothing prevents these types being built, so this is a mutual dependency'
+          + ' rather than a build failure: move the shared constant, helper or factory out of the loop.';
+
     findings.push({
       id: nextId('cycle'),
       kind: 'cycle',
-      severity: component.length > 3 ? 'high' : 'medium',
+      severity: isConstructionLoop ? 'high' : 'medium',
       title: `${component.length === 1 ? 'Self-dependency' : `Cycle of ${component.length}`}: ${names.join(' ↔ ')}`,
-      detail: component.length === 1
-        ? 'The type depends on itself.'
-        : `${loopEdges.length} dependency edge${loopEdges.length === 1 ? '' : 's'} form a loop, so none of these can be`
-          + ' constructed or resolved without the others. Break it by extracting the shared part into a type the loop can point at.',
+      detail: component.length === 1 ? 'The type depends on itself.' : loopText,
       nodeIds: [...component],
       edgeIds: loopEdges.map((edge) => edge.id),
       location: locationOf(files, component[0], decls),
+    });
+  }
+
+  /* ------------------------------------- reference-closure groups */
+
+  /*
+   * Some genuine mutual references are closed entirely by low-confidence edges — `A.X` calling
+   * `B.Y` that calls back into `A`, or two `typeof` constants. Those were excluded above, so run a
+   * second pass over the full graph and report what it adds:
+   *
+   * - a small group (a real, actionable knot) is reported as a low-severity cycle;
+   * - a large group is reported once, with a sample of its members, because a 99-type finding with
+   *   every name in the title is unreadable and paints the whole canvas red.
+   */
+  const REFERENCE_GROUP_SAMPLE = 30;
+  const fullAdjacency = new Map<string, string[]>();
+  for (const edge of edges) {
+    if (!CYCLE_EDGE_KINDS.has(edge.kind)) {
+      continue;
+    }
+    if (!nodeById.has(edge.source) || !nodeById.has(edge.target)) {
+      continue;
+    }
+    const list = fullAdjacency.get(edge.source);
+    if (list) {
+      list.push(edge.target);
+    } else {
+      fullAdjacency.set(edge.source, [edge.target]);
+    }
+  }
+
+  const alreadyReported = new Set(inCycle);
+  for (const component of stronglyConnected([...fullAdjacency.keys()], fullAdjacency)) {
+    if (component.length < 2 || component.every((id) => alreadyReported.has(id))) {
+      continue;
+    }
+
+    const members = new Set(component);
+    // Only the reference edges belong to this finding: the group is defined by them, and mixing in
+    // construction edges would make a low-severity reference note look like a construction loop.
+    const loopEdges = edges.filter((edge) =>
+      edge.kind === 'reference' && members.has(edge.source) && members.has(edge.target));
+    const sampled = [...component].sort((left, right) => left.localeCompare(right)).slice(0, REFERENCE_GROUP_SAMPLE);
+    for (const id of sampled) {
+      inCycle.add(id);
+    }
+
+    const names = sampled.map((id) => nodeById.get(id)?.label ?? id);
+    const truncated = component.length > sampled.length;
+    findings.push({
+      id: nextId('cycle'),
+      kind: 'cycle',
+      severity: 'low',
+      title: component.length <= 3
+        ? `Cycle of ${component.length}: ${names.join(' ↔ ')}`
+        : `Mutual references across ${component.length} types: ${names.slice(0, 4).join(' ↔ ')}${truncated ? ' …' : ''}`,
+      detail: `${component.length} types reach each other only through low-confidence references — static`
+        + ' access, `typeof`, or an attribute. Nothing here blocks construction, so this is a tangle of'
+        + ' shared constants and helpers rather than a dependency loop to break.'
+        + (truncated ? ` Only ${sampled.length} members are listed and highlighted so the canvas stays readable.` : ''),
+      nodeIds: sampled,
+      edgeIds: loopEdges.filter((edge) => sampled.includes(edge.source) && sampled.includes(edge.target))
+        .map((edge) => edge.id),
+      location: locationOf(files, sampled[0], decls),
     });
   }
 
@@ -337,10 +509,6 @@ export function computeFindings(input: FindingInput): FindingResult {
           // Either an unresolvable base could supply it, or the member is genuinely there.
           continue;
         }
-        // A row member may also be a whole-row binding like `{x:Bind}` with no path.
-        if (binding.path.length === 0 && binding.root === '') {
-          continue;
-        }
         findings.push({
           id: nextId('deadbinding'),
           kind: 'dead-binding',
@@ -355,17 +523,24 @@ export function computeFindings(input: FindingInput): FindingResult {
         continue;
       }
 
-      const rootProperty = viewDecl.properties.find((property) => property.name === binding.root);
-      if (!rootProperty) {
-        // The root is neither a view member nor a named element: the binding can only fail at runtime.
+      // The root is judged against everything the view can offer, not only its properties: x:Bind
+      // resolves fields, methods and the members the MVVM generators add (`SaveCommand` from
+      // `[RelayCommand] Save`), and a function binding root must be a method.
+      const viewMembers = memberNamesOf(xaml.className, decls, index, usingsFor);
+      if (!viewMembers) {
+        // An unresolvable base could supply the member, so no claim is made.
+        continue;
+      }
+
+      if (!viewMembers.has(binding.root)) {
         const isTypeRoot = /^[A-Z]/.test(binding.root) && xaml.xmlnsUsing[binding.root.split(':')[0]] === undefined;
         findings.push({
           id: nextId('deadbinding'),
           kind: 'dead-binding',
           severity: 'high',
           title: `${xaml.className.split('.').pop()}: x:Bind ${binding.root} has no such member`,
-          detail: `The markup binds \`${binding.expression}\` but ${viewDecl.name} declares no member named `
-            + `\`${binding.root}\`${isTypeRoot ? ' and no element of that name exists' : ''}. `
+          detail: `The markup binds \`${binding.expression}\` but ${viewDecl.name} declares no property, field`
+            + `, method or generated member named \`${binding.root}\`${isTypeRoot ? ' and no element of that name exists' : ''}. `
             + 'This binding cannot resolve, so it fails silently at run time.',
           nodeIds: [xaml.className],
           location: { file: xaml.path, line: binding.line },
@@ -373,40 +548,37 @@ export function computeFindings(input: FindingInput): FindingResult {
         continue;
       }
 
-      if (binding.path.length === 0) {
-        continue;
+      // Walk the rest of the path while each step resolves, so a broken later segment is reported
+      // against the type that should have supplied it rather than going unnoticed.
+      let current = memberType(binding.root, xaml.className);
+      for (let depth = 0; depth < binding.path.length; depth += 1) {
+        if (!current) {
+          break;
+        }
+        const segment = binding.path[depth].replace(/\(.*$/, '').trim();
+        if (!segment) {
+          break;
+        }
+        const members = memberNamesOf(current.fullName, decls, index, usingsFor);
+        if (!members) {
+          break;
+        }
+        if (!members.has(segment)) {
+          const failingPath = [binding.root, ...binding.path.slice(0, depth + 1)].join('.');
+          findings.push({
+            id: nextId('deadbinding'),
+            kind: 'dead-binding',
+            severity: 'medium',
+            title: `${xaml.className.split('.').pop()}: x:Bind ${failingPath} is not on ${current.name}`,
+            detail: `The markup binds \`${binding.expression}\`, but ${current.name} declares no member named `
+              + `\`${segment}\` and inherits none that could supply it. The binding is dead.`,
+            nodeIds: [xaml.className, current.fullName],
+            location: { file: xaml.path, line: binding.line },
+          });
+          break;
+        }
+        current = memberType(segment, current.fullName);
       }
-      const targetType = index.resolve(rootProperty.type, usings, viewDecl.namespace);
-      if (!targetType) {
-        continue;
-      }
-
-      const targetNode = nodeById.get(targetType.fullName);
-      if (!targetNode || targetNode.layer === 'external') {
-        continue;
-      }
-
-      const members = memberNamesOf(targetType.fullName, decls, index, usingsFor);
-      if (!members) {
-        // An unresolvable base type could supply the member, so no claim is made.
-        continue;
-      }
-
-      const first = binding.path[0];
-      if (members.has(first)) {
-        continue;
-      }
-
-      findings.push({
-        id: nextId('deadbinding'),
-        kind: 'dead-binding',
-        severity: 'medium',
-        title: `${xaml.className.split('.').pop()}: x:Bind ${binding.root}.${first} is not on ${targetType.name}`,
-        detail: `The markup binds \`${binding.expression}\`, but ${targetType.name} declares no member named `
-          + `\`${first}\` and inherits none that could supply it. The binding is dead.`,
-        nodeIds: [xaml.className, targetType.fullName],
-        location: { file: xaml.path, line: binding.line },
-      });
     }
   }
 
@@ -425,7 +597,6 @@ export function computeFindings(input: FindingInput): FindingResult {
       continue;
     }
 
-    const usings = usingsFor(view.id);
     const hasViewModelProperty = decl.properties.some((property) => property.name === 'ViewModel')
       || decl.fields.some((field) => field.name === 'ViewModel');
 
@@ -433,7 +604,6 @@ export function computeFindings(input: FindingInput): FindingResult {
       continue;
     }
 
-    void usings;
     findings.push({
       id: nextId('unboundview'),
       kind: 'unbound-view',
@@ -468,6 +638,20 @@ export function computeFindings(input: FindingInput): FindingResult {
   }
 
   const unusedTypes = new Set<string>();
+
+  /**
+   * Element names hosted by some view's markup. A UserControl is used this way — `<views:SetUpPanel/>`
+   * inside `SignInPage.xaml` — and that is real usage, not a dormant declaration.
+   */
+  const hostedElements = new Set<string>();
+  for (const xaml of xamlFiles) {
+    const ownName = xaml.className ? xaml.className.split('.').pop() : undefined;
+    for (const tag of xaml.elementTags) {
+      if (tag !== ownName) {
+        hostedElements.add(tag);
+      }
+    }
+  }
 
   // A graph edge is not the only way one type mentions another: a return type, a generic argument,
   // a `new` expression and a XAML `x:Class` all count. Counting identifier occurrences once across the
@@ -513,8 +697,13 @@ export function computeFindings(input: FindingInput): FindingResult {
     }
 
     if (node.layer === 'view') {
-      // Markup is not usage: a view with an x:Class but no registration and no navigation is dead.
+      // Registration is usage, and so is being hosted: a UserControl appears in another view's
+      // markup as an element (`<views:SetUpPanel />`), which no C# graph edge records. Only a view
+      // that is neither registered nor hosted anywhere is genuinely dead.
       if (node.diRegistered) {
+        continue;
+      }
+      if (hostedElements.has(node.label)) {
         continue;
       }
     } else {
@@ -556,11 +745,28 @@ export function computeFindings(input: FindingInput): FindingResult {
     typeName: string;
     member: string;
     line: number;
+    /** The file that declared the member; a partial type spreads its members over several. */
+    file?: string;
     what: string;
   }
 
   const candidates: Candidate[] = [];
   const candidateNames = new Set<string>();
+
+  /** Members markup binds to or handles, so the identifier count is not the only evidence. */
+  const handlerNames = new Set<string>(
+    xamlFiles.flatMap((xaml) => xaml.handlerNames),
+  );
+  for (const xaml of xamlFiles) {
+    for (const binding of xaml.bindings) {
+      if (binding.root) {
+        handlerNames.add(binding.root);
+      }
+      for (const segment of binding.path) {
+        handlerNames.add(segment.replace(/\(.*$/, '').trim());
+      }
+    }
+  }
 
   for (const [fullName, decl] of decls) {
     // A member of an unused type is reported once, as the type, not again per member.
@@ -578,7 +784,16 @@ export function computeFindings(input: FindingInput): FindingResult {
       if (method.name.startsWith('get_') || method.name.startsWith('set_')) {
         continue;
       }
-      candidates.push({ typeName: fullName, member: method.name, line: method.line, what: 'method' });
+      // An application entry point is invoked by the runtime, never by code in the corpus, so it can
+      // never look used. `Main` is only an entry point when it is static or on a type named Program.
+      if (method.name === 'Main' && (method.isStatic || decl.name === 'Program')) {
+        continue;
+      }
+      // A handler named by markup is invoked by XAML, not by a call the identifier count can see.
+      if (handlerNames.has(method.name)) {
+        continue;
+      }
+      candidates.push({ typeName: fullName, member: method.name, line: method.line, file: method.file, what: 'method' });
       candidateNames.add(method.name);
     }
 
@@ -586,10 +801,13 @@ export function computeFindings(input: FindingInput): FindingResult {
       if (field.visibility !== 'private' || field.attributes.includes('ObservableProperty')) {
         continue;
       }
+      if (handlerNames.has(field.name)) {
+        continue;
+      }
       if (field.isReadonly) {
         continue;
       }
-      candidates.push({ typeName: fullName, member: field.name, line: field.line, what: 'field' });
+      candidates.push({ typeName: fullName, member: field.name, line: field.line, file: field.file, what: 'field' });
       candidateNames.add(field.name);
     }
 
@@ -597,7 +815,10 @@ export function computeFindings(input: FindingInput): FindingResult {
       if (property.visibility !== 'private' || property.isObservable) {
         continue;
       }
-      candidates.push({ typeName: fullName, member: property.name, line: property.line, what: 'property' });
+      if (handlerNames.has(property.name)) {
+        continue;
+      }
+      candidates.push({ typeName: fullName, member: property.name, line: property.line, file: property.file, what: 'property' });
       candidateNames.add(property.name);
     }
   }
@@ -620,9 +841,13 @@ export function computeFindings(input: FindingInput): FindingResult {
       detail: `The private ${candidate.what} \`${candidate.member}\` is declared but never read or called anywhere in`
         + ' the analysed files.',
       nodeIds: [candidate.typeName],
-      location: files.get(candidate.typeName)
-        ? { file: files.get(candidate.typeName) as string, line: candidate.line }
-        : undefined,
+      // The member's own file, not the type's: a partial type declares members in several files, and
+      // naming the first one sends the reader to a line that does not exist there.
+      location: candidate.file
+        ? { file: candidate.file, line: candidate.line }
+        : files.get(candidate.typeName)
+          ? { file: files.get(candidate.typeName) as string, line: candidate.line }
+          : undefined,
     });
   }
 

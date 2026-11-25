@@ -16,7 +16,11 @@ export interface GraphNode {
   layer: NodeLayer;
   /** Top-level module bucket, used for compound grouping. */
   module: string;
-  /** class | record | struct | interface | enum | page | usercontrol | window | external */
+  /**
+   * How the type was declared, or for a view the root element that makes it one:
+   * `class | record | struct | interface | enum` for C#, and the lower-cased XAML root tag for a view
+   * (`page`, `usercontrol`, `window`, `windowex`, `application`, `resourcestyledictionary`, …).
+   */
   kind: string;
   location?: SourceLocation;
   /** XAML file that declares this view, when the node is a view. */
@@ -112,6 +116,33 @@ export interface CleanupSummary {
   unusedMembers: number;
 }
 
+/**
+ * Counts from the parse and resolution passes. These are deliberately separate from the graph: they
+ * say what the analyzer *saw* and what it could not place, which is exactly what you need when an edge
+ * or a finding is missing.
+ */
+export interface ParserTally {
+  typesDeclared: number;
+  /** Types declared in more than one file (partials). */
+  partialTypes: number;
+  /** Simple names carried by more than one type, so name resolution cannot be a guess. */
+  ambiguousSimpleNames: number;
+  namespaces: number;
+  modules: number;
+  /** XAML files with an `x:Class`, and files without one — the usual cause of a missing view node. */
+  xamlWithClass: number;
+  xamlWithoutClass: number;
+  bindings: number;
+  templateBindings: number;
+  /** `{Binding}` / `{TemplateBinding}` expressions, which bind against a run-time DataContext. */
+  classicBindings: number;
+  elementTags: number;
+  handlerNames: number;
+  dataTypes: number;
+  /** Edge attempts rejected because they were duplicates, self-references or unnamed. */
+  edgesDropped: number;
+}
+
 export interface GraphStats {
   filesAnalysed: number;
   csharpFiles: number;
@@ -120,6 +151,7 @@ export interface GraphStats {
   parseWarnings: number;
   elapsedMs: number;
   truncated: boolean;
+  parser?: ParserTally;
 }
 
 export interface GraphModel {
