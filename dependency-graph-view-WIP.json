@@ -1,0 +1,904 @@
+{
+  "exportedAt": "2026-11-25T20:06:14.216Z",
+  "scope": {
+    "description": "whole workspace",
+    "layout": "grid",
+    "density": "roomy",
+    "labels": "zoom",
+    "layers": [
+      "view",
+      "viewmodel"
+    ],
+    "edgeKinds": [
+      "resolves",
+      "getservice",
+      "binds",
+      "injects",
+      "field",
+      "constructs",
+      "composes"
+    ],
+    "module": "all",
+    "search": "",
+    "focus": null,
+    "focusDepth": 1,
+    "hideUnconnected": false,
+    "onlyProblems": false,
+    "scope": null,
+    "scopeExact": false,
+    "unpackedGroups": []
+  },
+  "workspace": "c:\\Users\\jkoll\\source\\repos\\MTM_WIP",
+  "generatedAt": "2026-11-25T20:05:39.656Z",
+  "nodes": [
+    {
+      "id": "MTM_WIP.App",
+      "label": "App",
+      "fullName": "MTM_WIP.App",
+      "layer": "view",
+      "module": "MTM_WIP",
+      "kind": "application",
+      "location": {
+        "file": "MTM_WIP/App.xaml.cs",
+        "line": 39
+      },
+      "interfaces": [],
+      "baseType": "Application",
+      "xamlFile": "MTM_WIP/App.xaml",
+      "viewModelProperties": []
+    },
+    {
+      "id": "MTM_WIP.Module_Shell.Views.View_Shell",
+      "label": "View_Shell",
+      "fullName": "MTM_WIP.Module_Shell.Views.View_Shell",
+      "layer": "view",
+      "module": "MTM_WIP.Module_Shell",
+      "kind": "page",
+      "location": {
+        "file": "MTM_WIP.Module_Shell/Views/View_Shell.xaml.cs",
+        "line": 18
+      },
+      "interfaces": [
+        "INavigationHost"
+      ],
+      "baseType": "Page",
+      "xamlFile": "MTM_WIP.Module_Shell/Views/View_Shell.xaml",
+      "viewModelProperties": [
+        "ViewModel"
+      ]
+    },
+    {
+      "id": "MTM_WIP.Shared.Grid.Control_DataGrid",
+      "label": "Control_DataGrid",
+      "fullName": "MTM_WIP.Shared.Grid.Control_DataGrid",
+      "layer": "view",
+      "module": "MTM_WIP.Shared",
+      "kind": "usercontrol",
+      "location": {
+        "file": "MTM_WIP.Shared/Grid/Control_DataGrid.xaml.cs",
+        "line": 18
+      },
+      "interfaces": [],
+      "baseType": "UserControl",
+      "xamlFile": "MTM_WIP.Shared/Grid/Control_DataGrid.xaml",
+      "viewModelProperties": []
+    },
+    {
+      "id": "MTM_WIP.Shared.Printing.Window_PrintHost",
+      "label": "Window_PrintHost",
+      "fullName": "MTM_WIP.Shared.Printing.Window_PrintHost",
+      "layer": "view",
+      "module": "MTM_WIP.Shared",
+      "kind": "window",
+      "location": {
+        "file": "MTM_WIP.Shared/Printing/Window_PrintHost.xaml.cs",
+        "line": 34
+      },
+      "interfaces": [],
+      "baseType": "Window",
+      "xamlFile": "MTM_WIP.Shared/Printing/Window_PrintHost.xaml",
+      "viewModelProperties": []
+    },
+    {
+      "id": "MTM_WIP.Module_DeveloperTools.Views.View_Developer_Gallery",
+      "label": "View_Developer_Gallery",
+      "fullName": "MTM_WIP.Module_DeveloperTools.Views.View_Developer_Gallery",
+      "layer": "view",
+      "module": "MTM_WIP.Module_DeveloperTools",
+      "kind": "page",
+      "location": {
+        "file": "MTM_WIP.Module_DeveloperTools/Views/View_Developer_Gallery.xaml.cs",
+        "line": 16
+      },
+      "interfaces": [],
+      "baseType": "Page",
+      "xamlFile": "MTM_WIP.Module_DeveloperTools/Views/View_Developer_Gallery.xaml",
+      "viewModelProperties": [
+        "ViewModel"
+      ]
+    },
+    {
+      "id": "MTM_WIP.Shared.Suggestions.Control_Suggestion",
+      "label": "Control_Suggestion",
+      "fullName": "MTM_WIP.Shared.Suggestions.Control_Suggestion",
+      "layer": "view",
+      "module": "MTM_WIP.Shared",
+      "kind": "usercontrol",
+      "location": {
+        "file": "MTM_WIP.Shared/Suggestions/Control_Suggestion.xaml.cs",
+        "line": 39
+      },
+      "interfaces": [],
+      "baseType": "UserControl",
+      "xamlFile": "MTM_WIP.Shared/Suggestions/Control_Suggestion.xaml",
+      "viewModelProperties": []
+    },
+    {
+      "id": "MTM_WIP.Startup.Views.View_Splash",
+      "label": "View_Splash",
+      "fullName": "MTM_WIP.Startup.Views.View_Splash",
+      "layer": "view",
+      "module": "MTM_WIP.Startup",
+      "kind": "page",
+      "location": {
+        "file": "MTM_WIP.Startup/Views/View_Splash.xaml.cs",
+        "line": 13
+      },
+      "interfaces": [],
+      "baseType": "Page",
+      "xamlFile": "MTM_WIP.Startup/Views/View_Splash.xaml",
+      "viewModelProperties": [
+        "ViewModel"
+      ]
+    },
+    {
+      "id": "MTM_WIP.Startup.Views.View_SignIn",
+      "label": "View_SignIn",
+      "fullName": "MTM_WIP.Startup.Views.View_SignIn",
+      "layer": "view",
+      "module": "MTM_WIP.Startup",
+      "kind": "page",
+      "location": {
+        "file": "MTM_WIP.Startup/Views/View_SignIn.xaml.cs",
+        "line": 15
+      },
+      "interfaces": [],
+      "baseType": "Page",
+      "xamlFile": "MTM_WIP.Startup/Views/View_SignIn.xaml",
+      "viewModelProperties": [
+        "ViewModel"
+      ]
+    },
+    {
+      "id": "MTM_WIP.Startup.Views.View_QuickUserCreation",
+      "label": "View_QuickUserCreation",
+      "fullName": "MTM_WIP.Startup.Views.View_QuickUserCreation",
+      "layer": "view",
+      "module": "MTM_WIP.Startup",
+      "kind": "page",
+      "location": {
+        "file": "MTM_WIP.Startup/Views/View_QuickUserCreation.xaml.cs",
+        "line": 14
+      },
+      "interfaces": [],
+      "baseType": "Page",
+      "xamlFile": "MTM_WIP.Startup/Views/View_QuickUserCreation.xaml",
+      "viewModelProperties": [
+        "ViewModel"
+      ]
+    },
+    {
+      "id": "MTM_WIP.MainWindow",
+      "label": "MainWindow",
+      "fullName": "MTM_WIP.MainWindow",
+      "layer": "view",
+      "module": "MTM_WIP",
+      "kind": "window",
+      "location": {
+        "file": "MTM_WIP/MainWindow.xaml.cs",
+        "line": 22
+      },
+      "interfaces": [],
+      "baseType": "Window",
+      "xamlFile": "MTM_WIP/MainWindow.xaml",
+      "viewModelProperties": []
+    },
+    {
+      "id": "MTM_WIP.Module_Settings.Views.View_PrintSettings",
+      "label": "View_PrintSettings",
+      "fullName": "MTM_WIP.Module_Settings.Views.View_PrintSettings",
+      "layer": "view",
+      "module": "MTM_WIP.Module_Settings",
+      "kind": "page",
+      "location": {
+        "file": "MTM_WIP.Module_Settings/Views/View_PrintSettings.xaml.cs",
+        "line": 11
+      },
+      "interfaces": [],
+      "baseType": "Page",
+      "xamlFile": "MTM_WIP.Module_Settings/Views/View_PrintSettings.xaml",
+      "viewModelProperties": [
+        "ViewModel"
+      ],
+      "problemCount": 1
+    },
+    {
+      "id": "MTM_WIP.Module_Settings.Views.View_Page_Settings_Home",
+      "label": "View_Page_Settings_Home",
+      "fullName": "MTM_WIP.Module_Settings.Views.View_Page_Settings_Home",
+      "layer": "view",
+      "module": "MTM_WIP.Module_Settings",
+      "kind": "page",
+      "location": {
+        "file": "MTM_WIP.Module_Settings/Views/View_Page_Settings_Home.xaml.cs",
+        "line": 8
+      },
+      "interfaces": [],
+      "baseType": "Page",
+      "xamlFile": "MTM_WIP.Module_Settings/Views/View_Page_Settings_Home.xaml",
+      "viewModelProperties": []
+    },
+    {
+      "id": "MTM_WIP.Module_Inventory.Views.View_Page_Inventory_Transfer",
+      "label": "View_Page_Inventory_Transfer",
+      "fullName": "MTM_WIP.Module_Inventory.Views.View_Page_Inventory_Transfer",
+      "layer": "view",
+      "module": "MTM_WIP.Module_Inventory",
+      "kind": "page",
+      "location": {
+        "file": "MTM_WIP.Module_Inventory/Views/View_Page_Inventory_Transfer.xaml.cs",
+        "line": 12
+      },
+      "interfaces": [],
+      "baseType": "Page",
+      "xamlFile": "MTM_WIP.Module_Inventory/Views/View_Page_Inventory_Transfer.xaml",
+      "viewModelProperties": []
+    },
+    {
+      "id": "MTM_WIP.Module_Inventory.Views.View_Page_Inventory_Remove",
+      "label": "View_Page_Inventory_Remove",
+      "fullName": "MTM_WIP.Module_Inventory.Views.View_Page_Inventory_Remove",
+      "layer": "view",
+      "module": "MTM_WIP.Module_Inventory",
+      "kind": "page",
+      "location": {
+        "file": "MTM_WIP.Module_Inventory/Views/View_Page_Inventory_Remove.xaml.cs",
+        "line": 12
+      },
+      "interfaces": [],
+      "baseType": "Page",
+      "xamlFile": "MTM_WIP.Module_Inventory/Views/View_Page_Inventory_Remove.xaml",
+      "viewModelProperties": []
+    },
+    {
+      "id": "MTM_WIP.Module_Inventory.Views.View_Page_Inventory_New",
+      "label": "View_Page_Inventory_New",
+      "fullName": "MTM_WIP.Module_Inventory.Views.View_Page_Inventory_New",
+      "layer": "view",
+      "module": "MTM_WIP.Module_Inventory",
+      "kind": "page",
+      "location": {
+        "file": "MTM_WIP.Module_Inventory/Views/View_Page_Inventory_New.xaml.cs",
+        "line": 12
+      },
+      "interfaces": [],
+      "baseType": "Page",
+      "xamlFile": "MTM_WIP.Module_Inventory/Views/View_Page_Inventory_New.xaml",
+      "viewModelProperties": []
+    },
+    {
+      "id": "MTM_WIP.Shared.Dialogs.Dialog_ErrorDetails",
+      "label": "Dialog_ErrorDetails",
+      "fullName": "MTM_WIP.Shared.Dialogs.Dialog_ErrorDetails",
+      "layer": "view",
+      "module": "MTM_WIP.Shared",
+      "kind": "usercontrol",
+      "location": {
+        "file": "MTM_WIP.Shared/Dialogs/Dialog_ErrorDetails.xaml.cs",
+        "line": 10
+      },
+      "interfaces": [],
+      "baseType": "UserControl",
+      "xamlFile": "MTM_WIP.Shared/Dialogs/Dialog_ErrorDetails.xaml",
+      "viewModelProperties": []
+    },
+    {
+      "id": "MTM_WIP.Module_DeveloperTools.Views.View_Dev_Suggestion",
+      "label": "View_Dev_Suggestion",
+      "fullName": "MTM_WIP.Module_DeveloperTools.Views.View_Dev_Suggestion",
+      "layer": "view",
+      "module": "MTM_WIP.Module_DeveloperTools",
+      "kind": "page",
+      "location": {
+        "file": "MTM_WIP.Module_DeveloperTools/Views/View_Dev_Suggestion.xaml.cs",
+        "line": 8
+      },
+      "interfaces": [],
+      "baseType": "Page",
+      "xamlFile": "MTM_WIP.Module_DeveloperTools/Views/View_Dev_Suggestion.xaml",
+      "viewModelProperties": []
+    },
+    {
+      "id": "MTM_WIP.Module_DeveloperTools.Views.View_Dev_Progress",
+      "label": "View_Dev_Progress",
+      "fullName": "MTM_WIP.Module_DeveloperTools.Views.View_Dev_Progress",
+      "layer": "view",
+      "module": "MTM_WIP.Module_DeveloperTools",
+      "kind": "page",
+      "location": {
+        "file": "MTM_WIP.Module_DeveloperTools/Views/View_Dev_Progress.xaml.cs",
+        "line": 8
+      },
+      "interfaces": [],
+      "baseType": "Page",
+      "xamlFile": "MTM_WIP.Module_DeveloperTools/Views/View_Dev_Progress.xaml",
+      "viewModelProperties": []
+    },
+    {
+      "id": "MTM_WIP.Module_DeveloperTools.Views.View_Dev_PrintExport",
+      "label": "View_Dev_PrintExport",
+      "fullName": "MTM_WIP.Module_DeveloperTools.Views.View_Dev_PrintExport",
+      "layer": "view",
+      "module": "MTM_WIP.Module_DeveloperTools",
+      "kind": "page",
+      "location": {
+        "file": "MTM_WIP.Module_DeveloperTools/Views/View_Dev_PrintExport.xaml.cs",
+        "line": 8
+      },
+      "interfaces": [],
+      "baseType": "Page",
+      "xamlFile": "MTM_WIP.Module_DeveloperTools/Views/View_Dev_PrintExport.xaml",
+      "viewModelProperties": []
+    },
+    {
+      "id": "MTM_WIP.Module_DeveloperTools.Views.View_Dev_Grid",
+      "label": "View_Dev_Grid",
+      "fullName": "MTM_WIP.Module_DeveloperTools.Views.View_Dev_Grid",
+      "layer": "view",
+      "module": "MTM_WIP.Module_DeveloperTools",
+      "kind": "page",
+      "location": {
+        "file": "MTM_WIP.Module_DeveloperTools/Views/View_Dev_Grid.xaml.cs",
+        "line": 8
+      },
+      "interfaces": [],
+      "baseType": "Page",
+      "xamlFile": "MTM_WIP.Module_DeveloperTools/Views/View_Dev_Grid.xaml",
+      "viewModelProperties": []
+    },
+    {
+      "id": "MTM_WIP.Module_DeveloperTools.Views.View_Dev_ErrorDialog",
+      "label": "View_Dev_ErrorDialog",
+      "fullName": "MTM_WIP.Module_DeveloperTools.Views.View_Dev_ErrorDialog",
+      "layer": "view",
+      "module": "MTM_WIP.Module_DeveloperTools",
+      "kind": "page",
+      "location": {
+        "file": "MTM_WIP.Module_DeveloperTools/Views/View_Dev_ErrorDialog.xaml.cs",
+        "line": 8
+      },
+      "interfaces": [],
+      "baseType": "Page",
+      "xamlFile": "MTM_WIP.Module_DeveloperTools/Views/View_Dev_ErrorDialog.xaml",
+      "viewModelProperties": []
+    },
+    {
+      "id": "MTM_WIP.Module_DeveloperTools.Views.View_Dev_Dialogs",
+      "label": "View_Dev_Dialogs",
+      "fullName": "MTM_WIP.Module_DeveloperTools.Views.View_Dev_Dialogs",
+      "layer": "view",
+      "module": "MTM_WIP.Module_DeveloperTools",
+      "kind": "page",
+      "location": {
+        "file": "MTM_WIP.Module_DeveloperTools/Views/View_Dev_Dialogs.xaml.cs",
+        "line": 8
+      },
+      "interfaces": [],
+      "baseType": "Page",
+      "xamlFile": "MTM_WIP.Module_DeveloperTools/Views/View_Dev_Dialogs.xaml",
+      "viewModelProperties": []
+    },
+    {
+      "id": "MTM_WIP.Module_DeveloperTools.Views.View_Dev_Configuration",
+      "label": "View_Dev_Configuration",
+      "fullName": "MTM_WIP.Module_DeveloperTools.Views.View_Dev_Configuration",
+      "layer": "view",
+      "module": "MTM_WIP.Module_DeveloperTools",
+      "kind": "page",
+      "location": {
+        "file": "MTM_WIP.Module_DeveloperTools/Views/View_Dev_Configuration.xaml.cs",
+        "line": 8
+      },
+      "interfaces": [],
+      "baseType": "Page",
+      "xamlFile": "MTM_WIP.Module_DeveloperTools/Views/View_Dev_Configuration.xaml",
+      "viewModelProperties": []
+    },
+    {
+      "id": "MTM_WIP.Module_DeveloperTools.Views.View_Dev_Appearance",
+      "label": "View_Dev_Appearance",
+      "fullName": "MTM_WIP.Module_DeveloperTools.Views.View_Dev_Appearance",
+      "layer": "view",
+      "module": "MTM_WIP.Module_DeveloperTools",
+      "kind": "page",
+      "location": {
+        "file": "MTM_WIP.Module_DeveloperTools/Views/View_Dev_Appearance.xaml.cs",
+        "line": 8
+      },
+      "interfaces": [],
+      "baseType": "Page",
+      "xamlFile": "MTM_WIP.Module_DeveloperTools/Views/View_Dev_Appearance.xaml",
+      "viewModelProperties": []
+    },
+    {
+      "id": "MTM_WIP.Shared.Progress.Control_Progress",
+      "label": "Control_Progress",
+      "fullName": "MTM_WIP.Shared.Progress.Control_Progress",
+      "layer": "view",
+      "module": "MTM_WIP.Shared",
+      "kind": "usercontrol",
+      "location": {
+        "file": "MTM_WIP.Shared/Progress/Control_Progress.xaml.cs",
+        "line": 9
+      },
+      "interfaces": [],
+      "baseType": "UserControl",
+      "xamlFile": "MTM_WIP.Shared/Progress/Control_Progress.xaml",
+      "viewModelProperties": []
+    },
+    {
+      "id": "MTM_WIP.Shared.Dialogs.Dialog_ShortcutCapture",
+      "label": "Dialog_ShortcutCapture",
+      "fullName": "MTM_WIP.Shared.Dialogs.Dialog_ShortcutCapture",
+      "layer": "view",
+      "module": "MTM_WIP.Shared",
+      "kind": "contentdialog",
+      "location": {
+        "file": "MTM_WIP.Shared/Dialogs/Dialog_ShortcutCapture.xaml.cs",
+        "line": 13
+      },
+      "interfaces": [],
+      "baseType": "ContentDialog",
+      "xamlFile": "MTM_WIP.Shared/Dialogs/Dialog_ShortcutCapture.xaml",
+      "viewModelProperties": [],
+      "problemCount": 1
+    },
+    {
+      "id": "MTM_WIP.Module_Shell.Controls.Control_Shell_QuickActions",
+      "label": "Control_Shell_QuickActions",
+      "fullName": "MTM_WIP.Module_Shell.Controls.Control_Shell_QuickActions",
+      "layer": "view",
+      "module": "MTM_WIP.Module_Shell",
+      "kind": "usercontrol",
+      "location": {
+        "file": "MTM_WIP.Module_Shell/Controls/Control_Shell_QuickActions.xaml.cs",
+        "line": 13
+      },
+      "interfaces": [],
+      "baseType": "UserControl",
+      "xamlFile": "MTM_WIP.Module_Shell/Controls/Control_Shell_QuickActions.xaml",
+      "viewModelProperties": []
+    },
+    {
+      "id": "MTM_WIP.Module_Shell.Controls.Control_ShellFooter",
+      "label": "Control_ShellFooter",
+      "fullName": "MTM_WIP.Module_Shell.Controls.Control_ShellFooter",
+      "layer": "view",
+      "module": "MTM_WIP.Module_Shell",
+      "kind": "usercontrol",
+      "location": {
+        "file": "MTM_WIP.Module_Shell/Controls/Control_ShellFooter.xaml.cs",
+        "line": 12
+      },
+      "interfaces": [],
+      "baseType": "UserControl",
+      "xamlFile": "MTM_WIP.Module_Shell/Controls/Control_ShellFooter.xaml",
+      "viewModelProperties": []
+    },
+    {
+      "id": "MTM_WIP.Module_DeveloperTools.ViewModels.ViewModel_Dev_PrintExport",
+      "label": "ViewModel_Dev_PrintExport",
+      "fullName": "MTM_WIP.Module_DeveloperTools.ViewModels.ViewModel_Dev_PrintExport",
+      "layer": "viewmodel",
+      "module": "MTM_WIP.Module_DeveloperTools",
+      "kind": "class",
+      "location": {
+        "file": "MTM_WIP.Module_DeveloperTools/ViewModels/ViewModel_Dev_PrintExport.cs",
+        "line": 18
+      },
+      "interfaces": [],
+      "baseType": "ViewModel_DevPage",
+      "diRegistered": true
+    },
+    {
+      "id": "MTM_WIP.Module_Shell.ViewModels.ViewModel_Shell",
+      "label": "ViewModel_Shell",
+      "fullName": "MTM_WIP.Module_Shell.ViewModels.ViewModel_Shell",
+      "layer": "viewmodel",
+      "module": "MTM_WIP.Module_Shell",
+      "kind": "class",
+      "location": {
+        "file": "MTM_WIP.Module_Shell/ViewModels/ViewModel_Shell.cs",
+        "line": 37
+      },
+      "interfaces": [
+        "INotifyPropertyChanged"
+      ],
+      "baseType": "INotifyPropertyChanged"
+    },
+    {
+      "id": "MTM_WIP.Shared.Suggestions.ViewModel_SuggestionField",
+      "label": "ViewModel_SuggestionField",
+      "fullName": "MTM_WIP.Shared.Suggestions.ViewModel_SuggestionField",
+      "layer": "viewmodel",
+      "module": "MTM_WIP.Shared",
+      "kind": "class",
+      "location": {
+        "file": "MTM_WIP.Shared/Suggestions/ViewModel_SuggestionField.cs",
+        "line": 23
+      },
+      "interfaces": [],
+      "baseType": "ObservableObject"
+    },
+    {
+      "id": "MTM_WIP.Module_DeveloperTools.ViewModels.ViewModel_Dev_Suggestion",
+      "label": "ViewModel_Dev_Suggestion",
+      "fullName": "MTM_WIP.Module_DeveloperTools.ViewModels.ViewModel_Dev_Suggestion",
+      "layer": "viewmodel",
+      "module": "MTM_WIP.Module_DeveloperTools",
+      "kind": "class",
+      "location": {
+        "file": "MTM_WIP.Module_DeveloperTools/ViewModels/ViewModel_Dev_Suggestion.cs",
+        "line": 18
+      },
+      "interfaces": [],
+      "baseType": "ViewModel_DevPage",
+      "diRegistered": true
+    },
+    {
+      "id": "MTM_WIP.Module_DeveloperTools.ViewModels.ViewModel_Developer_Gallery",
+      "label": "ViewModel_Developer_Gallery",
+      "fullName": "MTM_WIP.Module_DeveloperTools.ViewModels.ViewModel_Developer_Gallery",
+      "layer": "viewmodel",
+      "module": "MTM_WIP.Module_DeveloperTools",
+      "kind": "class",
+      "location": {
+        "file": "MTM_WIP.Module_DeveloperTools/ViewModels/ViewModel_Developer_Gallery.cs",
+        "line": 15
+      },
+      "interfaces": [],
+      "diRegistered": true
+    },
+    {
+      "id": "MTM_WIP.Startup.ViewModels.ViewModel_QuickUserCreation",
+      "label": "ViewModel_QuickUserCreation",
+      "fullName": "MTM_WIP.Startup.ViewModels.ViewModel_QuickUserCreation",
+      "layer": "viewmodel",
+      "module": "MTM_WIP.Startup",
+      "kind": "class",
+      "location": {
+        "file": "MTM_WIP.Startup/ViewModels/ViewModel_QuickUserCreation.cs",
+        "line": 17
+      },
+      "interfaces": [],
+      "baseType": "Observable_Base"
+    },
+    {
+      "id": "MTM_WIP.Module_DeveloperTools.ViewModels.ViewModel_Dev_Grid",
+      "label": "ViewModel_Dev_Grid",
+      "fullName": "MTM_WIP.Module_DeveloperTools.ViewModels.ViewModel_Dev_Grid",
+      "layer": "viewmodel",
+      "module": "MTM_WIP.Module_DeveloperTools",
+      "kind": "class",
+      "location": {
+        "file": "MTM_WIP.Module_DeveloperTools/ViewModels/ViewModel_Dev_Grid.cs",
+        "line": 27
+      },
+      "interfaces": [
+        "IGridCommands"
+      ],
+      "baseType": "ViewModel_DevPage",
+      "diRegistered": true
+    },
+    {
+      "id": "MTM_WIP.Module_DeveloperTools.ViewModels.ViewModel_DevPage",
+      "label": "ViewModel_DevPage",
+      "fullName": "MTM_WIP.Module_DeveloperTools.ViewModels.ViewModel_DevPage",
+      "layer": "viewmodel",
+      "module": "MTM_WIP.Module_DeveloperTools",
+      "kind": "class",
+      "location": {
+        "file": "MTM_WIP.Module_DeveloperTools/ViewModels/ViewModel_DevPage.cs",
+        "line": 16
+      },
+      "interfaces": [],
+      "baseType": "ObservableObject"
+    },
+    {
+      "id": "MTM_WIP.Startup.ViewModels.ViewModel_SignIn",
+      "label": "ViewModel_SignIn",
+      "fullName": "MTM_WIP.Startup.ViewModels.ViewModel_SignIn",
+      "layer": "viewmodel",
+      "module": "MTM_WIP.Startup",
+      "kind": "class",
+      "location": {
+        "file": "MTM_WIP.Startup/ViewModels/ViewModel_SignIn.cs",
+        "line": 23
+      },
+      "interfaces": [],
+      "baseType": "Observable_Base"
+    },
+    {
+      "id": "MTM_WIP.Startup.ViewModels.ViewModel_Splash",
+      "label": "ViewModel_Splash",
+      "fullName": "MTM_WIP.Startup.ViewModels.ViewModel_Splash",
+      "layer": "viewmodel",
+      "module": "MTM_WIP.Startup",
+      "kind": "class",
+      "location": {
+        "file": "MTM_WIP.Startup/ViewModels/ViewModel_Splash.cs",
+        "line": 23
+      },
+      "interfaces": [],
+      "baseType": "Observable_Base"
+    },
+    {
+      "id": "MTM_WIP.Module_DeveloperTools.ViewModels.ViewModel_Dev_ErrorDialog",
+      "label": "ViewModel_Dev_ErrorDialog",
+      "fullName": "MTM_WIP.Module_DeveloperTools.ViewModels.ViewModel_Dev_ErrorDialog",
+      "layer": "viewmodel",
+      "module": "MTM_WIP.Module_DeveloperTools",
+      "kind": "class",
+      "location": {
+        "file": "MTM_WIP.Module_DeveloperTools/ViewModels/ViewModel_Dev_ErrorDialog.cs",
+        "line": 24
+      },
+      "interfaces": [],
+      "baseType": "ViewModel_DevPage",
+      "diRegistered": true
+    },
+    {
+      "id": "MTM_WIP.Module_DeveloperTools.ViewModels.ViewModel_Dev_Appearance",
+      "label": "ViewModel_Dev_Appearance",
+      "fullName": "MTM_WIP.Module_DeveloperTools.ViewModels.ViewModel_Dev_Appearance",
+      "layer": "viewmodel",
+      "module": "MTM_WIP.Module_DeveloperTools",
+      "kind": "class",
+      "location": {
+        "file": "MTM_WIP.Module_DeveloperTools/ViewModels/ViewModel_Dev_Appearance.cs",
+        "line": 15
+      },
+      "interfaces": [],
+      "baseType": "ViewModel_DevPage",
+      "diRegistered": true
+    },
+    {
+      "id": "MTM_WIP.Module_Settings.ViewModels.ViewModel_PrintSettings",
+      "label": "ViewModel_PrintSettings",
+      "fullName": "MTM_WIP.Module_Settings.ViewModels.ViewModel_PrintSettings",
+      "layer": "viewmodel",
+      "module": "MTM_WIP.Module_Settings",
+      "kind": "class",
+      "location": {
+        "file": "MTM_WIP.Module_Settings/ViewModels/ViewModel_PrintSettings.cs",
+        "line": 28
+      },
+      "interfaces": []
+    },
+    {
+      "id": "MTM_WIP.Module_DeveloperTools.ViewModels.ViewModel_Dev_Dialogs",
+      "label": "ViewModel_Dev_Dialogs",
+      "fullName": "MTM_WIP.Module_DeveloperTools.ViewModels.ViewModel_Dev_Dialogs",
+      "layer": "viewmodel",
+      "module": "MTM_WIP.Module_DeveloperTools",
+      "kind": "class",
+      "location": {
+        "file": "MTM_WIP.Module_DeveloperTools/ViewModels/ViewModel_Dev_Dialogs.cs",
+        "line": 16
+      },
+      "interfaces": [],
+      "baseType": "ViewModel_DevPage",
+      "diRegistered": true
+    },
+    {
+      "id": "MTM_WIP.Module_DeveloperTools.ViewModels.ViewModel_Dev_Configuration",
+      "label": "ViewModel_Dev_Configuration",
+      "fullName": "MTM_WIP.Module_DeveloperTools.ViewModels.ViewModel_Dev_Configuration",
+      "layer": "viewmodel",
+      "module": "MTM_WIP.Module_DeveloperTools",
+      "kind": "class",
+      "location": {
+        "file": "MTM_WIP.Module_DeveloperTools/ViewModels/ViewModel_Dev_Configuration.cs",
+        "line": 16
+      },
+      "interfaces": [],
+      "baseType": "ViewModel_DevPage",
+      "diRegistered": true
+    },
+    {
+      "id": "MTM_WIP.Module_DeveloperTools.ViewModels.ViewModel_Dev_Progress",
+      "label": "ViewModel_Dev_Progress",
+      "fullName": "MTM_WIP.Module_DeveloperTools.ViewModels.ViewModel_Dev_Progress",
+      "layer": "viewmodel",
+      "module": "MTM_WIP.Module_DeveloperTools",
+      "kind": "class",
+      "location": {
+        "file": "MTM_WIP.Module_DeveloperTools/ViewModels/ViewModel_Dev_Progress.cs",
+        "line": 15
+      },
+      "interfaces": [],
+      "baseType": "ViewModel_DevPage",
+      "diRegistered": true
+    },
+    {
+      "id": "MTM_WIP.Module_Settings.ViewModels.Model_PrintSettingsColumn",
+      "label": "Model_PrintSettingsColumn",
+      "fullName": "MTM_WIP.Module_Settings.ViewModels.Model_PrintSettingsColumn",
+      "layer": "viewmodel",
+      "module": "MTM_WIP.Module_Settings",
+      "kind": "class",
+      "location": {
+        "file": "MTM_WIP.Module_Settings/ViewModels/ViewModel_PrintSettings.cs",
+        "line": 7
+      },
+      "interfaces": []
+    },
+    {
+      "id": "MTM_WIP.Module_Settings.ViewModels.ViewModel_Settings_Home",
+      "label": "ViewModel_Settings_Home",
+      "fullName": "MTM_WIP.Module_Settings.ViewModels.ViewModel_Settings_Home",
+      "layer": "viewmodel",
+      "module": "MTM_WIP.Module_Settings",
+      "kind": "class",
+      "location": {
+        "file": "MTM_WIP.Module_Settings/ViewModels/ViewModel_Settings_Home.cs",
+        "line": 11
+      },
+      "interfaces": [],
+      "diRegistered": true
+    },
+    {
+      "id": "MTM_WIP.Module_Inventory.ViewModels.ViewModel_Inventory_Transfer",
+      "label": "ViewModel_Inventory_Transfer",
+      "fullName": "MTM_WIP.Module_Inventory.ViewModels.ViewModel_Inventory_Transfer",
+      "layer": "viewmodel",
+      "module": "MTM_WIP.Module_Inventory",
+      "kind": "class",
+      "location": {
+        "file": "MTM_WIP.Module_Inventory/ViewModels/ViewModel_Inventory_Transfer.cs",
+        "line": 11
+      },
+      "interfaces": []
+    },
+    {
+      "id": "MTM_WIP.Module_Inventory.ViewModels.ViewModel_Inventory_Remove",
+      "label": "ViewModel_Inventory_Remove",
+      "fullName": "MTM_WIP.Module_Inventory.ViewModels.ViewModel_Inventory_Remove",
+      "layer": "viewmodel",
+      "module": "MTM_WIP.Module_Inventory",
+      "kind": "class",
+      "location": {
+        "file": "MTM_WIP.Module_Inventory/ViewModels/ViewModel_Inventory_Remove.cs",
+        "line": 11
+      },
+      "interfaces": []
+    },
+    {
+      "id": "MTM_WIP.Module_Inventory.ViewModels.ViewModel_Inventory_New",
+      "label": "ViewModel_Inventory_New",
+      "fullName": "MTM_WIP.Module_Inventory.ViewModels.ViewModel_Inventory_New",
+      "layer": "viewmodel",
+      "module": "MTM_WIP.Module_Inventory",
+      "kind": "class",
+      "location": {
+        "file": "MTM_WIP.Module_Inventory/ViewModels/ViewModel_Inventory_New.cs",
+        "line": 11
+      },
+      "interfaces": []
+    }
+  ],
+  "edges": [
+    {
+      "id": "e16_composes",
+      "source": "MTM_WIP.Module_Settings.ViewModels.ViewModel_PrintSettings",
+      "target": "MTM_WIP.Module_Settings.ViewModels.Model_PrintSettingsColumn",
+      "kind": "composes",
+      "confidence": "medium",
+      "evidence": {
+        "file": "MTM_WIP.Module_Settings/ViewModels/ViewModel_PrintSettings.cs",
+        "line": 49
+      }
+    },
+    {
+      "id": "e383_constructs",
+      "source": "MTM_WIP.Module_DeveloperTools.ViewModels.ViewModel_Dev_Suggestion",
+      "target": "MTM_WIP.Shared.Suggestions.ViewModel_SuggestionField",
+      "kind": "constructs",
+      "confidence": "high",
+      "evidence": {
+        "file": "MTM_WIP.Module_DeveloperTools/ViewModels/ViewModel_Dev_Suggestion.cs",
+        "line": 47
+      },
+      "label": "MasterData"
+    },
+    {
+      "id": "e384_composes",
+      "source": "MTM_WIP.Module_DeveloperTools.ViewModels.ViewModel_Dev_Suggestion",
+      "target": "MTM_WIP.Shared.Suggestions.ViewModel_SuggestionField",
+      "kind": "composes",
+      "confidence": "medium",
+      "evidence": {
+        "file": "MTM_WIP.Module_DeveloperTools/ViewModels/ViewModel_Dev_Suggestion.cs",
+        "line": 47
+      }
+    }
+  ],
+  "findings": [
+    {
+      "id": "f5_unusedtype",
+      "kind": "unused-type",
+      "severity": "medium",
+      "title": "Unused view: Dialog_ShortcutCapture",
+      "detail": "MTM_WIP.Shared.Dialogs.Dialog_ShortcutCapture is never referenced. It is not registered with the container and nothing navigates to it. A view is normally reached by navigation, so check its registration.",
+      "nodeIds": [
+        "MTM_WIP.Shared.Dialogs.Dialog_ShortcutCapture"
+      ],
+      "location": {
+        "file": "MTM_WIP.Shared/Dialogs/Dialog_ShortcutCapture.xaml.cs",
+        "line": 13
+      }
+    },
+    {
+      "id": "f2_unusedtype",
+      "kind": "unused-type",
+      "severity": "medium",
+      "title": "Unused view: View_PrintSettings",
+      "detail": "MTM_WIP.Module_Settings.Views.View_PrintSettings is never referenced. It is not registered with the container and nothing navigates to it. A view is normally reached by navigation, so check its registration.",
+      "nodeIds": [
+        "MTM_WIP.Module_Settings.Views.View_PrintSettings"
+      ],
+      "location": {
+        "file": "MTM_WIP.Module_Settings/Views/View_PrintSettings.xaml.cs",
+        "line": 11
+      }
+    }
+  ],
+  "cleanup": {
+    "cycles": 0,
+    "deadBindings": 0,
+    "unboundViews": 0,
+    "unusedTypes": 2,
+    "unusedMembers": 0
+  },
+  "stats": {
+    "filesAnalysed": 227,
+    "csharpFiles": 199,
+    "xamlFiles": 28,
+    "parseErrors": 0,
+    "parseWarnings": 0,
+    "elapsedMs": 280,
+    "truncated": false,
+    "parser": {
+      "typesDeclared": 268,
+      "partialTypes": 1,
+      "ambiguousSimpleNames": 0,
+      "namespaces": 61,
+      "modules": 9,
+      "xamlWithClass": 28,
+      "xamlWithoutClass": 0,
+      "bindings": 113,
+      "templateBindings": 10,
+      "classicBindings": 110,
+      "elementTags": 332,
+      "handlerNames": 9,
+      "dataTypes": 0,
+      "edgesDropped": 1144
+    },
+    "visibleNodes": 49,
+    "visibleEdges": 3,
+    "hiddenUnconnected": 0,
+    "totalNodes": 299,
+    "totalEdges": 838
+  },
+  "warnings": []
+}
