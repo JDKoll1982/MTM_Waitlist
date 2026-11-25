@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Startup.Services;
@@ -132,7 +133,14 @@ public sealed class SetUpPanelViewModelTests
         Assert.AreEqual("6229", panel.EmployeeNumber);
         Assert.AreEqual("John", panel.FirstName, "the plant system's name is pre-filled (FR-007)");
         Assert.AreEqual("Koll", panel.LastName);
-        StringAssert.Contains(panel.PermissionNoteText, "IT", "FR-011: a higher level is requested from IT");
+        Assert.AreEqual(
+            "Startup_SetUp.PermissionNote".GetLocalized(),
+            panel.PermissionNoteText,
+            "FR-011: the note is a resource string rather than a literal, so the panel is translated like the labels beside it");
+        Assert.AreNotEqual(
+            "A higher permission level must be requested from IT.",
+            panel.PermissionNoteText,
+            "FR-011: the note still asks for a role the catalogue retired instead of naming the level the account receives");
     }
 
     private static SetUpPanelViewModel Build(StubStore? store = null)

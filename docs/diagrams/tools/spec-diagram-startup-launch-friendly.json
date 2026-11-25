@@ -40,11 +40,6 @@
       "x_next",
       "[To Sheet 2]\\nSigning in",
       "conn"
-     ],
-     [
-      "n_authority",
-      "Worth fixing: the setup\\nscreen says Administrator,\\nbut only IT Department\\ncan unlock it.",
-      "refactor"
      ]
     ],
     "svc": [
@@ -130,11 +125,6 @@
      "d_ready",
      "u_setup",
      "no"
-    ],
-    [
-     "u_setup",
-     "n_authority",
-     "says"
     ],
     [
      "u_setup",
@@ -235,11 +225,6 @@
       "d_recent",
       "People who signed\\nin here before",
       "db"
-     ],
-     [
-      "n_offer",
-      "Worth fixing: the list can vanish,\\noffer someone who cannot sign in,\\nand never say how many people\\nuse this computer.",
-      "refactor"
      ]
     ]
    },
@@ -264,12 +249,6 @@
      "s_name",
      "d_known",
      "known?"
-    ],
-    [
-     "v_offer",
-     "n_offer",
-     "cannot read",
-     "link"
     ],
     [
      "v_offer",

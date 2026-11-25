@@ -1481,6 +1481,18 @@
   <data name="Startup_SignIn.PreviousPeopleHeading" xml:space="preserve">
     <value>Signed in here before</value>
   </data>
+  <data name="Startup_SignIn.PreviousPeopleScopeOne" xml:space="preserve">
+    <value>One person has signed in on this computer.</value>
+  </data>
+  <data name="Startup_SignIn.PreviousPeopleScopeFew" xml:space="preserve">
+    <value>Several people have signed in on this computer. Most recent first.</value>
+  </data>
+  <data name="Startup_SignIn.PreviousPeopleScopeMany" xml:space="preserve">
+    <value>Six or more people have signed in on this computer. Most recent first.</value>
+  </data>
+  <data name="Startup_SignIn.PreviousPeopleUnavailable" xml:space="preserve">
+    <value>Who signed in here before could not be read. Type your user name. Your PIN is still required.</value>
+  </data>
   <data name="Startup_SignIn.HintNameRequired" xml:space="preserve">
     <value>Type your user name.</value>
   </data>
@@ -1494,7 +1506,7 @@
     <value>That user name and PIN do not match an account. Check both and try again.</value>
   </data>
   <data name="Startup_SignIn.RefusedAttemptsExhausted" xml:space="preserve">
-    <value>This account's temporary PIN has been refused five times, so it is refused until a new PIN is set. Ask an administrator to issue a new temporary PIN.</value>
+    <value>This account's temporary PIN has been refused five times, so it is refused until a new PIN is set. Ask your lead or the IT Department to issue a new temporary PIN.</value>
   </data>
   <data name="Startup_SignIn.RefusedStoreUnreadable" xml:space="preserve">
     <value>The store could not be reached, so the sign-in could not be confirmed. Try again shortly.</value>
@@ -1529,6 +1541,16 @@
   <data name="Startup_SetUp.LeaveAction" xml:space="preserve">
     <value>Back</value>
   </data>
+  <!-- The panel's own sentences. They resolve like the labels beside them, so the panel is translated as a whole. -->
+  <data name="Startup_SetUp.Heading" xml:space="preserve">
+    <value>You are not set up for the waitlist yet</value>
+  </data>
+  <data name="Startup_SetUp.NamePrompt" xml:space="preserve">
+    <value>Your name from the plant system, which you can correct:</value>
+  </data>
+  <data name="Startup_SetUp.PermissionNote" xml:space="preserve">
+    <value>Your account starts at the lowest level. Ask IT Department.</value>
+  </data>
   <data name="Startup_PasswordChange.Heading" xml:space="preserve">
     <value>Choose a new PIN</value>
   </data>
@@ -1557,16 +1579,16 @@
     <value>Set up this computer</value>
   </data>
   <data name="Startup_MachineSetup.Subtitle" xml:space="preserve">
-    <value>This computer has not been set up yet. A Developer or an Admin has to tell it where it stands.</value>
+    <value>This computer has not been set up yet. A Developer or IT Department user has to tell it where it stands.</value>
   </data>
   <data name="Startup_MachineSetup.SignInHeading" xml:space="preserve">
     <value>Sign in to set this computer up</value>
   </data>
   <data name="Startup_MachineSetup.SignInNameLabel" xml:space="preserve">
-    <value>Developer / Admin user name</value>
+    <value>Developer or IT Department user name</value>
   </data>
   <data name="Startup_MachineSetup.SignInNameHint" xml:space="preserve">
-    <value>The user name of a Developer or Admin account</value>
+    <value>The user name of a Developer or IT Department account</value>
   </data>
   <data name="Startup_MachineSetup.CredentialLabel" xml:space="preserve">
     <value>PIN</value>
@@ -1599,10 +1621,10 @@
     <value>Close</value>
   </data>
   <data name="Startup_MachineSetup.NotAuthorized" xml:space="preserve">
-    <value>Sign in with a Developer or Admin account to set this computer up.</value>
+    <value>Sign in with a Developer or IT Department account to set this computer up.</value>
   </data>
   <data name="Startup_MachineSetup.RefusedSignInRequired" xml:space="preserve">
-    <value>Type a Developer or Admin user name and PIN before unlocking setup.</value>
+    <value>Type a Developer or IT Department user name and PIN before unlocking setup.</value>
   </data>
   <data name="Startup_MachineSetup.RefusedCredential" xml:space="preserve">
     <value>That user name and PIN do not match an account. Check both and try again.</value>

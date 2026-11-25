@@ -2,17 +2,17 @@
 
 Workflow: `startup-launch` · Screen: sign in · Refactor: `no-offer-explained`
 
-Proposed by: GitHub Copilot (proposal only) · Date: 2026-11-24 · Design record:
+Proposed by: GitHub Copilot · Date: 2026-11-24 · Approved and implemented: 2026-11-25 · Design record:
 `no-offer-explained-design.json`
 
 **Flow source.** `startup-launch` is mapped as Diagram 5 in
-[`../../../diagrams/pdf/startup-launch/diagram-startup-launch.pdf`](../../../diagrams/pdf/startup-launch/diagram-startup-launch.pdf):
+[`../../../../diagrams/pdf/startup-launch/diagram-startup-launch.pdf`](../../../../diagrams/pdf/startup-launch/diagram-startup-launch.pdf):
 sheet 1 is the entry and this computer, sheet 2 is signing in, sheet 3 is the stops and the hand-over.
 This design cites sheet 2 (`v_signin`, `s_people`, `x_offer`) in `workflow_refs`; `x_offer` is the
 finding this proposal answers. That flag now also records two neighbours found in the same read — an
 offer that keeps a deactivated account, and one that never says how many people use the computer — which
 `terminal-aware-offer` answers instead; the detail is in §6 of
-[`../../../diagrams/diagram-workflow-refactor-notes.md`](../../../diagrams/diagram-workflow-refactor-notes.md).
+[`../../../../diagrams/diagram-workflow-refactor-notes.md`](../../../../diagrams/diagram-workflow-refactor-notes.md).
 
 **BEFORE is a reconstruction.** The application was not driven for this proposal: the stage needs a
 configured machine and a store that fails in a specific way. The mockup is built from
@@ -26,6 +26,8 @@ compose: the note described here appears in the column that the other proposal d
 changes the other's wording.
 
 ## A. Current State
+
+*Applied 25 November 2026 — this section records the state as it stood before the change; see §F.*
 
 The sign-in stage offers the last six people who signed in on this computer in a column to the right of
 the form, behind a divider. The stage is 780 × 640; that size exists so no name in the offer is cut off.
@@ -88,8 +90,24 @@ Observable, not measured:
 The two risk cases are states the implementation must handle, not new behaviour: a readable empty list is
 still an empty column.
 
+## F. Implementation Record
+
+Applied on 25 November 2026.
+
+- `PreviousSignInService.ReadAsync` returns a `PreviousSignInResult` carrying the people and whether the
+  store answered; the `AppLog.Error` stays, and a failed read still leaves an empty list.
+- `SignInViewModel` exposes `IsOfferUnavailable` from that answer, `ShowOffer` (`HasPreviousPeople ||
+  IsOfferUnavailable`) and `PreviousPeopleUnavailableText`.
+- `SignInPage.xaml` binds the divider and the offer column to `ShowOffer`, and the column carries one
+  `InfoBar` at `Informational` severity opened by `IsOfferUnavailable`.
+- `Strings/en-us/Resources.resw` adds `Startup_SignIn.PreviousPeopleUnavailable`.
+
+Both risk cases from §E are covered by tests: a readable empty list and a computer with no registry row
+each show no column and no note, while a failed read shows the column with the note. The solution builds
+with no warnings and the 428 startup tests pass.
+
 ## Approval
 
-This proposal is **not approved**. Once the design is accepted, record it with
-`render_mockup.py --approve --by "<name>"`; the approval hash covers the mockups, the shared assets and
-the design-system XAML, and any later edit to them invalidates it.
+**Approved** by John Koll on 25 November 2026, after the implementation in §F. The record is written in
+`no-offer-explained-design.json`; its hash covers the mockups, the shared assets and the design-system
+XAML, so any later edit to those invalidates it.

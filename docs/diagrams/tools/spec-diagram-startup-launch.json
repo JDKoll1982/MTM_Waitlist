@@ -40,11 +40,6 @@
       "d_conf",
       "configured?",
       "dec"
-     ],
-     [
-      "x_authority",
-      "[REFACTOR] setup asks for an\\nAdministrator; the gate\\nchecks IT Department",
-      "refactor"
      ]
     ],
     "svc": [
@@ -72,6 +67,11 @@
       "x_block",
       "[To Sheet 3]\\nBlocked",
       "conn"
+     ],
+     [
+      "x_signin",
+      "[To Sheet 2]\\nSignIn",
+      "conn"
      ]
     ],
     "data": [
@@ -94,11 +94,6 @@
       "db_save",
       "sp_core_computers_\\nregistry_upsert",
       "db"
-     ],
-     [
-      "x_signin",
-      "[To Sheet 2]\\nSignIn",
-      "conn"
      ]
     ]
    },
@@ -172,11 +167,6 @@
      "d_conf",
      "u_setup",
      "no"
-    ],
-    [
-     "u_setup",
-     "x_authority",
-     "says"
     ],
     [
      "u_setup",
@@ -282,11 +272,6 @@
       "db"
      ],
      [
-      "x_offer",
-      "[REFACTOR] the offer vanishes\\nwhen unread, offers people\\nwho cannot sign in, and\\nnever says how many\\npeople use this computer",
-      "refactor"
-     ],
-     [
       "db_cred",
       "sp_auth_user_\\ncredential_get",
       "db"
@@ -375,12 +360,6 @@
      "db_prev",
      "",
      "dots"
-    ],
-    [
-     "s_people",
-     "x_offer",
-     "needs",
-     "link"
     ],
     [
      "s_session",

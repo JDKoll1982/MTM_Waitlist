@@ -24,7 +24,9 @@ namespace MTM_Waitlist.Module_Startup.ViewModels;
 /// <para>
 /// <b>The list beside the form offers a name, never a way in.</b> The last six people who signed in on this
 /// computer are read from the session records the store already holds and shown on the right, behind a divider;
-/// choosing one fills in the user name and nothing else, so the PIN is still required (FR-014, FR-048).
+/// choosing one fills in the user name and nothing else, so the PIN is still required (FR-014, FR-048). The
+/// column says how many people have signed in here, and when the read fails it stays and says so rather than
+/// leaving an unexplained gap beside the form.
 /// </para>
 /// <para>
 /// <b>The credential is an argument, never a property.</b> It arrives with the command and is handed straight to
@@ -130,6 +132,32 @@ internal sealed partial class SignInViewModel : ObservableObject
     /// <summary>Whether there is anybody to offer, which is what shows the list beside the form.</summary>
     public bool HasPreviousPeople => PreviousPeople.Count > 0;
 
+    /// <summary>
+    /// Whether the offer could not be read, so the column stays where it is and says why instead of vanishing.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool IsOfferUnavailable { get; set; }
+
+    /// <summary>
+    /// Whether the offer column is shown: there are people to offer, or there is a reason there are none.
+    /// </summary>
+    public bool ShowOffer => HasPreviousPeople || IsOfferUnavailable;
+
+    /// <summary>
+    /// What the column says about this computer: how many people have signed in here, in the band the read supports.
+    /// </summary>
+    /// <remarks>
+    /// The read caps at six rows and returns no time, so fewer than six rows is the exact number of people and six
+    /// rows means six or more. An empty column has no line at all.
+    /// </remarks>
+    public string PreviousPeopleScopeText => PreviousPeople.Count switch
+    {
+        0 => string.Empty,
+        1 => "Startup_SignIn.PreviousPeopleScopeOne".GetLocalized(),
+        >= 6 => "Startup_SignIn.PreviousPeopleScopeMany".GetLocalized(),
+        _ => "Startup_SignIn.PreviousPeopleScopeFew".GetLocalized(),
+    };
+
     /// <summary>True from the moment a sign-in starts until it answers, which guards the repeated press.</summary>
     [ObservableProperty]
     public partial bool IsBusy { get; set; }
@@ -174,6 +202,9 @@ internal sealed partial class SignInViewModel : ObservableObject
     /// <summary>The heading over the list of people who signed in on this computer before.</summary>
     public string PreviousPeopleHeadingText => "Startup_SignIn.PreviousPeopleHeading".GetLocalized();
 
+    /// <summary>Why the list beside the form is empty when the store could not be read.</summary>
+    public string PreviousPeopleUnavailableText => "Startup_SignIn.PreviousPeopleUnavailable".GetLocalized();
+
     /// <summary>The one action that confirms a sign-in.</summary>
     public string SignInActionText => "Startup_SignIn.SignInAction".GetLocalized();
 
@@ -188,9 +219,13 @@ internal sealed partial class SignInViewModel : ObservableObject
     /// <param name="value">The new value, which is not read here.</param>
     partial void OnIsBusyChanged(bool value) => OnPropertyChanged(nameof(CanSignIn));
 
-    /// <summary>Whether the message strip is shown follows every change to the message.</summary>
+    /// <summary>A run of derived state follows every change to the message.</summary>
     /// <param name="value">The new value, which is not read here.</param>
     partial void OnMessageChanged(string? value) => OnPropertyChanged(nameof(HasMessage));
+
+    /// <summary>The offer column follows every change to whether the read failed.</summary>
+    /// <param name="value">The new value, which is not read here.</param>
+    partial void OnIsOfferUnavailableChanged(bool value) => OnPropertyChanged(nameof(ShowOffer));
 
     /// <summary>The switch between the form and the new-password panel follows every change to that flag.</summary>
     /// <param name="value">The new value, which is not read here.</param>
@@ -353,22 +388,28 @@ internal sealed partial class SignInViewModel : ObservableObject
     /// <remarks>
     /// It is a read the stage performs for itself and never a reason to refuse a sign-in: a store that cannot
     /// answer leaves the list empty and the ordinary form in full working order (FR-015). The list is cleared
-    /// before it is filled, so a second read cannot show a person the store no longer holds.
+    /// before it is filled, so a second read cannot show a person the store no longer holds. Whether the read
+    /// failed is kept alongside it, so the column can say why it is empty rather than disappearing.
     /// </remarks>
     public async Task LoadPreviousPeopleAsync()
     {
         PreviousPeople.Clear();
+        IsOfferUnavailable = false;
 
-        var people = await _previousSignIns
+        var answer = await _previousSignIns
             .ReadAsync(_machine.RegisteredComputer?.Id ?? 0, CancellationToken.None)
             .ConfigureAwait(true);
 
-        foreach (var person in people)
+        foreach (var person in answer.People)
         {
             PreviousPeople.Add(person);
         }
 
+        IsOfferUnavailable = !answer.ReadOk;
+
         OnPropertyChanged(nameof(HasPreviousPeople));
+        OnPropertyChanged(nameof(ShowOffer));
+        OnPropertyChanged(nameof(PreviousPeopleScopeText));
     }
 
     /// <summary>

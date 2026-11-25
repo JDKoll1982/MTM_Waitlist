@@ -41,7 +41,6 @@ digraph StartupLaunch2 {
     style="rounded,dashed"; penwidth=1.5; labeljust=l; labelloc=t; margin=8;
     db_employee [shape=cylinder, label="sp_core_employee_\nby_identifier_get", fillcolor="#EDEDED", fontname="Consolas"];
     db_prev [shape=cylinder, label="sp_auth_user_\nprevious_sign_ins", fillcolor="#EDEDED", fontname="Consolas"];
-    x_offer [shape=note, label="[REFACTOR] the offer vanishes\nwhen unread, offers people\nwho cannot sign in, and\nnever says how many\npeople use this computer", fillcolor="#FFD6D6", color="#C62828", style="filled,dashed"];
     db_cred [shape=cylinder, label="sp_auth_user_\ncredential_get", fillcolor="#EDEDED", fontname="Consolas"];
     db_user [shape=cylinder, label="sp_auth_user_row_get\nsp_core_account_\nsetup_create", fillcolor="#EDEDED", fontname="Consolas"];
   }
@@ -49,15 +48,15 @@ digraph StartupLaunch2 {
   u_signin -> v_signin -> s_ident -> db_employee [style=invis, constraint=false];
   { rank=same; d_ident; s_people; db_prev; }
   d_ident -> s_people -> db_prev [style=invis, constraint=false];
-  { rank=same; v_setup; s_cred; x_offer; }
-  v_setup -> s_cred -> x_offer [style=invis, constraint=false];
-  { rank=same; x_from; s_session; db_cred; }
-  x_from -> s_session -> db_cred [style=invis, constraint=false];
-  { rank=same; x_next; s_account; db_user; }
-  x_next -> s_account -> db_user [style=invis, constraint=false];
+  { rank=same; v_setup; s_cred; db_cred; }
+  v_setup -> s_cred -> db_cred [style=invis, constraint=false];
+  { rank=same; x_from; s_session; db_user; }
+  x_from -> s_session -> db_user [style=invis, constraint=false];
+  { rank=same; x_next; s_account; }
+  x_next -> s_account [style=invis, constraint=false];
   v_signin -> d_ident -> v_setup -> x_from -> x_next [style=invis, constraint=true];
   s_ident -> s_people -> s_cred -> s_session -> s_account [style=invis, constraint=true];
-  db_employee -> db_prev -> x_offer -> db_cred -> db_user [style=invis, constraint=true];
+  db_employee -> db_prev -> db_cred -> db_user [style=invis, constraint=true];
   x_from -> v_signin;
   v_signin -> u_signin [label="bind", style=dashed, color="#8250DF"];
   v_signin -> s_ident [label="Enter"];
@@ -72,6 +71,5 @@ digraph StartupLaunch2 {
   s_account -> db_user [label="writes"];
   v_signin -> s_people [label="offer", style=dashed, color="#B7791F"];
   s_people -> db_prev [style=dotted];
-  s_people -> x_offer [label="needs", style=dashed, color="#C62828", arrowhead=none, constraint=false];
   s_session -> x_next [label="signed in"];
 }

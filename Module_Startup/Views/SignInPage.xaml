@@ -168,9 +168,13 @@
                 Width="1"
                 Margin="20,0"
                 Background="{ThemeResource CardStrokeColorDefaultBrush}"
-                Visibility="{x:Bind ViewModel.HasPreviousPeople, Mode=OneWay}" />
+                Visibility="{x:Bind ViewModel.ShowOffer, Mode=OneWay}" />
 
-            <!-- The people who signed in here before: one card each, drawn on the right of the form (FR-048). -->
+            <!--
+                The people who signed in here before: one card each, drawn on the right of the form (FR-048). The
+                column stays when the read fails and says why it is empty, so an absent offer is never mistaken for
+                a computer nobody has used.
+            -->
             <ScrollViewer
                 Grid.Column="2"
                 MaxWidth="300"
@@ -179,12 +183,24 @@
                     x:Name="PreviousPeoplePanel"
                     AutomationProperties.AutomationId="SignInWindow_PreviousPeoplePanel"
                     Spacing="8"
-                    Visibility="{x:Bind ViewModel.HasPreviousPeople, Mode=OneWay}">
+                    Visibility="{x:Bind ViewModel.ShowOffer, Mode=OneWay}">
                     <TextBlock
                         AutomationProperties.AutomationId="SignInWindow_PreviousPeopleHeading"
                         Style="{ThemeResource BodyStrongTextBlockStyle}"
                         Text="{x:Bind ViewModel.PreviousPeopleHeadingText}"
                         TextWrapping="Wrap" />
+                    <TextBlock
+                        AutomationProperties.AutomationId="SignInWindow_PreviousPeopleScope"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind ViewModel.PreviousPeopleScopeText, Mode=OneWay}"
+                        TextWrapping="Wrap"
+                        Visibility="{x:Bind ViewModel.HasPreviousPeople, Mode=OneWay}" />
+                    <InfoBar
+                        AutomationProperties.AutomationId="SignInWindow_PreviousPeopleUnavailable"
+                        IsClosable="False"
+                        IsOpen="{x:Bind ViewModel.IsOfferUnavailable, Mode=OneWay}"
+                        Message="{x:Bind ViewModel.PreviousPeopleUnavailableText}"
+                        Severity="Informational" />
                     <ItemsControl
                         AutomationProperties.AutomationId="SignInWindow_PreviousPeople"
                         ItemsSource="{x:Bind ViewModel.PreviousPeople}">

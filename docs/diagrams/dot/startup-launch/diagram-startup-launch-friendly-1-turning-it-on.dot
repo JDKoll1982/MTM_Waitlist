@@ -26,7 +26,6 @@ digraph StartupFriendly1 {
     v_limits [shape=box, label="One step at a time,\neach with a time\nlimit", fillcolor="#EFE3FF"];
     d_ready [shape=diamond, label="Is this computer\nset up yet?", fillcolor="#FFF1C9", color="#B7791F", margin="0.01,0.01"];
     x_next [shape=cds, label="[To Sheet 2]\nSigning in", fillcolor="#E8F0FF", color="#1F6FEB", style="filled,dashed"];
-    n_authority [shape=note, label="Worth fixing: the setup\nscreen says Administrator,\nbut only IT Department\ncan unlock it.", fillcolor="#FFD6D6", color="#C62828", style="filled,dashed"];
   }
   subgraph cluster_svc {
     label="3 · What it does"; fontcolor="#0A5A4F"; color="#0F7B6C";
@@ -49,10 +48,8 @@ digraph StartupFriendly1 {
   u_setup -> d_ready -> s_settings -> d_record [style=invis, constraint=false];
   { rank=same; u_signin; x_next; s_store; d_place; }
   u_signin -> x_next -> s_store -> d_place [style=invis, constraint=false];
-  { rank=same; n_authority; s_computer; }
-  n_authority -> s_computer [style=invis, constraint=false];
   u_launch -> u_setup -> u_signin [style=invis, constraint=true];
-  v_limits -> d_ready -> x_next -> n_authority [style=invis, constraint=true];
+  v_limits -> d_ready -> x_next [style=invis, constraint=true];
   s_pictures -> s_settings -> s_store -> s_computer [style=invis, constraint=true];
   d_settings -> d_record -> d_place [style=invis, constraint=true];
   u_launch -> v_limits [label="start"];
@@ -63,7 +60,6 @@ digraph StartupFriendly1 {
   s_computer -> d_record;
   s_computer -> d_place;
   d_ready -> u_setup [label="no"];
-  u_setup -> n_authority [label="says"];
   u_setup -> d_place [label="writes"];
   d_ready -> x_next [label="yes"];
   x_next -> u_signin;

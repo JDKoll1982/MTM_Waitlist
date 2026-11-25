@@ -9,7 +9,12 @@
     "kind": "stage",
     "stage": "sign-in",
     "viewports": [
-      { "name": "stage", "width": 780, "height": 640, "scale": 1 }
+      {
+        "name": "stage",
+        "width": 780,
+        "height": 640,
+        "scale": 1
+      }
     ]
   },
   "before": {
@@ -28,9 +33,27 @@
     "mockup": "mockups/terminal-aware-offer-after.html"
   },
   "states": [
-    { "name": "default", "applies_to": ["before", "after"] },
-    { "name": "state-few", "applies_to": ["before", "after"] },
-    { "name": "state-solo", "applies_to": ["before", "after"] }
+    {
+      "name": "default",
+      "applies_to": [
+        "before",
+        "after"
+      ]
+    },
+    {
+      "name": "state-few",
+      "applies_to": [
+        "before",
+        "after"
+      ]
+    },
+    {
+      "name": "state-solo",
+      "applies_to": [
+        "before",
+        "after"
+      ]
+    }
   ],
   "callouts": [
     "The column now says whether one person or many have signed in on this computer, from the rows the read already returns.",
@@ -90,7 +113,14 @@
     }
   ],
   "workflow_refs": [
-    { "sheet": 2, "nodes": ["v_signin", "s_people", "x_offer"] }
+    {
+      "sheet": 2,
+      "nodes": [
+        "v_signin",
+        "s_people",
+        "db_prev"
+      ]
+    }
   ],
   "design_system": {
     "resources": [
@@ -102,10 +132,21 @@
     ]
   },
   "approval": {
-    "approved_at": null,
-    "approved_by": null,
-    "sources_sha256": null,
-    "rendered_sha256": null,
-    "design_system_sha256": null
+    "approved_at": "2026-11-25T05:50:11-06:00",
+    "approved_by": "John Koll",
+    "sources_sha256": "b5a510e686a0bc9d02fab20d069a871ab463b572ecfc1d9de46453afc68d0388",
+    "rendered_sha256": {
+      "pngs/terminal-aware-offer-after-default-stage.png": "65b13eeb3d3adc0c28b3021d14b09f35ab467b35c471cb44bc9efc69ea572aa7",
+      "pngs/terminal-aware-offer-after-state-few-stage.png": "a6889a63c8879bb9cc2e132e101521934b2820b285be243166663850112d897c",
+      "pngs/terminal-aware-offer-after-state-solo-stage.png": "c7ecf2fc2bba02de408b465b29c957887ec147ff65b683c63395b5acefd1c0b5",
+      "pngs/terminal-aware-offer-after.png": "65b13eeb3d3adc0c28b3021d14b09f35ab467b35c471cb44bc9efc69ea572aa7",
+      "pngs/terminal-aware-offer-before-default-stage.png": "540edeae5aaf0b2c995b057794e0bebfb905d17b7ee2a232d0bcdb5012b935ff",
+      "pngs/terminal-aware-offer-before-state-few-stage.png": "0c75c1c3f0f76c28fef7527405917faf5d948a469e057b246cf3deb50aef13fe",
+      "pngs/terminal-aware-offer-before-state-solo-stage.png": "4ac331d6ab816fd18ffe17e4b3bad8e3bd4125656e20fc27459cba0cf60b879d",
+      "pngs/terminal-aware-offer-before.png": "540edeae5aaf0b2c995b057794e0bebfb905d17b7ee2a232d0bcdb5012b935ff",
+      "terminal-aware-offer-comparison.pdf": "c37f94a57d217d82f302934fc0572c2118aad8aee6f4ce7022543afd6abbbb09",
+      "terminal-aware-offer-comparison.png": "ec483ab6dca7e15795ab04ee1d81f9c47c26ff25a6a3eefcb4c5ad5f116ba062"
+    },
+    "design_system_sha256": "6cc10e88fd5302d8a734cb06a4fa072cdf1969c9038d4156d725c818e9dbc30a"
   }
 }

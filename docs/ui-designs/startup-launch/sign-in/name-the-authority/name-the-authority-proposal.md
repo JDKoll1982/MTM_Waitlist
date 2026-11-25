@@ -2,15 +2,15 @@
 
 Workflow: `startup-launch` · Screen: sign in · Refactor: `name-the-authority`
 
-Proposed by: GitHub Copilot (proposal only) · Date: 2026-11-24 · Design record:
+Proposed by: GitHub Copilot · Date: 2026-11-24 · Approved and implemented: 2026-11-25 · Design record:
 `name-the-authority-design.json`
 
 **Flow source.** `startup-launch` is mapped as Diagram 5 in
-[`../../../diagrams/pdf/startup-launch/diagram-startup-launch.pdf`](../../../diagrams/pdf/startup-launch/diagram-startup-launch.pdf).
+[`../../../../diagrams/pdf/startup-launch/diagram-startup-launch.pdf`](../../../../diagrams/pdf/startup-launch/diagram-startup-launch.pdf).
 This design cites sheet 2 (`v_signin`, `v_setup`). The shared finding — the startup screens name an
 authority the role catalogue retired — is flagged once, as `x_authority` on sheet 1, and recorded as
 S1 in §6 of
-[`../../../diagrams/diagram-workflow-refactor-notes.md`](../../../diagrams/diagram-workflow-refactor-notes.md).
+[`../../../../diagrams/diagram-workflow-refactor-notes.md`](../../../../diagrams/diagram-workflow-refactor-notes.md).
 
 **BEFORE is a reconstruction.** The application was not driven for this proposal: the set-up panel needs
 an employee number the plant system knows and the store does not, and the refusal needs five spent
@@ -19,6 +19,8 @@ attempts. The mockup is built from `Module_Startup/Views/SignInPage.xaml`,
 not been captured.
 
 ## A. Current State
+
+*Applied 25 November 2026 — this section records the state as it stood before the change; see §F.*
 
 Two pieces of help text on this stage tell the person who can help, and both name somebody who cannot.
 
@@ -88,8 +90,23 @@ Observable, not measured:
 | Validation and business rules | none: the note is text, and the refusal is chosen by the existing code |
 | Regression risk | the new note is longer than the old one and the panel is at the stage's height; it was measured to stay on one line at the 780 × 640 stage. A longer translation would wrap and push the buttons into the page's existing scroll area |
 
+## F. Implementation Record
+
+Applied on 25 November 2026.
+
+- `SetUpPanelViewModel.HeadingText`, `NamePromptText` and `PermissionNoteText` now resolve
+  `Startup_SetUp.Heading`, `.NamePrompt` and `.PermissionNote` instead of holding literals.
+- `Strings/en-us/Resources.resw` carries the three new keys, and `Startup_SignIn.RefusedAttemptsExhausted`
+  now ends "Ask your lead or the IT Department to issue a new temporary PIN."
+- No XAML, store, route or validation code changed. `AccountSetupResult.RoleCode` is still not shown
+  anywhere; that is a separate question from the wording.
+
+Verified by building the solution (no warnings, no errors) and running the 428 startup tests, including
+`SetUpPanelViewModelTests`, whose permission-note assertion now proves the value is a resource string
+rather than the retired literal.
+
 ## Approval
 
-This proposal is **not approved**. Once the design is accepted, record it with
-`render_mockup.py --approve --by "<name>"`; the approval hash covers the mockups, the shared assets and
-the design-system XAML, and any later edit to them invalidates it.
+**Approved** by John Koll on 25 November 2026, after the implementation in §F. The record is written in
+`name-the-authority-design.json`; its hash covers the mockups, the shared assets and the design-system
+XAML, so any later edit to those invalidates it.

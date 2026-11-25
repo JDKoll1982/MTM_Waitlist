@@ -240,7 +240,26 @@ and nothing else, so the PIN is still required and picking a name signs nobody i
 
 #### Scenario: The store cannot be read while somebody signs in
 - **WHEN** the offer cannot be read
-- **THEN** the form is shown on its own and the sign-in still works
+- **THEN** the form is shown with the offer column still in place saying the list could not be read, and the
+  sign-in still works
+
+### The offer says what kind of computer this is
+
+The offer says how many people have signed in on this computer, drawn from the rows the read already returns,
+and it offers only accounts that can still sign in. The read caps at six, so fewer than six rows is the exact
+number of people and six rows means six or more.
+
+#### Scenario: One person uses this computer
+- **WHEN** one person has signed in on this computer
+- **THEN** the column says one person has signed in
+
+#### Scenario: Six or more people use this computer
+- **WHEN** the read returns its six most recent people
+- **THEN** the column says six or more have signed in, and that the most recent is first
+
+#### Scenario: A person who can no longer sign in signed here before
+- **WHEN** the offer is read
+- **THEN** a deactivated account is not offered, because the next stage would refuse it
 
 ### The offer of previous people is shown whole beside the sign-in form
 

@@ -204,6 +204,57 @@ public sealed class LaunchSurfaceMarkupTests
     }
 
     /// <summary>
+    /// The offer column and its divider are shown when there are people to offer or a reason there are none, and
+    /// the reason is stated in the column rather than left to be guessed (FR-015, FR-048).
+    /// </summary>
+    [TestMethod]
+    public void UI_LaunchSurfaceMarkupTests_TheSignInSurface_KeepsTheOfferColumnWhenTheReadFailsAndSaysWhy()
+    {
+        var (document, _) = Load("SignInPage.xaml");
+
+        var panel = document
+            .Descendants()
+            .FirstOrDefault(element => (string?)element.Attribute((s_xaml + "Name")) == "PreviousPeoplePanel");
+
+        Assert.IsNotNull(panel, "The sign-in surface no longer carries the previous-people panel (FR-048).");
+
+        var divider = document
+            .Descendants(s_presentation + "Border")
+            .FirstOrDefault(border => (string?)border.Attribute("Grid.Column") == "1" && (string?)border.Attribute("Width") == "1");
+
+        Assert.IsNotNull(divider, "The rule between the form and the previous people is gone (FR-048).");
+
+        foreach (var element in new[] { panel!, divider! })
+        {
+            Assert.IsTrue(
+                ((string?)element.Attribute("Visibility"))?.Contains("ShowOffer", StringComparison.Ordinal) == true,
+                "The offer no longer follows ShowOffer, so a failed read would take the column away instead of explaining it.");
+        }
+
+        var note = panel!
+            .Descendants(s_presentation + "InfoBar")
+            .ToList();
+
+        Assert.AreEqual(
+            1,
+            note.Count,
+            "The offer column does not carry exactly one note, so an unreadable list has no explanation (FR-015).");
+
+        Assert.AreEqual(
+            "Informational",
+            (string?)note[0].Attribute("Severity"),
+            "The note reads as a stop, but signing in still works with the name typed by hand.");
+
+        Assert.IsTrue(
+            ((string?)note[0].Attribute("IsOpen"))?.Contains("IsOfferUnavailable", StringComparison.Ordinal) == true,
+            "The note is not opened by the failed read, so it would never be seen.");
+
+        Assert.IsTrue(
+            ((string?)note[0].Attribute("Message"))?.Contains("PreviousPeopleUnavailable", StringComparison.Ordinal) == true,
+            "The note's wording is not the localised resource key, so it cannot be translated.");
+    }
+
+    /// <summary>
     /// Choosing one of the previous people fills in the user name and nothing else: the list offers names to type
     /// beside, never a way past the PIN (FR-014, FR-048).
     /// </summary>

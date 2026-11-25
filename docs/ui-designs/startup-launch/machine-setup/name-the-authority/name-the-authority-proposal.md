@@ -2,14 +2,14 @@
 
 Workflow: `startup-launch` · Screen: machine setup · Refactor: `name-the-authority`
 
-Proposed by: GitHub Copilot (proposal only) · Date: 2026-11-24 · Design record:
+Proposed by: GitHub Copilot · Date: 2026-11-24 · Approved and implemented: 2026-11-25 · Design record:
 `name-the-authority-design.json`
 
 **Flow source.** `startup-launch` is mapped as Diagram 5 in
-[`../../../diagrams/pdf/startup-launch/diagram-startup-launch.pdf`](../../../diagrams/pdf/startup-launch/diagram-startup-launch.pdf).
+[`../../../../diagrams/pdf/startup-launch/diagram-startup-launch.pdf`](../../../../diagrams/pdf/startup-launch/diagram-startup-launch.pdf).
 This design cites sheet 1 (`u_setup`, `s_cfg`, `x_authority`); `x_authority` is the finding this proposal
 answers, recorded as S1 in §6 of
-[`../../../diagrams/diagram-workflow-refactor-notes.md`](../../../diagrams/diagram-workflow-refactor-notes.md).
+[`../../../../diagrams/diagram-workflow-refactor-notes.md`](../../../../diagrams/diagram-workflow-refactor-notes.md).
 
 **BEFORE is a reconstruction.** The application was not driven for this proposal: the stage appears only
 when this computer has no configuration, which needs an unconfigured machine and a store. The mockup is
@@ -17,6 +17,8 @@ built from `Module_Startup/Views/MachineSetupPage.xaml`, `MachineSetupViewModel`
 The real screen has not been captured.
 
 ## A. Current State
+
+*Applied 25 November 2026 — this section records the wording as it stood before the change; see §F.*
 
 This stage is the only way a computer joins the fleet, and it is shown before anybody signs in. It asks
 for an account that may configure the machine, and the gate behind it answers from one permission key:
@@ -100,8 +102,24 @@ Observable, not measured:
 The five key values are the whole change. No test asserts their text; the guardrails that matter here —
 `InlineSqlAuditTests` and `RetiredSymbolAuditTests` — are unaffected.
 
+## F. Implementation Record
+
+Applied on 25 November 2026 as the five `Strings/en-us/Resources.resw` values listed in §B. No other
+application file changed, and the wording matches the AFTER mockup exactly, so there is no intentional
+deviation to record.
+
+Verified by building the solution (no warnings, no errors) and running the 420 startup tests, and by
+checking the new values at the stage's 520 × 560 size: the subtitle still wraps to two lines and the
+label and placeholder stay on one line.
+
+The `x_authority` flag on sheet 1 of the startup-launch diagram and its plain-language twin described
+this finding, so both were removed and the two PDFs re-rendered and re-checked against the print
+contract. See §6 of
+[`diagram-workflow-refactor-notes.md`](../../../../diagrams/diagram-workflow-refactor-notes.md).
+
 ## Approval
 
-This proposal is **not approved**. Once the design is accepted, record it with
-`render_mockup.py --approve --by "<name>"`; the approval hash covers the mockups, the shared assets and
-the design-system XAML, and any later edit to them invalidates it.
+**Approved** by John Koll on 25 November 2026, after the implementation in §F. The record is written in
+`name-the-authority-design.json`; its hash covers the mockups, the shared assets and the design-system
+XAML, so any later edit to those invalidates it. Re-record with
+`render_mockup.py --approve --by "<name>"` if that happens.

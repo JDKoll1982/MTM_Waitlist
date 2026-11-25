@@ -26,7 +26,6 @@ digraph StartupLaunch1 {
     v_pipe [shape=box, label="LaunchPipeline\nRunAsync", fillcolor="#EFE3FF"];
     v_feed [shape=box, label="SplashViewModel\nfeed", fillcolor="#EFE3FF"];
     d_conf [shape=diamond, label="configured?", fillcolor="#FFF1C9", color="#B7791F", margin="0.01,0.01"];
-    x_authority [shape=note, label="[REFACTOR] setup asks for an\nAdministrator; the gate\nchecks IT Department", fillcolor="#FFD6D6", color="#C62828", style="filled,dashed"];
   }
   subgraph cluster_svc {
     label="3 · Services (DI)"; fontcolor="#0A5A4F"; color="#0F7B6C";
@@ -36,6 +35,7 @@ digraph StartupLaunch1 {
     s_reach [shape=box, label="StoreReachability\nStep", fillcolor="#D6F5F0"];
     s_ready [shape=box, label="MachineReadiness\nStep", fillcolor="#D6F5F0"];
     x_block [shape=cds, label="[To Sheet 3]\nBlocked", fillcolor="#E8F0FF", color="#1F6FEB", style="filled,dashed"];
+    x_signin [shape=cds, label="[To Sheet 2]\nSignIn", fillcolor="#E8F0FF", color="#1F6FEB", style="filled,dashed"];
   }
   subgraph cluster_data {
     label="4 · Store"; fontcolor="#5A4300"; color="#8A6D3B";
@@ -44,7 +44,6 @@ digraph StartupLaunch1 {
     db_lookup [shape=cylinder, label="sp_core_computers_\nregistry_lookup", fillcolor="#EDEDED", fontname="Consolas"];
     db_config [shape=cylinder, label="sp_core_computers_\nregistry_get_all", fillcolor="#EDEDED", fontname="Consolas"];
     db_save [shape=cylinder, label="sp_core_computers_\nregistry_upsert", fillcolor="#EDEDED", fontname="Consolas"];
-    x_signin [shape=cds, label="[To Sheet 2]\nSignIn", fillcolor="#E8F0FF", color="#1F6FEB", style="filled,dashed"];
   }
   { rank=same; u_splash; v_app; s_budget; db_settings; }
   u_splash -> v_app -> s_budget -> db_settings [style=invis, constraint=false];
@@ -54,12 +53,10 @@ digraph StartupLaunch1 {
   v_feed -> s_reach -> db_config [style=invis, constraint=false];
   { rank=same; d_conf; s_ready; db_save; }
   d_conf -> s_ready -> db_save [style=invis, constraint=false];
-  { rank=same; x_authority; x_block; x_signin; }
-  x_authority -> x_block -> x_signin [style=invis, constraint=false];
   u_splash -> u_setup [style=invis, constraint=true];
-  v_app -> v_pipe -> v_feed -> d_conf -> x_authority [style=invis, constraint=true];
-  s_budget -> s_cfg -> s_reach -> s_ready -> x_block [style=invis, constraint=true];
-  db_settings -> db_lookup -> db_config -> db_save -> x_signin [style=invis, constraint=true];
+  v_app -> v_pipe -> v_feed -> d_conf [style=invis, constraint=true];
+  s_budget -> s_cfg -> s_reach -> s_ready -> x_block -> x_signin [style=invis, constraint=true];
+  db_settings -> db_lookup -> db_config -> db_save [style=invis, constraint=true];
   v_app -> v_pipe [label="RunAsync"];
   v_pipe -> v_feed [label="feed", style=dashed, color="#8250DF"];
   v_feed -> u_splash [label="bind", style=dashed, color="#8250DF"];
@@ -73,7 +70,6 @@ digraph StartupLaunch1 {
   s_ready -> db_config;
   s_ready -> d_conf;
   d_conf -> u_setup [label="no"];
-  u_setup -> x_authority [label="says"];
   u_setup -> db_save [label="writes"];
   d_conf -> x_signin [label="yes"];
   v_pipe -> x_block [label="fails", color="#C62828", penwidth=2.0];

@@ -179,6 +179,85 @@ public sealed class SignInViewModelTests
     }
 
     [TestMethod]
+    public async Task ViewModel_SignInViewModelTests_LoadPreviousPeopleCommand_WhenTheStoreCannotAnswerKeepsTheColumnAndSaysWhy()
+    {
+        // Arrange: a store that is unreachable, which must not stop anybody signing in (FR-015).
+        var store = new StubAccountStore(TemporaryAccount()) { Fails = true };
+        var viewModel = Build(store);
+
+        // Act
+        await viewModel.LoadPreviousPeopleAsync();
+
+        // Assert: the column stays where it is and says the list could not be read, rather than vanishing and
+        // leaving the person to guess whether nobody has used this computer.
+        Assert.IsTrue(viewModel.IsOfferUnavailable);
+        Assert.IsTrue(viewModel.ShowOffer);
+        Assert.IsFalse(viewModel.HasPreviousPeople, "a failed read offers nobody");
+        Assert.AreEqual(
+            string.Empty,
+            viewModel.PreviousPeopleScopeText,
+            "a column with no people says nothing about how many there are");
+        Assert.AreEqual(
+            "Startup_SignIn.PreviousPeopleUnavailable".GetLocalized(),
+            viewModel.PreviousPeopleUnavailableText);
+    }
+
+    [TestMethod]
+    public async Task ViewModel_SignInViewModelTests_LoadPreviousPeopleCommand_WhenNobodyHasSignedInShowsNoColumn()
+    {
+        // Arrange: a store that answers, and nothing recorded against this computer.
+        var viewModel = Build(new StubAccountStore(TemporaryAccount()));
+
+        // Act
+        await viewModel.LoadPreviousPeopleAsync();
+
+        // Assert: a readable empty list is an answer, so there is nothing to explain and no column to explain it in.
+        Assert.IsFalse(viewModel.IsOfferUnavailable, "a readable empty list is not a failed read");
+        Assert.IsFalse(viewModel.ShowOffer, "an empty but readable list shows no column");
+    }
+
+    [TestMethod]
+    public async Task ViewModel_SignInViewModelTests_LoadPreviousPeopleCommand_WhenThisComputerHasNoRecordShowsNoColumn()
+    {
+        // Arrange: a machine the store has never held, so the read is never attempted.
+        var viewModel = Build(new StubAccountStore(TemporaryAccount()), identifierSignIn: null, recorded: false);
+
+        // Act
+        await viewModel.LoadPreviousPeopleAsync();
+
+        // Assert: nothing was tried, so nothing failed and nothing is explained.
+        Assert.IsFalse(viewModel.IsOfferUnavailable, "a computer with no record has nothing to explain");
+        Assert.IsFalse(viewModel.ShowOffer);
+    }
+
+    [TestMethod]
+    [DataRow(1, "Startup_SignIn.PreviousPeopleScopeOne")]
+    [DataRow(3, "Startup_SignIn.PreviousPeopleScopeFew")]
+    [DataRow(5, "Startup_SignIn.PreviousPeopleScopeFew")]
+    [DataRow(6, "Startup_SignIn.PreviousPeopleScopeMany")]
+    public async Task ViewModel_SignInViewModelTests_LoadPreviousPeopleCommand_StatesHowManyPeopleHaveSignedInHere(
+        int people,
+        string expectedKey)
+    {
+        // Arrange: the read caps at six rows, so six rows means six or more rather than exactly six.
+        var store = new StubAccountStore(TemporaryAccount());
+
+        for (var index = 0; index < people; index++)
+        {
+            store.PreviousPeople.Add(Person($"KSmith{index}", $"K. Smith {index}"));
+        }
+
+        var viewModel = Build(store);
+
+        // Act
+        await viewModel.LoadPreviousPeopleAsync();
+
+        // Assert
+        Assert.AreEqual(people, viewModel.PreviousPeople.Count);
+        Assert.AreEqual(expectedKey.GetLocalized(), viewModel.PreviousPeopleScopeText);
+    }
+
+    [TestMethod]
     public async Task ViewModel_SignInViewModelTests_ChoosePreviousPersonCommand_WhenAPersonIsChosenFillsInTheUserNameAndNothingElse()
     {
         // Arrange

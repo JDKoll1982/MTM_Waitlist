@@ -21,9 +21,10 @@ namespace MTM_Waitlist.Module_Startup.Services;
 /// time, so the list offers somebody to type beside and the PIN is still required (FR-014).
 /// </para>
 /// <para>
-/// <b>A store that cannot be read is an empty list, never a failure.</b> The list is a convenience beside a form
-/// that works without it, so a store outage must not stop somebody signing in: the fault is recorded and the
-/// stage simply shows the form alone (FR-015).
+/// <b>A store that cannot be read leaves an empty list, never a failure.</b> The list is a convenience beside a
+/// form that works without it, so a store outage must not stop somebody signing in: the fault is recorded and the
+/// stage carries on with the form alone (FR-015). The answer still says the read failed, so the stage can say why
+/// the offer is absent instead of leaving a column-shaped silence.
 /// </para>
 /// </remarks>
 public sealed class PreviousSignInService
@@ -43,14 +44,17 @@ public sealed class PreviousSignInService
     /// </summary>
     /// <param name="computerId">This computer's registry identifier, or <c>0</c> when it has no record yet.</param>
     /// <param name="cancellationToken">Cancels the store read.</param>
-    /// <returns>The people to offer, most recent first, and an empty list when there are none or none could be read.</returns>
-    public async Task<IReadOnlyList<PreviousSignIn>> ReadAsync(long computerId, CancellationToken cancellationToken)
+    /// <returns>
+    /// The people to offer, most recent first, and whether the store answered. A computer with no record, or nobody
+    /// to offer, reads as an answered empty list; only a failed read reports <c>ReadOk: false</c>.
+    /// </returns>
+    public async Task<PreviousSignInResult> ReadAsync(long computerId, CancellationToken cancellationToken)
     {
         if (computerId <= 0)
         {
             // A computer with no registry row has no sign-ins recorded against it, so there is nothing to ask the
-            // store and no reason to make the round trip.
-            return [];
+            // store and no reason to make the round trip. Nothing failed here, so the stage has nothing to explain.
+            return new PreviousSignInResult([], ReadOk: true);
         }
 
         try
@@ -63,18 +67,20 @@ public sealed class PreviousSignInService
                     cancellationToken)
                 .ConfigureAwait(false);
 
-            return (MTM_Waitlist.Module_Startup.Models.PreviousSignIn[])[.. rows.Select(Map).Where(person => person is not null).Select(person => person!)];
+            PreviousSignIn[] people = [.. rows.Select(Map).Where(person => person is not null).Select(person => person!)];
+
+            return new PreviousSignInResult(people, ReadOk: true);
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
-            // The list is a convenience beside the form, so a store that cannot answer leaves the form on its own
-            // rather than stopping the sign-in (FR-015).
+            // The list is a convenience beside the form, so a store that cannot answer leaves the form working
+            // rather than stopping the sign-in (FR-015). The answer says it was not read, so the stage can say so.
             AppLog.Error(
                 "PreviousSignIn",
                 exception,
                 "The people who signed in on this computer before could not be read, so the sign-in form was shown without them.");
 
-            return [];
+            return new PreviousSignInResult([], ReadOk: false);
         }
     }
 

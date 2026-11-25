@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
+using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Startup.Services;
 
 namespace MTM_Waitlist.Module_Startup.ViewModels;
@@ -101,13 +102,16 @@ internal sealed partial class SetUpPanelViewModel : ObservableObject
     public partial bool IsBusy { get; set; }
 
     /// <summary>What the panel says about why it is asking.</summary>
-    public string HeadingText => "You are not set up for the waitlist yet";
+    public string HeadingText => "Startup_SetUp.Heading".GetLocalized();
 
     /// <summary>What the panel says about the name it is confirming (FR-007).</summary>
-    public string NamePromptText => "Your name from the plant system, which you can correct:";
+    public string NamePromptText => "Startup_SetUp.NamePrompt".GetLocalized();
 
-    /// <summary>What the panel says about permission, in the terms FR-011 asks for.</summary>
-    public string PermissionNoteText => "A higher permission level must be requested from IT.";
+    /// <summary>
+    /// What the panel says about permission, in the terms FR-011 asks for: the level the account receives and the
+    /// role that can raise it.
+    /// </summary>
+    public string PermissionNoteText => "Startup_SetUp.PermissionNote".GetLocalized();
 
     /// <summary>Whether there is anything for the panel to say.</summary>
     public bool HasMessage => !string.IsNullOrWhiteSpace(Message);

@@ -4,8 +4,9 @@ Companion to the five print-ready flowchart PDFs in this folder. Everything here
 lifted straight into `/speckit.specify`: the comparison matrix supplies the *current state*, the hotspot
 list supplies the *why*, and the Spec Kit inputs supply the *what*.
 
-Nothing in this document is implemented. It records what the code does today, as read from the
-repository on the date below.
+Nothing in this document is implemented, with one exception: the four findings in §6 (S1 to S4) were fixed
+on 25 November 2026 and are marked so there. Everything else records what the code does today, as read from
+the repository on the date below.
 
 Source revision: `main` working tree at time of writing. Diagrams verified at US Letter landscape
 (792 × 612 pt), 0.5 in margins, ≥ 9.5 pt effective text, 12–16 nodes per sheet.
@@ -365,8 +366,9 @@ Every PDF was checked programmatically before this file was written:
   genuinely smaller flows (part/sequence and dunnage setup, save, and result), not compressed dense
   graphs; the 17-shape sheets include their plain-language note and `[REFACTOR]` callouts, which occupy
   their own lane cells rather than a row;
-- every sheet carries at least one `[REFACTOR]` flag where §3 records a finding, in both the technical
-  and the plain-language variant (8 of 8 friendly sheets, 1 flag each).
+- every sheet carried at least one `[REFACTOR]` flag where §3 records a finding, in both the technical
+  and the plain-language variant (8 of the 10 friendly sheets, 1 flag each). Both startup-launch flags
+  have since been removed, because their findings were fixed (§6).
 
 No `.cs` file, test, or inline SQL was added to the solution for this work; `InlineSqlAuditTests` and
 `RetiredSymbolAuditTests` are unaffected.
@@ -376,10 +378,15 @@ No `.cs` file, test, or inline SQL was added to the solution for this work; `Inl
 ## 6. Startup launch — findings recorded on Diagram 5
 
 Diagram 5 was added after this document's hotspots were written, so its findings are recorded here.
-Two `[REFACTOR]` flags carry them: `x_authority` on sheet 1 (the words the setup stage uses) and
-`x_offer` on sheet 2 (the people offered on the sign-in stage, which now carries three related defects
-in one flag because the sheet is at its shape ceiling). The plain-language sheets carry the same two
-flags.
+Two `[REFACTOR]` flags carried them: `x_authority` on sheet 1 (the words the setup stage uses) and
+`x_offer` on sheet 2 (the people offered on the sign-in stage, which carried three related defects in one
+flag because the sheet is at its shape ceiling). The plain-language sheets carried the same two flags.
+
+All four findings were fixed on 25 November 2026, so both flags and their plain-language twins were
+removed: sheet 1 keeps 16 shapes and sheet 2 keeps 15, and the plain-language sheets keep 13 and 14. No
+`[REFACTOR]` flag remains on Diagram 5. Sheet 1's `[To Sheet 2] SignIn` connector also moved into the
+service lane beside `[To Sheet 3] Blocked`, because the `configured? → SignIn` label had been landing on
+the machine-readiness box; the flow it describes is unchanged.
 
 ### S1 — The startup screens name an Administrator the catalogue retired
 
@@ -403,6 +410,23 @@ held by Production Lead, Setup Lead, Material Handler Lead, Plant Manager, IT De
 A person following the label looks for an account type that no longer exists, and the same screen tells
 them a different one in its refusal. The sign-in stage's "an administrator" is the same drift.
 
+**Fixed 25 November 2026.** The five machine-setup values in `Strings/en-us/Resources.resw` now name
+Developer and IT Department, and the design behind the change is recorded in
+[`name-the-authority-proposal.md`](../ui-designs/startup-launch/machine-setup/name-the-authority/name-the-authority-proposal.md):
+
+| Key | Value now |
+| --- | --- |
+| `Startup_MachineSetup.Subtitle` | This computer has not been set up yet. A Developer or IT Department user has to tell it where it stands. |
+| `.SignInNameLabel` | Developer or IT Department user name |
+| `.SignInNameHint` | The user name of a Developer or IT Department account |
+| `.NotAuthorized` | Sign in with a Developer or IT Department account to set this computer up. |
+| `.RefusedSignInRequired` | Type a Developer or IT Department user name and PIN before unlocking setup. |
+
+`.RefusedNotPermitted` and `.AbortSignInDeclined` already said it and were not touched. The gate, the
+permission key, the save and the abort routes are unchanged; the solution builds and the 420 startup
+tests pass. `Startup_SignIn.RefusedAttemptsExhausted` ("Ask an administrator to issue a new temporary
+PIN") is on the sign-in stage rather than this one and is still open.
+
 ### S2 — The set-up panel writes its own English beside localised labels
 
 `MTM_Waitlist.Startup/ViewModels/SetUpPanelViewModel.cs` holds `HeadingText`, `NamePromptText` and
@@ -414,6 +438,14 @@ in the catalogue (`IT Department` is), and the sentence leaves out the fact that
 `sp_core_account_setup_create` assigns the lowest rung of `auth_roles_catalog`
 (`ORDER BY role_rank ASC`), and `AccountSetupResult.RoleCode` is returned to the panel and never shown.
 
+**Fixed 25 November 2026.** The three sentences are resource strings now — `Startup_SetUp.Heading`,
+`.NamePrompt` and `.PermissionNote` — so the panel is translated like the labels beside it. The note reads
+"Your account starts at the lowest level. Ask IT Department.", which names the level the account receives
+and the role that can raise it; the other two keep their English wording. The design is recorded in
+[`name-the-authority-proposal.md`](../ui-designs/startup-launch/sign-in/name-the-authority/name-the-authority-proposal.md).
+`AccountSetupResult.RoleCode` is still not shown anywhere, and the panel's blank-field messages in
+`EnterAsync` are still literals; both are separate from the three sentences this finding named.
+
 ### S3 — The offer keeps a person who can no longer sign in
 
 `Database/StoredProcedures/sp_auth_user_previous_sign_ins_list/create.sql` joins
@@ -421,6 +453,12 @@ in the catalogue (`IT Department` is), and the sentence leaves out the fact that
 `sp_auth_user_credential_get` and `sp_auth_user_row_get` — both carry `u.is_active = 1`. A deactivated
 account therefore stays in "Signed in here before" on every computer it once used, and the credential
 stage refuses it immediately afterwards.
+
+**Fixed 25 November 2026.** The procedure now carries `AND u.is_active = 1` on the join, in both its own
+`create.sql` and `AllSPs.sql`, and its header comment separates the session flag it deliberately ignores
+from the account flag it now honours. No test runs the procedure against a store, so the filter is proven
+by reading the SQL — the gap is recorded in
+[`../living-specs/living-specs-capability-startup-launch.coverage.md`](../living-specs/living-specs-capability-startup-launch.coverage.md).
 
 ### S4 — Nothing says whether this is one person's computer or a shared terminal
 
@@ -438,4 +476,12 @@ The effect is the same column on two very different machines. On a dedicated com
 beside a form that already asks for a name. On a shared terminal it holds the six most recent of dozens,
 with nothing saying when any of them signed in, so the six may all be the previous shift — and the
 person who is not among them still has to type. Nothing on the stage distinguishes the two cases.
+
+**Fixed 25 November 2026, in part.** The column now states how many people have signed in on this
+computer, in the band the read supports: one person, several, or six or more with "most recent first".
+That answers whether this is one person's desk or a shared terminal, from the rows the read already
+returns. The remaining question — *when* the top of the list signed in — is still open, because the read
+returns no time; it is recorded as a deliberate follow-on in
+[`terminal-aware-offer-proposal.md`](../ui-designs/startup-launch/sign-in/terminal-aware-offer/terminal-aware-offer-proposal.md)
+rather than drawn as if it existed.
 

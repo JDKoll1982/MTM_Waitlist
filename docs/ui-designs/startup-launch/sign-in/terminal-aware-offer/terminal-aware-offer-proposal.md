@@ -2,15 +2,15 @@
 
 Workflow: `startup-launch` · Screen: sign in · Refactor: `terminal-aware-offer`
 
-Proposed by: GitHub Copilot (proposal only) · Date: 2026-11-24 · Design record:
+Proposed by: GitHub Copilot · Date: 2026-11-24 · Approved and implemented: 2026-11-25 · Design record:
 `terminal-aware-offer-design.json`
 
 **Flow source.** `startup-launch` is mapped as Diagram 5 in
-[`../../../diagrams/pdf/startup-launch/diagram-startup-launch.pdf`](../../../diagrams/pdf/startup-launch/diagram-startup-launch.pdf).
+[`../../../../diagrams/pdf/startup-launch/diagram-startup-launch.pdf`](../../../../diagrams/pdf/startup-launch/diagram-startup-launch.pdf).
 This design cites sheet 2 (`v_signin`, `s_people`, `x_offer`). `x_offer` is the finding this proposal
 answers, and it now records three related defects in one flag because the sheet is at its shape ceiling;
 the detail is in §6 of
-[`../../../diagrams/diagram-workflow-refactor-notes.md`](../../../diagrams/diagram-workflow-refactor-notes.md).
+[`../../../../diagrams/diagram-workflow-refactor-notes.md`](../../../../diagrams/diagram-workflow-refactor-notes.md).
 
 **BEFORE is a reconstruction.** The application was not driven for this proposal: the stage needs a
 configured machine whose store holds several sign-ins. The mockup is built from
@@ -21,6 +21,8 @@ This refactor sits beside `no-offer-explained`, which answers a different defect
 the column says when the read fails. The two are compatible and neither replaces the other.
 
 ## A. Current State
+
+*Applied 25 November 2026 — this section records the state as it stood before the change; see §F.*
 
 The sign-in stage offers the people who signed in on this computer before, in a column to the right of
 the form behind a divider. Each card shows a display name and the sign-in name and fills in the user name
@@ -111,8 +113,30 @@ answer the remaining question on a shared terminal — is the top of this list t
 That needs a read-shape change and a card change, so it is proposed as a follow-on rather than drawn as if
 it existed.
 
+## F. Implementation Record
+
+Applied on 25 November 2026.
+
+- `SignInViewModel` exposes `PreviousPeopleScopeText`, one band per row count: one, several, or six or
+  more with "most recent first"; an unreadable or empty offer has no line at all.
+- `SignInPage.xaml` draws that line under the offer heading, in the secondary text colour, shown only
+  while there are people to offer.
+- `Strings/en-us/Resources.resw` adds `Startup_SignIn.PreviousPeopleScopeOne`, `.ScopeFew` and
+  `.ScopeMany`.
+- `sp_auth_user_previous_sign_ins_list` gains `AND u.is_active = 1` in its own `create.sql` and in
+  `AllSPs.sql`, and its header comment now separates the session flag it ignores from the account flag it
+  honours. The store itself is not written by this change: the routine ships as SQL and is applied by
+  `Database/DeployDatabase.cmd`.
+
+The solution builds with no warnings and the 428 startup tests pass, including the four bands of
+`ViewModel_SignInViewModelTests_LoadPreviousPeopleCommand_StatesHowManyPeopleHaveSignedInHere`. No test
+runs the procedure against a store, so the `is_active` filter is proven by reading the SQL; that gap is
+recorded in the capability's coverage map.
+
+The timestamp follow-on named in §E is still not built and still needs its own design.
+
 ## Approval
 
-This proposal is **not approved**. Once the design is accepted, record it with
-`render_mockup.py --approve --by "<name>"`; the approval hash covers the mockups, the shared assets and
-the design-system XAML, and any later edit to them invalidates it.
+**Approved** by John Koll on 25 November 2026, after the implementation in §F. The record is written in
+`terminal-aware-offer-design.json`; its hash covers the mockups, the shared assets and the design-system
+XAML, so any later edit to those invalidates it.

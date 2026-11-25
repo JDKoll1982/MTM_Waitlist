@@ -474,7 +474,11 @@ WHERE
 --
 -- A row that has been signed out still counts. `sp_auth_user_active_sessions_clear` revokes the session in
 -- place rather than deleting the row, and somebody who signed in and then signed out did sign in on this
--- computer — which is exactly what the list says. Rows are therefore read regardless of `is_active`.
+-- computer — which is exactly what the list says. Session rows are therefore read regardless of their own
+-- `is_active`. The person, however, must still be active: `sp_auth_user_credential_get` and
+-- `sp_auth_user_row_get` both carry `u.is_active = 1`, and offering a deactivated account would invite a
+-- sign-in the next stage refuses. `core_users_profiles.is_active` is the account's own state and is not the
+-- session flag above.
 --
 -- Six is fixed here rather than passed in: FR-014 names six, nothing else asks this question, and a caller that
 -- could widen it could turn a hint beside a form into a directory export.
@@ -496,6 +500,7 @@ FROM
     INNER JOIN core_users_profiles u ON u.id = s.user_id
 WHERE
     s.computer_id = p_computer_id
+    AND u.is_active = 1
 ORDER BY
     s.issued_utc DESC,
     s.id DESC

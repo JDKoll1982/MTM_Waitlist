@@ -91,7 +91,9 @@ carried and why, so a later reader can see what was withdrawn rather than findin
 What is left of it is the read that replaced it: `sp_auth_user_previous_sign_ins_list` returns the last six
 people who signed in on one computer, most recent first, from the `user_active_sessions` rows the store already
 holds. It carries no payload, no initialisation vector and no key fingerprint, because the list offers a name to
-type beside, not a way past the PIN (FR-014, FR-048).
+type beside, not a way past the PIN (FR-014, FR-048). It offers only accounts that can still sign in: the join
+carries `u.is_active = 1`, as `sp_auth_user_credential_get` and `sp_auth_user_row_get` already do, so a
+deactivated account is not offered a name the next stage would refuse.
 
 ```sql
 CREATE TABLE IF NOT EXISTS auth_remembered_sign_ins (

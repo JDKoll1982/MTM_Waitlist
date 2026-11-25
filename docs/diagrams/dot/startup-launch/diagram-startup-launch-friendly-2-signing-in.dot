@@ -42,7 +42,6 @@ digraph StartupFriendly2 {
     d_accounts [shape=cylinder, label="Accounts\nand roles", fillcolor="#EDEDED", fontname="Consolas"];
     d_pins [shape=cylinder, label="PINs, never shown", fillcolor="#EDEDED", fontname="Consolas"];
     d_recent [shape=cylinder, label="People who signed\nin here before", fillcolor="#EDEDED", fontname="Consolas"];
-    n_offer [shape=note, label="Worth fixing: the list can vanish,\noffer someone who cannot sign in,\nand never say how many people\nuse this computer.", fillcolor="#FFD6D6", color="#C62828", style="filled,dashed"];
   }
   { rank=same; u_signin; x_back; s_name; d_people; }
   u_signin -> x_back -> s_name -> d_people [style=invis, constraint=false];
@@ -55,11 +54,10 @@ digraph StartupFriendly2 {
   u_signin -> u_form -> u_first [style=invis, constraint=true];
   x_back -> d_known -> v_offer [style=invis, constraint=true];
   s_name -> s_pin -> s_session -> s_setup [style=invis, constraint=true];
-  d_people -> d_accounts -> d_pins -> d_recent -> n_offer [style=invis, constraint=true];
+  d_people -> d_accounts -> d_pins -> d_recent [style=invis, constraint=true];
   x_back -> u_signin [label="shows"];
   u_signin -> d_known [label="type a name"];
   s_name -> d_known [label="known?"];
-  v_offer -> n_offer [label="cannot read", style=dashed, color="#C62828", arrowhead=none, constraint=false];
   v_offer -> d_recent;
   s_name -> d_people;
   d_known -> u_form [label="no"];
