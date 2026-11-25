@@ -5,15 +5,51 @@ import type { GraphModel } from './graph/model';
 import type { Finding } from './graph/model';
 import { EDGE_KINDS, NODE_LAYERS } from './graph/model';
 import { computeVisible, moduleSummary } from './webview/client/view';
-import { packedLayout } from './webview/client/packing';
+import { componentGroups, groupRootFor, packedLayout } from './webview/client/packing';
 import { renderHtml } from './webview/html';
+import { renderMenuHtml } from './menu/menuHtml';
+import { DEFAULT_GRAPH_SETTINGS } from './graph/settings';
+import { buildSections } from './debug/report';
+import { renderDebugHtml, sectionText } from './debug/reportHtml';
+import { renderEdgeTooltip, renderTooltip, summariseEdge, summariseNode } from './webview/client/tooltip';
+import { existsSync } from 'node:fs';
+
+/** The tooltip escapes the text it renders, so a comparison has to escape the same way. */
+const escapeForTest = (value: string): string => String(value)
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;');
 import { computeFindings } from './graph/findings';
-import { TypeIndex } from './graph/csharp/symbols';
+import { TypeIndex, moduleOf } from './graph/csharp/symbols';
+import { classifyType } from './graph/layers';
 
 const extensionRoot = resolve(__dirname, '..');
-const workspaceRoot = resolve(extensionRoot, '..', '..');
+/** The repository this extension lives in, used when no root argument is given. */
+const defaultWorkspaceRoot = resolve(extensionRoot, '..', '..');
+/**
+ * Any repository with C# and XAML can be validated: `node out/selftest.js <path>`.
+ *
+ * The assertions that describe MTM_Waitlist itself run only against that repository; the generic
+ * invariants below run against whatever root was given, because those are the checks that catch a
+ * parser or resolver defect on a codebase that does not follow this one's conventions.
+ */
+const workspaceRoot = process.argv[2] ? resolve(process.argv[2]) : defaultWorkspaceRoot;
+const isDefaultWorkspace = workspaceRoot.toLowerCase() === defaultWorkspaceRoot.toLowerCase();
 
-const SKIP_DIRECTORIES = new Set(['bin', 'obj', 'node_modules', '.git', '.vs', 'TestResults', 'out']);
+function bounds(positions: { x: number; y: number }[]): {
+  minX: number; minY: number; maxX: number; maxY: number; width: number; height: number;
+} {
+  const xs = positions.map((position) => position.x);
+  const ys = positions.map((position) => position.y);
+  const minX = xs.length > 0 ? Math.min(...xs) : 0;
+  const maxX = xs.length > 0 ? Math.max(...xs) : 0;
+  const minY = ys.length > 0 ? Math.min(...ys) : 0;
+  const maxY = ys.length > 0 ? Math.max(...ys) : 0;
+  return { minX, minY, maxX, maxY, width: maxX - minX, height: maxY - minY };
+}
+
+const SKIP_DIRECTORIES = new Set(['bin', 'obj', 'node_modules', '.git', '.vs', 'TestResults', 'out', '.playwright-mcp', '.github', '.specify']);
 
 /** Matches the extension's default exclude list, so the self-test sees what the panel will see. */
 function skipDirectory(name: string): boolean {
@@ -60,6 +96,8 @@ interface Check {
   name: string;
   passed: boolean;
   detail?: string;
+  /** True when the check holds for any repository, so it runs even against a foreign root. */
+  generic?: boolean;
 }
 
 function hasEdge(
@@ -96,12 +134,226 @@ async function main(): Promise<void> {
 
   const checks: Check[] = [];
 
-  const viewNode = model.nodes.find((node) => node.id === 'MTM_Waitlist.Module_Setup.Views.SetupWorkCenterPage');
+  /* ---- generic invariants: these hold for every repository, not just this one ---- */
+
   checks.push({
-    name: 'SetupWorkCenterPage is a View node with its XAML file',
-    passed: viewNode?.layer === 'view' && viewNode?.xamlFile === 'Module_Setup/Views/SetupWorkCenterPage.xaml',
-    detail: viewNode ? `layer=${viewNode.layer} xaml=${viewNode.xamlFile}` : 'node missing',
+    name: 'no edge points at a node that does not exist',
+    passed: model.edges.every((edge) => model.nodes.some((node) => node.id === edge.source)
+      && model.nodes.some((node) => node.id === edge.target)),
+    detail: `${model.edges.length} edges`,
+    generic: true,
   });
+
+  const nodeIdSet = new Set(model.nodes.map((node) => node.id));
+  checks.push({
+    name: 'no finding points at a node that does not exist',
+    passed: model.findings.every((finding) => finding.nodeIds.every((id) => nodeIdSet.has(id))),
+    detail: `${model.findings.length} findings`,
+    generic: true,
+  });
+
+  checks.push({
+    name: 'no node id is emitted twice',
+    passed: nodeIdSet.size === model.nodes.length,
+    detail: `${nodeIdSet.size} unique of ${model.nodes.length}`,
+    generic: true,
+  });
+
+  // A line outside the file it names sends the reader to nowhere. This is the check that catches a
+  // merged partial attributing evidence to the wrong file.
+  const lineCache = new Map<string, number>();
+  const lineCount = (file: string): number => {
+    const cached = lineCache.get(file);
+    if (cached !== undefined) {
+      return cached;
+    }
+    let count = 0;
+    try {
+      count = readFileSync(join(workspaceRoot, ...file.split('/')), 'utf8').split('\n').length;
+    } catch {
+      count = -1;
+    }
+    lineCache.set(file, count);
+    return count;
+  };
+  const outOfRange = [
+    ...model.nodes.flatMap((node) => (node.location ? [{ file: node.location.file, line: node.location.line }] : [])),
+    ...model.edges.flatMap((edge) => (edge.evidence ? [{ file: edge.evidence.file, line: edge.evidence.line }] : [])),
+    ...model.findings.flatMap((finding) => (finding.location
+      ? [{ file: finding.location.file, line: finding.location.line }]
+      : [])),
+  ].filter((entry) => {
+    const total = lineCount(entry.file);
+    return total < 0 || entry.line < 1 || entry.line > total;
+  });
+  checks.push({
+    name: 'every location lies inside the file it names',
+    passed: outOfRange.length === 0,
+    detail: outOfRange.length === 0
+      ? `${lineCache.size} files checked`
+      : `${outOfRange.length} out of range, e.g. ${outOfRange[0].file}:${outOfRange[0].line}`,
+    generic: true,
+  });
+
+  // A partial type spread over N files must contribute the union of its members. Dropping one member
+  // list during the merge is invisible in every other check but breaks whole classes of finding, so
+  // this is proved on a two-file fixture rather than on whatever a given repository happens to contain.
+  const fixtureCsharp: AnalyzeInput[] = [
+      {
+        path: 'src/A.cs',
+        text: [
+          'namespace N;',
+          'public partial class Thing',
+          '{',
+          '    public string Alpha { get; set; } = string.Empty;',
+          '}',
+        ].join('\n'),
+      },
+      {
+        path: 'src/B.cs',
+        text: [
+          'namespace N;',
+          'public partial class Thing',
+          '{',
+          '    private readonly Helper _holder = new Helper();',
+          '',
+          '    private void Second() => MarkerOnly.Reset();',
+          '}',
+          '',
+          'public partial class ThingViewModel',
+          '{',
+          '    public string Status { get; set; } = string.Empty;',
+          '',
+          '    [RelayCommand]',
+          '    private void Save() { }',
+          '}',
+          '',
+          'public class Helper { }',
+          'public static class MarkerOnly { public static void Reset() { } }',
+        ].join('\n'),
+      },
+      {
+        path: 'src/ThingView.xaml.cs',
+        text: [
+          'namespace N;',
+          'public sealed partial class ThingView : Page',
+          '{',
+          '    public ThingViewModel ViewModel { get; }',
+          '}',
+        ].join('\n'),
+      },
+  ];
+
+  const fixtureXaml: AnalyzeInput[] = [
+    {
+      path: 'src/ThingView.xaml',
+      text: [
+        '<Page x:Class="N.ThingView" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">',
+        '  <TextBlock Text="{x:Bind ViewModel.SaveCommand}" />',
+        '  <TextBlock Text="{x:Bind ViewModel.Missing}" />',
+        '  <TextBlock Text="{Binding Status}" />',
+        '</Page>',
+      ].join('\n'),
+    },
+  ];
+
+  const fixture = await analyzeWorkspace({
+    workspaceRoot: '/virtual',
+    csharp: fixtureCsharp,
+    xaml: fixtureXaml,
+    grammarWasmPath: join(extensionRoot, 'media', 'tree-sitter-c_sharp.wasm'),
+    includeExternalTypes: false,
+    maxNodes: 1000,
+  });
+
+  const fixtureThing = fixture.nodes.find((node) => node.label === 'Thing');
+  const mergedEdge = fixture.edges.find((edge) =>
+    edge.source === fixtureThing?.id && edge.target.endsWith('.Helper'));
+  checks.push({
+    name: 'a member declared in a later partial is merged, and its edge is produced',
+    passed: mergedEdge !== undefined,
+    detail: mergedEdge ? `${mergedEdge.kind} @ ${mergedEdge.evidence?.file}:${mergedEdge.evidence?.line}` : 'no edge',
+    generic: true,
+  });
+  checks.push({
+    name: 'evidence for a merged member names the file that declares it',
+    passed: mergedEdge?.evidence?.file === 'src/B.cs',
+    detail: mergedEdge?.evidence ? `${mergedEdge.evidence.file}:${mergedEdge.evidence.line}` : 'no evidence',
+    generic: true,
+  });
+  // F3: the command is generated by [RelayCommand] in the second partial; the binding is not dead.
+  // `{Binding Status}` binds a DataContext this extension does not model, so it is never judged.
+  const fixtureDeadBindings = fixture.findings
+    .filter((finding) => finding.kind === 'dead-binding')
+    .map((finding) => finding.title);
+  checks.push({
+    name: 'a generated member from a later partial is not a dead binding, and {Binding} is never judged',
+    passed: fixtureDeadBindings.length === 1 && fixtureDeadBindings[0].includes('Missing'),
+    detail: fixtureDeadBindings.join(' | ') || 'none',
+    generic: true,
+  });
+  checks.push({
+    name: 'layer classification understands the ViewModel_ prefix convention',
+    passed: classifyType({ name: 'ViewModel_Workflow', namespace: 'X.ViewModels' } as never) === 'viewmodel'
+      && classifyType({ name: 'ThingViewModel', namespace: 'X' } as never) === 'viewmodel'
+      && classifyType({ name: 'IResettableViewModel', namespace: 'X', kind: 'interface' } as never) === 'model'
+      && classifyType({ name: 'Dao_Parts', namespace: 'X' } as never) === 'service',
+    generic: true,
+  });
+  checks.push({
+    name: 'a module bucket skips container segments such as src',
+    passed: moduleOf('src/Feature/Thing.cs') === 'Feature'
+      && moduleOf('Module_Setup/Views/Page.xaml') === 'Module_Setup',
+    generic: true,
+  });
+
+  /* ---- analysis progress: a real bar, fed by the parse loops ---- */
+
+  const reports: { phase: string; completed: number; total: number }[] = [];
+  const probed = await analyzeWorkspace({
+    workspaceRoot: '/virtual',
+    csharp: fixtureCsharp,
+    xaml: fixtureXaml,
+    grammarWasmPath: join(extensionRoot, 'media', 'tree-sitter-c_sharp.wasm'),
+    includeExternalTypes: false,
+    maxNodes: 1000,
+    progress: (phase, completed, total) => reports.push({ phase, completed, total }),
+  });
+
+  const parseReports = reports.filter((entry) => entry.total > 0);
+  const lastParse = parseReports[parseReports.length - 1];
+  checks.push({
+    name: 'the analysis reports its progress with a real completed/total',
+    passed: probed.nodes.length > 0
+      && reports.length >= 3
+      && parseReports.length > 0
+      && lastParse !== undefined
+      && lastParse.completed === lastParse.total
+      && parseReports.every((entry) => entry.completed <= entry.total),
+    detail: reports.map((entry) => `${entry.phase} ${entry.completed}/${entry.total}`).join(' → '),
+    generic: true,
+  });
+
+  const seen = new Set<string>();
+  for (const entry of fixtureCsharp) {
+    seen.add(entry.path);
+  }
+  checks.push({
+    name: 'the progress bar advances without ever going backwards',
+    passed: parseReports.every((entry, index) =>
+      index === 0 || entry.completed >= parseReports[index - 1].completed),
+    detail: `${parseReports.length} measured reports`,
+    generic: true,
+  });
+
+  if (isDefaultWorkspace) {
+    const viewNode = model.nodes.find((node) => node.id === 'MTM_Waitlist.Module_Setup.Views.SetupWorkCenterPage');
+    checks.push({
+      name: 'SetupWorkCenterPage is a View node with its XAML file',
+      passed: viewNode?.layer === 'view' && viewNode?.xamlFile === 'Module_Setup/Views/SetupWorkCenterPage.xaml',
+      detail: viewNode ? `layer=${viewNode.layer} xaml=${viewNode.xamlFile}` : 'node missing',
+    });
+  }
 
   checks.push({
     name: 'SetupWorkCenterPage resolves SetupWorkCenterViewModel via App.GetService',
@@ -566,6 +818,14 @@ async function main(): Promise<void> {
   };
 
   const measurements = new Map<string, { width: number; height: number; distinct: number; crowded: number }>();
+  if (initial.nodeIds.size === 0) {
+    checks.push({
+      name: 'canvas geometry checks skipped: the default scope draws no shape',
+      passed: true,
+      detail: `${initial.nodeIds.size} nodes in the default scope`,
+      generic: true,
+    });
+  }
   // Headless cytoscape reports a 3×3 box for every node, so separation is judged against a nominal
   // node size rather than the reported box.
   const NOMINAL_NODE = 18;
@@ -636,6 +896,617 @@ async function main(): Promise<void> {
     detail: `aspect ${(plainDagre.width / Math.max(1, plainDagre.height)).toFixed(2)}`,
   });
 
+  /* ---- unpacking: a right-clicked shape is drawn from its root, above the packed tiles ---- */
+
+  const unpackGraph = cytoscape({ headless: true, elements: [...layoutElements, ...layoutEdges] });
+  const groups = componentGroups(unpackGraph);
+  const target = groups
+    .filter((group) => group.nodeIds.length >= 3)
+    .sort((left, right) => right.nodeIds.length - left.nodeIds.length)[0]
+    ?? { root: '', nodeIds: [] as string[] };
+  // A WinForms repository has no XAML, so its default canvas is empty and the geometry checks below
+  // have nothing to measure. They still run for any repository that draws a shape.
+  const hasChart = target.nodeIds.length >= 3;
+  const otherIds = new Set(groups
+    .filter((group) => group.root !== target.root)
+    .flatMap((group) => group.nodeIds));
+
+  packedLayout(unpackGraph, { gap: 66, aspect: 1.7 });
+  const packedBox = bounds(unpackGraph.nodes().map((node) => node.position()));
+
+  packedLayout(unpackGraph, {
+    gap: 66,
+    aspect: 1.7,
+    nodeSep: 20,
+    rankSep: 95,
+    unpacked: new Set([target.root]),
+  });
+
+  const bandPositions = target.nodeIds.map((id) => unpackGraph.getElementById(id).position());
+  const bandBox = bounds(bandPositions);
+  const tilePositions = [...otherIds].map((id) => unpackGraph.getElementById(id).position());
+  const tileBox = bounds(tilePositions);
+  const bandDistinct = new Set(bandPositions.map((position) => `${Math.round(position.x)}:${Math.round(position.y)}`)).size;
+
+  checks.push({
+    name: 'every node in a packed shape resolves to the same group root',
+    passed: target.nodeIds.every((id) => groupRootFor(unpackGraph, id) === target.root),
+    detail: `root ${target.root.split('.').pop()} · ${target.nodeIds.length} nodes`,
+  });
+
+  checks.push({
+    name: 'unpacking a shape draws it as its own band above the remaining tiles',
+    passed: hasChart
+      && bandPositions.length >= 3
+      && bandDistinct === bandPositions.length
+      && bandBox.maxY < tileBox.minY
+      && bandBox.width > packedBox.width * 0.05,
+    detail: `band ${Math.round(bandBox.width)}×${Math.round(bandBox.height)} px, `
+      + `tiles start at y=${Math.round(tileBox.minY)}, band ends at y=${Math.round(bandBox.maxY)}`,
+  });
+
+  const unpackedSource = readFileSync(join(extensionRoot, 'src', 'webview', 'client', 'main.ts'), 'utf8');
+  checks.push({
+    name: 'the canvas offers unpack on right-click and a way back',
+    passed: unpackedSource.includes("'cxttap'")
+      && unpackedSource.includes('Unpack this group')
+      && unpackedSource.includes('Re-pack every group')
+      && html.includes('id="node-menu"')
+      && html.includes('id="repack"'),
+  });
+
+  checks.push({
+    name: 'unpacking shows the group alone, with no hop expansion back to its partners',
+    passed: hasChart
+      && unpackedSource.includes('ui.scopeExact = true')
+      && unpackedSource.includes('ui.scope = [...group.nodeIds]')
+      && computeVisible(model, {
+        ...defaults,
+        scope: [...target.nodeIds],
+        scopeExact: true,
+        hideOrphans: false,
+      }).nodeIds.size === target.nodeIds.length
+      && computeVisible(model, {
+        ...defaults,
+        scope: [...target.nodeIds],
+        scopeExact: false,
+        hideOrphans: false,
+      }).nodeIds.size > target.nodeIds.length,
+    detail: `${target.nodeIds.length} types in the shape`,
+  });
+
+  /* ---- the zoom stack in the upper-left corner ---- */
+
+  const viewControlIds = ['view-controls', 'zoom-region', 'zoom-slider', 'view-reset', 'zoom-rect'];
+  const missingViewControls = viewControlIds.filter((id) => !html.includes(`id="${id}"`));
+  checks.push({
+    name: 'the canvas carries a zoom stack: region zoom, a zoom slider, and a reset',
+    passed: missingViewControls.length === 0
+      && html.indexOf('id="view-controls"') < html.indexOf('id="focus-bar"')
+      && unpackedSource.includes('pointerdown')
+      && unpackedSource.includes('applyRegionZoom(')
+      && unpackedSource.includes('function resetView('),
+    detail: missingViewControls.length === 0 ? `${viewControlIds.length} controls` : `missing: ${missingViewControls.join(', ')}`,
+  });
+
+  checks.push({
+    name: 'the zoom slider covers the whole zoom range and follows wheel zoom',
+    passed: unpackedSource.includes('const ZOOM_MIN = 0.08')
+      && unpackedSource.includes('const ZOOM_MAX = 3')
+      && unpackedSource.includes('function sliderToZoom(')
+      && unpackedSource.includes('syncZoomSlider()'),
+  });
+
+  /* ---- accuracy guards: findings this workspace would otherwise get wrong ---- */
+
+  const flagged = new Set(model.findings.filter((finding) => finding.kind === 'unused-type').map((finding) => finding.nodeIds[0]));
+  const registeredPages = ['GeneralSettingsPage', 'OperationsSettingsPage', 'PicturesSettingsPage', 'DevicesSettingsPage',
+    'DiagnosticsSettingsPage', 'AdministrationSettingsPage'];
+  const hostedControls = ['ReadStatusIndicator', 'SetUpPanel', 'ImageOverrideEditorControl', 'PermissionHoldersView', 'DeveloperLogPanelView'];
+  const wronglyFlagged = [...registeredPages, ...hostedControls].filter((label) => {
+    const node = model.nodes.find((candidate) => candidate.label === label);
+    return node !== undefined && flagged.has(node.id);
+  });
+
+  checks.push({
+    name: 'a page registered against a route, or a control hosted by another view, is not reported unused',
+    passed: wronglyFlagged.length === 0,
+    detail: wronglyFlagged.length === 0
+      ? `${registeredPages.length} registered pages, ${hostedControls.length} hosted controls`
+      : `flagged anyway: ${wronglyFlagged.join(', ')}`,
+  });
+
+  const referenceOnlyCycles = model.findings.filter((finding) => finding.kind === 'cycle'
+    && (finding.edgeIds ?? []).every((edgeId) => model.edges.find((edge) => edge.id === edgeId)?.kind === 'reference'));
+  checks.push({
+    name: 'a cycle of plain type references is not claimed to block construction',
+    passed: referenceOnlyCycles.length > 0
+      && referenceOnlyCycles.every((finding) => finding.severity !== 'high'
+        && !finding.detail.includes('cannot be built first')),
+    detail: `${referenceOnlyCycles.length} reference-only cycles`,
+  });
+
+  const constructionCycles = model.findings.filter((finding) => finding.kind === 'cycle'
+    && (finding.edgeIds ?? []).some((edgeId) => {
+      const kind = model.edges.find((edge) => edge.id === edgeId)?.kind;
+      return kind === 'injects' || kind === 'constructs' || kind === 'composes';
+    }));
+  checks.push({
+    name: 'a cycle that mentions construction edges says whether those edges themselves loop',
+    passed: constructionCycles.length === 0
+      || constructionCycles.every((finding) => finding.detail.includes('do not themselves form a loop')
+        || finding.detail.includes('construction edges form a loop of their own')),
+    detail: `${constructionCycles.length} cycles with construction edges`,
+  });
+
+  const docSamples = model.nodes.filter((node) => node.location?.file.startsWith('.github/'));
+  checks.push({
+    name: 'documentation samples are not analysed as application code',
+    passed: docSamples.length === 0,
+    detail: docSamples.length === 0 ? 'none analysed' : `${docSamples.length} nodes from .github`,
+  });
+
+  // The unpacked shape must adopt the chosen layout, so Down and Right are measurably different.
+  const shapeOf = (layout: 'layered-tb' | 'layered-lr'): { width: number; height: number } => {
+    const graph = cytoscape({ headless: true, elements: [...layoutElements, ...layoutEdges] });
+    packedLayout(graph, {
+      gap: 66,
+      aspect: 1.7,
+      nodeSep: 20,
+      rankSep: 95,
+      unpacked: new Set([target.root]),
+      unpackedLayout: layout,
+    });
+    const box = bounds(target.nodeIds.map((id) => graph.getElementById(id).position()));
+    graph.destroy();
+    return box;
+  };
+
+  const down = shapeOf('layered-tb');
+  const right = shapeOf('layered-lr');
+  checks.push({
+    name: 'unpacking follows the configured layout, and Layered Down stacks rather than spreads',
+    passed: hasChart
+      && down.height > down.width && right.width > right.height
+      && DEFAULT_GRAPH_SETTINGS.unpackedLayout === 'layered-tb',
+    detail: `down ${Math.round(down.width)}×${Math.round(down.height)}, `
+      + `right ${Math.round(right.width)}×${Math.round(right.height)}`,
+  });
+
+  const manifestText = readFileSync(join(extensionRoot, 'package.json'), 'utf8');
+  checks.push({
+    name: 'the unpacked-shape layout is a contributed setting defaulting to Layered Down',
+    passed: DEFAULT_GRAPH_SETTINGS.unpackedLayout === 'layered-tb'
+      && manifestText.includes('"csharpXamlGraph.unpackedLayout"')
+      && /"csharpXamlGraph\.unpackedLayout"[\s\S]*?"default": "layered-tb"/.test(manifestText),
+  });
+
+  unpackGraph.destroy();
+
+  /* ---- the panel tab beside Terminal: commands and the settings form ---- */
+
+  const menuHtml = renderMenuHtml(
+    {
+      include: ['**/*.cs'],
+      exclude: ['**/bin/**'],
+      includeExternalTypes: false,
+      maxNodes: 2500,
+      unpackedLayout: 'layered-tb',
+    },
+    'nonce-value',
+  );
+  const menuControls = ['show', 'reanalyze', 'export', 'open-settings', 'settings-form', 'include', 'exclude',
+    'max-nodes', 'include-external', 'unpacked-layout', 'save', 'reset', 'status'];
+  const missingMenuControls = menuControls.filter((id) => !menuHtml.includes(`id="${id}"`));
+  checks.push({
+    name: 'the panel tab carries every command shortcut and settings control',
+    passed: missingMenuControls.length === 0,
+    detail: missingMenuControls.length === 0 ? `${menuControls.length} controls` : `missing: ${missingMenuControls.join(', ')}`,
+  });
+
+  checks.push({
+    name: 'the panel tab shows the current settings, not placeholders',
+    passed: menuHtml.includes('**/*.cs') && menuHtml.includes('**/bin/**')
+      && menuHtml.includes('value="2500"') && !menuHtml.includes('id="include-external" type="checkbox" checked'),
+  });
+
+  checks.push({
+    name: 'the panel tab carries a nonce-restricted script',
+    passed: menuHtml.includes("script-src 'nonce-nonce-value'"),
+  });
+
+  const manifest = JSON.parse(readFileSync(join(extensionRoot, 'package.json'), 'utf8')) as {
+    activationEvents?: string[];
+    contributes?: {
+      commands?: { command: string }[];
+      menus?: Record<string, { command: string }[]>;
+      viewsContainers?: { panel?: { id: string; title: string; icon: string }[] };
+      views?: Record<string, { id: string; type: string }[]>;
+    };
+  };
+  const activationSource = readFileSync(join(extensionRoot, 'src', 'extension.ts'), 'utf8');
+  const contributed = (manifest.contributes?.commands ?? []).map((entry) => entry.command);
+  const unregistered = contributed.filter((id) => !activationSource.includes(`registerCommand('${id}'`)
+    && !activationSource.includes(`register('${id}'`));
+  checks.push({
+    name: 'every contributed command is registered by the extension',
+    passed: contributed.length >= 7 && unregistered.length === 0,
+    detail: unregistered.length === 0 ? `${contributed.length} commands` : `unregistered: ${unregistered.join(', ')}`,
+  });
+
+  const panelContainer = manifest.contributes?.viewsContainers?.panel?.find((entry) => entry.id === 'csharpXamlGraphPanel');
+  const menuView = manifest.contributes?.views?.csharpXamlGraphPanel?.find((entry) => entry.id === 'csharpXamlGraph.menu');
+  checks.push({
+    name: 'a panel tab is contributed next to Terminal, with shortcuts and settings',
+    passed: panelContainer !== undefined
+      && panelContainer.icon === 'assets/graph.svg'
+      && menuView?.type === 'webview'
+      && (manifest.activationEvents ?? []).includes('onView:csharpXamlGraph.menu'),
+    detail: panelContainer ? `${panelContainer.title} · ${menuView?.type}` : 'missing',
+  });
+
+  const editorMenu = (manifest.contributes?.menus?.['editor/context'] ?? []).map((entry) => entry.command);
+  const explorerMenu = (manifest.contributes?.menus?.['explorer/context'] ?? []).map((entry) => entry.command);
+  checks.push({
+    name: 'the editor and Explorer offer a dependency graph for what was right-clicked',
+    passed: editorMenu.includes('csharpXamlGraph.showForSelection')
+      && editorMenu.includes('csharpXamlGraph.showForFile')
+      && explorerMenu.includes('csharpXamlGraph.showForFile'),
+    detail: `${editorMenu.length} editor, ${explorerMenu.length} explorer`,
+  });
+
+  const resolverSource = readFileSync(join(extensionRoot, 'src', 'symbols', 'resolve.ts'), 'utf8');
+  checks.push({
+    name: 'a right-click resolves through definitions and offers a picker for multiple matches',
+    passed: resolverSource.includes('vscode.executeDefinitionProvider')
+      && resolverSource.includes('vscode.executeDocumentSymbolProvider')
+      && resolverSource.includes('Whole file')
+      && activationSource.includes('showQuickPick'),
+  });
+
+  checks.push({
+    name: 'the panel tab offers the unpacked-shape layout with Layered Down selected',
+    passed: menuHtml.includes('id="unpacked-layout"')
+      && menuHtml.includes('<option value="layered-tb" selected>Layered Down</option>')
+      && menuHtml.includes('<option value="layered-lr">Layered Right</option>'),
+  });
+
+  /* ---- toolbar: three rows, checkboxes on their own row ---- */
+
+  const inputsRow = html.slice(html.indexOf('<div class="row inputs">'), html.indexOf('<div class="row checks">'));
+  const checksRow = html.slice(html.indexOf('<div class="row checks">'), html.indexOf('<div class="row actions">'));
+  checks.push({
+    name: 'the toolbar is three rows: inputs, checkboxes, then actions',
+    passed: html.includes('<div class="row inputs">')
+      && html.includes('<div class="row checks">')
+      && html.includes('<div class="row actions">')
+      && !html.includes('<div class="row status">')
+      // The combo boxes stay on the first row and the checkboxes on the second.
+      && inputsRow.includes('id="module"') && inputsRow.includes('id="layout"') && inputsRow.includes('id="search"')
+      && !inputsRow.includes('id="hide-orphans"') && !inputsRow.includes('id="only-problems"')
+      && checksRow.includes('id="hide-orphans"') && checksRow.includes('id="only-problems"')
+      && !checksRow.includes('<select'),
+  });
+
+  checks.push({
+    name: 'the status line and focus bar moved onto the canvas so the toolbar stays three rows',
+    passed: html.includes('<span id="stats">') && html.includes('<span id="focus-bar" hidden>')
+      && html.indexOf('id="stats"') > html.indexOf('id="canvas"'),
+  });
+
+  /* ---- hover tooltip: what the shape is, and what is wrong with it ---- */
+
+  const tooltipSource = readFileSync(join(extensionRoot, 'src', 'webview', 'client', 'main.ts'), 'utf8');
+  checks.push({
+    name: 'the canvas owns a hover tooltip that is shown on mouseover and cleared on mouseout',
+    passed: html.includes('id="tooltip"')
+      && tooltipSource.includes("cy.on('mouseover', 'node'")
+      && tooltipSource.includes('scheduleTooltip(')
+      && tooltipSource.includes("cy.on('mouseout', 'node'")
+      && tooltipSource.includes('hideTooltip()'),
+  });
+
+  checks.push({
+    name: 'a line hover states the relationship, its evidence and how sure the analyzer is',
+    passed: tooltipSource.includes("cy.on('mouseover', 'edge'")
+      && tooltipSource.includes('edgeTooltipMarkup(')
+      && tooltipSource.includes("cy.on('mouseout', 'edge'")
+      && tooltipSource.includes("cy.on('dbltap', 'edge'")
+      && tooltipSource.includes('hovered-edge'),
+  });
+
+  const sampleEdge = model.edges.find((edge) => edge.evidence !== undefined && edge.confidence === 'high')
+    ?? model.edges[0];
+  const sampleSource = model.nodes.find((node) => node.id === sampleEdge.source);
+  const sampleTarget = model.nodes.find((node) => node.id === sampleEdge.target);
+  const edgeSummary = summariseEdge({
+    kind: sampleEdge.kind,
+    sourceLabel: sampleSource?.label ?? sampleEdge.source,
+    sourceFullName: sampleSource?.fullName ?? sampleEdge.source,
+    targetLabel: sampleTarget?.label ?? sampleEdge.target,
+    targetFullName: sampleTarget?.fullName ?? sampleEdge.target,
+    confidence: sampleEdge.confidence,
+    member: sampleEdge.label,
+    file: sampleEdge.evidence?.file,
+    line: sampleEdge.evidence?.line,
+  });
+  const edgeTooltipHtml = renderEdgeTooltip(edgeSummary);
+  checks.push({
+    name: 'the line tooltip names both types, the edge kind and the source line it came from',
+    passed: edgeTooltipHtml.includes(edgeSummary.kindLabel)
+      && edgeTooltipHtml.includes(escapeForTest(edgeSummary.sourceLabel))
+      && edgeTooltipHtml.includes(escapeForTest(edgeSummary.targetLabel))
+      && (sampleEdge.evidence === undefined
+        || edgeTooltipHtml.includes(escapeForTest(sampleEdge.evidence.file)))
+      && edgeTooltipHtml.includes(edgeSummary.colour)
+      && !edgeTooltipHtml.includes('No cleanup findings'),
+    detail: `${edgeSummary.kindLabel}: ${edgeSummary.sourceLabel} → ${edgeSummary.targetLabel}`,
+  });
+
+  const flaggedId = model.findings[0]?.nodeIds[0];
+  const flaggedNode = model.nodes.find((node) => node.id === flaggedId);
+  const flaggedSummary = flaggedNode
+    ? summariseNode({
+      ...flaggedNode,
+      edges: model.edges,
+      findings: model.findings.filter((finding) => finding.nodeIds.includes(flaggedNode.id)),
+    })
+    : undefined;
+  const cleanNode = model.nodes.find((node) =>
+    node.location !== undefined && !model.findings.some((finding) => finding.nodeIds.includes(node.id)));
+  const cleanSummary = cleanNode
+    ? summariseNode({ ...cleanNode, edges: model.edges, findings: [] })
+    : undefined;
+
+  checks.push({
+    name: 'the hover tooltip lists the issues found for that type',
+    passed: flaggedSummary !== undefined
+      && flaggedSummary.issues.length > 0
+      && renderTooltip(flaggedSummary).includes('tip-issue')
+      && renderTooltip(flaggedSummary).includes(flaggedSummary.issues[0].kind)
+      && !renderTooltip(flaggedSummary).includes('No cleanup findings'),
+    detail: flaggedNode ? `${flaggedNode.label}: ${flaggedSummary?.issues.length ?? 0} issues` : 'no flagged node',
+  });
+
+  checks.push({
+    name: 'the hover tooltip says so plainly when a type has no findings',
+    passed: cleanSummary !== undefined && renderTooltip(cleanSummary).includes('No cleanup findings.'),
+  });
+
+  checks.push({
+    name: 'the hover tooltip counts the dependencies both ways',
+    passed: cleanSummary !== undefined
+      && renderTooltip(cleanSummary).includes(`${cleanSummary.out} dependenc`)
+      && renderTooltip(cleanSummary).includes(`${cleanSummary.incoming} used by`),
+    detail: cleanNode ? `${cleanSummary?.out} out, ${cleanSummary?.incoming} in` : 'no clean node',
+  });
+
+  /* ---- every edge handed to the canvas must have both endpoints on the canvas ---- */
+
+  const optionSets: Array<{ name: string; options: Record<string, unknown> }> = [
+    { name: 'default view', options: { ...defaults } },
+    { name: 'hide unconnected off', options: { ...defaults, hideOrphans: false } },
+    { name: 'exact scope', options: { ...defaults, scope: [...target.nodeIds], scopeExact: true } },
+    { name: 'exact scope, hide unconnected off', options: { ...defaults, scope: [...target.nodeIds], scopeExact: true, hideOrphans: false } },
+    { name: 'module scope', options: { ...defaults, module: model.nodes[0].module } },
+    { name: 'only problems', options: { ...defaults, onlyProblems: true } },
+    { name: 'focus 2 hops', options: { ...defaults, focus: target.root, focusDepth: 2 } },
+    { name: 'every layer and edge kind', options: { ...defaults, layers: [...NODE_LAYERS], edgeKinds: [...EDGE_KINDS] } },
+  ];
+
+  const danglingSets = optionSets.filter((entry) => {
+    const visible = computeVisible(model, entry.options as never);
+    return visible.edges.some((edge) => !visible.nodeIds.has(edge.source) || !visible.nodeIds.has(edge.target));
+  });
+
+  checks.push({
+    name: 'no visible edge ever points at a node that is not drawn',
+    passed: danglingSets.length === 0,
+    detail: danglingSets.length === 0
+      ? `${optionSets.length} filter combinations`
+      : `dangling in: ${danglingSets.map((entry) => entry.name).join('; ')}`,
+  });
+
+  checks.push({
+    name: 'a filter change keeps the graph in place instead of rebuilding it at the origin',
+    passed: unpackedSource.includes('lastPositions')
+      && unpackedSource.includes('position: lastPositions.get(node.id)')
+      && unpackedSource.includes('capturePositions()'),
+  });
+
+  /* ---- export writes the visible graph, not the whole workspace ---- */
+
+  checks.push({
+    name: 'export is built from the visible subgraph, with the applied filters recorded',
+    passed: unpackedSource.includes('function visibleExport(')
+      && unpackedSource.includes('const visible = computeVisible(model, options())')
+      && unpackedSource.includes('model.nodes.filter((node) => visible.nodeIds.has(node.id))')
+      && unpackedSource.includes('edges: visible.edges')
+      && unpackedSource.includes('const findings = model.findings.filter')
+      && unpackedSource.includes('vscode.postMessage({ type: \'export\', payload })'),
+  });
+
+  const panelSource = readFileSync(join(extensionRoot, 'src', 'webview', 'panel.ts'), 'utf8');
+  const extensionSource = readFileSync(join(extensionRoot, 'src', 'extension.ts'), 'utf8');
+  checks.push({
+    name: 'the host shows a real notification progress bar with increments',
+    passed: extensionSource.includes('vscode.ProgressLocation.Notification')
+      && extensionSource.includes('progress.report({ message, increment:')
+      && extensionSource.includes('GraphPanel.instance()?.showProgress('),
+  });
+
+  const htmlProgressIds = ['progress', 'progress-message', 'progress-percent', 'progress-fill'];
+  const missingProgress = htmlProgressIds.filter((id) => !html.includes(`id="${id}"`));
+  checks.push({
+    name: 'the canvas carries a progress overlay that can be shown and hidden',
+    passed: missingProgress.length === 0
+      && unpackedSource.includes('function setProgress(')
+      && unpackedSource.includes("message?.type === 'progress'")
+      && unpackedSource.includes('indeterminate')
+      && panelSource.includes('showProgress(message: string, percent: number, known: boolean)')
+      && panelSource.includes("type: 'progress', message: '', percent: 100, known: true, done: true"),
+    detail: missingProgress.length === 0 ? `${htmlProgressIds.length} elements` : `missing: ${missingProgress.join(', ')}`,
+  });
+
+  checks.push({
+    name: 'the host writes the payload the panel sent, and asks the panel before exporting',
+    passed: panelSource.includes('private async exportJson(payload?: unknown)')
+      && panelSource.includes('const subject = payload ?? this.model;')
+      && panelSource.includes("type: 'requestExport'")
+      && activationSource.includes('await panel.requestExport()'),
+  });
+
+  /* ---- the debug report: one section per subsystem, each naming the files that own it ---- */
+
+  const debugSections = buildSections({
+    host: {
+      extensionVersion: '0.1.6',
+      vscodeVersion: '1.90.0',
+      extensionMode: 'development',
+      appHost: 'desktop',
+      uiKind: 'Desktop',
+      remoteName: '',
+      isTrusted: true,
+      platform: 'win32',
+      arch: 'x64',
+      nodeVersion: '20.0.0',
+      locale: 'en',
+      extensionPath: 'C:/ext',
+      workspaceFolders: ['C:/repo'],
+    },
+    settings: [
+      { key: 'csharpXamlGraph.maxNodes', value: '40000', source: 'workspace' },
+      { key: 'csharpXamlGraph.include', value: '**/*.cs, **/*.xaml', source: 'default' },
+    ],
+    model,
+    modelAgeMs: 5000,
+    cacheInvalidated: false,
+    webview: {
+      ready: true,
+      modelLoadedAt: new Date().toISOString(),
+      nodesDrawn: 139,
+      edgesDrawn: 194,
+      hiddenOrphans: 11,
+      layout: 'packed',
+      density: 'normal',
+      labels: 'zoom',
+      zoom: 0.8,
+      canvasWidth: 1200,
+      canvasHeight: 800,
+      module: 'all',
+      search: '',
+      layers: ['view', 'viewmodel'],
+      edgeKinds: ['resolves', 'binds'],
+      focus: null,
+      focusDepth: 1,
+      scope: null,
+      scopeExact: false,
+      unpacked: [],
+      history: [{ at: new Date().toISOString(), kind: 'model', detail: 'loaded' }],
+    },
+    registeredCommands: ['csharpXamlGraph.show', 'csharpXamlGraph.debug'],
+    contributedCommands: ['csharpXamlGraph.show', 'csharpXamlGraph.debug', 'csharpXamlGraph.export'],
+    contributedMenus: [{ menu: 'editor/context', commands: ['csharpXamlGraph.showForSelection'] }],
+    assets: [{ path: 'media/tree-sitter-c_sharp.wasm', exists: true, bytes: 7_000_000 }],
+    activationEvents: ['onCommand:csharpXamlGraph.show'],
+    views: [{ id: 'csharpXamlGraph.menu', type: 'webview' }],
+  });
+
+  const expectedCategories = ['Host', 'Settings', 'Analysis', 'Parsers', 'Findings', 'Canvas', 'Commands', 'Packaging'];
+  const debugCategories = debugSections.map((section) => section.category);
+  checks.push({
+    name: 'the debug report has one section per subsystem, in reading order',
+    passed: JSON.stringify(debugCategories) === JSON.stringify(expectedCategories)
+      && debugSections.every((section) => section.files.length > 0 && section.purpose.length > 40),
+    detail: debugCategories.join(' → '),
+  });
+
+  const debugFilePaths = debugSections.flatMap((section) => section.files);
+  const existingDebugFiles = debugFilePaths.filter((file) => file === 'package.json'
+    || existsSync(join(extensionRoot, ...file.split('/'))));
+  checks.push({
+    name: 'every file a debug section points at actually exists',
+    passed: debugFilePaths.length >= 12 && existingDebugFiles.length === debugFilePaths.length,
+    detail: `${existingDebugFiles.length} of ${debugFilePaths.length} paths`,
+  });
+
+  const parserSection = debugSections.find((section) => section.id === 'parsers');
+  const parserRows = (parserSection?.rows ?? []).map((row) => row.label).join(' | ');
+  checks.push({
+    name: 'the parser section reports what the parse pass saw, not just what the graph kept',
+    passed: model.stats.parser !== undefined
+      && parserRows.includes('Types declared')
+      && parserRows.includes('XAML with x:Class')
+      && parserRows.includes('Edges dropped')
+      && (model.stats.parser?.typesDeclared ?? 0) > 0,
+    detail: model.stats.parser
+      ? `${model.stats.parser.typesDeclared} types, ${model.stats.parser.bindings} x:Bind`
+      : 'no tally',
+  });
+
+  const canvasSection = debugSections.find((section) => section.id === 'canvas');
+  checks.push({
+    name: 'the canvas section names the filters in force and what is drawn',
+    passed: (canvasSection?.rows ?? []).some((row) => row.label === 'Layers' && row.value.includes('view'))
+      && (canvasSection?.rows ?? []).some((row) => row.label === 'Drawn' && row.value.includes('139')),
+  });
+
+  const commandsSection = debugSections.find((section) => section.id === 'commands');
+  checks.push({
+    name: 'the commands section compares the manifest with what activation registered',
+    passed: (commandsSection?.rows ?? []).some((row) => row.label === 'Contributed but not registered'
+      && row.value.includes('csharpXamlGraph.export') && row.tone === 'bad'),
+  });
+
+  const missingAssetReport = buildSections({
+    host: {
+      extensionVersion: '0.1.6', vscodeVersion: '1.90.0', extensionMode: 'development', appHost: 'desktop',
+      uiKind: 'Desktop', remoteName: '', isTrusted: true, platform: 'win32', arch: 'x64',
+      nodeVersion: '20.0.0', locale: 'en', extensionPath: 'C:/ext', workspaceFolders: [],
+    },
+    settings: [],
+    cacheInvalidated: true,
+    registeredCommands: [],
+    contributedCommands: [],
+    contributedMenus: [],
+    assets: [{ path: 'media/tree-sitter-c_sharp.wasm', exists: false }],
+    activationEvents: [],
+    views: [],
+  });
+  checks.push({
+    name: 'a missing or invalidated asset is reported in red and in words',
+    passed: (missingAssetReport.find((section) => section.id === 'packaging')?.rows ?? [])
+      .some((row) => row.tone === 'bad' && row.value.startsWith('MISSING'))
+      && (missingAssetReport.find((section) => section.id === 'analysis')?.rows ?? [])
+        .some((row) => row.value.includes('not analysed yet')),
+  });
+
+  const debugHtml = renderDebugHtml(debugSections, 'nonce-value');
+  checks.push({
+    name: 'the debug page renders a nav link and a copy button for every section',
+    passed: debugSections.every((section) => debugHtml.includes(`href="#section-${section.id}"`)
+      && debugHtml.includes(`data-section="${section.id}"`))
+      && debugHtml.includes("script-src 'nonce-nonce-value'")
+      && debugHtml.includes('Refresh report'),
+  });
+
+  const plain = sectionText(debugSections, 'parsers');
+  checks.push({
+    name: 'copying one section yields that section only',
+    passed: plain.includes('Parsers — C# and XAML parsers')
+      && !plain.includes('Packaging — Bundles'),
+  });
+
+  const manifestForDebug = JSON.parse(readFileSync(join(extensionRoot, 'package.json'), 'utf8')) as {
+    contributes?: { commands?: { command: string }[] };
+  };
+  checks.push({
+    name: 'the debug report is a contributed, registered command reachable from the panel tab',
+    passed: (manifestForDebug.contributes?.commands ?? []).some((entry) => entry.command === 'csharpXamlGraph.debug')
+      && activationSource.includes("register('csharpXamlGraph.debug'")
+      && menuHtml.includes('id="debug"'),
+  });
+
   console.log(`workspace: ${workspaceRoot}`);
   console.log(`files: ${model.stats.csharpFiles} C#, ${model.stats.xamlFiles} XAML in ${model.stats.elapsedMs} ms`);
   console.log(`parse errors: ${model.stats.parseErrors}`);
@@ -647,7 +1518,11 @@ async function main(): Promise<void> {
   console.log('');
 
   let failures = 0;
-  for (const check of checks) {
+  const reported = isDefaultWorkspace ? checks : checks.filter((check) => check.generic === true);
+  if (!isDefaultWorkspace) {
+    console.log(`validating ${workspaceRoot} — repository-specific assertions skipped\n`);
+  }
+  for (const check of reported) {
     if (!check.passed) {
       failures += 1;
     }

@@ -13,6 +13,17 @@ export interface ViewOptions {
   hideOrphans: boolean;
   /** Show only nodes that carry a cleanup finding or sit in a cycle. */
   onlyProblems: boolean;
+  /**
+   * Node ids a symbol search asked for. The graph is restricted to these and everything within
+   * `focusDepth` hops, so a right-click on one method shows that method's type and its partners
+   * rather than the whole workspace.
+   */
+  scope?: readonly string[] | null;
+  /**
+   * Draw the scope exactly, with no hop expansion. Unpacking a shape uses this: the reader asked to
+   * see that shape, so partners outside it must not be added back.
+   */
+  scopeExact?: boolean;
 }
 
 export interface VisibleGraph {
@@ -123,6 +134,40 @@ export function computeVisible(model: GraphModel, options: ViewOptions): Visible
   let edges = model.edges.filter((edge) =>
     kinds.has(edge.kind) && nodeIds.has(edge.source) && nodeIds.has(edge.target));
 
+  let scopeIds = new Set<string>();
+  if (options.scope && options.scope.length > 0) {
+    const known = new Set(model.nodes.map((node) => node.id));
+    scopeIds = new Set(options.scope.filter((id) => known.has(id)));
+
+    const reached = new Set<string>(scopeIds);
+    if (!options.scopeExact) {
+      let frontier = [...scopeIds];
+      const depth = Math.max(1, options.focusDepth);
+      for (let step = 0; step < depth; step += 1) {
+        const next: string[] = [];
+        for (const id of frontier) {
+          for (const neighbour of adjacency.get(id) ?? []) {
+            if (!reached.has(neighbour)) {
+              reached.add(neighbour);
+              next.push(neighbour);
+            }
+          }
+        }
+        frontier = next;
+      }
+    }
+
+    nodeIds = new Set([...nodeIds].filter((id) => reached.has(id)));
+    for (const id of scopeIds) {
+      nodeIds.add(id);
+    }
+  }
+
+  // The node set can only have shrunk since the edges were first collected, so re-filter here. An
+  // edge whose endpoint is no longer drawn makes cytoscape reject the whole add, which empties the
+  // canvas — the exact failure that made "Hide unconnected" appear to unlink everything.
+  edges = edges.filter((edge) => nodeIds.has(edge.source) && nodeIds.has(edge.target));
+
   let hiddenOrphans = 0;
   if (options.hideOrphans) {
     const connected = new Set<string>();
@@ -137,7 +182,7 @@ export function computeVisible(model: GraphModel, options: ViewOptions): Visible
     for (const id of nodeIds) {
       // A cleanup finding is the thing the reader came for; hiding it as "unconnected" would delete
       // the problem and leave an empty panel.
-      if (connected.has(id) || id === options.focus || flagged.has(id)) {
+      if (connected.has(id) || id === options.focus || flagged.has(id) || scopeIds.has(id)) {
         kept.add(id);
       } else {
         hiddenOrphans += 1;

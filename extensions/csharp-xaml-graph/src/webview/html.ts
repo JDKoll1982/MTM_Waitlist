@@ -160,8 +160,18 @@ function legendMarkup(): string {
         <p><b>Packed (auto)</b> arranges each connected piece internally, then tiles the pieces across
         and down the panel. A dependency graph is many small shapes, not one big one, so this fills the
         space instead of stacking into a single column.</p>
-        <p><b>Click</b> a node to inspect it. <b>Double-click</b> to open its source.
-        <b>Esc</b> clears a focus.</p>
+        <p><b>Unpack a shape.</b> Right-click any node and choose <b>Unpack this group</b> to show that
+        shape on its own, at full density, from its starting root to the end of the group. Every other
+        type is hidden while it is unpacked. The shape uses the layout chosen in <b>Layout of an
+        unpacked shape</b> (Layered Down by default, so each type sits above the types it depends on).
+        <b>Re-pack group</b> in the toolbar brings the rest back.</p>
+        <p><b>Zoom.</b> The upper-left corner of the canvas holds a region-zoom button (drag a box over
+        the shapes you want), a vertical zoom slider, and a reset that returns the normal view.</p>
+        <p><b>Click</b> a node to inspect it. <b>Hover</b> a node for its tooltip: what it is, what it
+        depends on, and any cleanup findings that point at it. <b>Hover a line</b> for the dependency it
+        draws — both types, the kind, the confidence, and the source line that produced it; double-click
+        the line to open that code. <b>Double-click</b> a node to open its source.
+        <b>Esc</b> clears a focus, a scope, or the right-click menu.</p>
       </section>
     </div>
   </div>
@@ -192,7 +202,7 @@ export function renderHtml(context: HtmlContext): string {
 <div id="shell">
 
   <div id="toolbar">
-    <div class="row">
+    <div class="row inputs">
       <input id="search" type="search" placeholder="Filter by name, namespace or module  (Esc clears)" />
       <label class="field">Module<select id="module" title="Restrict the graph to one module"></select></label>
       <label class="field">Layout<select id="layout" title="How the nodes are arranged">
@@ -220,40 +230,76 @@ export function renderHtml(context: HtmlContext): string {
         <option value="2">2</option>
         <option value="3">3</option>
       </select></label>
+    </div>
+
+    <div class="row checks">
       <label class="check"><input id="hide-orphans" type="checkbox" />Hide unconnected</label>
       <label class="check"><input id="only-problems" type="checkbox" />Only problems</label>
-      <span class="spacer"></span>
+    </div>
+
+    <div class="row actions">
       <button id="visibility-open" type="button" aria-expanded="false"
               title="Choose which node layers and edge kinds are visible">Layers &amp; edges</button>
       <button id="legend-open" type="button" title="What the shapes, colours and lines mean">Legend</button>
       <button id="fit" type="button" title="Frame the visible graph">Fit</button>
+      <button id="repack" type="button" hidden
+              title="Put every unpacked group back into the packed tiles">Re-pack groups</button>
+      <span id="unpack-status" class="unpack-status" hidden></span>
       <button id="toggle-panel" type="button" aria-pressed="false" title="Give the graph the full width">Hide details</button>
+      <span class="spacer"></span>
       <button id="reanalyze" type="button" class="primary">Re-analyse</button>
       <button id="export" type="button">Export JSON</button>
-    </div>
-
-    <div class="row status">
-      <span id="stats">analysing…</span>
-      <span id="focus-bar" hidden></span>
     </div>
   </div>
 
   ${visibilityFlyout()}
 
   <div id="main">
-    <div id="canvas"><div id="cy"></div></div>
+    <div id="canvas">
+      <div id="cy"></div>
+      <div id="view-controls" role="group" aria-label="View controls">
+        <button id="zoom-region" type="button" aria-pressed="false"
+                title="Drag a box over shapes to zoom to them">
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+            <circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.5" />
+            <path d="M10.6 10.6 L14.2 14.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+          </svg>
+        </button>
+        <input id="zoom-slider" type="range" min="0" max="100" step="1" value="50"
+               aria-label="Zoom" title="Drag up for closer, down for further away" />
+        <button id="view-reset" type="button" title="Reset the view to normal">
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M13 8a5 5 0 1 1-1.6-3.7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            <path d="M13.4 1.9 L13.4 5.1 L10.2 5.1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+      <div id="zoom-rect" hidden></div>
+      <div id="progress" hidden role="progressbar" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-head">
+          <span id="progress-message">Analysing the workspace…</span>
+          <span id="progress-percent"></span>
+        </div>
+        <div class="progress-track"><div id="progress-fill"></div></div>
+      </div>
+      <span id="focus-bar" hidden></span>
+      <span id="stats">analysing…</span>
+      <div id="tooltip" hidden role="tooltip"></div>
+    </div>
 
     <div id="side">
       <div id="side-tabs">
         <button id="tab-details" type="button" class="tab active">Details</button>
         <button id="tab-problems" type="button" class="tab">Problems <span id="problem-count" class="badge">0</span></button>
       </div>
-      <div id="details" class="pane active"><p class="muted">Select a node to inspect it. Double-click to open the source.</p></div>
+      <div id="details" class="pane active"><p class="muted">Select a node to inspect it. Double-click to open the source. Right-click to unpack its shape.</p></div>
       <div id="problems" class="pane"><p class="muted">Run the analysis to see cleanup findings.</p></div>
     </div>
   </div>
 
   ${legendMarkup()}
+
+  <div id="node-menu" class="context-menu" hidden role="menu" aria-label="Node actions"></div>
 
 </div>
 <script nonce="${context.nonce}" src="${scriptUri.toString()}"></script>

@@ -3,7 +3,9 @@ import dagre from 'cytoscape-dagre';
 import type { EdgeKind, Finding, GraphModel, NodeLayer } from '../../graph/model';
 import { EDGE_KIND_LABEL, EDGE_KINDS, FINDING_LABEL, NODE_LAYERS } from '../../graph/model';
 import { computeVisible, moduleSummary, type ViewOptions } from './view';
-import { packedLayout } from './packing';
+import { componentGroups, groupRootFor, packedLayout } from './packing';
+import { renderEdgeTooltip, renderTooltip, summariseEdge, summariseNode } from './tooltip';
+import { DEFAULT_GRAPH_SETTINGS, UNPACKED_LAYOUT_LABEL, toUnpackedLayout, type GraphSettings } from '../../graph/settings';
 
 cytoscape.use(dagre);
 
@@ -50,6 +52,18 @@ const DENSITY_SPACING: Record<DensityName, number> = { compact: 1.1, normal: 1.3
 /** Zoom the view falls back to when fitting a large graph would shrink it past legibility. */
 const MIN_READABLE_ZOOM = 0.34;
 
+/**
+ * The canvas, or nothing once the panel has been disposed.
+ *
+ * `cy` keeps pointing at a destroyed core after `mount()` replaces it, and the webview can be torn
+ * down while a short timer is still pending — a zoom settling its labels, a hidden details panel
+ * asking for a resize. Every deferred entry point asks this instead of `cy`, so late work is dropped
+ * rather than run against a renderer that no longer exists.
+ */
+function liveCanvas(): cytoscape.Core | undefined {
+  return cy && !cy.destroyed() ? cy : undefined;
+}
+
 const ui = {
   search: '',
   layers: new Set<NodeLayer>(['view', 'viewmodel']),
@@ -65,6 +79,18 @@ const ui = {
   onlyProblems: false,
   focus: null as string | null,
   focusDepth: 1,
+  /** Group roots the reader unpacked by right-clicking them. */
+  unpacked: new Set<string>(),
+  /** Layout used inside an unpacked shape; a setting, defaulting to Layered Down. */
+  unpackedLayout: DEFAULT_GRAPH_SETTINGS.unpackedLayout,
+  /** Node ids a symbol search asked for, or null for the whole workspace. */
+  scope: null as string[] | null,
+  /** Draw the scope exactly, with no hop expansion (unpacking a shape uses this). */
+  scopeExact: false,
+  /** Member name to highlight on the graph, set when a search started from a method or field. */
+  member: null as string | null,
+  /** Human-readable origin of the current scope, shown in the focus bar. */
+  scopeLabel: '',
 };
 
 let model: GraphModel | undefined;
@@ -73,6 +99,73 @@ let labelsVisible = true;
 let panning = false;
 let lastPointer = { x: 0, y: 0 };
 let zoomTimer: ReturnType<typeof setTimeout> | undefined;
+let tooltipTimer: ReturnType<typeof setTimeout> | undefined;
+
+/** Findings that point at each node, so a hover can say what is wrong with the type under it. */
+let findingsByNode = new Map<string, Finding[]>();
+
+/**
+ * Last known position of every node.
+ *
+ * `cy.elements().remove()` then `cy.add()` destroys positions, and re-assigning them afterwards is
+ * not dependable while a layout may still be settling. Holding the coordinates here lets each new
+ * element be *created* at the right place, so a filter change — Hide unconnected, a layer toggle, a
+ * search keystroke — never collapses the graph into one spot.
+ */
+const lastPositions = new Map<string, { x: number; y: number }>();
+
+/**
+ * A short event log for the debug report. The canvas is the one place where "it worked a minute ago"
+ * cannot be reconstructed from the model, so the last few actions are recorded as they happen.
+ */
+const eventLog: { at: string; kind: string; detail: string }[] = [];
+
+function logEvent(kind: string, detail: string): void {
+  eventLog.push({ at: new Date().toISOString(), kind, detail });
+  if (eventLog.length > 40) {
+    eventLog.shift();
+  }
+}
+
+/** What the debug report asks for: the filters in force and what is actually drawn. */
+function diagnosticsFacts(): Record<string, unknown> {
+  const visible = model ? computeVisible(model, options()) : undefined;
+  return {
+    ready: Boolean(model && cy),
+    modelLoadedAt: modelLoadedAt ?? 'not loaded',
+    nodesDrawn: visible?.nodeIds.size ?? 0,
+    edgesDrawn: visible?.edges.length ?? 0,
+    hiddenOrphans: visible?.hiddenOrphans ?? 0,
+    layout: ui.layout,
+    density: ui.density,
+    labels: ui.labels,
+    zoom: cy?.zoom() ?? 0,
+    canvasWidth: cy?.width() ?? 0,
+    canvasHeight: cy?.height() ?? 0,
+    module: ui.module,
+    search: ui.search,
+    layers: [...ui.layers],
+    edgeKinds: [...ui.edgeKinds],
+    focus: ui.focus,
+    focusDepth: ui.focusDepth,
+    scope: ui.scope,
+    scopeExact: ui.scopeExact,
+    unpacked: [...ui.unpacked],
+    history: [...eventLog].reverse().slice(0, 12),
+  };
+}
+
+let modelLoadedAt: string | undefined;
+
+
+function capturePositions(): void {
+  cy?.nodes().forEach((node) => {
+    const position = node.position();
+    if (Number.isFinite(position.x) && Number.isFinite(position.y)) {
+      lastPositions.set(node.id(), { x: position.x, y: position.y });
+    }
+  });
+}
 
 const element = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
 
@@ -91,6 +184,8 @@ const options = (): ViewOptions => ({
   focusDepth: ui.focusDepth,
   hideOrphans: ui.hideOrphans,
   onlyProblems: ui.onlyProblems,
+  scope: ui.scope,
+  scopeExact: ui.scopeExact,
 });
 
 /* ---------------------------------------------------------------- styling */
@@ -192,6 +287,12 @@ function buildStyle(): cytoscape.StylesheetStyle[] {
     { selector: 'edge.edge-inherits', style: { 'line-color': '#8a8a8a', 'target-arrow-color': '#8a8a8a' } },
     { selector: 'edge.edge-template', style: { 'line-style': 'dotted', 'line-color': '#555555', opacity: 0.3 } },
     { selector: 'edge.neighbour', style: { opacity: 1, width: 2.6 } },
+    {
+      selector: 'edge.hovered-edge',
+      style: { opacity: 1, width: 3.4, 'line-color': '#ffffff', 'target-arrow-color': '#ffffff', 'z-index': 20 },
+    },
+    { selector: 'edge.member-match', style: { opacity: 1, width: 3.2, 'line-color': '#ffffff', 'target-arrow-color': '#ffffff' } },
+    { selector: 'node.unpacked-group', style: { 'underlay-color': '#4a9eff', 'underlay-opacity': 0.07, 'underlay-padding': 26 } },
   ];
 }
 
@@ -323,22 +424,130 @@ function layoutFor(name: LayoutName): LayoutOptions {
 }
 
 function runLayout(): void {
-  if (!cy) {
+  const core = liveCanvas();
+  if (!core) {
     return;
   }
-  const elements = visibleElements();
+  const elements = core.elements();
   if (elements.nodes().length === 0) {
     return;
   }
 
   if (ui.layout === 'packed') {
-    packedLayout(cy, { gap: GEOMETRY[ui.density].rankSep * 0.7, aspect: canvasAspect() });
+    const geometry = GEOMETRY[ui.density];
+    packedLayout(core, {
+      gap: geometry.rankSep * 0.7,
+      aspect: canvasAspect(),
+      nodeSep: geometry.nodeSep,
+      rankSep: geometry.rankSep,
+      unpacked: ui.unpacked,
+      unpackedLayout: ui.unpackedLayout,
+    });
+    markUnpackedGroups();
   } else {
-    cy.layout(layoutFor(ui.layout)).run();
+    core.nodes().removeClass('unpacked-group');
+    core.layout(layoutFor(ui.layout)).run();
   }
 
   frame(ui.focus);
   syncLabels();
+  syncToolbarState();
+  syncZoomSlider();
+  capturePositions();
+}
+
+/**
+ * The toolbar has to say what mode it is in. The Re-pack button appearing is the reader's only
+ * affordance to undo an unpack, and the status line names the layout the band was drawn in.
+ */
+function syncToolbarState(): void {
+  const repack = document.getElementById('repack') as HTMLButtonElement | null;
+  if (repack) {
+    repack.hidden = ui.unpacked.size === 0;
+    repack.textContent = ui.unpacked.size > 1
+      ? `Re-pack ${ui.unpacked.size} groups`
+      : 'Re-pack group';
+  }
+
+  const status = document.getElementById('unpack-status');
+  if (status) {
+    const count = ui.unpacked.size;
+    status.hidden = count === 0;
+    status.textContent = count === 0
+      ? ''
+      : `${count} unpacked · ${UNPACKED_LAYOUT_LABEL[ui.unpackedLayout]}`;
+  }
+}
+
+/** A soft background behind the nodes of every unpacked group, so the band reads as one shape. */
+function markUnpackedGroups(): void {
+  if (!cy) {
+    return;
+  }
+  cy.nodes().removeClass('unpacked-group');
+  if (ui.layout !== 'packed' || ui.unpacked.size === 0) {
+    return;
+  }
+  for (const group of componentGroups(cy)) {
+    if (!ui.unpacked.has(group.root)) {
+      continue;
+    }
+    for (const id of group.nodeIds) {
+      cy.getElementById(id).addClass('unpacked-group');
+    }
+  }
+}
+
+/**
+ * Unpacks the group the right-clicked node belongs to and shows that group alone, drawn in the
+ * configured unpacked layout from its root to the end of the chain. Partners outside the group are
+ * deliberately left out: the reader asked to see this shape, not the workspace around it.
+ */
+function unpackGroup(node: NodeSingular): void {
+  if (!cy) {
+    return;
+  }
+  const group = componentGroups(cy).find((entry) => entry.nodeIds.includes(node.id()));
+  if (!group || group.nodeIds.length < 2) {
+    void vscode.postMessage({
+      type: 'notice',
+      message: 'That type has no dependencies in this view, so there is no shape to unpack.',
+    });
+    return;
+  }
+
+  ui.unpacked.add(group.root);
+  ui.scope = [...group.nodeIds];
+  ui.scopeExact = true;
+  ui.focus = null;
+  ui.scopeLabel = `${String(node.data('label'))} · ${group.nodeIds.length} types`;
+  logEvent('unpack', `root ${group.root.split('.').pop()} · ${group.nodeIds.length} types`);
+
+  applyView(true);
+  selectNode(String(node.id()));
+}
+
+/** Puts one shape back into the tiles and restores the whole graph. */
+function repackGroup(node: NodeSingular): void {
+  if (!cy) {
+    return;
+  }
+  ui.unpacked.delete(groupRootFor(cy, node.id()));
+  ui.scope = null;
+  ui.scopeExact = false;
+  ui.scopeLabel = '';
+  logEvent('repack', 'one group');
+  applyView(true);
+}
+
+/** Puts every unpacked shape back and returns to the whole graph. */
+function repackAll(): void {
+  ui.unpacked.clear();
+  ui.scope = null;
+  ui.scopeExact = false;
+  ui.scopeLabel = '';
+  logEvent('repack', 'all groups');
+  applyView(true);
 }
 
 /** Roughly the shape of the canvas, so packed components tile to the panel rather than to a square. */
@@ -379,6 +588,8 @@ function elementsFor(visible: { nodeIds: Set<string>; edges: { id: string; sourc
         ...(node.inCycle ? ['in-cycle'] : []),
         ...(!node.inCycle && (node.problemCount ?? 0) > 0 ? ['flagged'] : []),
       ],
+      // Born in place: re-adding an element without this drops it at the origin.
+      position: lastPositions.get(node.id),
     });
   }
 
@@ -386,6 +597,10 @@ function elementsFor(visible: { nodeIds: Set<string>; edges: { id: string; sourc
   const edges: ElementDefinition[] = [];
   for (const edge of model!.edges) {
     if (!visibleEdges.has(edge.id)) {
+      continue;
+    }
+    // Defensive: cytoscape refuses the entire add if an endpoint is missing, so never hand it one.
+    if (!visible.nodeIds.has(edge.source) || !visible.nodeIds.has(edge.target)) {
       continue;
     }
     edges.push({
@@ -412,7 +627,17 @@ function applyView(relayout: boolean): void {
     return;
   }
 
+  if (!relayout) {
+    capturePositions();
+  }
+
   const visible = computeVisible(model, options());
+
+  // A node the canvas has never placed has no entry yet, so the layout must run for it. Without
+  // this, a filter that reveals new nodes would leave them stacked at the origin.
+  const needsLayout = relayout
+    || [...visible.nodeIds].some((id) => !lastPositions.has(id));
+
   cy.elements().remove();
   cy.add(elementsFor(visible));
   refreshStyle();
@@ -426,12 +651,32 @@ function applyView(relayout: boolean): void {
 
   updateCounters(visible.nodeIds.size, visible.edges.length, visible.hiddenOrphans);
   updateFocusBar();
+  highlightMember();
+  syncToolbarState();
 
-  if (relayout) {
+  if (needsLayout) {
     runLayout();
   } else {
     frame(ui.focus);
   }
+}
+
+/** Marks the dependencies a member search came from, so the member's own lines stand out. */
+function highlightMember(): void {
+  if (!cy) {
+    return;
+  }
+  cy.edges().removeClass('member-match');
+  const member = ui.member?.toLowerCase();
+  if (!member) {
+    return;
+  }
+  cy.edges().forEach((edge) => {
+    const label = String(edge.data('label') ?? '').toLowerCase();
+    if (label.includes(member)) {
+      edge.addClass('member-match');
+    }
+  });
 }
 
 function updateCounters(nodeCount: number, edgeCount: number, hidden: number): void {
@@ -445,6 +690,10 @@ function updateCounters(nodeCount: number, edgeCount: number, hidden: number): v
   if (hidden > 0) {
     parts.push(`${hidden} unconnected hidden`);
   }
+  // A truncated graph looks complete otherwise: say so where the reader is looking.
+  if (model.stats.truncated) {
+    parts.push(`TRUNCATED to ${model.nodes.length} of the workspace — raise maxNodes`);
+  }
   parts.push(`${model.stats.elapsedMs} ms`);
   if (model.stats.parseErrors) {
     parts.push(`${model.stats.parseErrors} parse errors`);
@@ -454,25 +703,42 @@ function updateCounters(nodeCount: number, edgeCount: number, hidden: number): v
 
 function updateFocusBar(): void {
   const bar = element<HTMLDivElement>('focus-bar');
-  if (!ui.focus) {
+  const scoped = (ui.scope?.length ?? 0) > 0;
+  if (!ui.focus && !scoped) {
     bar.hidden = true;
     bar.textContent = '';
     return;
   }
   const node = model?.nodes.find((candidate) => candidate.id === ui.focus);
   bar.hidden = false;
-  bar.innerHTML = `Focused on <strong>${escapeHtml(node?.label ?? ui.focus)}</strong>`;
+
+  const parts: string[] = [];
+  if (node) {
+    parts.push(`Focused on <strong>${escapeHtml(node.label)}</strong>`);
+  } else if (scoped) {
+    parts.push(`Scoped to <strong>${escapeHtml(ui.scopeLabel || `${ui.scope!.length} types`)}</strong>`);
+  }
+  if (ui.member) {
+    parts.push(`member <strong>${escapeHtml(ui.member)}</strong>`);
+  }
+  bar.innerHTML = parts.join(' · ');
+
   const clear = document.createElement('button');
   clear.type = 'button';
-  clear.textContent = 'Show everything';
+  clear.textContent = scoped ? 'Show everything' : 'Clear focus';
   clear.addEventListener('click', () => {
     ui.focus = null;
+    ui.scope = null;
+    ui.scopeExact = false;
+    ui.scopeLabel = '';
+    ui.member = null;
     applyView(true);
   });
   bar.appendChild(clear);
 }
 
 function mount(): void {
+  hideTooltip();
   if (cy) {
     cy.destroy();
   }
@@ -489,6 +755,7 @@ function mount(): void {
   });
 
   cy.on('tap', 'node', (event) => {
+    hideTooltip();
     const node = event.target as NodeSingular;
     showDetails(node);
   });
@@ -513,15 +780,78 @@ function mount(): void {
     node.addClass('hovered');
     node.connectedEdges().addClass('neighbour');
     node.connectedEdges().connectedNodes().addClass('hover-source');
+    const pointer = pointerOf(event);
+    lastPointer = pointer;
+    scheduleTooltip(() => tooltipMarkup(node), pointer.x, pointer.y);
   });
 
-  cy.on('mouseout', 'node', (event) => {
+  cy.on('mouseout', 'node', () => {
+    hideTooltip();
+    cy!.elements().removeClass('hovered').removeClass('neighbour').removeClass('hover-source');
+  });
+
+  // Hovering a line says what the dependency is and where it comes from. Edges are thin, so the
+  // line is also drawn thicker while hovered to show which one the tooltip describes.
+  cy.on('mouseover', 'edge', (event) => {
+    const edge = event.target as cytoscape.EdgeSingular;
+    edge.addClass('hovered-edge');
+    const pointer = pointerOf(event);
+    lastPointer = pointer;
+    scheduleTooltip(() => edgeTooltipMarkup(edge), pointer.x, pointer.y);
+  });
+
+  cy.on('mouseout', 'edge', (event) => {
+    (event.target as cytoscape.EdgeSingular).removeClass('hovered-edge');
+    hideTooltip();
+  });
+
+  cy.on('mousemove', 'edge', (event) => {
+    const pointer = pointerOf(event);
+    lastPointer = pointer;
+    const tooltip = document.getElementById('tooltip') as HTMLDivElement | null;
+    if (tooltip && !tooltip.hidden) {
+      placeTooltip(tooltip, pointer.x, pointer.y);
+    }
+  });
+
+  cy.on('dbltap', 'edge', (event) => {
+    const edge = event.target as cytoscape.EdgeSingular;
+    const record = model?.edges.find((candidate) => candidate.id === edge.id());
+    if (record?.evidence) {
+      hideTooltip();
+      vscode.postMessage({ type: 'reveal', file: record.evidence.file, line: record.evidence.line });
+    }
+  });
+
+  cy.on('mousemove', 'node', (event) => {
+    const pointer = pointerOf(event);
+    lastPointer = pointer;
+    const tooltip = document.getElementById('tooltip') as HTMLDivElement | null;
+    if (tooltip && !tooltip.hidden) {
+      placeTooltip(tooltip, pointer.x, pointer.y);
+    }
+  });
+
+  cy.on('cxttap', 'node', (event) => {
+    hideTooltip();
     const node = event.target as NodeSingular;
-    node.removeClass('hovered');
-    cy!.elements().removeClass('neighbour').removeClass('hover-source');
+    const original = event.originalEvent as MouseEvent | undefined;
+    openNodeMenu(node, original?.clientX ?? 0, original?.clientY ?? 0);
+  });
+
+  cy.on('cxttap', (event) => {
+    if (event.target === cy) {
+      closeNodeMenu();
+    }
+  });
+
+  cy.on('pan zoom', () => {
+    closeNodeMenu();
+    hideTooltip();
   });
 
   cy.on('zoom', () => {
+    syncZoomSlider();
     if (ui.labels !== 'zoom') {
       return;
     }
@@ -529,20 +859,503 @@ function mount(): void {
       clearTimeout(zoomTimer);
     }
     zoomTimer = setTimeout(() => {
-      syncLabels();
+      if (liveCanvas()) {
+        syncLabels();
+      }
     }, 90);
   });
 
   // A dropped pointer cancels the pan cursor if the mouseup happened outside the canvas.
+  window.addEventListener('mousemove', (event) => {
+    lastPointer = { x: event.clientX, y: event.clientY };
+  }, { passive: true });
+
   window.addEventListener('mouseup', () => {
     panning = false;
     element('cy').classList.remove('panning');
   });
 
   const observer = new ResizeObserver(() => {
-    cy?.resize();
+    liveCanvas()?.resize();
   });
   observer.observe(element<HTMLDivElement>('cy'));
+}
+
+/* ---------------------------------------------------------------- context menu */
+
+function closeNodeMenu(): void {
+  const menu = element<HTMLDivElement>('node-menu');
+  menu.hidden = true;
+  menu.innerHTML = '';
+}
+
+interface MenuItem {
+  label: string;
+  hint?: string;
+  run: () => void;
+}
+
+/** Right-click menu for a node: unpack its packed shape, focus, scope, or open the source. */
+function openNodeMenu(node: NodeSingular, clientX: number, clientY: number): void {
+  const menu = element<HTMLDivElement>('node-menu');
+  const id = node.id();
+  const packed = ui.layout === 'packed';
+  const group = cy ? componentGroups(cy).find((entry) => entry.nodeIds.includes(id)) : undefined;
+  const root = group?.root ?? id;
+  const groupSize = group?.nodeIds.length ?? 1;
+  const unpacked = ui.unpacked.has(root);
+
+  menu.innerHTML = '';
+  const heading = document.createElement('div');
+  heading.className = 'menu-heading';
+  heading.textContent = `${node.data('label') as string} · ${groupSize} type${groupSize === 1 ? '' : 's'}`;
+  menu.appendChild(heading);
+
+  const items: MenuItem[] = [];
+
+  if (packed) {
+    items.push({
+      label: unpacked ? 'Re-pack this group' : 'Unpack this group',
+      hint: unpacked
+        ? 'back into the packed tiles'
+        : `${UNPACKED_LAYOUT_LABEL[ui.unpackedLayout]} · ${groupSize} type${groupSize === 1 ? '' : 's'}`,
+      run: () => (unpacked ? repackGroup(node) : unpackGroup(node)),
+    });
+    if (ui.unpacked.size > 0) {
+      items.push({
+        label: 'Re-pack every group',
+        hint: `${ui.unpacked.size} unpacked`,
+        run: repackAll,
+      });
+    }
+  }
+
+  items.push(
+    {
+      label: 'Focus here',
+      hint: `${ui.focusDepth} hop${ui.focusDepth === 1 ? '' : 's'}`,
+      run: () => {
+        ui.focus = id;
+        showSelected(id);
+      },
+    },
+    {
+      label: 'Expand 2 hops',
+      run: () => {
+        ui.focus = id;
+        ui.focusDepth = 2;
+        element<HTMLSelectElement>('depth').value = '2';
+        showSelected(id);
+      },
+    },
+    {
+      label: 'Scope to this type',
+      hint: 'this type and its partners',
+      run: () => {
+        ui.scope = [id];
+        ui.focus = id;
+        ui.member = null;
+        ui.scopeLabel = String(node.data('label'));
+        applyView(true);
+        showSelected(id);
+      },
+    },
+    {
+      label: 'Open source',
+      run: () => vscode.postMessage({ type: 'reveal', file: node.data('file'), line: Number(node.data('line') ?? 1) }),
+    },
+    {
+      label: 'Copy full name',
+      run: () => vscode.postMessage({ type: 'copy', text: node.data('fullName') }),
+    },
+  );
+
+  for (const entry of items) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'menu-item';
+    button.innerHTML = `<span>${escapeHtml(entry.label)}</span>`
+      + (entry.hint ? `<span class="muted">${escapeHtml(entry.hint)}</span>` : '');
+    button.addEventListener('click', () => {
+      closeNodeMenu();
+      entry.run();
+    });
+    menu.appendChild(button);
+  }
+
+  menu.hidden = false;
+  const bounds = menu.getBoundingClientRect();
+  const left = Math.max(8, Math.min(clientX, window.innerWidth - bounds.width - 8));
+  const top = Math.max(8, Math.min(clientY, window.innerHeight - bounds.height - 8));
+  menu.style.left = `${left}px`;
+  menu.style.top = `${top}px`;
+}
+
+/* ---------------------------------------------------------------- hover tooltip */
+
+function indexFindings(): void {
+  findingsByNode = new Map();
+  for (const finding of model?.findings ?? []) {
+    for (const id of finding.nodeIds) {
+      const list = findingsByNode.get(id);
+      if (list) {
+        list.push(finding);
+      } else {
+        findingsByNode.set(id, [finding]);
+      }
+    }
+  }
+}
+
+function tooltipMarkup(node: NodeSingular): string {
+  const data = node.data();
+  return renderTooltip(summariseNode({
+    id: String(data.id),
+    label: String(data.label ?? ''),
+    fullName: String(data.fullName ?? ''),
+    layer: String(data.layer ?? 'model'),
+    kind: String(data.kind ?? ''),
+    module: String(data.module ?? ''),
+    file: data.file ? String(data.file) : undefined,
+    line: data.file ? Number(data.line ?? 1) : undefined,
+    diRegistered: data.diRegistered === true,
+    inCycle: data.inCycle === true,
+    edges: model?.edges ?? [],
+    findings: findingsByNode.get(String(data.id)) ?? [],
+  }));
+}
+
+/** Builds the line tooltip from the model edge, so it carries the evidence location and member. */
+function edgeTooltipMarkup(edge: cytoscape.EdgeSingular): string {
+  const record = model?.edges.find((candidate) => candidate.id === edge.id());
+  if (!record || !model) {
+    return '';
+  }
+  const source = model.nodes.find((node) => node.id === record.source);
+  const target = model.nodes.find((node) => node.id === record.target);
+  return renderEdgeTooltip(summariseEdge({
+    kind: record.kind,
+    sourceLabel: source?.label ?? record.source,
+    sourceFullName: source?.fullName ?? record.source,
+    targetLabel: target?.label ?? record.target,
+    targetFullName: target?.fullName ?? record.target,
+    confidence: record.confidence,
+    member: record.label,
+    file: record.evidence?.file,
+    line: record.evidence?.line,
+  }));
+}
+
+function hideTooltip(): void {
+  if (tooltipTimer) {
+    clearTimeout(tooltipTimer);
+    tooltipTimer = undefined;
+  }
+  const tooltip = document.getElementById('tooltip') as HTMLDivElement | null;
+  if (tooltip) {
+    tooltip.hidden = true;
+    tooltip.innerHTML = '';
+  }
+}
+
+function placeTooltip(tooltip: HTMLDivElement, x: number, y: number): void {
+  const bounds = tooltip.getBoundingClientRect();
+  const left = Math.max(8, Math.min(x + 16, window.innerWidth - bounds.width - 8));
+  const top = Math.max(8, Math.min(y + 18, window.innerHeight - bounds.height - 8));
+  tooltip.style.left = `${left}px`;
+  tooltip.style.top = `${top}px`;
+}
+
+/** Hovering says what the shape is before the reader commits a click. */
+function scheduleTooltip(build: () => string, x: number, y: number): void {
+  hideTooltip();
+  tooltipTimer = setTimeout(() => {
+    tooltipTimer = undefined;
+    const tooltip = document.getElementById('tooltip') as HTMLDivElement | null;
+    if (!tooltip) {
+      return;
+    }
+    const markup = build();
+    if (!markup) {
+      return;
+    }
+    tooltip.innerHTML = markup;
+    tooltip.hidden = false;
+    placeTooltip(tooltip, x, y);
+  }, 220);
+}
+
+function pointerOf(event: cytoscape.EventObject): { x: number; y: number } {
+  const original = event.originalEvent as MouseEvent | undefined;
+  if (original && typeof original.clientX === 'number') {
+    return { x: original.clientX, y: original.clientY };
+  }
+  const rendered = (event as unknown as { renderedPosition?: { x: number; y: number } }).renderedPosition;
+  const container = cy ? cy.container() : null;
+  const rect = container ? container.getBoundingClientRect() : undefined;
+  if (rendered && rect) {
+    return { x: rect.left + rendered.x, y: rect.top + rendered.y };
+  }
+  return lastPointer;
+}
+
+/* ---------------------------------------------------------------- view controls */
+
+/** Zoom range the slider covers. The bounds match the cytoscape instance's own limits. */
+const ZOOM_MIN = 0.08;
+const ZOOM_MAX = 3;
+
+let regionArmed = false;
+let regionStart: { x: number; y: number } | null = null;
+let syncingSlider = false;
+
+/** The slider is logarithmic, so the middle of the travel is a usable zoom rather than 1.5×. */
+function sliderToZoom(value: number): number {
+  const t = Math.min(1, Math.max(0, value / 100));
+  return ZOOM_MIN * Math.pow(ZOOM_MAX / ZOOM_MIN, t);
+}
+
+function zoomToSlider(level: number): number {
+  const clamped = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, level));
+  return Math.round((Math.log(clamped / ZOOM_MIN) / Math.log(ZOOM_MAX / ZOOM_MIN)) * 100);
+}
+
+function syncZoomSlider(): void {
+  const slider = document.getElementById('zoom-slider') as HTMLInputElement | null;
+  if (!slider || !cy || syncingSlider) {
+    return;
+  }
+  syncingSlider = true;
+  slider.value = String(zoomToSlider(cy.zoom()));
+  syncingSlider = false;
+}
+
+/** Zooms about the middle of the canvas, so the view stays where the reader is looking. */
+function zoomAboutCentre(level: number, centre?: { x: number; y: number }): void {
+  if (!cy) {
+    return;
+  }
+  const width = cy.width();
+  const height = cy.height();
+  if (width <= 0 || height <= 0) {
+    return;
+  }
+
+  const anchor = centre
+    ?? { x: width / 2, y: height / 2 };
+  const model = {
+    x: (anchor.x - cy.pan().x) / cy.zoom(),
+    y: (anchor.y - cy.pan().y) / cy.zoom(),
+  };
+  const next = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, level));
+  cy.zoom({ level: next, renderedPosition: anchor });
+  cy.pan({
+    x: anchor.x - model.x * next,
+    y: anchor.y - model.y * next,
+  });
+  syncZoomSlider();
+}
+
+function setRegionArmed(armed: boolean): void {
+  regionArmed = armed;
+  const button = document.getElementById('zoom-region') as HTMLButtonElement | null;
+  if (button) {
+    button.setAttribute('aria-pressed', String(armed));
+  }
+  const canvas = document.getElementById('cy');
+  canvas?.classList.toggle('zooming-region', armed);
+  const rect = document.getElementById('zoom-rect');
+  if (rect) {
+    rect.hidden = true;
+  }
+  regionStart = null;
+  if (armed) {
+    hideTooltip();
+  }
+}
+
+/** Local canvas coordinates for a pointer event, so the rectangle and the zoom agree. */
+function canvasPoint(event: PointerEvent | MouseEvent): { x: number; y: number } {
+  const rect = document.getElementById('cy')?.getBoundingClientRect();
+  return {
+    x: event.clientX - (rect?.left ?? 0),
+    y: event.clientY - (rect?.top ?? 0),
+  };
+}
+
+function drawRegion(from: { x: number; y: number }, to: { x: number; y: number }): void {
+  const rect = document.getElementById('zoom-rect');
+  if (!rect) {
+    return;
+  }
+  rect.hidden = false;
+  rect.style.left = `${Math.min(from.x, to.x)}px`;
+  rect.style.top = `${Math.min(from.y, to.y)}px`;
+  rect.style.width = `${Math.abs(to.x - from.x)}px`;
+  rect.style.height = `${Math.abs(to.y - from.y)}px`;
+}
+
+/**
+ * Applies a dragged box as the new view: the box becomes the panel. Shapes inside it are what the
+ * reader framed, so fitting their bounding box keeps them all visible with a little margin.
+ */
+function applyRegionZoom(from: { x: number; y: number }, to: { x: number; y: number }): void {
+  if (!cy) {
+    return;
+  }
+
+  const width = Math.abs(to.x - from.x);
+  const height = Math.abs(to.y - from.y);
+  if (width < 8 || height < 8) {
+    // A click rather than a drag: leave the view alone.
+    return;
+  }
+
+  const left = Math.min(from.x, to.x);
+  const top = Math.min(from.y, to.y);
+  const zoom = cy.zoom();
+  const pan = cy.pan();
+
+  const inside = cy.nodes().filter((node) => {
+    const position = node.renderedPosition();
+    const halfWidth = (node.renderedOuterWidth() || 20) / 2;
+    const halfHeight = (node.renderedOuterHeight() || 20) / 2;
+    return position.x + halfWidth >= left
+      && position.x - halfWidth <= left + width
+      && position.y + halfHeight >= top
+      && position.y - halfHeight <= top + height;
+  });
+
+  if (inside.length > 0) {
+    cy.fit(inside, 70);
+    if (cy.zoom() > ZOOM_MAX) {
+      cy.zoom({ level: ZOOM_MAX, renderedPosition: { x: cy.width() / 2, y: cy.height() / 2 } });
+    }
+    syncZoomSlider();
+    return;
+  }
+
+  // Nothing inside the box: zoom to the box itself, so the drag still means something.
+  const level = Math.min(cy.width() / width, cy.height() / height) * zoom;
+  const modelX = (left + width / 2 - pan.x) / zoom;
+  const modelY = (top + height / 2 - pan.y) / zoom;
+  const next = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, level));
+  cy.zoom(next);
+  cy.pan({ x: cy.width() / 2 - modelX * next, y: cy.height() / 2 - modelY * next });
+  syncZoomSlider();
+}
+
+/** Resets zoom, pan, focus, scope and unpacking: the view the panel opens with. */
+function resetView(): void {
+  if (!cy) {
+    return;
+  }
+  setRegionArmed(false);
+  hideTooltip();
+  logEvent('reset-view', 'zoom, focus, scope and unpacking cleared');
+  ui.focus = null;
+  ui.scope = null;
+  ui.scopeExact = false;
+  ui.scopeLabel = '';
+  ui.member = null;
+  ui.unpacked.clear();
+  applyView(true);
+}
+
+function wireViewControls(): void {
+  element<HTMLButtonElement>('zoom-region').addEventListener('click', () => {
+    setRegionArmed(!regionArmed);
+  });
+
+  element<HTMLButtonElement>('view-reset').addEventListener('click', () => resetView());
+
+  const slider = element<HTMLInputElement>('zoom-slider');
+  slider.value = String(zoomToSlider(1));
+  slider.addEventListener('input', () => {
+    if (!cy || syncingSlider) {
+      return;
+    }
+    zoomAboutCentre(sliderToZoom(Number(slider.value)));
+  });
+
+  const canvas = element<HTMLDivElement>('cy');
+
+  canvas.addEventListener('pointerdown', (event) => {
+    if (!regionArmed || event.button !== 0) {
+      return;
+    }
+    regionStart = canvasPoint(event);
+    drawRegion(regionStart, regionStart);
+    canvas.setPointerCapture(event.pointerId);
+    event.preventDefault();
+  });
+
+  canvas.addEventListener('pointermove', (event) => {
+    if (!regionArmed || !regionStart) {
+      return;
+    }
+    drawRegion(regionStart, canvasPoint(event));
+  });
+
+  canvas.addEventListener('pointerup', (event) => {
+    if (!regionArmed || !regionStart) {
+      return;
+    }
+    const start = regionStart;
+    const end = canvasPoint(event);
+    regionStart = null;
+    const rect = document.getElementById('zoom-rect');
+    if (rect) {
+      rect.hidden = true;
+    }
+    applyRegionZoom(start, end);
+    setRegionArmed(false);
+  });
+
+  canvas.addEventListener('pointercancel', () => {
+    regionStart = null;
+    const rect = document.getElementById('zoom-rect');
+    if (rect) {
+      rect.hidden = true;
+    }
+  });
+}
+
+/* ---------------------------------------------------------------- analysis progress */
+
+/**
+ * Shows, updates or hides the progress overlay.
+ *
+ * `known` is false while a phase has no measurable total (reading files, building the graph), which
+ * switches the bar to an indeterminate sweep instead of reporting a percentage it cannot know.
+ */
+function setProgress(visible: boolean, message?: string, percent?: number, known?: boolean): void {
+  const panel = document.getElementById('progress') as HTMLDivElement | null;
+  const fill = document.getElementById('progress-fill') as HTMLDivElement | null;
+  const label = document.getElementById('progress-message');
+  const readout = document.getElementById('progress-percent');
+  if (!panel || !fill) {
+    return;
+  }
+
+  panel.hidden = !visible;
+  document.getElementById('cy')?.classList.toggle('analysing', visible);
+  if (!visible) {
+    return;
+  }
+
+  if (label && message) {
+    label.textContent = message;
+  }
+  const measured = known !== false && typeof percent === 'number';
+  panel.classList.toggle('indeterminate', !measured);
+  fill.style.width = measured ? `${Math.max(0, Math.min(100, percent ?? 0))}%` : '';
+  if (readout) {
+    readout.textContent = measured ? `${Math.round(percent ?? 0)}%` : '';
+  }
+  if (measured) {
+    panel.setAttribute('aria-valuenow', String(Math.round(percent ?? 0)));
+  }
 }
 
 /* ---------------------------------------------------------------- details */
@@ -550,7 +1363,7 @@ function mount(): void {
 function showDetails(node: NodeSingular | undefined): void {
   const details = element<HTMLDivElement>('details');
   if (!node || !model) {
-    details.innerHTML = '<p class="muted">Select a node to inspect it. Double-click to open the source.</p>';
+    details.innerHTML = '<p class="muted">Select a node to inspect it. Double-click to open the source. Right-click to unpack its shape.</p>';
     return;
   }
 
@@ -847,6 +1660,7 @@ function wireControls(): void {
   const search = element<HTMLInputElement>('search');
   search.addEventListener('input', () => {
     ui.search = search.value.trim();
+    logEvent('search', ui.search || '(cleared)');
     applyView(false);
   });
   search.addEventListener('keydown', (event) => {
@@ -885,6 +1699,7 @@ function wireControls(): void {
   moduleSelect.addEventListener('change', () => {
     ui.module = moduleSelect.value;
     ui.focus = null;
+    logEvent('module', ui.module);
     applyView(true);
   });
 
@@ -892,6 +1707,7 @@ function wireControls(): void {
   layout.value = ui.layout;
   layout.addEventListener('change', () => {
     ui.layout = layout.value as LayoutName;
+    logEvent('layout', ui.layout);
     runLayout();
   });
 
@@ -899,6 +1715,7 @@ function wireControls(): void {
   density.value = ui.density;
   density.addEventListener('change', () => {
     ui.density = density.value as DensityName;
+    logEvent('density', ui.density);
     refreshStyle();
     runLayout();
   });
@@ -923,6 +1740,7 @@ function wireControls(): void {
   orphans.checked = ui.hideOrphans;
   orphans.addEventListener('change', () => {
     ui.hideOrphans = orphans.checked;
+    logEvent('hide-unconnected', String(ui.hideOrphans));
     applyView(false);
   });
 
@@ -970,12 +1788,21 @@ function wireControls(): void {
     frame(ui.focus);
   });
 
+  element<HTMLButtonElement>('repack').addEventListener('click', () => repackAll());
+
+  document.addEventListener('click', (event) => {
+    const menu = element<HTMLDivElement>('node-menu');
+    if (!menu.hidden && !menu.contains(event.target as Node)) {
+      closeNodeMenu();
+    }
+  });
+
   element<HTMLButtonElement>('reanalyze').addEventListener('click', () => {
     vscode.postMessage({ type: 'reanalyze' });
   });
 
   element<HTMLButtonElement>('export').addEventListener('click', () => {
-    vscode.postMessage({ type: 'export' });
+    sendVisibleExport();
   });
 
   const panelToggle = element<HTMLButtonElement>('toggle-panel');
@@ -984,11 +1811,19 @@ function wireControls(): void {
     const hidden = shell.classList.toggle('panel-hidden');
     panelToggle.textContent = hidden ? 'Show details' : 'Hide details';
     panelToggle.setAttribute('aria-pressed', String(hidden));
-    setTimeout(() => cy?.resize(), 60);
+    setTimeout(() => liveCanvas()?.resize(), 60);
   });
 
   document.addEventListener('keydown', (event) => {
     if (event.key !== 'Escape') {
+      return;
+    }
+    if (regionArmed) {
+      setRegionArmed(false);
+      return;
+    }
+    if (!element<HTMLDivElement>('node-menu').hidden) {
+      closeNodeMenu();
       return;
     }
     const visibility = element<HTMLDivElement>('visibility');
@@ -1010,21 +1845,209 @@ function wireControls(): void {
 
 /* ---------------------------------------------------------------- boot */
 
+/**
+ * Everything currently drawn, in the same shape as the full model, plus a record of the filters that
+ * produced it. Exporting the whole workspace would hand back types the reader is not looking at.
+ */
+function visibleExport(): Record<string, unknown> | undefined {
+  if (!model) {
+    return undefined;
+  }
+
+  const visible = computeVisible(model, options());
+  const nodes = model.nodes.filter((node) => visible.nodeIds.has(node.id));
+  const findings = model.findings.filter((finding) =>
+    finding.nodeIds.some((id) => visible.nodeIds.has(id)));
+  const count = (kind: string): number => findings.filter((finding) => finding.kind === kind).length;
+
+  return {
+    exportedAt: new Date().toISOString(),
+    scope: {
+      description: ui.scopeLabel || (ui.scope ? `${ui.scope.length} types` : 'whole workspace'),
+      layout: ui.layout,
+      density: ui.density,
+      labels: ui.labels,
+      layers: [...ui.layers],
+      edgeKinds: [...ui.edgeKinds],
+      module: ui.module,
+      search: ui.search,
+      focus: ui.focus,
+      focusDepth: ui.focusDepth,
+      hideUnconnected: ui.hideOrphans,
+      onlyProblems: ui.onlyProblems,
+      scope: ui.scope,
+      scopeExact: ui.scopeExact,
+      unpackedGroups: [...ui.unpacked],
+    },
+    workspace: model.workspace,
+    generatedAt: model.generatedAt,
+    nodes,
+    edges: visible.edges,
+    findings,
+    cleanup: {
+      cycles: count('cycle'),
+      deadBindings: count('dead-binding'),
+      unboundViews: count('unbound-view'),
+      unusedTypes: count('unused-type'),
+      unusedMembers: count('unused-member'),
+    },
+    stats: {
+      ...model.stats,
+      visibleNodes: nodes.length,
+      visibleEdges: visible.edges.length,
+      hiddenUnconnected: visible.hiddenOrphans,
+      totalNodes: model.nodes.length,
+      totalEdges: model.edges.length,
+    },
+    warnings: model.warnings,
+  };
+}
+
+/** Asks the host to save what is on screen. Nothing leaves the panel without a visible graph. */
+function sendVisibleExport(): void {
+  const payload = visibleExport();
+  if (!payload) {
+    return;
+  }
+  vscode.postMessage({ type: 'export', payload });
+}
+
+interface GraphRequestMessage {
+  title?: string;
+  nodeIds?: string[];
+  focus?: string;
+  member?: string;
+  depth?: number;
+}
+
+let pendingRequest: GraphRequestMessage | undefined;
+
+/** Applies a request that started outside the panel (a right-click in the editor or Explorer). */
+function applyRequest(request: GraphRequestMessage): void {
+  if (!model) {
+    pendingRequest = request;
+    return;
+  }
+
+  const known = new Set(model.nodes.map((node) => node.id));
+  const ids = (request.nodeIds ?? []).filter((id) => known.has(id));
+  if (ids.length === 0 && !(request.focus && known.has(request.focus))) {
+    return;
+  }
+
+  // The requested types must be drawable, so their layers and the edge kinds a symbol search
+  // depends on are switched on before the scope is applied.
+  for (const node of model.nodes) {
+    if (ids.includes(node.id) || node.id === request.focus) {
+      ui.layers.add(node.layer);
+    }
+  }
+  if (request.member) {
+    ui.edgeKinds.add('reference');
+  }
+  syncVisibilityControls();
+
+  ui.scope = ids.length > 0 ? ids : null;
+  ui.scopeExact = false;
+  ui.focus = request.focus && known.has(request.focus) ? request.focus : (ids[0] ?? null);
+  ui.member = request.member ?? null;
+  ui.scopeLabel = request.title ?? '';
+  ui.focusDepth = Math.max(1, Math.min(3, request.depth ?? 1));
+  element<HTMLSelectElement>('depth').value = String(ui.focusDepth);
+
+  applyView(true);
+  selectNode(ui.focus);
+}
+
+function selectNode(id: string | null): void {
+  if (!cy || !id) {
+    return;
+  }
+  const node = cy.getElementById(id);
+  if (node.nonempty()) {
+    cy.elements().unselect();
+    node.select();
+    showDetails(node as NodeSingular);
+  }
+}
+
 window.addEventListener('message', (event: MessageEvent) => {
-  const message = event.data as { type?: string; model?: GraphModel; message?: string };
+  const message = event.data as {
+    type?: string;
+    model?: GraphModel;
+    message?: string;
+    request?: GraphRequestMessage;
+    settings?: Partial<GraphSettings>;
+    percent?: number;
+    known?: boolean;
+    done?: boolean;
+  };
+  if (message?.type === 'settings' && message.settings) {
+    const next = toUnpackedLayout(message.settings.unpackedLayout);
+    if (next !== ui.unpackedLayout) {
+      ui.unpackedLayout = next;
+      // Only the unpacked shapes move, so the graph is redrawn in place rather than re-analysed.
+      if (ui.unpacked.size > 0) {
+        runLayout();
+      }
+    }
+  }
+  if (message?.type === 'progress') {
+    if (message.done) {
+      setProgress(false);
+    } else {
+      setProgress(true, message.message, message.percent, message.known);
+    }
+  }
   if (message?.type === 'model' && message.model) {
+    setProgress(false);
     model = message.model;
+    modelLoadedAt = new Date().toISOString();
+    logEvent('model', `${model.nodes.length} nodes, ${model.edges.length} edges`);
     ui.focus = null;
+    ui.scope = null;
+    ui.scopeExact = false;
+    ui.member = null;
+    ui.scopeLabel = '';
+    ui.unpacked.clear();
+    lastPositions.clear();
     populateModules();
     mount();
+    indexFindings();
+    updateVisibilityCounts();
     applyView(true);
     renderProblems();
+    if (pendingRequest) {
+      const request = pendingRequest;
+      pendingRequest = undefined;
+      applyRequest(request);
+    }
+  }
+  if (message?.type === 'request' && message.request) {
+    applyRequest(message.request);
+  }
+  if (message?.type === 'requestExport') {
+    sendVisibleExport();
+  }
+  if (message?.type === 'requestDiagnostics') {
+    vscode.postMessage({ type: 'diagnostics', facts: diagnosticsFacts() });
+  }
+  if (message?.type === 'notice') {
+    const details = element<HTMLDivElement>('details');
+    const note = document.createElement('p');
+    note.className = 'muted notice';
+    note.textContent = message.message ?? '';
+    details.prepend(note);
+    setTimeout(() => note.remove(), 6000);
   }
   if (message?.type === 'error') {
+    setProgress(false);
     element('details').innerHTML = `<p class="error">${escapeHtml(message.message ?? 'Analysis failed')}</p>`;
   }
 });
 
 wireControls();
+wireViewControls();
 setTab('details');
 vscode.postMessage({ type: 'ready' });
+
