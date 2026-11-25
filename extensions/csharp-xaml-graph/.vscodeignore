@@ -3,6 +3,9 @@ scripts/**
 tsconfig.json
 .gitignore
 .vscode/**
+test/**
+vitest.config.mts
+coverage/**
 **/*.ts
 **/*.d.cts
 **/*.map
@@ -12,3 +15,7 @@ out/preview-*
 out/probe-*
 out/dump-*
 out/model-dump.json
+out/webview/*.html
+out/webview/*.json
+out/tmp-*
+
