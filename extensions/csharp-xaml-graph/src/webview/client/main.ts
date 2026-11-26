@@ -66,7 +66,10 @@ function liveCanvas(): cytoscape.Core | undefined {
 
 const ui = {
   search: '',
-  layers: new Set<NodeLayer>(['view', 'viewmodel']),
+  // A view pair alone is an island: every view model injects the services it works through, so
+  // hiding services leaves each view and its view model floating with nothing attached. Services are
+  // therefore part of the default tree; models stay off because they are mostly row types.
+  layers: new Set<NodeLayer>(['view', 'viewmodel', 'service']),
   edgeKinds: new Set<EdgeKind>(['resolves', 'getservice', 'binds', 'injects', 'field', 'constructs', 'composes']),
   // Type references are numerous (2,600+ here), so they stay off the canvas by default; cycle
   // detection always considers them, which is why the Problems tab can report cycles the canvas
@@ -96,6 +99,8 @@ const ui = {
 let model: GraphModel | undefined;
 let cy: Core | undefined;
 let labelsVisible = true;
+/** True once the reader picks a density, so the automatic size stops overriding them. */
+let densityChosen = false;
 let panning = false;
 let lastPointer = { x: 0, y: 0 };
 let zoomTimer: ReturnType<typeof setTimeout> | undefined;
@@ -632,6 +637,16 @@ function applyView(relayout: boolean): void {
   }
 
   const visible = computeVisible(model, options());
+
+  // A big tree is unreadable at normal spacing, so the node size follows the graph size unless the
+  // reader has chosen a density themselves.
+  if (!densityChosen) {
+    const wanted: DensityName = visible.nodeIds.size > 600 ? 'compact' : 'normal';
+    if (wanted !== ui.density) {
+      ui.density = wanted;
+      element<HTMLSelectElement>('density').value = wanted;
+    }
+  }
 
   // A node the canvas has never placed has no entry yet, so the layout must run for it. Without
   // this, a filter that reveals new nodes would leave them stacked at the origin.
@@ -1714,6 +1729,7 @@ function wireControls(): void {
   const density = element<HTMLSelectElement>('density');
   density.value = ui.density;
   density.addEventListener('change', () => {
+    densityChosen = true;
     ui.density = density.value as DensityName;
     logEvent('density', ui.density);
     refreshStyle();

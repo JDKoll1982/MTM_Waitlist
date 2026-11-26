@@ -801,6 +801,8 @@ describe('messages from the host', () => {
   });
 
   it('reports the canvas state the debug report asks for', () => {
+    // The presets other tests click leave module state behind, so pin the view before asking.
+    click('preset-mvvm');
     send({ type: 'requestDiagnostics' });
     const message = posted.at(-1) as { type: string; facts: Record<string, unknown> };
     expect(message.type).toBe('diagnostics');

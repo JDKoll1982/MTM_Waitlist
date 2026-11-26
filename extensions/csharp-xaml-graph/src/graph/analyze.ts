@@ -398,6 +398,36 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
         continue;
       }
 
+      // navigation.RegisterRoute(typeof(TViewModel), typeof(TPage)) and the tuple/array route tables
+      // that feed it. The types live in `typeof(...)` arguments, not in generic parameters, so a
+      // generic-argument scan alone never sees them.
+      if (/^RegisterRoute$/i.test(call.method) && call.typeOfArgs.length >= 2) {
+        const viewModel = index.resolve(call.typeOfArgs[0], usings, decl.namespace);
+        const page = index.resolve(call.typeOfArgs[1], usings, decl.namespace);
+        if (viewModel) {
+          diRegistered.add(viewModel.fullName);
+        }
+        if (viewModel && page) {
+          addEdge(page.fullName, viewModel.fullName, 'resolves', 'high',
+            { file: call.file ?? file, line: call.line }, 'route');
+        }
+        continue;
+      }
+
+      /* A view model exposed as a dependency property:
+         DependencyProperty.Register(nameof(ViewModel), typeof(ViewModel_X), typeof(View_Y))
+         The third typeof is the owning view; the second is the view model it carries. */
+      if (call.method === 'Register' && call.typeOfArgs.length >= 3) {
+        const valueType = index.resolve(call.typeOfArgs[1], usings, decl.namespace);
+        const ownerType = index.resolve(call.typeOfArgs[2], usings, decl.namespace);
+        if (valueType && ownerType && valueType.name.endsWith('ViewModel')) {
+          addEdge(ownerType.fullName, valueType.fullName, 'getservice', 'high',
+            { file: call.file ?? file, line: call.line }, 'DependencyProperty');
+          diRegistered.add(valueType.fullName);
+        }
+        continue;
+      }
+
       // services.AddTransient<TViewModel>() and friends
       if (/^Add[A-Z]/.test(call.method) && call.typeArgs.length === 1) {
         const registered = index.resolve(call.typeArgs[0], usings, decl.namespace);
@@ -490,6 +520,21 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
       // Only composed view models and services are interesting; `new List<T>()` and row models are noise.
       if (target && (layer === 'viewmodel' || layer === 'service')) {
         addEdge(self, target.fullName, 'composes', 'medium', { file: creation.file ?? file, line: creation.line });
+      }
+    }
+
+    // A control that casts its data context to an INTERFACE binds that shape of view model without
+    // naming a class (`DataContext is IGridCommands`). Class-typed casts are already handled by the
+    // typed-property rule above, which carries the markup as evidence, so only interfaces are added
+    // here — otherwise the same relationship would produce two edges with different evidence.
+    for (const mention of decl.mentions) {
+      if (mention.via !== 'is' && mention.via !== 'as') {
+        continue;
+      }
+      const target = index.resolve(mention.name, usings, decl.namespace);
+      if (target && target.kind === 'interface') {
+        addEdge(self, target.fullName, 'binds', 'medium',
+          { file, line: mention.line }, 'DataContext');
       }
     }
 

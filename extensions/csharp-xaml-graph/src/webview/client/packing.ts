@@ -69,7 +69,7 @@ export interface ComponentGroup {
   nodeIds: string[];
 }
 
-function weaklyConnected(nodes: NodeSingular[], core: Core): NodeSingular[][] {
+function weaklyConnected(nodes: NodeSingular[], core: Core, exclude = new Set<string>()): NodeSingular[][] {
   const adjacency = new Map<string, string[]>();
   const link = (from: string, to: string): void => {
     const list = adjacency.get(from);
@@ -80,8 +80,14 @@ function weaklyConnected(nodes: NodeSingular[], core: Core): NodeSingular[][] {
     }
   };
   for (const edge of core.edges()) {
-    link(edge.source().id(), edge.target().id());
-    link(edge.target().id(), edge.source().id());
+    const source = edge.source().id();
+    const target = edge.target().id();
+    // An excluded hub contributes no adjacency, so the groups it joined fall apart again.
+    if (exclude.has(source) || exclude.has(target)) {
+      continue;
+    }
+    link(source, target);
+    link(target, source);
   }
 
   const seen = new Set<string>();
@@ -188,7 +194,7 @@ export interface PackedOptions {
 }
 
 /** Tight internal spacing used inside a packed tile. */
-const TILE_NODE_SEP = 18;
+const TILE_NODE_SEP = 26;
 const TILE_RANK_SEP = 80;
 
 /**
@@ -256,6 +262,40 @@ function layoutGroup(
 }
 
 /**
+ * The nodes that act as hubs: high-degree types that join otherwise separate groups.
+ *
+ * The threshold scales with the graph, and no hub is picked from a graph small enough to lay out in
+ * one piece, so a normal-sized picture is never altered by this.
+ */
+function hubNodes(core: Core, nodes: NodeSingular[]): Set<string> {
+  if (nodes.length < 120) {
+    return new Set();
+  }
+
+  const degree = new Map<string, number>();
+  for (const edge of core.edges()) {
+    const source = edge.source().id();
+    const target = edge.target().id();
+    if (source === target) {
+      continue;
+    }
+    degree.set(source, (degree.get(source) ?? 0) + 1);
+    degree.set(target, (degree.get(target) ?? 0) + 1);
+  }
+
+  const threshold = Math.max(10, Math.round(Math.sqrt(nodes.length)));
+  const hubs = new Set<string>();
+  for (const [id, value] of degree) {
+    if (value >= threshold) {
+      hubs.add(id);
+    }
+  }
+
+  // Removing almost everything would be worse than leaving the graph alone.
+  return hubs.size > nodes.length * 0.15 ? new Set() : hubs;
+}
+
+/**
  * Lays the graph out as packed components: each connected piece is arranged internally, then the
  * pieces tile across the panel so the result fills both axes.
  *
@@ -273,7 +313,14 @@ export function packedLayout(core: Core, options: PackedOptions = {}): void {
     return;
   }
 
-  const components = weaklyConnected(nodes, core)
+  /* A shared service — a navigation service injected by thirty view models — joins every group into
+     one connected component, and one giant component is exactly the shape that collapses into a
+     column. Removing the hubs from the adjacency gives back the many small trees; the hubs are then
+     placed next to the neighbours they serve. */
+  const hubIds = hubNodes(core, nodes);
+  const groups = weaklyConnected(nodes, core, hubIds);
+
+  const components = groups
     .map((group) => {
       const root = rootOf(group, core);
       const isUnpacked = unpacked.has(root);
@@ -318,5 +365,49 @@ export function packedLayout(core: Core, options: PackedOptions = {}): void {
   tiles.forEach((component, index) => {
     place(component, placements[index].x, bandY + placements[index].y);
   });
+
+  // A hub sits at the average of the neighbours already placed, so it lands inside the cluster it
+  // serves instead of on top of one arbitrary group. Only tiled neighbours count: an unpacked band
+  // owns its own strip, and averaging into it would drag the hub out of the picture.
+  const tiledIds = new Set(tiles.flatMap((component) => component.nodes.map((node) => node.id())));
+
+  for (const id of hubIds) {
+    const hub = core.getElementById(id);
+    if (hub.empty()) {
+      continue;
+    }
+    const hubNode = hub as NodeSingular;
+    const all = hubNode.connectedEdges().connectedNodes().toArray()
+      .filter((neighbour) => neighbour.id() !== id);
+    const preferred = all.filter((neighbour) => tiledIds.has(neighbour.id()));
+    // Falling back to the band would drag the hub out of the picture, so when every neighbour is
+    // inside an unpacked band the hub joins the tiles as a whole instead.
+    const chosen = preferred.length > 0
+      ? preferred
+      : tiles.flatMap((component) => component.nodes);
+    const points = chosen.map((neighbour) => neighbour.position());
+    if (points.length > 0) {
+      const x = points.reduce((sum, point) => sum + point.x, 0) / points.length;
+      const y = points.reduce((sum, point) => sum + point.y, 0) / points.length;
+      // Hubs share their neighbours' centroid, so two of them can land on the same point. Walk the
+      // candidate outwards until it clears every other node rather than nudging by a fixed offset,
+      // which only pushes the collision somewhere else.
+      const others = core.nodes().toArray().filter((node) => node.id() !== id);
+      let placed = { x, y };
+      for (let step = 1; step <= 24; step += 1) {
+        const clear = others.every((other) => {
+          const point = other.position();
+          return Math.abs(point.x - placed.x) >= TILE_NODE_SEP || Math.abs(point.y - placed.y) >= TILE_NODE_SEP;
+        });
+        if (clear) {
+          break;
+        }
+        const angle = (step * 2.399) % (Math.PI * 2);
+        const radius = TILE_NODE_SEP * (1 + Math.floor(step / 6));
+        placed = { x: x + Math.cos(angle) * radius, y: y + Math.sin(angle) * radius };
+      }
+      hubNode.position(placed);
+    }
+  }
 }
 

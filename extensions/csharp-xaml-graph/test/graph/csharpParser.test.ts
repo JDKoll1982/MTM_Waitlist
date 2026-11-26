@@ -341,8 +341,8 @@ namespace N
 
   it('records generic member calls with their type arguments', () => {
     expect(bodyFile().types[0].calls).toEqual([
-      { receiver: 'App', method: 'GetService', typeArgs: ['IDep'], line: 12 },
-      { receiver: '_dep', method: 'Do', typeArgs: ['Thing'], line: 19 },
+      { receiver: 'App', method: 'GetService', typeArgs: ['IDep'], typeOfArgs: [], line: 12 },
+      { receiver: '_dep', method: 'Do', typeArgs: ['Thing'], typeOfArgs: [], line: 19 },
     ]);
   });
 

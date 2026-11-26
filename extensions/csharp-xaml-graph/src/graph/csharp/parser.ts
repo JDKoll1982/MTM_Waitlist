@@ -31,6 +31,10 @@ export interface PropertyDecl {
   visibility: Visibility;
   /** Attribute names, without the trailing `Attribute`, e.g. ["RelayCommand"], ["JsonIgnore"]. */
   attributes: string[];
+  /** `{ get; } = new();` — the property builds its own value, which is a View→ViewModel link. */
+  initializedInline: boolean;
+  /** `get => DataContext as Foo;` / `set => DataContext = value;` — a typed view over the data context. */
+  readsDataContext: boolean;
   /** The file this record was parsed from. */
   file?: string;
 }
@@ -83,6 +87,8 @@ export interface CallSite {
   receiver: string;
   method: string;
   typeArgs: string[];
+  /** Types named in `typeof(X)` arguments, in argument order. */
+  typeOfArgs: string[];
   line: number;
   /** The file this record was parsed from. */
   file?: string;
@@ -304,6 +310,26 @@ function describeValue(right: any): AssignedValue | undefined {
   return { kind: 'other', text: text(right) };
 }
 
+/** Types named in `typeof(X)` arguments of one invocation, in argument order. */
+function typeofArgumentsOf(invocation: any): string[] {
+  const argumentList = named(invocation).find((child: any) => child.type === 'argument_list');
+  if (!argumentList) {
+    return [];
+  }
+  const names: string[] = [];
+  for (const argument of named(argumentList)) {
+    const inner = named(argument)[0] ?? argument;
+    if (inner?.type === 'typeof_expression') {
+      const typeNode = named(inner).find((child: any) => child.type !== 'typeof');
+      const name = normalizeTypeText(text(typeNode ?? named(inner)[0]));
+      if (name) {
+        names.push(name);
+      }
+    }
+  }
+  return names;
+}
+
 function collectCalls(body: any): CallSite[] {
   const calls: CallSite[] = [];
   walk(body, (current: any) => {
@@ -321,6 +347,20 @@ function collectCalls(body: any): CallSite[] {
         receiver,
         method: text(nameNode.childForFieldName?.('name') ?? named(nameNode)[0]).trim(),
         typeArgs: genericArgumentTexts(nameNode),
+        typeOfArgs: typeofArgumentsOf(current),
+        line: lineOf(current),
+      });
+      return;
+    }
+    // A non-generic call still matters when its arguments are `typeof(X)`: that is how routes and
+    // dependency properties name their types.
+    const typeOfArgs = typeofArgumentsOf(current);
+    if (typeOfArgs.length > 0) {
+      calls.push({
+        receiver,
+        method: text(nameNode).trim(),
+        typeArgs: [],
+        typeOfArgs,
         line: lineOf(current),
       });
     }
@@ -548,6 +588,8 @@ function readRecordParameters(body: any, child: any, decl: TypeDecl): void {
       isPublic: true,
       visibility: 'public',
       attributes: [],
+      initializedInline: false,
+      readsDataContext: false,
     });
   }
 }
@@ -559,14 +601,22 @@ function readMembers(body: any, decl: TypeDecl): void {
 
   for (const member of named(body)) {
     switch (member.type) {
-      case 'constructor_declaration':
+      case 'constructor_declaration': {
         decl.constructors.push({
           params: readParameters(
             member.childForFieldName?.('parameters')
               ?? named(member).find((child: any) => child.type === 'parameter_list')),
           line: lineOf(member),
         });
+        // `public View() : this(App.GetService<X>())` — the chained constructor names the view model,
+        // and it sits outside the body block, so the body scans would never see it.
+        const initializer = named(member).find((child: any) => child.type === 'constructor_initializer');
+        if (initializer) {
+          decl.calls.push(...collectCalls(initializer));
+          decl.assignments.push(...collectAssignments(initializer));
+        }
         break;
+      }
 
       case 'property_declaration': {
         const positional = named(member).filter((child: any) =>
@@ -586,6 +636,11 @@ function readMembers(body: any, decl: TypeDecl): void {
           isPublic: hasModifier(member, 'public'),
           visibility: visibilityOf(member, decl.kind === 'interface' ? 'interface' : 'class'),
           attributes: attributeNames(member),
+          // `{ get; } = new();` — the property builds its own value, linking a view to its view model.
+          initializedInline: named(member).some((child: any) => child.type === 'equals_value_clause'
+            && /\bnew\b/.test(text(child))),
+          // `get => DataContext as Foo;` / `set => DataContext = value;` — a typed view over the context.
+          readsDataContext: /\bDataContext\b/.test(text(member)),
         });
         break;
       }
