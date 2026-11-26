@@ -12,6 +12,13 @@ export interface GraphNode {
   id: string;
   /** Short name shown on the node. */
   label: string;
+  /**
+   * What the canvas draws instead of `label` when two types would otherwise read as one name.
+   *
+   * Kept apart from `label` because the label is also the key a symbol search matches on and the name
+   * a finding title reads from, both of which must stay the plain type name.
+   */
+  displayLabel?: string;
   fullName: string;
   layer: NodeLayer;
   /** Top-level module bucket, used for compound grouping. */
@@ -139,8 +146,10 @@ export interface ParserTally {
   elementTags: number;
   handlerNames: number;
   dataTypes: number;
-  /** Edge attempts rejected because they were duplicates, self-references or unnamed. */
+  /** Edge attempts rejected outright: a missing endpoint, or a type pointing at itself. */
   edgesDropped: number;
+  /** Edge attempts collapsed into an identical edge already recorded. Normal, not a fault. */
+  edgesMerged: number;
 }
 
 export interface GraphStats {

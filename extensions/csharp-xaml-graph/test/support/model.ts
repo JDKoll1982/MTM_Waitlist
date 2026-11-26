@@ -60,6 +60,7 @@ export const EMPTY_TALLY: ParserTally = {
   handlerNames: 0,
   dataTypes: 0,
   edgesDropped: 0,
+  edgesMerged: 0,
 };
 
 export const EMPTY_CLEANUP: CleanupSummary = {

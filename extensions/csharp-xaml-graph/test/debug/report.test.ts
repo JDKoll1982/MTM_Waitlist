@@ -23,6 +23,7 @@ const EMPTY_TALLY: ParserTally = {
   handlerNames: 0,
   dataTypes: 0,
   edgesDropped: 0,
+  edgesMerged: 0,
 };
 
 const CLEAN_CLEANUP: CleanupSummary = {
@@ -382,6 +383,7 @@ describe('buildSections — parsers', () => {
             handlerNames: 22,
             dataTypes: 9,
             edgesDropped: 0,
+            edgesMerged: 0,
           }),
         }),
       }),

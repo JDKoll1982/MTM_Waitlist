@@ -141,10 +141,34 @@ describe('computeVisible: a symbol scope', () => {
 });
 
 describe('computeVisible: hide unconnected', () => {
-  it('removes a node with no edge in the current view and counts it', () => {
-    const result = visible({ hideOrphans: true });
-    expect([...result.nodeIds].sort()).toEqual(['A.Model', 'A.Service', 'A.View', 'A.ViewModel']);
+  const orphanModel = graphModel({
+    nodes: [
+      graphNode({ id: 'S.Used', layer: 'service' }),
+      graphNode({ id: 'S.Orphan', layer: 'service' }),
+      graphNode({ id: 'S.Caller', layer: 'service' }),
+      graphNode({ id: 'M.OrphanModel', layer: 'model' }),
+    ],
+    edges: [graphEdge({ source: 'S.Caller', target: 'S.Used', kind: 'injects' })],
+  });
+
+  it('removes a service with no edge in the current view and counts it', () => {
+    const result = computeVisible(orphanModel, options({ hideOrphans: true, layers: ['service'] }));
+    expect([...result.nodeIds].sort()).toEqual(['S.Caller', 'S.Used']);
     expect(result.hiddenOrphans).toBe(1);
+  });
+
+  it('removes an unconnected model too, so only the types that serve something are left', () => {
+    const result = computeVisible(orphanModel, options({ hideOrphans: true, layers: ['service', 'model'] }));
+    expect(result.nodeIds.has('M.OrphanModel')).toBe(false);
+    expect(result.hiddenOrphans).toBe(2);
+  });
+
+  it('keeps a view or a view model that has no edge in the current view', () => {
+    // Its link to its partner may be a kind that is filtered out; a screen is still a screen, and
+    // pruning it as "unconnected" removes real structure from the picture.
+    const result = visible({ hideOrphans: true, layers: ['view', 'viewmodel'], edgeKinds: [] });
+    expect([...result.nodeIds].sort()).toEqual(['A.Lonely', 'A.View', 'A.ViewModel']);
+    expect(result.hiddenOrphans).toBe(0);
   });
 
   it('keeps a flagged node, because the finding is why the panel was opened', () => {

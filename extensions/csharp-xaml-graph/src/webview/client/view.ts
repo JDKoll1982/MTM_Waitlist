@@ -180,11 +180,19 @@ export function computeVisible(model: GraphModel, options: ViewOptions): Visible
     const flagged = new Set(model.nodes
       .filter((node) => node.inCycle || (node.problemCount ?? 0) > 0)
       .map((node) => node.id));
+    // A view or a view model is the thing the reader came to look at. Its link to its partner may be
+    // a kind that is currently filtered out — a view whose only relationship is a type reference or a
+    // base class relationship is still a screen — so pruning it as "unconnected" removes real
+    // structure from the picture. Only services and models are pruned; they exist to serve the rest.
+    const selfEvident = new Set(model.nodes
+      .filter((node) => node.layer === 'view' || node.layer === 'viewmodel')
+      .map((node) => node.id));
     const kept = new Set<string>();
     for (const id of nodeIds) {
       // A cleanup finding is the thing the reader came for; hiding it as "unconnected" would delete
       // the problem and leave an empty panel.
-      if (connected.has(id) || id === options.focus || flagged.has(id) || scopeIds.has(id)) {
+      if (connected.has(id) || id === options.focus || flagged.has(id) || scopeIds.has(id)
+        || selfEvident.has(id)) {
         kept.add(id);
       } else {
         hiddenOrphans += 1;

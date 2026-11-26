@@ -725,7 +725,9 @@ export function computeFindings(input: FindingInput): FindingResult {
 
     const reason = node.layer === 'view'
       ? 'It is not registered with the container and nothing navigates to it.'
-      : 'Nothing in the analysed files refers to it, by type name or by edge.';
+      : 'Nothing in the analysed files refers to it, by type name or by edge. Test projects are '
+        + 'excluded from the analysis, so a type used only by its tests is reported here — check that '
+        + 'before treating it as dead.';
 
     findings.push({
       id: nextId('unusedtype'),

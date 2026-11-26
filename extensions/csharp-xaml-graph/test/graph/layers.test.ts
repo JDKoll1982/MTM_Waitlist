@@ -35,6 +35,32 @@ describe('classifyType', () => {
     expect(classify('SignIn', 'App.ViewModels')).toBe('viewmodel');
   });
 
+  it('keeps a record in a ViewModels namespace as data', () => {
+    // Row models, records and navigation payloads live beside the view models that own them, so the
+    // namespace alone is not enough: only a class whose name does not say "I am data" counts.
+    expect(classify('SignInRow', 'App.ViewModels', 'record')).toBe('model');
+    expect(classify('SignInResult', 'App.ViewModels', 'record')).toBe('model');
+  });
+
+  it('keeps a data-shaped class in a ViewModels namespace as a model', () => {
+    for (const name of [
+      'PartStockLocationItem', 'SetupCompletionNavigationData', 'AnswerOptionCard',
+      'GenericRequestSummaryRow', 'PartPictureSystemOption', 'SignInCredentials',
+      'SetUpRequestedEventArgs', 'SetUpEnterOutcome', 'DunnageCatalogueLoadResult',
+    ]) {
+      expect(classify(name, 'App.ViewModels')).toBe('model');
+    }
+  });
+
+  it('still prefers a ViewModel name wherever it is declared', () => {
+    expect(classify('SignInViewModel', 'App.ViewModels', 'record')).toBe('viewmodel');
+    expect(classify('ViewModel_DatabaseDeployment', 'App.Models')).toBe('viewmodel');
+  });
+
+  it('keeps an enum in a ViewModels namespace an enum', () => {
+    expect(classify('SortOrder', 'App.ViewModels', 'enum')).toBe('model');
+  });
+
   it('does not read ViewModels as Models', () => {
     expect(classify('SignIn', 'App.Models')).toBe('model');
     expect(classify('SignIn', 'App.ViewModels')).toBe('viewmodel');

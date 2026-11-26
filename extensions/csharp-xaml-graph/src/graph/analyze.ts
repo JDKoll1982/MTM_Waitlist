@@ -238,7 +238,16 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
   const nodes = new Map<string, GraphNode>();
   const edges: GraphEdge[] = [];
   const edgeKeys = new Set<string>();
+  /** Edges that could not be drawn at all: a missing endpoint, or a type pointing at itself. */
   let edgesDropped = 0;
+  /**
+   * Edges collapsed into one already recorded: the same pair related the same way, met again.
+   *
+   * This is the common case by far — a type named in twenty methods yields one injection edge — and
+   * it is not a fault, so it is counted apart from `edgesDropped`. Reporting the two together made
+   * the debug report warn on every run of this repository about something no one could act on.
+   */
+  let edgesMerged = 0;
 
   const ensureTypeNode = (decl: TypeDecl, file: string): GraphNode => {
     const existing = nodes.get(decl.fullName);
@@ -294,7 +303,7 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
     }
     const key = `${source}|${target}|${kind}`;
     if (edgeKeys.has(key)) {
-      edgesDropped += 1;
+      edgesMerged += 1;
       return;
     }
     edgeKeys.add(key);
@@ -745,7 +754,28 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
     priority(left) - priority(right) || (degree.get(right.id) ?? 0) - (degree.get(left.id) ?? 0));
 
   const kept = ranked.length > maxNodes ? new Set(ranked.slice(0, maxNodes).map((node) => node.id)) : null;
-  const finalNodes = kept ? ranked.filter((node) => kept.has(node.id)) : ranked;
+  const nodesInModel = kept ? ranked.filter((node) => kept.has(node.id)) : ranked;
+
+  /* The canvas shows one name per type, so two types sharing one are indistinguishable there: `App`
+     exists in the app, in the mock service and in the deployment tool. `label` itself must stay the
+     simple name — the symbol search matches against it and finding titles read from it — so the
+     disambiguation lives in `displayLabel`, which only the canvas uses. Two types in the *same*
+     module would still collide on the module name, so that case falls back to the full name. */
+  const labelCounts = new Map<string, number>();
+  const labelAndModule = new Map<string, number>();
+  for (const node of nodesInModel) {
+    labelCounts.set(node.label, (labelCounts.get(node.label) ?? 0) + 1);
+    const key = `${node.label}|${node.module}`;
+    labelAndModule.set(key, (labelAndModule.get(key) ?? 0) + 1);
+  }
+  const finalNodes = nodesInModel.map((node) => {
+    if ((labelCounts.get(node.label) ?? 0) < 2) {
+      return node;
+    }
+    const shared = (labelAndModule.get(`${node.label}|${node.module}`) ?? 0) > 1;
+    const suffix = shared ? node.fullName : node.module;
+    return { ...node, displayLabel: `${node.label} · ${suffix}` };
+  });
   const finalEdges = kept ? edges.filter((edge) => kept.has(edge.source) && kept.has(edge.target)) : edges;
 
   const keptIds = new Set(finalNodes.map((node) => node.id));
@@ -795,6 +825,7 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
     handlerNames: xamlFiles.reduce((sum, file) => sum + file.handlerNames.length, 0),
     dataTypes: xamlFiles.reduce((sum, file) => sum + file.dataTypes.length, 0),
     edgesDropped,
+    edgesMerged,
   };
 
   return {

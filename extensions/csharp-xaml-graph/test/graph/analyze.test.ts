@@ -299,7 +299,8 @@ describe('analyzeWorkspace: inheritance and references', () => {
     expect(references).toHaveLength(1);
     expect(references[0]).toMatchObject({ source: 'N.Holder', target: 'N.Dep', label: 'Property', confidence: 'medium' });
     // The field, the return type, the parameter and the property mention all collapse into it.
-    expect(model.stats.parser?.edgesDropped).toBe(6);
+    expect(model.stats.parser?.edgesMerged).toBe(6);
+    expect(model.stats.parser?.edgesDropped).toBe(0);
   });
 
   it('draws references from generic arguments and skips a self-reference', async () => {
@@ -334,10 +335,10 @@ describe('analyzeWorkspace: inheritance and references', () => {
     const mentions = model.edges.filter((edge) => edge.kind === 'reference' && edge.confidence === 'low');
     expect(mentions).toHaveLength(1);
     expect(mentions[0].label).toBe('cast Row');
-    expect(model.stats.parser?.edgesDropped).toBeGreaterThan(0);
+    expect(model.stats.parser?.edgesMerged).toBeGreaterThan(0);
   });
 
-  it('counts duplicate and self edges as dropped', async () => {
+  it('counts a repeated pair as merged and a self-reference as dropped', async () => {
     const model = await analyze({
       'A/Types.cs': `namespace N
 {
@@ -351,10 +352,12 @@ describe('analyzeWorkspace: inheritance and references', () => {
 }`,
     });
 
-    // One edge survives per (source, target, kind): the second property, its two mentions and the
-    // second mention are rejected. A self-reference never attempts an edge at all.
+    // One edge survives per (source, target, kind): the second property and its mentions collapse into
+    // the first. A self-reference is not a link between two types at all, so it is a real drop — the
+    // distinction is what lets the debug report warn on a fault and stay quiet on the normal case.
     expect(model.edges.filter((edge) => edge.kind === 'reference')).toHaveLength(1);
-    expect(model.stats.parser?.edgesDropped).toBe(3);
+    expect(model.stats.parser?.edgesMerged).toBe(3);
+    expect(model.stats.parser?.edgesDropped).toBe(0);
   });
 });
 
@@ -804,5 +807,37 @@ describe('analyzeWorkspace: view and view-model registration pairs', () => {
     });
 
     expect(model.edges.filter((entry) => entry.kind === 'resolves')).toEqual([]);
+  });
+});
+
+describe('analyzeWorkspace: names two types would otherwise share', () => {
+  it('qualifies a repeated label on the canvas but leaves the label itself alone', async () => {
+    const model = await analyze({
+      'Alpha/Shell.cs': 'namespace App { public class Shell {} }',
+      'Beta/Shell.cs': 'namespace Tools { public class Shell {} }',
+    });
+
+    // The label is what a symbol search matches and what finding titles read, so it must stay the
+    // plain type name; the canvas gets the unambiguous form instead.
+    expect(model.nodes.map((node) => node.label).sort()).toEqual(['Shell', 'Shell']);
+    expect(model.nodes.map((node) => node.displayLabel).sort())
+      .toEqual(['Shell · Alpha', 'Shell · Beta']);
+  });
+
+  it('qualifies with the full name when two same-named types share a module', async () => {
+    const model = await analyze({
+      'One/Same.cs': 'namespace First { public class Shell {} }',
+      'One/Other.cs': 'namespace Second { public class Shell {} }',
+    });
+
+    expect(model.nodes.map((node) => node.displayLabel).sort())
+      .toEqual(['Shell · First.Shell', 'Shell · Second.Shell']);
+  });
+
+  it('leaves a unique label without a display override', async () => {
+    const model = await analyze({
+      'A/Types.cs': 'namespace N { public class Holder {} public class Dep {} }',
+    });
+    expect(model.nodes.every((node) => node.displayLabel === undefined)).toBe(true);
   });
 });

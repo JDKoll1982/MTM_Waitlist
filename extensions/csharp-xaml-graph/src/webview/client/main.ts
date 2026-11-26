@@ -487,7 +487,7 @@ function applyDimming(): void {
 /** The type a group starts at, without its namespace. */
 function groupCaption(root: string): string {
   const node = model?.nodes.find((candidate) => candidate.id === root);
-  return node?.label ?? root.split('.').pop() ?? root;
+  return node?.displayLabel ?? node?.label ?? root.split('.').pop() ?? root;
 }
 
 /** Fraction of the smaller of two boxes that the two share. */
@@ -1010,7 +1010,8 @@ function elementsFor(visible: { nodeIds: Set<string>; edges: { id: string; sourc
         id: node.id,
         label: node.label,
         // Middle-shortened for the canvas; the full name is what the tooltip and the details pane use.
-        shortLabel: shortenLabel(node.label, LABEL_LIMIT[ui.density]),
+        // A name two types share is qualified in `displayLabel` so the picture can tell them apart.
+        shortLabel: shortenLabel(node.displayLabel ?? node.label, LABEL_LIMIT[ui.density]),
         fullName: node.fullName,
         layer: node.layer,
         module: node.module,
@@ -2362,9 +2363,32 @@ function visibleExport(): Record<string, unknown> | undefined {
 
   const visible = computeVisible(model, options());
   const nodes = model.nodes.filter((node) => visible.nodeIds.has(node.id));
-  const findings = model.findings.filter((finding) =>
-    finding.nodeIds.some((id) => visible.nodeIds.has(id)));
+  const allFindings = model.findings;
+
+  /* A finding cites the edges that prove it, and some of those are a kind the reader has filtered
+     out — a cycle built from type references is the usual case. Exporting the findings without those
+     edges produced a file that claimed seven cycles and contained none of them, which is worse than
+     saying nothing. Every cited edge whose endpoints are drawn is therefore included whatever its
+     kind, and a finding that still cannot show all of its evidence is left out. */
+  const drawnEdges = new Map(visible.edges.map((edge) => [edge.id, edge]));
+  for (const finding of model.findings) {
+    for (const id of finding.edgeIds ?? []) {
+      if (drawnEdges.has(id)) {
+        continue;
+      }
+      const record = model.edges.find((edge) => edge.id === id);
+      if (record && visible.nodeIds.has(record.source) && visible.nodeIds.has(record.target)) {
+        drawnEdges.set(id, record);
+      }
+    }
+  }
+  const edges = [...drawnEdges.values()];
+
+  const findings = allFindings
+    .filter((finding) => finding.nodeIds.some((id) => visible.nodeIds.has(id)))
+    .filter((finding) => (finding.edgeIds ?? []).every((id) => drawnEdges.has(id)));
   const count = (kind: string): number => findings.filter((finding) => finding.kind === kind).length;
+  const total = (kind: string): number => allFindings.filter((finding) => finding.kind === kind).length;
 
   return {
     exportedAt: new Date().toISOString(),
@@ -2388,8 +2412,10 @@ function visibleExport(): Record<string, unknown> | undefined {
     workspace: model.workspace,
     generatedAt: model.generatedAt,
     nodes,
-    edges: visible.edges,
+    edges,
     findings,
+    // Counted over what this file contains. `modelTotals` carries the whole-workspace figures, so a
+    // reader can tell a quiet workspace from a narrow export.
     cleanup: {
       cycles: count('cycle'),
       deadBindings: count('dead-binding'),
@@ -2397,10 +2423,17 @@ function visibleExport(): Record<string, unknown> | undefined {
       unusedTypes: count('unused-type'),
       unusedMembers: count('unused-member'),
     },
+    modelTotals: {
+      cycles: total('cycle'),
+      deadBindings: total('dead-binding'),
+      unboundViews: total('unbound-view'),
+      unusedTypes: total('unused-type'),
+      unusedMembers: total('unused-member'),
+    },
     stats: {
       ...model.stats,
       visibleNodes: nodes.length,
-      visibleEdges: visible.edges.length,
+      visibleEdges: edges.length,
       hiddenUnconnected: visible.hiddenOrphans,
       totalNodes: model.nodes.length,
       totalEdges: model.edges.length,

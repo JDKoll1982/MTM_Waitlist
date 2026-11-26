@@ -161,7 +161,13 @@ function parsersSection(input: BuildSectionsInput): DebugSection {
       {
         label: 'Edges dropped',
         value: String(tally.edgesDropped),
+        // A drop is a link the analysis could not draw at all, so any drop is worth a look.
         tone: tally.edgesDropped > 0 ? 'warn' : 'good',
+      },
+      {
+        label: 'Edges merged',
+        // The same pair related the same way, met again. Expected in every workspace.
+        value: String(tally.edgesMerged ?? 0),
       },
     ]
     : [{ label: 'Parser pass', value: 'no tally recorded by this build', tone: 'warn' }];

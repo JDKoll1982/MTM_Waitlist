@@ -50,6 +50,24 @@ function isServiceName(name: string): boolean {
  * or by prefix. Interfaces are judged first, so an `IResettableViewModel` interface stays a model
  * rather than being tinted like a page's view model.
  */
+/**
+ * Name endings that mark a type as data rather than behaviour.
+ *
+ * A `ViewModels` namespace is a weak signal on its own: this codebase — and most others — keeps its
+ * row models, records and navigation payloads in the same folder as the view models that own them.
+ * Trusting the namespace alone classified 21 non-view-models as view models, which then read as
+ * "view models no view reaches" and competed for the same colour. A type that ends with one of these
+ * is data even when it sits beside the view models.
+ */
+const DATA_NAME_SUFFIXES = [
+  'Data', 'Card', 'Row', 'Item', 'Option', 'Credentials', 'EventArgs', 'Args',
+  'Outcome', 'Display', 'Result', 'Entry', 'Dto', 'Payload', 'Model',
+];
+
+function looksLikeData(name: string): boolean {
+  return DATA_NAME_SUFFIXES.some((suffix) => name.endsWith(suffix));
+}
+
 export function classifyType(decl: TypeDecl): NodeLayer {
   const name = decl.name;
   const namespace = decl.namespace || '';
@@ -61,8 +79,15 @@ export function classifyType(decl: TypeDecl): NodeLayer {
     return 'model';
   }
 
-  // A view-model naming convention is the strongest signal a type carries, so it wins.
-  if (isViewModelName(name) || hasSegment(namespace, 'ViewModels')) {
+  // A view-model naming convention is the strongest signal a type carries, so it wins outright —
+  // `ViewModel_DatabaseDeployment` is a view model wherever it lives.
+  if (isViewModelName(name)) {
+    return 'viewmodel';
+  }
+
+  // The namespace is a weaker signal, so it only counts for a class whose name does not say "I am
+  // data". A record in a `ViewModels` folder is a row type, and an enum there is an enum.
+  if (decl.kind === 'class' && hasSegment(namespace, 'ViewModels') && !looksLikeData(name)) {
     return 'viewmodel';
   }
 

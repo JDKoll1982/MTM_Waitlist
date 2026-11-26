@@ -1530,3 +1530,86 @@ describe('main: the overview picture', () => {
     expect(core.pan().x).not.toBe(before.x);
   });
 });
+
+/* --------------------------------------------------------------- export integrity */
+
+describe('main: the exported file proves what it claims', () => {
+  /** A model whose only cycle is built from type references, which the default view filters out. */
+  const referenceCycle = graphModel({
+    nodes: [
+      graphNode({ id: 'N.Alpha', label: 'Alpha', layer: 'viewmodel', module: 'M', inCycle: true }),
+      graphNode({ id: 'N.Beta', label: 'Beta', layer: 'viewmodel', module: 'M', inCycle: true }),
+    ],
+    edges: [
+      graphEdge({ id: 'r1', source: 'N.Alpha', target: 'N.Beta', kind: 'reference' }),
+      graphEdge({ id: 'r2', source: 'N.Beta', target: 'N.Alpha', kind: 'reference' }),
+    ],
+    findings: [
+      finding({
+        id: 'cyc',
+        kind: 'cycle',
+        severity: 'low',
+        title: 'Cycle of 2: Alpha ↔ Beta',
+        detail: 'They reference each other.',
+        nodeIds: ['N.Alpha', 'N.Beta'],
+        edgeIds: ['r1', 'r2'],
+      }),
+    ],
+    cleanup: { cycles: 1, deadBindings: 0, unboundViews: 0, unusedTypes: 0, unusedMembers: 0 },
+  });
+
+  const exported = (): {
+    edges: { id: string; kind: string }[];
+    findings: { id: string; edgeIds?: string[] }[];
+    cleanup: Record<string, number>;
+    modelTotals: Record<string, number>;
+    stats: Record<string, unknown>;
+  } => {
+    click('export');
+    const message = posted.at(-1) as { payload: Record<string, unknown> };
+    return message.payload as never;
+  };
+
+  it('includes the edges a finding cites even when their kind is filtered out', async () => {
+    await load(referenceCycle);
+    await tick(10);
+
+    const payload = exported();
+    const ids = payload.edges.map((edge) => edge.id).sort();
+    expect(ids).toEqual(['r1', 'r2']);
+    expect(payload.findings.map((entry) => entry.id)).toEqual(['cyc']);
+  });
+
+  it('leaves out a finding whose evidence cannot be shown', async () => {
+    // Hide one endpoint of the cycle: the remaining type cannot prove the loop, so claiming it would
+    // hand back a file that says "there is a cycle" with no cycle in it.
+    await load(referenceCycle);
+    const beta = el<HTMLInputElement>('search');
+    beta.value = 'Alpha';
+    beta.dispatchEvent(new Event('input'));
+    await tick(10);
+
+    const payload = exported();
+    expect(payload.edges.every((edge) => edge.id !== 'r2')).toBe(true);
+    expect(payload.findings.map((entry) => entry.id)).toEqual([]);
+
+    beta.value = '';
+    beta.dispatchEvent(new Event('input'));
+    await tick(10);
+  });
+
+  it('reports both the exported counts and the whole-workspace totals', async () => {
+    await load();
+    const payload = exported();
+    expect(payload.cleanup.cycles).toBe(1);
+    expect(payload.modelTotals.cycles).toBe(1);
+    expect(payload.modelTotals.unusedTypes).toBe(1);
+  });
+
+  it('counts the same edges in stats as the ones it wrote', async () => {
+    await load(referenceCycle);
+    await tick(10);
+    const payload = exported();
+    expect(payload.stats.visibleEdges).toBe(payload.edges.length);
+  });
+});

@@ -84,7 +84,7 @@ and the focus bar sit over the canvas rather than in the toolbar, so the rows ne
 | Density | Compact, Normal, Roomy — node size and spacing. |
 | Labels | When zoomed in (default), Always, On hover, Never. |
 | Hops | How far a focus reaches: 1, 2 or 3. |
-| Hide unconnected | Drops nodes with no edge in the current view — except flagged ones. |
+| Hide unconnected | Drops a **service or model** with no edge in the current view — except flagged ones. A view or a view model always stays: its link to its partner may be an edge kind you have switched off, and pruning it would delete real structure from the picture. |
 | Only problems | Restricts the canvas to types with a cleanup finding or in a cycle. |
 | Layers &amp; edges | Opens the visibility flyout: every node layer and edge kind with live counts, plus presets (MVVM flow, Structure, Cleanup, Everything). |
 | Legend | Opens the shape/colour/line key. |
@@ -180,9 +180,10 @@ looking at**, not the whole workspace. The file carries:
 | Field | Contents |
 | --- | --- |
 | `scope` | the filters that produced the picture: layout, density, visible layers and edge kinds, module, search, focus and hops, Hide unconnected, Only problems, and any unpacked or scoped shape |
-| `nodes`, `edges` | only what is drawn |
-| `findings` | only findings that point at a drawn node |
-| `cleanup` | counts over those findings |
+| `nodes`, `edges` | what is drawn, **plus the edges a finding needs to prove itself** even when that edge kind is switched off — a cycle built from type references is still a cycle. If a needed edge cannot be included, the finding is left out rather than exported unprovable. |
+| `findings` | only findings that point at a drawn node and can show all of their evidence |
+| `cleanup` | counts over the findings in this file |
+| `modelTotals` | the same five counts over the whole analysed workspace, so a small export is not mistaken for a quiet codebase |
 | `stats` | the visible counts alongside `totalNodes` and `totalEdges`, so the file still says what it was cut from |
 
 Change a filter and export again and the file changes with it. The save dialog suggests
@@ -199,7 +200,7 @@ you are about to change. Every section names the files that own it and has a **C
 | **Host** | Which VS Code, host, platform and workspace is this? A second workspace root explains an empty graph. | `package.json`, `extension.ts` |
 | **Settings** | What is each key *actually* set to, and which scope supplied it — user, workspace or default? | `extension.ts`, `menu/menuView.ts`, `webview/panel.ts` |
 | **Analysis** | Model age, cache state, file and edge counts, elapsed time, truncation, warnings. | `graph/analyze.ts`, `graph/model.ts` |
-| **Parsers** | What the parse pass saw before any graph existed: types declared, partials merged, ambiguous simple names, XAML files with and without `x:Class`, `x:Bind` counts, elements, handlers, and edges dropped as duplicates. | `graph/csharp/parser.ts`, `graph/csharp/symbols.ts`, `graph/xaml/parser.ts` |
+| **Parsers** | What the parse pass saw before any graph existed: types declared, partials merged, ambiguous simple names, XAML files with and without `x:Class`, `x:Bind` counts, elements, handlers, and the two edge counters — dropped (a missing endpoint, or a type pointing at itself) and merged (the same pair related the same way, met again, which is the normal case). | `graph/csharp/parser.ts`, `graph/csharp/symbols.ts`, `graph/xaml/parser.ts` |
 | **Findings** | Counts by kind and severity, and every cycle with how many of its edges bind construction. | `graph/findings.ts` |
 | **Canvas** | The exact filters `computeVisible` is running with, what is drawn, zoom, scope, unpacked set, and the last canvas events. | `webview/client/main.ts`, `view.ts`, `packing.ts` |
 | **Commands** | Manifest versus live registration — the usual cause of a command that does nothing. | `package.json`, `extension.ts`, `menu/menuView.ts` |
@@ -249,7 +250,7 @@ Cycle severity follows what the loop is made of, not how large it is:
 | **Dead binding** | An `x:Bind` path whose member does not exist on the type it is bound to — checked against the view for page-level bindings, and against the template's own `x:DataType` for bindings inside a `DataTemplate`. Members the MVVM generators add (`[RelayCommand] OnSave()` → `SaveCommand`, `[ObservableProperty] _x` → `X`) and positional record parameters count as present. |
 | **Unbound view** | A view whose markup binds `ViewModel.*` but which declares no `ViewModel` member at all. |
 | **Unused view** | A view that is neither registered with the container, nor navigated to, nor hosted as an element in another view's markup (`<views:SetUpPanel />`). |
-| **Unused type** | A declared type with no incoming edge, no `typeof` reference, and no textual mention anywhere. Extension-method holders are credited to their methods. |
+| **Unused type** | A declared type with no incoming edge, no `typeof` reference, and no textual mention anywhere. Extension-method holders are credited to their methods. Test projects are excluded from the analysis, so a type exercised only by its tests is reported here — the finding says so, and it is not a delete-me verdict. |
 | **Unused member** | A private method, field or property whose name occurs only where it is declared. Generated members, overrides, partial methods, `[RelayCommand]` and `[ObservableProperty]` are excluded. |
 
 **Reference edges matter.** Without them the graph is a declaration map, and this repository looks
@@ -301,7 +302,16 @@ default-scope size, module scoping across projects, that every control the scrip
 in the panel markup, that unpacking a packed shape shows that shape alone in the configured layout, that
 the toolbar keeps its three rows, that the hover tooltip states a type's findings, that the zoom
 stack carries region zoom, a slider and a reset, that the panel tab carries every shortcut and
-settings control, and that every contributed command is registered by the extension.
+settings control, that every contributed command is registered by the extension, that no label two
+types share reaches the canvas unqualified, and that no finding cites an edge the model does not hold.
+
+**How a type is placed in a layer.** A `*ViewModel` suffix or a `ViewModel_`/`VM_` prefix is the
+strongest signal and wins outright. A `ViewModels` namespace is a weaker one, so it only counts for a
+**class** whose name does not say "I am data": a record, struct or enum in that folder, or a class
+ending in `Data`, `Row`, `Card`, `Item`, `Option`, `Result`, `Display`, `Credentials`, `EventArgs`,
+`Outcome`, `Dto`, `Payload`, `Entry` or `Model`, is a row or navigation type and stays a model. Without
+that distinction 21 row types in this repository were drawn as view models and read as "view models no
+view reaches".
 
 ## Tests
 

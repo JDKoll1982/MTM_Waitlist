@@ -737,6 +737,66 @@ async function main(): Promise<void> {
       === realCycles.reduce((sum, finding) => sum + finding.nodeIds.length, 0),
   });
 
+  /* ---- names two types would otherwise share ---- */
+
+  const sharedLabels = new Map<string, string[]>();
+  for (const node of model.nodes) {
+    const ids = sharedLabels.get(node.label) ?? [];
+    ids.push(node.id);
+    sharedLabels.set(node.label, ids);
+  }
+  const colliding = [...sharedLabels].filter(([, ids]) => ids.length > 1);
+  const unqualified = colliding.filter(([, ids]) => ids.some((id) =>
+    !model.nodes.find((node) => node.id === id)?.displayLabel));
+  checks.push({
+    // The canvas shows one name per type. `App` exists in the app, in the mock service and in the
+    // deployment tool, and a picture that labels all three "App" is a picture you cannot read.
+    name: 'a label two types share is qualified on the canvas',
+    passed: unqualified.length === 0,
+    detail: colliding.length === 0
+      ? 'no two types share a label'
+      : `${colliding.length} shared labels, all qualified (${colliding.map(([label]) => label).join(', ')})`,
+  });
+
+  checks.push({
+    name: 'the plain label survives next to the qualified one, so a symbol search still matches',
+    passed: colliding.every(([label, ids]) => ids.every((id) =>
+      model.nodes.find((node) => node.id === id)?.label === label)),
+    detail: `${colliding.length} qualified labels keep their plain name`,
+  });
+
+  /* ---- every finding can prove itself ---- */
+
+  const edgeIdsInModel = new Set(model.edges.map((edge) => edge.id));
+  const unprovable = model.findings.filter((finding) =>
+    (finding.edgeIds ?? []).some((id) => !edgeIdsInModel.has(id)));
+  checks.push({
+    name: 'no finding cites evidence the model does not contain',
+    passed: unprovable.length === 0,
+    detail: unprovable.length === 0
+      ? `${model.findings.length} findings, every citation present`
+      : `${unprovable.length} findings cite an edge that does not exist`,
+  });
+
+  /* ---- layer classification of the row types ---- */
+
+  const rowTypes = model.nodes.filter((node) => node.layer === 'viewmodel' && node.kind !== 'class');
+  checks.push({
+    // A record, struct or enum in a `ViewModels` folder is a row type, not the view model of a page.
+    name: 'a record or enum in a ViewModels namespace is not drawn as a view model',
+    passed: rowTypes.length === 0,
+    detail: rowTypes.length === 0 ? 'none misclassified' : rowTypes.map((node) => node.label).join(', '),
+  });
+
+  const namedData = model.nodes.filter((node) => node.layer === 'viewmodel'
+    && !node.label.endsWith('ViewModel')
+    && /(Data|Card|Row|Item|Option|Credentials|EventArgs|Outcome|Display|Result|Dto|Payload|Model)$/.test(node.label));
+  checks.push({
+    name: 'a data-shaped class in a ViewModels namespace is not drawn as a view model',
+    passed: namedData.length === 0,
+    detail: namedData.length === 0 ? 'none misclassified' : namedData.map((node) => node.label).join(', '),
+  });
+
   /* ---- legend and problem list ---- */
 
   const layerColours = ['#4a9eff', '#2fbf71', '#f0a030', '#9b8cff'];
@@ -1403,8 +1463,12 @@ async function main(): Promise<void> {
     passed: unpackedSource.includes('function visibleExport(')
       && unpackedSource.includes('const visible = computeVisible(model, options())')
       && unpackedSource.includes('model.nodes.filter((node) => visible.nodeIds.has(node.id))')
-      && unpackedSource.includes('edges: visible.edges')
-      && unpackedSource.includes('const findings = model.findings.filter')
+      // The export is the visible subgraph plus whatever evidence a finding needs to prove itself;
+      // exporting the findings alone produced a file that claimed cycles it did not contain.
+      && unpackedSource.includes('const drawnEdges = new Map(visible.edges.map((edge) => [edge.id, edge]))')
+      && unpackedSource.includes('drawnEdges.has(id)')
+      && unpackedSource.includes('edges,')
+      && unpackedSource.includes('const findings = allFindings')
       && unpackedSource.includes('vscode.postMessage({ type: \'export\', payload })'),
   });
 
