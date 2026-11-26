@@ -8,88 +8,28 @@
         "kinds": [
           "class"
         ],
-        "nameSuffixes": [
-          "Page",
-          "Panel"
+        "namespaceSegments": [
+          "Views",
+          "View",
+          "Controls",
+          "Dialogs",
+          "Converters"
         ]
       },
       {
-        "layer": "model",
-        "kinds": [
-          "record",
-          "struct"
-        ]
-      },
-      {
-        "layer": "model",
+        "layer": "view",
         "kinds": [
           "class"
         ],
         "nameSuffixes": [
-          "Data",
-          "Result",
-          "Outcome",
-          "EventArgs",
-          "Options"
-        ]
-      },
-      {
-        "layer": "service",
-        "kinds": [
-          "interface"
-        ],
-        "nameSuffixes": [
-          "Service",
-          "Store",
-          "Provider",
-          "Reader",
-          "Writer",
-          "Catalog",
-          "Resolver",
-          "Policy",
-          "Tracker",
-          "Hasher",
-          "Server",
-          "Gate",
-          "Host",
-          "Pipeline",
-          "Notifier",
-          "Prompt",
-          "Repository",
-          "Client"
-        ]
-      },
-      {
-        "layer": "service",
-        "kinds": [
-          "interface"
-        ],
-        "namePrefixes": [
-          "Service_"
-        ]
-      },
-      {
-        "layer": "service",
-        "kinds": [
-          "interface"
-        ],
-        "namespaceSegments": [
-          "Services"
-        ]
-      },
-      {
-        "layer": "service",
-        "kinds": [
-          "interface"
-        ],
-        "namespaceSegments": [
-          "Contracts"
-        ]
-      },
-      {
-        "layer": "model",
-        "kinds": [
-          "interface"
+          "Page",
+          "Window",
+          "Dialog",
+          "UserControl",
+          "Control",
+          "View",
+          "Panel",
+          "Converter"
         ]
       },
       {
@@ -102,6 +42,48 @@
         "layer": "viewmodel",
         "namePrefixes": [
           "ViewModel_"
+        ]
+      },
+      {
+        "layer": "model",
+        "namePrefixes": [
+          "Model_",
+          "Enum_"
+        ]
+      },
+      {
+        "layer": "model",
+        "kinds": [
+          "record",
+          "struct",
+          "enum"
+        ]
+      },
+      {
+        "layer": "model",
+        "kinds": [
+          "class"
+        ],
+        "nameSuffixes": [
+          "Data",
+          "Result",
+          "Row",
+          "Entry",
+          "Option",
+          "Item",
+          "Column",
+          "Request",
+          "Payload",
+          "Outcome",
+          "Kind",
+          "State",
+          "Dto",
+          "EventArgs",
+          "Args",
+          "Options",
+          "Card",
+          "Credentials",
+          "Display"
         ]
       },
       {
@@ -118,6 +100,7 @@
           "Row",
           "Item",
           "Option",
+          "Column",
           "Credentials",
           "EventArgs",
           "Args",
@@ -127,20 +110,72 @@
           "Entry",
           "Dto",
           "Payload",
+          "State",
+          "Kind",
           "Model",
           "Routes"
         ]
       },
       {
+        "layer": "service",
+        "kinds": [
+          "interface"
+        ],
+        "nameSuffixes": [
+          "Service",
+          "Store",
+          "Provider",
+          "Reader",
+          "Writer",
+          "Catalog",
+          "Resolver",
+          "Fallback",
+          "Policy",
+          "Tracker",
+          "Hasher",
+          "Server",
+          "Gate",
+          "Host",
+          "Pipeline",
+          "Notifier",
+          "Prompt",
+          "Repository",
+          "Client",
+          "Handler"
+        ]
+      },
+      {
+        "layer": "service",
+        "kinds": [
+          "interface"
+        ],
+        "namePrefixes": [
+          "Service_"
+        ]
+      },
+      {
+        "layer": "service",
+        "kinds": [
+          "interface"
+        ],
+        "namespaceSegments": [
+          "Services",
+          "Service",
+          "Contracts"
+        ]
+      },
+      {
         "layer": "model",
         "kinds": [
-          "enum"
+          "interface"
         ]
       },
       {
         "layer": "service",
         "namespaceSegments": [
-          "Services"
+          "Services",
+          "Service",
+          "DependencyInjection"
         ]
       },
       {
@@ -153,6 +188,7 @@
           "Writer",
           "Catalog",
           "Resolver",
+          "Fallback",
           "Policy",
           "Tracker",
           "Hasher",
@@ -163,7 +199,8 @@
           "Notifier",
           "Prompt",
           "Repository",
-          "Client"
+          "Client",
+          "Handler"
         ]
       },
       {
@@ -179,7 +216,6 @@
     "genericPairCalls": [
       "Configure"
     ],
-    "typeofPairCalls": [],
     "dependencyPropertyCall": "Register",
     "addCallPattern": "^Add(Singleton|Transient)$",
     "serviceLocator": [
@@ -203,7 +239,6 @@
       "UserControl",
       "Panel",
       "Window",
-      "WindowEx",
       "Application"
     ],
     "generatedMembers": [
@@ -212,6 +247,16 @@
         "on": "method",
         "form": "commandSuffix"
       }
+    ]
+  },
+  "files": {
+    "include": [
+      "**/*.cs",
+      "**/*.xaml"
+    ],
+    "exclude": [
+      "**/bin/**",
+      "**/obj/**"
     ]
   }
 }
