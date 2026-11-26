@@ -2,6 +2,12 @@ installed:
 - assess
 - bug
 - companion
+- harness
+- optimize
+- review
+- spectest
+- token-budget
+- wireframe
 settings:
   auto_execute_hooks: true
 hooks:
@@ -23,6 +29,23 @@ hooks:
     prompt: Execute speckit.companion.before-step?
     description: Record the plan start
     condition: null
+  - extension: token-budget
+    command: speckit.token-budget.scope
+    enabled: true
+    optional: true
+    priority: 10
+    prompt: Scope a focused reading manifest for /speckit.plan?
+    description: Scope reading manifest before planning
+    condition: null
+  - extension: wireframe
+    command: speckit.wireframe.review
+    enabled: true
+    optional: true
+    priority: 10
+    prompt: Review and sign off wireframes before planning? (signed-off wireframes
+      become spec constraints)
+    description: Ensure wireframes are reviewed and signed off before plan is written
+    condition: null
   before_tasks:
   - extension: companion
     command: speckit.companion.before-step
@@ -31,6 +54,14 @@ hooks:
     priority: 10
     prompt: Execute speckit.companion.before-step?
     description: Record the tasks start
+    condition: null
+  - extension: token-budget
+    command: speckit.token-budget.scope
+    enabled: true
+    optional: true
+    priority: 10
+    prompt: Scope a focused reading manifest for /speckit.tasks?
+    description: Scope reading manifest before task generation
     condition: null
   before_implement:
   - extension: companion
@@ -41,6 +72,14 @@ hooks:
     prompt: Execute speckit.companion.before-step?
     description: Record the implement start
     condition: null
+  - extension: token-budget
+    command: speckit.token-budget.scope
+    enabled: true
+    optional: true
+    priority: 10
+    prompt: Scope a focused reading manifest for /speckit.implement?
+    description: Scope reading manifest before implementation
+    condition: null
   after_specify:
   - extension: companion
     command: speckit.companion.after-specify
@@ -49,6 +88,30 @@ hooks:
     priority: 10
     prompt: Execute speckit.companion.after-specify?
     description: Record the specify start and finish
+    condition: null
+  - extension: token-budget
+    command: speckit.token-budget.compact
+    enabled: true
+    optional: true
+    priority: 10
+    prompt: Compact spec.md to reduce tokens for /speckit.plan?
+    description: Compact spec after specification
+    condition: null
+  - extension: harness
+    command: speckit.harness.init
+    enabled: true
+    optional: true
+    priority: 10
+    prompt: Set up a state-externalized research harness for this feature?
+    description: Initialize harness state after specification
+    condition: null
+  - extension: wireframe
+    command: speckit.wireframe.generate
+    enabled: true
+    optional: true
+    priority: 10
+    prompt: Generate wireframes for this feature now?
+    description: Offer wireframe generation after spec creation
     condition: null
   after_plan:
   - extension: companion
@@ -59,6 +122,22 @@ hooks:
     prompt: Execute speckit.companion.after-plan?
     description: Record the plan finish
     condition: null
+  - extension: token-budget
+    command: speckit.token-budget.compact
+    enabled: true
+    optional: true
+    priority: 10
+    prompt: Compact plan and design docs to reduce tokens for /speckit.tasks?
+    description: Compact plan docs after planning
+    condition: null
+  - extension: harness
+    command: speckit.harness.verify
+    enabled: true
+    optional: true
+    priority: 10
+    prompt: Verify plan claims against primary sources and the harness evidence base?
+    description: Run claim verification after planning
+    condition: null
   after_tasks:
   - extension: companion
     command: speckit.companion.after-tasks
@@ -68,6 +147,14 @@ hooks:
     prompt: Execute speckit.companion.after-tasks?
     description: Record the tasks finish
     condition: null
+  - extension: token-budget
+    command: speckit.token-budget.compact
+    enabled: true
+    optional: true
+    priority: 10
+    prompt: Compact tasks.md to reduce tokens for /speckit.implement?
+    description: Compact tasks after task generation
+    condition: null
   after_implement:
   - extension: companion
     command: speckit.companion.after-implement
@@ -76,6 +163,30 @@ hooks:
     priority: 10
     prompt: Execute speckit.companion.after-implement?
     description: Sync implement progress from tasks.md
+    condition: null
+  - extension: review
+    command: speckit.review.run
+    enabled: true
+    optional: true
+    priority: 10
+    prompt: Run PR review on implemented changes?
+    description: Comprehensive review after implementation
+    condition: null
+  - extension: spectest
+    command: speckit.spectest.gaps
+    enabled: true
+    optional: true
+    priority: 10
+    prompt: Check for untested spec requirements?
+    description: Scan for spec requirements with no matching tests after implementation
+    condition: null
+  - extension: wireframe
+    command: speckit.wireframe.screenshots
+    enabled: true
+    optional: true
+    priority: 10
+    prompt: Capture implementation screenshots and compare to signed-off wireframes?
+    description: 'Regression check: compare implementation to approved wireframes'
     condition: null
   before_converge:
   - extension: companion

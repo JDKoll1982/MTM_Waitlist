@@ -2,9 +2,6 @@
 description: 'Compact one or more Spec-Driven Development artifacts in place to reduce token cost on subsequent /speckit.* commands. Lossless on requirements, decisions, contracts, IDs; strips template scaffolding, examples, and prose padding. The original is preserved as <artifact>.full.md the first time an artifact is compacted.
 
   '
-scripts:
-  sh: .specify/extensions/token-budget/scripts/bash/compact_helper.sh
-  ps: .specify/extensions/token-budget/scripts/powershell/compact_helper.ps1
 ---
 
 
@@ -31,6 +28,10 @@ decision, contract, ID, user story, or acceptance criterion**.
    - `spec` | `plan` | `tasks` | `research` | `data-model` | `contracts` |
      `quickstart` | `constitution` → compact only that one (or that group, in
      the case of `contracts`).
+     When the target is `constitution`, compact **both**
+     `specs/<feature>/constitution.md` (if it exists in the active feature)
+     **and** `.specify/memory/constitution.md` (if it exists at the project
+     root). Either may be absent; skip silently if so.
    - a relative or absolute path → compact that file.
    - `--level=light|medium|aggressive` → override the configured level for
      this run only.
@@ -49,6 +50,42 @@ If `keep_full_backup` is true and `<artifact>.full.md` does not yet exist,
 copy the current artifact to `<artifact>.full.md`. Never overwrite an
 existing backup. The backup is the source of truth for re-compaction at a
 different level later.
+
+### Step 1b — Guard injection (skipped for --dry-run)
+
+Runs only when `keep_full_backup` is true **and** `compact.guard_memory_file`
+is true (the default) **and** this is **not** a `--dry-run` invocation.
+
+1. **Locate the memory file** using the exact same resolution logic as
+   `/speckit.token-budget.concise` Step 1 (AGENTS.md preferred; then
+   agent-specific files in `concise.memory_files` order; create `AGENTS.md`
+   if none exist; prefer `AGENTS.md` when multiple agents are detected).
+   Do not honor `--file=<path>` here — `compact` has no such flag.
+
+2. **Check for the block.** Scan the resolved memory file for
+   `<!-- BEGIN token-budget compact-backups -->`. If found, skip silently
+   (idempotent).
+
+3. **Inject the block.** If not found, append after a blank line:
+
+   ```
+   <!-- BEGIN token-budget compact-backups -->
+
+   ## Token Budget — backup guard
+
+   Files ending in `.full.md` inside `specs/` and `.specify/memory/`
+   (e.g. `spec.full.md`, `plan.full.md`) are pre-compaction backups created
+   by `/speckit.token-budget.compact`. **Do not read them.** They contain the
+   full uncompacted content; loading them cancels the token savings compaction
+   achieved. To revert an artifact to its original state, run
+   `/speckit.token-budget.restore` instead.
+
+   <!-- END token-budget compact-backups -->
+   ```
+
+4. **On `--dry-run`:** do not write. Append to the dry-run report:
+   `[would inject backup guard into <path>]` or
+   `[backup guard already present in <path>]`.
 
 ### Step 2 — Lossless strips (every level)
 - Remove HTML comments left over from templates (`<!-- ... -->`), **except**
@@ -101,6 +138,11 @@ In addition to Steps 2–3:
 - The acceptance test expectations in tasks.md.
 - File path references (anything that looks like a path: `src/...`,
   `./...`, `/...`).
+- `.specify/memory/constitution.md` is always compacted at **light level
+  only**, regardless of the `--level` flag or config. Steps 3 (medium) and
+  4 (aggressive) are skipped for this file. The memory constitution is
+  loaded on every `/speckit.*` invocation; any lossy transformation risks
+  silently dropping a project-wide constraint.
 
 If at any point you are uncertain whether a transformation is lossless, do
 **not** apply it. Compaction must never invent, summarize away, or merge

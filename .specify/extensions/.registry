@@ -69,6 +69,114 @@
       },
       "registered_skills": [],
       "installed_at": "2026-11-24T20:41:50.258354+00:00"
+    },
+    "token-budget": {
+      "version": "1.1.0",
+      "source": "local",
+      "manifest_hash": "sha256:be1fbbd21d0cce6cd32f048ffad331a68d268947aead092681ee5e5d8667a3d0",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "copilot": [
+          "speckit.token-budget.compact",
+          "speckit.token-budget.scope",
+          "speckit.token-budget.concise",
+          "speckit.token-budget.usage",
+          "speckit.token-budget.restore"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-11-26T18:45:01.493694+00:00"
+    },
+    "harness": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:a3e746c50436226dc25a424d8424b9036bbfcda8ad0ee090a661038466efea13",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "copilot": [
+          "speckit.harness.init",
+          "speckit.harness.explore",
+          "speckit.harness.verify",
+          "speckit.harness.status",
+          "speckit.harness.report"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-11-26T18:46:57.807040+00:00"
+    },
+    "review": {
+      "version": "1.0.1",
+      "source": "local",
+      "manifest_hash": "sha256:c6f526628e20fffbbf9051e05b682a4037988583a89a278940b709e5466064c4",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "copilot": [
+          "speckit.review.run",
+          "speckit.review.code",
+          "speckit.review.comments",
+          "speckit.review.tests",
+          "speckit.review.errors",
+          "speckit.review.types",
+          "speckit.review.simplify"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-11-26T18:49:25.559160+00:00"
+    },
+    "optimize": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:011bc93e18ca788185271fc493d658d66c2544b99c131fcd293b136442af30f1",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "copilot": [
+          "speckit.optimize.run",
+          "speckit.optimize.tokens",
+          "speckit.optimize.learn"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-11-26T18:49:42.627371+00:00"
+    },
+    "spectest": {
+      "version": "1.0.0",
+      "source": "local",
+      "manifest_hash": "sha256:df34b1d0cc9ad8101cdf82078d24ecf19db40095df39b32cb6712cb11f81fe9d",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "copilot": [
+          "speckit.spectest.generate",
+          "speckit.spectest.coverage",
+          "speckit.spectest.gaps",
+          "speckit.spectest.plan"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-11-26T18:53:33.151512+00:00"
+    },
+    "wireframe": {
+      "version": "0.1.1",
+      "source": "local",
+      "manifest_hash": "sha256:c6786fa70054e43b52a57283132269060cb6ac55bef3b5d964b8d8313007a1b8",
+      "enabled": true,
+      "priority": 10,
+      "registered_commands": {
+        "copilot": [
+          "speckit.wireframe.generate",
+          "speckit.wireframe.prep",
+          "speckit.wireframe.review",
+          "speckit.wireframe.inspect",
+          "speckit.wireframe.screenshots",
+          "speckit.wireframe.view"
+        ]
+      },
+      "registered_skills": [],
+      "installed_at": "2026-11-26T18:54:32.439185+00:00"
     }
   }
 }
