@@ -41,6 +41,27 @@ interface FakeDisposable {
   dispose: () => void;
 }
 
+/**
+ * A stand-in for `vscode.FileSystemWatcher`.
+ *
+ * The extension watches the profile file so an imported or hand-edited profile re-reads in the same
+ * session. A test drives that path with `fireWatcherChange`, which is the watcher's own change event
+ * rather than a call into the extension.
+ */
+export interface FakeFileSystemWatcher {
+  pattern: string;
+  disposed: boolean;
+  onDidChange: (callback: (uri: Uri) => void) => FakeDisposable;
+  onDidCreate: (callback: (uri: Uri) => void) => FakeDisposable;
+  onDidDelete: (callback: (uri: Uri) => void) => FakeDisposable;
+  dispose: () => void;
+  /** Delivers a change to every listener the extension registered on this watcher. */
+  fire: (path?: string) => void;
+  /** Delivers a create or delete the way VS Code does, for the two events a file can raise. */
+  fireCreated: (path?: string) => void;
+  fireDeleted: (path?: string) => void;
+}
+
 export interface FakeWebviewPanel {
   viewType: string;
   title: string;
@@ -72,14 +93,19 @@ export const state = {
   findFilesCalls: [] as { include: unknown; exclude: unknown; max: number }[],
   findFilesError: undefined as Error | undefined,
   commandHandlers: {} as Record<string, (...args: unknown[]) => unknown>,
+  /** When set, `getCommands` answers with this list instead of the registered handlers. */
+  availableCommands: undefined as string[] | undefined,
   registeredCommands: [] as string[],
   executedCommands: [] as { command: string; args: unknown[] }[],
   messages: [] as RecordedMessage[],
+  /** Replies the next modal/notification calls hand back, in order; each call takes one. */
+  messageResults: [] as (string | undefined)[],
   clipboard: [] as string[],
   panels: [] as FakeWebviewPanel[],
   viewProviders: [] as { id: string; provider: unknown }[],
   viewViews: [] as unknown[],
   configurationListeners: [] as ((event: { affectsConfiguration: (section: string) => boolean }) => void)[],
+  watchers: [] as FakeFileSystemWatcher[],
   progressOptions: undefined as unknown,
   progressReports: [] as { message?: string; increment?: number }[],
   quickPickItems: undefined as unknown,
@@ -109,14 +135,17 @@ export function resetVscodeState(): void {
   state.findFilesCalls = [];
   state.findFilesError = undefined;
   state.commandHandlers = {};
+  state.availableCommands = undefined;
   state.registeredCommands = [];
   state.executedCommands = [];
   state.messages = [];
+  state.messageResults = [];
   state.clipboard = [];
   state.panels = [];
   state.viewProviders = [];
   state.viewViews = [];
   state.configurationListeners = [];
+  state.watchers = [];
   state.progressOptions = undefined;
   state.progressReports = [];
   state.quickPickItems = undefined;
@@ -312,7 +341,14 @@ function configuration(section: string) {
       return `${section}.${key}` in state.configValues;
     },
     inspect(key: string) {
-      return state.inspected[`${section}.${key}`] ?? {};
+      const full = `${section}.${key}`;
+      const known = state.inspected[full];
+      if (known) {
+        return known;
+      }
+      // A value a test set through `configValues` is a value the person configured, as the real
+      // `inspect` reports it at the workspace level.
+      return full in state.configValues ? { workspaceValue: state.configValues[full] } : {};
     },
     async update(key: string, value: unknown, target?: unknown): Promise<void> {
       if (state.updateError) {
@@ -388,7 +424,78 @@ export const workspace = {
     state.configurationListeners.push(listener);
     return { dispose: () => undefined };
   },
+  createFileSystemWatcher(pattern: unknown): FakeFileSystemWatcher {
+    const changeListeners: ((uri: Uri) => void)[] = [];
+    const createListeners: ((uri: Uri) => void)[] = [];
+    const deleteListeners: ((uri: Uri) => void)[] = [];
+    const watcher: FakeFileSystemWatcher = {
+      pattern: typeof pattern === 'string' ? pattern : String((pattern as { pattern?: string }).pattern ?? ''),
+      disposed: false,
+      onDidChange(callback: (uri: Uri) => void) {
+        changeListeners.push(callback);
+        return { dispose: () => undefined };
+      },
+      onDidCreate(callback: (uri: Uri) => void) {
+        createListeners.push(callback);
+        return { dispose: () => undefined };
+      },
+      onDidDelete(callback: (uri: Uri) => void) {
+        deleteListeners.push(callback);
+        return { dispose: () => undefined };
+      },
+      dispose() {
+        watcher.disposed = true;
+      },
+      fire(path = '/work/csharp-xaml-graph.profile.json') {
+        if (watcher.disposed) {
+          return;
+        }
+        for (const listener of [...changeListeners]) {
+          listener(Uri.file(path));
+        }
+      },
+      fireCreated(path = '/work/csharp-xaml-graph.profile.json') {
+        if (watcher.disposed) {
+          return;
+        }
+        for (const listener of [...createListeners]) {
+          listener(Uri.file(path));
+        }
+      },
+      fireDeleted(path = '/work/csharp-xaml-graph.profile.json') {
+        if (watcher.disposed) {
+          return;
+        }
+        for (const listener of [...deleteListeners]) {
+          listener(Uri.file(path));
+        }
+      },
+    };
+    state.watchers.push(watcher);
+    return watcher;
+  },
 };
+
+/** Fires every live watcher's change event, as VS Code does when the watched file changes. */
+export function fireWatcherChange(path?: string): void {
+  for (const watcher of [...state.watchers]) {
+    watcher.fire(path);
+  }
+}
+
+/** Fires every live watcher's create event: the profile appearing where there was none. */
+export function fireWatcherCreate(path?: string): void {
+  for (const watcher of [...state.watchers]) {
+    watcher.fireCreated(path);
+  }
+}
+
+/** Fires every live watcher's delete event: the profile going away. */
+export function fireWatcherDelete(path?: string): void {
+  for (const watcher of [...state.watchers]) {
+    watcher.fireDeleted(path);
+  }
+}
 
 export class RelativePattern {
   constructor(public readonly base: unknown, public readonly pattern: string) {}
@@ -463,15 +570,15 @@ export const window = {
   },
   showWarningMessage(message: string, ...actions: unknown[]): Promise<unknown> {
     state.messages.push({ level: 'warning', message, actions });
-    return Promise.resolve(undefined);
+    return Promise.resolve(state.messageResults.shift());
   },
   showInformationMessage(message: string, ...actions: unknown[]): Promise<unknown> {
     state.messages.push({ level: 'information', message, actions });
-    return Promise.resolve(undefined);
+    return Promise.resolve(state.messageResults.shift());
   },
   showErrorMessage(message: string, ...actions: unknown[]): Promise<unknown> {
     state.messages.push({ level: 'error', message, actions });
-    return Promise.resolve(undefined);
+    return Promise.resolve(state.messageResults.shift());
   },
   setStatusBarMessage(message: string, _timeout?: number): FakeDisposable {
     state.messages.push({ level: 'status', message, actions: [] });
@@ -519,7 +626,7 @@ export const commands = {
     return undefined as unknown as T;
   },
   async getCommands(): Promise<string[]> {
-    return Object.keys(state.commandHandlers);
+    return state.availableCommands ?? Object.keys(state.commandHandlers);
   },
 };
 

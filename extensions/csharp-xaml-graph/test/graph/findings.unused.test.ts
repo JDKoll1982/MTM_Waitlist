@@ -3,9 +3,13 @@ import { computeFindings } from '../../src/graph/findings';
 import { graphEdge, graphNode, typeDecl } from '../support/model';
 import { makeFindingInput, xamlBinding, xamlFile } from '../support/findings';
 import type { TypeDecl } from '../../src/graph/csharp/parser';
+import { compileConventions } from '../../src/graph/conventions';
 
 const unusedTypes = (options: Parameters<typeof makeFindingInput>[0]) =>
   computeFindings(makeFindingInput(options)).findings.filter((entry) => entry.kind === 'unused-type');
+
+const deadBindings = (options: Parameters<typeof makeFindingInput>[0]) =>
+  computeFindings(makeFindingInput(options)).findings.filter((entry) => entry.kind === 'dead-binding');
 
 const unusedMembers = (options: Parameters<typeof makeFindingInput>[0]) =>
   computeFindings(makeFindingInput(options)).findings.filter((entry) => entry.kind === 'unused-member');
@@ -493,5 +497,68 @@ describe('computeFindings: further corners', () => {
       })],
     });
     expect(computeFindings(input).findings.filter((entry) => entry.kind === 'unused-member')).toEqual([]);
+  });
+});
+
+
+describe('computeFindings: a profile’s findings rules', () => {
+  const profiled = (profile: Parameters<typeof compileConventions>[0]) => ({
+    conventions: compileConventions(profile),
+  });
+
+  it('leaves a type the profile names as an entry point out of the unused list', () => {
+    const decls = [typeDecl({ name: 'Bootstrapper', namespace: 'N' })];
+    expect(unusedTypes({ decls }).map((entry) => entry.title)).toEqual(['Unused class: Bootstrapper']);
+
+    const withProfile = unusedTypes({
+      decls,
+      ...profiled({ version: 1, findings: { entryPoints: ['Bootstrapper'] } }),
+    });
+    expect(withProfile).toEqual([]);
+  });
+
+  it('adds no members from a base the profile calls transparent, so a missing member is reported', () => {
+    const view = typeDecl({
+      name: 'SamplePage',
+      namespace: 'N.Views',
+      bases: ['GhostBase'],
+    });
+    const options = () => ({
+      decls: [view],
+      nodes: [graphNode({ id: 'N.Views.SamplePage', layer: 'view', xamlFile: 'Views/SamplePage.xaml' })],
+      xamlFiles: [xamlFile({
+        path: 'Views/SamplePage.xaml',
+        className: 'N.Views.SamplePage',
+        bindings: [xamlBinding({ expression: 'Missing', root: 'Missing' })],
+      })],
+    });
+
+    // An unresolvable base could supply the member, so nothing is claimed without a profile.
+    expect(deadBindings(options())).toEqual([]);
+
+    // Once the profile says the base carries nothing, the member really is missing.
+    const withProfile = deadBindings({ ...options(), ...profiled({ version: 1, findings: { transparentBases: ['GhostBase'] } }) });
+    expect(withProfile.map((entry) => entry.title)).toEqual(['SamplePage: x:Bind Missing has no such member']);
+  });
+
+  it('reads the built-in findings rules exactly as no profile at all', () => {
+    const build = () => ({
+      decls: [
+        typeDecl({ name: 'App', namespace: 'N' }),
+        typeDecl({ name: 'Lonely', namespace: 'N' }),
+        typeDecl({ name: 'Caller', namespace: 'N' }),
+      ],
+      edges: [graphEdge({ source: 'N.Caller', target: 'N.App', kind: 'reference' })],
+    });
+    expect(unusedTypes({ ...build(), ...profiled(undefined) }).map((entry) => entry.title))
+      .toEqual(unusedTypes(build()).map((entry) => entry.title));
+    expect(unusedMembers({
+      decls: [
+        typeDecl({ name: 'Holder', namespace: 'N', methods: [method('Forgotten')] }),
+        typeDecl({ name: 'Caller', namespace: 'N' }),
+      ],
+      edges: [graphEdge({ source: 'N.Caller', target: 'N.Holder', kind: 'reference' })],
+      ...profiled(undefined),
+    }).map((entry) => entry.title)).toEqual(['Unused method: Holder.Forgotten']);
   });
 });

@@ -46,7 +46,7 @@ describe('renderMenuHtml', () => {
 
   it('offers a shortcut for every contributed command', () => {
     const page = html();
-    for (const id of ['show', 'reanalyze', 'export', 'open-settings', 'debug']) {
+    for (const id of ['show', 'reanalyze', 'export', 'profile-initialize', 'profile-import', 'open-settings', 'debug']) {
       expect(page).toContain(`id="${id}"`);
     }
     for (const command of [
@@ -55,9 +55,24 @@ describe('renderMenuHtml', () => {
       'Show Dependency Graph for Selection',
       'Show Dependency Graph for File',
       'Open Debug Report',
+      'Set up Repository Profile',
+      'Import Profile Reply',
     ]) {
       expect(page).toContain(`<td class="key">${command}</td>`);
     }
+  });
+
+  it('offers the two profile actions, saying setup asks before proposing', () => {
+    const page = html();
+    expect(page).toContain('>Set up repository profile</button>');
+    expect(page).toContain('>Import profile reply</button>');
+    // The row explains what the assistant is asked to do, in the order it does it.
+    expect(page).toContain('The prompt asks before proposing');
+    expect(page).toContain('what marks a service, what marks a view model, how registration happens');
+    expect(page).toContain('A reply that would not make a usable profile is refused');
+    // Both buttons reach the extension through the same command message the other shortcuts use.
+    expect(page).toContain("post('command', { command: 'profileInitialize' })");
+    expect(page).toContain("post('command', { command: 'profileImport' })");
   });
 
   it('shows the include and exclude patterns one per line', () => {

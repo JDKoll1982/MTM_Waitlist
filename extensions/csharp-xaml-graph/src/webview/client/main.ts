@@ -8,6 +8,7 @@ import { renderEdgeTooltip, renderTooltip, summariseEdge, summariseNode } from '
 import { readTheme, type CanvasTheme } from './theme';
 import { renderMinimap } from './minimap';
 import { createOverlay, type Overlay, type OverlayFrame } from './overlay';
+import { renderRepositoryNotes } from './profileProblems';
 import { DEFAULT_GRAPH_SETTINGS, UNPACKED_LAYOUT_LABEL, toUnpackedLayout, type GraphSettings } from '../../graph/settings';
 
 cytoscape.use(dagre);
@@ -1941,14 +1942,24 @@ function setTab(tab: 'details' | 'problems'): void {
 const SEVERITY_ORDER: Record<Finding['severity'], number> = { high: 0, medium: 1, low: 2 };
 
 function renderProblems(): void {
-  const container = element<HTMLDivElement>('problems');
+  const container = element<HTMLDivElement>('finding-problems');
+  const profileMount = element<HTMLDivElement>('repository-notes');
   const badge = element<HTMLSpanElement>('problem-count');
 
   if (!model) {
     container.innerHTML = '<p class="muted">Run the analysis to see cleanup findings.</p>';
+    profileMount.innerHTML = '';
+    profileMount.hidden = true;
     badge.textContent = '0';
     return;
   }
+
+  // The repository notes sit above the findings: how a repository was read is met before the list of
+  // things to fix in the code. Both kinds share this one block, and the badge keeps counting findings
+  // only, which is what it has always said.
+  const profileBlock = renderRepositoryNotes(model.warnings ?? []);
+  profileMount.innerHTML = profileBlock;
+  profileMount.hidden = profileBlock.length === 0;
 
   badge.textContent = String(model.findings.length);
 
@@ -2263,7 +2274,8 @@ function wireControls(): void {
   element<HTMLButtonElement>('legend-close').addEventListener('click', () => setLegend(false));
 
   element<HTMLButtonElement>('visibility-open').addEventListener('click', () => {
-    setVisibilityOpen(element<HTMLDivElement>('visibility').hidden);
+    // `hidden` is `boolean | 'until-found'` in the current DOM types, so coerce before passing it on.
+    setVisibilityOpen(Boolean(element<HTMLDivElement>('visibility').hidden));
   });
   element<HTMLButtonElement>('visibility-close').addEventListener('click', () => setVisibilityOpen(false));
 
@@ -2310,6 +2322,10 @@ function wireControls(): void {
 
   element<HTMLButtonElement>('export').addEventListener('click', () => {
     sendVisibleExport();
+  });
+
+  element<HTMLButtonElement>('update-profile').addEventListener('click', () => {
+    vscode.postMessage({ type: 'profile' });
   });
 
   const panelToggle = element<HTMLButtonElement>('toggle-panel');

@@ -46,15 +46,36 @@ describe('renderHtml', () => {
       'hide-orphans', 'only-problems',
       'visibility', 'visibility-open', 'visibility-close',
       'legend', 'legend-open', 'legend-close',
-      'fit', 'repack', 'unpack-status', 'toggle-panel', 'reanalyze', 'export',
+      'fit', 'repack', 'unpack-status', 'toggle-panel', 'reanalyze', 'export', 'update-profile',
       'cy', 'view-controls', 'zoom-region', 'zoom-slider', 'view-reset', 'zoom-rect',
       'progress', 'progress-message', 'progress-percent', 'progress-fill',
-      'focus-bar', 'stats', 'tooltip', 'details', 'problems',
+      'focus-bar', 'stats', 'tooltip', 'details', 'problems', 'repository-notes', 'finding-problems',
       'tab-details', 'tab-problems', 'problem-count', 'node-menu',
       'preset-mvvm', 'preset-structure', 'preset-cleanup', 'preset-all',
     ]) {
       expect(page(html(), `id="${id}"`)).toBe(true);
     }
+  });
+
+  it('puts the profile control last in the actions row, after Export JSON', () => {
+    const page = html();
+    const start = page.indexOf('<div class="row actions">');
+    const row = page.slice(start, page.indexOf('</div>', start));
+
+    expect(row).toContain('id="export"');
+    expect(row).toContain('id="update-profile"');
+    expect(row.indexOf('id="export"')).toBeLessThan(row.indexOf('id="update-profile"'));
+    // Nothing else follows it, so both existing buttons keep their place.
+    const buttons = [...row.matchAll(/<button id="([^"]+)"/g)].map((match) => match[1]);
+    expect(buttons.at(-1)).toBe('update-profile');
+    expect(row).toContain('>Update profile</button>');
+  });
+
+  it('heads the Problems pane with the container the profile rows fill', () => {
+    const page = html();
+    expect(page).toContain('<div id="repository-notes" hidden></div>');
+    const problems = page.slice(page.indexOf('<div id="problems" class="pane">'));
+    expect(problems.indexOf('id="repository-notes"')).toBeLessThan(problems.indexOf('id="finding-problems"'));
   });
 
   it('offers every layout and density the script understands', () => {

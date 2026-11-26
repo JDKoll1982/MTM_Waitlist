@@ -285,6 +285,8 @@ export function renderHtml(context: HtmlContext): string {
       <span class="spacer"></span>
       <button id="reanalyze" type="button" class="primary">Re-analyse</button>
       <button id="export" type="button">Export JSON</button>
+      <button id="update-profile" type="button"
+              title="Ask the assistant to find conventions this repository's profile does not cover">Update profile</button>
     </div>
   </div>
 
@@ -330,7 +332,10 @@ export function renderHtml(context: HtmlContext): string {
         <button id="tab-problems" type="button" class="tab">Problems <span id="problem-count" class="badge">0</span></button>
       </div>
       <div id="details" class="pane active"><p class="muted">Select a node to inspect it. Double-click to open the source. Right-click to unpack its shape.</p></div>
-      <div id="problems" class="pane"><p class="muted">Run the analysis to see cleanup findings.</p></div>
+      <div id="problems" class="pane">
+        <div id="repository-notes" hidden></div>
+        <div id="finding-problems"><p class="muted">Run the analysis to see cleanup findings.</p></div>
+      </div>
     </div>
   </div>
 

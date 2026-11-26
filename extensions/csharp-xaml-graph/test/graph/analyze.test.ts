@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import * as path from 'node:path';
 import { analyzeWorkspace, type AnalyzeInput, type AnalyzeOptions } from '../../src/graph/analyze';
 import type { GraphModel } from '../../src/graph/model';
+import { compileConventions } from '../../src/graph/conventions';
 
 const grammarWasmPath = path.join(process.cwd(), 'media', 'tree-sitter-c_sharp.wasm');
 
@@ -850,5 +851,159 @@ describe('analyzeWorkspace: names two types would otherwise share', () => {
       'A/Types.cs': 'namespace N { public class Holder {} public class Dep {} }',
     });
     expect(model.nodes.every((node) => node.displayLabel === undefined)).toBe(true);
+  });
+});
+
+
+describe('analyzeWorkspace: a profile’s conventions', () => {
+  const profiled = (profile: Parameters<typeof compileConventions>[0]) => ({
+    conventions: compileConventions(profile),
+  });
+
+  it('draws a registration through a call name only the profile declares', async () => {
+    const sources = {
+      'App/App.cs': `namespace App
+{
+    public class App
+    {
+        void Wire(Pages pages)
+        {
+            pages.Wire<SampleViewModel, SamplePage>();
+        }
+    }
+    public class Pages { }
+}`,
+      'App/SamplePage.cs': 'namespace App { public class SamplePage { } }',
+      'App/SampleViewModel.cs': 'namespace App { public class SampleViewModel { } }',
+    };
+
+    const model = await analyze(sources, {}, profiled({
+      version: 1,
+      links: { genericPairCalls: ['Wire'] },
+      layers: { rules: [{ layer: 'viewmodel', nameSuffixes: ['ViewModel'] }], default: 'model' },
+    }));
+
+    expect(edgeKeys(model)).toContain('App.SamplePage -resolves-> App.SampleViewModel');
+    // Both sides of the pair are registered, so neither reads as an unused declaration.
+    expect(nodeOf(model, 'App.SamplePage')?.diRegistered).toBe(true);
+    expect(nodeOf(model, 'App.SampleViewModel')?.diRegistered).toBe(true);
+    const unused = model.findings.filter((finding) => finding.kind === 'unused-type').map((finding) => finding.title);
+    expect(unused.join(' ')).not.toContain('SamplePage');
+    expect(unused.join(' ')).not.toContain('SampleViewModel');
+  });
+
+  it('draws a route through a typeof pair call name only the profile declares', async () => {
+    const sources = {
+      'App/Routes.cs': `namespace App
+{
+    public class Routes
+    {
+        void MapAll(Navigation navigation)
+        {
+            navigation.Map(typeof(SampleViewModel), typeof(SamplePage));
+        }
+    }
+    public class Navigation { }
+}`,
+      'App/SamplePage.cs': 'namespace App { public class SamplePage { } }',
+      'App/SampleViewModel.cs': 'namespace App { public class SampleViewModel { } }',
+    };
+
+    const withProfile = await analyze(sources, {}, profiled({
+      version: 1,
+      links: { typeofPairCalls: ['Map'] },
+    }));
+    expect(edgeKeys(withProfile)).toContain('App.SamplePage -resolves-> App.SampleViewModel');
+    expect(nodeOf(withProfile, 'App.SampleViewModel')?.diRegistered).toBe(true);
+
+    // The built-in conventions know no such call, so nothing is drawn from it.
+    const without = await analyze(sources);
+    expect(edgeKeys(without)).not.toContain('App.SamplePage -resolves-> App.SampleViewModel');
+  });
+
+  it('gates the dependency-property edge on the profile’s view-model test, not on a suffix', async () => {
+    const sources = {
+      'App/HomePage.cs': `namespace App
+{
+    public class HomePage
+    {
+        public static readonly DependencyProperty ViewModelProperty =
+            DependencyProperty.Register(typeof(ViewModelLabel), typeof(HomeScreen), typeof(HomePage));
+    }
+    public class DependencyProperty { }
+    public class ViewModelLabel { }
+}`,
+      'App/HomeScreen.cs': 'namespace App { public class HomeScreen { } }',
+    };
+
+    const conventions = profiled({
+      version: 1,
+      layers: { rules: [{ layer: 'viewmodel', nameSuffixes: ['Screen'] }], default: 'model' },
+    });
+    const model = await analyze(sources, {}, conventions);
+
+    expect(edgeKeys(model)).toContain('App.HomePage -getservice-> App.HomeScreen');
+    expect(nodeOf(model, 'App.HomeScreen')?.layer).toBe('viewmodel');
+    expect(nodeOf(model, 'App.HomeScreen')?.diRegistered).toBe(true);
+
+    // With the built-in rules a `Screen` is a plain model, so the same call draws nothing.
+    const without = await analyze(sources);
+    expect(edgeKeys(without)).not.toContain('App.HomePage -getservice-> App.HomeScreen');
+  });
+
+  it('draws the data-context binding edge through the cast keyword the profile declares', async () => {
+    const sources = {
+      'App/GridControl.cs': `namespace App
+{
+    public class GridControl
+    {
+        void Bind()
+        {
+            var commands = (IGridCommands)DataContext;
+        }
+    }
+    public interface IGridCommands { }
+}`,
+    };
+
+    const model = await analyze(sources, {}, profiled({
+      version: 1,
+      links: { dataContextCasts: ['cast'] },
+    }));
+    const binds = model.edges.filter((edge) => edge.kind === 'binds');
+    expect(binds.map((edge) => `${edge.source}->${edge.target}`)).toContain('App.GridControl->App.IGridCommands');
+
+    // `is` and `as` are the built-in casts, so a plain cast is an ordinary reference instead.
+    const without = await analyze(sources);
+    expect(without.edges.some((edge) => edge.kind === 'binds')).toBe(false);
+  });
+
+  it('produces the same graph for a built-in profile as for no profile at all', async () => {
+    const sources = {
+      'App/App.cs': `namespace App
+{
+    public class App
+    {
+        void Wire(PageService pageService, IServiceCollection services)
+        {
+            pageService.Configure<SampleViewModel, SamplePage>();
+            services.AddSingleton<IRepo, Repo>();
+        }
+    }
+    public class PageService { }
+    public interface IServiceCollection { }
+}`,
+      'App/SamplePage.cs': 'namespace App { public class SamplePage { } }',
+      'App/SampleViewModel.cs': 'namespace App { public class SampleViewModel { } }',
+      'App/IRepo.cs': 'namespace App { public interface IRepo { } public class Repo : IRepo { } }',
+    };
+
+    const none = await analyze(sources);
+    const builtIn = await analyze(sources, {}, profiled(undefined));
+    expect(edgeKeys(builtIn)).toEqual(edgeKeys(none));
+    expect(builtIn.nodes.map((node) => `${node.id}:${node.layer}`).sort())
+      .toEqual(none.nodes.map((node) => `${node.id}:${node.layer}`).sort());
+    expect(builtIn.findings.map((finding) => finding.title).sort())
+      .toEqual(none.findings.map((finding) => finding.title).sort());
   });
 });

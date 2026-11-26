@@ -124,6 +124,8 @@ container gives it, and each type with what it injects, inherits and constructs.
   <button id="show">Show dependency graph</button>
   <button id="reanalyze" class="secondary">Re-analyse now</button>
   <button id="export" class="secondary">Export JSON</button>
+  <button id="profile-initialize" class="secondary">Set up repository profile</button>
+  <button id="profile-import" class="secondary">Import profile reply</button>
   <button id="open-settings" class="secondary">Open VS Code settings</button>
   <button id="debug" class="secondary">Debug report</button>
 </div>
@@ -158,6 +160,21 @@ container gives it, and each type with what it injects, inherits and constructs.
     <td>Command Palette, or <b>Debug report</b> above</td>
     <td>Opens a diagnostics page organised by subsystem: host, settings, analysis, parsers, findings,
         canvas state, commands and packaging — each labelled with the files that own it.</td>
+  </tr>
+  <tr>
+    <td class="key">Set up Repository Profile</td>
+    <td>Command Palette, or <b>Set up repository profile</b> above</td>
+    <td>Opens the assistant with a setup prompt for this folder. The prompt asks before proposing
+        anything: what marks a service, what marks a view model, how registration happens, which
+        types start the application, and which files matter, each question quoting this repository's
+        own types, namespaces and calls. The answer is committed as <code>csharp-xaml-graph.profile.json</code>.</td>
+  </tr>
+  <tr>
+    <td class="key">Import Profile Reply</td>
+    <td>Command Palette, or <b>Import profile reply</b> above</td>
+    <td>Reads the assistant's reply from the clipboard, checks it, and merges it into the profile
+        beside the code. A reply that would not make a usable profile is refused and the missing part
+        is named, so nothing half-understood is written.</td>
   </tr>
 </table>
 
@@ -223,6 +240,8 @@ setting at its default and it follows the extension instead.</p>
   document.getElementById('show').addEventListener('click', () => post('command', { command: 'show' }));
   document.getElementById('reanalyze').addEventListener('click', () => post('command', { command: 'refresh' }));
   document.getElementById('export').addEventListener('click', () => post('command', { command: 'export' }));
+  document.getElementById('profile-initialize').addEventListener('click', () => post('command', { command: 'profileInitialize' }));
+  document.getElementById('profile-import').addEventListener('click', () => post('command', { command: 'profileImport' }));
   document.getElementById('open-settings').addEventListener('click', () => post('command', { command: 'openSettings' }));
   document.getElementById('debug').addEventListener('click', () => post('command', { command: 'debug' }));
 

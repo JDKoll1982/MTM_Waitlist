@@ -21,8 +21,12 @@ const escapeForTest = (value: string): string => String(value)
   .replace(/>/g, '&gt;')
   .replace(/"/g, '&quot;');
 import { computeFindings } from './graph/findings';
+
+/** The conventions a repository with no profile gets, compiled once for the synthetic fixtures. */
+const BUILT_IN = compileConventions();
 import { TypeIndex, moduleOf } from './graph/csharp/symbols';
 import { classifyType } from './graph/layers';
+import { compileConventions } from './graph/conventions';
 
 const extensionRoot = resolve(__dirname, '..');
 /** The repository this extension lives in, used when no root argument is given. */
@@ -294,10 +298,10 @@ async function main(): Promise<void> {
   });
   checks.push({
     name: 'layer classification understands the ViewModel_ prefix convention',
-    passed: classifyType({ name: 'ViewModel_Workflow', namespace: 'X.ViewModels' } as never) === 'viewmodel'
-      && classifyType({ name: 'ThingViewModel', namespace: 'X' } as never) === 'viewmodel'
-      && classifyType({ name: 'IResettableViewModel', namespace: 'X', kind: 'interface' } as never) === 'model'
-      && classifyType({ name: 'Dao_Parts', namespace: 'X' } as never) === 'service',
+    passed: classifyType({ name: 'ViewModel_Workflow', namespace: 'X.ViewModels' } as never, BUILT_IN) === 'viewmodel'
+      && classifyType({ name: 'ThingViewModel', namespace: 'X' } as never, BUILT_IN) === 'viewmodel'
+      && classifyType({ name: 'IResettableViewModel', namespace: 'X', kind: 'interface' } as never, BUILT_IN) === 'model'
+      && classifyType({ name: 'Dao_Parts', namespace: 'X' } as never, BUILT_IN) === 'service',
     generic: true,
   });
   checks.push({
@@ -601,6 +605,55 @@ async function main(): Promise<void> {
     passed: html.includes('Content-Security-Policy') && html.includes("script-src 'nonce-nonce-value'"),
   });
 
+  /* ---- the profile: the control, and what a profile changes ---- */
+
+  checks.push({
+    name: 'the graph carries the profile control and the place its problems are listed',
+    passed: html.includes('id="update-profile"')
+      && html.indexOf('id="update-profile"') > html.indexOf('id="export"')
+      && html.includes('id="repository-notes"'),
+  });
+
+  // A profile that changes one convention must change that convention and nothing else: a wider
+  // blast radius would mean the profile work reached into the analysis somewhere it should not.
+  const profileFixture = {
+    'Fixture/DunnageHandler.cs': 'namespace Fixture { public class DunnageHandler { } }',
+    'Fixture/Other.cs': 'namespace Fixture { public class Other { } }',
+  };
+  const fixtureInputs: AnalyzeInput[] = Object.entries(profileFixture)
+    .map(([path, text]) => ({ path, text }));
+  const bareModel = await analyzeWorkspace({
+    workspaceRoot,
+    csharp: fixtureInputs,
+    xaml: [],
+    grammarWasmPath: join(extensionRoot, 'media', 'tree-sitter_c_sharp.wasm'),
+  });
+  const profiledModel = await analyzeWorkspace({
+    workspaceRoot,
+    csharp: fixtureInputs,
+    xaml: [],
+    grammarWasmPath: join(extensionRoot, 'media', 'tree-sitter_c_sharp.wasm'),
+    conventions: compileConventions({
+      version: 1,
+      layers: { rules: [{ layer: 'service', nameSuffixes: ['Handler'] }], default: 'model' },
+    }),
+  });
+  const layerOf = (model: GraphModel, id: string): string | undefined =>
+    model.nodes.find((node) => node.id === id)?.layer;
+
+  checks.push({
+    name: 'a hand-written profile changes the one classification it names and nothing else',
+    passed: layerOf(bareModel, 'Fixture.DunnageHandler') === 'model'
+      && layerOf(profiledModel, 'Fixture.DunnageHandler') === 'service'
+      && layerOf(bareModel, 'Fixture.Other') === layerOf(profiledModel, 'Fixture.Other')
+      && bareModel.nodes.length === profiledModel.nodes.length
+      && bareModel.edges.length === profiledModel.edges.length
+      && bareModel.findings.length === profiledModel.findings.length,
+    detail: `${bareModel.nodes.length} nodes, ${bareModel.edges.length} edges, `
+      + `${bareModel.findings.length} findings in both runs`,
+    generic: true,
+  });
+
   /* ---- cleanup findings ---- */
 
   checks.push({
@@ -667,6 +720,7 @@ async function main(): Promise<void> {
     usingsFor: () => [],
     xamlFiles: [],
     sources: [],
+    conventions: BUILT_IN,
   });
   const cycles = synthetic.findings.filter((finding) => finding.kind === 'cycle');
   checks.push({
@@ -688,6 +742,7 @@ async function main(): Promise<void> {
     usingsFor: () => [],
     xamlFiles: [],
     sources: [],
+    conventions: BUILT_IN,
   });
   checks.push({
     name: 'a self-dependency is reported as its own finding',
@@ -1359,31 +1414,41 @@ async function main(): Promise<void> {
 
   const sampleEdge = model.edges.find((edge) => edge.evidence !== undefined && edge.confidence === 'high')
     ?? model.edges[0];
-  const sampleSource = model.nodes.find((node) => node.id === sampleEdge.source);
-  const sampleTarget = model.nodes.find((node) => node.id === sampleEdge.target);
-  const edgeSummary = summariseEdge({
-    kind: sampleEdge.kind,
-    sourceLabel: sampleSource?.label ?? sampleEdge.source,
-    sourceFullName: sampleSource?.fullName ?? sampleEdge.source,
-    targetLabel: sampleTarget?.label ?? sampleEdge.target,
-    targetFullName: sampleTarget?.fullName ?? sampleEdge.target,
-    confidence: sampleEdge.confidence,
-    member: sampleEdge.label,
-    file: sampleEdge.evidence?.file,
-    line: sampleEdge.evidence?.line,
-  });
-  const edgeTooltipHtml = renderEdgeTooltip(edgeSummary);
-  checks.push({
-    name: 'the line tooltip names both types, the edge kind and the source line it came from',
-    passed: edgeTooltipHtml.includes(edgeSummary.kindLabel)
-      && edgeTooltipHtml.includes(escapeForTest(edgeSummary.sourceLabel))
-      && edgeTooltipHtml.includes(escapeForTest(edgeSummary.targetLabel))
-      && (sampleEdge.evidence === undefined
-        || edgeTooltipHtml.includes(escapeForTest(sampleEdge.evidence.file)))
-      && edgeTooltipHtml.includes(edgeSummary.colour)
-      && !edgeTooltipHtml.includes('No cleanup findings'),
-    detail: `${edgeSummary.kindLabel}: ${edgeSummary.sourceLabel} → ${edgeSummary.targetLabel}`,
-  });
+  if (sampleEdge) {
+    const sampleSource = model.nodes.find((node) => node.id === sampleEdge.source);
+    const sampleTarget = model.nodes.find((node) => node.id === sampleEdge.target);
+    const edgeSummary = summariseEdge({
+      kind: sampleEdge.kind,
+      sourceLabel: sampleSource?.label ?? sampleEdge.source,
+      sourceFullName: sampleSource?.fullName ?? sampleEdge.source,
+      targetLabel: sampleTarget?.label ?? sampleEdge.target,
+      targetFullName: sampleTarget?.fullName ?? sampleEdge.target,
+      confidence: sampleEdge.confidence,
+      member: sampleEdge.label,
+      file: sampleEdge.evidence?.file,
+      line: sampleEdge.evidence?.line,
+    });
+    const edgeTooltipHtml = renderEdgeTooltip(edgeSummary);
+    checks.push({
+      name: 'the line tooltip names both types, the edge kind and the source line it came from',
+      passed: edgeTooltipHtml.includes(edgeSummary.kindLabel)
+        && edgeTooltipHtml.includes(escapeForTest(edgeSummary.sourceLabel))
+        && edgeTooltipHtml.includes(escapeForTest(edgeSummary.targetLabel))
+        && (sampleEdge.evidence === undefined
+          || edgeTooltipHtml.includes(escapeForTest(sampleEdge.evidence.file)))
+        && edgeTooltipHtml.includes(edgeSummary.colour)
+        && !edgeTooltipHtml.includes('No cleanup findings'),
+      detail: `${edgeSummary.kindLabel}: ${edgeSummary.sourceLabel} → ${edgeSummary.targetLabel}`,
+    });
+  } else {
+    // A checkout with no dependency at all is legal; the check it cannot run is reported rather than
+    // crashing the whole suite, which would hide every check below it.
+    checks.push({
+      name: 'the line tooltip names both types, the edge kind and the source line it came from',
+      passed: false,
+      detail: 'this checkout declares no edge to describe',
+    });
+  }
 
   const flaggedId = model.findings[0]?.nodeIds[0];
   const flaggedNode = model.nodes.find((node) => node.id === flaggedId);

@@ -162,6 +162,14 @@ function text(node: any): string {
   return node ? String(node.text) : '';
 }
 
+/**
+ * The container-lookup names the parser recognises when no profile says otherwise.
+ *
+ * Kept here as the default so a caller that does not compile conventions — a parser test, the
+ * self-test's own fixtures — still reads a locator assignment the way the extension always has.
+ */
+const DEFAULT_LOCATOR_NAMES = new Set(['GetService', 'GetRequiredService']);
+
 /** Strips generics, nullability, array bounds and the `global::` prefix so a name can be resolved. */
 export function normalizeTypeText(raw: string): string {
   let value = (raw ?? '').trim().replace(/^global::/, '');
@@ -255,7 +263,7 @@ function walk(node: any, visit: (node: any) => void): void {
   }
 }
 
-function describeValue(right: any): AssignedValue | undefined {
+function describeValue(right: any, locatorNames: Set<string>): AssignedValue | undefined {
   if (!right) {
     return undefined;
   }
@@ -272,7 +280,7 @@ function describeValue(right: any): AssignedValue | undefined {
       if (nameNode?.type === 'generic_name') {
         const method = text(nameNode.childForFieldName?.('name') ?? named(nameNode)[0]).trim();
         const args = genericArgumentTexts(nameNode);
-        if (method === 'GetService' || method === 'GetRequiredService') {
+        if (locatorNames.has(method)) {
           return { kind: 'service-locator', typeName: normalizeTypeText(args[0] ?? '') };
         }
       }
@@ -282,7 +290,7 @@ function describeValue(right: any): AssignedValue | undefined {
     if (fn.type === 'generic_name') {
       const method = text(fn.childForFieldName?.('name') ?? named(fn)[0]).trim();
       const args = genericArgumentTexts(fn);
-      if (method === 'GetService' || method === 'GetRequiredService') {
+      if (locatorNames.has(method)) {
         return { kind: 'service-locator', typeName: normalizeTypeText(args[0] ?? '') };
       }
     }
@@ -368,7 +376,7 @@ function collectCalls(body: any): CallSite[] {
   return calls;
 }
 
-function collectAssignments(body: any): AssignmentSite[] {
+function collectAssignments(body: any, locatorNames: Set<string>): AssignmentSite[] {
   const sites: AssignmentSite[] = [];
   walk(body, (current: any) => {
     if (current.type !== 'assignment_expression') {
@@ -379,7 +387,7 @@ function collectAssignments(body: any): AssignmentSite[] {
     if (!left || left.type !== 'identifier') {
       return;
     }
-    const value = describeValue(right);
+    const value = describeValue(right, locatorNames);
     if (value) {
       sites.push({ target: text(left).trim(), value, line: lineOf(current) });
     }
@@ -594,7 +602,7 @@ function readRecordParameters(body: any, child: any, decl: TypeDecl): void {
   }
 }
 
-function readMembers(body: any, decl: TypeDecl): void {
+function readMembers(body: any, decl: TypeDecl, locatorNames: Set<string>): void {
   if (!body) {
     return;
   }
@@ -613,7 +621,7 @@ function readMembers(body: any, decl: TypeDecl): void {
         const initializer = named(member).find((child: any) => child.type === 'constructor_initializer');
         if (initializer) {
           decl.calls.push(...collectCalls(initializer));
-          decl.assignments.push(...collectAssignments(initializer));
+          decl.assignments.push(...collectAssignments(initializer, locatorNames));
         }
         break;
       }
@@ -704,7 +712,7 @@ function readMembers(body: any, decl: TypeDecl): void {
     }
   }
 
-  decl.assignments.push(...collectAssignments(body));
+  decl.assignments.push(...collectAssignments(body, locatorNames));
   decl.calls.push(...collectCalls(body));
   decl.creations.push(...collectCreations(body));
   decl.typeofRefs.push(...collectTypeofRefs(body));
@@ -718,7 +726,7 @@ function readMembers(body: any, decl: TypeDecl): void {
  * `Namespace.Outer.Inner` rather than a re-ordered join of separate pieces. A file-scoped namespace
  * applies to its following siblings, not to its own (empty) body, so the scope is carried in a local.
  */
-function visitChildren(children: any[], file: CSharpFile, prefix: string): void {
+function visitChildren(children: any[], file: CSharpFile, prefix: string, locatorNames: Set<string>): void {
   let scope = prefix;
 
   for (const child of children) {
@@ -739,7 +747,7 @@ function visitChildren(children: any[], file: CSharpFile, prefix: string): void 
       const combined = scope && name ? `${scope}.${name}` : (name || scope);
       const body = child.childForFieldName?.('body')
         ?? named(child).find((inner: any) => inner.type === 'declaration_list');
-      visitChildren(named(body), file, combined);
+      visitChildren(named(body), file, combined, locatorNames);
       continue;
     }
 
@@ -795,7 +803,7 @@ function visitChildren(children: any[], file: CSharpFile, prefix: string): void 
       const body = child.childForFieldName?.('body')
         ?? named(child).find((inner: any) => inner.type === 'declaration_list');
 
-      readMembers(body, decl);
+      readMembers(body, decl, locatorNames);
       readRecordParameters(body, child, decl);
 
       // A type's own attributes and generic constraints sit beside its body, not inside it, so the
@@ -810,18 +818,22 @@ function visitChildren(children: any[], file: CSharpFile, prefix: string): void 
 
       const nested = named(body).filter((inner: any) => isTypeDeclaration(inner.type));
       if (nested.length > 0) {
-        visitChildren(nested, file, decl.fullName);
+        visitChildren(nested, file, decl.fullName, locatorNames);
       }
       continue;
     }
 
     // Anything not handled above (compilation unit, preprocessor branches) is descended into.
-    visitChildren(named(child), file, scope);
+    visitChildren(named(child), file, scope, locatorNames);
   }
 }
 
 /** Parses one C# file into the declarations and call sites the graph needs. */
-export function parseCSharpFile(relativePath: string, source: string): CSharpFile {
+export function parseCSharpFile(
+  relativePath: string,
+  source: string,
+  locatorNames: Set<string> = DEFAULT_LOCATOR_NAMES,
+): CSharpFile {
   if (!parser) {
     throw new Error('C# grammar is not loaded; call initCSharpGrammar first.');
   }
@@ -833,7 +845,7 @@ export function parseCSharpFile(relativePath: string, source: string): CSharpFil
     types: [],
     hasSyntaxError: tree.rootNode.hasError === true,
   };
-  visitChildren(named(tree.rootNode), file, '');
+  visitChildren(named(tree.rootNode), file, '', locatorNames);
   tree.delete();
   return file;
 }

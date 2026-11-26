@@ -153,12 +153,30 @@ describe('MenuViewProvider: commands and settings messages', () => {
       ['openSettings', 'csharpXamlGraph.openSettings'],
       ['debug', 'csharpXamlGraph.debug'],
       ['export', 'csharpXamlGraph.export'],
+      ['profileInitialize', 'csharpXamlGraph.profile.initialize'],
+      ['profileImport', 'csharpXamlGraph.profile.import'],
       ['anythingElse', 'csharpXamlGraph.export'],
     ];
     for (const [command, expected] of cases) {
       await view.send({ type: 'command', command });
       expect(state.executedCommands.at(-1)?.command).toBe(expected);
     }
+  });
+
+  it('forwards the two profile actions to the commands that do the work', async () => {
+    open();
+
+    await view.send({ type: 'command', command: 'profileInitialize' });
+    expect(state.executedCommands.at(-1)).toMatchObject({
+      command: 'csharpXamlGraph.profile.initialize',
+      args: [],
+    });
+
+    await view.send({ type: 'command', command: 'profileImport' });
+    expect(state.executedCommands.at(-1)).toMatchObject({
+      command: 'csharpXamlGraph.profile.import',
+      args: [],
+    });
   });
 
   it('saves every field to the workspace scope and confirms', async () => {
@@ -183,6 +201,25 @@ describe('MenuViewProvider: commands and settings messages', () => {
       'unpackedLayout=grid@2',
     ]);
     expect(view.webview.posted.at(-1)).toMatchObject({ type: 'saved' });
+  });
+
+  it('writes nothing for a field the reader left as it was shown', async () => {
+    state.folders = [{ uri: { scheme: 'file', path: '/work' } as never, name: 'work', index: 0 }];
+    open();
+    // Submit exactly what the form displayed, which is what a Save after changing one field sends
+    // for every other field: nothing should be pinned, so a profile's file selection keeps working.
+    await view.send({ type: 'save', settings: readSettings() });
+
+    expect(state.configUpdates).toEqual([]);
+    expect(view.webview.posted.at(-1)).toMatchObject({ type: 'saved' });
+  });
+
+  it('writes only the field the reader actually changed', async () => {
+    state.folders = [{ uri: { scheme: 'file', path: '/work' } as never, name: 'work', index: 0 }];
+    open();
+    await view.send({ type: 'save', settings: { ...readSettings(), maxNodes: 900 } });
+
+    expect(state.configUpdates.map((update) => update.key)).toEqual(['maxNodes']);
   });
 
   it('saves to the user scope when no folder is open', async () => {

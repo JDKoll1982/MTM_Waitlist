@@ -1,4 +1,5 @@
 import { TypeIndex } from '../../src/graph/csharp/symbols';
+import { compileConventions, type CompiledConventions } from '../../src/graph/conventions';
 import type { FindingInput } from '../../src/graph/findings';
 import type { GraphEdge, GraphNode } from '../../src/graph/model';
 import type { TypeDecl } from '../../src/graph/csharp/parser';
@@ -15,6 +16,8 @@ export interface FindingInputOptions {
   xamlFiles?: XamlFile[];
   sources?: string[];
   usings?: Record<string, string[]>;
+  /** The conventions the rules are judged by. Absent means the built-in conventions. */
+  conventions?: CompiledConventions;
 }
 
 /** A `FindingInput` with every field filled, so a test states only what it is about. */
@@ -52,6 +55,7 @@ export function makeFindingInput(options: FindingInputOptions = {}): FindingInpu
     usingsFor: (fullName: string) => options.usings?.[fullName] ?? [],
     xamlFiles: options.xamlFiles ?? [],
     sources: options.sources ?? [],
+    conventions: options.conventions ?? compileConventions(),
   };
 }
 

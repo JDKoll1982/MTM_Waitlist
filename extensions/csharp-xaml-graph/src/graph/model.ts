@@ -163,6 +163,38 @@ export interface GraphStats {
   parser?: ParserTally;
 }
 
+/* ------------------------------------------------------------------ profile evidence */
+
+/**
+ * What the setup and refresh prompts are allowed to quote: counts and examples drawn from the
+ * declarations that were parsed, never file contents.
+ *
+ * It is derived per analysis run and carried on the model because the analysis has already parsed
+ * every file and seen every call site; a prompt builder that re-read the workspace would have to
+ * parse it a second time and would still lose the call names. It exists only to be read by the two
+ * prompt builders, so the graph JSON export leaves it out.
+ */
+export interface ProfileEvidence {
+  /** Name endings on declared types, each with up to two types that carry it. */
+  nameSuffixes: { name: string; examples: string[] }[];
+  /** Name prefixes on declared types, each with up to two types that carry it. */
+  namePrefixes: { name: string; examples: string[] }[];
+  /** Namespace segments, with how many types carry each. */
+  namespaceSegments: { segment: string; types: number }[];
+  /** Call names the analysis saw, with the type-argument count and one place it was written. */
+  calls: { name: string; typeArguments: number; example: string }[];
+  /** Base type names declared in the repository. */
+  baseTypes: string[];
+  /** Attribute names seen on methods. */
+  methodAttributes: string[];
+  /** Attribute names seen on fields. */
+  fieldAttributes: string[];
+  /** XAML root tags, and how many files carry each. */
+  xamlRootTags: { tag: string; files: number }[];
+  csharpFiles: number;
+  xamlFiles: number;
+}
+
 export interface GraphModel {
   workspace: string;
   generatedAt: string;
@@ -172,6 +204,11 @@ export interface GraphModel {
   cleanup: CleanupSummary;
   stats: GraphStats;
   warnings: string[];
+  /**
+   * Evidence for the two profile prompts. Optional because a model built by an older caller, or by
+   * a test fixture, has none; it is never written by the graph JSON export.
+   */
+  profileEvidence?: ProfileEvidence;
 }
 
 export const EDGE_KIND_LABEL: Record<EdgeKind, string> = {

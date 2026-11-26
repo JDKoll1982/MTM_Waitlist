@@ -1,0 +1,217 @@
+{
+  "version": 1,
+  "repository": "MTM_Waitlist",
+  "layers": {
+    "rules": [
+      {
+        "layer": "view",
+        "kinds": [
+          "class"
+        ],
+        "nameSuffixes": [
+          "Page",
+          "Panel"
+        ]
+      },
+      {
+        "layer": "model",
+        "kinds": [
+          "record",
+          "struct"
+        ]
+      },
+      {
+        "layer": "model",
+        "kinds": [
+          "class"
+        ],
+        "nameSuffixes": [
+          "Data",
+          "Result",
+          "Outcome",
+          "EventArgs",
+          "Options"
+        ]
+      },
+      {
+        "layer": "service",
+        "kinds": [
+          "interface"
+        ],
+        "nameSuffixes": [
+          "Service",
+          "Store",
+          "Provider",
+          "Reader",
+          "Writer",
+          "Catalog",
+          "Resolver",
+          "Policy",
+          "Tracker",
+          "Hasher",
+          "Server",
+          "Gate",
+          "Host",
+          "Pipeline",
+          "Notifier",
+          "Prompt",
+          "Repository",
+          "Client"
+        ]
+      },
+      {
+        "layer": "service",
+        "kinds": [
+          "interface"
+        ],
+        "namePrefixes": [
+          "Service_"
+        ]
+      },
+      {
+        "layer": "service",
+        "kinds": [
+          "interface"
+        ],
+        "namespaceSegments": [
+          "Services"
+        ]
+      },
+      {
+        "layer": "service",
+        "kinds": [
+          "interface"
+        ],
+        "namespaceSegments": [
+          "Contracts"
+        ]
+      },
+      {
+        "layer": "model",
+        "kinds": [
+          "interface"
+        ]
+      },
+      {
+        "layer": "viewmodel",
+        "nameSuffixes": [
+          "ViewModel"
+        ]
+      },
+      {
+        "layer": "viewmodel",
+        "namePrefixes": [
+          "ViewModel_"
+        ]
+      },
+      {
+        "layer": "viewmodel",
+        "kinds": [
+          "class"
+        ],
+        "namespaceSegments": [
+          "ViewModels"
+        ],
+        "unlessNameSuffixes": [
+          "Data",
+          "Card",
+          "Row",
+          "Item",
+          "Option",
+          "Credentials",
+          "EventArgs",
+          "Args",
+          "Outcome",
+          "Display",
+          "Result",
+          "Entry",
+          "Dto",
+          "Payload",
+          "Model",
+          "Routes"
+        ]
+      },
+      {
+        "layer": "model",
+        "kinds": [
+          "enum"
+        ]
+      },
+      {
+        "layer": "service",
+        "namespaceSegments": [
+          "Services"
+        ]
+      },
+      {
+        "layer": "service",
+        "nameSuffixes": [
+          "Service",
+          "Store",
+          "Provider",
+          "Reader",
+          "Writer",
+          "Catalog",
+          "Resolver",
+          "Policy",
+          "Tracker",
+          "Hasher",
+          "Server",
+          "Gate",
+          "Host",
+          "Pipeline",
+          "Notifier",
+          "Prompt",
+          "Repository",
+          "Client"
+        ]
+      },
+      {
+        "layer": "service",
+        "namePrefixes": [
+          "Service_"
+        ]
+      }
+    ],
+    "default": "model"
+  },
+  "links": {
+    "genericPairCalls": [
+      "Configure"
+    ],
+    "typeofPairCalls": [],
+    "dependencyPropertyCall": "Register",
+    "addCallPattern": "^Add(Singleton|Transient)$",
+    "serviceLocator": [
+      "GetService",
+      "GetRequiredService",
+      "Get"
+    ],
+    "dataContextCasts": [
+      "is",
+      "as"
+    ]
+  },
+  "findings": {
+    "entryPoints": [
+      "App"
+    ],
+    "transparentBases": [
+      "ObservableObject",
+      "ObservableRecipient",
+      "Page",
+      "UserControl",
+      "Panel",
+      "Window",
+      "WindowEx",
+      "Application"
+    ],
+    "generatedMembers": [
+      {
+        "attribute": "RelayCommand",
+        "on": "method",
+        "form": "commandSuffix"
+      }
+    ]
+  }
+}

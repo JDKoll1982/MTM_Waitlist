@@ -225,7 +225,8 @@ note.
 The extension contributes a **C#/XAML Graph** tab to the panel, beside Terminal, Problems and
 Output. It holds:
 
-- **Shortcuts** — show the graph, re-analyse, export JSON, and open the extension's settings.
+- **Shortcuts** — show the graph, re-analyse, export JSON, set up or import a repository profile, and
+  open the extension's settings.
 - **A command table** — what each command does and where to find it.
 - **A settings form** — files to analyse, files to skip, the largest graph to draw, the layout used
   inside an unpacked shape, and whether framework types are shown. Saving writes to this workspace
@@ -234,7 +235,9 @@ Output. It holds:
 ## Cleanup findings
 
 The **Problems** tab lists what the graph implies about code health, each row carrying the file and
-line so you can jump straight to it.
+line so you can jump straight to it. A repository profile that could not be read in full is reported
+at the top of that tab, before the findings: it is a note about how the repository was read, not a
+finding about the code.
 
 | Finding | How it is decided |
 | --- | --- |
@@ -274,6 +277,152 @@ Three honest limits, all deliberate:
 **Only problems** restricts the canvas to flagged types, and a flagged type is never hidden as
 "unconnected" — the finding is the reason you opened the panel.
 
+## The repository profile
+
+A repository's C#/XAML conventions live in one file beside the code, not in this extension:
+
+```text
+<workspace folder>/csharp-xaml-graph.profile.json
+```
+
+It is plain JSON, committed and reviewed like code. Every section and every key inside it is
+optional: an absent key keeps the extension's built-in convention, and a present array **replaces**
+the built-in array rather than extending it. A repository with no profile is read exactly as it was
+before profiles existed.
+
+### Creating one
+
+Three commands, all in the **C#/XAML Graph** category, and all three on the panel tab as buttons:
+
+| Command | What it does |
+| --- | --- |
+| **Set up Repository Profile** | Opens VS Code's chat with a prepared prompt for this folder. The prompt asks before it proposes anything: what marks a service, what marks a view model, how a type is registered, which types start the application, and which files matter. Each question quotes this repository's own type names, namespaces and calls, so it can be answered from code you can see. |
+| **Import Profile Reply** | Takes the assistant's reply from the clipboard, checks it, and merges it into the file. A reply that would not make a usable profile is refused, nothing is written, and the missing part is named. |
+| **Update Repository Profile** | The **Update profile** button in the graph toolbar runs this. It opens chat with the profile as it stands and asks for conventions the profile does not cover yet. Additions only: every declaration already in the file is kept. |
+
+Chat is opened through the workbench command `workbench.action.chat.open` with a partial query, so
+the prompt is placed in the input box and nothing is sent until you press Enter. Where that command
+does not exist, the prompt goes to the clipboard instead and the notification says what to do with
+it. The extension never calls a model itself.
+
+### The file, by hand
+
+This is a complete example for a repository whose services end in `Handler`, whose view models live in
+a `Screens` folder, and whose registrations run through a `Wire<TScreen, TPage>()` call:
+
+```json
+{
+  "version": 1,
+  "repository": "Dunnage",
+  "layers": {
+    "rules": [
+      { "layer": "service", "kinds": ["class", "interface"], "nameSuffixes": ["Handler"] },
+      { "layer": "viewmodel", "namespaceSegments": ["Screens"], "unlessNameSuffixes": ["Row"] }
+    ],
+    "default": "model"
+  },
+  "links": {
+    "genericPairCalls": ["Wire"],
+    "dataContextCasts": ["is", "as"]
+  },
+  "findings": {
+    "entryPoints": ["Bootstrap"],
+    "transparentBases": ["Page", "UserControl"],
+    "generatedMembers": [
+      { "attribute": "TellCommand", "on": "method", "form": "commandSuffix" }
+    ]
+  },
+  "files": {
+    "include": ["src/**/*.cs", "src/**/*.xaml"],
+    "exclude": ["**/obj/**", "**/Generated/**"]
+  }
+}
+```
+
+| Section | What it decides |
+| --- | --- |
+| `layers.rules` | Classification, in order: **the first rule that matches decides**, so precedence is the order you write. A rule matches when every condition it states holds — `kinds`, `nameSuffixes`, `namePrefixes`, `namespaceSegments` (whole segments only), `unlessNameSuffixes`. |
+| `layers.default` | The layer for a type no rule matches. `model` is the built-in value. |
+| `links` | Which calls draw a dependency: `genericPairCalls` (`x.Wire<TA, TB>()`), `typeofPairCalls` (`x.Map(typeof(TA), typeof(TB))`), `dependencyPropertyCall` (`DependencyProperty.Register(...)`), `addCallPattern` (a regular expression, `^Add[A-Z]` by default), `serviceLocator` (`GetService`, `GetRequiredService`), and `dataContextCasts` (`is`, `as`). |
+| `findings` | `entryPoints` (never reported unused), `transparentBases` (bases that add no bindable member), and `generatedMembers` (an attribute plus the naming form it produces: `commandSuffix` for `Foo` → `FooCommand`, `pascalCaseWithoutPrefix` for `_foo` → `Foo`). |
+| `files` | `include` and `exclude` globs. An explicit `csharpXamlGraph.include` or `csharpXamlGraph.exclude` setting **wins over this section**, one list at a time, because that setting is the escape hatch when a profile is wrong. |
+
+### What a broken profile costs
+
+A warning, never the graph. The file is read on every analysis, and:
+
+- a missing file is the normal case — the built-in conventions apply and nothing is reported;
+- a blank file is treated as missing, with a message that says so;
+- a section that cannot be read is skipped and named, and the rest of the file still applies;
+- a key the format does not recognise is reported and ignored;
+- a file selection that matched nothing says so, rather than drawing an empty canvas.
+
+The problems appear at the top of the **Problems** tab, above the findings, each one with its path in
+the file (`layers.rules[2].kinds`) and a sentence saying what was expected. They are also carried in
+the model's `warnings`, which is what the debug report shows. The tab badge keeps counting findings
+only. Editing the file outside VS Code is noticed: the extension watches the profile and re-reads in
+the same session.
+
+## When a repository cannot be read
+
+Before any profile question, the extension looks at the repository's **structure** — one path walk,
+no file opened — and decides whether it can analyse it at all. It reads C# and XAML. A repository
+built in another language, one with no C# or no XAML, or one larger than the analysis file cap, gets
+an answer instead of a guess:
+
+- the specific structures it cannot handle are named in a plain sentence, each with the evidence under
+  it (`0 C# files`, `src/Other.fsproj`, `1 .fsproj project`);
+- it then asks whether you want to start a new specification to make the extension compatible with
+  that repository;
+- nothing is created or changed before that question is answered.
+
+**The two answers behave differently, and only one of them writes.**
+
+| Answer | What happens |
+| --- | --- |
+| No | Nothing is written. The reason stays visible in the **Problems** tab for the rest of the session rather than disappearing with the dialog that asked. |
+| Yes | `extensions/csharp-xaml-graph/update_prompts/<repository>/request.md` is written. One folder per repository and one `request.md` inside it, so answering yes twice leaves one current request rather than a stack. |
+
+The request file is for a person, not for this extension: every reason the verdict found becomes a
+section, every change the extension would need becomes a subsection, and each one carries the
+repository's own evidence. Its second line says to run it with `/speckit-companion-specify`, which is
+how the request becomes a specification. The repository it is about is read and never written — the
+request is a request against the extension.
+
+## Checking a profile, and a checkout, without an editor
+
+`out/validate.js` is built by `npm run compile` and needs nothing but Node: no editor, no open folder,
+no model call. It analyses a checkout given its path, and no invocation waits for input or writes
+inside the checkout it is given.
+
+| Invocation | What it does | Writes | Exits |
+| --- | --- | --- | --- |
+| `<checkout> --inspect [--json]` | Prints the structure facts and the convention evidence a profile author needs: name suffixes and prefixes with examples, namespace segments, calls with type arguments, base types, attributes and XAML root tags. `--json` prints one object instead of sections. | nothing | 0 read, 2 not listable |
+| `<checkout> --prompt` | Prints the setup prompt the **Set up Repository Profile** command would put in chat, contract first, quoting the same evidence `--inspect` prints. | nothing | 0 |
+| `<checkout> --check <reply> [--record-attempt]` | Parses a profile reply with the import command's parser and prints one line per problem. With `--record-attempt`, appends a hash and the problems to `results/<slug>.attempts.json`, so a first reply that carried a problem is recorded rather than quietly retried. | nothing, or the attempts record | 0 accepted, 1 refused |
+| `<checkout> --compatibility` | Prints the verdict, its facts, and each structure it cannot handle with its evidence. | nothing | 0 compatible, 3 incompatible, 2 unknown |
+| `<checkout> --request` | The yes answer. On an incompatible checkout, writes the request file described above and prints its path; on a compatible one it writes nothing and says so. | the request file, only when incompatible | 0, or 2 when no verdict was reached |
+| `<checkout> --expected <record.json>` | Produces the expected-answer record: every declared type with its file and layer, every view-to-view-model link, every finding the rules imply, in a stable order. | the record path it is given | 0 written, 2 not run |
+| `<checkout> --record <record.json> --result <result.json>` | Analyses with the checkout's profile, compares with the record item by item, runs the self-test's invariants against the checkout, and prints the counts, the five conditions, every mismatch and the verdict. | the result path it is given | 0 pass, 1 fail, 2 not run |
+| `--compare <first> <second>` | Compares two results on measurements, mismatches and conditions, ignoring the profile hash. | nothing | 0 `IDENTICAL`, 1 `DIFFERENT`, 2 unreadable |
+
+Two rules keep the comparison honest. A record is produced **before** the first measured run and is
+never edited after one; a mismatch is fixed by re-reading the code, never by copying a run into the
+record. And the record never changes a checkout: the only files any mode writes are the record, the
+result, the attempts record and the request file, and none of them is inside the checkout.
+
+**Re-checking a recorded result** needs no checkout at all. A result carries the profile's digest, the
+measurements, the mismatches and the five conditions, and no timestamp, duration or absolute path, so
+two files can be compared on any machine where the feature folder exists:
+
+```bash
+node out/validate.js --compare results/<slug>.json results/<slug>.repeat.json
+```
+
+`IDENTICAL` is the determinism claim. To re-read a single result, open it: the `verdict` is `pass` only
+when every one of the five conditions passed, and each failing condition lists the items it failed on
+by name, so nothing has to be re-run to see what disagreed.
+
 ## Settings
 
 | Setting | Default | Meaning |
@@ -303,19 +452,29 @@ in the panel markup, that unpacking a packed shape shows that shape alone in the
 the toolbar keeps its three rows, that the hover tooltip states a type's findings, that the zoom
 stack carries region zoom, a slider and a reset, that the panel tab carries every shortcut and
 settings control, that every contributed command is registered by the extension, that no label two
-types share reaches the canvas unqualified, and that no finding cites an edge the model does not hold.
+types share reaches the canvas unqualified, that no finding cites an edge the model does not hold, that
+the graph carries the profile control, and that a hand-written profile changes the one classification
+it names and nothing else in the node, edge and finding counts.
 
-**How a type is placed in a layer.** A `*ViewModel` suffix or a `ViewModel_`/`VM_` prefix is the
-strongest signal and wins outright. A `ViewModels` namespace is a weaker one, so it only counts for a
-**class** whose name does not say "I am data": a record, struct or enum in that folder, or a class
-ending in `Data`, `Row`, `Card`, `Item`, `Option`, `Result`, `Display`, `Credentials`, `EventArgs`,
-`Outcome`, `Dto`, `Payload`, `Entry` or `Model`, is a row or navigation type and stays a model. Without
-that distinction 21 row types in this repository were drawn as view models and read as "view models no
-view reaches".
+**How a type is placed in a layer.** The decision order is data now, and lives in the profile:
+`src/graph/profile.ts` holds the built-in rules, and `evaluateLayerRules` in
+`src/graph/conventions.ts` returns the layer of the first rule that matches. The built-in order is the
+one this extension has always used: an interface with a service name, `Services` or `Contracts`
+namespace is a service and any other interface is a model; a `*ViewModel` suffix or a
+`ViewModel_`/`VM_` prefix wins outright; a `ViewModels` namespace counts only for a **class** whose
+name does not say "I am data" (a record, struct or enum in that folder, or a class ending in `Data`,
+`Row`, `Card`, `Item`, `Option`, `Result`, `Display`, `Credentials`, `EventArgs`, `Outcome`, `Dto`,
+`Payload`, `Entry` or `Model`, stays a model); an enum is a model; a service name or a `Services`
+namespace is a service; everything else is a model. Without that data-name distinction 21 row types in
+this repository were drawn as view models and read as "view models no view reaches".
+
+A profile replaces that list, so a repository that marks its handlers with a `Handler` suffix, or
+calls its view models `Screen`, is read by its own order instead — and still needs no change to this
+extension's source.
 
 ## Tests
 
-`npm test` runs the suite: 26 files, 637 tests, Vitest on jsdom. `npm run coverage` adds the v8
+`npm test` runs the suite: 40 files, 1038 tests, Vitest on jsdom. `npm run coverage` adds the v8
 report under `coverage/`.
 
 Nothing in the suite is a stand-in for the extension's own code. The real tree-sitter WASM grammar
@@ -332,13 +491,16 @@ Coverage today:
 
 | Area | Statements | Branches | Functions |
 | --- | --- | --- | --- |
-| All source | 98.96 | 93.6 | 100 |
-| `graph/` (analysis, findings, parsers) | 98–100 | 89–100 | 100 |
-| `webview/` (panel, page script) | 98–100 | 91–100 | 100 |
-| `menu/`, `symbols/`, `debug/` | 100 | 96–100 | 100 |
+| All source | 98.31 | 90.68 | 98.85 |
+| `graph/` (analysis, findings, parsers, profile, inspection) | 94.83–100 | 80.62–100 | 92.64–100 |
+| `webview/` (panel, page script) | 98.21–100 | 85.71–100 | 98.11–100 |
+| `menu/`, `symbols/`, `debug/` | 97.77–100 | 92.5–100 | 100 |
 
-The thresholds in `vitest.config.mts` sit just under those figures, so a change that loses coverage
-fails `npm run coverage` rather than quietly eroding the suite.
+The guard in `vitest.config.mts` holds the suite at **lines 98, statements 98, branches 90 and
+functions 98** — each just under the figure above it — so a change that loses coverage fails
+`npm run coverage` rather than quietly eroding the suite. Branches and functions are lower than they
+were before the validation and compatibility code landed, because that code arrived with thinner
+coverage than the analysis modules; the guard records where the suite is, not where it used to be.
 
 **What is still uncovered, and why.** What remains is defensive guards that cannot fire through any
 path the panel offers: `if (!cy)` in helpers that are only reachable once a canvas exists, `if

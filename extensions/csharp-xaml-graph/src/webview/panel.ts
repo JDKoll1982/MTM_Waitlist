@@ -211,6 +211,11 @@ export class GraphPanel {
         await this.refresh(true);
         break;
 
+      case 'profile':
+        // The page asks for the command rather than duplicating it, exactly as re-analyse does.
+        await vscode.commands.executeCommand('csharpXamlGraph.profile.refresh');
+        break;
+
       case 'export':
         await this.exportJson(message.payload);
         break;

@@ -136,6 +136,18 @@ describe('GraphPanel: ready and analysis', () => {
     expect(loader).toHaveBeenLastCalledWith(true);
   });
 
+  it('asks the extension for the profile refresh rather than running it itself', async () => {
+    open();
+    await state.panels[0].send({ type: 'ready' });
+    const before = loader.mock.calls.length;
+
+    await state.panels[0].send({ type: 'profile' });
+
+    expect(state.executedCommands.at(-1)?.command).toBe('csharpXamlGraph.profile.refresh');
+    // The command owns the chat and the import; the page only asks for it.
+    expect(loader.mock.calls.length).toBe(before);
+  });
+
   it('says an analysis is already running rather than dropping the request silently', async () => {
     let release: (value: GraphModel) => void = () => undefined;
     const slow = vi.fn(() => new Promise<GraphModel>((resolve) => { release = resolve; }));

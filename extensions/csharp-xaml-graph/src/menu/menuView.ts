@@ -9,6 +9,23 @@ import {
 } from './menuHtml';
 import { DEFAULT_GRAPH_SETTINGS, toUnpackedLayout } from '../graph/settings';
 
+/**
+ * The panel tab's command names, mapped to the commands they run.
+ *
+ * The page posts a short name; the extension owns the full id, so a renamed command is one edit here
+ * and nothing in the page. An unknown name falls back to export, which is the one action that never
+ * surprises the reader.
+ */
+const COMMANDS: Record<string, string> = {
+  show: 'csharpXamlGraph.show',
+  refresh: 'csharpXamlGraph.refresh',
+  export: 'csharpXamlGraph.export',
+  openSettings: 'csharpXamlGraph.openSettings',
+  debug: 'csharpXamlGraph.debug',
+  profileInitialize: 'csharpXamlGraph.profile.initialize',
+  profileImport: 'csharpXamlGraph.profile.import',
+};
+
 /** Reads the settings the form shows. Falls back to the contributed defaults. */
 export function readSettings(): MenuSettings {
   const configuration = vscode.workspace.getConfiguration('csharpXamlGraph');
@@ -71,16 +88,7 @@ export class MenuViewProvider implements vscode.WebviewViewProvider {
   }
 
   private async runCommand(command: string): Promise<void> {
-    const target = command === 'show'
-      ? 'csharpXamlGraph.show'
-      : command === 'refresh'
-        ? 'csharpXamlGraph.refresh'
-        : command === 'openSettings'
-          ? 'csharpXamlGraph.openSettings'
-          : command === 'debug'
-            ? 'csharpXamlGraph.debug'
-            : 'csharpXamlGraph.export';
-    await vscode.commands.executeCommand(target);
+    await vscode.commands.executeCommand(COMMANDS[command] ?? 'csharpXamlGraph.export');
   }
 
   private async save(settings: MenuSettings): Promise<void> {
@@ -89,12 +97,27 @@ export class MenuViewProvider implements vscode.WebviewViewProvider {
       ? vscode.ConfigurationTarget.Workspace
       : vscode.ConfigurationTarget.Global;
 
+    /**
+     * Writes a key only when the reader changed it.
+     *
+     * `include` and `exclude` are the two lists a profile is allowed to choose, and an explicitly
+     * configured pattern wins over it. Saving them on every submit would therefore pin them the
+     * first time the reader touched any other field, and silently stop the profile's `files`
+     * section from ever applying.
+     */
+    const writeChanged = async (key: string, value: unknown, fallback: unknown): Promise<void> => {
+      if (JSON.stringify(configuration.get(key, fallback)) === JSON.stringify(value)) {
+        return;
+      }
+      await configuration.update(key, value, target);
+    };
+
     try {
-      await configuration.update('include', settings.include, target);
-      await configuration.update('exclude', settings.exclude, target);
-      await configuration.update('includeExternalTypes', settings.includeExternalTypes, target);
-      await configuration.update('maxNodes', settings.maxNodes, target);
-      await configuration.update('unpackedLayout', settings.unpackedLayout, target);
+      await writeChanged('include', settings.include, DEFAULT_INCLUDE);
+      await writeChanged('exclude', settings.exclude, DEFAULT_EXCLUDE);
+      await writeChanged('includeExternalTypes', settings.includeExternalTypes, true);
+      await writeChanged('maxNodes', settings.maxNodes, 4000);
+      await writeChanged('unpackedLayout', settings.unpackedLayout, DEFAULT_GRAPH_SETTINGS.unpackedLayout);
       await this.view?.webview.postMessage({ type: 'saved', settings: readSettings() });
     } catch (error) {
       const text = error instanceof Error ? error.message : String(error);

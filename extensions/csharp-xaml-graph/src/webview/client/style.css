@@ -422,6 +422,55 @@ body {
 .finding .chip.danger-medium { background: rgba(245, 158, 11, 0.3); }
 .finding .chip.danger-low { background: rgba(120, 120, 120, 0.3); }
 
+/* A profile problem is a notice about how the repository was read, not a finding about its code, so
+   it sits above the list and reads in the muted tone rather than in a severity colour. */
+.profile-problems {
+  margin: 0 0 10px;
+  padding: 6px 8px;
+  border: 1px solid var(--vscode-panel-border, #333);
+  border-left: 3px solid var(--vscode-descriptionForeground, #9a9a9a);
+  border-radius: 2px;
+}
+
+.profile-problems h3 {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.8;
+}
+
+.profile-problem-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.profile-problem {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 4px;
+  line-height: 1.4;
+}
+
+.profile-problem:last-child {
+  margin-bottom: 0;
+}
+
+.profile-problem-path {
+  white-space: nowrap;
+  opacity: 0.65;
+  font-family: var(--vscode-editor-font-family, monospace);
+  font-size: 11px;
+}
+
+.profile-problem-text {
+  opacity: 0.85;
+  word-break: break-word;
+}
+
 /* ---------------------------------------------------------------- legend */
 
 #legend[hidden] {

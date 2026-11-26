@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "csharp-xaml-graph.profile.schema.json",
+  "title": "C#/XAML Dependency Graph repository profile",
+  "description": "The conventions one workspace folder declares, stored at <workspace folder>/csharp-xaml-graph.profile.json. Every section and every key inside it is optional: an absent key keeps the extension's built-in value, and a present array replaces the built-in array rather than extending it. Keys this schema does not name are reported to the reader and otherwise ignored, never fatal.",
+  "type": "object",
+  "required": ["version"],
+  "properties": {
+    "version": {
+      "const": 1,
+      "description": "Format version. A profile without this, or with any other value, is unusable and nothing is written."
+    },
+    "repository": {
+      "type": "string",
+      "description": "Which repository this describes. Informational only: it is never used to match a folder or gate a run."
+    },
+    "layers": {
+      "type": "object",
+      "description": "Layer classification. Rules are evaluated in order and the first that matches decides, which is how precedence is declared.",
+      "additionalProperties": true,
+      "properties": {
+        "rules": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/layerRule" }
+        },
+        "default": {
+          "enum": ["view", "viewmodel", "service", "model"],
+          "description": "Layer for a type no rule matches. Built-in value is model."
+        }
+      }
+    },
+    "links": {
+      "type": "object",
+      "description": "Link detection. Each key names the calls or casts that draw a dependency, and each maps to one branch of the analysis.",
+      "additionalProperties": true,
+      "properties": {
+        "genericPairCalls": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Method names called as x.Call<TA, TB>(): draws a resolves edge from the second type to the first and registers both."
+        },
+        "typeofPairCalls": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Method names called as x.Call(typeof(TA), typeof(TB)): draws a resolves edge and registers the first type."
+        },
+        "dependencyPropertyCall": {
+          "type": "string",
+          "description": "Method name called as x.Call(nameof(P), typeof(TValue), typeof(TOwner)): draws a getservice edge when the value type is a view model by the layers rules."
+        },
+        "addCallPattern": {
+          "type": "string",
+          "description": "Regular expression a registration method name matches. One type argument registers that type; two pair an implementation with the interface it serves."
+        },
+        "serviceLocator": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Method names that read a service from the container rather than being a plain call."
+        },
+        "dataContextCasts": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Cast keywords that, applied to the data context with an interface type, draw a binding edge. Built-in value is is and as."
+        }
+      }
+    },
+    "findings": {
+      "type": "object",
+      "description": "Rules that change what the cleanup report counts or reports.",
+      "additionalProperties": true,
+      "properties": {
+        "entryPoints": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Type names that are never reported unused."
+        },
+        "transparentBases": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Base type names that add no bindable members, so a missing member is genuinely missing."
+        },
+        "generatedMembers": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/generatedMembersRule" }
+        }
+      }
+    },
+    "files": {
+      "type": "object",
+      "description": "Which files are read. An explicitly configured csharpXamlGraph.include or csharpXamlGraph.exclude wins over this section, pattern by pattern.",
+      "additionalProperties": true,
+      "properties": {
+        "include": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Glob patterns, relative to the workspace folder, describing the files to read."
+        },
+        "exclude": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Glob patterns excluded from the read."
+        }
+      }
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "layerRule": {
+      "type": "object",
+      "description": "One layer rule. Every condition it states must hold for it to match; a rule with no condition matches any type.",
+      "required": ["layer"],
+      "additionalProperties": true,
+      "properties": {
+        "layer": {
+          "enum": ["view", "viewmodel", "service", "model"],
+          "description": "Layer assigned when the rule matches."
+        },
+        "kinds": {
+          "type": "array",
+          "items": { "enum": ["class", "interface", "enum", "record", "struct"] },
+          "description": "Declaration kinds the rule applies to. Absent means any kind."
+        },
+        "nameSuffixes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "The type name ends with one of these."
+        },
+        "namePrefixes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "The type name starts with one of these."
+        },
+        "namespaceSegments": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "The namespace has a segment exactly equal to one of these. Whole segments only: a substring test for Models also matches ViewModels."
+        },
+        "unlessNameSuffixes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "The rule does not apply when the name ends with one of these, which is how a row model beside the view models stays a model."
+        }
+      }
+    },
+    "generatedMembersRule": {
+      "type": "object",
+      "description": "Members the compiler generates from an attribute, so a binding to one is not a dead binding.",
+      "required": ["attribute", "on", "form"],
+      "additionalProperties": true,
+      "properties": {
+        "attribute": {
+          "type": "string",
+          "description": "Attribute name without brackets, for example RelayCommand."
+        },
+        "on": {
+          "enum": ["method", "field"],
+          "description": "Which declaration carries the attribute."
+        },
+        "form": {
+          "enum": ["commandSuffix", "pascalCaseWithoutPrefix"],
+          "description": "How the generated member is named. commandSuffix yields NameCommand and, for a name ending in Async, StemCommand. pascalCaseWithoutPrefix strips leading underscores and upper-cases the first letter."
+        }
+      }
+    }
+  }
+}

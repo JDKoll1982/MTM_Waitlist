@@ -4,12 +4,15 @@ import { TypeIndex } from '../../src/graph/csharp/symbols';
 import type { TypeDecl } from '../../src/graph/csharp/parser';
 import type { XamlFile, XamlBinding } from '../../src/graph/xaml/parser';
 import type { GraphNode } from '../../src/graph/model';
+import { compileConventions, type CompiledConventions } from '../../src/graph/conventions';
 import { graphNode, typeDecl } from '../support/model';
 
 function input(options: {
   decls: TypeDecl[];
   xamlFiles?: XamlFile[];
   nodes?: GraphNode[];
+  /** The conventions the rules are judged by. Absent means the built-in conventions. */
+  conventions?: CompiledConventions;
 }): FindingInput {
   const decls = new Map(options.decls.map((decl) => [decl.fullName, decl]));
   const index = new TypeIndex();
@@ -29,6 +32,7 @@ function input(options: {
     usingsFor: () => [],
     xamlFiles: options.xamlFiles ?? [],
     sources: [],
+    conventions: options.conventions ?? compileConventions(),
   };
 }
 
@@ -417,6 +421,122 @@ describe('computeFindings: a member inherited from a workspace base beside an ex
       })],
     }));
 
+    expect(findings).toEqual([]);
+  });
+});
+
+
+describe('computeFindings: members a profile says are generated', () => {
+  /** A view with one method and one field, carrying the attributes a test declares. */
+  const holder = (methodAttribute: string, fieldAttribute: string) => typeDecl({
+    name: 'SamplePage',
+    namespace: 'N.Views',
+    methods: [
+      { name: 'Save', returnType: 'void', rawReturnType: 'void', rawParamTypes: [], line: 6, visibility: 'private', attributes: [methodAttribute], isOverride: false, isStatic: false, isAsync: false, isPartial: false, isExtension: false },
+      { name: 'SaveAsync', returnType: 'Task', rawReturnType: 'Task', rawParamTypes: [], line: 7, visibility: 'private', attributes: [methodAttribute], isOverride: false, isStatic: false, isAsync: true, isPartial: false, isExtension: false },
+    ],
+    fields: [
+      { name: '_count', type: 'int', rawType: 'int', line: 8, isReadonly: false, visibility: 'private', attributes: [fieldAttribute] },
+    ],
+  });
+
+  const bindTo = (root: string, decl: TypeDecl) => dead(input({
+    decls: [decl],
+    nodes: [graphNode({ id: 'N.Views.SamplePage', layer: 'view', xamlFile: 'Views/SamplePage.xaml' })],
+    xamlFiles: [xaml({
+      path: 'Views/SamplePage.xaml',
+      className: 'N.Views.SamplePage',
+      bindings: [binding({ expression: root, root })],
+    })],
+  }));
+
+  const declared = {
+    conventions: compileConventions({
+      version: 1,
+      findings: {
+        generatedMembers: [
+          { attribute: 'TellCommand', on: 'method', form: 'commandSuffix' },
+          { attribute: 'Reveal', on: 'field', form: 'pascalCaseWithoutPrefix' },
+        ],
+      },
+    }),
+  };
+
+  it('counts the command a profile’s method attribute generates as a member', () => {
+    const decl = holder('TellCommand', 'Nothing');
+    const withProfile = dead(input({
+      decls: [decl],
+      nodes: [graphNode({ id: 'N.Views.SamplePage', layer: 'view', xamlFile: 'Views/SamplePage.xaml' })],
+      xamlFiles: [xaml({
+        path: 'Views/SamplePage.xaml',
+        className: 'N.Views.SamplePage',
+        bindings: [
+          binding({ expression: 'SaveCommand', root: 'SaveCommand' }),
+          binding({ expression: 'SaveCommand', root: 'SaveCommand' }),
+        ],
+      })],
+      ...declared,
+    }));
+    expect(withProfile).toEqual([]);
+
+    // Without the profile the attribute generates nothing, so the binding is dead.
+    const without = bindTo('SaveCommand', decl);
+    expect(without.map((entry) => entry.title)).toEqual(['SamplePage: x:Bind SaveCommand has no such member']);
+  });
+
+  it('strips the Async suffix for a command form the profile declares', () => {
+    const decl = holder('TellCommand', 'Nothing');
+    expect(dead(input({
+      decls: [decl],
+      nodes: [graphNode({ id: 'N.Views.SamplePage', layer: 'view', xamlFile: 'Views/SamplePage.xaml' })],
+      xamlFiles: [xaml({
+        path: 'Views/SamplePage.xaml',
+        className: 'N.Views.SamplePage',
+        bindings: [binding({ expression: 'SaveCommand', root: 'SaveCommand' })],
+      })],
+      ...declared,
+    }))).toEqual([]);
+  });
+
+  it('counts the stripped, upper-cased name of a field the profile names', () => {
+    const decl = holder('Nothing', 'Reveal');
+    expect(dead(input({
+      decls: [decl],
+      nodes: [graphNode({ id: 'N.Views.SamplePage', layer: 'view', xamlFile: 'Views/SamplePage.xaml' })],
+      xamlFiles: [xaml({
+        path: 'Views/SamplePage.xaml',
+        className: 'N.Views.SamplePage',
+        bindings: [binding({ expression: 'Count', root: 'Count' })],
+      })],
+      ...declared,
+    }))).toEqual([]);
+
+    expect(bindTo('Count', decl).map((entry) => entry.title))
+      .toEqual(['SamplePage: x:Bind Count has no such member']);
+  });
+
+  it('does not report the holder of a generated member as an unused member', () => {
+    const findings = computeFindings(input({
+      decls: [holder('RelayCommand', 'ObservableProperty')],
+      nodes: [graphNode({ id: 'N.Views.SamplePage', layer: 'view', xamlFile: 'Views/SamplePage.xaml' })],
+      xamlFiles: [xaml({ path: 'Views/SamplePage.xaml', className: 'N.Views.SamplePage' })],
+    })).findings.filter((entry) => entry.kind === 'unused-member');
+    expect(findings).toEqual([]);
+  });
+
+  it('still covers RelayCommand and ObservableProperty with no profile', () => {
+    const findings = dead(input({
+      decls: [holder('RelayCommand', 'ObservableProperty')],
+      nodes: [graphNode({ id: 'N.Views.SamplePage', layer: 'view', xamlFile: 'Views/SamplePage.xaml' })],
+      xamlFiles: [xaml({
+        path: 'Views/SamplePage.xaml',
+        className: 'N.Views.SamplePage',
+        bindings: [
+          binding({ expression: 'SaveCommand', root: 'SaveCommand' }),
+          binding({ expression: 'Count', root: 'Count' }),
+        ],
+      })],
+    }));
     expect(findings).toEqual([]);
   });
 });

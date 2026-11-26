@@ -3,6 +3,7 @@ import { computeFindings, type FindingInput } from '../../src/graph/findings';
 import { TypeIndex } from '../../src/graph/csharp/symbols';
 import type { GraphEdge, GraphNode } from '../../src/graph/model';
 import type { TypeDecl } from '../../src/graph/csharp/parser';
+import { compileConventions, type CompiledConventions } from '../../src/graph/conventions';
 import type { XamlFile } from '../../src/graph/xaml/parser';
 import { finding, graphEdge, graphNode, typeDecl } from '../support/model';
 
@@ -14,6 +15,8 @@ interface Options {
   declarationCounts?: Record<string, number>;
   xamlFiles?: XamlFile[];
   sources?: string[];
+  /** The conventions the rules are judged by. Absent means the built-in conventions. */
+  conventions?: CompiledConventions;
 }
 
 function makeInput(options: Options = {}): FindingInput {
@@ -50,6 +53,7 @@ function makeInput(options: Options = {}): FindingInput {
     usingsFor: () => [],
     xamlFiles: options.xamlFiles ?? [],
     sources: options.sources ?? [],
+    conventions: options.conventions ?? compileConventions(),
   };
 }
 
@@ -206,5 +210,45 @@ describe('computeFindings: cycles', () => {
       ],
     });
     expect(computeFindings(input).findings[0].edgeIds).toHaveLength(2);
+  });
+});
+
+
+describe('computeFindings: cycles are unaffected by how types are classified', () => {
+  /** A fixed fixture: one real construction loop and one acyclic branch beside it. */
+  const fixture = () => ({
+    nodes: ['A', 'B', 'C', 'D'].map((id) => graphNode({ id, layer: 'service' as const })),
+    edges: [
+      graphEdge({ id: 'e1', source: 'A', target: 'B', kind: 'injects' }),
+      graphEdge({ id: 'e2', source: 'B', target: 'C', kind: 'injects' }),
+      graphEdge({ id: 'e3', source: 'C', target: 'A', kind: 'injects' }),
+      graphEdge({ id: 'e4', source: 'A', target: 'D', kind: 'injects' }),
+    ],
+  });
+
+  const cycleShape = (options: Parameters<typeof makeInput>[0]) =>
+    computeFindings(makeInput(options)).findings
+      .filter((entry) => entry.kind === 'cycle')
+      .map((entry) => `${entry.title}|${[...entry.nodeIds].sort().join(',')}`);
+
+  it('reports the same cycles with a built-in profile as with none', () => {
+    expect(cycleShape({ ...fixture(), conventions: compileConventions() }))
+      .toEqual(cycleShape(fixture()));
+  });
+
+  it('leaves cycle detection alone when a profile reclassifies the types in the loop', () => {
+    const before = cycleShape(fixture());
+    const after = cycleShape({
+      ...fixture(),
+      nodes: ['A', 'B', 'C', 'D'].map((id) => graphNode({ id, layer: 'viewmodel' as const })),
+      conventions: compileConventions({
+        version: 1,
+        layers: { rules: [{ layer: 'viewmodel', nameSuffixes: [] }], default: 'viewmodel' },
+      }),
+    });
+    // Edges drive the report, not layers: the same three types are in the same one loop.
+    expect(after).toEqual(before);
+    expect(after).toHaveLength(1);
+    expect(after[0]).toContain('A,B,C');
   });
 });

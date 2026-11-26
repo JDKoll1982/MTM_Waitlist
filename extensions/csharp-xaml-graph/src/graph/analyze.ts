@@ -2,10 +2,12 @@ import type { EdgeConfidence, Finding, GraphEdge, GraphModel, GraphNode } from '
 import type { CSharpFile, TypeDecl } from './csharp/parser';
 import { initCSharpGrammar, parseCSharpFile } from './csharp/parser';
 import { TypeIndex, moduleOf } from './csharp/symbols';
+import { compileConventions, isViewModelType, type CompiledConventions } from './conventions';
 import { classifyType, isViewModelName } from './layers';
 import { computeFindings } from './findings';
 import type { XamlFile } from './xaml/parser';
 import { parseXamlFile } from './xaml/parser';
+import { deriveProfileEvidence, mergeDeclarations } from './inspect';
 
 export interface AnalyzeInput {
   /** Workspace-relative path with forward slashes. */
@@ -26,11 +28,11 @@ export interface AnalyzeOptions {
    * a reader waits on.
    */
   progress?: (phase: string, completed: number, total: number) => void;
-}
-
-interface Entry {
-  decl: TypeDecl;
-  file: string;
+  /**
+   * The conventions the repository declares, compiled once by the host. Absent means the built-in
+   * conventions, which is what a repository with no profile gets.
+   */
+  conventions?: CompiledConventions;
 }
 
 const VIEW_ROOT_KIND: Record<string, string> = {
@@ -40,84 +42,6 @@ const VIEW_ROOT_KIND: Record<string, string> = {
   WindowEx: 'window',
   windowex: 'window',
 };
-
-/**
- * Stamps the origin file onto every record a declaration produced.
- *
- * A partial type merges records from several files, and each record's line number is only meaningful
- * against the file it was parsed from. Without this, an evidence location for a member declared in a
- * later partial names the first partial's file and points at the wrong line.
- */
-function stampOrigin(decl: TypeDecl, file: string): void {
-  const mark = (record: { file?: string }): void => {
-    if (!record.file) {
-      record.file = file;
-    }
-  };
-  decl.constructors.forEach(mark);
-  decl.properties.forEach(mark);
-  decl.fields.forEach(mark);
-  decl.methods.forEach(mark);
-  decl.assignments.forEach(mark);
-  decl.calls.forEach(mark);
-  decl.creations.forEach(mark);
-  decl.mentions.forEach(mark);
-}
-
-/** Merges every declaration of a partial type into one record. */
-function mergeDeclarations(files: CSharpFile[]): Map<string, Entry> {
-  const merged = new Map<string, Entry>();
-
-  for (const file of files) {
-    for (const decl of file.types) {
-      stampOrigin(decl, file.path);
-
-      const existing = merged.get(decl.fullName);
-      if (!existing) {
-        merged.set(decl.fullName, {
-          decl: {
-            ...decl,
-            constructors: [...decl.constructors],
-            properties: [...decl.properties],
-            fields: [...decl.fields],
-            methods: [...decl.methods],
-            assignments: [...decl.assignments],
-            calls: [...decl.calls],
-            creations: [...decl.creations],
-            mentions: [...decl.mentions],
-            typeofRefs: [...decl.typeofRefs],
-            bases: [...decl.bases],
-          },
-          file: file.path,
-        });
-        continue;
-      }
-
-      // Every member list has to be merged. Dropping one here silently loses that whole kind of
-      // evidence for the rest of the type — which is what made commands declared in a second partial
-      // read as dead bindings.
-      const target = existing.decl;
-      target.constructors.push(...decl.constructors);
-      target.properties.push(...decl.properties);
-      target.fields.push(...decl.fields);
-      target.methods.push(...decl.methods);
-      target.assignments.push(...decl.assignments);
-      target.calls.push(...decl.calls);
-      target.creations.push(...decl.creations);
-      target.mentions.push(...decl.mentions);
-      target.typeofRefs.push(...decl.typeofRefs);
-      for (const base of decl.bases) {
-        if (!target.bases.includes(base)) {
-          target.bases.push(base);
-        }
-      }
-      target.isPartial = target.isPartial || decl.isPartial;
-      target.isAbstract = target.isAbstract || decl.isAbstract;
-    }
-  }
-
-  return merged;
-}
 
 /** Splits a declared type into the identifiers it names: `IReadOnlyList<PermissionCell>` → both. */
 function typeNamesIn(rawType: string): string[] {
@@ -138,11 +62,23 @@ function typeNamesIn(rawType: string): string[] {
   return names;
 }
 
+/** Case-insensitive membership, because a route call name was always matched without regard to case. */
+function namedCall(names: Set<string>, method: string): boolean {
+  const lower = method.toLowerCase();
+  for (const name of names) {
+    if (name.toLowerCase() === lower) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /** Builds the whole dependency model from parsed sources. */
 export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphModel> {
   const started = Date.now();
   const includeExternalTypes = options.includeExternalTypes !== false;
   const maxNodes = options.maxNodes && options.maxNodes > 0 ? options.maxNodes : 4000;
+  const conventions = options.conventions ?? compileConventions();
 
   /**
    * Parsing is synchronous, so the extension host cannot repaint while a loop of 900 files runs.
@@ -174,7 +110,7 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
   for (let index = 0; index < options.csharp.length; index += 1) {
     const file = options.csharp[index];
     try {
-      const parsed = parseCSharpFile(file.path, file.text);
+      const parsed = parseCSharpFile(file.path, file.text, conventions.serviceLocator);
       if (parsed.hasSyntaxError) {
         parseErrors += 1;
       }
@@ -258,7 +194,7 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
       id: decl.fullName,
       label: decl.name,
       fullName: decl.fullName,
-      layer: classifyType(decl),
+      layer: classifyType(decl, conventions),
       module: moduleOf(file),
       kind: decl.kind,
       location: { file, line: decl.line },
@@ -355,7 +291,7 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
     // constructor takes nothing and the markup binds with `{Binding}` — so without reading the pair
     // the view and its view model reach the canvas unconnected. One pair per line is the convention,
     // which is why the mentions are grouped by line rather than by declaration.
-    const mentionsByLine = new Map<number, { id: string; layer: string; via: string }[]>();
+    const mentionsByLine = new Map<number, { id: string; layer: string; via: string; file: string }[]>();
     for (const mention of decl.mentions) {
       const target = index.resolve(mention.name, usings, decl.namespace);
       if (!target) {
@@ -366,7 +302,10 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
         continue;
       }
       const list = mentionsByLine.get(mention.line) ?? [];
-      list.push({ id: target.fullName, layer, via: mention.via });
+      // A partial type's mentions can come from any of its files, so the file travels with the
+      // mention rather than being taken from the entry; otherwise the evidence names one file and a
+      // line from another.
+      list.push({ id: target.fullName, layer, via: mention.via, file: mention.file ?? file });
       mentionsByLine.set(mention.line, list);
     }
 
@@ -382,7 +321,7 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
       for (const view of views) {
         for (const viewModel of viewModels) {
           addEdge(view.id, viewModel.id, 'resolves', 'medium',
-            { file, line }, 'route registration');
+            { file: view.file, line }, 'route registration');
         }
       }
     }
@@ -392,7 +331,7 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
       // The first argument is usually a view model, but this codebase also registers a page against a
       // route type, so both sides count as container-registered — otherwise every route-registered
       // page looks dead to the unused-type rule.
-      if (call.method === 'Configure' && call.typeArgs.length >= 2) {
+      if (conventions.genericPairCalls.has(call.method) && call.typeArgs.length >= 2) {
         const viewModel = index.resolve(call.typeArgs[0], usings, decl.namespace);
         const page = index.resolve(call.typeArgs[1], usings, decl.namespace);
         if (viewModel) {
@@ -410,7 +349,7 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
       // navigation.RegisterRoute(typeof(TViewModel), typeof(TPage)) and the tuple/array route tables
       // that feed it. The types live in `typeof(...)` arguments, not in generic parameters, so a
       // generic-argument scan alone never sees them.
-      if (/^RegisterRoute$/i.test(call.method) && call.typeOfArgs.length >= 2) {
+      if (namedCall(conventions.typeofPairCalls, call.method) && call.typeOfArgs.length >= 2) {
         const viewModel = index.resolve(call.typeOfArgs[0], usings, decl.namespace);
         const page = index.resolve(call.typeOfArgs[1], usings, decl.namespace);
         if (viewModel) {
@@ -426,10 +365,10 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
       /* A view model exposed as a dependency property:
          DependencyProperty.Register(nameof(ViewModel), typeof(ViewModel_X), typeof(View_Y))
          The third typeof is the owning view; the second is the view model it carries. */
-      if (call.method === 'Register' && call.typeOfArgs.length >= 3) {
+      if (call.method === conventions.dependencyPropertyCall && call.typeOfArgs.length >= 3) {
         const valueType = index.resolve(call.typeOfArgs[1], usings, decl.namespace);
         const ownerType = index.resolve(call.typeOfArgs[2], usings, decl.namespace);
-        if (valueType && ownerType && valueType.name.endsWith('ViewModel')) {
+        if (valueType && ownerType && isViewModelType(conventions, valueType)) {
           addEdge(ownerType.fullName, valueType.fullName, 'getservice', 'high',
             { file: call.file ?? file, line: call.line }, 'DependencyProperty');
           diRegistered.add(valueType.fullName);
@@ -438,7 +377,7 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
       }
 
       // services.AddTransient<TViewModel>() and friends
-      if (/^Add[A-Z]/.test(call.method) && call.typeArgs.length === 1) {
+      if (conventions.addCallPattern.test(call.method) && call.typeArgs.length === 1) {
         const registered = index.resolve(call.typeArgs[0], usings, decl.namespace);
         if (registered) {
           diRegistered.add(registered.fullName);
@@ -448,7 +387,7 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
 
       // services.AddSingleton<TInterface, TImplementation>() — the implementation serves the interface,
       // which is a real relationship the graph should carry, and it keeps the interface from looking dead.
-      if (/^Add[A-Z]/.test(call.method) && call.typeArgs.length >= 2) {
+      if (conventions.addCallPattern.test(call.method) && call.typeArgs.length >= 2) {
         const service = index.resolve(call.typeArgs[0], usings, decl.namespace);
         const implementation = index.resolve(call.typeArgs[1], usings, decl.namespace);
         if (service) {
@@ -493,7 +432,7 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
         if (target) {
           addEdge(self, target.fullName, 'getservice', 'high',
             { file: assignment.file ?? file, line: assignment.line }, assignment.target);
-          if (isViewModelName(target.name)) {
+          if (isViewModelName(target.name, conventions)) {
             diRegistered.add(target.fullName);
           }
         }
@@ -537,13 +476,13 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
     // typed-property rule above, which carries the markup as evidence, so only interfaces are added
     // here — otherwise the same relationship would produce two edges with different evidence.
     for (const mention of decl.mentions) {
-      if (mention.via !== 'is' && mention.via !== 'as') {
+      if (!conventions.dataContextCasts.has(mention.via)) {
         continue;
       }
       const target = index.resolve(mention.name, usings, decl.namespace);
       if (target && target.kind === 'interface') {
         addEdge(self, target.fullName, 'binds', 'medium',
-          { file, line: mention.line }, 'DataContext');
+          { file: mention.file ?? file, line: mention.line }, 'DataContext');
       }
     }
 
@@ -666,7 +605,7 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
     }
 
     viewNode.viewModelProperties = decl.properties
-      .filter((property) => isViewModelName(property.type))
+      .filter((property) => isViewModelName(property.type, conventions))
       .map((property) => property.name);
 
     // A view that exposes its view model as a property is bound to it even when the markup carries no
@@ -675,7 +614,7 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
     // Without this the pair existed only as a low-confidence type reference, and the canvas hides
     // those by default — so the view and its view model arrived unconnected.
     for (const property of decl.properties) {
-      if (!isViewModelName(property.type)) {
+      if (!isViewModelName(property.type, conventions)) {
         continue;
       }
       const target = index.resolve(property.type, usings, decl.namespace);
@@ -715,6 +654,7 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
       ...options.csharp.map((file) => file.text),
       ...options.xaml.map((file) => file.text),
     ],
+    conventions,
   });
 
   for (const id of cleanup.inCycle) {
@@ -855,5 +795,11 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
       parser,
     },
     warnings,
+    profileEvidence: deriveProfileEvidence(
+      entries,
+      xamlFiles,
+      options.csharp.length,
+      options.xaml.length,
+    ),
   };
 }

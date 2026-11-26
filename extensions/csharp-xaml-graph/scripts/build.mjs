@@ -35,6 +35,19 @@ const selftest = {
   logLevel: 'info',
 };
 
+/** The headless validator: the same analysis, reachable without an editor. */
+const validate = {
+  entryPoints: [join(root, 'src/validate.ts')],
+  outfile: join(root, 'out/validate.js'),
+  bundle: true,
+  platform: 'node',
+  format: 'cjs',
+  target: 'node20',
+  sourcemap: true,
+  external: ['web-tree-sitter'],
+  logLevel: 'info',
+};
+
 /** @type {import('esbuild').BuildOptions} */
 const webview = {
   entryPoints: [join(root, 'src/webview/client/main.ts')],
@@ -62,11 +75,16 @@ function copyAssets() {
 copyAssets();
 
 if (watch) {
-  for (const options of [extension, selftest, webview]) {
+  for (const options of [extension, selftest, validate, webview]) {
     const ctx = await esbuild.context(options);
     await ctx.watch();
   }
   console.log('watching...');
 } else {
-  await Promise.all([esbuild.build(extension), esbuild.build(selftest), esbuild.build(webview)]);
+  await Promise.all([
+    esbuild.build(extension),
+    esbuild.build(selftest),
+    esbuild.build(validate),
+    esbuild.build(webview),
+  ]);
 }

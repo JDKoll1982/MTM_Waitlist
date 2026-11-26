@@ -1613,3 +1613,74 @@ describe('main: the exported file proves what it claims', () => {
     expect(payload.stats.visibleEdges).toBe(payload.edges.length);
   });
 });
+
+
+describe('main: the profile control and the profile notice', () => {
+  const profileWarning = (path: string, message: string) =>
+    `csharp-xaml-graph.profile.json › ${path}: ${message}`;
+
+  it('asks the extension for the profile refresh when the control is pressed', async () => {
+    posted = [];
+    click('update-profile');
+    expect(posted).toEqual([{ type: 'profile' }]);
+  });
+
+  it('shows the profile problems above the findings, and leaves the badge counting findings', async () => {
+    await load({
+      ...model,
+      warnings: [
+        'A/Odd.cs: unexpected end of input',
+        profileWarning('layers.rules[1].kinds', '`delegate` is not a declaration kind.'),
+      ],
+    });
+
+    const mount = el<HTMLDivElement>('repository-notes');
+    expect(mount.hidden).toBe(false);
+    expect(mount.textContent).toContain('layers.rules[1].kinds');
+    expect(mount.textContent).toContain('is not a declaration kind');
+    // A warning that is not about the profile is not shown here.
+    expect(mount.textContent).not.toContain('Odd.cs');
+
+    // Above the findings: the notice is the pane's first element.
+    expect(el('problems').firstElementChild?.id).toBe('repository-notes');
+    expect(el('finding-problems').querySelectorAll('.finding-title')).toHaveLength(2);
+    // The badge counts findings, which is what it has always said.
+    expect(el('problem-count').textContent).toBe('2');
+  });
+
+  it('shows no profile notice when the profile was read cleanly', async () => {
+    const mount = el<HTMLDivElement>('repository-notes');
+    expect(mount.hidden).toBe(true);
+    expect(mount.innerHTML).toBe('');
+    expect(el('finding-problems').querySelectorAll('.finding-title')).toHaveLength(2);
+  });
+
+  it('carries a compatibility note beside a profile problem, counting both and escaping both', async () => {
+    await load({
+      ...model,
+      warnings: [
+        profileWarning('layers.<b>', 'Expected a section.'),
+        'not analysed › no XAML files: No <i>XAML</i> files were found.',
+      ],
+    });
+
+    const mount = el<HTMLDivElement>('repository-notes');
+    expect(mount.hidden).toBe(false);
+    expect(mount.textContent).toContain('This repository (2 notes)');
+    expect(mount.textContent).toContain('no XAML files');
+    expect(mount.innerHTML).not.toContain('<i>XAML</i>');
+    expect(mount.innerHTML).not.toContain('<b>');
+    expect(mount.innerHTML).toContain('&lt;i&gt;XAML&lt;/i&gt;');
+    // The badge still counts findings only, never notes.
+    expect(el('problem-count').textContent).toBe('2');
+  });
+
+  it('clears the notice when a later analysis has no profile problem', async () => {
+    await load({ ...model, warnings: [profileWarning('layers', 'Expected a section.')] });
+    expect(el<HTMLDivElement>('repository-notes').hidden).toBe(false);
+
+    await load({ ...model, warnings: [] });
+    expect(el<HTMLDivElement>('repository-notes').hidden).toBe(true);
+    expect(el('repository-notes').innerHTML).toBe('');
+  });
+});

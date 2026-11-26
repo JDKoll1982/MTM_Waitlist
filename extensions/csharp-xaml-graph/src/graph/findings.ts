@@ -2,28 +2,13 @@ import type { EdgeKind, Finding, GraphEdge, GraphNode, SourceLocation } from './
 import type { TypeDecl } from './csharp/parser';
 import type { TypeIndex } from './csharp/symbols';
 import type { XamlFile } from './xaml/parser';
+import type { CompiledConventions } from './conventions';
+import type { GeneratedMemberOn, GeneratedMembersRule } from './profile';
 
 /** Edge kinds that represent a real dependency; inheritance and template rows are excluded. */
 const CYCLE_EDGE_KINDS = new Set<EdgeKind>([
   'injects', 'getservice', 'resolves', 'binds', 'field', 'constructs', 'composes', 'reference',
 ]);
-
-/**
- * Base types known to add no bindable members, so a missing member is genuinely missing.
- *
- * Framework bases matter here: a WinUI page derives from `Page`, a WPF page from `Page` or
- * `UserControl`, a MAUI page from `ContentPage`. None of them declares application members, and none
- * of them is declared in the workspace, so without this list every view would look like it had an
- * unresolvable base and no dead binding could ever be reported.
- */
-const TRANSPARENT_BASES = new Set([
-  'ObservableObject', 'ObservableRecipient', 'ObservableValidator', 'ObservableMessage',
-  'BindableBase', 'ViewModelBase',
-  'Page', 'UserControl', 'Window', 'WindowEx', 'Application', 'ContentPage', 'ContentView',
-  'ContentDialog', 'Form', 'Control', 'FrameworkElement', 'Component', 'UserControlBase',
-]);
-
-const ENTRY_POINT_NAMES = new Set(['App', 'Program', 'Startup', 'Main']);
 
 const MAX_BASE_DEPTH = 8;
 
@@ -41,6 +26,11 @@ export interface FindingInput {
   xamlFiles: XamlFile[];
   /** Every analysed source (C# and XAML), for member-usage counting. */
   sources: string[];
+  /**
+   * The repository's conventions: which types are entry points, which bases are transparent, which
+   * attributes generate members. Absent means the built-in conventions.
+   */
+  conventions: CompiledConventions;
 }
 
 export interface FindingResult {
@@ -121,34 +111,54 @@ function stronglyConnected(nodeIds: string[], adjacency: Map<string, string[]>):
 }
 
 /**
- * Members the MVVM source generators add to a type.
+ * Members the MVVM source generators add to a type, named by the form each declared rule uses.
  *
- * `[RelayCommand]` on `Foo()` declares `FooCommand`; on `FooAsync()` it declares `FooCommand` (the
- * toolkit strips the trailing `Async`). `[ObservableProperty]` on `_foo` declares `Foo`. Without
- * these, every `x:Bind ViewModel.SomeCommand` in the workspace reads as a dead binding.
+ * `commandSuffix` on `Foo()` declares `FooCommand`; on `FooAsync()` it declares `FooCommand` too,
+ * because the toolkit strips the trailing `Async`. `pascalCaseWithoutPrefix` on `_foo` declares
+ * `Foo`. Without these, every `x:Bind ViewModel.SomeCommand` in the workspace reads as a dead
+ * binding. The attributes and the naming form are the profile's; the two forms are a closed set
+ * because they are the two generators the analysis understands.
  */
-function generatedMembers(decl: TypeDecl): string[] {
+function generatedMembers(decl: TypeDecl, rules: GeneratedMembersRule[]): string[] {
   const names: string[] = [];
 
+  const generatedBy = (attributes: string[], on: GeneratedMemberOn): GeneratedMembersRule[] =>
+    rules.filter((rule) => rule.on === on
+      && attributes.some((attribute) => attribute.toLowerCase() === rule.attribute.toLowerCase()));
+
   for (const method of decl.methods) {
-    if (!method.attributes.includes('RelayCommand')) {
-      continue;
+    for (const rule of generatedBy(method.attributes, 'method')) {
+      if (rule.form === 'commandSuffix') {
+        const stem = method.name.endsWith('Async') ? method.name.slice(0, -'Async'.length) : method.name;
+        names.push(`${method.name}Command`, `${stem}Command`);
+      }
     }
-    const stem = method.name.endsWith('Async') ? method.name.slice(0, -'Async'.length) : method.name;
-    names.push(`${method.name}Command`, `${stem}Command`);
   }
 
   for (const field of decl.fields) {
-    if (!field.attributes.includes('ObservableProperty')) {
-      continue;
-    }
-    const trimmed = field.name.replace(/^_+/, '');
-    if (trimmed.length > 0) {
-      names.push(trimmed.charAt(0).toUpperCase() + trimmed.slice(1));
+    for (const rule of generatedBy(field.attributes, 'field')) {
+      if (rule.form === 'pascalCaseWithoutPrefix') {
+        const trimmed = field.name.replace(/^_+/, '');
+        if (trimmed.length > 0) {
+          names.push(trimmed.charAt(0).toUpperCase() + trimmed.slice(1));
+        }
+      }
     }
   }
 
   return names;
+}
+
+/**
+ * True when the profile declares this attribute, on this kind of declaration, as one that makes the
+ * compiler generate a member. The holder is then not a dead member of its own.
+ */
+function holdsGenerated(
+  rules: GeneratedMembersRule[],
+  attribute: string,
+  on: GeneratedMemberOn,
+): boolean {
+  return rules.some((rule) => rule.on === on && rule.attribute.toLowerCase() === attribute.toLowerCase());
 }
 
 function memberNamesOf(
@@ -156,6 +166,7 @@ function memberNamesOf(
   decls: Map<string, TypeDecl>,
   index: TypeIndex,
   usingsFor: (name: string) => string[],
+  conventions: CompiledConventions,
   depth = 0,
 ): Set<string> | null {
   const decl = decls.get(fullName);
@@ -173,13 +184,13 @@ function memberNamesOf(
   for (const method of decl.methods) {
     names.add(method.name);
   }
-  for (const generated of generatedMembers(decl)) {
+  for (const generated of generatedMembers(decl, conventions.generatedMembers)) {
     names.add(generated);
   }
 
   for (const base of decl.bases) {
     const simple = base.slice(base.lastIndexOf('.') + 1);
-    if (TRANSPARENT_BASES.has(simple)) {
+    if (conventions.transparentBases.has(simple)) {
       continue;
     }
     const resolved = index.resolve(base, usingsFor(fullName), decl.namespace);
@@ -187,7 +198,7 @@ function memberNamesOf(
       // An unknown base could supply the member, so nothing below it can be judged missing.
       return null;
     }
-    const inherited = memberNamesOf(resolved.fullName, decls, index, usingsFor, depth + 1);
+    const inherited = memberNamesOf(resolved.fullName, decls, index, usingsFor, conventions, depth + 1);
     if (!inherited) {
       return null;
     }
@@ -277,7 +288,7 @@ function hasCycleWithin(component: string[], edges: GraphEdge[]): boolean {
 
 /** Builds every cleanup finding the graph can support. */
 export function computeFindings(input: FindingInput): FindingResult {
-  const { nodes, edges, decls, files, declarationCounts, index, usingsFor, xamlFiles, sources } = input;
+  const { nodes, edges, decls, files, declarationCounts, index, usingsFor, xamlFiles, sources, conventions } = input;
   const nodeById = new Map(nodes.map((node) => [node.id, node]));
   const findings: Finding[] = [];
   let sequence = 0;
@@ -303,7 +314,7 @@ export function computeFindings(input: FindingInput): FindingResult {
     }
     for (const base of decl.bases) {
       const simple = base.slice(base.lastIndexOf('.') + 1);
-      if (TRANSPARENT_BASES.has(simple)) {
+      if (conventions.transparentBases.has(simple)) {
         continue;
       }
       const resolved = index.resolve(base, usingsFor(typeFullName), decl.namespace);
@@ -504,7 +515,7 @@ export function computeFindings(input: FindingInput): FindingResult {
         if (!templateType) {
           continue;
         }
-        const templateMembers = memberNamesOf(templateType.fullName, decls, index, usingsFor);
+        const templateMembers = memberNamesOf(templateType.fullName, decls, index, usingsFor, conventions);
         if (!templateMembers || templateMembers.has(binding.root)) {
           // Either an unresolvable base could supply it, or the member is genuinely there.
           continue;
@@ -526,7 +537,7 @@ export function computeFindings(input: FindingInput): FindingResult {
       // The root is judged against everything the view can offer, not only its properties: x:Bind
       // resolves fields, methods and the members the MVVM generators add (`SaveCommand` from
       // `[RelayCommand] Save`), and a function binding root must be a method.
-      const viewMembers = memberNamesOf(xaml.className, decls, index, usingsFor);
+      const viewMembers = memberNamesOf(xaml.className, decls, index, usingsFor, conventions);
       if (!viewMembers) {
         // An unresolvable base could supply the member, so no claim is made.
         continue;
@@ -559,7 +570,7 @@ export function computeFindings(input: FindingInput): FindingResult {
         if (!segment) {
           break;
         }
-        const members = memberNamesOf(current.fullName, decls, index, usingsFor);
+        const members = memberNamesOf(current.fullName, decls, index, usingsFor, conventions);
         if (!members) {
           break;
         }
@@ -686,7 +697,7 @@ export function computeFindings(input: FindingInput): FindingResult {
     if (node.layer === 'external') {
       continue;
     }
-    if (ENTRY_POINT_NAMES.has(node.label)) {
+    if (conventions.entryPoints.has(node.label)) {
       continue;
     }
     if ((incoming.get(node.id) ?? 0) > 0) {
@@ -780,7 +791,10 @@ export function computeFindings(input: FindingInput): FindingResult {
       if (method.visibility !== 'private' || method.isOverride || method.isPartial) {
         continue;
       }
-      if (method.attributes.some((name) => name === 'RelayCommand' || name === 'Conditional')) {
+      // An attribute the profile says generates a member is not a member of its own to report; nor is
+      // `[Conditional]`, which is how the compiler removes a call rather than what names one.
+      if (method.attributes.some((name) => name === 'Conditional'
+        || holdsGenerated(conventions.generatedMembers, name, 'method'))) {
         continue;
       }
       if (method.name.startsWith('get_') || method.name.startsWith('set_')) {
@@ -800,7 +814,8 @@ export function computeFindings(input: FindingInput): FindingResult {
     }
 
     for (const field of decl.fields) {
-      if (field.visibility !== 'private' || field.attributes.includes('ObservableProperty')) {
+      if (field.visibility !== 'private'
+        || field.attributes.some((name) => holdsGenerated(conventions.generatedMembers, name, 'field'))) {
         continue;
       }
       if (handlerNames.has(field.name)) {

@@ -2,12 +2,12 @@
   "name": "csharp-xaml-graph",
   "displayName": "C# / XAML Dependency Graph",
   "description": "Interactive dependency graph of C# class relationships and XAML View-to-ViewModel bindings for a WinUI 3 workspace.",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "publisher": "mtm-local",
   "license": "UNLICENSED",
   "private": true,
   "engines": {
-    "vscode": "^1.90.0"
+    "vscode": "^1.146.0"
   },
   "categories": [
     "Visualization",
@@ -16,6 +16,9 @@
   "activationEvents": [
     "onCommand:csharpXamlGraph.show",
     "onCommand:csharpXamlGraph.debug",
+    "onCommand:csharpXamlGraph.profile.initialize",
+    "onCommand:csharpXamlGraph.profile.import",
+    "onCommand:csharpXamlGraph.profile.refresh",
     "onView:csharpXamlGraph.menu"
   ],
   "main": "./out/extension.js",
@@ -59,6 +62,21 @@
       {
         "command": "csharpXamlGraph.debug",
         "title": "Open Debug Report",
+        "category": "C#/XAML Graph"
+      },
+      {
+        "command": "csharpXamlGraph.profile.initialize",
+        "title": "Set up Repository Profile",
+        "category": "C#/XAML Graph"
+      },
+      {
+        "command": "csharpXamlGraph.profile.import",
+        "title": "Import Profile Reply",
+        "category": "C#/XAML Graph"
+      },
+      {
+        "command": "csharpXamlGraph.profile.refresh",
+        "title": "Update Repository Profile",
         "category": "C#/XAML Graph"
       }
     ],
@@ -170,6 +188,7 @@
     "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json",
     "build": "npm run typecheck && npm run compile",
     "selftest": "npm run build && node out/selftest.js",
+    "validate": "npm run build && node out/validate.js",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
     "package:vsix": "npm run build && vsce package --allow-missing-repository --out csharp-xaml-graph.vsix",
@@ -179,18 +198,18 @@
     "web-tree-sitter": "0.27.2"
   },
   "devDependencies": {
-    "@types/node": "22.20.7",
-    "@types/vscode": "1.90.0",
-    "@vitest/coverage-v8": "^3.2.7",
+    "@types/node": "26.6.11",
+    "@types/vscode": "1.146.0",
+    "@vitest/coverage-v8": "^5.1.2",
     "@vscode/vsce": "4.1.1",
     "cytoscape": "3.35.0",
     "cytoscape-dagre": "4.1.0",
     "dagre": "0.8.5",
     "esbuild": "0.28.2",
-    "htmlparser2": "10.0.0",
-    "jsdom": "^26.1.0",
+    "htmlparser2": "12.0.0",
+    "jsdom": "^31.0.1",
     "tree-sitter-c-sharp": "0.24.0",
-    "typescript": "5.9.3",
-    "vitest": "^3.2.7"
+    "typescript": "7.0.2",
+    "vitest": "^5.1.2"
   }
 }
