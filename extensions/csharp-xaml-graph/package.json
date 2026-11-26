@@ -167,12 +167,13 @@
   "scripts": {
     "compile": "node scripts/build.mjs",
     "watch": "node scripts/build.mjs --watch",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json",
     "build": "npm run typecheck && npm run compile",
     "selftest": "npm run build && node out/selftest.js",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
-    "package:vsix": "npm run build && vsce package --allow-missing-repository --out csharp-xaml-graph.vsix"
+    "package:vsix": "npm run build && vsce package --allow-missing-repository --out csharp-xaml-graph.vsix",
+    "typecheck:tests": "tsc -p tsconfig.test.json"
   },
   "dependencies": {
     "web-tree-sitter": "0.27.2"

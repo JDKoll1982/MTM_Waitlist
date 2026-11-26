@@ -35,6 +35,8 @@ const property = (name: string, partial: Partial<TypeDecl['properties'][number]>
   isPublic: false,
   visibility: 'private' as const,
   attributes: [],
+  initializedInline: false,
+  readsDataContext: false,
   ...partial,
 });
 
@@ -456,13 +458,13 @@ describe('computeFindings: further corners', () => {
         typeDecl({
           name: 'SamplePage',
           namespace: 'N.Views',
-          properties: [{ name: 'Row', type: 'Derived', rawType: 'Derived', line: 3, isObservable: false, isPublic: true, visibility: 'public', attributes: [] }],
+          properties: [{ name: 'Row', type: 'Derived', rawType: 'Derived', line: 3, isObservable: false, isPublic: true, visibility: 'public', attributes: [], initializedInline: false, readsDataContext: false }],
         }),
         typeDecl({ name: 'Derived', namespace: 'N.Models', bases: ['Base'] }),
         typeDecl({
           name: 'Base',
           namespace: 'N.Models',
-          properties: [{ name: 'Middle', type: 'Cell', rawType: 'Cell', line: 1, isObservable: false, isPublic: true, visibility: 'public', attributes: [] }],
+          properties: [{ name: 'Middle', type: 'Cell', rawType: 'Cell', line: 1, isObservable: false, isPublic: true, visibility: 'public', attributes: [], initializedInline: false, readsDataContext: false }],
         }),
         typeDecl({ name: 'Cell', namespace: 'N.Models' }),
       ],
@@ -481,7 +483,7 @@ describe('computeFindings: further corners', () => {
     const input = makeFindingInput({
       decls: [
         typeDecl({ name: 'Caller', namespace: 'N' }),
-        typeDecl({ name: 'Holder', namespace: 'N', properties: [{ name: 'Secret', type: 'string', rawType: 'string', line: 1, isObservable: false, isPublic: false, visibility: 'private', attributes: [] }] }),
+        typeDecl({ name: 'Holder', namespace: 'N', properties: [{ name: 'Secret', type: 'string', rawType: 'string', line: 1, isObservable: false, isPublic: false, visibility: 'private', attributes: [], initializedInline: false, readsDataContext: false }] }),
       ],
       edges: [graphEdge({ source: 'N.Caller', target: 'N.Holder', kind: 'reference' })],
       xamlFiles: [xamlFile({

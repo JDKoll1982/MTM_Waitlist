@@ -135,8 +135,21 @@ export function resetVscodeState(): void {
 
 /* -------------------------------------------------------------------- uri */
 
+/**
+ * A stand-in for `vscode.Uri`.
+ *
+ * It is deliberately structurally compatible with the real class — scheme, authority, path, query,
+ * fragment, `with` and `toJSON` — so a test can hand it to code typed against `vscode.Uri` without a
+ * cast. Anything less makes the fakes a source of type errors in their own right.
+ */
 export class Uri {
-  constructor(public readonly scheme: string, public readonly path: string) {}
+  constructor(
+    public readonly scheme: string,
+    public readonly path: string,
+    public readonly authority = '',
+    public readonly query = '',
+    public readonly fragment = '',
+  ) {}
 
   static file(fsPath: string): Uri {
     return new Uri('file', fsPath.replace(/\\/g, '/'));
@@ -158,6 +171,32 @@ export class Uri {
     return this.path;
   }
 
+  with(change: {
+    scheme?: string;
+    authority?: string;
+    path?: string;
+    query?: string;
+    fragment?: string;
+  }): Uri {
+    return new Uri(
+      change.scheme ?? this.scheme,
+      change.path ?? this.path,
+      change.authority ?? this.authority,
+      change.query ?? this.query,
+      change.fragment ?? this.fragment,
+    );
+  }
+
+  toJSON(): { scheme: string; authority: string; path: string; query: string; fragment: string } {
+    return {
+      scheme: this.scheme,
+      authority: this.authority,
+      path: this.path,
+      query: this.query,
+      fragment: this.fragment,
+    };
+  }
+
   toString(): string {
     return `${this.scheme}://${this.path}`;
   }
@@ -165,6 +204,10 @@ export class Uri {
 
 /* ------------------------------------------------------------ positions */
 
+/**
+ * A stand-in for `vscode.Position`, structurally compatible with the real class so a test can pass
+ * one to code typed against the API without a cast.
+ */
 export class Position {
   constructor(public readonly line: number, public readonly character: number) {}
 
@@ -186,6 +229,27 @@ export class Position {
 
   isEqual(other: Position): boolean {
     return this.line === other.line && this.character === other.character;
+  }
+
+  compareTo(other: Position): number {
+    if (this.line !== other.line) {
+      return this.line - other.line;
+    }
+    return this.character - other.character;
+  }
+
+  translate(lineDeltaOrChange?: number | { lineDelta?: number; characterDelta?: number }, characterDelta = 0): Position {
+    const delta = typeof lineDeltaOrChange === 'number'
+      ? { lineDelta: lineDeltaOrChange, characterDelta }
+      : { lineDelta: lineDeltaOrChange?.lineDelta ?? 0, characterDelta: lineDeltaOrChange?.characterDelta ?? 0 };
+    return new Position(this.line + delta.lineDelta, this.character + delta.characterDelta);
+  }
+
+  with(lineOrChange?: number | { line?: number; character?: number }, character = this.character): Position {
+    const next = typeof lineOrChange === 'number'
+      ? { line: lineOrChange, character }
+      : { line: lineOrChange?.line ?? this.line, character: lineOrChange?.character ?? this.character };
+    return new Position(next.line, next.character);
   }
 }
 

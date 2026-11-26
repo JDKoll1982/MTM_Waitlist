@@ -62,8 +62,8 @@ const page = typeDecl({
   name: 'SamplePage',
   namespace: 'N.Views',
   properties: [
-    { name: 'ViewModel', type: 'SampleViewModel', rawType: 'SampleViewModel', line: 3, isObservable: false, isPublic: true, visibility: 'public', attributes: [] },
-    { name: 'Row', type: 'Cell', rawType: 'Cell', line: 4, isObservable: false, isPublic: true, visibility: 'public', attributes: [] },
+    { name: 'ViewModel', type: 'SampleViewModel', rawType: 'SampleViewModel', line: 3, isObservable: false, isPublic: true, visibility: 'public', attributes: [], initializedInline: false, readsDataContext: false },
+    { name: 'Row', type: 'Cell', rawType: 'Cell', line: 4, isObservable: false, isPublic: true, visibility: 'public', attributes: [], initializedInline: false, readsDataContext: false },
   ],
   methods: [
     { name: 'SaveAsync', returnType: 'Task', rawReturnType: 'Task', rawParamTypes: [], line: 6, visibility: 'private', attributes: ['RelayCommand'], isOverride: false, isStatic: false, isAsync: true, isPartial: false, isExtension: false },
@@ -79,8 +79,8 @@ const viewModel = typeDecl({
   name: 'SampleViewModel',
   namespace: 'N.ViewModels',
   properties: [
-    { name: 'Status', type: 'string', rawType: 'string', line: 3, isObservable: true, isPublic: true, visibility: 'public', attributes: [] },
-    { name: 'Cells', type: 'Cell', rawType: 'Cell', line: 4, isObservable: false, isPublic: true, visibility: 'public', attributes: [] },
+    { name: 'Status', type: 'string', rawType: 'string', line: 3, isObservable: true, isPublic: true, visibility: 'public', attributes: [], initializedInline: false, readsDataContext: false },
+    { name: 'Cells', type: 'Cell', rawType: 'Cell', line: 4, isObservable: false, isPublic: true, visibility: 'public', attributes: [], initializedInline: false, readsDataContext: false },
   ],
 });
 
@@ -88,7 +88,7 @@ const cell = typeDecl({
   name: 'Cell',
   namespace: 'N.Models',
   properties: [
-    { name: 'Title', type: 'string', rawType: 'string', line: 3, isObservable: false, isPublic: true, visibility: 'public', attributes: [] },
+    { name: 'Title', type: 'string', rawType: 'string', line: 3, isObservable: false, isPublic: true, visibility: 'public', attributes: [], initializedInline: false, readsDataContext: false },
   ],
 });
 
@@ -246,7 +246,7 @@ describe('computeFindings: binding paths', () => {
   it('stops walking when the next type cannot be resolved', () => {
     const findings = dead(input({
       decls: [
-        typeDecl({ name: 'SamplePage', namespace: 'N.Views', properties: [{ name: 'Row', type: 'Cell', rawType: 'Cell', line: 3, isObservable: false, isPublic: true, visibility: 'public', attributes: [] }] }),
+        typeDecl({ name: 'SamplePage', namespace: 'N.Views', properties: [{ name: 'Row', type: 'Cell', rawType: 'Cell', line: 3, isObservable: false, isPublic: true, visibility: 'public', attributes: [], initializedInline: false, readsDataContext: false }] }),
       ],
       xamlFiles: [xaml({ path: 'Views/SamplePage.xaml', className: 'N.Views.SamplePage', bindings: [binding({ expression: 'Row.Deep.Missing', root: 'Row', path: ['Deep', 'Missing'] })] })],
     }));
@@ -281,9 +281,9 @@ describe('computeFindings: binding paths', () => {
   it('resolves a member declared on a base type', () => {
     const findings = dead(input({
       decls: [
-        typeDecl({ name: 'SamplePage', namespace: 'N.Views', properties: [{ name: 'Row', type: 'Derived', rawType: 'Derived', line: 3, isObservable: false, isPublic: true, visibility: 'public', attributes: [] }] }),
+        typeDecl({ name: 'SamplePage', namespace: 'N.Views', properties: [{ name: 'Row', type: 'Derived', rawType: 'Derived', line: 3, isObservable: false, isPublic: true, visibility: 'public', attributes: [], initializedInline: false, readsDataContext: false }] }),
         typeDecl({ name: 'Derived', namespace: 'N.Models', bases: ['Base'] }),
-        typeDecl({ name: 'Base', namespace: 'N.Models', properties: [{ name: 'Inherited', type: 'string', rawType: 'string', line: 1, isObservable: false, isPublic: true, visibility: 'public', attributes: [] }] }),
+        typeDecl({ name: 'Base', namespace: 'N.Models', properties: [{ name: 'Inherited', type: 'string', rawType: 'string', line: 1, isObservable: false, isPublic: true, visibility: 'public', attributes: [], initializedInline: false, readsDataContext: false }] }),
       ],
       xamlFiles: [xaml({ path: 'Views/SamplePage.xaml', className: 'N.Views.SamplePage', bindings: [binding({ expression: 'Row.Inherited', root: 'Row', path: ['Inherited'] })] })],
     }));
@@ -291,7 +291,7 @@ describe('computeFindings: binding paths', () => {
   });
 
   it('makes no claim when a base chain is deeper than the walk allows', () => {
-    const chain: TypeDecl[] = [typeDecl({ name: 'SamplePage', namespace: 'N.Views', properties: [{ name: 'Row', type: 'L0', rawType: 'L0', line: 3, isObservable: false, isPublic: true, visibility: 'public', attributes: [] }] })];
+    const chain: TypeDecl[] = [typeDecl({ name: 'SamplePage', namespace: 'N.Views', properties: [{ name: 'Row', type: 'L0', rawType: 'L0', line: 3, isObservable: false, isPublic: true, visibility: 'public', attributes: [], initializedInline: false, readsDataContext: false }] })];
     for (let level = 0; level < 10; level += 1) {
       chain.push(typeDecl({ name: `L${level}`, namespace: 'N.Models', bases: level < 9 ? [`L${level + 1}`] : [] }));
     }
@@ -367,7 +367,7 @@ describe('computeFindings: a template row type with a transparent base', () => {
       namespace: 'N.Models',
       bases: ['ObservableObject'],
       properties: [
-        { name: 'Title', type: 'string', rawType: 'string', line: 3, isObservable: false, isPublic: true, visibility: 'public', attributes: [] },
+        { name: 'Title', type: 'string', rawType: 'string', line: 3, isObservable: false, isPublic: true, visibility: 'public', attributes: [], initializedInline: false, readsDataContext: false },
       ],
     });
 
@@ -399,7 +399,7 @@ describe('computeFindings: a member inherited from a workspace base beside an ex
       kind: 'interface',
       namespace: 'N.Views',
       properties: [
-        { name: 'Row', type: 'Cell', rawType: 'Cell', line: 3, isObservable: false, isPublic: true, visibility: 'public', attributes: [] },
+        { name: 'Row', type: 'Cell', rawType: 'Cell', line: 3, isObservable: false, isPublic: true, visibility: 'public', attributes: [], initializedInline: false, readsDataContext: false },
       ],
     });
     const inheritingPage = typeDecl({

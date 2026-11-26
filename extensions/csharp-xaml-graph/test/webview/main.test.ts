@@ -8,7 +8,11 @@ import type { Core } from 'cytoscape';
 const captured = vi.hoisted(() => ({ cores: [] as unknown[] }));
 
 vi.mock('cytoscape', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('cytoscape')>();
+  // cytoscape declares `export =`, so its namespace has no typed `default` even though the bundler
+    // hands one over. The cast states that shape once instead of leaving the error in every file.
+    const actual = await importOriginal<typeof import('cytoscape')>() as unknown as {
+      default: typeof import('cytoscape');
+    };
   const real = actual.default;
   const wrapper = ((options: never) => {
     const core = real(options);
