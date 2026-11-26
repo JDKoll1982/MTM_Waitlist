@@ -2,7 +2,7 @@
   "name": "csharp-xaml-graph",
   "displayName": "C# / XAML Dependency Graph",
   "description": "Interactive dependency graph of C# class relationships and XAML View-to-ViewModel bindings for a WinUI 3 workspace.",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "publisher": "mtm-local",
   "license": "UNLICENSED",
   "private": true,

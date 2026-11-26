@@ -772,8 +772,11 @@ export async function analyzeWorkspace(options: AnalyzeOptions): Promise<GraphMo
     if ((labelCounts.get(node.label) ?? 0) < 2) {
       return node;
     }
+    // A placeholder module ("(root)" for a file at the repository root, "(external)" for a framework
+    // type) says nothing about where the type lives, so a repeated label falls back to the full name.
+    const placeholder = !node.module || node.module.startsWith('(');
     const shared = (labelAndModule.get(`${node.label}|${node.module}`) ?? 0) > 1;
-    const suffix = shared ? node.fullName : node.module;
+    const suffix = shared || placeholder ? node.fullName : node.module;
     return { ...node, displayLabel: `${node.label} · ${suffix}` };
   });
   const finalEdges = kept ? edges.filter((edge) => kept.has(edge.source) && kept.has(edge.target)) : edges;

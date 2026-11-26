@@ -834,6 +834,17 @@ describe('analyzeWorkspace: names two types would otherwise share', () => {
       .toEqual(['Shell · First.Shell', 'Shell · Second.Shell']);
   });
 
+
+  it('qualifies with the full name when the module is only a placeholder', async () => {    // A file at the repository root lands in "(root)", which says nothing about where the type lives.
+    const model = await analyze({
+      'Root.cs': 'namespace App { public class Shell {} }',
+      'Alpha/Shell.cs': 'namespace Tools { public class Shell {} }',
+    });
+
+    expect(model.nodes.map((node) => node.displayLabel).sort())
+      .toEqual(['Shell · Alpha', 'Shell · App.Shell']);
+  });
+
   it('leaves a unique label without a display override', async () => {
     const model = await analyze({
       'A/Types.cs': 'namespace N { public class Holder {} public class Dep {} }',
