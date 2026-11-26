@@ -160,9 +160,9 @@
       "installed_at": "2026-11-26T18:53:33.151512+00:00"
     },
     "wireframe": {
-      "version": "0.1.1",
+      "version": "0.1.2",
       "source": "local",
-      "manifest_hash": "sha256:c6786fa70054e43b52a57283132269060cb6ac55bef3b5d964b8d8313007a1b8",
+      "manifest_hash": "sha256:17f9ccec590ba9230d3b347d728ed8a75385178d4b69744380b62c0450dfaa66",
       "enabled": true,
       "priority": 10,
       "registered_commands": {
@@ -176,7 +176,7 @@
         ]
       },
       "registered_skills": [],
-      "installed_at": "2026-11-26T18:54:32.439185+00:00"
+      "installed_at": "2026-11-26T20:26:30.875017+00:00"
     }
   }
 }

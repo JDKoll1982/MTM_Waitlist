@@ -18,7 +18,7 @@ $ARGUMENTS
 Accepts:
 - Feature identifier (e.g. `001-user-auth` or `001`) — generates wireframes for that feature
 - `--theme {light|dark|both}` — override the auto-detected theme
-- No args — operates on the current feature (inferred from `specs/` directory or active branch)
+- No args — operates on the active feature from `.specify/feature.json`
 
 ## Theme Selection by Feature Type
 
@@ -167,12 +167,15 @@ Load the matching template from `.specify/extensions/wireframe/templates/{light,
 
 ### Step 1: Load context
 
-Read the feature's `spec.md`:
+Resolve the feature directory first. The active feature is the one `.specify/feature.json`
+names — never the first folder under `specs/`:
 
-```bash
-# Accepts feature ID with or without slug suffix
-SPEC_PATH="specs/$(ls specs/ | grep -E '^[0-9]+(-|$)' | head -1)/spec.md"
-```
+1. `.specify/feature.json` → `feature_directory` (e.g. `specs/022-generic-wc-temp-to-live-verification`)
+2. A single match under `specs/` when that file is absent or unnamed
+3. The branch name (`git rev-parse --abbrev-ref HEAD`) when it names a `specs/` folder
+4. Otherwise, ask which feature and stop
+
+State which source you used, then read `<feature_directory>/spec.md`.
 
 Identify from `spec.md`:
 - Feature ID and human-readable name

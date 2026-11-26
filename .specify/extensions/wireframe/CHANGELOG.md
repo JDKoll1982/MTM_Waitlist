@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `/speckit.wireframe.generate`, `.review`, `.inspect` and `.screenshots` now resolve the no-argument
+  feature from `.specify/feature.json` before falling back to `specs/` or the branch name. The old
+  heuristic took the first numbered folder under `specs/`, so in a project with more than one feature
+  it generated and signed off wireframes for the wrong spec.
+
+### Added
+
+- Node hooks for SpecKit Companion pipelines: `.specify/companion.yml` attaches wireframe generation
+  to `specify.finalize`, sign-off to `plan.plan-doc`, and the screenshot regression check to
+  `implement.complete`.
+
 ## [0.1.1] - 2026-04-21
 
 ### Fixed

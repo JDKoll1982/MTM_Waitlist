@@ -1,0 +1,32 @@
+# Companion node hooks — wireframe visual sign-off.
+#
+# The wireframe extension (`speckit.wireframe.*`) is offered at the three points
+# where a visual can still change the work: after the spec is written, before the
+# plan is authored, and after the implementation lands. Each hook is state-aware
+# and idempotent, so a run that already signed off its mockup does not ask again,
+# and no hook can fail the host command.
+#
+# Keep every `text:` on one quoted line: the extension's config loader reads a
+# constrained YAML subset and rejects block scalars (`|`, `>`).
+
+commands:
+  specify:
+    hooks:
+      after:
+        finalize:
+          - type: prompt
+            text: "Wireframe offer. Only when spec.md describes a screen, form, dashboard or other visual surface: if <feature_directory>/wireframes/ holds no .svg yet, tell the operator in one line that /speckit.wireframe.generate can draw the mockup for review, and run it when they accept. If wireframes exist already, or the spec is pure backend behavior, say so in one line and continue. Never block the specify step on this, and never write a wireframe the operator did not approve."
+
+  plan:
+    hooks:
+      before:
+        plan-doc:
+          - type: prompt
+            text: "Wireframe sign-off before planning. Read spec.md. If it already carries a ## UI Mockup section, report it in one line as the visual constraint the plan must honor and continue. If <feature_directory>/wireframes/ holds .svg files but spec.md has no ## UI Mockup section, offer /speckit.wireframe.review so the operator can sign off; on approval that command writes the section, and on decline continue without it. If there are no wireframes at all, say so in one line and continue. Never invent or edit a wireframe yourself."
+
+  implement:
+    hooks:
+      after:
+        complete:
+          - type: prompt
+            text: "Wireframe regression check. Only when spec.md carries a signed-off ## UI Mockup section: offer /speckit.wireframe.screenshots to capture the built UI and compare it to the approved wireframes, and report drift in one line when the capture tooling is unavailable. Without a signed-off mockup, say so in one line and continue. This never fails the implement step and never rewrites the signed-off wireframe."

@@ -18,9 +18,21 @@ $ARGUMENTS
 Accepts:
 - Feature identifier (e.g. `001`) — review all wireframes for that feature
 - `NNN:NN` — review a single wireframe (e.g. `002:01` → `002-*/01-*.svg`)
-- No args — review the current feature
+- No args — review the active feature from `.specify/feature.json`
 
 ## Workflow
+
+### Step 0: Resolve the feature
+
+The active feature is the one `.specify/feature.json` names — never the first folder under
+`specs/`:
+
+1. `.specify/feature.json` → `feature_directory`
+2. A single match under `specs/` when that file is absent or unnamed
+3. The branch name (`git rev-parse --abbrev-ref HEAD`) when it names a `specs/` folder
+4. Otherwise, ask which feature and stop
+
+State which source you used.
 
 ### Step 1: Capture screenshots (optional, Tier-2)
 

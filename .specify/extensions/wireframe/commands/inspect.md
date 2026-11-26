@@ -15,7 +15,7 @@ $ARGUMENTS
 Accepts:
 - Feature identifier (e.g. `001`) — inspect all wireframes for one feature
 - `--all` — inspect every wireframe across all features
-- No args — inspect current feature
+- No args — inspect the active feature from `.specify/feature.json`
 
 ## What cross-SVG inspection catches
 
@@ -39,6 +39,10 @@ Per-SVG review catches issues within one wireframe. Inspection catches drift **b
 ```bash
 find specs/<feature>/wireframes -name "*.svg" -not -path "*/includes/*"
 ```
+
+**If no argument:** read `.specify/feature.json` → `feature_directory` and scan that feature.
+Only when the file is absent or unnamed fall back to the branch name naming a `specs/` folder,
+then to asking which feature.
 
 **If `--all`:**
 ```bash

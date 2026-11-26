@@ -66,3 +66,16 @@ Run the core sequence in order; `specify` must precede `plan`, which must preced
 `.specify/extensions.yml` may declare `before_*`/`after_*` hooks per command. Honor them: skip entries with
 `enabled: false`, treat missing `enabled` as enabled, and leave hooks that declare a non-empty `condition` for
 the HookExecutor rather than evaluating it yourself.
+
+**Wireframe sign-off.** The `wireframe` extension is wired in three places, and no two of them ask twice:
+
+- `.specify/extensions.yml` — the `after_specify` / `before_plan` / `after_implement` offers for bare
+  `/speckit.*` runs.
+- `.specify/companion.yml` — node hooks at `specify.finalize`, `plan.plan-doc`, `implement.complete` for
+  `/speckit.companion.*` runs and for the Companion's Workflow Builder board.
+- `.specify/workflows/{speckit,speckit-companion}/workflow.yml` — optional `prompt` steps
+  (`wireframes`, `wireframe-check`) with `continue_on_error: true`, so a declined mockup never fails a run.
+
+Every one of them is state-aware: it reads `.specify/feature.json`, the feature's `wireframes/` directory and
+the `## UI Mockup` block in `spec.md` before it offers anything, and says so in one line when there is nothing
+to do. Keep that property when editing them — it is what makes the three layers idempotent.

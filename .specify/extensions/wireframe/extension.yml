@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: "wireframe"
   name: "Wireframe Visual Feedback Loop"
-  version: "0.1.1"
+  version: "0.1.2"
   description: "SVG wireframe generation, review, and sign-off for spec-driven development. Wireframes become spec constraints honored by /speckit.plan, /speckit.tasks, and /speckit.implement."
   author: "TortoiseWolfe"
   repository: "https://github.com/TortoiseWolfe/spec-kit-extension-wireframe"

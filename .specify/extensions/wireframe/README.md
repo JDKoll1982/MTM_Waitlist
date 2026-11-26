@@ -79,6 +79,38 @@ The extension registers three optional hooks into SpecKit's workflow:
 
 All hooks are **optional** — the extension prompts before executing, and you can decline to continue the SpecKit workflow unchanged.
 
+### Companion node hooks
+
+A project running the [SpecKit Companion](https://speckit-companion.dev) pipeline gets the same three offers
+inside `/speckit.companion.*` runs through `.specify/companion.yml`, attached to the pipeline nodes rather
+than to the command boundaries. The hooks are state-aware, so a feature that is already signed off passes
+straight through and nothing asks twice:
+
+| Step | Anchor | What it offers |
+|------|--------|----------------|
+| `specify` | `after: finalize` | Generate wireframes once the spec is written |
+| `plan` | `before: plan-doc` | Review and sign off before the plan is authored |
+| `implement` | `after: complete` | Screenshot regression check against the signed-off mockup |
+
+```yaml
+commands:
+  plan:
+    hooks:
+      before:
+        plan-doc:
+          - type: prompt
+            text: "Offer /speckit.wireframe.review for the active feature, then continue."
+```
+
+Keep each `text:` on one quoted line — the Companion's config loader reads a constrained YAML subset and
+rejects block scalars. A `prompt` hook is the widest-compatible kind: `skill` hooks need a named skill, and
+this extension ships none.
+
+### Workflow steps
+
+The `speckit` and `speckit-companion` workflow definitions can carry wireframe work as `prompt` steps marked
+`continue_on_error: true`, so a declined or unavailable wireframe never fails a run.
+
 ## Theme convention
 
 The extension ships two canonical templates in `templates/`:

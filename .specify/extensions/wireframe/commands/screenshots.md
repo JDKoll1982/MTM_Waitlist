@@ -17,7 +17,7 @@ Accepts:
 - `--feature NNN` — one feature
 - `--svg NNN:NN` — one specific SVG (e.g. `002:01` → `specs/002-*/wireframes/01-*.svg`)
 - `--batch N` — process N features at a time
-- No args — current feature
+- No args — the active feature from `.specify/feature.json`
 
 ## Capability check
 
@@ -68,6 +68,10 @@ fi
 # Based on --all, --feature, --svg
 find specs/*/wireframes -name "*.svg" -not -path "*/includes/*"
 ```
+
+With no argument, read `.specify/feature.json` → `feature_directory` and scan that feature
+rather than every folder under `specs/`. Only when the file is absent or unnamed fall back to
+the branch name naming a `specs/` folder, then to asking which feature.
 
 ### Step 3: Display plan
 

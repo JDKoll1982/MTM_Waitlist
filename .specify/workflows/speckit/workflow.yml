@@ -2,9 +2,9 @@ schema_version: "1.0"
 workflow:
   id: "speckit"
   name: "Full SDD Cycle"
-  version: "1.0.1"
+  version: "1.1.0"
   author: "GitHub"
-  description: "Runs specify → plan → tasks → implement with review gates"
+  description: "Runs specify → plan → tasks → implement with review gates and optional wireframe sign-off"
 
 requires:
   # 0.8.5 is the first release with engine-side resolution of the
@@ -49,6 +49,25 @@ steps:
     options: [approve, reject]
     on_reject: abort
 
+  # Visual sign-off, between the spec review and the plan. Optional and never
+  # fatal: the step reads spec.md and the feature's wireframes/ directory before
+  # it asks anything, so a feature already signed off passes through and a
+  # backend-only feature is skipped in one line.
+  - id: wireframes
+    type: prompt
+    integration: "{{ inputs.integration }}"
+    continue_on_error: true
+    timeout: 900
+    prompt: >-
+      Resolve the active feature from .specify/feature.json (feature_directory) and read its
+      spec.md. If the spec describes a screen, form, dashboard or other visual surface and that
+      feature's wireframes/ directory holds no .svg yet, run /speckit.wireframe.generate for it and
+      then /speckit.wireframe.review so the operator can sign off; sign-off writes a ## UI Mockup
+      section into spec.md, which the plan then honors. If wireframes exist but spec.md carries no
+      ## UI Mockup section, offer /speckit.wireframe.review. If the feature has no visual surface,
+      or it is already signed off, say so in one line. Never invent a wireframe, never edit spec.md
+      yourself, and never fail this step: a declined or unavailable wireframe is a normal outcome.
+
   - id: plan
     command: speckit.plan
     integration: "{{ inputs.integration }}"
@@ -72,3 +91,17 @@ steps:
     integration: "{{ inputs.integration }}"
     input:
       args: "{{ inputs.spec }}"
+
+  # Regression check against the signed-off mockup. Optional and never fatal,
+  # and silent for a feature that has no signed-off wireframe.
+  - id: wireframe-check
+    type: prompt
+    integration: "{{ inputs.integration }}"
+    continue_on_error: true
+    timeout: 900
+    prompt: >-
+      Resolve the active feature from .specify/feature.json and read spec.md. Only when it carries
+      a signed-off ## UI Mockup section, offer /speckit.wireframe.screenshots to capture the built
+      UI and compare it with the approved wireframes, and report any drift in one line. Without a
+      signed-off mockup, say so in one line. Never rewrite the signed-off wireframe, never edit
+      spec.md, and never fail this step.
