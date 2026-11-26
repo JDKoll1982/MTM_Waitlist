@@ -4,3 +4,10 @@ media/
 *.vsix
 coverage/
 *.tsbuildinfo
+
+# The host repository's .gitignore carries the Visual Studio `[Dd]ebug/` rule, which matches any
+# directory named `debug` at any depth — including this extension's own source folder. Negating the
+# directory re-includes it, because nothing above `src/` is excluded. Without this the debug report
+# modules are invisible to git and a fresh clone builds an extension that cannot typecheck.
+!src/debug/
+!src/debug/**
