@@ -181,6 +181,71 @@ export function groupRootFor(core: Core, nodeId: string): string {
   return componentGroups(core).find((group) => group.nodeIds.includes(nodeId))?.root ?? nodeId;
 }
 
+/** A rectangle in model coordinates. */
+export interface GroupBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/** One packed shape with the rectangle it currently occupies on the canvas. */
+export interface PackedGroup {
+  root: string;
+  nodeIds: string[];
+  box: GroupBox;
+}
+
+/** Everything a packed run produces: the tiled shapes, the hubs it lifted out, and the island band. */
+export interface PackedResult {
+  groups: PackedGroup[];
+  /** Ids of the high-degree nodes that were placed beside their neighbours instead of tiled. */
+  hubs: string[];
+  /** Rectangle of the band holding the island groups, or null when there is no such band. */
+  island: GroupBox | null;
+}
+
+function boundsOf(nodes: readonly NodeSingular[]): GroupBox {
+  let minX = Number.POSITIVE_INFINITY;
+  let minY = Number.POSITIVE_INFINITY;
+  let maxX = Number.NEGATIVE_INFINITY;
+  let maxY = Number.NEGATIVE_INFINITY;
+
+  for (const node of nodes) {
+    const position = node.position();
+    // Headless cytoscape reports a 3 px box, which is not what a caption frame should wrap, so the
+    // measured size is floored at a nominal node size.
+    const halfWidth = Math.max(node.outerWidth() || 0, 20) / 2;
+    const halfHeight = Math.max(node.outerHeight() || 0, 20) / 2;
+    minX = Math.min(minX, position.x - halfWidth);
+    maxX = Math.max(maxX, position.x + halfWidth);
+    minY = Math.min(minY, position.y - halfHeight);
+    maxY = Math.max(maxY, position.y + halfHeight);
+  }
+
+  if (!Number.isFinite(minX)) {
+    return { x: 0, y: 0, width: 0, height: 0 };
+  }
+  return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+}
+
+/**
+ * The packed shapes as they sit on the canvas right now.
+ *
+ * Reads positions rather than laying anything out, so it can be called after a pan, a filter change
+ * or a restore to tell the overlay where to put each group's caption.
+ */
+export function packedGroups(core: Core): PackedGroup[] {
+  const nodes = core.nodes().toArray() as NodeSingular[];
+  return weaklyConnected(nodes, core, hubNodes(core, nodes))
+    .map((group) => ({
+      root: rootOf(group, core),
+      nodeIds: group.map((node) => node.id()),
+      box: boundsOf(group),
+    }))
+    .sort((left, right) => left.root.localeCompare(right.root));
+}
+
 export interface PackedOptions {
   gap?: number;
   aspect?: number;
@@ -191,6 +256,14 @@ export interface PackedOptions {
   unpacked?: ReadonlySet<string>;
   /** Layout used inside an unpacked group. Packed tiles always use a tight layered arrangement. */
   unpackedLayout?: UnpackedLayout;
+  /**
+   * Group roots collected into one band below the tiles.
+   *
+   * The unlinked screens are the reason this exists: left in the tiles they are scattered among the
+   * working groups and cannot be found, and hidden they look like a gap in the picture. A single band
+   * at the bottom makes "these types reach nothing" one place to look.
+   */
+  islands?: ReadonlySet<string>;
 }
 
 /** Tight internal spacing used inside a packed tile. */
@@ -303,14 +376,15 @@ function hubNodes(core: Core, nodes: NodeSingular[]): Set<string> {
  * root to the end of the group, in the layout the reader chose (Layered Down by default), and given a
  * full-width band above the tiles rather than being compressed into one.
  */
-export function packedLayout(core: Core, options: PackedOptions = {}): void {
+export function packedLayout(core: Core, options: PackedOptions = {}): PackedResult {
   const gap = options.gap ?? 70;
   const aspect = options.aspect ?? 1.7;
   const unpacked = options.unpacked ?? new Set<string>();
+  const islands = options.islands ?? new Set<string>();
   const unpackedLayout = options.unpackedLayout ?? DEFAULT_GRAPH_SETTINGS.unpackedLayout;
   const nodes = core.nodes().toArray() as NodeSingular[];
   if (nodes.length === 0) {
-    return;
+    return { groups: [], hubs: [], island: null };
   }
 
   /* A shared service — a navigation service injected by thirty view models — joins every group into
@@ -319,6 +393,15 @@ export function packedLayout(core: Core, options: PackedOptions = {}): void {
      placed next to the neighbours they serve. */
   const hubIds = hubNodes(core, nodes);
   const groups = weaklyConnected(nodes, core, hubIds);
+
+  // The class is what gives a hub its heavier ring, so the reader can see why the layout singled it
+  // out. Cleared first: a filter change can leave a stale mark on a node that is no longer a hub.
+  for (const node of nodes) {
+    node.removeClass('hub');
+  }
+  for (const id of hubIds) {
+    core.getElementById(id).addClass('hub');
+  }
 
   const components = groups
     .map((group) => {
@@ -342,7 +425,8 @@ export function packedLayout(core: Core, options: PackedOptions = {}): void {
     }
   };
 
-  const tiles = components.filter((entry) => !entry.unpacked);
+  const islandsOnCanvas = components.filter((entry) => !entry.unpacked && islands.has(entry.root));
+  const tiles = components.filter((entry) => !entry.unpacked && !islands.has(entry.root));
   const placements = packBoxes(
     tiles.map((component) => ({ width: component.width, height: component.height })),
     gap,
@@ -353,6 +437,10 @@ export function packedLayout(core: Core, options: PackedOptions = {}): void {
   // reading as part of the same picture instead of hanging off the left edge.
   const tilesWidth = placements.reduce(
     (widest, placement, index) => Math.max(widest, placement.x + tiles[index].width),
+    0,
+  );
+  const tilesHeight = placements.reduce(
+    (tallest, placement, index) => Math.max(tallest, placement.y + tiles[index].height),
     0,
   );
 
@@ -366,17 +454,41 @@ export function packedLayout(core: Core, options: PackedOptions = {}): void {
     place(component, placements[index].x, bandY + placements[index].y);
   });
 
+  // The island band sits below the tiles, so it reads as a footnote to the picture rather than as
+  // one more working group.
+  let island: GroupBox | null = null;
+  if (islandsOnCanvas.length > 0) {
+    const islandGap = gap * 0.6;
+    const islandPlacements = packBoxes(
+      islandsOnCanvas.map((component) => ({ width: component.width, height: component.height })),
+      islandGap,
+      Math.max(2, aspect * 1.6),
+    );
+    const islandY = bandY + tilesHeight + gap;
+    let minX = Number.POSITIVE_INFINITY;
+    let minY = Number.POSITIVE_INFINITY;
+    let maxX = Number.NEGATIVE_INFINITY;
+    let maxY = Number.NEGATIVE_INFINITY;
+
+    islandsOnCanvas.forEach((component, index) => {
+      const at = islandPlacements[index];
+      place(component, at.x, islandY + at.y);
+      minX = Math.min(minX, at.x);
+      minY = Math.min(minY, islandY + at.y);
+      maxX = Math.max(maxX, at.x + component.width);
+      maxY = Math.max(maxY, islandY + at.y + component.height);
+    });
+
+    island = { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+  }
+
   // A hub sits at the average of the neighbours already placed, so it lands inside the cluster it
   // serves instead of on top of one arbitrary group. Only tiled neighbours count: an unpacked band
   // owns its own strip, and averaging into it would drag the hub out of the picture.
   const tiledIds = new Set(tiles.flatMap((component) => component.nodes.map((node) => node.id())));
 
   for (const id of hubIds) {
-    const hub = core.getElementById(id);
-    if (hub.empty()) {
-      continue;
-    }
-    const hubNode = hub as NodeSingular;
+    const hubNode = core.getElementById(id) as NodeSingular;
     const all = hubNode.connectedEdges().connectedNodes().toArray()
       .filter((neighbour) => neighbour.id() !== id);
     const preferred = all.filter((neighbour) => tiledIds.has(neighbour.id()));
@@ -409,5 +521,15 @@ export function packedLayout(core: Core, options: PackedOptions = {}): void {
       hubNode.position(placed);
     }
   }
+
+  return {
+    groups: components.map((component) => ({
+      root: component.root,
+      nodeIds: component.nodes.map((node) => node.id()),
+      box: boundsOf(component.nodes),
+    })),
+    hubs: [...hubIds],
+    island,
+  };
 }
 

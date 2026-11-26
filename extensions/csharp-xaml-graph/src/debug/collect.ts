@@ -14,6 +14,9 @@ import type {
 import type { GraphModel } from '../graph/model';
 
 /** Assets the extension cannot work without, in the order the page lists them. */
+/** The configuration section this extension owns; every contributed key is declared under it. */
+const SECTION = 'csharpXamlGraph';
+
 const ASSET_PATHS = [
   'package.json',
   'out/extension.js',
@@ -52,13 +55,14 @@ function readVersionFromDisk(extensionPath: string): string {
   }
 }
 
-function extensionModeName(): string {
-  const mode = vscode.ExtensionMode;
-  const current = (vscode as unknown as { ExtensionMode?: number }).ExtensionMode;
-  if (current === mode?.Development) {
+function extensionModeName(context: vscode.ExtensionContext): string {
+  // `vscode.ExtensionMode` is the enum object; the run's own mode is on the context. Comparing the
+  // enum to itself reported "production" for every run, including a development build.
+  const current = (context as unknown as { extensionMode?: number }).extensionMode;
+  if (current === vscode.ExtensionMode.Development) {
     return 'development';
   }
-  if (current === mode?.Test) {
+  if (current === vscode.ExtensionMode.Test) {
     return 'test';
   }
   return 'production';
@@ -79,22 +83,27 @@ function collectSettings(context: vscode.ExtensionContext): SettingFact[] {
 
   let configuration: vscode.WorkspaceConfiguration | undefined;
   try {
-    configuration = vscode.workspace.getConfiguration('csharpXamlGraph');
+    configuration = vscode.workspace.getConfiguration(SECTION);
   } catch {
     configuration = undefined;
   }
 
   const settings: SettingFact[] = [];
   for (const key of keys.sort()) {
+    // A manifest key is fully qualified (`csharpXamlGraph.maxNodes`) while the configuration section
+    // is already open, so the section prefix has to come off before asking for the value. Leaving it
+    // on asked for `csharpXamlGraph.csharpXamlGraph.maxNodes`, which is never set, and every setting
+    // was then reported as its default.
+    const name = key.startsWith(`${SECTION}.`) ? key.slice(SECTION.length + 1) : key;
     if (!configuration) {
-      settings.push({ key, value: 'unavailable', source: 'unknown' });
+      settings.push({ key: name, value: 'unavailable', source: 'unknown' });
       continue;
     }
 
     let source = 'default';
     let value: unknown;
     try {
-      const inspected = configuration.inspect(key);
+      const inspected = configuration.inspect(name);
       if (inspected?.workspaceFolderValue !== undefined) {
         source = 'folder';
         value = inspected.workspaceFolderValue;
@@ -105,13 +114,13 @@ function collectSettings(context: vscode.ExtensionContext): SettingFact[] {
         source = 'user';
         value = inspected.globalValue;
       } else {
-        value = inspected?.defaultValue ?? configuration.get(key);
+        value = inspected?.defaultValue ?? configuration.get(name);
       }
     } catch {
-      value = configuration.get(key);
+      value = configuration.get(name);
     }
 
-    settings.push({ key, value: describeSettingValue(value), source });
+    settings.push({ key: name, value: describeSettingValue(value), source });
   }
 
   return settings;
@@ -188,7 +197,7 @@ function collectHostFacts(context: vscode.ExtensionContext): HostFacts {
   return {
     extensionVersion: manifest.version ?? readVersionFromDisk(context.extensionPath),
     vscodeVersion: (vscode as unknown as { version?: string }).version ?? 'unknown',
-    extensionMode: extensionModeName(),
+    extensionMode: extensionModeName(context),
     appHost: String((vscode.env as unknown as { appHost?: string }).appHost ?? 'unknown'),
     uiKind: uiKindName(),
     remoteName: String((vscode.env as unknown as { remoteName?: string }).remoteName ?? ''),

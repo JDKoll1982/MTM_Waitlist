@@ -11,3 +11,5 @@ coverage/
 # modules are invisible to git and a fresh clone builds an extension that cannot typecheck.
 !src/debug/
 !src/debug/**
+!test/debug/
+!test/debug/**

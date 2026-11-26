@@ -4,6 +4,7 @@ import {
   componentGroups,
   groupRootFor,
   packBoxes,
+  packedGroups,
   packedLayout,
 } from '../../src/webview/client/packing';
 import { createCore, edgeData, nodeData } from '../support/cytoscape';
@@ -210,5 +211,148 @@ describe('packedLayout: an unknown layout name', () => {
     packedLayout(core, { unpacked: new Set(['N.Root']), unpackedLayout: 'mystery' as never });
     expect(core.getElementById('N.Leaf').position().x)
       .toBeGreaterThan(core.getElementById('N.Root').position().x);
+  });
+});
+
+describe('packedLayout: the island band', () => {
+  const threeGroups = () => createCore([
+    nodeData('N.A1'), nodeData('N.A2'), edgeData('N.A1', 'N.A2'),
+    nodeData('N.B1'), nodeData('N.B2'), edgeData('N.B1', 'N.B2'),
+    nodeData('N.C1'), nodeData('N.C2'), edgeData('N.C1', 'N.C2'),
+  ]);
+
+  it('draws island groups below every tiled group', () => {
+    core = threeGroups();
+    const result = packedLayout(core, { islands: new Set(['N.C1']) });
+
+    const island = ['N.C1', 'N.C2'].map((id) => core!.getElementById(id).position().y);
+    const tiled = ['N.A1', 'N.B1'].map((id) => core!.getElementById(id).position().y);
+    expect(Math.min(...island)).toBeGreaterThan(Math.max(...tiled));
+    expect(result.island).not.toBeNull();
+  });
+
+  it('reports the island rectangle around the nodes it holds', () => {
+    core = threeGroups();
+    const result = packedLayout(core, { islands: new Set(['N.C1']) });
+    const positions = ['N.C1', 'N.C2'].map((id) => core!.getElementById(id).position());
+
+    expect(result.island!.x).toBeLessThanOrEqual(Math.min(...positions.map((p) => p.x)));
+    expect(result.island!.y).toBeLessThanOrEqual(Math.min(...positions.map((p) => p.y)));
+    expect(result.island!.x + result.island!.width).toBeGreaterThanOrEqual(Math.max(...positions.map((p) => p.x)));
+  });
+
+  it('reports no island band when nothing is marked', () => {
+    core = threeGroups();
+    expect(packedLayout(core).island).toBeNull();
+  });
+
+  it('keeps an unpacked group above the tiles even when islands exist', () => {
+    core = threeGroups();
+    packedLayout(core, { unpacked: new Set(['N.B1']), islands: new Set(['N.C1']) });
+
+    const unpacked = core.getElementById('N.B1').position().y;
+    const tiled = core.getElementById('N.A1').position().y;
+    const island = core.getElementById('N.C1').position().y;
+    expect(unpacked).toBeLessThan(tiled);
+    expect(tiled).toBeLessThan(island);
+  });
+});
+
+describe('packedLayout: hubs', () => {
+  /** A graph big enough for the hub threshold, with one type wired to everything. */
+  const hubGraph = (): Core => {
+    const elements = [nodeData('N.Hub')];
+    for (let index = 0; index < 130; index += 1) {
+      elements.push(nodeData(`N.Leaf${index}`), edgeData('N.Hub', `N.Leaf${index}`));
+    }
+    return createCore(elements);
+  };
+
+  it('marks the high-degree types so the layout decision is visible', () => {
+    core = hubGraph();
+    const result = packedLayout(core);
+    expect(result.hubs).toContain('N.Hub');
+    expect(core.getElementById('N.Hub').hasClass('hub')).toBe(true);
+  });
+
+  it('clears a stale mark on the next run', () => {
+    core = createCore([nodeData('N.Root'), nodeData('N.Leaf'), edgeData('N.Root', 'N.Leaf')]);
+    core.getElementById('N.Root').addClass('hub');
+    packedLayout(core);
+    expect(core.getElementById('N.Root').hasClass('hub')).toBe(false);
+  });
+
+  /** Two hubs wired to the same leaves share a centroid, which is where the collision happens. */
+  const twinHubs = (): Core => {
+    const elements = [nodeData('N.HubA'), nodeData('N.HubB')];
+    for (let index = 0; index < 120; index += 1) {
+      elements.push(
+        nodeData(`N.Leaf${index}`),
+        edgeData('N.HubA', `N.Leaf${index}`),
+        edgeData('N.HubB', `N.Leaf${index}`),
+      );
+    }
+    return createCore(elements);
+  };
+
+  it('moves a hub off a type it would otherwise land on top of', () => {
+    core = twinHubs();
+    const result = packedLayout(core);
+
+    expect(result.hubs).toContain('N.HubA');
+    expect(result.hubs).toContain('N.HubB');
+    const a = core.getElementById('N.HubA').position();
+    const b = core.getElementById('N.HubB').position();
+    const apart = Math.abs(a.x - b.x) >= 20 || Math.abs(a.y - b.y) >= 20;
+    expect(apart).toBe(true);
+  });
+
+  it('leaves a hub where it is when every neighbour sits in an unpacked band', () => {
+    // With no tiled neighbour there is no centroid to move to; the hub must simply stay put rather
+    // than be dragged into the band that owns the rest of the picture.
+    const elements = [nodeData('N.Hub')];
+    for (let index = 0; index < 120; index += 1) {
+      elements.push(nodeData(`N.Leaf${index}`), edgeData('N.Hub', `N.Leaf${index}`));
+      if (index > 0) {
+        elements.push(edgeData(`N.Leaf${index - 1}`, `N.Leaf${index}`));
+      }
+    }
+    core = createCore(elements);
+
+    const roots = componentGroups(core).map((group) => group.root);
+    expect(() => packedLayout(core!, { unpacked: new Set(roots) })).not.toThrow();
+    expect(Number.isFinite(core.getElementById('N.Hub').position().x)).toBe(true);
+  });
+});
+
+describe('packedGroups', () => {
+  it('reports each group with the rectangle it occupies', () => {
+    core = createCore([
+      nodeData('N.A'), nodeData('N.B'), edgeData('N.A', 'N.B'),
+      nodeData('N.C'),
+    ]);
+    packedLayout(core);
+    const groups = packedGroups(core);
+
+    expect(groups.map((group) => group.root)).toEqual(['N.A', 'N.C']);
+    const first = groups[0];
+    expect(first.nodeIds).toEqual(['N.A', 'N.B']);
+    expect(first.box.width).toBeGreaterThan(0);
+    expect(first.box.height).toBeGreaterThan(0);
+  });
+
+  it('reads the positions already on the canvas rather than laying anything out', () => {
+    core = createCore([nodeData('N.A'), nodeData('N.B'), edgeData('N.A', 'N.B')]);
+    core.getElementById('N.A').position({ x: 100, y: 200 });
+    core.getElementById('N.B').position({ x: 300, y: 200 });
+
+    const box = packedGroups(core)[0].box;
+    expect(box.x).toBeLessThan(100);
+    expect(box.x + box.width).toBeGreaterThan(300);
+  });
+
+  it('reports nothing for an empty canvas', () => {
+    core = createCore([]);
+    expect(packedGroups(core)).toEqual([]);
   });
 });

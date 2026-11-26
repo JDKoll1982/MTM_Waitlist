@@ -3,8 +3,11 @@ import dagre from 'cytoscape-dagre';
 import type { EdgeKind, Finding, GraphModel, NodeLayer } from '../../graph/model';
 import { EDGE_KIND_LABEL, EDGE_KINDS, FINDING_LABEL, NODE_LAYERS } from '../../graph/model';
 import { computeVisible, moduleSummary, type ViewOptions } from './view';
-import { componentGroups, groupRootFor, packedLayout } from './packing';
+import { componentGroups, groupRootFor, packedGroups, packedLayout, type GroupBox } from './packing';
 import { renderEdgeTooltip, renderTooltip, summariseEdge, summariseNode } from './tooltip';
+import { readTheme, type CanvasTheme } from './theme';
+import { renderMinimap } from './minimap';
+import { createOverlay, type Overlay, type OverlayFrame } from './overlay';
 import { DEFAULT_GRAPH_SETTINGS, UNPACKED_LAYOUT_LABEL, toUnpackedLayout, type GraphSettings } from '../../graph/settings';
 
 cytoscape.use(dagre);
@@ -37,6 +40,15 @@ const GEOMETRY: Record<DensityName, Geometry> = {
   roomy: { nodeSize: 24, viewWidth: 42, viewHeight: 26, fontSize: 12, nodeSep: 34, rankSep: 145, textMaxWidth: 125 },
 };
 
+/**
+ * Characters a label may keep before it is shortened in the middle.
+ *
+ * A name is cut from its middle rather than its end because the end is what distinguishes two types:
+ * `SettingsPageBase` and `SettingsPageHost` share a useless prefix and differ in their last four
+ * letters, so an end truncation makes them indistinguishable.
+ */
+const LABEL_LIMIT: Record<DensityName, number> = { compact: 16, normal: 24, roomy: 30 };
+
 const LAYER_COLOURS: Record<NodeLayer, string> = {
   view: '#4a9eff',
   viewmodel: '#2fbf71',
@@ -44,6 +56,16 @@ const LAYER_COLOURS: Record<NodeLayer, string> = {
   model: '#9b8cff',
   external: '#8a8a8a',
 };
+
+/** Shortens a label in the middle, keeping both ends, so two similar names stay distinguishable. */
+function shortenLabel(label: string, limit: number): string {
+  if (label.length <= limit || limit < 5) {
+    return label;
+  }
+  const head = Math.ceil((limit - 1) / 2);
+  const tail = Math.floor((limit - 1) / 2);
+  return `${label.slice(0, head)}…${label.slice(label.length - tail)}`;
+}
 
 /** Zoom below which labels are suppressed in `zoom` mode, so a busy graph stays readable. */
 const LABEL_ZOOM_THRESHOLD = 0.62;
@@ -80,6 +102,14 @@ const ui = {
   labels: 'zoom' as LabelName,
   hideOrphans: true,
   onlyProblems: false,
+  /** Fade everything outside the selected type's neighbourhood, so the local tree reads on its own. */
+  dimSelection: true,
+  /** Caption each packed group with its root type and size. */
+  groupCaptions: true,
+  /** Outline each module's region, where the region is coherent enough to be worth drawing. */
+  moduleFrames: true,
+  /** Collect groups holding an unlinked view into one band below the tiles. */
+  islandTray: true,
   focus: null as string | null,
   focusDepth: 1,
   /** Group roots the reader unpacked by right-clicking them. */
@@ -108,6 +138,24 @@ let tooltipTimer: ReturnType<typeof setTimeout> | undefined;
 
 /** Findings that point at each node, so a hover can say what is wrong with the type under it. */
 let findingsByNode = new Map<string, Finding[]>();
+
+/** The canvas palette, re-read whenever the editor theme changes. */
+let theme: CanvasTheme = readTheme();
+
+/** The DOM layer that paints group, island and module frames over the canvas. */
+let overlay: Overlay | undefined;
+
+/** The id of the type the reader last selected, which is what the dimming is centred on. */
+let selectedId: string | null = null;
+
+/** Rectangle of the island band from the last packed run, so its caption lands on the band. */
+let islandBox: GroupBox | null = null;
+
+/** Node ids collected into the island band, kept so the caption can count them. */
+let islandIds: string[] = [];
+
+/** The captions and region frames, in model coordinates; only re-projected on a pan or a zoom. */
+let overlayFrames: OverlayFrame[] = [];
 
 /**
  * Last known position of every node.
@@ -156,6 +204,13 @@ function diagnosticsFacts(): Record<string, unknown> {
     scope: ui.scope,
     scopeExact: ui.scopeExact,
     unpacked: [...ui.unpacked],
+    selectedId,
+    islandNodes: islandIds.length,
+    dimSelection: ui.dimSelection,
+    groupCaptions: ui.groupCaptions,
+    moduleFrames: ui.moduleFrames,
+    islandTray: ui.islandTray,
+    themeLight: theme.light,
     history: [...eventLog].reverse().slice(0, 12),
   };
 }
@@ -197,7 +252,12 @@ const options = (): ViewOptions => ({
 
 function buildStyle(): cytoscape.StylesheetStyle[] {
   const geometry = GEOMETRY[ui.density];
-  const label = labelsVisible ? 'data(label)' : '';
+  const label = labelsVisible
+    ? (node: cytoscape.NodeSingular) => String(node.data('shortLabel') ?? node.data('label') ?? '')
+    : '';
+  // Roomy density has the space to break a long identifier across lines, so nothing is lost; the
+  // tighter densities rely on the middle-shortened label instead.
+  const wraps = ui.density === 'roomy';
 
   return [
     {
@@ -205,23 +265,26 @@ function buildStyle(): cytoscape.StylesheetStyle[] {
       style: {
         label,
         'font-size': geometry.fontSize,
-        color: '#e8e8e8',
+        color: theme.label,
         'text-valign': 'bottom',
         'text-halign': 'center',
         'text-margin-y': 3,
         'text-max-width': `${geometry.textMaxWidth}px`,
-        'text-wrap': 'ellipsis',
+        'text-wrap': wraps ? 'wrap' : 'ellipsis',
+        'text-overflow-wrap': wraps ? 'anywhere' : 'whitespace',
         'background-color': (node) => LAYER_COLOURS[node.data('layer') as NodeLayer] ?? '#888888',
         width: geometry.nodeSize,
         height: geometry.nodeSize,
         'border-width': 1,
-        'border-color': '#141414',
-        'text-outline-color': '#0d0d0d',
+        'border-color': theme.nodeBorder,
+        'text-outline-color': theme.labelOutline,
         'text-outline-width': 2,
         'overlay-opacity': 0,
         'min-zoomed-font-size': 6,
       },
     },
+    // Each layer gets its own silhouette, so the layer survives a low zoom where the label is not
+    // drawn and survives colour blindness, where five hues are not five categories.
     {
       selector: 'node.layer-view',
       style: {
@@ -236,17 +299,25 @@ function buildStyle(): cytoscape.StylesheetStyle[] {
       style: { shape: 'round-rectangle' },
     },
     {
+      selector: 'node.layer-service',
+      style: { shape: 'hexagon' },
+    },
+    {
+      selector: 'node.layer-model',
+      style: { shape: 'ellipse' },
+    },
+    {
       selector: 'node.layer-external',
       style: {
+        shape: 'ellipse',
         'background-opacity': 0.1,
         'border-style': 'dashed',
-        'border-color': '#9a9a9a',
-        color: '#b6b6b6',
+        'border-color': theme.edgeMuted,
       },
     },
     {
       selector: 'node[?diRegistered]',
-      style: { 'border-width': 3, 'border-color': '#ffffff' },
+      style: { 'border-width': 3, 'border-color': theme.highlight },
     },
     {
       selector: 'node.flagged',
@@ -257,8 +328,14 @@ function buildStyle(): cytoscape.StylesheetStyle[] {
       style: { 'border-width': 3.5, 'border-color': '#ef4444', 'border-style': 'solid' },
     },
     {
+      // A hub is a type almost everything touches. Marking it explains why the layout pulled it out
+      // of the tiles and put it between the groups it serves.
+      selector: 'node.hub',
+      style: { 'border-width': 3, 'border-color': theme.edgeMuted, 'border-style': 'double' },
+    },
+    {
       selector: 'node.focused',
-      style: { 'border-width': 4, 'border-color': '#ffffff', 'overlay-opacity': 0.12, 'overlay-color': '#ffffff' },
+      style: { 'border-width': 4, 'border-color': theme.highlight, 'overlay-opacity': 0.12, 'overlay-color': theme.highlight },
     },
     {
       selector: 'node.hovered',
@@ -266,14 +343,20 @@ function buildStyle(): cytoscape.StylesheetStyle[] {
     },
     {
       selector: 'node.hover-source',
-      style: { 'border-width': 4, 'border-color': '#ffffff' },
+      style: { 'border-width': 4, 'border-color': theme.highlight },
+    },
+    {
+      // Dimming is what makes one tree legible inside a picture of nine hundred nodes: the rest of
+      // the graph stays as context instead of competing for the same attention.
+      selector: 'node.dimmed',
+      style: { opacity: 0.16 },
     },
     {
       selector: 'edge',
       style: {
         width: 1.4,
-        'line-color': '#6b6b6b',
-        'target-arrow-color': '#6b6b6b',
+        'line-color': theme.edge,
+        'target-arrow-color': theme.edge,
         'target-arrow-shape': 'triangle',
         'curve-style': 'bezier',
         'arrow-scale': 0.8,
@@ -288,16 +371,17 @@ function buildStyle(): cytoscape.StylesheetStyle[] {
     { selector: 'edge.edge-field', style: { 'line-style': 'dashed', 'line-color': '#4a9eff', 'target-arrow-color': '#4a9eff' } },
     { selector: 'edge.edge-constructs', style: { 'line-color': '#c084fc', 'target-arrow-color': '#c084fc' } },
     { selector: 'edge.edge-composes', style: { 'line-style': 'dotted', 'line-color': '#c084fc', 'target-arrow-color': '#c084fc' } },
-    { selector: 'edge.edge-implements', style: { 'line-style': 'dashed', 'line-color': '#8a8a8a', 'target-arrow-color': '#8a8a8a', 'target-arrow-shape': 'diamond' } },
-    { selector: 'edge.edge-inherits', style: { 'line-color': '#8a8a8a', 'target-arrow-color': '#8a8a8a' } },
-    { selector: 'edge.edge-template', style: { 'line-style': 'dotted', 'line-color': '#555555', opacity: 0.3 } },
+    { selector: 'edge.edge-implements', style: { 'line-style': 'dashed', 'line-color': theme.edgeMuted, 'target-arrow-color': theme.edgeMuted, 'target-arrow-shape': 'diamond' } },
+    { selector: 'edge.edge-inherits', style: { 'line-color': theme.edgeMuted, 'target-arrow-color': theme.edgeMuted } },
+    { selector: 'edge.edge-template', style: { 'line-style': 'dotted', 'line-color': theme.edgeMuted, opacity: 0.3 } },
     { selector: 'edge.neighbour', style: { opacity: 1, width: 2.6 } },
     {
       selector: 'edge.hovered-edge',
-      style: { opacity: 1, width: 3.4, 'line-color': '#ffffff', 'target-arrow-color': '#ffffff', 'z-index': 20 },
+      style: { opacity: 1, width: 3.4, 'line-color': theme.highlight, 'target-arrow-color': theme.highlight, 'z-index': 20 },
     },
-    { selector: 'edge.member-match', style: { opacity: 1, width: 3.2, 'line-color': '#ffffff', 'target-arrow-color': '#ffffff' } },
-    { selector: 'node.unpacked-group', style: { 'underlay-color': '#4a9eff', 'underlay-opacity': 0.07, 'underlay-padding': 26 } },
+    { selector: 'edge.member-match', style: { opacity: 1, width: 3.2, 'line-color': theme.highlight, 'target-arrow-color': theme.highlight } },
+    { selector: 'edge.dimmed', style: { opacity: 0.06 } },
+    { selector: 'node.unpacked-group', style: { 'underlay-color': theme.underlay, 'underlay-opacity': 0.07, 'underlay-padding': 26 } },
   ];
 }
 
@@ -323,6 +407,311 @@ function syncLabels(): void {
   if (shouldShow !== labelsVisible) {
     labelsVisible = shouldShow;
     refreshStyle();
+  }
+}
+
+/** Re-reads the palette and repaints: what an editor theme switch needs. */
+function applyTheme(): void {
+  theme = readTheme();
+  refreshStyle();
+  // A theme switch can arrive while the workspace is still being analysed, so this runs through the
+  // same no-canvas guards as a paint from any other source.
+  paintOverlay();
+  refreshOverlayFrames();
+  paintMinimap();
+}
+
+/**
+ * Watches the body for a theme change.
+ *
+ * VS Code signals a theme switch by rewriting the body class (`vscode-light`, `vscode-dark`,
+ * `vscode-high-contrast`) and the `--vscode-*` custom properties, not by sending a message, so the
+ * attribute is the only reliable signal.
+ */
+function watchTheme(): void {
+  const observer = new MutationObserver(() => applyTheme());
+  observer.observe(document.body, {
+    attributes: true,
+    attributeFilter: ['class', 'data-vscode-theme-kind'],
+  });
+}
+
+/* ---------------------------------------------------------------- dimming */
+
+/**
+ * Fades everything outside the selected type's immediate neighbourhood.
+ *
+ * In a picture of nine hundred nodes every line competes equally, so the one tree the reader picked
+ * cannot be seen. Dimming rather than hiding keeps the rest as context: the shape of the whole graph
+ * survives, and the local tree is the only thing at full strength.
+ */
+function applyDimming(): void {
+  if (!cy) {
+    return;
+  }
+  cy.elements().removeClass('dimmed');
+  if (!ui.dimSelection) {
+    return;
+  }
+
+  const anchor = selectedId ?? ui.focus;
+  if (!anchor) {
+    return;
+  }
+  const node = cy.getElementById(anchor);
+  if (node.empty()) {
+    return;
+  }
+
+  const keep = new Set<string>([anchor]);
+  (node as NodeSingular).connectedEdges().connectedNodes().forEach((neighbour) => {
+    keep.add(neighbour.id());
+  });
+
+  cy.nodes().forEach((candidate) => {
+    if (!keep.has(candidate.id())) {
+      candidate.addClass('dimmed');
+    }
+  });
+  cy.edges().forEach((edge) => {
+    if (!keep.has(edge.source().id()) || !keep.has(edge.target().id())) {
+      edge.addClass('dimmed');
+    }
+  });
+}
+
+/* ---------------------------------------------------------------- overlay */
+
+/** Model coordinates to the transform the overlay needs to place a frame. */
+
+/** The type a group starts at, without its namespace. */
+function groupCaption(root: string): string {
+  const node = model?.nodes.find((candidate) => candidate.id === root);
+  return node?.label ?? root.split('.').pop() ?? root;
+}
+
+/** Fraction of the smaller of two boxes that the two share. */
+function overlapRatio(left: GroupBox, right: GroupBox): number {
+  const width = Math.min(left.x + left.width, right.x + right.width) - Math.max(left.x, right.x);
+  const height = Math.min(left.y + left.height, right.y + right.height) - Math.max(left.y, right.y);
+  if (width <= 0 || height <= 0) {
+    return 0;
+  }
+  const smaller = Math.min(left.width * left.height, right.width * right.height);
+  return smaller <= 0 ? 0 : (width * height) / smaller;
+}
+
+/**
+ * Module boundaries, but only the honest ones.
+ *
+ * Packed tiling does not respect modules, so one module's types can be spread across the whole
+ * picture. Drawing a box around them would then claim territory another module also sits in, which is
+ * worse than drawing nothing: a frame is kept only when it does not share most of its area with
+ * another module's frame.
+ */
+function moduleFrames(core: Core): OverlayFrame[] {
+  const boxes = new Map<string, GroupBox & { nodes: number }>();
+  core.nodes().forEach((node) => {
+    const name = String(node.data('module') ?? '');
+    if (!name) {
+      return;
+    }
+    const position = node.position();
+    const half = 16;
+    const existing = boxes.get(name);
+    if (existing) {
+      const minX = Math.min(existing.x, position.x - half);
+      const minY = Math.min(existing.y, position.y - half);
+      existing.width = Math.max(existing.x + existing.width, position.x + half) - minX;
+      existing.height = Math.max(existing.y + existing.height, position.y + half) - minY;
+      existing.x = minX;
+      existing.y = minY;
+      existing.nodes += 1;
+    } else {
+      boxes.set(name, {
+        x: position.x - half,
+        y: position.y - half,
+        width: half * 2,
+        height: half * 2,
+        nodes: 1,
+      });
+    }
+  });
+
+  // A module of one or two types is a label on a dot, not a region.
+  const candidates = [...boxes].filter(([, box]) => box.nodes >= 3);
+  const frames: OverlayFrame[] = [];
+  for (const [name, box] of candidates) {
+    const contested = candidates.some(([other, otherBox]) =>
+      other !== name && overlapRatio(box, otherBox) > 0.5);
+    if (!contested && frames.length < 12) {
+      frames.push({
+        id: `module:${name}`,
+        label: name,
+        x: box.x,
+        y: box.y,
+        width: box.width,
+        height: box.height,
+        tone: 'module',
+      });
+    }
+  }
+  return frames;
+}
+
+/** Paints the captions and region frames for the current viewport. */
+function paintOverlay(): void {
+  const core = liveCanvas();
+  if (!overlay || !core) {
+    overlay?.clear();
+    return;
+  }
+  const pan = core.pan();
+  overlay.paint(overlayFrames, { zoom: core.zoom(), panX: pan.x, panY: pan.y }, {
+    width: core.width(),
+    height: core.height(),
+  });
+}
+
+/**
+ * Recomputes the frames from the graph.
+ *
+ * Frames live in model coordinates, so a pan or a zoom only has to re-project them. Recomputing the
+ * connected pieces on every frame of a drag would do real work sixty times a second for a picture
+ * that has not changed, which is why this runs on a layout or a filter change instead.
+ */
+function refreshOverlayFrames(): void {
+  const core = liveCanvas();
+  if (!core || !model) {
+    overlayFrames = [];
+    overlay?.clear();
+    return;
+  }
+
+  const frames: OverlayFrame[] = [];
+  const groups = packedGroups(core);
+
+  if (ui.moduleFrames && ui.module === 'all') {
+    frames.push(...moduleFrames(core));
+  }
+  if (ui.groupCaptions) {
+    // Past a few dozen captions the picture becomes a wall of text, so only the groups big enough to
+    // be worth naming keep a label.
+    const minimum = groups.length > 40 ? 4 : 2;
+    for (const group of groups.filter((entry) => entry.nodeIds.length >= minimum).slice(0, 80)) {
+      frames.push({
+        id: `group:${group.root}`,
+        label: `${groupCaption(group.root)} · ${group.nodeIds.length}`,
+        ...group.box,
+        tone: 'group',
+      });
+    }
+  }
+  if (ui.islandTray && islandBox && islandIds.length > 0) {
+    frames.push({
+      id: 'island',
+      label: `Nothing links these to a view model · ${islandIds.length}`,
+      ...islandBox,
+      tone: 'island',
+    });
+  }
+
+  overlayFrames = frames;
+  paintOverlay();
+}
+
+/* ---------------------------------------------------------------- minimap */
+
+/** Size of the overview box; the height follows the graph's own aspect so the mapping stays linear. */
+const MINIMAP_WIDTH = 168;
+
+/** The markup currently in the overview, so an unchanged picture is not rewritten. */
+let lastMinimapMarkup = '';
+
+/** Repaints the overview picture: dots for every type, a box for what is on screen. */
+function paintMinimap(): void {
+  const host = document.getElementById('minimap');
+  if (!host) {
+    return;
+  }
+  const core = liveCanvas();
+  if (!core || core.nodes().length === 0 || core.width() <= 0 || core.height() <= 0) {
+    host.hidden = true;
+    host.innerHTML = '';
+    return;
+  }
+
+  const bounds = core.elements().boundingBox();
+  const spanX = Math.max(1, bounds.x2 - bounds.x1);
+  const spanY = Math.max(1, bounds.y2 - bounds.y1);
+  // Matching the box to the graph's aspect means no letterboxing, so a click maps linearly.
+  const height = Math.max(64, Math.min(240, Math.round(MINIMAP_WIDTH / (spanX / spanY))));
+  const viewport = core.extent();
+
+  const markup = renderMinimap({
+    nodes: core.nodes().map((node) => ({
+      x: node.position().x,
+      y: node.position().y,
+      layer: String(node.data('layer') ?? ''),
+    })),
+    bounds: { minX: bounds.x1, minY: bounds.y1, maxX: bounds.x2, maxY: bounds.y2 },
+    viewport: { x1: viewport.x1, y1: viewport.y1, x2: viewport.x2, y2: viewport.y2 },
+    width: MINIMAP_WIDTH,
+    height,
+    colours: LAYER_COLOURS,
+    background: theme.background,
+  });
+
+  host.hidden = !markup;
+  // A pan changes only the viewport rectangle, so most frames produce identical markup; rewriting
+  // the same SVG several times a second is pure DOM churn.
+  if (markup !== lastMinimapMarkup) {
+    host.innerHTML = markup;
+    lastMinimapMarkup = markup;
+  }
+  host.style.width = `${MINIMAP_WIDTH}px`;
+  host.style.height = `${height}px`;
+}
+
+/** Centres the canvas on a point given as a fraction of the overview box. */
+function centreOnMinimapFraction(fx: number, fy: number): void {
+  const core = liveCanvas();
+  if (!core) {
+    return;
+  }
+  const bounds = core.elements().boundingBox();
+  const modelX = bounds.x1 + Math.min(1, Math.max(0, fx)) * (bounds.x2 - bounds.x1);
+  const modelY = bounds.y1 + Math.min(1, Math.max(0, fy)) * (bounds.y2 - bounds.y1);
+  const zoom = core.zoom();
+  core.pan({ x: core.width() / 2 - modelX * zoom, y: core.height() / 2 - modelY * zoom });
+  paintOverlay();
+  paintMinimap();
+  syncZoomSlider();
+}
+
+/** The overlay follows every pan frame; the overview is cheaper to refresh a little less often. */
+let viewportFrame: number | null = null;
+let minimapTimer: ReturnType<typeof setTimeout> | undefined;
+
+function scheduleViewportPaint(): void {
+  if (viewportFrame === null) {
+    const run = (): void => {
+      viewportFrame = null;
+      if (liveCanvas()) {
+        paintOverlay();
+      }
+    };
+    viewportFrame = typeof requestAnimationFrame === 'function'
+      ? requestAnimationFrame(run)
+      : (setTimeout(run, 16) as unknown as number);
+  }
+  if (minimapTimer === undefined) {
+    minimapTimer = setTimeout(() => {
+      minimapTimer = undefined;
+      if (liveCanvas()) {
+        paintMinimap();
+      }
+    }, 120);
   }
 }
 
@@ -361,9 +750,10 @@ function frame(focusId: string | null): void {
   }
 
   syncLabels();
+  applyDimming();
+  refreshOverlayFrames();
+  paintMinimap();
 }
-
-/* ---------------------------------------------------------------- layout */
 
 function layoutFor(name: LayoutName): LayoutOptions {
   const geometry = GEOMETRY[ui.density];
@@ -428,6 +818,39 @@ function layoutFor(name: LayoutName): LayoutOptions {
   }
 }
 
+/**
+ * Group roots that hold a view nothing binds to.
+ *
+ * These are the screens with no view model: genuinely orphaned, and the reason the picture looks like
+ * it has holes. Collecting each such group into one band is what turns "where are the unlinked
+ * screens" into a single place to look.
+ */
+function islandRoots(core: Core): Set<string> {
+  const roots = new Set<string>();
+  if (!ui.islandTray || !model) {
+    return roots;
+  }
+
+  const unlinked = new Set<string>();
+  for (const finding of model.findings) {
+    if (finding.kind === 'unbound-view') {
+      for (const id of finding.nodeIds) {
+        unlinked.add(id);
+      }
+    }
+  }
+  if (unlinked.size === 0) {
+    return roots;
+  }
+
+  for (const group of componentGroups(core)) {
+    if (group.nodeIds.some((id) => unlinked.has(id))) {
+      roots.add(group.root);
+    }
+  }
+  return roots;
+}
+
 function runLayout(): void {
   const core = liveCanvas();
   if (!core) {
@@ -440,17 +863,25 @@ function runLayout(): void {
 
   if (ui.layout === 'packed') {
     const geometry = GEOMETRY[ui.density];
-    packedLayout(core, {
+    const islands = islandRoots(core);
+    const result = packedLayout(core, {
       gap: geometry.rankSep * 0.7,
       aspect: canvasAspect(),
       nodeSep: geometry.nodeSep,
       rankSep: geometry.rankSep,
       unpacked: ui.unpacked,
       unpackedLayout: ui.unpackedLayout,
+      islands,
     });
+    islandBox = result.island;
+    islandIds = islands.size === 0
+      ? []
+      : result.groups.filter((group) => islands.has(group.root)).flatMap((group) => group.nodeIds);
     markUnpackedGroups();
   } else {
-    core.nodes().removeClass('unpacked-group');
+    core.nodes().removeClass('unpacked-group').removeClass('hub');
+    islandBox = null;
+    islandIds = [];
     core.layout(layoutFor(ui.layout)).run();
   }
 
@@ -578,6 +1009,8 @@ function elementsFor(visible: { nodeIds: Set<string>; edges: { id: string; sourc
       data: {
         id: node.id,
         label: node.label,
+        // Middle-shortened for the canvas; the full name is what the tooltip and the details pane use.
+        shortLabel: shortenLabel(node.label, LABEL_LIMIT[ui.density]),
         fullName: node.fullName,
         layer: node.layer,
         module: node.module,
@@ -772,7 +1205,9 @@ function mount(): void {
   cy.on('tap', 'node', (event) => {
     hideTooltip();
     const node = event.target as NodeSingular;
+    selectedId = node.id();
     showDetails(node);
+    applyDimming();
   });
 
   cy.on('dbltap', 'node', (event) => {
@@ -786,7 +1221,9 @@ function mount(): void {
 
   cy.on('tap', (event) => {
     if (event.target === cy) {
+      selectedId = null;
       showDetails(undefined);
+      applyDimming();
     }
   });
 
@@ -863,6 +1300,7 @@ function mount(): void {
   cy.on('pan zoom', () => {
     closeNodeMenu();
     hideTooltip();
+    scheduleViewportPaint();
   });
 
   cy.on('zoom', () => {
@@ -892,8 +1330,17 @@ function mount(): void {
 
   const observer = new ResizeObserver(() => {
     liveCanvas()?.resize();
+    scheduleViewportPaint();
+    paintMinimap();
   });
   observer.observe(element<HTMLDivElement>('cy'));
+
+  const canvasHost = document.getElementById('canvas');
+  // Created once: a re-analysis replaces the cytoscape core but not the canvas, and a second overlay
+  // layer would leave the previous one's frames painted underneath the new graph.
+  if (canvasHost && !overlay) {
+    overlay = createOverlay(canvasHost);
+  }
 }
 
 /* ---------------------------------------------------------------- context menu */
@@ -1274,6 +1721,7 @@ function resetView(): void {
   ui.scopeLabel = '';
   ui.member = null;
   ui.unpacked.clear();
+  selectedId = null;
   applyView(true);
 }
 
@@ -1464,6 +1912,7 @@ function showDetails(node: NodeSingular | undefined): void {
 
 /** Selects a node by id, applies the focus, and refreshes the details panel for it. */
 function showSelected(id: string): void {
+  selectedId = id;
   applyView(true);
   if (!cy) {
     return;
@@ -1580,6 +2029,12 @@ const PRESETS: Record<string, { layers: NodeLayer[]; edges: EdgeKind[] }> = {
   structure: {
     layers: ['view', 'viewmodel', 'service', 'model'],
     edges: ['reference', 'inherits', 'implements'],
+  },
+  inheritance: {
+    // The class hierarchy is invisible in every other preset because base types and interfaces are
+    // structural, not behavioural. This is the one view that shows what derives from what.
+    layers: [...NODE_LAYERS],
+    edges: ['inherits', 'implements', 'template', 'reference'],
   },
   cleanup: {
     layers: ['view', 'viewmodel', 'service', 'model'],
@@ -1767,6 +2222,40 @@ function wireControls(): void {
     applyView(true);
   });
 
+  const wireCheck = (
+    id: string,
+    value: () => boolean,
+    set: (next: boolean) => void,
+    onChange: () => void,
+  ): void => {
+    const box = document.getElementById(id) as HTMLInputElement | null;
+    if (!box) {
+      return;
+    }
+    box.checked = value();
+    box.addEventListener('change', () => {
+      set(box.checked);
+      onChange();
+    });
+  };
+
+  wireCheck('dim-selection', () => ui.dimSelection, (next) => { ui.dimSelection = next; }, applyDimming);
+  wireCheck('group-captions', () => ui.groupCaptions, (next) => { ui.groupCaptions = next; }, refreshOverlayFrames);
+  wireCheck('module-frames', () => ui.moduleFrames, (next) => { ui.moduleFrames = next; }, refreshOverlayFrames);
+  wireCheck('island-tray', () => ui.islandTray, (next) => { ui.islandTray = next; }, () => applyView(true));
+
+  const minimap = document.getElementById('minimap');
+  minimap?.addEventListener('pointerdown', (event) => {
+    const rect = minimap.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) {
+      return;
+    }
+    centreOnMinimapFraction(
+      (event.clientX - rect.left) / rect.width,
+      (event.clientY - rect.top) / rect.height,
+    );
+  });
+
   element<HTMLButtonElement>('tab-details').addEventListener('click', () => setTab('details'));
   element<HTMLButtonElement>('tab-problems').addEventListener('click', () => setTab('problems'));
   element<HTMLButtonElement>('legend-open').addEventListener('click', () => setLegend(true));
@@ -1779,6 +2268,7 @@ function wireControls(): void {
 
   element<HTMLButtonElement>('preset-mvvm').addEventListener('click', () => applyPreset('mvvm'));
   element<HTMLButtonElement>('preset-structure').addEventListener('click', () => applyPreset('structure'));
+  element<HTMLButtonElement>('preset-inheritance').addEventListener('click', () => applyPreset('inheritance'));
   element<HTMLButtonElement>('preset-cleanup').addEventListener('click', () => applyPreset('cleanup'));
   element<HTMLButtonElement>('preset-all').addEventListener('click', () => applyPreset('all'));
 
@@ -2026,6 +2516,7 @@ window.addEventListener('message', (event: MessageEvent) => {
     ui.member = null;
     ui.scopeLabel = '';
     ui.unpacked.clear();
+    selectedId = null;
     lastPositions.clear();
     populateModules();
     mount();
@@ -2064,6 +2555,7 @@ window.addEventListener('message', (event: MessageEvent) => {
 
 wireControls();
 wireViewControls();
+watchTheme();
 setTab('details');
 vscode.postMessage({ type: 'ready' });
 

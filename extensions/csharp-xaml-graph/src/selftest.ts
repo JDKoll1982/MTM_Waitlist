@@ -5,7 +5,7 @@ import type { GraphModel } from './graph/model';
 import type { Finding } from './graph/model';
 import { EDGE_KINDS, NODE_LAYERS } from './graph/model';
 import { computeVisible, moduleSummary } from './webview/client/view';
-import { componentGroups, groupRootFor, packedLayout } from './webview/client/packing';
+import { componentGroups, groupRootFor, packedGroups, packedLayout } from './webview/client/packing';
 import { renderHtml } from './webview/html';
 import { renderMenuHtml } from './menu/menuHtml';
 import { DEFAULT_GRAPH_SETTINGS } from './graph/settings';
@@ -760,8 +760,27 @@ async function main(): Promise<void> {
 
   checks.push({
     name: 'the legend explains the state rings (DI, cycle, finding)',
+    // The DI ring is described by role rather than by colour: on a light theme the ring is dark, so
+    // "white ring" was only ever true of the dark palette.
     passed: html.includes('#ffffff') && html.includes('#ef4444') && html.includes('#f59e0b')
-      && html.includes('White ring') && html.includes('Red ring') && html.includes('Amber dashed ring'),
+      && html.includes('Bright ring') && html.includes('Red ring') && html.includes('Amber dashed ring'),
+  });
+
+  checks.push({
+    name: 'the legend documents the shapes, the region frames and the overview',
+    passed: html.includes('Every layer has its own silhouette')
+      && html.includes('Regions drawn over the canvas')
+      && html.includes('Group frame')
+      && html.includes('Module frame')
+      && html.includes('Unlinked band')
+      && html.includes('Overview.')
+      && html.includes('<polygon'),
+  });
+
+  checks.push({
+    name: 'the panel carries the overview, the region toggles and the inheritance preset',
+    passed: ['minimap', 'dim-selection', 'group-captions', 'module-frames', 'island-tray', 'preset-inheritance']
+      .every((id) => html.includes(`id="${id}"`)),
   });
 
   checks.push({
@@ -1119,6 +1138,30 @@ async function main(): Promise<void> {
       && manifestText.includes('"csharpXamlGraph.unpackedLayout"')
       && /"csharpXamlGraph\.unpackedLayout"[\s\S]*?"default": "layered-tb"/.test(manifestText),
   });
+
+  // The canvas captions each packed shape, so the group boxes have to be real rectangles over the
+  // nodes they name — a box of zero size would caption nothing, and one that misses its nodes would
+  // caption the wrong part of the picture.
+  const captionGraph = cytoscape({ headless: true, elements: [...layoutElements, ...layoutEdges] });
+  packedLayout(captionGraph, { gap: 66, aspect: 1.7 });
+  const captions = packedGroups(captionGraph);
+  const badBoxes = captions.filter((group) => {
+    const box = group.box;
+    if (!(box.width > 0) || !(box.height > 0)) {
+      return true;
+    }
+    return group.nodeIds.some((id) => {
+      const position = captionGraph.getElementById(id).position();
+      return position.x < box.x - 1 || position.x > box.x + box.width + 1
+        || position.y < box.y - 1 || position.y > box.y + box.height + 1;
+    });
+  });
+  checks.push({
+    name: 'every packed shape reports a caption box that covers the types it names',
+    passed: hasChart && captions.length > 0 && badBoxes.length === 0,
+    detail: `${captions.length} groups, ${badBoxes.length} with a box that misses its own nodes`,
+  });
+  captionGraph.destroy();
 
   unpackGraph.destroy();
 

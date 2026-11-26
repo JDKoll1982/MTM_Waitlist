@@ -1362,3 +1362,167 @@ describe('main: a request that names no selectable shape', () => {
 
 
 
+
+/* --------------------------------------------------------------- appearance */
+
+describe('main: reading one tree inside a big picture', () => {
+  /** Draws every layer, so the neighbours of a selected type are really on the canvas. */
+  const showEverything = async (): Promise<void> => {
+    click('preset-all');
+    await tick(10);
+  };
+
+  it('fades every type outside the selected type neighbourhood', async () => {
+    await showEverything();
+    emitNode('tap', 'N.Views.SamplePage');
+    await tick(20);
+
+    expect(node('N.Views.SamplePage').hasClass('dimmed')).toBe(false);
+    expect(node('N.ViewModels.SampleViewModel').hasClass('dimmed')).toBe(false);
+    expect(node('N.Services.PartStore').hasClass('dimmed')).toBe(true);
+    expect(node('N.Models.Lonely').hasClass('dimmed')).toBe(true);
+    expect(node('e1').hasClass('dimmed')).toBe(false);
+    expect(node('e3').hasClass('dimmed')).toBe(true);
+  });
+
+  it('brings the whole graph back when empty canvas is clicked', async () => {
+    await showEverything();
+    emitNode('tap', 'N.Views.SamplePage');
+    await tick(20);
+    expect(node('N.Models.Lonely').hasClass('dimmed')).toBe(true);
+
+    emitBackground('tap');
+    await tick(20);
+    expect(core.nodes().filter((candidate) => candidate.hasClass('dimmed')).length).toBe(0);
+  });
+
+  it('can be switched off, leaving every type at full strength', async () => {
+    await showEverything();
+    const box = el<HTMLInputElement>('dim-selection');
+    box.checked = false;
+    box.dispatchEvent(new Event('change'));
+
+    emitNode('tap', 'N.Views.SamplePage');
+    await tick(20);
+
+    expect(core.nodes().filter((candidate) => candidate.hasClass('dimmed')).length).toBe(0);
+    box.checked = true;
+    box.dispatchEvent(new Event('change'));
+  });
+});
+
+describe('main: names that are longer than the space for them', () => {
+  const longModel = graphModel({
+    nodes: [
+      graphNode({ id: 'N.Long', label: 'GenericRequestStepFrameHostViewModel', layer: 'viewmodel', module: 'M' }),
+      graphNode({ id: 'N.Other', label: 'Other', layer: 'service', module: 'M' }),
+    ],
+    edges: [graphEdge({ id: 'x1', source: 'N.Long', target: 'N.Other', kind: 'injects' })],
+  });
+
+  /** The partner is a service, which the MVVM preset hides, so every layer has to be drawn. */
+  const loadLong = async (): Promise<void> => {
+    await load(longModel);
+    click('preset-all');
+    await tick(10);
+  };
+
+  it('shortens in the middle, so the end that tells two names apart survives', async () => {
+    await loadLong();
+    const short = String(node('N.Long').data('shortLabel'));
+    expect(short).toContain('…');
+    expect(short.length).toBeLessThan('GenericRequestStepFrameHostViewModel'.length);
+    expect(short.startsWith('Generic')).toBe(true);
+    expect(short.endsWith('ViewModel')).toBe(true);
+  });
+
+  it('keeps the whole name as the label the tooltip and details pane read', async () => {
+    await loadLong();
+    expect(node('N.Long').data('label')).toBe('GenericRequestStepFrameHostViewModel');
+  });
+
+  it('gives a roomier density more characters before shortening', async () => {
+    await loadLong();
+    const normal = String(node('N.Long').data('shortLabel')).length;
+    change('density', 'roomy');
+    await tick(10);
+    expect(String(node('N.Long').data('shortLabel')).length).toBeGreaterThanOrEqual(normal);
+  });
+});
+
+describe('main: regions painted over the canvas', () => {
+  it('captions the packed groups', async () => {
+    await load();
+    const captions = document.querySelectorAll('.overlay-frame-group .overlay-label');
+    expect(captions.length).toBeGreaterThan(0);
+    expect([...captions].map((entry) => entry.textContent).join(' ')).toContain('SamplePage');
+  });
+
+  it('stops captioning when the toggles are switched off', async () => {
+    await load();
+    for (const id of ['group-captions', 'module-frames']) {
+      const box = el<HTMLInputElement>(id);
+      box.checked = false;
+      box.dispatchEvent(new Event('change'));
+    }
+    await tick(10);
+    expect(document.querySelectorAll('.overlay-frame-group').length).toBe(0);
+    expect(document.querySelectorAll('.overlay-frame-module').length).toBe(0);
+
+    for (const id of ['group-captions', 'module-frames']) {
+      const box = el<HTMLInputElement>(id);
+      box.checked = true;
+      box.dispatchEvent(new Event('change'));
+    }
+  });
+
+  it('gathers the screens nothing binds to into one band', async () => {
+    const islandModel = graphModel({
+      nodes: [
+        graphNode({ id: 'N.OrphanView', label: 'OrphanView', layer: 'view', module: 'M' }),
+        graphNode({ id: 'N.OrphanService', label: 'OrphanService', layer: 'service', module: 'M' }),
+      ],
+      edges: [graphEdge({ id: 'i1', source: 'N.OrphanView', target: 'N.OrphanService', kind: 'injects' })],
+      findings: [
+        finding({
+          id: 'fb',
+          kind: 'unbound-view',
+          severity: 'medium',
+          title: 'Unbound view: OrphanView',
+          detail: 'No view model is bound to it.',
+          nodeIds: ['N.OrphanView'],
+        }),
+      ],
+    });
+
+    await load(islandModel);
+    click('preset-all');
+    await tick(10);
+    const band = document.querySelector('.overlay-frame-island');
+    expect(band).not.toBeNull();
+    expect(band?.textContent).toContain('Nothing links these');
+  });
+});
+
+describe('main: the overview picture', () => {
+  it('shows where the viewport sits once a graph is drawn', async () => {
+    await load();
+    const minimap = el<HTMLDivElement>('minimap');
+    expect(minimap.hidden).toBe(false);
+    expect(minimap.querySelector('svg')).not.toBeNull();
+    expect(minimap.innerHTML).toContain('rect');
+  });
+
+  it('centres the canvas on the part of the overview that was clicked', async () => {
+    await load();
+    const minimap = el<HTMLDivElement>('minimap');
+    minimap.getBoundingClientRect = () => ({
+      x: 0, y: 0, left: 0, top: 0, right: 168, bottom: 120, width: 168, height: 120, toJSON: () => ({}),
+    }) as DOMRect;
+
+    const before = { ...core.pan() };
+    minimap.dispatchEvent(new MouseEvent('pointerdown', { clientX: 150, clientY: 110, bubbles: true }));
+    await tick(10);
+    expect(core.pan().x).not.toBe(before.x);
+  });
+});

@@ -65,6 +65,12 @@ describe('computeVisible: layers, search and problems', () => {
 });
 
 describe('computeVisible: module scope', () => {
+  it('treats an empty module as no filter', () => {
+    // The module select reads as empty until the list is populated; a scope of '' used to match no
+    // node at all, which emptied the canvas instead of showing the whole graph.
+    expect([...visible({ module: '' }).nodeIds].sort()).toEqual([...visible({ module: 'all' }).nodeIds].sort());
+  });
+
   it('keeps one hop of partners outside the module', () => {
     const result = visible({ module: 'Module_A' });
     expect([...result.nodeIds].sort()).toEqual(['A.View', 'A.ViewModel']);

@@ -49,6 +49,7 @@ function visibilityFlyout(): string {
         <span class="group-label">Presets</span>
         <button id="preset-mvvm" type="button">MVVM flow</button>
         <button id="preset-structure" type="button">Structure</button>
+        <button id="preset-inheritance" type="button">Inheritance</button>
         <button id="preset-cleanup" type="button">Cleanup</button>
         <button id="preset-all" type="button">Everything</button>
       </div>
@@ -102,6 +103,8 @@ function legendMarkup(): string {
     node(`<circle cx="13" cy="9" r="6" fill="${fill}" ${extra}/>`);
   const rect = (fill: string, extra = ''): string =>
     node(`<rect x="7" y="5" width="13" height="9" rx="2" fill="${fill}" ${extra}/>`);
+  const hexagon = (fill: string): string =>
+    node(`<polygon points="13,2.5 18.5,5.75 18.5,12.25 13,15.5 7.5,12.25 7.5,5.75" fill="${fill}"/>`);
   const line = (colour: string, dash = '', width = 2): string =>
     edge(`<line x1="1" y1="6" x2="27" y2="6" stroke="${colour}" stroke-width="${width}"`
       + `${dash ? ` stroke-dasharray="${dash}"` : ''}/><path d="M27 2.5 L33 6 L27 9.5 Z" fill="${colour}"/>`);
@@ -116,14 +119,16 @@ function legendMarkup(): string {
 
     <div class="legend-body">
       <section>
-        <h3>Nodes are types, coloured by layer</h3>
+        <h3>Every layer has its own silhouette, not just its own colour</h3>
+        <p class="hint">The shape carries the layer when a label is too small to read, or when colour
+        alone is not enough to tell two kinds apart.</p>
         <dl>
-          <dt>${rect('#4a9eff')}</dt><dd><b>View</b> — a Page, UserControl or Window with XAML. Drawn wider than tall.</dd>
-          <dt>${rect('#2fbf71')}</dt><dd><b>View model</b> — a class ending in <code>ViewModel</code>.</dd>
-          <dt>${circle('#f0a030')}</dt><dd><b>Service</b> — an interface or a class named for a role: Service, Store, Provider, Reader, Catalog, Policy, Repository.</dd>
-          <dt>${circle('#9b8cff')}</dt><dd><b>Model</b> — everything else: models, enums, records, converters, helpers.</dd>
+          <dt>${rect('#4a9eff')}</dt><dd><b>View</b> — a Page, UserControl or Window with XAML. A wide rounded rectangle.</dd>
+          <dt>${rect('#2fbf71')}</dt><dd><b>View model</b> — a class ending in <code>ViewModel</code>. A rounded rectangle.</dd>
+          <dt>${hexagon('#f0a030')}</dt><dd><b>Service</b> — an interface or a class named for a role: Service, Store, Provider, Reader, Catalog, Policy, Repository. A hexagon.</dd>
+          <dt>${circle('#9b8cff')}</dt><dd><b>Model</b> — everything else: models, enums, records, converters, helpers. A circle.</dd>
           <dt>${circle('none', 'stroke="#9a9a9a" stroke-width="1.5" stroke-dasharray="3 2"')}</dt>
-            <dd><b>External</b> — referenced but not declared here: framework and package types. Never expanded.</dd>
+            <dd><b>External</b> — referenced but not declared here: framework and package types. A dashed circle. Never expanded.</dd>
         </dl>
       </section>
 
@@ -131,11 +136,15 @@ function legendMarkup(): string {
         <h3>Rings mark state</h3>
         <dl>
           <dt>${circle('#2fbf71', 'stroke="#ffffff" stroke-width="2.5"')}</dt>
-            <dd><b>White ring</b> — the type is registered with the dependency-injection container.</dd>
+            <dd><b>Bright ring</b> — the type is registered with the dependency-injection container.</dd>
           <dt>${circle('#2fbf71', 'stroke="#ef4444" stroke-width="2.5"')}</dt>
             <dd><b>Red ring</b> — the type is part of a dependency cycle. See the Problems tab.</dd>
           <dt>${circle('#2fbf71', 'stroke="#f59e0b" stroke-width="2" stroke-dasharray="3 2"')}</dt>
             <dd><b>Amber dashed ring</b> — the type has a cleanup finding: unused, dead binding, or unbound view.</dd>
+          <dt>${hexagon('#f0a030')}</dt>
+            <dd><b>Double ring</b> — a <i>hub</i>: a type almost everything depends on. The packed layout lifts
+            hubs out of the tiles and places each one between the groups it serves, which is why a hub can sit
+            between two groups that otherwise never touch.</dd>
         </dl>
       </section>
 
@@ -156,10 +165,33 @@ function legendMarkup(): string {
       </section>
 
       <section>
+        <h3>Regions drawn over the canvas</h3>
+        <dl>
+          <dt>${rect('none', 'stroke="#4a9eff" stroke-width="1.5" stroke-dasharray="4 3"')}</dt>
+            <dd><b>Group frame</b> — one packed shape, captioned with the type it starts at and how many
+            types it holds. Turn it off with <b>Group captions</b>.</dd>
+          <dt>${rect('none', 'stroke="#9b8cff" stroke-width="1.5"')}</dt>
+            <dd><b>Module frame</b> — the region one module occupies. A module's frame is drawn only when it
+            does not share most of its area with another module, because a frame that claims territory it does
+            not own is worse than none. Turn it off with <b>Module frames</b>.</dd>
+          <dt>${rect('none', 'stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="6 3"')}</dt>
+            <dd><b>Unlinked band</b> — every group holding a view that nothing binds to a view model, gathered
+            below the tiles so the legacy screens are one place to look. Turn it off with <b>Unlinked band</b>.</dd>
+        </dl>
+      </section>
+
+      <section>
         <h3>Reading the layout</h3>
         <p><b>Packed (auto)</b> arranges each connected piece internally, then tiles the pieces across
         and down the panel. A dependency graph is many small shapes, not one big one, so this fills the
         space instead of stacking into a single column.</p>
+        <p><b>Dim others.</b> Clicking a type fades everything that is not its immediate neighbour, so one
+        tree can be read inside a picture of hundreds of nodes. Click empty canvas to bring the rest back.</p>
+        <p><b>Names.</b> A long name is shortened in its middle, keeping the end that tells two similar
+        types apart; hovering shows the full name. At <b>Roomy</b> density names wrap onto more than one
+        line instead.</p>
+        <p><b>Overview.</b> The small picture in the corner shows the whole graph with a box over what is on
+        screen. Click anywhere in it to move the view there.</p>
         <p><b>Unpack a shape.</b> Right-click any node and choose <b>Unpack this group</b> to show that
         shape on its own, at full density, from its starting root to the end of the group. Every other
         type is hidden while it is unpacked. The shape uses the layout chosen in <b>Layout of an
@@ -235,6 +267,10 @@ export function renderHtml(context: HtmlContext): string {
     <div class="row checks">
       <label class="check"><input id="hide-orphans" type="checkbox" />Hide unconnected</label>
       <label class="check"><input id="only-problems" type="checkbox" />Only problems</label>
+      <label class="check"><input id="dim-selection" type="checkbox" title="Fade everything outside the selected type's neighbourhood" />Dim others</label>
+      <label class="check"><input id="group-captions" type="checkbox" title="Name each packed group over the canvas" />Group captions</label>
+      <label class="check"><input id="module-frames" type="checkbox" title="Outline each module's region where it is coherent" />Module frames</label>
+      <label class="check"><input id="island-tray" type="checkbox" title="Collect the groups with an unlinked view into one band" />Unlinked band</label>
     </div>
 
     <div class="row actions">
@@ -275,6 +311,7 @@ export function renderHtml(context: HtmlContext): string {
         </button>
       </div>
       <div id="zoom-rect" hidden></div>
+      <div id="minimap" hidden role="img" aria-label="Overview of the whole graph; click to move the view"></div>
       <div id="progress" hidden role="progressbar" aria-valuemin="0" aria-valuemax="100">
         <div class="progress-head">
           <span id="progress-message">Analysing the workspace…</span>

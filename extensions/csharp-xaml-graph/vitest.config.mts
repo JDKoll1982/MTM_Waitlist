@@ -20,9 +20,11 @@ export default defineConfig({
     globals: false,
     include: ['test/**/*.test.ts'],
     setupFiles: [path.join(here, 'test', 'setup', 'environment.ts')],
-    // The C# grammar is loaded once per process; a single fork keeps that cost paid once.
+    // Each test file gets its own process. The panel modules keep their state at module scope — the
+    // canvas, the model, the filters — and several files drive that same panel; sharing a process let
+    // one file's model leak into another's "no model yet" case. A parse of the C# grammar costs a
+    // few hundred milliseconds, which is cheaper than a suite that fails one run in three.
     pool: 'forks',
-    poolOptions: { forks: { singleFork: true } },
     testTimeout: 30000,
     hookTimeout: 30000,
     coverage: {

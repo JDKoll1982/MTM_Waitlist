@@ -87,7 +87,9 @@ export function computeVisible(model: GraphModel, options: ViewOptions): Visible
   }
 
   let nodeIds: Set<string>;
-  if (options.module === 'all') {
+  // An empty module is "no filter", not "a module with no name": the module select reads as empty
+  // before the list is populated, and treating that as a scope empties the canvas.
+  if (!options.module || options.module === 'all') {
     nodeIds = new Set(base);
   } else {
     nodeIds = new Set<string>();

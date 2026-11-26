@@ -1065,3 +1065,103 @@ body {
 #cy.analysing {
   opacity: 0.45;
 }
+
+/* ---------------------------------------------------------------- overlay frames */
+
+/*
+ * Captions and region frames are DOM rather than canvas elements: cytoscape has no text-only node,
+ * and a compound parent would change the layout it is describing. The layer sits over the canvas and
+ * never takes a pointer event, so panning, dragging and clicking still reach the graph underneath.
+ */
+.overlay-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.overlay-frame {
+  position: absolute;
+  box-sizing: border-box;
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+.overlay-label {
+  position: absolute;
+  top: -1px;
+  left: 6px;
+  transform: translateY(-100%);
+  padding: 0 4px;
+  border-radius: 3px;
+  font-size: 9.5px;
+  font-weight: 600;
+  line-height: 1.6;
+  white-space: nowrap;
+  opacity: 0.85;
+}
+
+.overlay-frame-group {
+  border: 1px dashed rgba(74, 158, 255, 0.28);
+}
+
+.overlay-frame-group > .overlay-label {
+  color: var(--vscode-descriptionForeground, #b4b4b4);
+  background: var(--vscode-editor-background, #1e1e1e);
+}
+
+.overlay-frame-island {
+  border: 1px dashed rgba(245, 158, 11, 0.55);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.overlay-frame-island > .overlay-label {
+  color: #f59e0b;
+  background: var(--vscode-editor-background, #1e1e1e);
+}
+
+.overlay-frame-module {
+  border: 1px solid rgba(155, 140, 255, 0.34);
+}
+
+.overlay-frame-module > .overlay-label {
+  color: #b7aaff;
+  background: var(--vscode-editor-background, #1e1e1e);
+}
+
+/* ---------------------------------------------------------------- overview */
+
+/*
+ * The graph is thousands of model pixels across and the panel is not, so the reader is looking at a
+ * fragment with no way to tell where. The overview is the map: dots for the types that exist and a
+ * box for the part on screen, with a click to move there.
+ */
+#minimap {
+  position: absolute;
+  left: 10px;
+  bottom: 28px;
+  z-index: 4;
+  padding: 3px;
+  border: 1px solid var(--vscode-panel-border, #3a3a3a);
+  border-radius: 4px;
+  background: var(--vscode-editor-background, #1e1e1e);
+  opacity: 0.86;
+  cursor: crosshair;
+  transition: opacity 120ms linear;
+}
+
+#minimap:hover {
+  opacity: 1;
+}
+
+#minimap svg {
+  display: block;
+  border-radius: 2px;
+}
+
+/* ---------------------------------------------------------------- layered checkboxes */
+
+#toolbar .checks {
+  flex-wrap: wrap;
+}

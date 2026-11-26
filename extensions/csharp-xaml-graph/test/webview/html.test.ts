@@ -88,11 +88,23 @@ describe('renderHtml', () => {
   it('explains the legend with the same shapes the canvas draws', () => {
     const page = html();
     expect(page).toContain('What the shapes mean');
-    expect(page).toContain('Nodes are types, coloured by layer');
+    // Layers are told apart by silhouette as well as colour, so the legend says so and draws it.
+    expect(page).toContain('Every layer has its own silhouette');
     expect(page).toContain('Rings mark state');
     expect(page).toContain('Lines are the kinds of dependency');
+    expect(page).toContain('Regions drawn over the canvas');
     expect(page).toContain('<svg width="26" height="18"');
     expect(page).toContain('<svg width="34" height="12"');
+    expect(page).toContain('<polygon'); // the service hexagon
+  });
+
+  it('provides the overview, the region layer and the new visibility toggles', () => {
+    const page = html();
+    expect(page).toMatch(/<div id="minimap" hidden role="img"/);
+    for (const id of ['dim-selection', 'group-captions', 'module-frames', 'island-tray']) {
+      expect(page).toContain(`id="${id}"`);
+    }
+    expect(page).toContain('id="preset-inheritance"');
   });
 
   it('starts the progress overlay hidden and the re-pack button hidden', () => {
