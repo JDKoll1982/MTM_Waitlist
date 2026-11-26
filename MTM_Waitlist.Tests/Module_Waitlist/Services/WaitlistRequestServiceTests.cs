@@ -375,6 +375,9 @@ public sealed class WaitlistRequestServiceTests
         /// <summary>Every non-query call made, with the parameters it carried.</summary>
         public List<(string Procedure, IReadOnlyDictionary<string, object?> Parameters)> NonQueryCalls { get; } = new();
 
+        /// <summary>Every query call made, with the parameters it carried, so a read can be asserted.</summary>
+        public List<(string Procedure, IReadOnlyDictionary<string, object?> Parameters)> QueryCalls { get; } = new();
+
         /// <summary>
         /// The affected-row count every non-query call reports. A test sets this to 0 to model the store
         /// refusing a transition — the second handler's accept loses the race.
@@ -394,6 +397,7 @@ public sealed class WaitlistRequestServiceTests
             CancellationToken cancellationToken = default)
         {
             QueryCallCount++;
+            QueryCalls.Add((storedProcedureName, parameters));
             return Task.FromResult(_rows);
         }
 
@@ -1942,5 +1946,138 @@ public sealed class WaitlistRequestServiceTests
         public void Invalidate()
         {
         }
+    }
+
+    /* ------------------------------------------------------------------ resolved retention */
+
+    /// <summary>One row of <c>sp_waitlist_request_list</c>, with the columns the mapper reads.</summary>
+    private static Dictionary<string, object?> StoreRow(string publicId, string status, DateTime? completedUtc) =>
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["public_id"] = publicId,
+            ["building"] = "Expo Drive",
+            ["work_center"] = "100-03",
+            ["category"] = "Pickup",
+            ["item"] = "pickup-coil",
+            ["input_value"] = null,
+            ["active_setup_job_id"] = "100-03",
+            ["work_center_name"] = "100-03",
+            ["requester_employee_number"] = "6229",
+            ["requester_employee_name"] = "John Koll",
+            ["status"] = status,
+            ["requested_utc"] = DateTime.UtcNow.AddDays(-120),
+            ["target_time_utc"] = null,
+            ["is_overdue"] = 0,
+            ["assigned_material_handler"] = null,
+            ["cancellation_reason"] = null,
+            ["canceled_utc"] = null,
+            ["canceled_by_employee_number"] = null,
+            ["note"] = null,
+            ["accepted_utc"] = null,
+            ["completed_utc"] = completedUtc,
+            ["released_utc"] = null,
+        };
+
+    [TestMethod]
+    public async Task Service_WaitlistRequestServiceTests_RefreshFromDatabaseAsync_AsksForResolvedRowsInsideTheRetentionWindow()
+    {
+        var helper = new StubMySqlHelperServer([StoreRow("f0000000-00aa-4000-8000-0000000000ab", "Pending", null)]);
+        var service = new WaitlistRequestService(helper);
+
+        await service.RefreshFromDatabaseAsync("Expo Drive");
+
+        Assert.AreEqual(1, helper.QueryCalls.Count);
+        Assert.AreEqual("sp_waitlist_request_list", helper.QueryCalls[0].Procedure);
+
+        var parameters = helper.QueryCalls[0].Parameters;
+        Assert.AreEqual(1, parameters["p_include_resolved"], "the resolved branch has to be asked for, or the retention rule never applies");
+
+        // The cutoff is the one the shared rule computes, so the window has a single owner.
+        var cutoff = (DateTime)parameters["p_resolved_since"]!;
+        var expected = ResolvedRetentionFilter.RetentionCutoff(DateTimeOffset.UtcNow).UtcDateTime;
+        Assert.IsTrue(Math.Abs((cutoff - expected).TotalMinutes) < 5, $"cutoff {cutoff:o} is not the window's cutoff {expected:o}");
+    }
+
+    [TestMethod]
+    public async Task Service_WaitlistRequestServiceTests_RefreshFromDatabaseAsync_KeepsAResolvedRequestInsideTheWindow()
+    {
+        var helper = new StubMySqlHelperServer(
+        [
+            StoreRow("f0000000-00aa-4000-8000-0000000000ac", "Completed", DateTime.UtcNow.AddDays(-1)),
+        ]);
+        var service = new WaitlistRequestService(helper);
+
+        var count = await service.RefreshFromDatabaseAsync("Expo Drive");
+
+        Assert.AreEqual(1, count, "a request completed inside the window is still the session's business");
+
+        // The board itself draws only Pending and Accepted, so this row is not on it — but "my requests" promises
+        // every status, and until now a completed request vanished from that list on the next refresh.
+        var mine = service.GetMyRequests("6229", "Expo Drive").Single();
+        Assert.AreEqual("Completed", mine.Status);
+        Assert.IsNotNull(service.GetRequest(mine.Id), "a recently completed request is still reachable by id");
+        Assert.AreEqual(0, service.GetActiveRequests("Expo Drive").Count, "the board keeps its open-only rule");
+    }
+
+    [TestMethod]
+    public async Task Service_WaitlistRequestServiceTests_RefreshFromDatabaseAsync_DropsAResolvedRequestOlderThanTheWindow()
+    {
+        var helper = new StubMySqlHelperServer(
+        [
+            StoreRow("f0000000-00aa-4000-8000-0000000000ad", "Completed", DateTime.UtcNow.AddDays(-91)),
+            StoreRow("f0000000-00aa-4000-8000-0000000000ae", "Pending", null),
+        ]);
+        var service = new WaitlistRequestService(helper);
+
+        var count = await service.RefreshFromDatabaseAsync("Expo Drive");
+
+        Assert.AreEqual(1, count, "the aged-out request is retained in the store but not in the session");
+        Assert.AreEqual("Pending", service.GetActiveRequests("Expo Drive").Single().Status);
+        Assert.AreEqual(
+            0,
+            service.GetMyRequests("6229", "Expo Drive").Count(request => request.Status == "Completed"),
+            "a request older than the window is hidden without being purged");
+    }
+
+    [TestMethod]
+    public async Task Service_WaitlistRequestServiceTests_RefreshFromDatabaseAsync_AppliesTheConfiguredWindow()
+    {
+        var settings = new FakeConfigSettingsValueService();
+        settings.SetInt(WaitlistRequestService.ResolvedRetentionSettingKey, 7);
+
+        var helper = new StubMySqlHelperServer(
+        [
+            StoreRow("f0000000-00aa-4000-8000-0000000000af", "Completed", DateTime.UtcNow.AddDays(-10)),
+        ]);
+        var service = new WaitlistRequestService(helper, configSettingsValueService: settings);
+
+        var count = await service.RefreshFromDatabaseAsync("Expo Drive");
+
+        Assert.AreEqual(1, settings.GetCallCount, "the window is a plant setting, so it is read rather than assumed");
+        Assert.AreEqual(0, count, "ten days old is outside a seven-day window");
+
+        var cutoff = (DateTime)helper.QueryCalls[0].Parameters["p_resolved_since"]!;
+        var expected = ResolvedRetentionFilter.RetentionCutoff(DateTimeOffset.UtcNow, 7).UtcDateTime;
+        Assert.IsTrue(Math.Abs((cutoff - expected).TotalMinutes) < 5);
+    }
+
+    [TestMethod]
+    public async Task Service_WaitlistRequestServiceTests_RefreshFromDatabaseAsync_FallsBackToTheDefaultWindowWhenTheSettingIsUnusable()
+    {
+        var settings = new FakeConfigSettingsValueService();
+        settings.SetInt(WaitlistRequestService.ResolvedRetentionSettingKey, 0);
+
+        var helper = new StubMySqlHelperServer(
+        [
+            StoreRow("f0000000-00aa-4000-8000-0000000000b0", "Completed", DateTime.UtcNow.AddDays(-1)),
+        ]);
+        var service = new WaitlistRequestService(helper, configSettingsValueService: settings);
+
+        var count = await service.RefreshFromDatabaseAsync("Expo Drive");
+
+        Assert.AreEqual(1, count, "a zero-day window would empty the board, so the default stays in force");
+        var cutoff = (DateTime)helper.QueryCalls[0].Parameters["p_resolved_since"]!;
+        var expected = ResolvedRetentionFilter.RetentionCutoff(DateTimeOffset.UtcNow).UtcDateTime;
+        Assert.IsTrue(Math.Abs((cutoff - expected).TotalMinutes) < 5);
     }
 }

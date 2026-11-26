@@ -1068,8 +1068,11 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
 
             // Left unset when the file is not a picture the application will draw, so the page falls back to the
             // application's no-image placeholder rather than a hole: an empty picture and a placeholder are not
-            // the same answer.
-            item.WorkCenterImagePath = ImageFileProbe.IsUsablePicture(resolvedPath) ? resolvedPath : string.Empty;
+            // the same answer. The policy is asked rather than the bare file probe, so the resolver's own
+            // "nothing is configured" answer is refused even when the placeholder file it names is drawable.
+            item.WorkCenterImagePath = RequestImagePathPolicy.IsUsableResolvedPicture(resolvedPath)
+                ? resolvedPath
+                : string.Empty;
         }
         catch (OperationCanceledException)
         {

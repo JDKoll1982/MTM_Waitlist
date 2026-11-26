@@ -1876,14 +1876,16 @@ public partial class WaitlistViewViewModel : ObservableRecipient, INavigationAwa
                 // Checked once per work centre rather than once per row, because every row of a work centre draws
                 // the same picture. A resolved path that is not a picture the application will draw is not an
                 // answer: it is stored as empty so the card draws the application's no-image placeholder rather
-                // than a hole. The share is asked about first, because this probe is against the picture share
+                // than a hole. Ask the policy rather than the file probe, because the resolver's own "nothing is
+                // configured" answer must never be taken even on the day the placeholder file is real artwork.
+                // The share is asked about first, because this probe is against the picture share
                 // and a share that is not answering costs a failed lookup per work centre on every rebuild
                 // (PictureShareReachability); the answer it gives when it is silent is the same one the probe
                 // would have produced.
                 var shareRoot = PictureShareReachability.ShareRootOf(resolvedPath);
 
                 if ((shareRoot is not null && PictureShareReachability.IsReachable(shareRoot) is false)
-                    || ImageFileProbe.IsUsablePicture(resolvedPath) is false)
+                    || RequestImagePathPolicy.IsUsableResolvedPicture(resolvedPath) is false)
                 {
                     AppLog.Info(
                         "WaitlistRequest",

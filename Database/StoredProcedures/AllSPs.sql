@@ -5100,6 +5100,14 @@ ORDER BY q.item ASC;
 -- Extended by specs/016-generic-wc-request-foundation: every row now also carries `is_generic`, `description` and
 -- `accepted_warnings_json`, so one read gives the board everything a generic card draws and no per-row second read
 -- is needed (research R10).
+-- Extended for waitlist.resolved_retention_days: `p_include_resolved = 1` now answers only the requests that
+-- resolved at or after `p_resolved_since`, instead of every resolved request the store has ever held. A resolved
+-- request inside the window is returned, so "my requests" can show a finished request and a detail page can still
+-- be reached by id after a refresh; one older than the window is dropped from this read while remaining in the
+-- queue, never purged. The board's own open-only rule is unaffected: it filters to Pending and Accepted after the
+-- read. The caller computes the instant from the configured window (ResolvedRetentionFilter.RetentionCutoff) so the
+-- number of days has one owner; a NULL instant means "no window", which is what a caller that genuinely wants the
+-- whole history passes.
 
 USE mtm_waitlist;
 
@@ -5111,7 +5119,8 @@ DROP PROCEDURE IF EXISTS sp_waitlist_request_list;
 -- marker as if somebody had sent a message. Entries with no actor are system writes and are excluded.
 CREATE PROCEDURE sp_waitlist_request_list(
     IN p_building VARCHAR(64),
-    IN p_include_resolved TINYINT
+    IN p_include_resolved TINYINT,
+    IN p_resolved_since DATETIME
 )
 SELECT
     q.id,
@@ -5164,7 +5173,15 @@ SELECT
         AND a.actor_employee_number IS NOT NULL) AS last_message_utc
 FROM waitlist_requests_queue q
 WHERE (p_building IS NULL OR TRIM(p_building) = '' OR q.building = TRIM(p_building))
-  AND (p_include_resolved = 1 OR q.status IN ('Pending', 'Accepted'))
+  AND (
+        q.status IN ('Pending', 'Accepted')
+        -- A resolved request is returned only while it is inside the retention window, so "my requests" can show
+        -- recently finished work without the read growing without limit. Canceled rows are not resolved ones: they
+        -- carry no completed_utc and this read has never returned them.
+        OR (p_include_resolved = 1
+            AND q.completed_utc IS NOT NULL
+            AND (p_resolved_since IS NULL OR q.completed_utc >= p_resolved_since))
+      )
 ORDER BY q.requested_utc ASC;
 
 -- Create procedure: sp_waitlist_request_status_update

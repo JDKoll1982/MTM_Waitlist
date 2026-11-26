@@ -20,6 +20,29 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
     private readonly IUrgencyDeadlineService? _urgencyDeadlineService;
 
     /// <summary>
+    /// Where the resolved-retention window is read from.
+    /// </summary>
+    /// <remarks>
+    /// <c>waitlist.resolved_retention_days</c> is seeded at 90 and is a plant setting, not a build constant, so the
+    /// number is read rather than compiled in. Absent or unreadable leaves
+    /// <see cref="ResolvedRetentionFilter.DefaultResolvedRetentionDays"/> in force: a board that stops showing
+    /// recently finished work because a settings read failed would be the worse failure.
+    /// </remarks>
+    private readonly IConfigSettingsValueService? _configSettingsValueService;
+
+    /// <summary>The setting the retention window comes from; seeded at 90 days.</summary>
+    internal const string ResolvedRetentionSettingKey = "waitlist.resolved_retention_days";
+
+    /// <summary>The scope the setting is stored under; it is a plant-wide number.</summary>
+    internal const string ResolvedRetentionScopeKey = "all_users";
+
+    /// <summary>
+    /// The longest window the setting may name. A year is already far longer than any shop-floor board needs, and
+    /// a typo of 9000 must not stall the read by asking for a decade of closed requests.
+    /// </summary>
+    internal const int MaximumResolvedRetentionDays = 3650;
+
+    /// <summary>
     /// The one place this service asks what a person may do, so a handler action is refused at the action and
     /// not only at the control that offered it (FR-056, FR-117). A caller that never drew the screen is refused
     /// here too, which is the whole point of asking a second time.
@@ -36,12 +59,14 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
         IMySqlHelperServer? mySqlHelperServer = null,
         INewRequestAlertNotifier? newRequestAlertNotifier = null,
         IUrgencyDeadlineService? urgencyDeadlineService = null,
-        IPermissionService? permissionService = null)
+        IPermissionService? permissionService = null,
+        IConfigSettingsValueService? configSettingsValueService = null)
     {
         _mySqlHelperServer = mySqlHelperServer;
         _newRequestAlertNotifier = newRequestAlertNotifier;
         _urgencyDeadlineService = urgencyDeadlineService;
         _permissionService = permissionService;
+        _configSettingsValueService = configSettingsValueService;
     }
 
     public async Task<int> RefreshFromDatabaseAsync(string? building = null, CancellationToken cancellationToken = default)
@@ -55,24 +80,47 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
             return 0;
         }
 
+        var retentionDays = await ResolveResolvedRetentionDaysAsync().ConfigureAwait(false);
+        var resolvedSince = ResolvedRetentionFilter.RetentionCutoff(DateTimeOffset.UtcNow, retentionDays);
+
         var rows = await _mySqlHelperServer.ExecuteStoredProcedureQueryAsync(
             "sp_waitlist_request_list",
             new Dictionary<string, object?>
             {
                 ["p_building"] = building,
-                ["p_include_resolved"] = 0,
+
+                // Resolved rows are read so a request that was completed inside the retention window stays in the
+                // session: "my requests" promises every status, and the detail page can still be reached by id
+                // after a refresh. The board itself keeps its open-only rule — GetActiveRequests draws Pending and
+                // Accepted — so asking for resolved rows changes nothing about what the board shows. The window is
+                // what keeps this from growing without limit, and it is applied in the stored procedure rather than
+                // after the read, so a year of closed requests is never fetched only to be discarded.
+                ["p_include_resolved"] = 1,
+                ["p_resolved_since"] = resolvedSince.UtcDateTime,
             },
             MySqlDatabaseTarget.MtmWaitlist,
             cancellationToken).ConfigureAwait(false);
 
         var loaded = new List<WaitlistRequest>(rows.Count);
+        var now = DateTimeOffset.UtcNow;
         foreach (var row in rows)
         {
             var mapped = MapRowToRequest(row);
-            if (mapped is not null)
+            if (mapped is null)
             {
-                loaded.Add(mapped);
+                continue;
             }
+
+            // Belt and braces over the procedure's own filter: the read is the authority on which rows exist, and
+            // this is the authority on which of them are still current. An open request carries no completion time
+            // and always passes; a resolved one is aged out once its completion falls outside the window.
+            if (mapped.CompletedUtc is { } completed
+                && ResolvedRetentionFilter.IsAgedOut(completed, now, retentionDays))
+            {
+                continue;
+            }
+
+            loaded.Add(mapped);
         }
 
         // The DB is the authoritative source for open requests: replace the in-memory set with the rows
@@ -85,6 +133,41 @@ public sealed class WaitlistRequestService : IWaitlistRequestService
 
         AppLog.Info("WaitlistRequest", $"RefreshFromDatabaseAsync loaded {loaded.Count} open request(s) from DB. Building='{building ?? "all"}'.");
         return loaded.Count;
+    }
+
+    /// <summary>
+    /// How many days a resolved request stays on the board, from <c>waitlist.resolved_retention_days</c>.
+    /// </summary>
+    /// <returns>
+    /// The configured window, or <see cref="ResolvedRetentionFilter.DefaultResolvedRetentionDays"/> when there is no
+    /// settings service, the read fails, or the stored value is not a usable day count.
+    /// </returns>
+    private async Task<int> ResolveResolvedRetentionDaysAsync()
+    {
+        if (_configSettingsValueService is null)
+        {
+            return ResolvedRetentionFilter.DefaultResolvedRetentionDays;
+        }
+
+        try
+        {
+            var setting = await _configSettingsValueService
+                .GetSettingValueAsync(ResolvedRetentionSettingKey, ResolvedRetentionScopeKey)
+                .ConfigureAwait(false);
+
+            var days = setting?.SettingValueInt;
+            return days is > 0 and <= MaximumResolvedRetentionDays
+                ? (int)days.Value
+                : ResolvedRetentionFilter.DefaultResolvedRetentionDays;
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error(
+                "WaitlistRequest",
+                ex,
+                $"The resolved-retention window could not be read, so {ResolvedRetentionFilter.DefaultResolvedRetentionDays} days is in force.");
+            return ResolvedRetentionFilter.DefaultResolvedRetentionDays;
+        }
     }
 
     /// <summary>

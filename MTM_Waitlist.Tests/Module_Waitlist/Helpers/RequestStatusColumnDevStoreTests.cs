@@ -317,9 +317,11 @@ public sealed class RequestStatusColumnDevStoreTests
     /// mapper so the shape the card reads is the shape the list reads.
     /// </summary>
     /// <remarks>
-    /// <c>p_include_resolved</c> is 1 here because the card's closed states are only ever drawn from a resolved
-    /// row; the application passes 0, so this is the one departure from the production call and it is stated
-    /// rather than hidden. Everything else — the procedure, the connection, the mapper — is the application's own.
+    /// <c>p_include_resolved</c> is 1 and <c>p_resolved_since</c> is null here because the card's closed states are
+    /// only drawn from a resolved row, and this check wants whatever the dev store holds rather than only the rows
+    /// inside the production retention window. The application passes 1 and a real cutoff, so this is the one
+    /// departure from the production call and it is stated rather than hidden. Everything else — the procedure, the
+    /// connection, the mapper — is the application's own.
     /// </remarks>
     private async Task<IReadOnlyList<WaitlistRequest>> ReadStoreRowsAsync()
     {
@@ -329,6 +331,7 @@ public sealed class RequestStatusColumnDevStoreTests
             {
                 ["p_building"] = null,
                 ["p_include_resolved"] = 1,
+                ["p_resolved_since"] = null,
             },
             MySqlDatabaseTarget.MtmWaitlist);
 
