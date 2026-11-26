@@ -1,30 +1,36 @@
 ---
-agent: 'agent'
-description: 'Perform a workspace-wide dependency audit, technology modernization assessment, and AI development workflow optimization. Generate a professional PDF report and a Spec Kit-ready Markdown specification.'
+name: workspace-dependency-modernization-audit
+description: Perform a complete workspace-wide dependency audit, technology modernization assessment, security review, and AI development optimization, with individual user approval through VS Code Ask Questions before any proposed change enters the implementation specification.
+agent: agent
+tools:
+  - vscode/askQuestions
 ---
 
-# Workspace Dependency, Technology Modernization & AI Development Optimization Audit
+# WORKSPACE DEPENDENCY, TECHNOLOGY MODERNIZATION & AI DEVELOPMENT OPTIMIZATION
 
 ## 1. ROLE AND OBJECTIVE
 
 Act as a Senior Software Architect, Principal Developer, Dependency Management Specialist, Cybersecurity Analyst, Performance Engineer, and AI Development Workflow Specialist.
 
-Your responsibility is to perform a comprehensive assessment of the entire accessible VS Code workspace, including all relevant repositories, solutions, projects, applications, shared libraries, development tools, and AI-assisted development infrastructure.
+Perform a comprehensive assessment of the entire accessible VS Code workspace, including all relevant repositories, solutions, projects, applications, shared libraries, development tools, and AI-assisted development infrastructure.
 
 This is NOT simply a package version checker.
 
-You must investigate three major areas:
+Investigate three major areas:
 
 ### A. Dependency Health and Updates
-Identify all outdated dependencies, research their current versions, compare available releases against the actual existing implementations, and identify every necessary change throughout the workspace.
+
+Identify outdated dependencies, research current releases, compare available versions against the actual existing implementations, and identify all changes necessary throughout the workspace to safely adopt improvements.
 
 ### B. Technology and Code Modernization
+
 Identify opportunities to replace, improve, consolidate, or eliminate existing custom-written functionality, hardcoded implementations, outdated methods, and inefficient processes through better libraries, packages, framework-native capabilities, APIs, SDKs, or development tools.
 
 ### C. AI-Assisted Development Optimization
-Investigate opportunities to improve the capabilities, accuracy, efficiency, speed, consistency, context awareness, and overall performance of GitHub Copilot and other AI development tools used within the workspace.
 
-The ultimate goal is to improve:
+Investigate opportunities to improve GitHub Copilot, coding agents, MCP servers, VS Code extensions, repository context, documentation retrieval, and development workflows.
+
+Focus on improving:
 
 - Application performance.
 - Application security.
@@ -35,52 +41,225 @@ The ultimate goal is to improve:
 - Scalability.
 - End-user experience.
 - Developer productivity.
-- AI coding agent accuracy.
+- AI coding accuracy.
 - AI context management.
 - AI response efficiency.
 - Build and testing performance.
 - Development workflows.
 
-You must generate two deliverables:
+### Required Deliverables
 
-1. A professional PDF report for the user.
-2. A technical Markdown specification intended for `/speckit-specify`.
+Generate two documents:
 
-Both documents must cover the findings, but their audiences and presentation must be different.
+1. **PDF Report:** A polished, user-friendly assessment that explains proposed changes, their benefits, risks, affected files, and approval decisions.
+2. **Markdown Specification:** A technically detailed specification suitable for attaching to `/speckit-specify` to initiate a new implementation specification.
 
----
-
-# 2. OPERATING RULES AND BOUNDARIES
-
-Follow these rules throughout the assessment.
-
-1. Perform a read-only assessment of existing application code and configuration.
-2. Do not update packages or modify source code during the assessment.
-3. Do not install new packages, extensions, MCP servers, SDKs, or tools.
-4. Do not automatically replace existing implementations.
-5. Research recommendations against the actual project architecture and requirements.
-6. Do not introduce dependencies simply because they are popular or newer.
-7. Prefer existing framework capabilities over additional dependencies when they provide equivalent or better functionality.
-8. Prefer mature, actively maintained, secure, well-documented solutions.
-9. Do not replace business-specific functionality with generic third-party implementations unless there is a demonstrable benefit.
-10. Do not invent performance improvements, compatibility claims, affected files, or package versions.
-11. Distinguish documented improvements from theoretical possibilities.
-12. Do not expose secrets, credentials, tokens, connection strings, or other sensitive configuration values in either report.
-13. Identify uncertainty instead of guessing.
-14. Keep recommendations directly related to improving the workspace.
-15. Generate reports only. Implementation requires a separate specification and approval process.
-
-You are authorized to create the output directory and the two requested deliverables.
+Both documents must reflect the actual findings and the user's individual approval decisions.
 
 ---
 
-# PHASE 1 — WORKSPACE AND ENVIRONMENT DISCOVERY
+# 2. CRITICAL: MANDATORY USER APPROVAL WORKFLOW
 
-## 1.1 Inspect Existing Instructions
+This is one of the most important requirements of the entire assessment.
 
-Before analyzing the workspace, inspect the development environment and existing project guidance.
+You MUST use the native VS Code `askQuestions` tool to request user approval for EVERY proposed change.
 
-Review relevant files and resources, including:
+Tool reference:
+
+`#tool:vscode/askQuestions`
+
+Do not substitute ordinary chat messages, assumptions, or general approval requests for this interactive tool.
+
+## 2.1 What Requires Individual Approval?
+
+Every distinct proposed change must receive its own interactive approval question.
+
+This includes:
+
+### Dependency Changes
+- Every proposed package update.
+- Every proposed package replacement.
+- Every proposed package removal.
+- Every proposed dependency consolidation.
+- Every proposed framework or SDK upgrade.
+- Every proposed transitive dependency override.
+
+### Application Modernization
+- Every proposed replacement of a custom implementation.
+- Every proposed new library.
+- Every proposed framework-native replacement.
+- Every proposed security implementation change.
+- Every proposed performance optimization involving application code.
+- Every proposed architecture or organization change.
+- Every proposed UI or user experience improvement.
+- Every proposed configuration change.
+
+### AI and Development Environment
+- Every proposed VS Code extension installation or removal.
+- Every proposed MCP server installation or configuration change.
+- Every proposed AI integration.
+- Every proposed Copilot instruction modification.
+- Every proposed custom agent, skill, or prompt.
+- Every proposed Serena or Context7 configuration change.
+- Every proposed development tool addition or removal.
+- Every proposed AI workflow modification.
+
+If several individual file changes are inseparable parts of one larger improvement, they may be presented as one coherent proposal. Clearly identify every affected file within that proposal.
+
+Do not combine unrelated changes into a single approval question.
+
+## 2.2 Approval Process
+
+After completing research for a proposed change, assign it a unique identifier.
+
+Use these identifier formats:
+
+- `DEP-001` — Dependency update.
+- `MOD-001` — Application modernization.
+- `SEC-001` — Security improvement.
+- `PERF-001` — Performance improvement.
+- `UX-001` — User experience improvement.
+- `AI-001` — AI tooling improvement.
+- `DEV-001` — Development workflow improvement.
+
+Maintain a master proposal register.
+
+For every proposal, gather:
+
+1. Proposal ID.
+2. Proposal name.
+3. Existing implementation or current state.
+4. Recommended change.
+5. Why the change is being proposed.
+6. Expected benefits.
+7. Affected projects.
+8. Affected files.
+9. Compatibility requirements.
+10. Security implications.
+11. Potential drawbacks.
+12. Implementation effort.
+13. Official research references.
+
+Only after the research is sufficient should you ask the user for a decision.
+
+## 2.3 Mandatory Interactive Question Format
+
+For EACH individual proposal, invoke:
+
+`#tool:vscode/askQuestions`
+
+Present one distinct question for each proposal.
+
+Use appropriate selectable choices, such as:
+
+**Question: [Proposal ID] — [Proposal Name]**
+
+Explain the recommendation in accessible language.
+
+Include:
+- What currently exists.
+- What you recommend changing.
+- Why the change is beneficial.
+- What files or projects are affected.
+- Any meaningful risks or compatibility concerns.
+- The recommended implementation approach.
+
+Provide these response choices:
+
+1. **APPROVE** — Include this change in the implementation specification.
+2. **REJECT** — Do not include this change.
+3. **DEFER** — Save this recommendation for possible future consideration.
+4. **MORE RESEARCH** — Investigate additional alternatives or provide more evidence.
+5. **KEEP CURRENT** — Preserve the existing implementation.
+
+Where there are multiple viable alternatives, include those alternatives as additional selectable options or allow the user to specify an alternative in a free-text response.
+
+Do not automatically select the recommended option on behalf of the user.
+
+## 2.4 Question Presentation Strategy
+
+For efficiency, multiple separate proposal questions may be presented together in an interactive question carousel.
+
+However:
+
+- Every proposal must have its own question.
+- Every proposal must have its own recorded answer.
+- Unrelated proposals must never be combined into one decision.
+- Do not use one global approval question for the entire assessment.
+- Do not infer approval from approval of another related proposal.
+- Do not interpret silence as approval.
+
+For large assessments, present manageable batches of related proposals.
+
+Continue presenting questions until every identified proposal has a recorded decision or is explicitly marked pending.
+
+## 2.5 Handling User Responses
+
+Record every response against its proposal ID.
+
+Use these final statuses:
+
+- `APPROVED`
+- `REJECTED`
+- `DEFERRED`
+- `MORE_RESEARCH_REQUIRED`
+- `KEEP_CURRENT`
+- `PENDING_USER_DECISION`
+
+If the user requests more research:
+
+1. Investigate the requested information.
+2. Update the proposal.
+3. Present the revised proposal using `askQuestions`.
+4. Record the new response.
+
+If the user changes an earlier decision, update the proposal register accordingly.
+
+Preserve a record of the previous decision and its replacement.
+
+If the user skips questions, cancels the interaction, or does not provide an answer, mark the corresponding proposal `PENDING_USER_DECISION`.
+
+Never assume that an unanswered proposal is approved.
+
+## 2.6 Important Distinction: Approval Is Not Implementation Authorization
+
+Approval means the user authorizes inclusion of the proposal in the generated Markdown implementation specification.
+
+It does NOT authorize you to:
+
+- Install packages.
+- Modify application source code.
+- Update dependency manifests.
+- Change project configurations.
+- Install VS Code extensions.
+- Install MCP servers.
+- Modify AI instructions.
+- Perform the proposed migration.
+
+The entire assessment remains read-only except for generating the requested output documents.
+
+## 2.7 If Ask Questions Is Unavailable
+
+If `vscode/askQuestions` cannot be found or invoked:
+
+1. Do not silently replace it with ordinary text questions.
+2. Do not assume user approval.
+3. Do not mark any proposal as approved.
+4. Continue factual research where practical.
+5. Mark all undecided proposals `PENDING_USER_DECISION`.
+6. Report that the interactive approval capability was unavailable.
+
+The requirement to obtain individual user decisions must never be bypassed.
+
+---
+
+# 3. WORKSPACE DISCOVERY
+
+Before analyzing packages or proposing changes, thoroughly inspect the workspace.
+
+## 3.1 Existing AI Instructions and Development Context
+
+Review applicable files and resources:
 
 - `AGENTS.md`
 - `.github/copilot-instructions.md`
@@ -91,30 +270,28 @@ Review relevant files and resources, including:
 - `GEMINI.md`
 - `README.md`
 - `CONTRIBUTING.md`
-- `agents.md`
-- `specs/`
-- `.specify/`
-- `memory/`
-- Serena configuration and instructions, if installed.
-- MCP server configurations.
-- Existing development documentation.
 - Existing architecture documentation.
-- Existing development conventions and coding standards.
+- Existing coding standards.
+- Serena instructions and configuration.
+- MCP server configurations.
+- Spec Kit configuration.
+- Existing reusable AI skills.
+- Relevant memory and context files.
 
-Identify relevant existing instructions that influence how future AI agents interact with the workspace.
+Identify existing instructions that affect how AI agents interact with the workspace.
 
 Do not modify existing AI instructions during this assessment.
 
-## 1.2 Workspace Inventory
+## 3.2 Workspace Inventory
 
 Determine:
 
 - Workspace root.
 - All accessible workspace folders.
 - All relevant repositories.
-- All solutions.
-- All projects.
-- All application types.
+- Solutions.
+- Projects.
+- Application types.
 - Programming languages.
 - Frameworks.
 - Target frameworks.
@@ -125,11 +302,9 @@ Determine:
 - Build systems.
 - Testing frameworks.
 - Deployment infrastructure.
-- Development tooling.
+- Development tools.
 
-Inspect all relevant project and dependency configuration files.
-
-Examples include:
+Inspect relevant files, including:
 
 - `.sln`, `.slnx`
 - `.csproj`, `.vbproj`, `.fsproj`
@@ -147,23 +322,22 @@ Examples include:
 - `requirements.txt`
 - `pyproject.toml`
 - `Cargo.toml`
-- `Cargo.lock`
 - `go.mod`
 - `pom.xml`
 - `build.gradle`
 - Dockerfiles.
 - CI/CD configuration.
-- Other relevant manifests discovered during inspection.
+- Other relevant dependency manifests.
 
-Exclude irrelevant generated directories, dependency caches, build artifacts, and unrelated personal files.
+Exclude irrelevant generated directories, caches, build artifacts, and unrelated personal files.
 
-If the VS Code workspace contains multiple roots, assess each relevant root. Do not claim to have inspected inaccessible repositories or directories.
+Assess every accessible workspace root, not just the currently open solution.
 
-## 1.3 Dependency and Project Relationships
+Clearly document anything inaccessible.
 
-Map the relationships between projects.
+## 3.3 Project Relationships
 
-Identify:
+Map:
 
 - Project references.
 - Shared libraries.
@@ -171,17 +345,17 @@ Identify:
 - Centralized dependency management.
 - Duplicate dependencies.
 - Version inconsistencies.
-- Cross-project interfaces.
 - Shared configuration.
-- Dependencies that affect multiple applications.
+- Cross-project interfaces.
+- Dependencies affecting multiple applications.
 
-Create an internal dependency map to use throughout the audit.
+Create an internal dependency and project relationship map.
 
 ---
 
-# PHASE 2 — COMPLETE PACKAGE AND DEPENDENCY AUDIT
+# 4. COMPLETE PACKAGE AND DEPENDENCY AUDIT
 
-## 2.1 Inventory All Dependencies
+## 4.1 Dependency Inventory
 
 Identify:
 
@@ -197,25 +371,25 @@ Identify:
 - Deployment dependencies.
 - AI development dependencies.
 
-Determine which dependencies are actively used and which appear redundant, unused, or obsolete.
+Identify packages that are unused, obsolete, redundant, unsupported, or potentially unnecessary.
 
-Do not confuse a declared package version with its actual resolved version.
+Distinguish declared versions from actually resolved versions.
 
-## 2.2 Research Available Updates
+## 4.2 Current Release Research
 
-For every relevant package, determine:
+For each relevant package, research:
 
 - Current declared version.
 - Current resolved version.
 - Latest stable version.
 - Latest compatible version.
-- Recommended version.
+- Recommended target version.
 - Major, minor, and patch updates.
 - Deprecated versions.
 - End-of-support status.
 - Known vulnerabilities.
 - Breaking changes.
-- Required migrations.
+- Migration requirements.
 - New features.
 - Performance improvements.
 - Compatibility requirements.
@@ -231,31 +405,50 @@ Research authoritative sources:
 7. Security advisories.
 8. Relevant issue trackers.
 
-Use current research rather than relying exclusively on cached package metadata or previous AI knowledge.
+Use current external research rather than relying entirely on cached package metadata or previous model knowledge.
 
-Record the research date and authoritative source URLs.
+Record research dates and source URLs.
 
-Never automatically recommend preview, alpha, beta, nightly, or release-candidate versions for production applications.
+Never recommend preview, alpha, beta, nightly, or release-candidate versions as production defaults.
+
+## 4.3 Package Update Recommendations
+
+For each package with a meaningful update, prepare a detailed proposal.
+
+Include:
+
+- Package name.
+- Current version.
+- Latest stable version.
+- Recommended version.
+- Update type.
+- Projects affected.
+- Files affected.
+- Benefits.
+- Breaking changes.
+- Compatibility.
+- Security implications.
+- Performance implications.
+- Implementation effort.
+- Risks.
+- Official sources.
+
+Every recommended package update requires its own `askQuestions` approval.
 
 ---
 
-# PHASE 3 — HARDCODED FUNCTIONALITY AND MODERNIZATION OPPORTUNITY AUDIT
+# 5. HARDCODED FUNCTIONALITY AND TECHNOLOGY MODERNIZATION
 
-This phase is essential.
+Do not limit the assessment to dependencies already installed.
 
-Do not limit your assessment to packages already installed in the project.
+Investigate opportunities to replace, improve, consolidate, or eliminate custom-built functionality.
 
-Look for functionality currently implemented manually that could be replaced, simplified, or improved through a suitable package, library, framework feature, SDK, service, or built-in platform capability.
+## 5.1 Inspect Existing Implementations
 
-The goal is to identify opportunities to make the application better, not simply increase the number of dependencies.
-
-## 3.1 Inspect Existing Custom Implementations
-
-Analyze the existing source code for custom-built functionality.
-
-Investigate applicable areas such as:
+Investigate applicable areas.
 
 ### Application Infrastructure
+
 - Logging.
 - Exception handling.
 - Error reporting.
@@ -271,24 +464,26 @@ Investigate applicable areas such as:
 - Resource management.
 
 ### Data and Database Operations
+
 - Database connection management.
-- Database access.
 - SQL execution.
+- Database access.
 - Object-relational mapping.
 - Data validation.
-- Data serialization.
-- Data deserialization.
+- Serialization.
+- Deserialization.
 - Data mapping.
 - Data transformation.
 - Bulk operations.
 - Transaction management.
 - Connection pooling.
 
-### User Interface and User Experience
+### User Interface
+
 - Custom controls.
-- UI component implementations.
+- UI components.
 - Data grids.
-- Search functionality.
+- Search.
 - Filtering.
 - Sorting.
 - Pagination.
@@ -296,13 +491,14 @@ Investigate applicable areas such as:
 - Notifications.
 - Progress indicators.
 - Keyboard shortcuts.
-- Accessibility features.
+- Accessibility.
 - Error dialogs.
 - Printing.
 - Reporting.
 - Export and import functionality.
 
 ### Security
+
 - Authentication.
 - Authorization.
 - Password handling.
@@ -317,6 +513,7 @@ Investigate applicable areas such as:
 - Permission handling.
 
 ### Application Performance
+
 - Repeated calculations.
 - Inefficient loops.
 - Unnecessary database requests.
@@ -330,9 +527,10 @@ Investigate applicable areas such as:
 - Inefficient network communication.
 
 ### Development Infrastructure
+
 - Custom build scripts.
 - Manual code formatting.
-- Manual testing procedures.
+- Manual testing.
 - Custom static analysis.
 - Duplicate validation tools.
 - Documentation generation.
@@ -341,112 +539,179 @@ Investigate applicable areas such as:
 - Release automation.
 - Dependency management scripts.
 
-The above are investigation categories, not instructions to replace every existing implementation.
+These are investigation categories, not instructions to replace every existing implementation.
 
 Only recommend changes supported by actual source-code evidence.
 
-## 3.2 Identify Replacement and Improvement Opportunities
+## 5.2 Compare Alternatives
 
-For each meaningful custom implementation, determine whether a better alternative exists.
+For every meaningful custom implementation, investigate:
 
-Evaluate:
-
-1. Existing custom implementation.
-2. Existing framework-native alternative.
+1. The current custom implementation.
+2. Framework-native alternatives.
 3. Available third-party libraries.
-4. Available SDKs or official APIs.
-5. Existing packages that already provide similar functionality.
-6. Whether a complete replacement or partial integration would be better.
+4. Official SDKs or APIs.
+5. Existing installed packages providing similar functionality.
+6. Partial replacement or integration options.
 
-For each candidate, compare:
+Compare:
 
-- Application performance.
+- Performance.
 - Memory utilization.
 - Security.
 - Reliability.
 - Compatibility.
 - Development complexity.
 - Maintenance burden.
-- Code readability.
-- Testing capabilities.
+- Readability.
+- Testability.
 - Extensibility.
 - User experience.
 - Long-term support.
 - Licensing.
 - Package size.
-- Additional transitive dependencies.
+- Additional dependencies.
 
-Determine whether adopting the alternative would genuinely improve the application.
+Prefer native framework capabilities when they provide equivalent or better results without unnecessary dependency overhead.
 
-### Important: Framework Features vs. Third-Party Packages
+Do not introduce a package simply to replace a few lines of efficient, maintainable code.
 
-Before recommending a package, investigate whether the current programming language or framework already provides an equivalent feature.
+## 5.3 Hardcoded Logic Assessment
 
-Prefer native capabilities when they:
-
-- Perform equally well or better.
-- Require fewer dependencies.
-- Improve security.
-- Reduce maintenance.
-- Fit existing architecture.
-
-Do not introduce an external package solely to replace a few lines of efficient, well-written code.
-
-### 3.3 Identify Hardcoded Logic That Should Be Modernized
-
-Investigate whether existing code contains:
+Identify:
 
 - Hardcoded configuration.
 - Duplicated business logic.
 - Repeated utility methods.
 - Manual implementations of standard algorithms.
 - Repeated validation logic.
-- Manually implemented common patterns.
+- Repeated common programming patterns.
 - Duplicated infrastructure.
-- Inconsistent implementations across projects.
-- Configuration values embedded in source files.
-- Application-specific functionality that would benefit from reusable abstractions.
+- Inconsistent implementations between projects.
+- Configuration embedded in source code.
+- Opportunities for reusable abstractions.
 
-Distinguish between legitimate application-specific logic and unnecessarily duplicated infrastructure.
+Distinguish legitimate business-specific rules from unnecessarily duplicated infrastructure.
 
-Do not recommend externalizing business rules simply because they are hardcoded.
+Do not externalize business rules simply because they are hardcoded.
 
-Never propose exposing secrets or moving sensitive configuration into an unsecured location.
+Never expose secrets or move sensitive configuration into an unsecured location.
 
-### 3.4 Replacement Opportunity Classification
+## 5.4 Modernization Classification
 
-Assign one of the following classifications to each identified opportunity:
+Assign each finding one classification:
 
-- **REPLACE:** Existing custom implementation should be replaced by a better-supported alternative.
-- **MODERNIZE:** Existing functionality should be improved without necessarily replacing the underlying implementation.
-- **ADD:** New functionality would provide meaningful benefits.
-- **CONSOLIDATE:** Multiple implementations should be unified.
-- **REMOVE:** Redundant or unnecessary functionality should be eliminated.
-- **NATIVE ALTERNATIVE:** Existing functionality can be improved using built-in framework capabilities.
-- **KEEP:** Existing implementation is already appropriate.
-- **INVESTIGATE:** More research or testing is required.
+- `REPLACE`
+- `MODERNIZE`
+- `ADD`
+- `CONSOLIDATE`
+- `REMOVE`
+- `NATIVE_ALTERNATIVE`
+- `KEEP`
+- `INVESTIGATE`
 
-For every opportunity, identify the exact source files, methods, classes, components, and other relevant code locations.
+For every proposed change, identify exact source files, classes, methods, components, and other relevant implementation locations.
 
-Explain why the existing implementation should or should not be changed.
+Explain why the existing solution should change.
+
+Each proposed change requires its own `askQuestions` approval.
 
 ---
 
-# PHASE 4 — AI DEVELOPMENT ENVIRONMENT AND COPILOT OPTIMIZATION
+# 6. SECURITY, PERFORMANCE, AND USER EXPERIENCE
 
-Investigate opportunities to improve the AI-assisted development environment used for this workspace.
+Analyze opportunities that may not involve package updates.
 
-This assessment should focus on making GitHub Copilot and other coding agents more accurate, efficient, consistent, and productive.
+## 6.1 Performance
 
-Do not limit this phase to application runtime packages.
+Investigate:
 
-## 4.1 AI Context and Repository Understanding
+- Startup time.
+- Execution speed.
+- CPU utilization.
+- Memory consumption.
+- Database performance.
+- Network efficiency.
+- UI responsiveness.
+- Resource consumption.
+- Build times.
+- Test execution times.
+
+Identify improvements achievable through code optimization, framework capabilities, or better dependencies.
+
+Use documented benchmarks or propose a measurable validation method.
+
+Do not invent performance improvements.
+
+## 6.2 Security
+
+Investigate:
+
+- Known CVEs.
+- Vulnerable dependencies.
+- Unsupported packages.
+- Unsafe APIs.
+- Outdated cryptography.
+- Insecure configurations.
+- Supply-chain risks.
+- Package ownership and maintenance.
+- License compatibility.
+- Security weaknesses in custom implementations.
+
+Explain both the security benefits and new risks of proposed alternatives.
+
+## 6.3 User Experience
+
+Identify opportunities involving:
+
+- Application usability.
+- Accessibility.
+- Workflow efficiency.
+- UI responsiveness.
+- Search and filtering.
+- Validation.
+- Error reporting.
+- Notifications.
+- Keyboard navigation.
+- Printing and reporting.
+- User feedback.
+- Data entry efficiency.
+- Consistency between applications.
+
+Only recommend features that make practical sense for the existing application.
+
+Every actual proposed change requires individual approval.
+
+## 6.4 Maintainability
 
 Evaluate:
 
-- Repository instructions.
+- Code duplication.
+- Shared utility opportunities.
+- Project separation.
+- Dependency consistency.
+- Configuration organization.
+- Architecture.
+- Naming conventions.
+- Abstraction quality.
+- Testability.
+- Documentation.
+- Long-term maintenance.
+
+Prioritize reductions in unnecessary complexity.
+
+---
+
+# 7. AI DEVELOPMENT ENVIRONMENT AND COPILOT OPTIMIZATION
+
+Investigate opportunities to improve the AI-assisted development environment.
+
+## 7.1 AI Context and Instructions
+
+Evaluate:
+
+- Copilot instructions.
 - `AGENTS.md` organization.
-- Copilot instruction files.
 - Path-specific instructions.
 - Custom prompt files.
 - Custom agents.
@@ -456,115 +721,98 @@ Evaluate:
 - Symbol navigation.
 - Semantic code search.
 - Documentation indexing.
-- Project architecture documentation.
-- Existing memory and context management.
-- Rules for selecting relevant files.
-- Duplicate or conflicting AI instructions.
+- Existing memory systems.
+- Context management.
+- Duplicate or conflicting instructions.
 
-Identify opportunities to reduce unnecessary context consumption while improving the quality of information provided to coding agents.
+Identify opportunities to improve AI accuracy while reducing unnecessary context consumption.
 
-Determine whether the current instruction architecture makes it difficult for an AI agent to understand the entire workspace.
+## 7.2 MCP Servers and Integrations
 
-Recommend improvements that increase consistency across projects.
+Investigate applicable integrations:
 
-## 4.2 MCP Servers and AI Integrations
-
-Investigate MCP servers and integrations that could improve development workflows.
-
-Consider applicable categories:
-
-- Microsoft Learn documentation.
-- Official SDK documentation.
-- Context7 or equivalent current documentation retrieval.
-- Serena and semantic code navigation.
+- Microsoft Learn.
+- Context7.
+- Serena.
 - GitHub integration.
 - Git history analysis.
-- Database development tools.
-- Testing and debugging tools.
+- Database tools.
+- Testing tools.
 - Browser automation.
 - API documentation.
 - Architecture visualization.
 - Dependency research.
 - Security analysis.
-- Code quality analysis.
 
 Identify:
 
-- Currently installed MCP servers.
+- Currently installed servers.
 - Available but unused integrations.
 - Missing integrations.
 - Redundant integrations.
-- Potential performance improvements.
-- Permission requirements.
+- Potential performance benefits.
+- Required permissions.
 - Configuration requirements.
 
-Prefer free or open-source options where appropriate, but evaluate paid solutions when they offer meaningful advantages.
+Prefer free and open-source options when appropriate.
 
 For every proposed MCP server, research:
 
-- Official project and repository.
-- Maintenance activity.
+- Official project.
+- Maintenance.
 - Compatibility.
 - Security history.
-- Required permissions.
+- Permissions.
 - Data access.
-- Whether it executes external code.
+- External code execution.
 - Configuration complexity.
 - Resource consumption.
-- Actual usefulness to this workspace.
+- Actual usefulness.
 
-Do not recommend a server solely because it is popular.
+Be cautious with integrations requiring unrestricted filesystem, terminal, network, or credential access.
 
-Be especially cautious with tools that provide unrestricted filesystem, terminal, credential, or network access.
+## 7.3 VS Code Extensions and Development Tools
 
-## 4.3 VS Code Extensions and Development Tools
+Investigate opportunities involving:
 
-Inspect the available information about installed VS Code extensions and relevant development tools.
-
-Identify opportunities involving:
-
-- C# and .NET tooling.
+- C# and .NET development.
 - Language servers.
 - Code navigation.
 - Static analysis.
-- Code quality.
-- Automated formatting.
+- Formatting.
 - Documentation.
 - Testing.
 - Debugging.
 - Security scanning.
 - Dependency management.
-- Git and GitHub integration.
+- Git and GitHub.
 - AI-assisted development.
 - Build optimization.
 
-Identify useful features from tools that may already be installed but are not being used effectively.
+Identify underused features in tools already installed.
 
-Look for missing extensions that provide demonstrable benefits.
+Avoid redundant extensions that introduce conflicts or unnecessary resource consumption.
 
-Do not recommend overlapping extensions that introduce unnecessary resource usage or conflicting behavior.
+## 7.4 AI Coding Performance
 
-## 4.4 Improving AI Coding Performance
-
-Evaluate opportunities to improve:
+Evaluate ways to improve:
 
 - Code understanding.
 - Context selection.
 - Repository-wide reasoning.
 - Multi-project awareness.
-- Accuracy of code changes.
+- Accuracy of modifications.
 - Tool selection.
 - Documentation retrieval.
 - API version accuracy.
 - Test generation.
 - Debugging.
-- Error diagnosis.
 - Token efficiency.
 - Response latency.
 - Consistency between agents.
 - Autonomous task execution.
 
-Consider whether reusable agents, skills, prompts, instruction files, MCP servers, or specialized development tools could improve these areas.
+Investigate reusable instructions, specialized agents, skills, MCP servers, and other improvements.
 
 Identify ways to prevent AI agents from:
 
@@ -575,227 +823,136 @@ Identify ways to prevent AI agents from:
 - Making inconsistent architectural decisions.
 - Duplicating utilities.
 - Generating unnecessary code.
-- Missing existing project conventions.
+- Missing project conventions.
 
-Where possible, recommend measurable improvements rather than subjective claims.
+Recommend measurable improvements where possible.
 
-Do not assume that introducing more AI tools automatically improves AI performance.
-
-## 4.5 AI Workflow Recommendations
-
-Create a dedicated section for improvements to the AI development environment.
-
-Include:
-
-- Current limitation.
-- Recommended improvement.
-- Tool or integration involved.
-- Expected benefit.
-- Required configuration.
-- Security implications.
-- Estimated effort.
-- Compatibility.
-- Supporting documentation.
-
-Keep application runtime dependencies, development dependencies, and AI workflow tools in separate categories.
+Every proposed tooling or instruction change must receive individual approval.
 
 ---
 
-# PHASE 5 — DEEP IMPACT AND COMPATIBILITY ANALYSIS
+# 8. RESEARCH AND CANDIDATE EVALUATION
 
-For every recommended package update or modernization opportunity, analyze the actual workspace implementation.
+Every proposed package, library, tool, framework feature, or replacement must undergo research.
 
-## 5.1 Compatibility
+Compare at least two reasonable alternatives when meaningful alternatives exist.
 
-Check compatibility with:
-
-- Current framework versions.
-- Target frameworks.
-- Runtime versions.
-- SDKs.
-- Compilers.
-- Existing dependencies.
-- Other projects.
-- Operating systems.
-- Deployment environments.
-- Existing architecture.
-
-Identify any required framework, runtime, SDK, or package upgrades.
-
-## 5.2 File-Level Impact
-
-Identify every file that would need modification.
-
-For each file, record:
-
-- Repository-relative path.
-- Relevant class, method, component, or configuration section.
-- Current implementation.
-- Recommended change.
-- Reason for the change.
-- Associated package or tool.
-- Whether the change is mandatory or optional.
-
-Use actual code references and line numbers where practical.
-
-Do not invent line numbers or implementation details.
-
-## 5.3 Performance Analysis
-
-Investigate measurable benefits involving:
-
-- Startup time.
-- Execution speed.
-- CPU consumption.
-- Memory consumption.
-- Database performance.
-- Network efficiency.
-- UI responsiveness.
-- Build performance.
-- Test execution.
-- Application resource consumption.
-
-Identify opportunities where existing code can be optimized without introducing additional dependencies.
-
-Distinguish benchmarks, documented performance changes, and estimated improvements.
-
-## 5.4 Security Analysis
-
-Investigate:
-
-- CVEs.
-- Vulnerable packages.
-- Outdated encryption.
-- Unsafe APIs.
-- Insecure configuration.
-- Vulnerable transitive dependencies.
-- Insecure custom implementations.
-- Unsupported packages.
-- Supply-chain risks.
-- Package ownership and maintenance.
-- License compatibility.
-
-Explain security benefits and possible new risks introduced by proposed replacements.
-
-## 5.5 Maintainability and Organization
-
-Evaluate:
-
-- Code duplication.
-- Shared utility opportunities.
-- Project separation.
-- Dependency consistency.
-- Centralized configuration.
-- Architecture.
-- Naming conventions.
-- Abstraction quality.
-- Testability.
-- Documentation.
-- Long-term maintainability.
-
-Prioritize improvements that reduce unnecessary complexity.
-
----
-
-# PHASE 6 — RESEARCH AND CANDIDATE EVALUATION
-
-Every proposed new package, replacement, framework feature, or development tool must undergo an evaluation.
-
-Use authoritative documentation and current research.
+Include the native framework solution where applicable.
 
 For every candidate, record:
 
-| Category | Information |
+| Field | Required Information |
 |---|---|
+| Proposal ID | Unique identifier |
 | Name | Package, tool, framework, or capability |
 | Type | Runtime, development, AI, security, etc. |
 | Current Solution | Existing implementation |
 | Proposed Alternative | Recommended replacement |
-| Latest Version | Current stable version when applicable |
+| Latest Version | Current stable version, where applicable |
 | License | License and compatibility |
 | Maintenance | Project activity and support |
-| Security | Known vulnerabilities and security practices |
+| Security | Vulnerabilities and security practices |
 | Compatibility | Workspace compatibility |
 | Performance | Documented or estimated benefits |
 | Complexity | Integration and maintenance impact |
 | Dependencies | Additional packages or tools |
 | Risks | Migration and operational concerns |
 | Recommendation | Adopt, replace, pilot, keep, etc. |
+| Approval | User's individual decision |
 
-Compare at least two reasonable alternatives when meaningful alternatives exist.
-
-Include the native framework solution as a candidate where applicable.
-
-### Candidate Evaluation Rules
-
-Evaluate whether the proposed solution:
+Determine whether the alternative:
 
 - Solves an actual problem.
-- Provides functionality unavailable or inefficiently implemented today.
+- Provides meaningful improvements.
 - Reduces maintenance.
 - Improves security.
 - Improves performance.
-- Improves development productivity.
+- Improves productivity.
 - Improves user experience.
-- Fits the existing architecture.
-- Justifies its additional complexity.
+- Fits existing architecture.
+- Justifies additional complexity.
 
-Recommend adoption only when the overall benefit justifies implementation and long-term maintenance costs.
-
----
-
-# PHASE 7 — PRIORITIZATION AND RECOMMENDATIONS
-
-Assign a priority:
-
-- **CRITICAL:** Serious security, stability, or operational issue.
-- **HIGH:** Significant improvement or important compatibility requirement.
-- **MEDIUM:** Meaningful improvement with manageable risk.
-- **LOW:** Optional enhancement or minor improvement.
-
-Assign a recommendation:
-
-- **RECOMMENDED:** Strong evidence of meaningful benefits.
-- **RECOMMENDED WITH CHANGES:** Benefits are substantial but require migration.
-- **PILOT:** Promising, but should be tested before broader adoption.
-- **OPTIONAL:** Useful improvement, but not essential.
-- **DEFER:** Not suitable for immediate adoption.
-- **KEEP CURRENT:** Existing implementation is preferable.
-- **INVESTIGATE:** More information is required.
-
-Also estimate:
-
-- Implementation complexity.
-- Affected projects.
-- Affected files.
-- Migration risk.
-- Testing requirements.
-- Long-term maintenance impact.
-
-Do not select the newest or most popular technology simply because it is newer or more popular.
+Do not recommend adoption unless the benefits justify the costs and risks.
 
 ---
 
-# PHASE 8 — WORKSPACE-WIDE MODERNIZATION ROADMAP
+# 9. USER APPROVAL INTERVIEW AND DECISION REGISTER
 
-Analyze all recommendations together.
+After completing the factual research and preparing the proposals, conduct the complete approval interview using `#tool:vscode/askQuestions`.
+
+Do not generate a final implementation specification with assumed approvals.
+
+## 9.1 Present Every Proposal
+
+For each proposal:
+
+1. Assign its ID.
+2. Prepare a plain-language explanation.
+3. Explain the existing problem or opportunity.
+4. Explain the proposed change.
+5. Identify affected files and projects.
+6. Explain expected benefits.
+7. Explain risks and compatibility.
+8. Present the individual interactive question.
+9. Record the user's response.
+
+Do not ask for approval before enough research has been completed to explain the proposal meaningfully.
+
+## 9.2 Decision Register
+
+Maintain a master register with these columns:
+
+| Proposal ID | Proposed Change | Category | Priority | Decision | Notes |
+|---|---|---|---|---|---|
+
+Track all approved, rejected, deferred, pending, and further-research decisions.
+
+## 9.3 Decision Rules
+
+- APPROVED: Include in implementation scope.
+- REJECTED: Exclude from implementation scope.
+- DEFERRED: Document as future consideration.
+- MORE RESEARCH: Investigate and ask again.
+- KEEP CURRENT: Explicitly preserve the existing implementation.
+- PENDING: Do not assume approval.
+
+A user approving a package update does not automatically approve related code refactoring unless that refactoring was included in the same clearly defined proposal.
+
+## 9.4 Final Decision Review
+
+Once all proposals have been presented, summarize the decisions.
 
 Identify:
 
-- Shared files that need modifications.
+- Total proposals.
+- Approved changes.
+- Rejected changes.
+- Deferred changes.
+- Pending decisions.
+- Further research required.
+
+Any newly discovered implementation change must also receive individual approval before being included as approved scope.
+
+---
+
+# 10. WORKSPACE-WIDE MODERNIZATION ROADMAP
+
+Analyze all proposals together.
+
+Identify:
+
+- Shared files needing modification.
 - Packages that must be updated together.
 - Projects requiring framework upgrades.
 - Common functionality that should be consolidated.
-- Multiple implementations that can be replaced with one shared solution.
-- AI tooling improvements that affect every repository.
+- Multiple implementations that could share one solution.
+- AI tooling changes affecting multiple repositories.
 - Changes that could conflict.
-- Changes that should be performed in a particular order.
+- Required implementation order.
 
-Create a unified roadmap that minimizes redundant work.
+Group related approved changes into logical phases.
 
-Group related changes into logical phases.
-
-For example:
+Examples:
 
 1. Critical security and compatibility changes.
 2. Shared dependency updates.
@@ -806,15 +963,19 @@ For example:
 7. AI development environment improvements.
 8. Testing and final validation.
 
-Adapt the actual sequence to the findings.
+Adapt the actual roadmap to the findings.
+
+Do not include rejected recommendations as required implementation work.
+
+Clearly mark deferred and pending proposals.
 
 ---
 
-# PHASE 9 — TESTING AND VALIDATION STRATEGY
+# 11. TESTING AND VALIDATION STRATEGY
 
-Determine how every proposed update and modernization should be validated.
+Determine how each approved change should be validated.
 
-Include applicable requirements for:
+Include:
 
 - Dependency restoration.
 - Clean builds.
@@ -830,35 +991,38 @@ Include applicable requirements for:
 - Deployment validation.
 - AI workflow validation.
 
-Identify existing tests that need modification.
+Identify:
 
-Identify missing tests.
+- Existing tests requiring modification.
+- Missing tests.
+- Expected results.
+- Performance baselines.
+- Security verification procedures.
+- Rollback requirements.
 
 Define measurable acceptance criteria wherever possible.
 
-Include baseline comparisons when performance improvements are claimed.
+Testing recommendations do not authorize implementation.
 
 ---
 
-# PHASE 10 — PDF DELIVERABLE
+# 12. PDF DELIVERABLE
 
 Generate:
 
 `Dependency_Update_and_Modernization_Report.pdf`
 
-This document is intended for the end user.
+This report is intended for the end user.
 
-## Audience and Writing Style
+## Audience
 
-Assume the reader understands their applications and general computer terminology but does not necessarily understand programming languages, packages, frameworks, or implementation details.
+Assume the reader understands their applications and general computer terminology but does not necessarily understand programming languages, package management, or implementation details.
 
-Use accessible language.
+Avoid unnecessary technical jargon.
 
-Avoid unnecessary programming jargon.
+Explain technical concepts in terms of their effects on applications, security, performance, user experience, and maintenance.
 
-Explain technical concepts in terms of their effect on the application, its security, performance, maintenance, and user experience.
-
-## Required PDF Structure
+## Required Structure
 
 ### 1. Cover Page
 
@@ -868,11 +1032,11 @@ Include:
 - Dependency Update & Technology Modernization Assessment.
 - Research date.
 - Report version.
-- Number of repositories reviewed.
-- Number of projects reviewed.
-- Number of dependencies reviewed.
-- Number of update opportunities.
-- Number of modernization opportunities.
+- Repositories reviewed.
+- Projects reviewed.
+- Dependencies reviewed.
+- Available update opportunities.
+- Modernization opportunities.
 
 ### 2. Executive Summary
 
@@ -883,13 +1047,13 @@ Explain:
 - Security concerns.
 - Performance opportunities.
 - Code modernization opportunities.
-- User experience opportunities.
-- AI development workflow opportunities.
-- Most valuable recommended improvements.
+- User experience improvements.
+- AI development improvements.
+- Highest-value recommendations.
 
 ### 3. Dependency Update Overview
 
-Provide a table containing:
+Include:
 
 - Package.
 - Current version.
@@ -897,48 +1061,46 @@ Provide a table containing:
 - Recommended version.
 - Projects affected.
 - Priority.
-- Recommendation.
+- Approval decision.
 
 ### 4. Individual Dependency Assessments
 
-For every package with a meaningful update:
+For each package:
 
 - Package name.
 - Current version.
 - Available versions.
 - Recommended version.
 - Projects affected.
-- Files needing updates.
+- Files requiring updates.
 - Why the update matters.
 - Performance benefits.
 - Security improvements.
-- Compatibility considerations.
-- Application changes.
+- Compatibility.
+- Required changes.
 - Risks.
 - Estimated effort.
+- User decision.
 
-### 5. Custom Functionality and Modernization Opportunities
+### 5. Custom Functionality and Modernization
 
-Explain which existing application features could benefit from replacement or modernization.
-
-For each opportunity include:
+Explain:
 
 - Existing functionality.
 - Recommended alternative.
-- Files and application areas affected.
-- Why the current implementation could be improved.
+- Affected files.
+- Why the existing implementation could improve.
 - Performance benefits.
 - Security benefits.
-- Maintainability benefits.
-- User experience benefits.
+- Maintainability improvements.
+- User experience improvements.
 - Risks.
 - Implementation effort.
-
-Explain why the proposed replacement is better in practical terms.
+- User decision.
 
 ### 6. Development Tools and AI Optimization
 
-Document opportunities to improve:
+Document opportunities involving:
 
 - GitHub Copilot.
 - Coding agents.
@@ -947,149 +1109,171 @@ Document opportunities to improve:
 - Repository instructions.
 - Code navigation.
 - Documentation retrieval.
-- Testing and debugging tools.
+- Testing and debugging.
 - Developer productivity.
 
-Explain how each improvement helps development quality, efficiency, or consistency.
+Explain the practical benefits of each recommendation and its approval status.
 
 ### 7. Workspace-Wide Changes
 
-Summarize common changes across all projects.
+Summarize changes affecting shared files, dependencies, libraries, frameworks, and multiple projects.
 
-Identify shared files and dependencies.
+### 8. Implementation Roadmap
 
-### 8. Recommended Implementation Roadmap
+Present approved changes in logical phases.
 
-Group the improvements into logical implementation phases.
+Show priorities, benefits, effort, and dependencies.
 
-Include priority, expected benefit, effort, and dependencies between phases.
+Show deferred and pending recommendations separately.
 
 ### 9. Testing and Risk Assessment
 
-Explain how to verify the improvements and what risks need consideration.
+Explain the validation process and important risks.
 
-### 10. Final Recommendations
+### 10. User Approval Summary
 
-Provide a prioritized list of the highest-value improvements.
+Show:
 
-### 11. Research Sources
+- Approved proposals.
+- Rejected proposals.
+- Deferred proposals.
+- Pending decisions.
+- Recommendations requiring more research.
 
-Include clickable links to authoritative sources.
+### 11. Final Recommendations
 
-## PDF Design Requirements
+Present the highest-value approved changes.
 
-- US Letter paper, 8.5 × 11 inches.
-- Professional report layout.
-- Consistent typography.
-- Clear section hierarchy.
+### 12. Sources
+
+Include clickable official references.
+
+## PDF Formatting
+
+- US Letter, 8.5 × 11 inches.
+- Professional typography.
+- Consistent headings.
+- Clear tables.
 - Page numbers.
 - Headers and footers.
 - Table of contents.
-- Properly formatted tables.
 - Clickable hyperlinks.
 - Readable margins.
+- Proper table pagination.
 - No clipped or overflowing content.
-- Avoid unnecessarily splitting related information across pages.
-- Use subtle professional colors.
-- Use clear priority indicators.
-- Make the report suitable for printing and management review.
+- Subtle professional colors.
+- Clear visual priority indicators.
 
-Do not make the PDF look like raw technical documentation.
+Make the report suitable for printing and management review.
+
+Do not make it resemble raw technical documentation.
 
 ---
 
-# PHASE 11 — SPECKIT-READY MARKDOWN SPECIFICATION
+# 13. SPECKIT-READY MARKDOWN SPECIFICATION
 
 Generate:
 
 `DEPENDENCY_AND_MODERNIZATION_SPECIFICATION.md`
 
-This document is intended for use with:
+This document is intended for:
 
 `/speckit-specify`
 
-It must be a technically detailed document suitable for another AI development agent.
+It must provide a technically detailed, actionable starting point for a subsequent AI coding agent.
 
-The purpose is to provide an implementation-ready starting point for a new Spec Kit feature specification.
-
-## Required Markdown Structure
+## Required Structure
 
 # Workspace Dependency and Technology Modernization Specification
 
 ## 1. Overview
 
-Describe the modernization objectives and overall scope.
+Describe the modernization objectives and scope.
 
 ## 2. Workspace Context
 
-Document repositories, projects, frameworks, architecture, runtimes, SDKs, and package management systems.
+Document:
+
+- Repositories.
+- Projects.
+- Frameworks.
+- Architecture.
+- Runtimes.
+- SDKs.
+- Package management systems.
 
 ## 3. Existing Dependency Inventory
 
-Document all identified dependencies, current declared versions, resolved versions, support status, and update availability.
+Document all dependencies, current declared versions, resolved versions, support status, and available updates.
 
-## 4. Proposed Dependency Updates
+## 4. Approved Dependency Updates
 
-For each update, document:
+For every approved update:
 
 - Package name.
 - Current version.
-- Recommended version.
+- Target version.
 - Projects affected.
 - Required changes.
 - Compatibility requirements.
 - Benefits.
 - Breaking changes.
 - Security impact.
-- Migration considerations.
+- Migration requirements.
 - Official sources.
+- Approval ID.
 
 ## 5. Existing Custom Functionality Assessment
 
-Document relevant custom-built implementations.
-
-Include:
+Document relevant existing implementations:
 
 - File path.
 - Class or method.
-- Existing behavior.
-- Current implementation limitations.
-- Why modernization is being considered.
-- Whether the implementation should remain or change.
+- Current behavior.
+- Limitations.
+- Reason for modernization.
+- Current user decision.
 
-## 6. Proposed Replacements and Modernizations
+## 6. Approved Replacements and Modernizations
 
-For every candidate, document:
+For each approved replacement:
 
+- Proposal ID.
 - Existing solution.
 - Proposed replacement.
 - Package, framework, SDK, or tool.
 - Recommended version where applicable.
-- Alternative candidates.
+- Alternatives considered.
 - Comparison.
 - Benefits.
 - Risks.
 - Compatibility.
 - Dependencies.
-- Estimated effort.
-- Recommendation.
+- Implementation effort.
+- User approval.
 
 ## 7. File-Level Change Requirements
 
-Provide exact repository-relative paths.
+For each affected file:
 
-For each affected file document:
-
+- Exact repository-relative path.
 - Existing implementation.
-- Required change.
-- Associated dependency or modernization.
+- Required modification.
+- Associated package or modernization.
 - Reason.
 - Mandatory or optional classification.
 - Expected outcome.
+- Associated approval ID.
 
 ## 8. Cross-Project Changes
 
-Document shared libraries, common components, dependency consolidation, centralized configuration, and multi-project implications.
+Document:
+
+- Shared libraries.
+- Common components.
+- Dependency consolidation.
+- Centralized configuration.
+- Multi-project implications.
 
 ## 9. AI Development Environment Improvements
 
@@ -1099,7 +1283,7 @@ Document:
 - Custom agents.
 - Prompt files.
 - Reusable skills.
-- Serena integration.
+- Serena.
 - MCP servers.
 - VS Code extensions.
 - Documentation retrieval.
@@ -1107,21 +1291,19 @@ Document:
 - AI context improvements.
 - Security and permission requirements.
 
-Separate currently installed tools from proposed additions.
+Separate installed tools from approved proposed additions.
 
 ## 10. Security Requirements
 
-Document vulnerabilities, CVEs, package trust, license issues, and required security improvements.
+Document vulnerabilities, CVEs, package trust, licensing, and approved security improvements.
 
 ## 11. Performance Requirements
 
-Document measurable or documented performance opportunities.
-
-Include baseline and expected outcomes where available.
+Document evidence-backed performance opportunities and validation requirements.
 
 ## 12. User Experience and Maintainability Requirements
 
-Document improvements to usability, accessibility, application consistency, maintainability, and developer workflows.
+Document improvements to usability, accessibility, application consistency, maintainability, and development workflows.
 
 ## 13. Architecture and Compatibility Requirements
 
@@ -1135,16 +1317,17 @@ For each phase include:
 
 - Objective.
 - Projects involved.
-- Dependencies involved.
+- Packages involved.
 - Files affected.
 - Required changes.
 - Prerequisites.
 - Dependencies on other phases.
+- Approval IDs.
 - Completion criteria.
 
 ## 15. Testing and Verification Strategy
 
-Document all required tests and validation procedures.
+Document required tests and validation procedures.
 
 ## 16. Acceptance Criteria
 
@@ -1159,70 +1342,89 @@ Examples:
 - [ ] Approved custom functionality replacements are implemented.
 - [ ] No unnecessary dependencies are introduced.
 - [ ] Identified security issues are addressed.
-- [ ] Performance improvements are validated against the baseline where applicable.
-- [ ] All relevant automated tests pass.
+- [ ] Performance improvements are validated where applicable.
+- [ ] Relevant automated tests pass.
 - [ ] AI development workflow changes are validated.
-- [ ] No unapproved application changes are introduced.
+- [ ] No rejected or unapproved changes are implemented.
 
 ## 17. Risks and Constraints
 
-Document migration risks, technical limitations, deferred improvements, and compatibility uncertainties.
+Document migration risks, limitations, deferred improvements, and compatibility uncertainties.
 
 ## 18. Out of Scope
 
-Identify unrelated work and improvements that should not be included.
+Identify unrelated work and rejected proposals.
 
-## 19. Decisions Required
+## 19. User Decisions and Approval Register
 
-Clearly identify any proposed changes requiring user approval.
+Record every proposal:
 
-Separate approved scope from optional recommendations and unresolved decisions.
+- Proposal ID.
+- Description.
+- Category.
+- User decision.
+- Rationale or comments.
+- Whether it belongs in implementation scope.
 
-## 20. Research References
+## 20. Decisions Required
 
-Include authoritative URLs for package documentation, release notes, migration guides, security advisories, tools, and integration documentation.
+Identify pending decisions and unresolved research questions.
+
+## 21. Research References
+
+Include authoritative URLs for package documentation, release notes, migration guides, security advisories, and tool documentation.
 
 ---
 
-# PHASE 12 — SPECKIT READINESS
+# 14. SPEC KIT READINESS AND SCOPE PROTECTION
 
-The Markdown document must be useful as the input to `/speckit-specify`.
+The Markdown document must be suitable for supplying to `/speckit-specify`.
 
-To achieve this:
+Follow these requirements:
 
-1. Describe the desired outcomes rather than prescribing every implementation detail unnecessarily.
+1. Describe desired outcomes, not unnecessarily prescriptive implementation details.
 2. Document existing application behavior that must be preserved.
-3. Clearly identify requirements and constraints.
-4. Include all affected projects and shared components.
-5. Provide enough technical evidence to prevent another agent from guessing.
-6. Include specific acceptance criteria.
-7. Distinguish mandatory changes from optional improvements.
-8. Identify dependencies between implementation phases.
-9. Include known risks and unresolved decisions.
-10. Explicitly protect existing business logic and functionality.
+3. Include all affected projects and shared components.
+4. Include accurate file-level technical evidence.
+5. Include specific, testable acceptance criteria.
+6. Distinguish mandatory changes from optional improvements.
+7. Identify dependencies between implementation phases.
+8. Include risks and constraints.
+9. Protect existing business logic.
+10. Preserve individual approval decisions.
 
-Do not treat every suggested package or replacement as approved.
+### Approval-Based Scope Rules
 
-The specification must clearly identify which recommendations are ready for implementation and which require a decision.
+Only `APPROVED` proposals may appear as approved implementation requirements.
 
-Do not begin implementing the modernization work.
+`REJECTED` proposals must be excluded from implementation scope.
+
+`DEFERRED` proposals must appear only as future considerations.
+
+`PENDING_USER_DECISION` proposals must remain unresolved and must not be treated as approved.
+
+`MORE_RESEARCH_REQUIRED` proposals must be clearly identified as incomplete.
+
+`KEEP_CURRENT` decisions must explicitly protect the existing implementation.
+
+The Markdown document may include all findings for traceability, but implementation scope must strictly reflect the user's recorded decisions.
 
 ---
 
-# PHASE 13 — FINAL QUALITY VALIDATION
+# 15. FINAL QUALITY VALIDATION
 
-Before completing the task, validate both files.
+Before completing the task, validate both documents.
 
 ## PDF Validation
 
 - PDF opens correctly.
-- All pages render correctly.
+- All pages render.
 - No clipped text.
 - No broken tables.
 - Links work.
-- All important findings are included.
-- Language is understandable to an end user.
-- Recommendations are consistent.
+- Findings are complete.
+- Language is understandable.
+- Approval statuses are accurate.
 
 ## Markdown Validation
 
@@ -1233,13 +1435,12 @@ Before completing the task, validate both files.
 - Technical recommendations are actionable.
 - Acceptance criteria are testable.
 - Spec Kit requirements are addressed.
-- Unapproved changes are clearly identified.
+- Approval decisions are accurate.
+- Unapproved changes are excluded from implementation scope.
 
 ## Cross-Document Validation
 
-Compare the PDF and Markdown documents.
-
-Verify that:
+Ensure:
 
 - Package counts match.
 - Version recommendations match.
@@ -1247,47 +1448,61 @@ Verify that:
 - Affected files match.
 - Priorities match.
 - Security findings match.
-- Recommendations do not contradict each other.
+- Proposal identifiers match.
+- User decisions match.
+- Approved implementation scope matches.
 
 ---
 
-# PHASE 14 — OUTPUT AND COMPLETION
+# 16. OUTPUT AND COMPLETION
 
 Create this directory at the workspace root:
 
 `Dependency_Assessment/`
 
-Generate these files:
+Generate:
 
 1. `Dependency_Update_and_Modernization_Report.pdf`
 2. `DEPENDENCY_AND_MODERNIZATION_SPECIFICATION.md`
 
-If the files already exist, preserve them and create appropriately versioned alternatives rather than silently overwriting them.
+If either file already exists, preserve it and create a versioned alternative rather than silently overwriting it.
 
-Use tools already available in the development environment to generate the PDF. Do not install additional dependencies just to create the report unless explicitly authorized.
+Use tools already available in the development environment to generate the PDF.
 
-If a genuine PDF generation limitation exists, report it rather than producing a broken or misleading file.
+Do not install additional dependencies merely to create the report unless explicitly authorized.
 
 At completion, provide:
 
 ### Workspace Assessment Summary
+
 - Repositories reviewed.
 - Projects reviewed.
 - Dependencies inventoried.
 - Dependencies with available updates.
 - Recommended package updates.
-- Identified custom functionality replacements.
-- Recommended modernization opportunities.
-- Identified security concerns.
-- Performance improvement opportunities.
+- Custom functionality replacement opportunities.
+- Modernization opportunities.
+- Security concerns.
+- Performance improvements.
 - User experience improvements.
 - AI development workflow improvements.
 
+### User Approval Summary
+
+- Total proposed changes.
+- Approved.
+- Rejected.
+- Deferred.
+- Pending.
+- More research required.
+
 ### Generated Deliverables
-Provide the exact paths to both files.
+
+Provide exact file locations.
 
 ### Important Findings
-Highlight the highest-priority findings and any significant compatibility or security concerns.
+
+Highlight the most important security, compatibility, performance, and modernization findings.
 
 ---
 
@@ -1295,7 +1510,7 @@ Highlight the highest-priority findings and any significant compatibility or sec
 
 Do not approach this task as simply finding newer packages.
 
-Approach it as an opportunity to comprehensively evaluate whether the entire development workspace and its applications are using the best appropriate technologies and practices.
+Treat it as a comprehensive opportunity to modernize the entire workspace and its development ecosystem.
 
 Look for opportunities to:
 
@@ -1306,7 +1521,7 @@ Look for opportunities to:
 - Consolidate duplicate functionality.
 - Improve application performance.
 - Strengthen security.
-- Improve user experience.
+- Improve end-user experience.
 - Improve maintainability.
 - Optimize developer tooling.
 - Improve GitHub Copilot and AI agent effectiveness.
@@ -1314,10 +1529,10 @@ Look for opportunities to:
 - Improve coding accuracy and consistency.
 - Simplify future development and maintenance.
 
-Every recommendation must have a clear purpose, evidence, and explanation of its expected benefit.
+**Every proposed change must be individually presented through VS Code `askQuestions` and receive an explicit user decision.**
 
-The PDF must help the user understand WHAT should improve and WHY.
+The PDF must clearly explain WHAT should improve, WHY it matters, and WHICH changes the user approved.
 
-The Markdown document must give a subsequent AI agent the information needed to understand HOW to plan and implement those improvements across the entire workspace.
+The Markdown document must provide the next AI coding agent with the technical information needed to understand HOW to plan and implement the approved improvements throughout the workspace.
 
-**Perform the complete assessment first. Do not implement the proposed changes.**
+**Complete the research, conduct the individual approval process, generate both documents, and do not implement any proposed changes.**
