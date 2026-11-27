@@ -1,0 +1,1092 @@
+{
+  "workflow": "companion",
+  "specName": "Documentation Accuracy Corrections",
+  "branch": "025-docs-accuracy-corrections",
+  "currentStep": "implement",
+  "status": "completed",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-27T18:24:38.915Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-11-27T18:25:44.215Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-27T18:25:49.802Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:28:12.430Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:28:39.486Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-27T18:28:47.685Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T001",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:28:55.625Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:29:31.041Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T009",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:29:31.042Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T010",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:29:31.042Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T011",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:29:31.043Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T012",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:29:31.043Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T013",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:29:31.043Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T002",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:29:34.078Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T003",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:29:34.078Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T004",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:29:34.078Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:29:34.079Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:29:34.079Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:29:34.079Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:31:55.557Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T018",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:31:55.558Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T019",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:31:55.558Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T020",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:31:55.780Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T021",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:31:55.780Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T022",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:31:55.781Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T014",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:31:56.009Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T015",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:31:56.010Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T016",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:31:56.010Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T028",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:32:23.343Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T029",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:32:23.343Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T030",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:32:23.343Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T031",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:32:23.562Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T032",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:32:23.563Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T023",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:32:23.780Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T024",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:32:23.780Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T025",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:32:23.781Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T026",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:32:23.781Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T027",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:32:23.781Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T033",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:33:55.335Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T034",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:33:55.570Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T035",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:33:55.809Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:33:55.878Z"
+    },
+    {
+      "step": "converge",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-27T18:38:42.456Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T036",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:39:16.330Z"
+    },
+    {
+      "step": "converge",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T18:41:26.395Z"
+    }
+  ],
+  "unattended": true,
+  "request": "Documentation accuracy corrections approved by the workspace modernization audit (Dependency_Assessment/2026-11-27-docs-deep). Bring the repository's documentation back in line with the code it describes, using the fourteen approved proposals DEV-001 to DEV-014 as the scope.",
+  "expectations": [
+    "history records stay as written",
+    "no new guidance or restructuring",
+    "no code, data, packaging or dependency changes",
+    "no automatic drift tooling"
+  ],
+  "context": [
+    "area: .github/instructions/spec-kit.instructions.md, .github/copilot-instructions.md, .github/instructions/test-conventions.instructions.md, .github/instructions/winui3-adoption.instructions.md, AGENTS.md",
+    "area: docs/living-specs/living-specs-drift-ledger.md",
+    "area: docs/startup/startup-rebuild-design-brief.md and specs/010-startup-rebuild/",
+    "area: docs/diagrams/README.md, docs/diagrams/diagram-workflow-refactor-notes.md, .github/memories/repo/workflow-diagrams.md",
+    "area: docs/ui-designs/startup-launch/**/â€¦-proposal.md (four documents, twelve image links)",
+    "area: docs/scripts/scripts-automation-index.md, docs/scripts/scripts-store-publish-app-payload.md, .github/memories/repo/tasks-md-id-allocation.md",
+    "constraint: instruction files keep frontmatter, voice and meaning; no new guidance",
+    "constraint: historical records under docs/defects/ and the pre-spec research note keep their original wording",
+    "constraint: no code, project, package, database or configuration file changes",
+    "evidence: Dependency_Assessment/2026-11-27-docs-deep/DEPENDENCY_AND_MODERNIZATION_SPECIFICATION.md verified each finding against the file; 18 guardrail test files and 92 interface files counted 2026-11-27"
+  ],
+  "coverage": {
+    "FR-001": {
+      "title": "Name the shipped seed folder and the two checklist skills instead of the deleted module workstream folder",
+      "tasks": [
+        "T002",
+        "T008"
+      ],
+      "tests": [
+        "search for the deleted references in .github/instructions/spec-kit.instructions.md"
+      ]
+    },
+    "FR-002": {
+      "title": "Name only companion helper scripts that exist",
+      "tasks": [
+        "T003",
+        "T009"
+      ],
+      "tests": [
+        "each named helper script tested for existence under .specify/extensions/companion/scripts"
+      ]
+    },
+    "FR-003": {
+      "title": "Make the living drift ledger resolve its references",
+      "tasks": [
+        "T014",
+        "T017"
+      ],
+      "tests": [
+        "search for the abbreviated spec path in the drift ledger"
+      ]
+    },
+    "FR-004": {
+      "title": "Describe only workflows that exist in the diagrams index and refactor notes",
+      "tasks": [
+        "T015",
+        "T018",
+        "T019"
+      ],
+      "tests": [
+        "link extraction plus target existence across the diagrams index and refactor notes"
+      ]
+    },
+    "FR-005": {
+      "title": "Move the shipped startup design brief beside its feature and follow it with its references",
+      "tasks": [
+        "T016",
+        "T020",
+        "T021",
+        "T022"
+      ],
+      "tests": [
+        "path existence for the moved brief plus the three guard tests that read it",
+        "and the full suite"
+      ]
+    },
+    "FR-006": {
+      "title": "Make all twelve startup-launch proposal image links resolve",
+      "tasks": [
+        "T023",
+        "T028"
+      ],
+      "tests": [
+        "each of the twelve image links resolved on disk"
+      ]
+    },
+    "FR-007": {
+      "title": "Offer a checklist example that exists",
+      "tasks": [
+        "T004",
+        "T010"
+      ],
+      "tests": [
+        "the offered checklist example tested for existence"
+      ]
+    },
+    "FR-008": {
+      "title": "Cite the guardrail test at a resolvable path",
+      "tasks": [
+        "T005",
+        "T011"
+      ],
+      "tests": [
+        "the cited guardrail test path tested for existence"
+      ]
+    },
+    "FR-009": {
+      "title": "State the true interface file count with its measurement date",
+      "tasks": [
+        "T006",
+        "T012"
+      ],
+      "tests": [
+        "a fresh count of interface files compared to the stated number"
+      ]
+    },
+    "FR-010": {
+      "title": "Cite the current specification folder in the identifier-allocation note",
+      "tasks": [
+        "T024",
+        "T029"
+      ],
+      "tests": [
+        "the cited specification folder tested for existence"
+      ]
+    },
+    "FR-011": {
+      "title": "Cite the diagram PDFs where they now live and record the removed flows",
+      "tasks": [
+        "T025",
+        "T030"
+      ],
+      "tests": [
+        "each named diagram PDF tested for existence at the stated path"
+      ]
+    },
+    "FR-012": {
+      "title": "Describe the tooltip artefacts as generated outputs",
+      "tasks": [
+        "T026",
+        "T031"
+      ],
+      "assumes": "the index now names the producing script and calls the folder generated; no run of the script is part of this change"
+    },
+    "FR-013": {
+      "title": "Remove another-machine paths from the store-publishing guide",
+      "tasks": [
+        "T027",
+        "T032"
+      ],
+      "tests": [
+        "search for any absolute user-profile path in the guide"
+      ]
+    },
+    "FR-014": {
+      "title": "State the true guardrail test count",
+      "tasks": [
+        "T007",
+        "T013"
+      ],
+      "tests": [
+        "a fresh count of guardrail test files compared to the stated number"
+      ]
+    }
+  },
+  "classification": {
+    "projectedFiles": 20,
+    "projectedTasks": 16,
+    "scopeSignal": "none",
+    "verdict": "normal"
+  },
+  "intent": "Bring the repository's current documentation back in line with the tree it describes",
+  "size": "normal",
+  "source": "Dependency_Assessment/2026-11-27-docs-deep",
+  "planBlocks": [
+    "calls"
+  ],
+  "planBlocksPicked": [
+    "calls"
+  ],
+  "verified": [
+    {
+      "what": "plan blocks check out",
+      "command": "python3 .specify/extensions/companion/scripts/check_plan.py --feature-dir specs/025-docs-accuracy-corrections --strict",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 0.1,
+      "result": "[plan-check] plan.md: 1 call path, 1 lines. Every cited file and line checks out."
+    },
+    {
+      "what": "SC-001 stale tokens in live guidance",
+      "result": "zero hits for the checklist example, the abbreviated spec path and the another-machine links; the two remaining token families appear only in historical records, which the spec's Non-goals protect"
+    },
+    {
+      "what": "SC-002 twelve proposal images",
+      "result": "12 of 12 resolve on disk after prefixing the eight before and after links"
+    },
+    {
+      "what": "FR-003 and FR-004 after the independent check",
+      "result": "The ledger now opens its run instructions by stating the detector is gone and frames every helper it names as retired; the diagrams index describes only the workflow that exists, points its rebuild and context examples at the startup-launch specs, and frames the old findings as a record"
+    },
+    {
+      "what": "solution build",
+      "command": "dotnet build MTM_Waitlist.sln -v q --nologo",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 20.9,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:20.66",
+      "commit": "1e7b6402",
+      "tree": "8cadc9c8b049e1622c11202c659ad51bb20001cc"
+    },
+    {
+      "what": "test suite",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -v q --nologo",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 59.4,
+      "result": "Test run for C:\\Users\\johnk\\Source\\repos\\MTM_Waitlist\\MTM_Waitlist.Tests\\bin\\Debug\\net10.0-windows10.0.19041.0\\win-x64\\MTM_Waitlist.Tests.dll (.NETCoreApp,Version=v10.0) · A total of 1 test files matched the specified pattern. · Passed!  - Failed:     0, Passed:  2915, Skipped:    66, Total:  2981, Duration: 46 s - MTM_Waitlist.Tests.dll (net10.0)",
+      "commit": "1e7b6402",
+      "tree": "da2e8de9be0ff90aa18b742e02520904b0bf1450"
+    },
+    {
+      "what": "test suite after convergence",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -v q --nologo",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 58.1,
+      "result": "Test run for C:\\Users\\johnk\\Source\\repos\\MTM_Waitlist\\MTM_Waitlist.Tests\\bin\\Debug\\net10.0-windows10.0.19041.0\\win-x64\\MTM_Waitlist.Tests.dll (.NETCoreApp,Version=v10.0) · A total of 1 test files matched the specified pattern. · Passed!  - Failed:     0, Passed:  2915, Skipped:    66, Total:  2981, Duration: 45 s - MTM_Waitlist.Tests.dll (net10.0)",
+      "commit": "1e7b6402",
+      "tree": "a4d0899b4c43c3126554fadf7ac710a3621b14f0"
+    },
+    {
+      "what": "Convergence assessment against all fourteen requirements and six success criteria",
+      "result": "One finding: the disposition memory note still pointed at the deleted checklist folder, which SC-001 forbids. It is now retired and the sweep is clean apart from the sentence that records the retirement."
+    }
+  ],
+  "decisions": [
+    {
+      "decision": "Follow the moved brief into README and the three guard-test path literals; leave spec planning records as written",
+      "why": "The README is a live index and the guard tests fail rather than degrade when the path is stale; planning records are history that one line in the moved brief already explains",
+      "rejected": "Updating all twenty-odd citations, or leaving a stub at the old path",
+      "by": "agent",
+      "at": "2026-11-27T18:28:11.933Z"
+    },
+    {
+      "decision": "Correct only live guidance, current indexes and living records",
+      "why": "A defect record states what was true when it was written, so a path that no longer resolves is part of the record",
+      "rejected": "Correcting every hit a repository-wide search returns",
+      "by": "agent",
+      "at": "2026-11-27T18:28:11.933Z"
+    },
+    {
+      "decision": "Leave the drift ledger's method prose naming three retired helpers, and record the gap in Non-goals",
+      "why": "The approved remediation covers its dead file references; rewriting the mechanism section would describe a mechanism that no longer exists",
+      "rejected": "Rewriting the method section or deleting the ledger",
+      "by": "agent",
+      "at": "2026-11-27T18:28:11.933Z"
+    },
+    {
+      "decision": "Repair eight image links, not twelve",
+      "why": "The before and after images live under pngs/ while the comparison images sit beside the proposal and already resolve, measured on disk",
+      "rejected": "Prefixing all twelve, which breaks the four working links",
+      "by": "agent",
+      "at": "2026-11-27T18:28:11.933Z"
+    },
+    {
+      "decision": "State each removal in one plain sentence and keep the remaining rows and columns",
+      "why": "A reader who remembers a removed workflow learns what happened while a new reader is not sent to a dead link",
+      "rejected": "Silently deleting the rows, or keeping rows whose links point nowhere",
+      "by": "agent",
+      "at": "2026-11-27T18:28:11.933Z"
+    },
+    {
+      "decision": "Corrected four citations the audit had not reported: the Copilot integration script path, the title-bar helper path, the settings view-model path in AGENTS.md, and left the two already-marked-retired references alone",
+      "why": "The success criterion asks that every path-like citation in always-applied guidance resolve; these were the only four that did not",
+      "rejected": "Recording them as out-of-scope residue while the criterion claimed one hundred percent",
+      "by": "agent",
+      "at": "2026-11-27T18:34:18.733Z"
+    },
+    {
+      "decision": "Recorded the generated PDF, the memory note and the diagrams manifest as residue instead of fixing them",
+      "why": "Each needs either a build-output regeneration or a decision about machinery the approved scope excluded",
+      "rejected": "Opening the scope to tooling and generated artifacts inside this feature",
+      "by": "agent",
+      "at": "2026-11-27T18:34:18.733Z"
+    },
+    {
+      "decision": "Marked the ledger's retired helpers as retired with a note rather than deleting the sentences",
+      "why": "The ledger's own rule says a retired artefact needs a note saying it is gone and why, so the next reader stops looking",
+      "rejected": "Deleting the run instructions, which would lose the record of how the drift was computed",
+      "by": "agent",
+      "at": "2026-11-27T18:37:05.807Z"
+    }
+  ],
+  "step_summaries": {
+    "specify": {
+      "summary": "Converged: all 36 tasks closed, the suite still passes 2915, and the only remaining mention of the deleted folder is the note that records its retirement",
+      "key_finding": "Moving the design brief breaks three guard tests that read it from disk, so the move needs those path literals updated in the same change"
+    }
+  },
+  "approach": "Apply fourteen documentation corrections as prose, link and count edits, move the shipped startup brief into its feature folder with its live references following it, and prove the result by search, link test, file count and a re-run of the build and tests.",
+  "currentTask": null,
+  "task_summaries": {
+    "T001": {
+      "status": "DONE",
+      "did": "Recorded the stale-token baseline and the pre-change counts",
+      "files": [
+        "specs/025-docs-accuracy-corrections/baseline.md"
+      ]
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "Corrected the five always-applied guidance files: seed folder, helper script, checklist example, guardrail path, and two counts with the measurement date",
+      "files": [
+        ".github/instructions/spec-kit.instructions.md",
+        ".github/copilot-instructions.md",
+        ".github/instructions/test-conventions.instructions.md",
+        ".github/instructions/winui3-adoption.instructions.md",
+        "AGENTS.md"
+      ],
+      "wave": "T008-T013"
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "Corrected the five always-applied guidance files: seed folder, helper script, checklist example, guardrail path, and two counts with the measurement date",
+      "files": [
+        ".github/instructions/spec-kit.instructions.md",
+        ".github/copilot-instructions.md",
+        ".github/instructions/test-conventions.instructions.md",
+        ".github/instructions/winui3-adoption.instructions.md",
+        "AGENTS.md"
+      ],
+      "wave": "T008-T013"
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "Corrected the five always-applied guidance files: seed folder, helper script, checklist example, guardrail path, and two counts with the measurement date",
+      "files": [
+        ".github/instructions/spec-kit.instructions.md",
+        ".github/copilot-instructions.md",
+        ".github/instructions/test-conventions.instructions.md",
+        ".github/instructions/winui3-adoption.instructions.md",
+        "AGENTS.md"
+      ],
+      "wave": "T008-T013"
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "Corrected the five always-applied guidance files: seed folder, helper script, checklist example, guardrail path, and two counts with the measurement date",
+      "files": [
+        ".github/instructions/spec-kit.instructions.md",
+        ".github/copilot-instructions.md",
+        ".github/instructions/test-conventions.instructions.md",
+        ".github/instructions/winui3-adoption.instructions.md",
+        "AGENTS.md"
+      ],
+      "wave": "T008-T013"
+    },
+    "T012": {
+      "status": "DONE",
+      "did": "Corrected the five always-applied guidance files: seed folder, helper script, checklist example, guardrail path, and two counts with the measurement date",
+      "files": [
+        ".github/instructions/spec-kit.instructions.md",
+        ".github/copilot-instructions.md",
+        ".github/instructions/test-conventions.instructions.md",
+        ".github/instructions/winui3-adoption.instructions.md",
+        "AGENTS.md"
+      ],
+      "wave": "T008-T013"
+    },
+    "T013": {
+      "status": "DONE",
+      "did": "Corrected the five always-applied guidance files: seed folder, helper script, checklist example, guardrail path, and two counts with the measurement date",
+      "files": [
+        ".github/instructions/spec-kit.instructions.md",
+        ".github/copilot-instructions.md",
+        ".github/instructions/test-conventions.instructions.md",
+        ".github/instructions/winui3-adoption.instructions.md",
+        "AGENTS.md"
+      ],
+      "wave": "T008-T013"
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "Re-ran the six checks: no module workstream references, every named helper exists, the checklist example resolves, the guardrail path opens, and both counts match the tree",
+      "files": [
+        ".github/instructions/spec-kit.instructions.md",
+        ".github/copilot-instructions.md",
+        ".github/instructions/test-conventions.instructions.md",
+        ".github/instructions/winui3-adoption.instructions.md",
+        "AGENTS.md"
+      ],
+      "wave": "T002-T007"
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "Re-ran the six checks: no module workstream references, every named helper exists, the checklist example resolves, the guardrail path opens, and both counts match the tree",
+      "files": [
+        ".github/instructions/spec-kit.instructions.md",
+        ".github/copilot-instructions.md",
+        ".github/instructions/test-conventions.instructions.md",
+        ".github/instructions/winui3-adoption.instructions.md",
+        "AGENTS.md"
+      ],
+      "wave": "T002-T007"
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "Re-ran the six checks: no module workstream references, every named helper exists, the checklist example resolves, the guardrail path opens, and both counts match the tree",
+      "files": [
+        ".github/instructions/spec-kit.instructions.md",
+        ".github/copilot-instructions.md",
+        ".github/instructions/test-conventions.instructions.md",
+        ".github/instructions/winui3-adoption.instructions.md",
+        "AGENTS.md"
+      ],
+      "wave": "T002-T007"
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "Re-ran the six checks: no module workstream references, every named helper exists, the checklist example resolves, the guardrail path opens, and both counts match the tree",
+      "files": [
+        ".github/instructions/spec-kit.instructions.md",
+        ".github/copilot-instructions.md",
+        ".github/instructions/test-conventions.instructions.md",
+        ".github/instructions/winui3-adoption.instructions.md",
+        "AGENTS.md"
+      ],
+      "wave": "T002-T007"
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "Re-ran the six checks: no module workstream references, every named helper exists, the checklist example resolves, the guardrail path opens, and both counts match the tree",
+      "files": [
+        ".github/instructions/spec-kit.instructions.md",
+        ".github/copilot-instructions.md",
+        ".github/instructions/test-conventions.instructions.md",
+        ".github/instructions/winui3-adoption.instructions.md",
+        "AGENTS.md"
+      ],
+      "wave": "T002-T007"
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "Re-ran the six checks: no module workstream references, every named helper exists, the checklist example resolves, the guardrail path opens, and both counts match the tree",
+      "files": [
+        ".github/instructions/spec-kit.instructions.md",
+        ".github/copilot-instructions.md",
+        ".github/instructions/test-conventions.instructions.md",
+        ".github/instructions/winui3-adoption.instructions.md",
+        "AGENTS.md"
+      ],
+      "wave": "T002-T007"
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "Repointed the ledger's spec reference; reduced the diagrams index and refactor notes to the workflow that exists and recorded the four removals",
+      "files": [
+        "docs/living-specs/living-specs-drift-ledger.md",
+        "docs/diagrams/README.md",
+        "docs/diagrams/diagram-workflow-refactor-notes.md"
+      ],
+      "wave": "T017-T019"
+    },
+    "T018": {
+      "status": "DONE",
+      "did": "Repointed the ledger's spec reference; reduced the diagrams index and refactor notes to the workflow that exists and recorded the four removals",
+      "files": [
+        "docs/living-specs/living-specs-drift-ledger.md",
+        "docs/diagrams/README.md",
+        "docs/diagrams/diagram-workflow-refactor-notes.md"
+      ],
+      "wave": "T017-T019"
+    },
+    "T019": {
+      "status": "DONE",
+      "did": "Repointed the ledger's spec reference; reduced the diagrams index and refactor notes to the workflow that exists and recorded the four removals",
+      "files": [
+        "docs/living-specs/living-specs-drift-ledger.md",
+        "docs/diagrams/README.md",
+        "docs/diagrams/diagram-workflow-refactor-notes.md"
+      ],
+      "wave": "T017-T019"
+    },
+    "T020": {
+      "status": "DONE",
+      "did": "Moved the startup design brief into its feature folder, rewrote its opening as shipped with a moved-from line, and repointed README and the four guard-test reads",
+      "files": [
+        "specs/010-startup-rebuild/startup-rebuild-design-brief.md",
+        "docs/startup/startup-rebuild-design-brief.md",
+        "README.md",
+        "MTM_Waitlist.Tests/Module_Startup/Services/AcceptanceSurfaceTests.cs"
+      ],
+      "wave": "T020-T022"
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "Moved the startup design brief into its feature folder, rewrote its opening as shipped with a moved-from line, and repointed README and the four guard-test reads",
+      "files": [
+        "specs/010-startup-rebuild/startup-rebuild-design-brief.md",
+        "docs/startup/startup-rebuild-design-brief.md",
+        "README.md",
+        "MTM_Waitlist.Tests/Module_Startup/Services/AcceptanceSurfaceTests.cs"
+      ],
+      "wave": "T020-T022"
+    },
+    "T022": {
+      "status": "DONE",
+      "did": "Moved the startup design brief into its feature folder, rewrote its opening as shipped with a moved-from line, and repointed README and the four guard-test reads",
+      "files": [
+        "specs/010-startup-rebuild/startup-rebuild-design-brief.md",
+        "docs/startup/startup-rebuild-design-brief.md",
+        "README.md",
+        "MTM_Waitlist.Tests/Module_Startup/Services/AcceptanceSurfaceTests.cs"
+      ],
+      "wave": "T020-T022"
+    },
+    "T014": {
+      "status": "DONE",
+      "did": "Re-ran the three checks: ledger reference resolves, no diagram link is dead, the brief is beside its feature with every live reference following it, and the suite still passes 2915",
+      "files": [
+        "docs/living-specs/living-specs-drift-ledger.md",
+        "docs/diagrams/README.md",
+        "docs/diagrams/diagram-workflow-refactor-notes.md",
+        "README.md",
+        "specs/010-startup-rebuild/startup-rebuild-design-brief.md"
+      ],
+      "wave": "T014-T016"
+    },
+    "T015": {
+      "status": "DONE",
+      "did": "Re-ran the three checks: ledger reference resolves, no diagram link is dead, the brief is beside its feature with every live reference following it, and the suite still passes 2915",
+      "files": [
+        "docs/living-specs/living-specs-drift-ledger.md",
+        "docs/diagrams/README.md",
+        "docs/diagrams/diagram-workflow-refactor-notes.md",
+        "README.md",
+        "specs/010-startup-rebuild/startup-rebuild-design-brief.md"
+      ],
+      "wave": "T014-T016"
+    },
+    "T016": {
+      "status": "DONE",
+      "did": "Re-ran the three checks: ledger reference resolves, no diagram link is dead, the brief is beside its feature with every live reference following it, and the suite still passes 2915",
+      "files": [
+        "docs/living-specs/living-specs-drift-ledger.md",
+        "docs/diagrams/README.md",
+        "docs/diagrams/diagram-workflow-refactor-notes.md",
+        "README.md",
+        "specs/010-startup-rebuild/startup-rebuild-design-brief.md"
+      ],
+      "wave": "T014-T016"
+    },
+    "T028": {
+      "status": "DONE",
+      "did": "Prefixed the eight before and after image links, cited the current spec folder in the identifier note, and gave the diagram note each PDF's real location with the removals recorded",
+      "files": [
+        "docs/ui-designs/startup-launch",
+        "github memories tasks-md-id-allocation.md",
+        ".github/memories/repo/workflow-diagrams.md"
+      ],
+      "wave": "T028-T030"
+    },
+    "T029": {
+      "status": "DONE",
+      "did": "Prefixed the eight before and after image links, cited the current spec folder in the identifier note, and gave the diagram note each PDF's real location with the removals recorded",
+      "files": [
+        "docs/ui-designs/startup-launch",
+        "github memories tasks-md-id-allocation.md",
+        ".github/memories/repo/workflow-diagrams.md"
+      ],
+      "wave": "T028-T030"
+    },
+    "T030": {
+      "status": "DONE",
+      "did": "Prefixed the eight before and after image links, cited the current spec folder in the identifier note, and gave the diagram note each PDF's real location with the removals recorded",
+      "files": [
+        "docs/ui-designs/startup-launch",
+        "github memories tasks-md-id-allocation.md",
+        ".github/memories/repo/workflow-diagrams.md"
+      ],
+      "wave": "T028-T030"
+    },
+    "T031": {
+      "status": "DONE",
+      "did": "Presented the tooltip artefacts as script output and removed the another-machine paths from the store-publishing guide",
+      "files": [
+        "docs/scripts/scripts-automation-index.md",
+        "docs/scripts/scripts-store-publish-app-payload.md"
+      ],
+      "wave": "T031-T032"
+    },
+    "T032": {
+      "status": "DONE",
+      "did": "Presented the tooltip artefacts as script output and removed the another-machine paths from the store-publishing guide",
+      "files": [
+        "docs/scripts/scripts-automation-index.md",
+        "docs/scripts/scripts-store-publish-app-payload.md"
+      ],
+      "wave": "T031-T032"
+    },
+    "T023": {
+      "status": "DONE",
+      "did": "Re-ran the five checks: twelve of twelve image links resolve, the note heading and diagram paths open, the artefacts read as generated, and no another-machine path remains",
+      "files": [
+        "docs/ui-designs/startup-launch",
+        ".github/memories/repo/tasks-md-id-allocation.md",
+        ".github/memories/repo/workflow-diagrams.md",
+        "docs/scripts/scripts-automation-index.md",
+        "docs/scripts/scripts-store-publish-app-payload.md"
+      ],
+      "wave": "T023-T027"
+    },
+    "T024": {
+      "status": "DONE",
+      "did": "Re-ran the five checks: twelve of twelve image links resolve, the note heading and diagram paths open, the artefacts read as generated, and no another-machine path remains",
+      "files": [
+        "docs/ui-designs/startup-launch",
+        ".github/memories/repo/tasks-md-id-allocation.md",
+        ".github/memories/repo/workflow-diagrams.md",
+        "docs/scripts/scripts-automation-index.md",
+        "docs/scripts/scripts-store-publish-app-payload.md"
+      ],
+      "wave": "T023-T027"
+    },
+    "T025": {
+      "status": "DONE",
+      "did": "Re-ran the five checks: twelve of twelve image links resolve, the note heading and diagram paths open, the artefacts read as generated, and no another-machine path remains",
+      "files": [
+        "docs/ui-designs/startup-launch",
+        ".github/memories/repo/tasks-md-id-allocation.md",
+        ".github/memories/repo/workflow-diagrams.md",
+        "docs/scripts/scripts-automation-index.md",
+        "docs/scripts/scripts-store-publish-app-payload.md"
+      ],
+      "wave": "T023-T027"
+    },
+    "T026": {
+      "status": "DONE",
+      "did": "Re-ran the five checks: twelve of twelve image links resolve, the note heading and diagram paths open, the artefacts read as generated, and no another-machine path remains",
+      "files": [
+        "docs/ui-designs/startup-launch",
+        ".github/memories/repo/tasks-md-id-allocation.md",
+        ".github/memories/repo/workflow-diagrams.md",
+        "docs/scripts/scripts-automation-index.md",
+        "docs/scripts/scripts-store-publish-app-payload.md"
+      ],
+      "wave": "T023-T027"
+    },
+    "T027": {
+      "status": "DONE",
+      "did": "Re-ran the five checks: twelve of twelve image links resolve, the note heading and diagram paths open, the artefacts read as generated, and no another-machine path remains",
+      "files": [
+        "docs/ui-designs/startup-launch",
+        ".github/memories/repo/tasks-md-id-allocation.md",
+        ".github/memories/repo/workflow-diagrams.md",
+        "docs/scripts/scripts-automation-index.md",
+        "docs/scripts/scripts-store-publish-app-payload.md"
+      ],
+      "wave": "T023-T027"
+    },
+    "T033": {
+      "status": "DONE",
+      "did": "Ran every success-criterion check and compared to the baseline: no stale token in live guidance, 41 path-like citations resolve, 12 of 12 images, both counts match",
+      "files": [
+        "specs/025-docs-accuracy-corrections/baseline.md"
+      ]
+    },
+    "T034": {
+      "status": "DONE",
+      "did": "Clean solution build with no warnings and the suite at 2915 passed, matching the pre-change result",
+      "files": [
+        "MTM_Waitlist.sln"
+      ]
+    },
+    "T035": {
+      "status": "DONE",
+      "did": "Recorded the three residues: a generated PDF with embedded profile links, a memory note citing a retired checklist, and the diagrams tool manifest",
+      "files": [
+        "specs/025-docs-accuracy-corrections/concerns.md"
+      ]
+    },
+    "T036": {
+      "status": "DONE",
+      "did": "Retired the deleted-folder checklist pointer in the disposition memory note and kept the note's provenance sentence",
+      "files": [
+        ".github/memories/repo/infor-visual-disposition.md"
+      ]
+    }
+  },
+  "risk": {
+    "tier": "high",
+    "computed": "high",
+    "reasons": [
+      "28 files changed"
+    ]
+  },
+  "concerns": [
+    {
+      "note": "The diagrams tool manifest still declares ten documents and eight missing spec files; recorded in concerns.md rather than fixed",
+      "step": "implement"
+    },
+    {
+      "note": "specs/015-generic-wc-ui-shell/BREAKDOWN.pdf embeds ninety absolute profile links from its generation time; regenerating it is a build-output change",
+      "step": "implement"
+    },
+    {
+      "note": ".github/memories/repo/infor-visual-disposition.md still points at a retired WeekendProject checklist",
+      "step": "implement"
+    },
+    {
+      "note": "The review-depth probe reported high because the worktree carries unrelated uncommitted changes from earlier work; this feature's own diff is documentation prose plus one test path literal",
+      "step": "implement"
+    },
+    {
+      "note": "The diagrams README now says the manifest still names removed specs, so the tooling defect is disclosed to the reader rather than silently left",
+      "step": "implement"
+    }
+  ],
+  "last_action": "Closed the two at-risk verdicts the independent check raised",
+  "convergeStartedAt": "2026-11-27T18:38:42.611Z",
+  "convergePasses": [
+    {
+      "startedAt": "2026-11-27T18:38:42.723Z",
+      "by": "extension",
+      "finishedAt": "2026-11-27T18:41:26.535Z",
+      "added": [
+        "T036"
+      ],
+      "completed": true
+    }
+  ],
+  "telemetryInstanceId": "1ec1a249-e7fc-461f-b4b2-b7053663d419"
+}

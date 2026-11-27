@@ -41,7 +41,7 @@ Repository-specific additions:
 - View models commonly derive from `ObservableRecipient` and use MVVM Toolkit source generators (`[ObservableProperty]`, `[RelayCommand]`).
 - Navigation-aware view models implement `INavigationAware` and load data in `OnNavigatedTo`.
 - UI strings are localized through `"ResourceKey".GetLocalized()`.
-- Custom title-bar behavior is centralized in `Helpers/TitleBarHelper.cs` and uses `App.AppTitlebar`.
+- Custom title-bar behavior is centralized in `MTM_Waitlist.Core/Helpers/TitleBarHelper.cs` and uses `App.AppTitlebar`.
 
 ## AI Feature Guidance (forward-looking standard — NOT yet implemented)
 - **Status — verified 2026-09-09:** there is currently **no AI integration** in this repo. `Foundry`, `phi-4-mini`, and `localhost:5272` appear nowhere in code or `appsettings.json`, and `Azure.AI.OpenAI` is not a `PackageReference`. Treat the bullets below as the intended standard for new work, not as a description of existing behavior.
@@ -92,7 +92,7 @@ Repository-specific additions:
 
 ## Persona Adherence
 - When a task names a persona (Database Engineer, Backend Engineer, Frontend Engineer, Tech Lead, Full Stack Engineer), adopt that persona's working style and output format. See `.github/skills/checklist-execution/SKILL.md` for the persona styles.
-- When the user references a checklist file (`checklist.md`, `WAITLIST_REQUEST_WORKFLOW_TASKS.md`, or any task checklist) or asks to "work through" / "execute" / "validate" a checklist, **auto-invoke the `checklist-execution` skill** and drive it task-by-task using each task's declared persona — do not wait for the user to re-paste the skill instructions or drive every task manually.
+- When the user references a checklist file (`checklist.md`, a `tasks.md` under `specs/`, or any task checklist) or asks to "work through" / "execute" / "validate" a checklist, **auto-invoke the `checklist-execution` skill** and drive it task-by-task using each task's declared persona — do not wait for the user to re-paste the skill instructions or drive every task manually.
 
 ## Large-Task Resilience
 - For whole-repo exploration or validation (e.g., "validate all tasks in `<checklist>`", "summarize all docs"), delegate read-only research to the `Explore` subagent instead of reading many files into the main context.

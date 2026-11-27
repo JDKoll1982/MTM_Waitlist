@@ -128,13 +128,13 @@ All project documentation lives under [docs/](docs/), in one folder per category
 | [docs/operations/](docs/operations/) | Runbooks: [live database and Mock host updates](docs/operations/operations-database-live-and-mock-updates.md), the [Mock service deploy and run guide](docs/operations/operations-mock-service-deploy-and-run.md), the [installer](docs/operations/operations-mock-service-install-script.md) and the [plant-host next run](docs/operations/operations-waitlist-next-run.md). |
 | [docs/reference/](docs/reference/) | The split Infor VISUAL system-wide user guide, one chapter per file, starting at [the index](docs/reference/reference-inforvisual-index.md). |
 | [docs/research/](docs/research/) | Research and decision records: [Phase 6 disposition status codes](docs/research/research-inforvisual-phase6-disposition-status-codes.md) and the [waitlist card layout pre-spec](docs/research/research-waitlist-card-layout-pre-spec.md). |
-| [docs/startup/](docs/startup/) | The [startup rebuild design brief](docs/startup/startup-rebuild-design-brief.md) that the launch surface is built from. |
+| [specs/010-startup-rebuild/](specs/010-startup-rebuild/) | The shipped startup feature, including the [design brief](specs/010-startup-rebuild/startup-rebuild-design-brief.md) that the launch surface is built from. |
 | [docs/scripts/](docs/scripts/) | [Script index](docs/scripts/scripts-automation-index.md) and [UI Automation guide](docs/scripts/scripts-automation-ui-automation.md) for everything under [scripts/](scripts/). |
 
 Adjacent, and deliberately not moved into `docs/`:
 
 - [specs/](specs/) - Spec Kit features (`spec.md`, `plan.md`, `tasks.md`, contracts, checklists) and their run
-  journals. One folder per feature, numbered in order.
+  journals. One folder per feature, numbered in order. The shipped startup feature's [design brief](specs/010-startup-rebuild/startup-rebuild-design-brief.md) sits with it.
 - [Database/](Database/) - schema artifacts and the [database ruleset](Database/Database-Ruleset.md).
 - [.github/](.github/) - agent instructions, prompts, skills and repo memories.
 
@@ -144,7 +144,7 @@ Adjacent, and deliberately not moved into `docs/`:
   `plan` -> `tasks` -> `analyze` -> `implement`. See `.github/instructions/spec-kit.instructions.md`.
 - **Docs serve the build rule, not the reverse.** A gate in `MTM_Waitlist.Tests` fails the build if a retired
   sample/demo symbol returns (`RetiredSymbolAuditTests`) or if inline SQL appears (`InlineSqlAuditTests`).
-  `AcceptanceSurfaceTests` reads [the startup brief](docs/startup/startup-rebuild-design-brief.md) from disk, so
+  `AcceptanceSurfaceTests` reads [the startup brief](specs/010-startup-rebuild/startup-rebuild-design-brief.md) from disk, so
   that file's section headings are part of the build.
 - **Localization.** UI strings resolve through `"ResourceKey".GetLocalized()`; resources live in
   [Strings/](Strings/).

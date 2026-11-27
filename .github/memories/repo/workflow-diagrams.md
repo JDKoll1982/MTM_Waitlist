@@ -1,20 +1,21 @@
-# Workflow diagrams — how the set is built and what it is for (2026-11-24)
+# Workflow diagrams — how the set is built and what it is for (2026-11-24, reduced 2026-11-27)
 
 ## What exists
 
-`docs/diagrams/` holds five workflow maps, each in an engineer version and a plain-language version,
-plus one refactor note:
+`docs/diagrams/` holds one workflow map in an engineer version and a plain-language version, plus the
+refactor note that records the work of comparing the flows that used to be mapped:
 
 | Document | Sheets | Subject |
 | --- | --- | --- |
-| `diagram-workorder-new-request.pdf` | 5 | Work order request, entry through submit and result |
-| `diagram-workorder-workcenter-setup.pdf` | 5 | Work-center setup, selection through save |
-| `diagram-generic-new-request.pdf` | 4 | Generic request, work center through result |
-| `diagram-generic-workcenter-setup.pdf` | 2 | The configuration paths a generic request depends on |
-| `diagram-*-friendly.pdf` (5) | 2 each | The same five flows in plain language, role-free wording |
-| `diagram-startup-launch.pdf` | 3 | Startup launch: entry and this computer, signing in, stops and hand-over |
-| `diagram-startup-launch-friendly.pdf` | 2 | The same launch in plain language |
-| `diagram-workflow-refactor-notes.md` | — | Comparison matrix, duplication hotspots, Spec Kit inputs |
+| `docs/diagrams/pdf/startup-launch/diagram-startup-launch.pdf` | 3 | Startup launch: entry and this computer, signing in, stops and hand-over |
+| `docs/diagrams/pdf/startup-launch/diagram-startup-launch-friendly.pdf` | 2 | The same launch in plain language |
+| `docs/diagrams/diagram-workflow-refactor-notes.md` | — | Comparison matrix, duplication hotspots, Spec Kit inputs — the record of the four flows that were removed |
+
+Four further maps were built and then removed with the flows they described: Work Order New Request (5
+sheets plus 2 friendly), Work Order Work Center Setup (5 plus 2), Generic Request New Request (4 plus 2) and
+Generic Request Work Center Setup (2 plus 2). Their PDFs, their Graphviz sources and their specs are gone,
+so only the startup-launch pair has a folder under `pdf/` or `dot/` today. The refactor note keeps the
+comparison those four made possible.
 
 Both variants come from one spec each, so the friendly sheet is a *translation*, not a second diagram.
 Findings carry a `[REFACTOR]` tag in the engineer version and a "Worth fixing:" callout in the friendly

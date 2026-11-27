@@ -8,7 +8,7 @@ applyTo: "**/*.xaml"
 
 Written against two real codebases:
 
-- `C:\Users\johnk\Source\repos\MTM_Waitlist` — 65 XAML files, WinUIEx `WindowEx` + `MicaBackdrop`,
+- `C:\Users\johnk\Source\repos\MTM_Waitlist` — 92 XAML files (counted 2026-11-27), WinUIEx `WindowEx` + `MicaBackdrop`,
   content swapped through a `ContentPresenter` stage host, custom `Styles\*.xaml` dictionaries.
 - `C:\Users\johnk\Source\repos\MTM_Receiving_Application` — 128 XAML files, single `Window` shell,
   `Module_Core\Themes\MaterialIcons.xaml` + `ModuleAccentBrushes.xaml`, several hand-templated buttons.

@@ -1,12 +1,13 @@
 # Workflow Refactor Notes — Work Order vs Generic Request
 
-Companion to the five print-ready flowchart PDFs in this folder. Everything here is written to be
+Companion to the two print-ready flowchart PDFs in this folder. Everything here is written to be
 lifted straight into `/speckit.specify`: the comparison matrix supplies the *current state*, the hotspot
 list supplies the *why*, and the Spec Kit inputs supply the *what*.
 
 Nothing in this document is implemented, with one exception: the four findings in §6 (S1 to S4) were fixed
-on 25 November 2026 and are marked so there. Everything else records what the code does today, as read from
-the repository on the date below.
+on 25 November 2026 and are marked so there. Everything else records what the code did when it was read, on
+the date below. The four flows this note compares, and the eight PDFs built from them, were removed
+afterwards with the flows themselves; the startup-launch pair is the only diagram set that remains.
 
 Source revision: `main` working tree at time of writing. Diagrams verified at US Letter landscape
 (792 × 612 pt), 0.5 in margins, ≥ 9.5 pt effective text, 12–16 nodes per sheet.
@@ -17,11 +18,12 @@ Source revision: `main` working tree at time of writing. Diagrams verified at US
 
 | # | Flow | Technical (engineer) | Plain-language (stakeholder) | Sheets |
 | --- | --- | --- | --- | --- |
-| 1 | Work Order — New Request | [diagram-workorder-new-request.pdf](./pdf/diagram-workorder-new-request.pdf) | [diagram-workorder-new-request-friendly.pdf](./pdf/diagram-workorder-new-request-friendly.pdf) | 5 / 2 |
-| 2 | Work Order — Work Center Setup | [diagram-workorder-workcenter-setup.pdf](./pdf/diagram-workorder-workcenter-setup.pdf) | [diagram-workorder-workcenter-setup-friendly.pdf](./pdf/diagram-workorder-workcenter-setup-friendly.pdf) | 5 / 2 |
-| 3 | Generic Request — New Request | [diagram-generic-new-request.pdf](./pdf/diagram-generic-new-request.pdf) | [diagram-generic-new-request-friendly.pdf](./pdf/diagram-generic-new-request-friendly.pdf) | 4 / 2 |
-| 4 | Generic Request — Work Center Setup | [diagram-generic-workcenter-setup.pdf](./pdf/diagram-generic-workcenter-setup.pdf) | [diagram-generic-workcenter-setup-friendly.pdf](./pdf/diagram-generic-workcenter-setup-friendly.pdf) | 2 / 2 |
-| 5 | Startup — launch, sign-in and hand-over | [diagram-startup-launch.pdf](./pdf/startup-launch/diagram-startup-launch.pdf) | [diagram-startup-launch-friendly.pdf](./pdf/startup-launch/diagram-startup-launch-friendly.pdf) | 3 / 2 |
+| 1 | Startup — launch, sign-in and hand-over | [diagram-startup-launch.pdf](./pdf/startup-launch/diagram-startup-launch.pdf) | [diagram-startup-launch-friendly.pdf](./pdf/startup-launch/diagram-startup-launch-friendly.pdf) | 3 / 2 |
+
+The four request flows this note exists to compare — Work Order New Request, Work Order Work Center Setup,
+Generic Request New Request and Generic Request Work Center Setup, each with an engineer and a friendly PDF
+— were removed with their flows, so their rows are gone from this index. The comparison in §2 to §4 is the
+record of what they did at the time of writing.
 
 Each PDF in [`pdf/`](./pdf/) is generated from a `<diagram>-<sheet>.dot` Graphviz source in
 [`dot/`](./dot/). The `.dot` files are the canonical, editable description of each sheet; the PDFs are
@@ -355,7 +357,7 @@ on which button they pressed.
 
 ## 5. Verification record
 
-Every PDF was checked programmatically before this file was written:
+Every PDF was checked programmatically before this file was written, when ten of them existed:
 
 - page size exactly 792 × 612 pt (`11 in × 8.5 in` landscape) on every page;
 - no text or drawing inside the 0.5 in margin band;
@@ -369,6 +371,9 @@ Every PDF was checked programmatically before this file was written:
 - every sheet carried at least one `[REFACTOR]` flag where §3 records a finding, in both the technical
   and the plain-language variant (8 of the 10 friendly sheets, 1 flag each). Both startup-launch flags
   have since been removed, because their findings were fixed (§6).
+
+Of those ten documents, the eight belonging to the four removed request flows went with their flows. The
+two startup-launch PDFs remain and still meet every check above.
 
 No `.cs` file, test, or inline SQL was added to the solution for this work; `InlineSqlAuditTests` and
 `RetiredSymbolAuditTests` are unaffected.

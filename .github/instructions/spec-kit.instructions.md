@@ -31,7 +31,8 @@ Run the core sequence in order; `specify` must precede `plan`, which must preced
   `implement`) resolve the feature from this file, **not** from the git branch name — keep it current.
 - Project constitution: `.specify/memory/constitution.md`. Templates: `.specify/templates/*`.
 - Scripts (Windows/PowerShell): `.specify/scripts/powershell/{create-new-feature,setup-plan,check-prerequisites,
-  resolve-template,setup-tasks,update-agent-context}.ps1`; Copilot integration: `.specify/integrations/copilot/scripts/update-context.ps1`.
+  resolve-template,setup-tasks,update-agent-context}.ps1`; Copilot integration: `.specify/integrations/copilot.manifest.json`
+  lists the files it owns, and `.github/hooks/speckit.json` with `.specify/events.py` are what it installs.
 
 ## Rules
 - **Replies follow Principle VII.** Every `/speckit.*` step's chat reply is plain English and
@@ -42,7 +43,7 @@ Run the core sequence in order; `specify` must precede `plan`, which must preced
   `Nothing needed from you.`
 - **Run the spec-kit scripts with a real interpreter.** Every `.specify/scripts/powershell/*.ps1`
   invocation needs `-ExecutionPolicy Bypass`, and the Companion extension's `write-context.py` / `doctor.py`
-  / `drift.py` calls should use `python` or `py`. `python3` used to resolve to a 0-byte Microsoft Store
+  calls should use `python` or `py`. `python3` used to resolve to a 0-byte Microsoft Store
   alias on this workstation that answered "Python was not found" and silently dropped the run journal;
   it now resolves to a real interpreter (3.13.15, verified 2026-11-26), but that is a workstation fact.
   Re-check `python3 --version` before relying on it rather than assuming either state.
@@ -58,11 +59,11 @@ Run the core sequence in order; `specify` must precede `plan`, which must preced
 - The project constitution (`.specify/memory/constitution.md`) is **ratified at v2.0.0 (last amended 2026-10-17)**
   and governs this repo. Amend it only via `/speckit.constitution`, which must propagate to dependent
   artifacts and emit a Sync Impact Report.
-- Do **not** duplicate existing repo checklists: `WeekendProject/PromptFiles/*` and
-  `.github/skills/checklist-creation` / `checklist-execution` remain authoritative for their scopes. Spec Kit
-  adds the spec-first layer for new features and can reference those checklists.
-- **First feature seed:** the Module_Mock workstream docs — `WeekendProject/Module_Mock/Spec.md`,
-  `Plan.md`, `Tasks.md`, and `Discovery/01..03` — are the input for the first `/speckit.specify` run.
+- Do **not** duplicate existing repo checklists: `.github/skills/checklist-creation` / `checklist-execution`
+  remain authoritative for their scopes. Spec Kit adds the spec-first layer for new features and can
+  reference those checklists.
+- **First feature seed:** `specs/001-module-mock-visual-fallback/` — its `spec.md`, `plan.md` and `tasks.md` —
+  is the first `/speckit.specify` input this repo actually used, and remains the worked example to copy.
 
 ## Extension hooks
 `.specify/extensions.yml` may declare `before_*`/`after_*` hooks per command. Honor them: skip entries with

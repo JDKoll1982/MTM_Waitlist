@@ -1,15 +1,15 @@
 # Publishing the application to the MTM Loader store
 
-`scripts/store/publish-app-payload.ps1` publishes the application in the shape the MTM Loader
-(`C:\Users\jkoll\source\repos\MTM_Loader_WinUI3`) expects, writes the application's `build-manifest.json`, and
+`scripts/store/publish-app-payload.ps1` publishes the application in the shape the MTM Loader expects, writes the
+application's `build-manifest.json`, and
 verifies the result before anything is copied to the share.
 
 The loader is not built from this repository, but it is what delivers this application to a floor machine, so the
-publish shape is a contract between the two. Two of its documents define that contract:
-[`01-Architecture/02-data-formats.md`](file:///C:/Users/jkoll/source/repos/MTM_Loader_WinUI3/docs/spec/01-Architecture/02-data-formats.md)
-for the file shapes and
-[`03-Platform/02-deployment-and-release.md`](file:///C:/Users/jkoll/source/repos/MTM_Loader_WinUI3/docs/spec/03-Platform/02-deployment-and-release.md)
-for the publish and ordering rules.
+publish shape is a contract between the two. The loader's own specification defines that contract two ways: its
+data-format document for the file shapes, and its deployment-and-release document for the publish and ordering
+rules. Neither is published in this repository — ask the loader's maintainer for the current copy rather than
+trusting a path from someone else's machine. What this repository owes the contract is written down in
+`scripts/store/publish-app-payload.ps1`, which verifies the shape before anything is copied to the share.
 
 ## What the loader requires of this application
 

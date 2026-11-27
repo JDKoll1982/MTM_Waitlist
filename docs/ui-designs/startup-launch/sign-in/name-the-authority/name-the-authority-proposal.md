@@ -41,7 +41,7 @@ and `PermissionNoteText` as literal English strings, while the seven field label
 `Startup_SetUp.*` keys in `SetUpPanel.xaml.cs`. The same panel is therefore translated in its labels and
 untranslated in its sentences.
 
-![BEFORE — current implementation](name-the-authority-before.png)
+![BEFORE — current implementation](pngs/name-the-authority-before.png)
 
 ## B. Proposed Improvement
 
@@ -55,7 +55,7 @@ untranslated in its sentences.
 Nothing else on the stage changes: the fields, the order the person fills them, the keyboard rules, the
 offer column and the sign-in form are all untouched.
 
-![AFTER — proposed QOL improvement](name-the-authority-after.png)
+![AFTER — proposed QOL improvement](pngs/name-the-authority-after.png)
 
 ## C. Visual Comparison
 

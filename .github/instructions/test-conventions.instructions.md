@@ -74,7 +74,7 @@ external reads are cached).
   stub, never a verification API
 - **`[TestInitialize]` for fixtures** — 21 classes use it, some with `Task TestInitializeAsync()` for async
   setup. Fixtures create their own temp files/folders and clean up; nothing writes into the repository tree
-- **Audit tests are first-class.** `Module_Mock/RetiredSymbolAuditTests.cs` scans `.cs/.xaml/.resw/.sql/.csproj/
+- **Audit tests are first-class.** `MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs` scans `.cs/.xaml/.resw/.sql/.csproj/
   .json` for retired symbols, retired wording and placeholder resource values; its pattern set is the extension
   point — extend it rather than inventing a second mechanism. Inline SQL is policed the same way
 - **A regression test must fail first.** When a check accompanies a defect fix, run it against the pre-fix code

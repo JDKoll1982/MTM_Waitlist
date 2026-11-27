@@ -1,26 +1,27 @@
 # Workflow diagrams
 
-Five workflows in this application, mapped from the code and rendered as print-ready flowcharts. Each
-has an **engineer** version — class names, command names, service
+One workflow map remains in this application: the startup launch and sign-in flow, rendered as print-ready flowcharts. The map has an **engineer** version — class names, command names, service
 interfaces, stored procedures, cache-fallback shapes — and a **friendly** version in plain language for
-the people who use the screens; both come from one spec, so they cannot disagree. The two request flows
-that carry the duplicated job also feed a refactor: [diagram-workflow-refactor-notes.md](./diagram-workflow-refactor-notes.md)
-turns that into something `/speckit.specify` can consume.
+the people who use the screens; both come from one spec, so they cannot disagree. The four request flows
+that were mapped for the duplication refactor, and the diagrams built from them, were removed with the
+flows themselves; [diagram-workflow-refactor-notes.md](./diagram-workflow-refactor-notes.md) keeps the
+record of that refactor.
 
-## The ten documents
+## The two documents
 
 | # | Workflow | Engineer | Plain language | Sheets |
 | --- | --- | --- | --- | --- |
-| 1 | Work Order — New Request | [PDF](./pdf/workorder-new-request/diagram-workorder-new-request.pdf) | [PDF](./pdf/workorder-new-request/diagram-workorder-new-request-friendly.pdf) | 5 / 2 |
-| 2 | Work Order — Work Center Setup | [PDF](./pdf/workorder-workcenter-setup/diagram-workorder-workcenter-setup.pdf) | [PDF](./pdf/workorder-workcenter-setup/diagram-workorder-workcenter-setup-friendly.pdf) | 5 / 2 |
-| 3 | Generic Request — New Request | [PDF](./pdf/generic-new-request/diagram-generic-new-request.pdf) | [PDF](./pdf/generic-new-request/diagram-generic-new-request-friendly.pdf) | 4 / 2 |
-| 4 | Generic Request — Work Center Setup | [PDF](./pdf/generic-workcenter-setup/diagram-generic-workcenter-setup.pdf) | [PDF](./pdf/generic-workcenter-setup/diagram-generic-workcenter-setup-friendly.pdf) | 2 / 2 |
-| 5 | Startup — launch and sign-in | [PDF](./pdf/startup-launch/diagram-startup-launch.pdf) | [PDF](./pdf/startup-launch/diagram-startup-launch-friendly.pdf) | 3 / 2 |
+| 1 | Startup — launch and sign-in | [PDF](./pdf/startup-launch/diagram-startup-launch.pdf) | [PDF](./pdf/startup-launch/diagram-startup-launch-friendly.pdf) | 3 / 2 |
+
+Four further workflows were mapped here — Work Order New Request, Work Order Work Center Setup, Generic
+Request New Request, and Generic Request Work Center Setup — each with an engineer and a friendly PDF and
+its own spec under `tools/`. They were removed together with the flows they described, so this index no
+longer lists them; only the startup-launch sheets have a folder under `pdf/` or `dot/` today.
 
 The finished documents are in [`pdf/<workflow>/`](./pdf/); the Graphviz sources they are described by are
-in [`dot/<workflow>/`](./dot/); the specs that generate both are in [`tools/`](./tools/README.md). Each
-workflow owns one folder under `pdf/` and one under `dot/`, so a run of the diagram workflow never shares a
-folder with another workflow.
+in [`dot/<workflow>/`](./dot/); the specs that generate both are in [`tools/`](./tools/README.md). A
+workflow that is still mapped owns one folder under `pdf/` and one under `dot/`, so a run of the diagram
+workflow never shares a folder with another workflow.
 
 ## How to read a page
 
@@ -44,9 +45,12 @@ Two conventions matter when following a flow:
 
 ## What the diagrams found
 
-The full list is in [the refactor notes](./diagram-workflow-refactor-notes.md) — 21 hotspots across
-seven high-severity, ten moderate and four low. Diagram 5 (startup) was mapped later, so its findings
-are recorded separately in §6 of the same file. The ones that change behaviour today:
+The findings below were recorded while the four request flows were still mapped, and they are kept here
+because they describe the code, not the diagrams. The full list is in
+[the refactor notes](./diagram-workflow-refactor-notes.md) — 21 hotspots across seven high-severity, ten
+moderate and four low. The startup map was made later, so its findings are recorded separately in §6 of the
+same file. Read them as the record of what the mapping turned up, and check the code before acting on any
+of them:
 
 - The submit guard compares the work centre with itself, so it cannot fail
   (`NewRequestSummaryViewModel.SubmitAsync`).
@@ -65,10 +69,13 @@ The PDFs in `pdf/` and the `.dot` files in `dot/` are build output. The source i
 document in [tools/](./tools/README.md).
 
 ```powershell
-python docs\diagrams\tools\dotgen.py docs\diagrams\tools\spec-diagram-workorder-new-request.json
+python docs\diagrams\tools\dotgen.py docs\diagrams\tools\spec-diagram-startup-launch.json
 python docs\diagrams\tools\render_sheets.py docs\diagrams\tools\manifest.json
 python docs\diagrams\tools\verify_pdfs.py
 ```
+
+Only the startup-launch specs remain, so point `dotgen.py` at those; the manifest still names the specs of
+the removed documents, and a rebuild that reads it reports them as missing rather than regenerating them.
 
 Needs PyMuPDF (`pip install pymupdf`) and the Segoe UI face that ships with Windows. Graphviz is only
 needed to inspect a single `.dot` file — it does not produce these PDFs.
@@ -81,7 +88,7 @@ flow from memory:
 
 ```powershell
 python docs\diagrams\tools\diagram_context.py --list
-python docs\diagrams\tools\diagram_context.py --workflow workorder-new-request --sheet 3
+python docs\diagrams\tools\diagram_context.py --workflow startup-launch --sheet 3
 ```
 
 Add `--inspect-pdf --png` to read the rendered pages and write them to `%TEMP%` for a look. The command

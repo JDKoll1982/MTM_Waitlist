@@ -12,7 +12,7 @@ dotnet run --project MTM_Waitlist.csproj
 ```
 
 There is no CI workflow and no `.editorconfig`. Warnings are not errors. The test project carries
-17 `*AuditTests` guardrails that fail the build on architecture regressions — read the failing test
+18 `*AuditTests` guardrails that fail the build on architecture regressions — read the failing test
 before assuming the failure is environmental.
 
 ## Stack
@@ -51,7 +51,7 @@ Six-month churn concentrates in `Strings/en-us/Resources.resw`,
 `Database/StoredProcedures/AllSPs.sql`, `MTM_Waitlist.csproj`, and
 `Module_Settings/Views/SettingsPage.xaml`. Start orientation there rather than reading the tree.
 
-Eight files exceed 1000 lines (`SettingsHub/ViewModels/SettingsViewModel.cs` is 2623). Slice them with
+Eight files exceed 1000 lines (`MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.cs` is 2623). Slice them with
 `git log -L<start>,<end>:<file>` or `git blame -C` instead of reading them whole.
 
 ## Conventions

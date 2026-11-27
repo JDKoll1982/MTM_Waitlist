@@ -2,9 +2,10 @@
 
 > Durable copy — canonical long-form research note:
 > `docs/research/research-inforvisual-phase6-disposition-status-codes.md`
-> Checklist: `WeekendProject/PromptFiles/14-57%-Phase2-UnifiedWaitlistCard.md`
+> The `WeekendProject/PromptFiles` checklist this was written against is retired; nothing in this note depends
+> on reading it.
 
-## Phase 6 implementation state (2026-09-08) — checklist `14-57%`
+## Phase 6 implementation state (2026-09-08) — checklist `14-57%` (retired)
 - Phase 0 done (build 0w/0e; full suite 581 green). Phase 6.1 done (config + GetDispositionInput.sql + validation). Phase 6.2 groundwork done (MySQL MtmWipApplication target + WipFloorInventoryService + RequestDispositionMapper + RequestDispositionResolver), UI item/picker wiring pending.
 - Phase 1.1 partial: catalog loader done - `Settings/Services/IRequestItemCatalogService.cs` + `RequestItemCatalogService.cs` (wraps static `RequestItemCatalog` 18-row CSV mirror; GetAllItems/GetByCategory/FindById/GetCategoriesInOrder), DI-registered, 5/5 tests. JSON schema extension (`Assets/Config/waitlist-request-types.json` legacy Type/Subtype tree) + RequestType/Subtype->Category/Item re-map + WaitlistRequestTitles + ResolveImagePath + GetDefaultTypes ordering still open (large, Phase 2-4 tied).
 - Infor derivation SQL: `Database/InforVisual/Queues/Module_Waitlist/Queries/GetDispositionInput.sql` (validated live: WO-074011/24733431 -> R, open 33, on-hand 54, outside 0; WO-074010/12-32754-000 -> R, outside 1).

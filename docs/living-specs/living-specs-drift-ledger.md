@@ -11,18 +11,26 @@ Keep it current rather than re-deriving these facts.
 
 ## How to run it
 
-- **Use `python` or `py`, never `python3`** — on this machine `python3` is a 0-byte Microsoft Store alias
-  that answers "Python was not found", and a literal reading of the agent files that say `python3 --version`
-  silently drops the lifecycle journal, task folds, coverage map and drift report together.
-- `python .specify/extensions/companion/scripts/drift.py [--working] [--json]`. It **always exits 0** and
-  **never edits**.
-- `--working` adds uncommitted edits, deletions and untracked files to each capability's changed set.
-  `/speckit.companion.living-sync` consumes that same mode's `--json` as its plan, so the two are the
+**The detector itself is gone.** `drift.py`, the `register-capability.py` and `resolve-spec-paths.py`
+helpers it was driven with, and the `/speckit.companion.living-*` commands that consumed them are not in
+this repository any more, so the commands below record how it was run rather than something a reader can
+run today. What survives is the registry (`living-specs.yml`), the capability specs under `capabilities/`
+and `docs/living-specs/`, and the findings in this file. Read the rest of this section as the record of a
+retired mechanism, and treat the findings as history that is still worth knowing.
+
+- **It was run with `python` or `py`, never `python3`** — on this machine `python3` was a 0-byte Microsoft
+  Store alias that answered "Python was not found", and a literal reading of the agent files that say
+  `python3 --version` silently dropped the lifecycle journal, task folds, coverage map and drift report
+  together.
+- `python .specify/extensions/companion/scripts/drift.py [--working] [--json]` always exited 0 and never
+  edited.
+- `--working` added uncommitted edits, deletions and untracked files to each capability's changed set.
+  `/speckit.companion.living-sync` consumed that same mode's `--json` as its plan, so the two were the
   read/write halves of one computation.
-- **Its self-trace does not go to a spec folder.** `drift.py` records through `run_trace` with
-  `UNATTRIBUTED_DIR = "specs"`, so drift lines land in **`specs/.trace.jsonl`** (two per run: a
+- **Its self-trace did not go to a spec folder.** `drift.py` recorded through `run_trace` with
+  `UNATTRIBUTED_DIR = "specs"`, so drift lines landed in **`specs/.trace.jsonl`** (two per run: a
   `drift-compute` line plus a `verdict` line), not in `specs/<feature>/.trace.jsonl`. A spec-scoped trace
-  only ever shows `write-context`.
+  only ever shows `write-context`. `run_trace.py` is the one piece of that machinery still present.
 
 ## The blind spot — read this before trusting a green run
 
@@ -38,21 +46,21 @@ The registry (`living-specs.yml` at the repo root) declares exactly **one** capa
 matched: the file-based log path `startup-diagnostics` watched was deleted, and the rebuilt launch surface is one
 capability rather than two, so the split that existed for one file-level concern no longer describes anything.
 `register-capability.py --replaces` performed the swap in one write, which is why the `exclude` that the old split
-needed is gone with it.
+needed is gone with it. (That helper, like the rest of the living-spec machinery, is no longer in the tree.)
 
 Everything else has **no living spec**, so drift across it is invisible *by construction*:
 
 `MTM_Waitlist.Waitlist.View/**`, `Module_Waitlist/**`, `MTM_Waitlist.Core/**`, `MTM_Waitlist.Setup/**`,
 `Module_Setup/**`, `Database/**`, `Strings/**`, `Views/**`, `ViewModels/**`.
 
-A green drift run therefore means **the registry is complete with respect to itself** — not that the
-repository is in sync. Confirm the distinction with
-`python .specify/extensions/companion/scripts/resolve-spec-paths.py --all --json`: `orphans: []` means no
-spec is unreachable, not that every area is watched.
+A green drift run therefore meant **the registry was complete with respect to itself** — not that the
+repository was in sync. Confirm the distinction with
+`python .specify/extensions/companion/scripts/resolve-spec-paths.py --all --json` (when the resolver is
+present again): `orphans: []` means no spec is unreachable, not that every area is watched.
 
-**Adopting a new area** (so the detector can see it) is `--speckit.companion.living-adopt`, opt-in and
-surface-first, drafting `[DRAFT]` specs. Until that is run for an area, treat any "no drift" result for it
-as silence, not health.
+**Adopting a new area** (so the detector can see it) was `--speckit.companion.living-adopt`, opt-in and
+surface-first, drafting `[DRAFT]` specs. Until that was run for an area, any "no drift" result for it was
+silence, not health.
 
 ## Registry hazard: a file-level glob leaf under a whole-area parent
 
@@ -100,7 +108,7 @@ Also recorded then: `FEATURES.md` was pinned to commit `7bf6857` and its maintai
 **Resolved 2026-09-20** by `specs/004-unified-card-item-picker` Phase 14 (US7, "the codebase is honest about
 itself"): the `Mockups/` and `DeveloperUI-VisualPrompts.md` references are now classified in place as
 **provenance, not instruction**; the `VALIDATION-PROMPT-SERVER.md` citations are classified the same way in
-`OPEN-TASKS.md` §5 and `specs/001/tasks.md`; `FEATURES.md` is re-pinned and its index extended to
+`OPEN-TASKS.md` §5 and `specs/001-module-mock-visual-fallback/tasks.md`; `FEATURES.md` is re-pinned and its index extended to
 `specs/001`–`004`; `OPEN-TASKS.md` names `specs/002`, `specs/003` and `specs/004` and its carry-forward total
 is corrected.
 

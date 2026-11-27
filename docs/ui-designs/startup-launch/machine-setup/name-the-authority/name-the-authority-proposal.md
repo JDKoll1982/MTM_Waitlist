@@ -45,7 +45,7 @@ The consequence is not cosmetic. A person who has to admit a new computer is tol
 No such role exists in `auth_roles_catalog`; the people who can help hold **IT Department** or
 **Developer**, and the refusals on this very screen say so two lines later.
 
-![BEFORE — current implementation](name-the-authority-before.png)
+![BEFORE — current implementation](pngs/name-the-authority-before.png)
 
 ## B. Proposed Improvement
 
@@ -64,7 +64,7 @@ Nothing about the gate, the form, the save, the reset or the abort routes change
 the same account opens the same stage, and a person without the permission is still refused in the same
 place.
 
-![AFTER — proposed QOL improvement](name-the-authority-after.png)
+![AFTER — proposed QOL improvement](pngs/name-the-authority-after.png)
 
 ## C. Visual Comparison
 

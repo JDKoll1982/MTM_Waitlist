@@ -135,6 +135,9 @@ Unnamed controls are auto-skipped (too ambiguous for safe regex edits).
 
 #### Outputs
 
+`Generate-TooltipInventory.ps1` writes four artefacts into `scripts/assets/tooltip-inventory/`. They are
+produced by the script and are not committed:
+
 - `scripts/assets/tooltip-inventory/tooltip-inventory.json`
 - `scripts/assets/tooltip-inventory/tooltip-missing.json`
 - `scripts/assets/tooltip-inventory/tooltip-inventory.csv`

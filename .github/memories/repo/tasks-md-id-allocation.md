@@ -1,4 +1,4 @@
-# `specs/001/tasks.md` — phase and task-ID allocation across workstations
+# `specs/001-module-mock-visual-fallback/tasks.md` — phase and task-ID allocation across workstations
 
 **Problem observed 2026-09-12.** `specs/001-module-mock-visual-fallback/tasks.md` is appended to by
 `/speckit.implement` at the end of a session. Two workstations ran that flow the same day and independently

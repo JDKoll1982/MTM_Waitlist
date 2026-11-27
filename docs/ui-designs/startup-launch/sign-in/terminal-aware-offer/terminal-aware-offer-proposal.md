@@ -46,7 +46,7 @@ uses, it holds that one name beside a form that asks for a name anyway. On a sha
 six most recent of a rotating crowd, with no indication of when any of them signed in, and a person who is
 not among the six still types their name.
 
-![BEFORE — current implementation](terminal-aware-offer-before.png)
+![BEFORE — current implementation](pngs/terminal-aware-offer-before.png)
 
 ## B. Proposed Improvement
 
@@ -68,7 +68,7 @@ Everything else stays as it is. The heading keeps its wording, the cards keep th
 "name only" rule, the divider still appears only when there is something to show, and the form is
 untouched.
 
-![AFTER — proposed QOL improvement](terminal-aware-offer-after.png)
+![AFTER — proposed QOL improvement](pngs/terminal-aware-offer-after.png)
 
 ## C. Visual Comparison
 

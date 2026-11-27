@@ -42,7 +42,7 @@ who expects their name to be offered cannot tell "the list is empty" from "the l
 and the living spec's scenario only promises that the form still works — it says nothing about the
 silence. Nothing on the screen, and nothing in the message strip, states the cause.
 
-![BEFORE — current implementation](no-offer-explained-before.png)
+![BEFORE — current implementation](pngs/no-offer-explained-before.png)
 
 ## B. Proposed Improvement
 
@@ -56,7 +56,7 @@ untouched.
 - The wording is a new resource key, `Startup_SignIn.PreviousPeopleUnavailable`, so it is localised like
   every other string on the screen.
 
-![AFTER — proposed QOL improvement](no-offer-explained-after.png)
+![AFTER — proposed QOL improvement](pngs/no-offer-explained-after.png)
 
 ## C. Visual Comparison
 

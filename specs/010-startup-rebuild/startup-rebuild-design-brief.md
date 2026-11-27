@@ -1,7 +1,11 @@
 # Startup Rebuild — Design Brief
 
-Source of truth for `STARTUP-REBUILD-CHECKLIST.md`. Section numbers (S1–S16) are the refs used by every
-task line in that checklist. Nothing here is implemented yet; the removal checklist is the first work.
+> **Moved.** This brief lived at `docs/startup/startup-rebuild-design-brief.md` until 2026-11-27, when it
+> joined the feature it describes. The path changed; the text below did not.
+
+Section numbers (S1–S16) are the refs used by the task lines of the removal checklist that drove this work.
+That checklist (`STARTUP-REBUILD-CHECKLIST.md`) was worked through and is no longer in the repository, so
+treat this document as the design record it became: what was deleted, what replaced it, and why.
 
 ---
 
