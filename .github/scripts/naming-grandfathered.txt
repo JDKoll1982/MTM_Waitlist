@@ -40,7 +40,6 @@ Module_Shared\Controls\RotatingTextView.xaml.cs|Private static readonly field 'H
 MTM_Waitlist.Core\Contracts\Services\IPermissionAdministrationService.cs|Public type 'PermissionProvenance' must match file name 'IPermissionAdministrationService'
 MTM_Waitlist.Core\Contracts\Services\IRoleCatalogService.cs|Public type 'RoleCatalogEntry' must match file name 'IRoleCatalogService'
 MTM_Waitlist.Core\Contracts\Services\IScopedPreferenceStore.cs|Public type 'PreferenceScope' must match file name 'IScopedPreferenceStore'
-MTM_Waitlist.Core\Models\ComputerGateCheck.cs|Public type 'ComputerGateStatus' must match file name 'ComputerGateCheck'
 MTM_Waitlist.Core\Models\ConnectionHealthState.cs|Public type 'ConnectionSource' must match file name 'ConnectionHealthState'
 MTM_Waitlist.Core\Models\InternalStoreAvailability.cs|Public type 'InternalStoreStatus' must match file name 'InternalStoreAvailability'
 MTM_Waitlist.Core\Models\UserManagement\UserManagementResult.cs|Public type 'UserManagementOutcomeKind' must match file name 'UserManagementResult'

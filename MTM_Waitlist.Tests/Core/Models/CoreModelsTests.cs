@@ -42,25 +42,6 @@ public sealed class CoreModelsTests
     }
 
     [TestMethod]
-    public void Model_CoreModelsTests_ComputerGateCheck_StoresStatusAndOptionalRecord()
-    {
-        var check = new ComputerGateCheck(ComputerGateStatus.Missing);
-
-        Assert.AreEqual(ComputerGateStatus.Missing, check.Status);
-        Assert.IsNull(check.ExistingComputer);
-    }
-
-    [TestMethod]
-    public void Model_CoreModelsTests_ComputerGateCheck_CanCarryExistingComputer()
-    {
-        var record = new ComputerRecord { ComputerName = "johnspc" };
-        var check = new ComputerGateCheck(ComputerGateStatus.RenamedMachine, record);
-
-        Assert.AreEqual(ComputerGateStatus.RenamedMachine, check.Status);
-        Assert.AreSame(record, check.ExistingComputer);
-    }
-
-    [TestMethod]
     public void Model_CoreModelsTests_PrintableReport_Defaults()
     {
         var report = new PrintableReport();

@@ -71,38 +71,3 @@ public sealed class ImageOverride
     /// </summary>
     public string LoadedFrom { get; init; } = "database";
 }
-
-/// <summary>
-/// Result of a query for an image override.
-/// Includes the override data and metadata about the query result.
-/// </summary>
-public sealed class ImageOverrideQueryResult
-{
-    /// <summary>
-    /// The override record, if found and active.
-    /// Null if not found or inactive.
-    /// </summary>
-    public ImageOverride? Override { get; init; }
-
-    /// <summary>
-    /// Indicates if the query succeeded (database was reachable).
-    /// False if there was a connection or query error.
-    /// </summary>
-    public bool Success { get; init; } = true;
-
-    /// <summary>
-    /// Error message if the query failed.
-    /// Null if successful.
-    /// </summary>
-    public string? ErrorMessage { get; init; }
-
-    /// <summary>
-    /// The scope that was queried.
-    /// </summary>
-    public string? QueriedScope { get; init; }
-
-    /// <summary>
-    /// The scope item ID that was queried.
-    /// </summary>
-    public string? QueriedScopeItemId { get; init; }
-}

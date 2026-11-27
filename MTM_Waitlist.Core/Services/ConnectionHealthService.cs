@@ -15,7 +15,6 @@ namespace MTM_Waitlist.Module_Core.Services;
 /// </remarks>
 public sealed class ConnectionHealthService : IConnectionHealthService
 {
-    private const int DefaultTimeoutSeconds = 5;
     private const int ReceivingTimeoutSeconds = 5;
     private const int InforTimeoutSeconds = 5;
 

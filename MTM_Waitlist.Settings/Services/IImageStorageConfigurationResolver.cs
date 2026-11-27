@@ -135,24 +135,3 @@ public interface IImageStorageConfigurationResolver
     /// </summary>
     void InvalidateCache();
 }
-
-/// <summary>
-/// Configuration resolution result with source tracking.
-/// </summary>
-public sealed class ConfigurationResolutionResult<T>
-{
-    /// <summary>
-    /// The resolved configuration value.
-    /// </summary>
-    public T Value { get; init; } = default!;
-
-    /// <summary>
-    /// The source of the resolved value: "database", "appsettings", or "default"
-    /// </summary>
-    public string Source { get; init; } = string.Empty;
-
-    /// <summary>
-    /// Human-readable description of where the value came from.
-    /// </summary>
-    public string SourceDescription { get; init; } = string.Empty;
-}

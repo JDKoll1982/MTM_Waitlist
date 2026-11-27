@@ -58,7 +58,6 @@ public sealed class PermissionAdministrationService : IPermissionAdministrationS
     private const string KeyInvalidToken = "mtm_permission_key_invalid";
     private const string ValueMovedToken = "mtm_permission_value_moved";
 
-    private const string UserScopePrefix = "user:";
     private const string PermissionNamespace = "permission.";
 
     private readonly WaitlistDatabaseOptions _waitlistDatabaseOptions;

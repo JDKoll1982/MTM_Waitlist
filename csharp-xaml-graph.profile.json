@@ -265,7 +265,11 @@
     ],
     "exclude": [
       "**/bin/**",
-      "**/obj/**"
+      "**/obj/**",
+      "**/node_modules/**",
+      "**/*.Tests/**",
+      "**/.github/**",
+      "**/.specify/**"
     ]
   }
 }

@@ -21,6 +21,12 @@ each of the two was estimated, put to the owner, and taken deliberately.
 Earlier counts recorded elsewhere — **901** in `READINESS-CHECKLIST.md` and in T226 of
 `specs/004-unified-card-item-picker/tasks.md`, and **910** at the first measurement — are superseded.
 
+**Retired 2026-11-27.** Deleting the retired computer-gate model (`ComputerGateCheck`/`ComputerGateStatus`,
+`MTM_Waitlist.Core/Models/ComputerGateCheck.cs`) removed Rule 4's row for that file, and renaming
+`MTM_Waitlist.Settings/Models/WorkCenterInventory.cs` to `WorkCenterItem.cs` cleared the type-name mismatch there
+without adding a finding. The tables below remain the 2026-10-10 measurement, so Rule 4 now measures **47**, not
+48, and the tree total **266**, not 267.
+
 ## Why the backlog was never visible
 
 `.github/workflows/csharp-xaml-naming-compliance.yml` built the changed-file list from the pull request diff

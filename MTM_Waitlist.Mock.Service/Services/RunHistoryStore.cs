@@ -266,13 +266,6 @@ public sealed class RunHistoryStore
     };
 
     /// <summary>
-    /// Returns the instant an entry belongs to, for retention. Refresh entries are dated by their cycle and
-    /// backup entries by their window; nothing else is a candidate.
-    /// </summary>
-    private static DateTime EntryUtc(RunHistoryEntry entry) =>
-        entry.CycleUtc != default ? entry.CycleUtc : entry.WindowUtc;
-
-    /// <summary>
     /// Normalizes an instant to UTC so the written JSON always ends in <c>Z</c>.
     /// </summary>
     /// <remarks>

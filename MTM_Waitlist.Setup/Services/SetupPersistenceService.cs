@@ -324,10 +324,4 @@ public sealed class SetupPersistenceService : ISetupPersistenceService
         [JsonPropertyName("Metadata")]
         public string? Metadata { get; set; }
     }
-
-    private sealed class PersistedSubordinatePart
-    {
-        [JsonPropertyName("SelectedScrapType")]
-        public string? SelectedScrapType { get; set; }
-    }
 }
