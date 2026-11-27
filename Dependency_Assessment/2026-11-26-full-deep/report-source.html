@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dependency Update and Modernization Report — MTM_Waitlist (full workspace audit)</title>
+<style>
+  @page {
+    size: 8.5in 11in;
+    margin: 0.85in 0.8in 0.9in 0.8in;
+    @bottom-center {
+      content: "MTM_Waitlist — Dependency Update and Modernization Report  ·  page " counter(page) " of " counter(pages);
+      font-family: "Segoe UI", Arial, sans-serif; font-size: 7.6pt; color: #6b8299;
+    }
+    @top-right {
+      content: "26 November 2026  ·  read-only audit";
+      font-family: "Segoe UI", Arial, sans-serif; font-size: 7.6pt; color: #8aa0b4;
+    }
+  }
+  html { font-size: 10.2pt; }
+  body {
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: #1d2530; line-height: 1.45; margin: 0;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  h1, h2, h3, h4 { font-family: "Segoe UI Semibold", "Segoe UI", Arial, sans-serif; color: #12304d; }
+  h1 { font-size: 21pt; margin: 0 0 .2em; letter-spacing: -.2px; }
+  h2 { font-size: 14.5pt; margin: 1.5em 0 .45em; padding-bottom: .18em; border-bottom: 1.5px solid #c9d6e2; break-after: avoid; }
+  h3 { font-size: 11.4pt; margin: 1.15em 0 .3em; color: #1b4b73; break-after: avoid; }
+  h4 { font-size: 10.4pt; margin: .9em 0 .2em; color: #2b5f88; break-after: avoid; }
+  p { margin: 0 0 .55em; }
+  ul, ol { margin: .2em 0 .7em; padding-left: 1.25em; }
+  li { margin-bottom: .18em; }
+  a { color: #0f5d8c; text-decoration: none; border-bottom: .5px solid #a8c4d8; word-break: break-word; }
+  code, .mono { font-family: "Cascadia Mono", Consolas, monospace; font-size: .88em; background: #f1f4f8; padding: .05em .25em; border-radius: 2px; }
+  table { width: 100%; border-collapse: collapse; margin: .5em 0 .95em; font-size: 8.9pt; }
+  th { background: #e8eef5; color: #12304d; text-align: left; font-weight: 600; padding: .38em .45em; border-bottom: 1.2px solid #b8c9da; }
+  td { padding: .34em .45em; border-bottom: .6px solid #dde5ee; vertical-align: top; }
+  tbody tr:nth-child(even) td { background: #f7f9fc; }
+  tr, .row { break-inside: avoid; page-break-inside: avoid; }
+  thead { display: table-header-group; }
+  .cover { page-break-after: always; display: flex; flex-direction: column; justify-content: center; min-height: 8.4in; }
+  .cover .kicker { font-size: 10pt; letter-spacing: 2.4px; text-transform: uppercase; color: #4a6b87; margin-bottom: 1.1em; }
+  .cover .rule { height: 5px; width: 92px; background: #1b6ea8; margin: 1.4em 0 1.6em; }
+  .cover h1 { font-size: 27pt; line-height: 1.16; margin-bottom: .35em; }
+  .cover .subtitle { font-size: 12.6pt; color: #3d5a72; margin-bottom: 2.2em; line-height: 1.4; }
+  .facts { display: grid; grid-template-columns: 1fr 1fr; gap: .42em 1.6em; font-size: 9.4pt; margin-top: .4em; }
+  .facts div { border-top: .6px solid #d5dfe9; padding-top: .3em; }
+  .facts .k { display: block; color: #5c7a92; font-size: 8.2pt; text-transform: uppercase; letter-spacing: .7px; }
+  .facts .v { font-weight: 600; color: #17364f; }
+  .badge { display: inline-block; padding: .08em .5em; border-radius: 9px; font-size: 7.8pt; font-weight: 700; letter-spacing: .3px; text-transform: uppercase; white-space: nowrap; }
+  .p-high { background: #fde3d6; color: #8a3b0d; }
+  .p-medium { background: #fdf0cd; color: #7a5a06; }
+  .p-low { background: #e3ecf4; color: #33566f; }
+  .ok { background: #d9efe0; color: #176b39; }
+  .callout { border-left: 3.5px solid #1b6ea8; background: #f2f7fb; padding: .6em .85em; margin: .75em 0 1em; font-size: 9.4pt; break-inside: avoid; }
+  .callout.warn { border-left-color: #b9761a; background: #fdf7ec; }
+  .toc { font-size: 9.6pt; }
+  .toc ol { list-style: none; padding-left: 0; }
+  .toc > ol > li { margin-bottom: .42em; border-bottom: .5px dotted #ccd8e4; padding-bottom: .3em; }
+  .toc .num { display: inline-block; width: 1.9em; color: #6b8aa4; font-weight: 600; }
+  .lead { font-size: 10.6pt; color: #294a63; }
+  .metric-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6em; margin: .6em 0 1.1em; }
+  .metric { border: .8px solid #ccd9e5; border-radius: 4px; padding: .55em .65em; background: #fafcfe; }
+  .metric .n { display: block; font-size: 17pt; font-weight: 700; color: #14568a; line-height: 1.1; }
+  .metric .l { display: block; font-size: 8.3pt; color: #52708a; margin-top: .2em; }
+  .avoid { break-inside: avoid; }
+  .pagebreak { page-break-before: always; }
+  .nowrap { white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<!-- ======================= COVER ======================= -->
+<section class="cover">
+  <div class="kicker">Workspace modernization audit · full scope · deep research</div>
+  <h1>Dependency Update and Modernization Report</h1>
+  <div class="rule"></div>
+  <div class="subtitle">
+    MTM_Waitlist — every project, every package, and the code built<br>
+    where a framework or a package already had the answer
+  </div>
+  <div class="facts">
+    <div><span class="k">Workspace</span><span class="v">MTM_Waitlist</span></div>
+    <div><span class="k">Repository</span><span class="v">JDKoll1982/MTM_Waitlist</span></div>
+    <div><span class="k">Research date</span><span class="v">26 November 2026</span></div>
+    <div><span class="k">Report version</span><span class="v">2.0 (full workspace)</span></div>
+    <div><span class="k">Baseline commit</span><span class="v">175cfc21, master, clean tree</span></div>
+    <div><span class="k">Projects reviewed</span><span class="v">17 projects, 1 solution, 1 on-host service</span></div>
+    <div><span class="k">Dependencies reviewed</span><span class="v">22 distinct NuGet packages across 81 declarations</span></div>
+    <div><span class="k">Available updates</span><span class="v">9 update proposals, all approved</span></div>
+    <div><span class="k">Modernization opportunities</span><span class="v">23 proposals, all approved</span></div>
+    <div><span class="k">Code, packages or settings changed</span><span class="v">None — read-only audit</span></div>
+  </div>
+</section>
+
+<!-- ======================= CONTENTS ======================= -->
+<section>
+  <h2 style="margin-top:0">Contents</h2>
+  <div class="toc">
+    <ol>
+      <li><span class="num">1</span>Executive summary</li>
+      <li><span class="num">2</span>Update overview</li>
+      <li><span class="num">3</span>Per-package assessment</li>
+      <li><span class="num">4</span>Custom functionality and modernization</li>
+      <li><span class="num">5</span>Development tools and AI optimization</li>
+      <li><span class="num">6</span>Workspace-wide changes</li>
+      <li><span class="num">7</span>Implementation roadmap</li>
+      <li><span class="num">8</span>Testing and risk</li>
+      <li><span class="num">9</span>Approval summary</li>
+      <li><span class="num">10</span>Final recommendations</li>
+      <li><span class="num">11</span>Sources</li>
+    </ol>
+  </div>
+  <div class="callout" style="margin-top:1.4em">
+    <strong>What this report is.</strong> A read-only assessment of the whole workspace. It states what was
+    found, what was approved, and what the work would involve. It is not a record of work performed: no
+    package was updated, no project, source, instruction or configuration file was edited, no database was
+    contacted, and nothing was installed. The companion specification,
+    <span class="mono">DEPENDENCY_AND_MODERNIZATION_SPECIFICATION.md</span>, is the implementation input for
+    <span class="mono">/speckit.specify</span>.
+  </div>
+</section>
+
+<!-- ======================= 1. EXECUTIVE SUMMARY ======================= -->
+<h2 class="pagebreak">1. Executive summary</h2>
+
+<p class="lead">
+  The application is in good shape. It builds clean, it carries no known vulnerability, and the
+  groundwork for its data access is sound. What this audit found is a different kind of debt: places where
+  the repository has quietly drifted from its own rules, and places where hand-written code is maintaining
+  something the platform already provides. None of it is on fire. All of it is cheap to fix now and
+  expensive to leave.
+</p>
+
+<div class="metric-row">
+  <div class="metric"><span class="n">0</span><span class="l">known vulnerabilities across every project, including transitive packages</span></div>
+  <div class="metric"><span class="n">1</span><span class="l">credential exposure: live-looking passwords committed in <span class="mono">appsettings.json</span></span></div>
+  <div class="metric"><span class="n">32</span><span class="l">proposals raised, every one approved</span></div>
+</div>
+
+<h3>Overall health</h3>
+<p>
+  The build is clean: 0 warnings and 0 errors across 17 projects on .NET 10. No package in the graph sits
+  in a vulnerable range, and the solution already pins its way out of two advisories that would otherwise
+  appear on every restore. The 17 architecture guardrail tests assert real contracts, the database artifacts
+  are complete (204 create scripts, 204 matching rollbacks), and the master SQL aggregates are byte-consistent
+  with the 107 individual procedure files they are built from.
+</p>
+<p>
+  Three areas need attention, in this order. First, <strong>credentials are committed</strong>. The tracked
+  configuration file carries a password inside two connection strings and a full Infor Visual server, user
+  and password triple. The configuration system already supports supplying these from the environment, so the
+  fix is to commit the shape and let each machine supply the values. Second, <strong>the platform is one
+  major version behind</strong> and several packages are terminal or superseded — including a Community
+  Toolkit line whose 7.1.2 release is the last it will ever have, while the repository has already adopted
+  the successor line elsewhere. Third, <strong>the code re-implements infrastructure it already owns</strong>:
+  about ten services open their own database connections instead of using the shared executor that carries the
+  retry policy, and the shared executor itself still exposes an inline-SQL path that the repository's own
+  "stored procedures only" rule forbids.
+</p>
+
+<h3>Update status</h3>
+<p>
+  Nine update proposals cover 17 package movements. Two are worth doing first because they make the rest
+  trivial: central package management (across 17 project files, the same product version is currently
+  repeated up to 14 times) and package source mapping. After those, each version change is a one-line edit.
+  The two largest moves are the Windows App SDK from 2.4.0 to 2.7.0 and DevWinUI from 10.8.0 to 11.1.0; both
+  are framework-level and both carry a manual screen-by-screen review before they ship.
+</p>
+
+<h3>Security concerns</h3>
+<p>
+  One, and it is the committed credentials above. There is no vulnerable package. The two advisories that
+  would otherwise affect this graph are already suppressed by a deliberate version pin, and the audit shows
+  why that pin can be retired once the SQL client moves to its current release. Separately, the NuGet
+  supply-chain posture is thinner than it looks: no NuGet configuration is tracked at all, so every clone
+  inherits whatever that machine happens to have, and the standard dependency-confusion guard is absent
+  because nobody needed it yet.
+</p>
+
+<h3>Performance</h3>
+<p>
+  Two real findings. The generic-request part search asks the plant system for results on every keystroke
+  once the text is long enough — a burst of typing becomes a burst of round trips, and an older answer can
+  land after a newer one. And two settings paths block the interface thread on an asynchronous call while
+  the settings screen loads. Both are small, contained fixes. Three other things that looked like problems
+  turned out not to be, and are recorded so nobody re-raises them: the picture-resolution loop is deliberately
+  once per work centre, the localised labels are evaluated once, and the background handlers are covered by
+  the application's global fault handler.
+</p>
+
+<h3>Modernization</h3>
+<p>
+  Nine proposals. The best-value one costs almost nothing: the Community Toolkit 7.1.2 packages are used in
+  exactly four files, and one of them — the <span class="mono">Controls</span> reference — has no control used from it at all. The
+  rest are the kind of debt that accrues quietly: a data library that depends on a user-interface project, a
+  shared library that ships a dialog control, the largest class in the repository at 2,623 lines, and a JSON
+  layer that is entirely reflection-based.
+</p>
+
+<h3>User experience</h3>
+<p>
+  No redesign is proposed, and the reason is deliberate: any layout change in this application must carry a
+  rendered before-and-after design, and nothing found here justified that cost. What is proposed is
+  correctness. The Setup review screen currently displays two internal resource identifiers to a production
+  lead because the strings they refer to do not exist. Coil weights are formatted for a fixed culture and
+  carry a hardcoded unit. And 140 visible sentences are typed directly into the layout files rather than into
+  resources, which means the interface cannot be translated predictably.
+</p>
+
+<h3>AI development</h3>
+<p>
+  The previous audit of this repository already cleaned up the AI environment, and its work stands: the
+  broken tool servers are gone and the two always-loaded instruction files were corrected. Four things were
+  left behind. An agent-facing configuration file still declares the platform as 2.3.1 when it is 2.4.0, and
+  a memory note records the same wrong number as a reference fact — an agent that trusts either looks up the
+  wrong documentation. A Spec Kit hook calls a Python launcher that does nothing on this machine. The
+  repository declares no documentation server at all, so the capability the project's own rules require
+  exists only because one workstation happens to have it configured globally. And the NuGet tooling server
+  cannot analyse this solution — it fails on every tool with an assembly mismatch against the current .NET
+  SDK, which is why every version figure in this report came from the command line instead.
+</p>
+
+<h3>Highest-value recommendations</h3>
+<ol>
+  <li><strong>Take the credentials out of the repository</strong> and rotate the ones that have been committed.</li>
+  <li><strong>Adopt central package management</strong>, then move the eight packages that are behind.</li>
+  <li><strong>Retire the Community Toolkit 7.1.2 line</strong> — four files, one dead reference, no behaviour change.</li>
+  <li><strong>Close the inline-SQL path</strong> in the shared executor, so "stored procedures only" is true rather than nearly true.</li>
+  <li><strong>Fix the two interface stalls and the keystroke search burst</strong>, then add the two missing strings.</li>
+  <li><strong>Correct the three files that tell an agent the wrong platform version</strong>, and declare the documentation servers.</li>
+</ol>
+
+<!-- ======================= 2. UPDATE OVERVIEW ======================= -->
+<h2 class="pagebreak">2. Update overview</h2>
+
+<p>
+  Declared version, latest stable release, and where the change lands. "Latest" was read from nuget.org
+  package metadata and from <span class="mono">dotnet list package --outdated</span> on 26 November 2026.
+  No pre-release version is proposed anywhere.
+</p>
+
+<table>
+  <thead>
+    <tr><th>Package</th><th>Current</th><th>Latest stable</th><th>Recommended</th><th>Projects</th><th>Priority</th><th>Decision</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Microsoft.WindowsAppSDK</td><td>2.4.0</td><td>2.7.0</td><td>2.7.0</td><td>14</td><td><span class="badge p-high">high</span></td><td><span class="badge ok">approved</span></td></tr>
+    <tr><td>Microsoft.Extensions.* (5 packages)</td><td>10.0.10</td><td>11.0.0</td><td>11.0.0</td><td>9</td><td><span class="badge p-medium">medium</span></td><td><span class="badge ok">approved</span></td></tr>
+    <tr><td>Microsoft.Data.SqlClient</td><td>6.1.1</td><td>8.0.0</td><td>8.0.0</td><td>4</td><td><span class="badge p-medium">medium</span></td><td><span class="badge ok">approved</span></td></tr>
+    <tr><td>MySqlConnector</td><td>2.6.1</td><td>3.0.0</td><td>3.0.0</td><td>5</td><td><span class="badge p-medium">medium</span></td><td><span class="badge ok">approved</span></td></tr>
+    <tr><td>DevWinUI</td><td>10.8.0</td><td>11.1.0</td><td>11.1.0</td><td>3</td><td><span class="badge p-medium">medium</span></td><td><span class="badge ok">approved</span></td></tr>
+    <tr><td>MSTest.TestAdapter / TestFramework</td><td>3.7.0</td><td>4.5.3</td><td>4.5.3</td><td>1</td><td><span class="badge p-medium">medium</span></td><td><span class="badge ok">approved</span></td></tr>
+    <tr><td>Microsoft.NET.Test.Sdk</td><td>17.13.0</td><td>18.12.0</td><td>18.12.0</td><td>1</td><td><span class="badge p-medium">medium</span></td><td><span class="badge ok">approved</span></td></tr>
+    <tr><td>coverlet.collector</td><td>6.0.2</td><td>10.1.1</td><td>10.1.1</td><td>1</td><td><span class="badge p-medium">medium</span></td><td><span class="badge ok">approved</span></td></tr>
+    <tr><td>WinUIEx</td><td>2.9.2</td><td>2.9.3</td><td>2.9.3</td><td>3</td><td><span class="badge p-low">low</span></td><td><span class="badge ok">approved</span></td></tr>
+    <tr><td>Microsoft.Windows.SDK.BuildTools</td><td>10.0.28000.2270</td><td>10.0.28000.2957</td><td>10.0.28000.2957</td><td>1</td><td><span class="badge p-low">low</span></td><td><span class="badge ok">approved</span></td></tr>
+    <tr><td>System.Security.Cryptography.ProtectedData</td><td>10.0.0</td><td>11.0.0</td><td>11.0.0</td><td>1</td><td><span class="badge p-low">low</span></td><td><span class="badge ok">approved</span></td></tr>
+    <tr><td>System.Security.Cryptography.Pkcs (pin)</td><td>9.0.21</td><td>11.0.0</td><td>remove the pin</td><td>17</td><td><span class="badge p-low">low</span></td><td><span class="badge ok">approved</span></td></tr>
+    <tr><td>CommunityToolkit.WinUI.UI.Controls</td><td>7.1.2</td><td>none (terminal)</td><td>remove</td><td>2</td><td><span class="badge p-high">high</span></td><td><span class="badge ok">approved</span></td></tr>
+    <tr><td>CommunityToolkit.WinUI.UI.Animations</td><td>7.1.2</td><td>none (terminal)</td><td>move to 8.2</td><td>2</td><td><span class="badge p-high">high</span></td><td><span class="badge ok">approved</span></td></tr>
+    <tr><td>CommunityToolkit.Mvvm</td><td>8.4.2</td><td>8.4.2</td><td>no change</td><td>9</td><td><span class="badge p-low">—</span></td><td><span class="badge ok">current</span></td></tr>
+    <tr><td>Microsoft.Xaml.Behaviors.WinUI.Managed</td><td>3.0.1</td><td>3.0.1</td><td>no change</td><td>2</td><td><span class="badge p-low">—</span></td><td><span class="badge ok">current</span></td></tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <strong>Two movements are not version bumps at all.</strong> Central package management changes where a
+  version is written, not what it is; package source mapping changes which feed a package may come from. Both
+  are approved, and both should land before any version change so that every later edit is one line.
+</div>
+
+<!-- ======================= 3. PER-PACKAGE ASSESSMENT ======================= -->
+<h2 class="pagebreak">3. Per-package assessment</h2>
+
+<h3>Windows App SDK — 2.4.0 to 2.7.0</h3>
+<p>
+<strong>Why it matters.</strong> This is the framework every screen runs on. Staying a major version behind
+means missing platform fixes and, eventually, losing the ability to take them without a much larger jump.
+<strong>Compatibility.</strong> Declared in 14 project files and resolved by all 17. <strong>Required
+work.</strong> The version change itself, then a manual pass of sign-in, the waitlist list and detail, setup,
+generic request, settings and the database deployment tool. <strong>Risk.</strong> WinUI control templates,
+theming and title-bar behaviour are the usual casualties. <strong>Effort.</strong> Medium, dominated by the
+review rather than the edit. <strong>Decision.</strong> Approved.
+</p>
+
+<h3>Microsoft.Extensions.* — 10.0.10 to 11.0.0</h3>
+<p>
+<strong>Why it matters.</strong> Five abstraction packages hold up the application's hosting, logging,
+configuration and dependency-injection stack. <strong>Compatibility.</strong> The 11.0.0 package manifest
+carries a <span class="mono">net10.0</span> asset group, so the upgrade does not force a target-framework
+change — this was verified from the manifest rather than assumed. <strong>Required work.</strong> One version
+per project once central management exists. <strong>Risk.</strong> Configuration binding and logging filter
+evaluation are the two areas worth watching. <strong>Effort.</strong> Medium. <strong>Decision.</strong> Approved.
+</p>
+
+<h3>Microsoft.Data.SqlClient — 6.1.1 to 8.0.0</h3>
+<p>
+<strong>Why it matters.</strong> This is the driver behind every Infor Visual read, and it is also what makes
+the solution carry a security version pin it would rather not have. The current 6.1.1 drags in a
+cryptography package inside two known advisories; the solution pins a safe version to keep the build clean.
+Release 8.0.0 requires a newer cryptography package that is already outside those advisories, so moving to it
+retires the pin as a side effect. <strong>Caution.</strong> 8.0.0 was published on the audit date. It has no
+field history. <strong>Required work.</strong> Prove Infor Visual connectivity through the live path before it
+ships, and record the previous version so a revert is one line. <strong>Effort.</strong> Small.
+<strong>Decision.</strong> Approved, with that connectivity gate written into the plan.
+</p>
+
+<h3>MySqlConnector — 2.6.1 to 3.0.0</h3>
+<p>
+<strong>Why it matters.</strong> Every read and write against the three internal stores goes through this
+driver. A major release can change connection-string option handling, date and time mapping, cancellation
+behaviour and pool defaults. <strong>Required work.</strong> Validate every stored-procedure call path against
+the local instance before the plant host is touched. <strong>Effort.</strong> Medium.
+<strong>Decision.</strong> Approved.
+</p>
+
+<h3>DevWinUI — 10.8.0 to 11.1.0</h3>
+<p>
+<strong>Why it matters.</strong> A third-party control and composition library that overrides WinUI styles.
+<strong>Risk.</strong> The highest visual risk in this set: a major version of a styling layer can move any
+screen. <strong>Required work.</strong> Deliberately sequenced last among the runtime upgrades, with every
+screen reviewed. <strong>Effort.</strong> Medium. <strong>Decision.</strong> Approved.
+</p>
+
+<h3>Test stack — MSTest 4.5.3, Test SDK 18.12.0, coverlet 10.1.1</h3>
+<p>
+<strong>Why it matters.</strong> 2,768 test methods and 17 architecture guardrails run on this stack.
+MSTest 4 is a major release with changes to assertion overloads and data-driven tests.
+<strong>Compatibility.</strong> The current MSTest release targets .NET 9 rather than .NET 10; it runs on
+.NET 10 but ships no .NET 10 asset of its own, which is worth knowing rather than discovering.
+<strong>Required work.</strong> Green run and matching method count before and after. <strong>Effort.</strong>
+Medium. <strong>Decision.</strong> Approved.
+</p>
+
+<h3>Patch-level updates — WinUIEx, SDK BuildTools, ProtectedData</h3>
+<p>
+Three low-risk bumps grouped into one decision. No behavioural expectation beyond the documented fixes, and a
+revert is a version-line revert. <strong>Effort.</strong> Small. <strong>Decision.</strong> Approved.
+</p>
+
+<h3>Community Toolkit 7.1.2 — remove, and move the animation helper to 8.x</h3>
+<p>
+<strong>Why it matters.</strong> The 7.1.2 packages are the last release of a retired line; the successor line
+renamed every package and is already in use in this repository for the settings controls. The audit measured
+the real usage rather than the reference list: the <span class="mono">Controls</span> namespace is declared in
+two layout files and <em>no control from it is used</em>; the animation package supplies exactly two
+connected-animation extension methods, used in two files. <strong>Required work.</strong> Remove the dead
+reference, repoint the two call sites at the 8.x animation package, and confirm the waitlist-to-detail
+transition still animates. <strong>Benefit.</strong> Two terminal packages gone for four edits, and — as a
+follow-on — the restore workaround for the older graphics runtime can then be removed, because the remaining
+projects unify on the current version. <strong>Effort.</strong> Small. <strong>Decision.</strong> Approved.
+</p>
+
+<!-- ======================= 4. CUSTOM FUNCTIONALITY ======================= -->
+<h2 class="pagebreak">4. Custom functionality and modernization</h2>
+
+<h3>Data access that bypasses the shared executor</h3>
+<p>
+<strong>Existing behaviour.</strong> The solution has a shared database executor that carries retry policy,
+timeouts and failure reporting. About ten services do not use it: they open their own connection and command
+directly. <strong>Why it should change.</strong> Every bypassed site is a place where the retry behaviour,
+the timeout and the failure report are somebody else's problem. <strong>Benefit.</strong> One place to fix a
+connection problem instead of ten. <strong>Risk.</strong> Each caller must not lose behaviour the shared
+executor does not model. <strong>Effort.</strong> Medium. <strong>Decision.</strong> Approved.
+</p>
+
+<h3>The inline-SQL escape hatch</h3>
+<p>
+<strong>Existing behaviour.</strong> The shared executor still exposes a path that runs caller-supplied SQL
+text, and a query method that will read an unlimited number of rows. <strong>Why it should change.</strong>
+The repository's rule is that every data operation goes through a stored procedure, and a build-failing audit
+test enforces that in application code. This path is the blind spot that test cannot see.
+<strong>Benefit.</strong> The rule becomes true, and one unbounded-read risk closes. <strong>Effort.</strong>
+Small. <strong>Decision.</strong> Approved.
+</p>
+
+<h3>Two implementations of one Infor Visual query path</h3>
+<p>
+<strong>Existing behaviour.</strong> The same query service exists twice, in the core library and in the setup
+module. <strong>Why it should change.</strong> Read behaviour, fallback and timeout policy can drift apart in
+two copies. <strong>Risk.</strong> One of the copies may exist because of a host difference that is genuinely
+load-bearing. <strong>Effort.</strong> Medium. <strong>Decision.</strong> Approved.
+</p>
+
+<h3>Reflection-based JSON everywhere</h3>
+<p>
+<strong>Existing behaviour.</strong> About 22 files serialise with reflection, and each of the five store
+classes hand-builds its own serializer options. <strong>Why it should change.</strong> Source generation makes
+serialisation faster and removes a blocker for trimming. <strong>Benefit.</strong> Mechanical and low risk.
+<strong>Effort.</strong> Medium. <strong>Decision.</strong> Approved.
+</p>
+
+<h3>A data project that depends on a user-interface project</h3>
+<p>
+<strong>Existing behaviour.</strong> The generic-request logic library references the waitlist view library,
+and the generic-request data library references the waitlist wizard project. A data layer currently depends
+on a user-interface layer. <strong>Why it should change.</strong> The dependency direction should be one-way,
+and the generic-request flow should not drag the waitlist interface through its chain.
+<strong>Benefit.</strong> Correct layering. <strong>Risk.</strong> The largest blast radius on this list.
+<strong>Effort.</strong> Large, and it is deliberately placed in its own late phase.
+<strong>Decision.</strong> Approved.
+</p>
+
+<h3>A dialog control living in the shared library</h3>
+<p>
+<strong>Existing behaviour.</strong> A user-interface control is defined inside the library that is meant to
+hold no view types, so every library referencing it links interface code. <strong>Why it should change.</strong>
+The stated layering rule should be true. <strong>Effort.</strong> Medium. <strong>Decision.</strong> Approved.
+</p>
+
+<h3>The largest class in the repository</h3>
+<p>
+<strong>Existing behaviour.</strong> One settings view model is 2,623 lines with 106 public members, and its
+test file is 1,124 lines. <strong>Why it should change.</strong> It is the hardest file to review and a
+top-three churn target. <strong>Risk.</strong> The whole settings surface binds to it, so this is
+behaviour-preserving extraction rather than redesign. <strong>Effort.</strong> Large. <strong>Decision.</strong>
+Approved.
+</p>
+
+<h3>Hand-written animation</h3>
+<p>
+<strong>Existing behaviour.</strong> One control builds its own animation timeline while the toolkit's
+animation helpers are already referenced. <strong>Effort.</strong> Small. <strong>Decision.</strong> Approved.
+</p>
+
+<h3>What was considered and deliberately not proposed</h3>
+<table>
+  <thead><tr><th>Candidate</th><th>Why it was not proposed</th></tr></thead>
+  <tbody>
+    <tr><td>Delete the ~298 unreferenced resource keys</td><td>Some keys are composed at run time, so the benefit is maintenance only and a wrong deletion is a runtime regression. Recorded, not proposed.</td></tr>
+    <tr><td>Rewrite the 70 <span class="mono">async void</span> handlers</td><td>The application registers a global fault handler, so those faults are recorded rather than lost. The churn is not justified.</td></tr>
+    <tr><td>Batch the per-work-centre picture resolution</td><td>A code comment states the once-per-work-centre design explicitly; a per-row loop was assumed by the first pass and the code disproved it.</td></tr>
+    <tr><td>Cache the localised label getters</td><td>They are evaluated once by one-time bindings. No cost to remove.</td></tr>
+    <tr><td>Replace the source-text architecture guardrails</td><td>They assert real contracts. Reading source text is this repository's chosen idiom across all 17 guardrails.</td></tr>
+    <tr><td>Remove the duplicated master SQL aggregate</td><td>It is currently byte-consistent with all 107 files it summarises, and a check mode already gates drift.</td></tr>
+    <tr><td>Trim the 90 Spec Kit agent files and 61 prompt stubs</td><td>Only metadata is loaded; the previous audit already removed the entries that could not load.</td></tr>
+  </tbody>
+</table>
+
+<!-- ======================= 5. AI AND TOOLING ======================= -->
+<h2 class="pagebreak">5. Development tools and AI optimization</h2>
+
+<p>
+  An agent opening this workspace reads about 48,700 bytes of instruction before it reads any code — roughly
+  12,000 tokens on every request, made up of the project instructions, four always-applied instruction files
+  and the orientation file. The previous audit of this repository already reduced that surface and its work
+  stands. This pass looked for what was left behind.
+</p>
+
+<table>
+  <thead><tr><th>Area</th><th>State found</th><th>Proposal</th><th>Approval</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Wrong platform version</td>
+      <td>Three agent-facing files still declare Windows App SDK 2.3.1: a start-up configuration file, a memory note that records it as a reference fact, and a reasoning comment inside the build props.</td>
+      <td>Correct all three to 2.4.0 and mark the figure as re-measured.</td>
+      <td><span class="badge ok">approved</span></td>
+    </tr>
+    <tr>
+      <td>Broken hook arm</td>
+      <td>The Spec Kit hook's bash arm calls a Python launcher that is a zero-byte placeholder on this machine, so it silently does nothing. The PowerShell arm is correct.</td>
+      <td>Match the bash arm to the PowerShell arm.</td>
+      <td><span class="badge ok">approved</span></td>
+    </tr>
+    <tr>
+      <td>Documentation retrieval</td>
+      <td>The repository declares no tool server at all. The capability the project's own rules require exists only because this workstation happens to carry global registrations.</td>
+      <td>Declare the Microsoft Learn and Context7 servers in the repository configuration.</td>
+      <td><span class="badge ok">approved</span></td>
+    </tr>
+    <tr>
+      <td>Dead tool server</td>
+      <td>The NuGet server cannot analyse this solution: every tool fails with an assembly-version mismatch against .NET SDK 10.0.404.</td>
+      <td>Record the failure and the command-line workaround in the tooling note. No code change is proposed.</td>
+      <td><span class="badge ok">approved</span></td>
+    </tr>
+    <tr>
+      <td>Context cost</td>
+      <td>92 agent files, 41 skill files, 61 prompt stubs, 14 instruction files. About 12,000 tokens of preamble per request.</td>
+      <td>No proposal. The previous audit covered this, and only metadata is loaded for unused entries.</td>
+      <td><span class="badge p-low">none</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout warn">
+  <strong>Path to put the documentation servers in place.</strong> The Microsoft Learn server is an HTTP endpoint
+  requiring outbound access to <span class="mono">learn.microsoft.com</span>. The Context7 server runs through
+  <span class="mono">npx</span>, which requires Node.js on the machine plus outbound access to the npm registry and
+  to Context7. Both offer documentation search only and neither reads the repository. A team that cannot reach
+  either endpoint should reject the proposal rather than declare a server that will not start.
+</div>
+
+<h3>Tooling that could not be used, and what replaced it</h3>
+<table>
+  <thead><tr><th>Tool</th><th>Failure</th><th>Replacement used</th></tr></thead>
+  <tbody>
+    <tr><td>NuGet MCP server (version, upgrade, vulnerability and supply-chain tools)</td><td>Fails to load <span class="mono">NuGet.Frameworks 7.9.0</span> while evaluating the target framework against .NET SDK 10.0.404</td><td><span class="mono">dotnet list &lt;project&gt; package --outdated</span> and <span class="mono">--vulnerable</span> per project, plus package manifests from the nuget.org flat container</td></tr>
+    <tr><td><span class="mono">dotnet list &lt;solution&gt; package --outdated</span></td><td>"Sequence contains no matching element" at solution scope</td><td>The same command run per project</td></tr>
+    <tr><td>CSV schema server</td><td>Not registered; the previous audit removed it because its loader fails at the only published version</td><td>Not needed — this audit read no Infor Visual schema export</td></tr>
+  </tbody>
+</table>
+
+<!-- ======================= 6. WORKSPACE-WIDE ======================= -->
+<h2 class="pagebreak">6. Workspace-wide changes</h2>
+
+<h3>Central package management</h3>
+<p>
+  The same product version is currently written into up to 14 project files. One file holding every version
+  once turns each of the eight version changes into a single line, and removes the possibility of two
+  projects drifting onto different builds of the same package. This is the highest-leverage structural change
+  in the set, and it must come before any version move.
+</p>
+
+<h3>Package source mapping</h3>
+<p>
+  No NuGet configuration is tracked in this repository at all: git has never held one, so every clone falls
+  back to whatever that machine happens to have and the feed set is not reproducible. Committing a
+  configuration that declares one feed and maps each package to it fixes both problems at once — the feed set
+  becomes shared, and the standard dependency-confusion guard exists before it is needed. The exposure today
+  is low precisely because there is one feed; the guard costs four lines.
+</p>
+
+<h3>Two entries in the shared build properties file</h3>
+<table>
+  <thead><tr><th>Entry</th><th>Status</th><th>Action</th><th>Proposal</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Security pin for the cryptography package</td>
+      <td>Doing exactly what it was written to do: keeping two advisories out of every restore</td>
+      <td>Retire when the SQL client moves to its current release, which requires the newer package anyway</td>
+      <td>DEP-005</td>
+    </tr>
+    <tr>
+      <td>Old runtime-identifier graph accommodation</td>
+      <td>Still load-bearing: three projects resolve the older graphics runtime that triggers the warning it suppresses. Its own comment predicted that the newer graphics runtime would make it unnecessary.</td>
+      <td>Remove only after the Community Toolkit replacement lets the newer graphics runtime resolve everywhere; the gate is a cold restore with the warning gone</td>
+      <td>DEV-001, after MOD-001</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Cross-project impact of the data-access work</h3>
+<p>
+  The shared executor is referenced by five projects, so tightening it to stored procedures only and routing
+  ten further call sites through it touches persistence across the application, the setup module, the mock
+  mirror and the mock service. It is the one change in this set that no single project owns.
+</p>
+
+<h3>A real risk that is not code</h3>
+<p>
+  Removing the committed credentials means each host must be given its values before it can start. That is a
+  deployment step, not a code change, and it belongs with whoever provisions the plant machines. The
+  application must fail loudly with the variable name if one is missing — never fall back to an empty
+  connection string.
+</p>
+
+<!-- ======================= 7. ROADMAP ======================= -->
+<h2 class="pagebreak">7. Implementation roadmap</h2>
+
+<p>
+  Eight phases, ordered by risk and by dependency. Every phase ends with a clean build and a green test
+  suite. Nothing in a later phase starts before its prerequisites are met.
+</p>
+
+<table>
+  <thead><tr><th style="width:4%">#</th><th style="width:22%">Phase</th><th style="width:38%">Proposals</th><th style="width:22%">Why this order</th><th style="width:14%">Effort</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>Immediate correctness and hygiene</td><td>SEC-001, PERF-002, UX-001, AI-001, AI-002, DEV-002, AI-004</td><td>Small, independent, separately revertable, and one closes a credential exposure</td><td>Small each; medium as a group</td></tr>
+    <tr><td>2</td><td>Dependency infrastructure</td><td>DEP-008, DEP-009, DEP-004</td><td>Makes every later version change a one-line edit</td><td>Medium</td></tr>
+    <tr><td>3</td><td>Runtime package upgrades</td><td>DEP-002 &rarr; DEP-006 &rarr; DEP-005 &rarr; DEP-001 &rarr; DEP-007</td><td>Strictly sequential, ascending blast radius; the styling library goes last</td><td>Medium each</td></tr>
+    <tr><td>4</td><td>Test stack and test quality</td><td>DEP-003 &rarr; DEV-003</td><td>The suite must measure settled code before its own tooling changes</td><td>Medium</td></tr>
+    <tr><td>5</td><td>Framework-native replacement</td><td>MOD-001, DEV-001, MOD-003, MOD-002, MOD-005, MOD-004, MOD-009</td><td>Toolkit replacement unlocks the runtime-identifier fix; tighten the executor before more callers adopt it</td><td>Small to medium</td></tr>
+    <tr><td>6</td><td>Architectural modernization</td><td>MOD-006, MOD-007, MOD-008</td><td>Data access and toolkit churn are settled before the structure moves</td><td>Medium to large</td></tr>
+    <tr><td>7</td><td>Performance and localization</td><td>PERF-001, UX-003, UX-002</td><td>The layout files are final before their strings are extracted</td><td>Small to medium</td></tr>
+    <tr><td>8</td><td>AI environment and design records</td><td>AI-003, DEV-004</td><td>The design images are regenerated from final screens</td><td>Small</td></tr>
+  </tbody>
+</table>
+
+<h3>Deferred and pending work</h3>
+<p>
+  None. All 32 proposals received a decision on 26 November 2026. Nothing is deferred, nothing is pending, and
+  nothing was rejected — so the roadmap above is the whole of the approved scope, and every other observation
+  in this report is recorded as out of scope in section 8.
+</p>
+
+<!-- ======================= 8. TESTING AND RISK ======================= -->
+<h2 class="pagebreak">8. Testing and risk</h2>
+
+<h3>How each kind of change is proven</h3>
+<table>
+  <thead><tr><th>Gate</th><th>Applies to</th><th>Evidence required</th></tr></thead>
+  <tbody>
+    <tr><td>Cold restore</td><td>Every dependency phase</td><td>Restore with a forced package cache; no new warning</td></tr>
+    <tr><td>Clean build</td><td>Every phase</td><td><span class="mono">dotnet build MTM_Waitlist.sln</span> — 0 errors; warnings reported, never suppressed</td></tr>
+    <tr><td>Test suite</td><td>Every phase from 2 onward</td><td>2,768 methods discovered and green, unless a phase is approved to change the count</td></tr>
+    <tr><td>Guardrail tests</td><td>Every phase</td><td>All 17 architecture guardrails pass; one that trips is a design decision, not a test to edit</td></tr>
+    <tr><td>Manual screen pass</td><td>Platform, styling, toolkit, dialog and settings changes</td><td>Sign-in, waitlist list and detail, setup, generic request, settings, deployment tool — each checked per display scale</td></tr>
+    <tr><td>Connectivity</td><td>Both database driver changes</td><td>Internal-store read and write against the local instance, then an Infor Visual read through the live path</td></tr>
+    <tr><td>Start-up honesty</td><td>Credential removal</td><td>A host with no variables fails with a message naming the variable; a host with them starts</td></tr>
+    <tr><td>Rollback</td><td>Every version change</td><td>The previous version recorded first, so a revert is one line</td></tr>
+  </tbody>
+</table>
+
+<h3>The risks that matter</h3>
+<table>
+  <thead><tr><th>Risk</th><th>Exposure</th><th>Mitigation</th></tr></thead>
+  <tbody>
+    <tr><td>The platform upgrade changes a control used on every screen</td><td>High reach, moderate likelihood</td><td>Full manual pass before merge; the version change reverts as one line</td></tr>
+    <tr><td>The styling library upgrade moves control appearance</td><td>High reach, moderate likelihood</td><td>Sequenced last of the runtime upgrades; every screen reviewed</td></tr>
+    <tr><td>The SQL client release is brand new</td><td>Moderate reach, unknown likelihood</td><td>Approved with a written connectivity gate and a one-line revert</td></tr>
+    <tr><td>The MySQL driver major release changes mapping or defaults</td><td>High reach, moderate likelihood</td><td>Local-instance validation before the plant host is touched</td></tr>
+    <tr><td>Central package management touches all 17 projects at once</td><td>Total reach, low likelihood</td><td>Restore-and-build gate before any version change is applied</td></tr>
+    <tr><td>A machine relied on the committed connection strings</td><td>Blocking if unplanned</td><td>Provision the environment variables first; fail loudly rather than silently</td></tr>
+    <tr><td>The largest class cannot be split without changing behaviour</td><td>High reach, low likelihood</td><td>Behaviour-preserving extraction with a 1,124-line test file as the safety net</td></tr>
+    <tr><td>Breaking the data-to-interface dependency reveals a hidden coupling</td><td>High reach, moderate likelihood</td><td>Own phase, own review cycle, after data access is settled</td></tr>
+    <tr><td>An unknown caller depends on the inline-SQL path</td><td>Low reach, low likelihood</td><td>Enumerate callers before removal; the surface is small</td></tr>
+    <tr><td>The graphics runtime does not unify as predicted</td><td>Low reach, low likelihood</td><td>The gate is an actual cold restore; if the warning appears, keep the accommodation and record why</td></tr>
+  </tbody>
+</table>
+
+<h3>What is out of scope, and why</h3>
+<ul>
+  <li><strong>Any interface redesign.</strong> A layout or interaction change in this application must carry a rendered before-and-after design. Nothing found justified that cost.</li>
+  <li><strong>The unreferenced resource keys.</strong> Deleting about 298 keys would trade a maintenance gain for a runtime-regression risk, because some keys are composed at run time.</li>
+  <li><strong>The Spec Kit catalogue size.</strong> 90 agent files and 61 prompt stubs cost metadata only, and the previous audit already removed what could not load.</li>
+  <li><strong>The user-level editor configuration.</strong> User instruction files, global tool servers and installed extensions were not audited.</li>
+  <li><strong>Any live store.</strong> No database connection was opened and no plant host was contacted.</li>
+  <li><strong>Engine, ORM or framework migration, and any benchmark.</strong> No performance figure in this report is measured; two behavioural requirements are stated with a stated way to measure them.</li>
+  <li><strong>Historical specification documents</strong> that cite the older platform version. They record what was true when written.</li>
+</ul>
+
+<!-- ======================= 9. APPROVAL SUMMARY ======================= -->
+<h2 class="pagebreak">9. Approval summary</h2>
+
+<div class="metric-row">
+  <div class="metric"><span class="n">32</span><span class="l">proposals raised</span></div>
+  <div class="metric"><span class="n">32</span><span class="l">approved</span></div>
+  <div class="metric"><span class="n">0</span><span class="l">rejected, deferred, kept current or pending</span></div>
+</div>
+
+<table>
+  <thead><tr><th>Category</th><th>Raised</th><th>Approved</th><th>Rejected</th><th>Deferred</th><th>Pending</th></tr></thead>
+  <tbody>
+    <tr><td>Dependency</td><td>9</td><td>9</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td>Modernization</td><td>9</td><td>9</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td>Security</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td>Performance</td><td>2</td><td>2</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td>User experience</td><td>3</td><td>3</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td>AI tooling</td><td>4</td><td>4</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td>Development workflow</td><td>4</td><td>4</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td>Database</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>32</strong></td><td><strong>32</strong></td><td><strong>0</strong></td><td><strong>0</strong></td><td><strong>0</strong></td></tr>
+  </tbody>
+</table>
+
+<p>
+  The database area produced no proposal. It was inspected — artifact coverage, rollback pairing, master-list
+  consistency and index coverage on the hot table — and found sound. The 50 procedure folders that hold only
+  a rollback script are deliberately retired procedures, recorded in the commit that retired them, not missing
+  create scripts.
+</p>
+
+<div class="callout">
+  <strong>Approval means "may appear in the specification", not "has been done".</strong> This report is a
+  record of decisions, not of changes. The specification is the implementation input; an implementation run
+  is a separate request.
+</div>
+
+<!-- ======================= 10. FINAL RECOMMENDATIONS ======================= -->
+<h2 class="pagebreak">10. Final recommendations</h2>
+
+<h3>Do these first — highest value per hour</h3>
+<ol>
+  <li><strong>Take the credentials out of the repository.</strong> Commit the shape, supply the values per
+  host, fail loudly when one is missing, and rotate the values that have been committed. Nothing else in this
+  report changes a security posture as much for as little work.</li>
+  <li><strong>Adopt central package management, then move the packages.</strong> One file for versions, then
+  eight version changes that are each a single line. This is the change that makes the rest of the list cheap,
+  including next year's.</li>
+  <li><strong>Retire the Community Toolkit 7.1.2 line.</strong> Four files, one dead reference, one terminal
+  package line, and it unlocks the removal of a build workaround whose own comment predicted this.</li>
+</ol>
+
+<h3>Then close the rule gaps</h3>
+<ol start="4">
+  <li><strong>Close the inline-SQL path in the shared executor</strong> and route the ten bypassing call sites
+  through it. Two proposals that turn "we use stored procedures" from a convention into a property of the
+  code.</li>
+  <li><strong>Fix the two interface stalls and the keystroke search burst.</strong> Small, contained, and each
+  one is felt by a person using the application rather than measured in a profile.</li>
+  <li><strong>Add the two missing strings on the Setup review screen.</strong> A production lead should not be
+  shown an internal identifier in place of a word.</li>
+</ol>
+
+<h3>Then the structural work, in its own phases</h3>
+<ol start="7">
+  <li><strong>Break the data-to-interface dependency</strong> and <strong>move the dialog out of the shared
+  library</strong>. These are the two changes that make the layering rule true, and they are large enough to
+  deserve their own review cycles.</li>
+  <li><strong>Split the largest class.</strong> 2,623 lines is not a crisis, but it is the file every settings
+  change walks through.</li>
+  <li><strong>Extract the visible sentences into resources.</strong> 140 attributes, no pixels moved, and the
+  interface becomes translatable on a predictable convention.</li>
+</ol>
+
+<h3>A closing note on what was not found</h3>
+<p>
+  This audit looked for problems and, in several places, found none. There is no vulnerable package. There is
+  no project-reference cycle. The database artifacts are complete and the master aggregates are consistent. The
+  architecture guardrails assert real contracts. The shared database executor already exists and is well
+  designed — the work is to finish adopting it, not to invent it. A modernization report that only lists
+  findings overstates how much is wrong; the state of the floor matters as much as the state of the roof.
+</p>
+
+<!-- ======================= 11. SOURCES ======================= -->
+<h2 class="pagebreak">11. Sources</h2>
+
+<table>
+  <thead><tr><th>Source</th><th>Used for</th><th>Checked</th></tr></thead>
+  <tbody>
+    <tr><td><span class="mono">dotnet list &lt;project&gt; package --outdated</span> (per project)</td><td>Every current-versus-latest figure</td><td>2026-11-26</td></tr>
+    <tr><td><span class="mono">dotnet list &lt;project&gt; package --vulnerable --include-transitive</span></td><td>The no-vulnerability verdict for four projects</td><td>2026-11-26</td></tr>
+    <tr><td><a href="https://api.nuget.org/v3-flatcontainer/communitytoolkit.winui.ui.controls/index.json">api.nuget.org — CommunityToolkit.WinUI.UI.Controls versions</a></td><td>Confirms 7.1.2 is published and is the last release of that line</td><td>2026-11-26</td></tr>
+    <tr><td><a href="https://api.nuget.org/v3-flatcontainer/microsoft.extensions.hosting/11.0.0/microsoft.extensions.hosting.nuspec">api.nuget.org — Microsoft.Extensions.Hosting 11.0.0 manifest</a></td><td>11.0.0 carries a net10.0 asset group</td><td>2026-11-26</td></tr>
+    <tr><td><a href="https://api.nuget.org/v3-flatcontainer/mstest.testframework/4.5.3/mstest.testframework.nuspec">api.nuget.org — MSTest.TestFramework 4.5.3 manifest</a></td><td>Target frameworks of the current MSTest release</td><td>2026-11-26</td></tr>
+    <tr><td><a href="https://api.nuget.org/v3-flatcontainer/microsoft.data.sqlclient/8.0.0/microsoft.data.sqlclient.nuspec">api.nuget.org — Microsoft.Data.SqlClient 8.0.0 manifest</a></td><td>Requires System.Security.Cryptography.Pkcs 10.0.15</td><td>2026-11-26</td></tr>
+    <tr><td><a href="https://github.com/communitytoolkit/windows/wiki/Migration-Guide-from-v7-to-v8">Windows Community Toolkit — v7 to v8 migration guide</a></td><td>Package renames and per-control packages</td><td>2026-11-26</td></tr>
+    <tr><td><a href="https://github.com/communitytoolkit/windows/blob/main/components/Animations/samples/ConnectedAnimations.md">Windows Community Toolkit — connected animations</a></td><td>The two extension methods exist in the 8.x line</td><td>2026-11-26</td></tr>
+    <tr><td>Local: 17 <span class="mono">*.csproj</span>, <span class="mono">Directory.Build.props</span>, <span class="mono">NuGet.Config</span> (untracked), <span class="mono">appsettings.json</span></td><td>Inventory, versions, supply-chain posture, credential surface</td><td>2026-11-26</td></tr>
+    <tr><td>Local: <span class="mono">obj/project.assets.json</span> in all 17 projects</td><td>Resolved versions and the graphics-runtime split</td><td>2026-11-26</td></tr>
+    <tr><td>Local: NuGet global packages cache, graphics runtime 1.0.0.30 and 1.4.0 runtime folders</td><td>Version-specific versus portable runtime assets</td><td>2026-11-26</td></tr>
+    <tr><td>Local: <span class="mono">git log --since="6 months ago" --name-only</span></td><td>Churn hotspots across 382 commits</td><td>2026-11-26</td></tr>
+    <tr><td>Local: <span class="mono">Database/**</span>, <span class="mono">build_mtm_mock_masters.ps1</span></td><td>Artifact coverage and master-list consistency</td><td>2026-11-26</td></tr>
+    <tr><td>Local: <span class="mono">MTM_Waitlist.Tests/**</span></td><td>2,768 test methods, 363 classes, 17 guardrails</td><td>2026-11-26</td></tr>
+    <tr><td>Local: <span class="mono">Strings/**/*.resw</span> and every <span class="mono">*.xaml</span></td><td>1,079 keys, 159 <span class="mono">x:Uid</span>, 140 literal prose attributes</td><td>2026-11-26</td></tr>
+    <tr><td>Local: <span class="mono">.github/**</span>, <span class="mono">.mcp.json</span>, <span class="mono">.vscode/settings.json</span>, <span class="mono">.specify/**</span></td><td>AI environment inventory and context cost</td><td>2026-11-26</td></tr>
+  </tbody>
+</table>
+
+<p style="margin-top:1.6em; font-size:8.8pt; color:#5c7a92">
+  Report 2.0 — full workspace audit, deep research — generated 26 November 2026 from commit 175cfc21.
+  The companion implementation input is
+  <span class="mono">DEPENDENCY_AND_MODERNIZATION_SPECIFICATION.md</span> in the same folder.
+</p>
+
+</body>
+</html>
