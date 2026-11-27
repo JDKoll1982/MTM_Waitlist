@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>MTM Waitlist Application — Changelog, 27 October to 27 November 2026</title>
+<style>
+  @page { size: Letter portrait; margin: 0.75in 0.7in; }
+
+  :root {
+    --page: #ffffff;
+    --surface: #f7f9fb;
+    --ink: #1b1f24;
+    --ink-muted: #4d5865;
+    --rule: #d7dde4;
+    --accent: #0f5c94;
+    --badge: #e7f0f8;
+    --note: #fff8e6;
+    --note-rule: #d9b45a;
+    --flag: #fdf1f1;
+    --flag-rule: #c05b5b;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--ink);
+    font: 10.5pt/1.55 "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+
+  .page { max-width: 100%; }
+
+  /* ---------- masthead ---------- */
+
+  header.masthead {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--accent);
+  }
+
+  header.masthead .mark {
+    flex: 0 0 auto;
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #ffffff;
+    font: 700 15pt/56px "Segoe UI", system-ui, sans-serif;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+
+  header.masthead h1 {
+    margin: 0;
+    font-size: 19pt;
+    line-height: 1.15;
+  }
+
+  header.masthead .sub {
+    margin: 4px 0 0;
+    color: var(--ink-muted);
+    font-size: 10.5pt;
+  }
+
+  /* ---------- headings ---------- */
+
+  h2 {
+    margin: 22pt 0 8pt;
+    padding-top: 6pt;
+    font-size: 14pt;
+    line-height: 1.2;
+    color: var(--accent);
+    border-top: 1px solid var(--rule);
+    break-after: avoid;
+  }
+
+  h2:first-of-type { margin-top: 14pt; border-top: none; padding-top: 0; }
+
+  h3 {
+    margin: 13pt 0 4pt;
+    font-size: 11.5pt;
+    line-height: 1.25;
+    break-after: avoid;
+  }
+
+  h4 {
+    margin: 10pt 0 3pt;
+    font-size: 10.5pt;
+    break-after: avoid;
+  }
+
+  p { margin: 0 0 7pt; max-width: 78ch; }
+  ul, ol { margin: 0 0 8pt; padding-left: 18pt; }
+  li { margin: 0 0 4pt; max-width: 76ch; }
+  li > ul { margin-top: 3pt; }
+
+  strong { font-weight: 600; }
+  code {
+    font: 0.92em/1 "Cascadia Mono", Consolas, monospace;
+    background: var(--surface);
+    border: 0.5pt solid var(--rule);
+    border-radius: 2pt;
+    padding: 0 2pt;
+  }
+
+  /* ---------- blocks ---------- */
+
+  .lede {
+    margin: 12pt 0 0;
+    padding: 10pt 13pt;
+    background: var(--surface);
+    border-left: 3pt solid var(--accent);
+    border-radius: 3pt;
+  }
+
+  .lede p { margin: 0 0 5pt; }
+  .lede p:last-child { margin-bottom: 0; }
+
+  .note, .flag {
+    margin: 10pt 0;
+    padding: 9pt 13pt;
+    border-radius: 3pt;
+    break-inside: avoid;
+  }
+
+  .note { background: var(--note); border-left: 3pt solid var(--note-rule); }
+  .flag { background: var(--flag); border-left: 3pt solid var(--flag-rule); }
+
+  .note p, .flag p { margin: 0 0 5pt; }
+  .note p:last-child, .flag p:last-child { margin-bottom: 0; }
+  .note .label, .flag .label {
+    display: block;
+    font-weight: 600;
+    font-size: 9.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.4pt;
+    margin-bottom: 3pt;
+  }
+  .flag .label { color: var(--flag-rule); }
+
+  /* ---------- tables ---------- */
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 6pt 0 10pt;
+    font-size: 9.5pt;
+  }
+
+  caption {
+    caption-side: top;
+    text-align: left;
+    color: var(--ink-muted);
+    font-size: 9pt;
+    padding-bottom: 5pt;
+  }
+
+  th, td {
+    text-align: left;
+    padding: 4.5pt 7pt;
+    border: 0.5pt solid var(--rule);
+    vertical-align: top;
+  }
+
+  th { background: var(--badge); font-weight: 600; }
+
+  tbody tr { break-inside: avoid; }
+
+  table.facts th { width: 32%; }
+
+  table.ledger { font-size: 9pt; }
+  table.ledger td.col-when { width: 15%; white-space: nowrap; color: var(--ink-muted); }
+  table.ledger td.col-id { width: 11%; font-family: "Cascadia Mono", Consolas, monospace; color: var(--ink-muted); }
+  table.ledger tr.group td {
+    background: var(--surface);
+    font-weight: 600;
+    padding-top: 7pt;
+    padding-bottom: 7pt;
+  }
+
+  table.ledger .sec {
+    color: var(--ink-muted);
+    font-size: 8.5pt;
+    white-space: nowrap;
+  }
+
+  table.ledger .dagger { color: var(--ink-muted); font-size: 8.5pt; }
+
+  /* ---------- structural helpers ---------- */
+
+  .newpage { break-before: page; }
+  .keep { break-inside: avoid; }
+
+  p.footnote {
+    margin: -2pt 0 0;
+    color: var(--ink-muted);
+    font-size: 9pt;
+    max-width: 72ch;
+  }
+
+  .steps { counter-reset: step; list-style: none; padding-left: 0; }
+  .steps > li { position: relative; padding-left: 20pt; margin-bottom: 6pt; }
+  .steps > li::before {
+    counter-increment: step;
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 0.5pt;
+    width: 13pt;
+    height: 13pt;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #ffffff;
+    font: 600 8pt/13pt "Segoe UI", system-ui, sans-serif;
+    text-align: center;
+  }
+
+  footer.doc {
+    margin-top: 18pt;
+    padding-top: 9pt;
+    border-top: 1px solid var(--rule);
+    color: var(--ink-muted);
+    font-size: 9pt;
+  }
+
+  footer.doc p { margin: 0 0 3pt; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="masthead">
+  <div class="mark" aria-hidden="true">MTM</div>
+  <div>
+    <h1>Waitlist Application — Changelog</h1>
+    <p class="sub">27 October 2026 to 27 November 2026 &middot; 101 recorded changes</p>
+  </div>
+</header>
+
+<div class="lede">
+  <p>This document covers everything committed to the waitlist application between the commit that wrote the
+  generic work center request specification on 27 October and the last change on 27 November.</p>
+  <p>The largest outcome of the month is that a work center with no work order can now raise a real request.
+  Everything else in this paper either makes that flow work, keeps the plant systems it reads from honest, or
+  moves the application onto components that are still supported.</p>
+</div>
+
+<h2>At a glance</h2>
+
+<table class="facts">
+  <caption>The shape of this period. Figures are measured from the commits themselves, not estimated.</caption>
+  <tbody>
+    <tr><th scope="row">Changes recorded</th><td>101 commits, 27 October to 27 November 2026</td></tr>
+    <tr><th scope="row">Application version</th><td>1.1.1 — unchanged in this period. Nothing here has been released under a new version number.</td></tr>
+    <tr><th scope="row">Files touched</th><td>1,451</td></tr>
+    <tr><th scope="row">Lines added / removed</th><td>113,098 added, 150,355 removed</td></tr>
+    <tr><th scope="row">Spec-driven features</th><td>10, numbered 015 to 024</td></tr>
+    <tr><th scope="row">Automated checks</th><td>2,915 passed, 66 skipped, 0 failed out of 2,981; solution builds at zero warnings and zero errors</td></tr>
+    <tr><th scope="row">Guardrail tests</th><td>17 architecture guards that fail the build if a rule is broken</td></tr>
+  </tbody>
+</table>
+
+<p>The line count goes down rather than up because two large bodies of material were retired: a full set of
+MAMP database dumps that nothing read, and a temporary preview application built only so the new screens could
+be looked at before their data existed. Both are covered below.</p>
+
+<h2>How to read this document</h2>
+
+<p>Three sections follow, in the order a reader usually needs them. <strong>Section 1</strong> describes the new
+capability in plain terms. <strong>Section 2</strong> lists what changed on the screens and in the information
+the system gives you. <strong>Section 3</strong> is for the people who install, deploy and maintain the
+application. <strong>Section 4</strong> lists the defects that were fixed, <strong>Section 5</strong> covers
+the engineering work behind the scenes, and <strong>Section 6</strong> states what is deliberately not finished.
+Appendix A lists every commit, so any statement here can be traced to the change that made it.</p>
+
+<h2>1. The headline: a work center without a work order can raise a request</h2>
+
+<p>Until this month the application could only raise a request against a work order. A work center that had no
+job — or a job that had not been released — had no way to ask for anything. The plant needed a route for those
+cases, and it needed the request to be as trustworthy as one made from a work order.</p>
+
+<p>That route now exists. It is called a <strong>generic request</strong>, and it is a complete flow from start
+to finish.</p>
+
+<h3>How it is set up</h3>
+
+<p>A work center is marked as a generic work center in the Setup screen. The designation is chosen inside the
+work center's Add or Edit form and is saved with the rest of the work center, so it is written once rather than
+the moment a switch is touched. A marked work center shows a badge wherever work centers are listed.</p>
+
+<p>Because a generic work center has no work order, the application says so plainly: opening one from Setup stops
+with an explanation instead of starting a job step that has nothing to read.</p>
+
+<h3>How a request is raised</h3>
+
+<ol class="steps">
+  <li><strong>Category.</strong> Pickup, deliver or other, drawn as cards. These are the same three the
+  work-order flow offers; the fourth, assist, is deliberately absent because a request for help with a thing
+  belongs to a job that says what the thing is.</li>
+  <li><strong>Item.</strong> What is being asked for. The four finished-product pickups — finished goods,
+  non-conforming stock, work in process and outside service — are folded into one Finished Product card that
+  opens a page asking which kind it is.</li>
+  <li><strong>Part and sequence.</strong> The requester states a part, the application proves it against Infor
+  Visual and lists the sequences that belong to it as cards. The sequence chosen decides which system owns the
+  quantity, and the screen says so in words rather than naming an internal system.</li>
+  <li><strong>Dunnage.</strong> Where dunnage is asked for, the plant's real catalogue is shown as a page, with
+  pictures, a filter and a remembered choice. The same catalogue now backs the existing substitute dialog, so
+  both surfaces show one thing.</li>
+  <li><strong>Scrap type.</strong> Where scrap is being picked up, the requester states the type. Each type is
+  offered as a card naming only the type, and the stated type is what the request is about, so two types raised
+  at one work center are two requests rather than one refused as a duplicate.</li>
+  <li><strong>Die.</strong> Search Infor Visual by die number or by part number. A part with several dies lists
+  every die with the location it lives in; choosing several raises one request per die.</li>
+  <li><strong>Review and result.</strong> A review that lists only the stages the request actually has, then a
+  result page that reads like the work-order result page: the same wording per outcome, and Retry that asks the
+  queue again rather than redrawing the same failure.</li>
+</ol>
+
+<h3>What a generic request looks like afterwards</h3>
+
+<p>The request appears on the board as a row drawn with its own card, and opens a detail page. A die request
+reads its part first with the die in brackets — <code>Pickup Die: 24733467-PKG - (FGT0150-01)</code> — so the
+handler sees which part the die makes and which die to fetch in a single read. A die found by its own number
+keeps its number alone rather than showing an empty bracket.</p>
+
+<h3>Filling a request from a job that happens to be running</h3>
+
+<p>A generic work center that is running a job is now offered the chance to fill the request from it. Accepting
+seeds the job's part, sequence, die and dunnage as candidates that are then proved by the read that owns each
+one. Declining changes nothing, and the question is never asked twice in one request.</p>
+
+<p>A filled request stays a generic request. The job is recorded as <em>provenance</em> rather than as the
+request's identity, and the detail page shows it as such, so nothing downstream confuses it with a request
+raised against a work order.</p>
+
+<div class="note">
+  <span class="label">Why this matters</span>
+  <p>A work center with nothing scheduled can now be supplied. Before, the only choices were to raise the
+  request against a work order that did not exist, or to walk to the crib.</p>
+</div>
+
+<h2>2. What changed on the screens</h2>
+
+<h3>Raising a request</h3>
+<ul>
+  <li><strong>Category cards.</strong> The category step is drawn as work center cards: a bordered surface with
+  the name, a divider and the description, and an accent outline on the chosen card. Continue waits for a
+  choice. Changing the category discards the item and everything asked below it, the way changing the work
+  center already did.</li>
+  <li><strong>Sequence cards.</strong> The part step puts the sequences beneath the part number box, one card
+  each, with the chosen card outlined and ticked.</li>
+  <li><strong>A coil or flatstock request reads as one part.</strong> A coil or flatstock pickup or deliver shows
+  the part number, its on-hand rounded up and its description in one detail card, and skips the details step,
+  because the requester is after the coil itself and not a sequence.</li>
+  <li><strong>Search that collapses.</strong> Typing in the work center search opens the other work centers and
+  clearing it closes them again, so a search shows every match rather than only this computer's own cards. The
+  Setup screen's work center search now behaves the same way.</li>
+  <li><strong>The details step asks how many, not what.</strong> The free-text description question is gone from
+  the details step.</li>
+</ul>
+
+<h3>Setup</h3>
+<ul>
+  <li><strong>The review reads as sentences.</strong> A review with no scrap, or one with subordinate parts, now
+  reads a sentence with the value in it rather than showing a resource key name where a word belongs. The dunnage
+  and job-context sections carry descriptions and empty states of their own.</li>
+  <li><strong>The generic designation lives in the work center form.</strong> It is chosen while editing the work
+  center and saved with it, and it resets to off when no work center is selected so it can never offer a write
+  for a work center that was not chosen.</li>
+</ul>
+
+<h3>Starting the application</h3>
+<ul>
+  <li><strong>The people who signed in before are offered.</strong> The sign-in surface lists the accounts that
+  last signed in, read from a new procedure, so a returning operator picks a name instead of retyping one.</li>
+  <li><strong>The picture cache reports its progress.</strong> The picture cache step runs first in the launch
+  group, reports every 25 files on the splash's progress line, and logs a warning once it takes two seconds or
+  more. A slow start now says where the time went instead of looking like one long wait.</li>
+  <li><strong>The launch machine setup and sign-in appear on their own.</strong> A picture-copy notice used to
+  hold every surface that says nothing about pictures, machine setup included. That is the one surface it must
+  never stand in front of, because a computer the store does not hold cannot be used until it is set up. The
+  decision now lives in a named policy that can be tested without a window, and the hold only applies while the
+  launch window is still the surface on screen.</li>
+</ul>
+
+<h3>Waiting, and what the board shows</h3>
+<ul>
+  <li><strong>Completed requests stay reachable.</strong> The list now asks for resolved rows inside a retention
+  window read from the setting <code>waitlist.resolved_retention_days</code> (seeded at 90 days), so a request
+  that was completed no longer disappears from the session on the next refresh. The board itself still draws
+  pending and accepted requests only, and the read is bounded at the database rather than fetched and discarded
+  in the application.</li>
+  <li><strong>Card labels.</strong> The card gained labelled cells for part, sequence, on-hand and on-hand-by,
+  a named source per inventory system, an explicit "die location missing" state, and a "lugger unavailable"
+  state, so a missing value says so instead of drawing blank.</li>
+</ul>
+
+<h3>Dialogs</h3>
+<ul>
+  <li><strong>One surface, not two.</strong> The standard message dialog body used to wrap itself in a card, so
+  a warning or confirmation showed a second surface inside the dialog while every other modal in the application
+  draws straight on the dialog. It now matches the work center form, the computer editor, the lugger editor and
+  the part stock window.</li>
+</ul>
+
+<h2>3. For the people who install and run it</h2>
+
+<h3>The database install scripts are gone, replaced by a tool that shows you first</h3>
+
+<p>The retired installer applied a bootstrap whose first statement dropped <code>mtm_waitlist</code>, so a store
+that was one deployment behind came back empty. It has been replaced by a three-step deployment tool that reads
+the object tree directly, shows what differs, and only removes what an operator confirms on a screen that names
+the object.</p>
+
+<ul>
+  <li><strong>It copies before it writes.</strong> Every table goes into <code>{database}_backup</code> before the
+  first statement, and the run stops if a copied table holds fewer rows than its source. On a host with binary
+  logging off, that copy is the only undo a deployment has.</li>
+  <li><strong>It can duplicate a database on request.</strong> Step one offers "Keep a copy of this database",
+  which carries tables with their keys, indexes, comments and auto-increment, every row, the views (re-pointed at
+  the copy), the routines and the triggers.</li>
+  <li><strong>It is scoped by database name.</strong> <code>mtm_waitlist*</code> deploys from one tree,
+  <code>mtm_mock*</code> from another, and anything else is refused. The tool used to have one tree and write it
+  wherever the picker pointed.</li>
+  <li><strong>A check writes nothing.</strong> Applying table scripts to the tool's scratch schema no longer
+  leaves empty tables behind in a live database.</li>
+  <li><strong>Seeds run once per database</strong>, recorded in <code>deployment_seed_ledger</code>, so a second
+  pass can no longer put shipped defaults back over an operator's values.</li>
+</ul>
+
+<p>The full procedure is in the database deployment guide under <code>docs/guides/</code>.</p>
+
+<h3>The application refuses to start without a connection, and names what is missing</h3>
+
+<p>A machine with no connection for the records store now stops and names the environment variable that would
+supply one, instead of going on to read a store that has nothing to open. Store reachability consults what the
+data seam recorded, so a configured store that does not answer is reported as an outage rather than as an empty
+read.</p>
+
+<h3>No credential is committed any more</h3>
+
+<p>The application configuration keeps its shape and the names of the environment variables that supply each
+value, and holds no credential of any kind. The Infor Visual server, user and password are blank for the same
+reason: each host supplies its own. This is the one finding in the month with a live blast radius, so it is
+called out again in Section 6.</p>
+
+<h3>Generic requests survive Infor Visual being unreachable</h3>
+
+<p>When Infor Visual cannot be reached, the application serves plant reads from a local mirror instead of failing.
+The generic request's part completions, sequence list, operation state, part quantity and die search used to
+reach the plant system directly, so with Infor Visual down every one of those steps answered "unavailable" while
+the work-order flow kept working from the mirror. Four read shapes were added to close that gap, each with its
+mirror table, staging table, read and refresh procedure, population read and freshness branch, and the generic
+request now asks the same route as everything else.</p>
+
+<p>A reachable but empty plant result is still treated as a real answer and is never replaced by cached data.</p>
+
+<h3>One database engine, at one version</h3>
+
+<p>MySQL 5.7 and MAMP were retired across every instruction, ruleset, script and document. The plant host and the
+local development instance both run MySQL Server 8.0.46, so there is one server version to target and no version
+split to maintain.</p>
+
+<h2>4. Defects fixed</h2>
+
+<table>
+  <caption>Each row is a fault that was reachable by a person using the application or the tooling.</caption>
+  <thead>
+    <tr><th style="width:27%">What you saw</th><th style="width:35%">What was wrong</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Clicking into Setup did nothing; the shell stayed on the previous page.</td>
+      <td>A layout resource key was read as a property to set on a switch that has no such property, so the page
+      threw while it was being built. The keys were renamed, and a check now fails if any resource key on that
+      page names a property its control does not have.</td>
+    </tr>
+    <tr>
+      <td>The generic designation switch saved the moment it was touched, and the preview button was clipped at
+      narrow widths.</td>
+      <td>The switch wrote before the work center was finished, and shared a row with the button. It moved into the
+      Add / Edit form and is written once, after the row is saved.</td>
+    </tr>
+    <tr>
+      <td>The generic switch kept the previous work center's value when no card was selected.</td>
+      <td>The state was never cleared on deselection, so it could offer a write for a work center nobody chose. It
+      now resets to off.</td>
+    </tr>
+    <tr>
+      <td>A store built from the master lists could not read a work center's generic flag.</td>
+      <td>One view was never updated with the new column while the procedure selecting it was. The view now carries
+      it.</td>
+    </tr>
+    <tr>
+      <td>On a request with no job, the item step's combo box drew nothing and the forward button never opened.</td>
+      <td>The step asked the requesting job's dunnage list, which cannot exist on a request that has no job. The
+      question moved to the step that owns the answer.</td>
+    </tr>
+    <tr>
+      <td>The die search errored on the first keystroke.</td>
+      <td>The queue script's early return left the statement before its common table expression unterminated, so
+      the server refused the whole batch. Queue scripts are now audited for that shape.</td>
+    </tr>
+    <tr>
+      <td>A freshly installed store had no picture storage settings at all.</td>
+      <td>The image storage overrides were written before a development baseline truncated the settings table. They
+      now run after it and upsert rather than truncate, and the seeded folder is the plant share rather than a
+      retired drive mapping.</td>
+    </tr>
+    <tr>
+      <td>After a failed picture refresh, the machine setup screen never came up and the launch looked hung.</td>
+      <td>The picture notice held every surface, including the one surface a person must be able to reach. The
+      decision now lives in a testable policy, and setup and sign-in are excluded.</td>
+    </tr>
+    <tr>
+      <td>After saving machine setup, the window waited for an acknowledgement instead of showing sign-in; after
+      an accepted sign-in, the form stayed on screen and nothing happened.</td>
+      <td>The hand-over to the main screens armed a hold while the launch window was already showing another page,
+      so it waited for a Continue button that was no longer there. The hold now also requires the launch window to
+      still be the surface.</td>
+    </tr>
+    <tr>
+      <td>Warnings and confirmations looked like a different palette from every other dialog.</td>
+      <td>The message body wrapped itself in a card. It now draws straight on the dialog surface.</td>
+    </tr>
+    <tr>
+      <td>Two scrap types raised at one work center were refused as a duplicate.</td>
+      <td>The request's identity ignored the stated type. The stated type is now what the request is about, so the
+      two are two requests.</td>
+    </tr>
+    <tr>
+      <td>The review listed a stage for a request type that derives none, and a queue refusal was reported as an
+      unreadable step.</td>
+      <td>The review and the result page now follow the type, and a refusal is reported in the queue's own
+      words.</td>
+    </tr>
+    <tr>
+      <td>Typing a part number asked the plant system on every keystroke, and a slow earlier answer could
+      overwrite the right one.</td>
+      <td>Each keystroke started a read. The search now asks once per typing pause and discards a superseded answer
+      by its attempt number rather than by arrival order.</td>
+    </tr>
+    <tr>
+      <td>Two Setup review fields showed resource key names instead of words.</td>
+      <td>The keys resolved to nothing. They now resolve, and a test pins them.</td>
+    </tr>
+    <tr>
+      <td>A coil weight used the wrong separators and a unit typed into the code.</td>
+      <td>The number is now formatted with the machine's culture and the unit comes from a resource.</td>
+    </tr>
+    <tr>
+      <td>Running a deployment check created eight empty tables in the live mirror.</td>
+      <td>The comparer applied table scripts to its scratch schema without re-pointing their database line. It now
+      re-points, and a check writes nothing.</td>
+    </tr>
+    <tr>
+      <td>The deployment tool rebuilt the mock test database as the waitlist store.</td>
+      <td>The tool had one script tree and wrote it wherever the picker pointed. Each database now maps to its own
+      tree by name, and an unknown name is refused.</td>
+    </tr>
+    <tr>
+      <td>Operator-chosen settings reverted to shipped defaults.</td>
+      <td>Seeds ran on every deployment and several of them upsert. They now run once per database, recorded in a
+      ledger.</td>
+    </tr>
+    <tr>
+      <td>The application could draw the "no image" placeholder as if it were the item's picture.</td>
+      <td>The list and detail page asked only whether a drawable file existed. They now ask the image-path policy,
+      which also refuses the resolver's own "nothing is configured" answer.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>5. Under the hood</h2>
+
+<p>This section is for the people who build and maintain the application. Nothing here changes what a person on
+the floor sees, beyond the responsiveness and wording items already listed.</p>
+
+<h3>The application moved onto supported components</h3>
+
+<p>Every package version is now declared once for the whole solution, so no two projects can drift apart and a
+future upgrade is a one-line edit. The restore pulls only from a feed the repository names, and a package whose
+source is not mapped is refused.</p>
+
+<table>
+  <caption>Approved dependency upgrades in this period.</caption>
+  <thead>
+    <tr><th style="width:34%">Component</th><th style="width:22%">From</th><th style="width:22%">To</th><th>Note</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Microsoft Windows App SDK</td><td>2.4.0</td><td>2.7.0</td><td>Interface platform, in every project that declares it</td></tr>
+    <tr><td>Microsoft.Extensions.* (hosting, configuration, DI, logging, options)</td><td>10.0.10</td><td>11.0.0</td><td>Five packages together</td></tr>
+    <tr><td>MSTest adapter and framework</td><td>3.7.0</td><td>4.5.3</td><td>Test stack, major release</td></tr>
+    <tr><td>Microsoft.NET.Test.Sdk</td><td>17.13.0</td><td>18.12.0</td><td>Test stack, major release</td></tr>
+    <tr><td>coverlet.collector</td><td>6.0.2</td><td>10.1.1</td><td>Coverage collector</td></tr>
+    <tr><td>Microsoft.Data.SqlClient</td><td>6.1.1</td><td>8.0.0</td><td>The <code>System.Security.Cryptography.Pkcs</code> 9.0.21 pin retired in the same change</td></tr>
+    <tr><td>MySqlConnector</td><td>2.6.1</td><td>3.0.0</td><td>MySQL driver, major release</td></tr>
+    <tr><td>System.Security.Cryptography.ProtectedData</td><td>10.0.0</td><td>11.0.0</td><td>Follows the runtime</td></tr>
+    <tr><td>DevWinUI</td><td>10.8.0</td><td>11.1.0</td><td>Needed a Windows SDK projection pin; see Section 6</td></tr>
+  </tbody>
+</table>
+
+<h3>One route to the data, and it only runs stored procedures</h3>
+
+<p>Five services used to open their own connections. All of them now go through the existing seam, so a change to
+retry policy, a timeout or how a failed store is reported is made once. The seam refuses anything that is not a
+stored procedure, which turns a stated rule into an enforced one, and a read past the shared row cap is bounded
+rather than unbounded. The Infor Visual read path has one implementation instead of two copies that could drift
+apart.</p>
+
+<h3>One idiom, and dependencies that point one way</h3>
+
+<ul>
+  <li>The shared library holds helpers and contracts, not screens; the message dialog body is composed in code
+  and every caller is unchanged.</li>
+  <li>The generic-request libraries no longer reference a waitlist screen project. Raising a request goes through
+  a named interface implemented beside the queue's write door.</li>
+  <li>JSON-backed stores serialize through generated metadata rather than reflection at run time, with one options
+  definition per store.</li>
+  <li>Animations use one library, and the retired toolkit line is gone. The rotating text control uses the same
+  animation idiom and looks the same on screen.</li>
+  <li>The 2,623-line settings view model is now eight cohesive parts behind the same page, with the same bindings
+  and the same messages. It behaves exactly as it did.</li>
+</ul>
+
+<h3>The interface does not freeze while it works</h3>
+
+<p>Three blocking waits were removed from the settings-load and shutdown paths: the settings view model and the
+image storage service now await, and the shutdown flush awaits a bounded cancellation instead of waiting on the
+dispatcher.</p>
+
+<h3>The checks that keep it honest</h3>
+
+<p>The suite ends the period at 2,915 passed, 66 skipped and 0 failed, with the solution building at zero warnings
+and zero errors. 17 guardrail tests fail the build when an architecture rule is broken, and this period added new
+ones: a guard that refuses a temporary preview artefact reachable from the shipped application, an audit that
+refuses resource keys naming properties their control does not have, an audit that refuses statement text in
+place of a stored-procedure name, and an audit of the queue scripts' shape. The tests now also prove the strict
+data route, the row cap, the permanent-error classification, the development-store fallback, and that the two
+Setup review keys resolve.</p>
+
+<h3>Documentation and tooling</h3>
+
+<ul>
+  <li><strong>The four request workflows are mapped as print-ready diagrams</strong> — an engineer version and a
+  plain-language version per flow — with 18 refactor findings drawn on the engineer sheets and consolidated into
+  21 hotspots.</li>
+  <li><strong>UI designs are rendered as a BEFORE and AFTER pair</strong> with an approval gate, at three window
+  sizes, composed into a captioned side-by-side comparison.</li>
+  <li><strong>The AI-facing configuration was brought back to the truth</strong>: two servers that could not serve
+  were removed, every stated figure corrected, and the documentation lookup tooling declared by the repository so
+  a fresh clone gets it. The always-loaded instruction text shrank by roughly 25,000 tokens of preamble per
+  request with no coding rule lost.</li>
+  <li><strong>A dependency graph extension was built, then moved to its own repository</strong> at the end of the
+  period, because an application repository should not build and package a tool that only happens to read it.
+  What remains here is the conventions profile that extension reads.</li>
+  <li><strong>The workflow tooling gained review, specification-test and wireframe extensions</strong>, with
+  wireframe sign-off wired so a feature already signed off is never asked twice and a declined mockup never fails
+  a run.</li>
+</ul>
+
+<h2>6. What is not finished</h2>
+
+<p>Stated plainly, because a changelog that stops at the successes is not usable.</p>
+
+<table>
+  <caption>Open items carried out of this period.</caption>
+  <thead>
+    <tr><th style="width:30%">Item</th><th>Status and what it needs</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Rotate the database credential that was committed</td>
+      <td>The value is already disclosed. The repository no longer contains it, but rotation on the plant host is
+      an operational action that has to be done by someone on that host.</td>
+    </tr>
+    <tr>
+      <td>DevWinUI 11.1.0</td>
+      <td><strong>Resolved.</strong> The block was not a missing platform release. DevWinUI 11.1.0 is compiled
+      against a newer C#/WinRT runtime than the .NET SDK selects by default, and that runtime ships in a package the
+      project can pin. Pinning it closed the gap: DevWinUI now sits at its approved 11.1.0, the solution builds at zero
+      warnings and zero errors, and the application was driven through sign-in, the shell, Settings, Work Center Setup
+      and the work center form to confirm the screens still render.</td>
+    </tr>
+    <tr>
+      <td>Screen-by-screen visual review after the interface platform upgrade</td>
+      <td>Partly done. Sign-in, the waitlist shell and its card, Settings, Work Center Setup and the work center form
+      were driven and render correctly. Still outstanding: the deployment tool window, and each screen re-read at each
+      display scale the plant uses. A control template or theme change is exactly the kind of failure the build cannot
+      catch.</td>
+    </tr>
+    <tr>
+      <td>Read the screens under a non-default culture</td>
+      <td>Not done. The weight formatting is fixed and tested, but the screens have not been read under a culture
+      other than the developer's.</td>
+    </tr>
+    <tr>
+      <td>Plant-host proofs</td>
+      <td>Not done. The database and plant reads were proved against the local instance; the plant host and the
+      real Infor Visual connection were not touched from this workstation.</td>
+    </tr>
+    <tr>
+      <td>Three sign-in comparison documents</td>
+      <td>Need regenerating from their current design source.</td>
+    </tr>
+    <tr>
+      <td>A new release number</td>
+      <td>The application still reports 1.1.1. None of the work in this period has been released under a new
+      version, so if it ships, the version has to be bumped and the operator-facing release note written.</td>
+    </tr>
+    <tr>
+      <td>The generic request designs after the preview was withdrawn</td>
+      <td>The screen preview was reviewed and then removed, which was the owner's choice. Each remaining chunk of
+      the generic flow therefore states that its design is to be clarified with the owner when it is implemented
+      rather than inferred from a preview that no longer exists.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>7. Release details</h2>
+
+<table class="facts keep">
+  <caption>This period, for the record.</caption>
+  <tbody>
+    <tr><th scope="row">Period covered</th><td>27 October 2026 to 27 November 2026</td></tr>
+    <tr><th scope="row">First change</th><td>The generic work center request specification is written, and the run self-trace file is ignored</td></tr>
+    <tr><th scope="row">Last change</th><td>The C#/XAML conventions profile is recorded</td></tr>
+    <tr><th scope="row">Application version</th><td>1.1.1, unchanged</td></tr>
+    <tr><th scope="row">Change type</th><td>Feature and modernization. New capability plus platform currentness; no existing screen changes behaviour it did not need to.</td></tr>
+    <tr><th scope="row">Work covered</th><td>Generic work center requests (specs 015 to 022), AI tooling remediation (023), dependency modernization (024)</td></tr>
+    <tr><th scope="row">Databases affected</th><td>The waitlist store gains one column, one procedure and one view change; the mock mirror gains four read shapes. All changes ship with a create and a rollback script.</td></tr>
+    <tr><th scope="row">Action required</th><td>Provision each host's connection and Infor Visual values as environment variables before starting this build, then rotate the credential that was previously committed.</td></tr>
+  </tbody>
+</table>
+
+<div class="flag">
+  <span class="label">Before you deploy this build</span>
+  <p>A host that has not been given its connection values will now refuse to start and name the missing variable.
+  That is deliberate. Check each plant machine has its variables set before the build is installed, or the
+  application will not open.</p>
+</div>
+
+<h2 class="newpage">Appendix A — every change in this period</h2>
+
+<p>One row per commit, oldest first, so any statement in this document can be traced to the change that made it.
+Subjects are reproduced as they were committed; some are terse, and the section that covers them is named where
+there is one.</p>
+
+<table class="ledger">
+  <thead>
+    <tr><th>Date</th><th>Commit</th><th>Change</th></tr>
+  </thead>
+  <tbody>
+<tr><td class='col-when'>27 Oct</td><td class='col-id'>e7fc63e4</td><td>015: write the generic work center request spec, ignore the run self-trace file, and commit the rendered spec <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>29 Oct</td><td class='col-id'>3301fbbb</td><td>keep the pre-split generic request spec whole, add its rendered pdf, and ignore the run self-trace in the spec folder <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>29 Oct</td><td class='col-id'>5cec54aa</td><td>015: build the generic request flow and card as their own projects, preview them from a separate Temp host, and fence the Temp naming out of the shipped app <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>29 Oct</td><td class='col-id'>d9d553bf</td><td>Bump application version to 1.1.1</td></tr>
+<tr><td class='col-when'>02 Nov</td><td class='col-id'>93730023</td><td>Remove the unused Reporting module project</td></tr>
+<tr><td class='col-when'>02 Nov</td><td class='col-id'>774ccf14</td><td>Delete the retired MAMP database dumps, which nothing read <span class='sec'>&sect;3</span> <span class='dagger'>&dagger;</span></td></tr>
+<tr><td class='col-when'>02 Nov</td><td class='col-id'>9f941a63</td><td>Retire MySQL 5.7 and MAMP; standardize on MySQL Server 8.0 + Workbench 8.0 across instructions, rulesets, scripts and docs <span class='sec'>&sect;3</span></td></tr>
+<tr><td class='col-when'>02 Nov</td><td class='col-id'>a752b6d5</td><td>016: add the generic work-center designation end to end — column, procedure, setup toggle, preview launcher <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>02 Nov</td><td class='col-id'>f27f61d4</td><td>Remove the throwaway schema probe that was committed by mistake <span class='sec'>&sect;3</span></td></tr>
+<tr><td class='col-when'>02 Nov</td><td class='col-id'>473af7ca</td><td>016: reset the generic toggle when no work center is selected <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>02 Nov</td><td class='col-id'>48c9d0f8</td><td>016: carry the generic designation into the view master list <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>02 Nov</td><td class='col-id'>fb5ffa1c</td><td>Fix the work-center screen failing to load: no resource key may name a property <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>02 Nov</td><td class='col-id'>8d9eb0e1</td><td>Resolve library resources and fix the generic request preview labels <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>03 Nov</td><td class='col-id'>f72a5a33</td><td>Move the generic designation into the work center Add / Edit form <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>03 Nov</td><td class='col-id'>743331aa</td><td>Restore the pre-split parent spec to how it was</td></tr>
+<tr><td class='col-when'>03 Nov</td><td class='col-id'>5ba61cb3</td><td>Refuse setup at a generic work center and move the preview to the main screen <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>03 Nov</td><td class='col-id'>37dc278e</td><td>Give the generic flow the work-order wizard&#x27;s categories <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>03 Nov</td><td class='col-id'>2f605f0f</td><td>Drop assist from the generic request categories <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>03 Nov</td><td class='col-id'>723cec0f</td><td>Delete the generic request preview host and everything that reached it <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>03 Nov</td><td class='col-id'>8247afb3</td><td>Draw the message dialog body on the dialog surface, like every other modal <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>03 Nov</td><td class='col-id'>466f76ed</td><td>Mark the waitlist card layout complete and register the generic work center specs <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>03 Nov</td><td class='col-id'>df62b59b</td><td>Make the generic request flow real end to end <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>05 Nov</td><td class='col-id'>25c813bf</td><td>Fill in spec 017&#x27;s research, contracts and task list for the stated-part chunk <span class='sec'>&sect;1 and 2</span> <span class='dagger'>&dagger;</span></td></tr>
+<tr><td class='col-when'>05 Nov</td><td class='col-id'>e5e4b57d</td><td>Make the dunnage step the plant&#x27;s real catalogue, as a page <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>06 Nov</td><td class='col-id'>eefada52</td><td>Add agent-performance-audit skill for self-optimization and performance auditing <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>06 Nov</td><td class='col-id'>2f0bb8ad</td><td>Add agent-performance-audit skill for self-optimization and performance auditing <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>06 Nov</td><td class='col-id'>8404d795</td><td>Remove the duplicated and stale always-loaded instruction files, and add the repository orientation file for agents <span class='sec'>&sect;5</span> <span class='dagger'>&dagger;</span></td></tr>
+<tr><td class='col-when'>09 Nov</td><td class='col-id'>aff1e6d4</td><td>Extend the workflow companion tooling with run records, receipt checks and spec-directory minting <span class='sec'>&sect;5</span> <span class='dagger'>&dagger;</span></td></tr>
+<tr><td class='col-when'>09 Nov</td><td class='col-id'>1a94c8ce</td><td>Merge branch &#x27;018-generic-wc-dunnage-page&#x27; <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>13 Nov</td><td class='col-id'>6c9548bb</td><td>Updated Speckit Companion <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>13 Nov</td><td class='col-id'>a26f09f4</td><td>Make the generic request flow state scrap type and end like the work-order flow <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>14 Nov</td><td class='col-id'>d1f917af</td><td>Make the die step a live Visual search that raises one request per die <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>15 Nov</td><td class='col-id'>52ceebf8</td><td>Draw the category step as the work center cards and clear what a changed category invalidates <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>15 Nov</td><td class='col-id'>af12e961</td><td>Stop the settings baseline wiping the picture storage seed, and say what a reinstall costs <span class='sec'>&sect;3</span></td></tr>
+<tr><td class='col-when'>15 Nov</td><td class='col-id'>8750b4a9</td><td>Let the machine setup screen come up on its own after a failed picture refresh <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>15 Nov</td><td class='col-id'>fcd54326</td><td>Answer the generic part and die reads from the probe&#x27;s verdict instead of hammering a Visual that is down <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>15 Nov</td><td class='col-id'>60ea9dcb</td><td>Let sign-in come up on its own after a setup save, instead of the picture notice holding it <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>15 Nov</td><td class='col-id'>eaa1a2f7</td><td>Hold the picture-copy notice only while the launch window is showing <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>15 Nov</td><td class='col-id'>99cd3462</td><td>Serve the generic request&#x27;s Infor Visual reads from the mock mirror when Visual is down <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>15 Nov</td><td class='col-id'>8c41621b</td><td>Search the die step as you type, draw its results as cards, and drop the identifier from the result sentence <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>15 Nov</td><td class='col-id'>38bb7d5a</td><td>Offer to fill a generic request from the job running at its work center <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>16 Nov</td><td class='col-id'>a64637ed</td><td>Replace the database install scripts with a review-before-write deployment tool <span class='sec'>&sect;3</span></td></tr>
+<tr><td class='col-when'>16 Nov</td><td class='col-id'>c44a0e47</td><td>Make the deployment tool safe: back up first, duplicate on request, scope by database, seed once <span class='sec'>&sect;3</span></td></tr>
+<tr><td class='col-when'>16 Nov</td><td class='col-id'>68b53a9a</td><td>Prove a value the job does not carry is still asked of the requester <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>16 Nov</td><td class='col-id'>23fe131d</td><td>Record spec 021&#x27;s audit: FR-008 covered, build and suite green on this commit</td></tr>
+<tr><td class='col-when'>16 Nov</td><td class='col-id'>bfdfdbd5</td><td>Register the Companion workflow with the spec-kit workflow engine <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>16 Nov</td><td class='col-id'>38b6c0b0</td><td>Record spec 022&#x27;s verification and extend the temporary-artefact boundary audit <span class='sec'>&sect;5</span> <span class='dagger'>&dagger;</span></td></tr>
+<tr><td class='col-when'>16 Nov</td><td class='col-id'>9c48b105</td><td>Redraw the request steps&#x27; cards and ask which finished product <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>21 Nov</td><td class='col-id'>2d31c355</td><td>Add WinUI 3 scaling skills and routing instruction <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>21 Nov</td><td class='col-id'>26770041</td><td>Make the companion&#x27;s dispatched briefs carry absolute paths, and tighten when a wave goes to workers <span class='sec'>&sect;5</span> <span class='dagger'>&dagger;</span></td></tr>
+<tr><td class='col-when'>21 Nov</td><td class='col-id'>1781a264</td><td>Merge branch &#x27;022-generic-wc-temp-to-live-verification&#x27; <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>23 Nov</td><td class='col-id'>ea70b732</td><td>Give every collection expression a concrete array type and fix the two remaining warnings <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>23 Nov</td><td class='col-id'>9a694e1a</td><td>Collapse the work center setup search the same way the new request search does <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>23 Nov</td><td class='col-id'>3b6d9324</td><td>Read a coil or flatstock request as one part, and stop the die search erroring <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>23 Nov</td><td class='col-id'>052f13b2</td><td>Show picture cache progress on the splash and time the step that copies them <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>23 Nov</td><td class='col-id'>07119c1f</td><td>Write a die request card as the part the die is for, then the die in brackets <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>24 Nov</td><td class='col-id'>0e7bc8e6</td><td>Map the four request workflows as print-ready diagrams with refactor flags <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>24 Nov</td><td class='col-id'>f11c263a</td><td>Split diagram output into dot/ and pdf/, and add a workflow digest <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>24 Nov</td><td class='col-id'>d0c1f015</td><td>Render BEFORE and AFTER UI designs, with an approval gate <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>24 Nov</td><td class='col-id'>7ca99f7b</td><td>Reorganize diagrams and UI designs per workflow, add startup-launch sheets <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>24 Nov</td><td class='col-id'>f9ad5161</td><td>Upgrade SpecKit Companion to 0.29.0 with bug-stage and amend commands <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>24 Nov</td><td class='col-id'>0ede167f</td><td>Reorganize startup UI designs by screen, add workflow-to-spec skill <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>25 Nov</td><td class='col-id'>54c17fac</td><td>Add a self-contained C#/XAML dependency graph extension <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>25 Nov</td><td class='col-id'>7cbe192b</td><td>Show the people who signed in before, and refresh the launch designs</td></tr>
+<tr><td class='col-when'>25 Nov</td><td class='col-id'>36b19525</td><td>Commit the class dependency graph dump <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>25 Nov</td><td class='col-id'>b4e12acb</td><td>Add the commands panel, symbol graphs and debug view <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>25 Nov</td><td class='col-id'>7c8896a3</td><td>Draw the graph as packed shapes, with zoom, tooltips and a live progress bar <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>25 Nov</td><td class='col-id'>0757e016</td><td>Fix the parsing and binding rules the graph was silently losing <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>25 Nov</td><td class='col-id'>76a44ddb</td><td>Add a Vitest suite for the graph extension, with a coverage gate <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>25 Nov</td><td class='col-id'>dfd8edae</td><td>Document what the graph extension extracts and how it is tested <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>25 Nov</td><td class='col-id'>49c74a99</td><td>Record the MTM_WIP graph export that exposed the missing view links <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>25 Nov</td><td class='col-id'>f050dd76</td><td>Record what testing found in the dependency graph extension, release 0.3.1 <span class='sec'>&sect;5</span> <span class='dagger'>&dagger;</span></td></tr>
+<tr><td class='col-when'>25 Nov</td><td class='col-id'>a26df5a4</td><td>Restore the debug report modules the gitignore had been hiding</td></tr>
+<tr><td class='col-when'>25 Nov</td><td class='col-id'>becb05fe</td><td>graph: draw services by default, split hubs so groups keep their tree, and learn four more link mechanisms <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>25 Nov</td><td class='col-id'>b8e2e028</td><td>graph 0.4.0: read one tree in a big picture — dimming, captions, an overview, and theme-aware colours <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>25 Nov</td><td class='col-id'>bc33fc3f</td><td>graph: typecheck the test suite, and fix the 68 type errors nothing was catching <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>25 Nov</td><td class='col-id'>5330a67d</td><td>graph 0.5.0: make the export prove its own claims, and stop hiding real views <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>25 Nov</td><td class='col-id'>64a1290c</td><td>graph 0.5.1: qualify a repeated label with the full name when the module is a placeholder <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>25 Nov</td><td class='col-id'>1c9a5b6e</td><td>waitlist: use the image-path policy and the resolved-retention window that were written for these paths <span class='sec'>&sect;1 and 2</span></td></tr>
+<tr><td class='col-when'>26 Nov</td><td class='col-id'>7bd17ecc</td><td>Delete the dependency graph extension&#x27;s work-in-progress view dump <span class='sec'>&sect;5</span> <span class='dagger'>&dagger;</span></td></tr>
+<tr><td class='col-when'>26 Nov</td><td class='col-id'>6c850dbc</td><td>Added new speckit community addons <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>26 Nov</td><td class='col-id'>9a5c41cd</td><td>graph 0.6.0: per-repository profiles, created and refreshed through Copilot chat <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>26 Nov</td><td class='col-id'>70e6bdb9</td><td>Add the review, spectest and wireframe speckit extensions and the modernization audit prompt <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>26 Nov</td><td class='col-id'>f9492a02</td><td>Track the review, spectest and wireframe extensions as files, not gitlinks <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>26 Nov</td><td class='col-id'>adc46e4a</td><td>Rewrite the modernization audit prompt and add the wireframe extension <span class='sec'>&sect;5</span> <span class='dagger'>&dagger;</span></td></tr>
+<tr><td class='col-when'>26 Nov</td><td class='col-id'>e5e14ffc</td><td>Remove the dependency-graph extension: it now lives in its own repository <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>26 Nov</td><td class='col-id'>65823c4d</td><td>Wireframe sign-off into the companion and speckit workflows <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>26 Nov</td><td class='col-id'>7bc6603c</td><td>Remove the unused wireframe extension dev clone <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>26 Nov</td><td class='col-id'>e52b9e3f</td><td>Track the workspace modernization audit as a skill <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>26 Nov</td><td class='col-id'>655dfff5</td><td>Update the C#/XAML graph conventions profile <span class='sec'>&sect;5</span> <span class='dagger'>&dagger;</span></td></tr>
+<tr><td class='col-when'>26 Nov</td><td class='col-id'>4f80c99e</td><td>Add the first dependency and modernization assessment deliverable <span class='sec'>&sect;5</span> <span class='dagger'>&dagger;</span></td></tr>
+<tr><td class='col-when'>26 Nov</td><td class='col-id'>175cfc21</td><td>Remove the two unusable MCP servers and repair the AI instruction surface <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>26 Nov</td><td class='col-id'>598c66cd</td><td>Re-run the dependency assessment in full depth, and add the repository&#x27;s package feed configuration <span class='sec'>&sect;5</span> <span class='dagger'>&dagger;</span></td></tr>
+<tr><td class='col-when'>26 Nov</td><td class='col-id'>152e1fa4</td><td>Give the spec-kit skills their invocation metadata <span class='sec'>&sect;5</span> <span class='dagger'>&dagger;</span></td></tr>
+<tr><td class='col-when'>27 Nov</td><td class='col-id'>0e866f05</td><td>chore(deps): central package management and current package versions <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>27 Nov</td><td class='col-id'>951239a3</td><td>refactor(data): stored procedures only, one strict route, honest failures <span class='sec'>&sect;3</span></td></tr>
+<tr><td class='col-when'>27 Nov</td><td class='col-id'>dde2acb1</td><td>feat(security): no committed credential, and a launch that names what is missing <span class='sec'>&sect;5</span></td></tr>
+<tr><td class='col-when'>27 Nov</td><td class='col-id'>ee912be7</td><td>refactor(ui): framework-native replacements, one string convention, fewer round trips</td></tr>
+<tr><td class='col-when'>27 Nov</td><td class='col-id'>6942a712</td><td>docs: correct the agent-facing records, the broken paths and the audit trail</td></tr>
+<tr><td class='col-when'>27 Nov</td><td class='col-id'>835e3f02</td><td>test: cover the strict route, the row cap, the failure classification and the fallback guard</td></tr>
+<tr><td class='col-when'>27 Nov</td><td class='col-id'>6c6397c2</td><td>chore: record the C#/XAML conventions profile the dependency graph reads <span class='sec'>&sect;5</span></td></tr>
+  </tbody>
+</table>
+
+<p class="footnote">&dagger; This change was committed with no subject line. Its description in this table is
+reconstructed from the changes it contains. A section reference (&sect;) points at the part of this document
+that covers the change.</p>
+
+<h2 class="newpage">Appendix B — where to read more</h2>
+
+<table>
+  <caption>Sources for the detail behind this paper.</caption>
+  <thead>
+    <tr><th style="width:44%">Document</th><th>What it holds</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>specs/015-generic-wc-ui-shell/</code> to <code>specs/022-generic-wc-temp-to-live-verification/</code></td><td>The eight chunks of the generic work center flow, each with its specification, plan, tasks and verification record.</td></tr>
+    <tr><td><code>specs/023-ai-tooling-remediation/spec.md</code></td><td>What the AI development environment had drifted away from, and the five outcomes that fixed it.</td></tr>
+    <tr><td><code>specs/024-dependency-modernization/</code></td><td>The 32 approved proposals, the eight ordered phases, the task list and the review checklist that gated the commit.</td></tr>
+    <tr><td><code>Dependency_Assessment/2026-11-26-full-deep/</code></td><td>The audit itself: the specification and the rendered report.</td></tr>
+    <tr><td><code>docs/guides/</code></td><td>The database deployment tool guide.</td></tr>
+    <tr><td><code>docs/diagrams/</code></td><td>The four request workflows mapped end to end, engineer version and plain-language version, with the refactor notes.</td></tr>
+    <tr><td><code>docs/ui-designs/</code></td><td>The rendered BEFORE and AFTER designs, their mockups and the approval record.</td></tr>
+    <tr><td><code>docs/defects/</code></td><td>The defect records behind the fixes in Section 4.</td></tr>
+  </tbody>
+</table>
+
+<footer class="doc">
+  <p>MTM Waitlist Application changelog, covering 101 commits from 27 October to 27 November 2026.</p>
+  <p>Figures are measured from the repository at commit <code>6c6397c2</code>. Test results are those recorded
+  against the same commit.</p>
+</footer>
+
+</div>
+</body>
+</html>
