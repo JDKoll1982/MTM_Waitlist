@@ -203,10 +203,10 @@ public sealed class BackupRestoreTests
         var arguments = File.ReadAllText(fixture.FakeToolArgumentsPath);
 
         // The expectation is "the dump targets the host the connection resolved to", not a literal address:
-        // the resolver substitutes this machine's own server when the configured one does not answer
-        // (MySqlHostFallback, T165/T171), so a literal would make this test pass or fail by machine rather
-        // than by behaviour. Applying the same rule to the same input keeps the assertion about the engine.
-        var effectiveConnection = MySqlHostFallback.Apply(
+        // a development build may substitute this machine's own server when the configured one does not answer,
+        // so a literal would make this test pass or fail by machine rather than by behaviour. Asking the same
+        // seam the engine asks keeps the assertion about the engine in either build.
+        var effectiveConnection = StoreHostResolution.Apply(
             Environment.GetEnvironmentVariable("MTM_MOCK_DB_CONNECTION_STRING"))!;
         var resolvedHost = new MySqlConnector.MySqlConnectionStringBuilder(effectiveConnection).Server;
 
@@ -308,7 +308,7 @@ public sealed class BackupRestoreTests
         var request = restore.RequestRestore(artifacts[0]);
 
         // Confirming with a different artifact is the mistake this guard exists to stop.
-        await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(
             () => restore.ConfirmAndRestoreAsync(request, artifacts[1]));
     }
 
@@ -321,7 +321,7 @@ public sealed class BackupRestoreTests
         var request = restore.RequestRestore(artifacts[0]);
         File.Delete(artifacts[0].FilePath);
 
-        await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(
             () => restore.ConfirmAndRestoreAsync(request, artifacts[0]));
     }
 

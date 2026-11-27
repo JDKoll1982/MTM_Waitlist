@@ -1,45 +1,6 @@
-using System.Text;
+﻿using System.Text;
 
 namespace MTM_Waitlist.Module_Setup.Services;
-
-internal static class SetupSqlScriptStore
-{
-    private const string ScriptFolderName = "Database";
-    private const string QueryFolderName = "InforVisual";
-    private const string ModuleFolderName = "Queues";
-    private const string ScriptModuleFolderName = "Module_Setup";
-    private const string ScriptQueryFolderName = "Queries";
-
-    public static async Task<string> LoadAsync(string scriptName, CancellationToken cancellationToken = default)
-    {
-        var scriptPath = GetScriptPath(scriptName);
-        if (!File.Exists(scriptPath))
-        {
-            return string.Empty;
-        }
-
-        await using var stream = File.OpenRead(scriptPath);
-        using var reader = new StreamReader(stream, Encoding.UTF8, true);
-        cancellationToken.ThrowIfCancellationRequested();
-        return await reader.ReadToEndAsync().ConfigureAwait(false);
-    }
-
-    private static string GetScriptPath(string scriptName)
-    {
-        var normalizedName = scriptName.EndsWith(".sql", StringComparison.OrdinalIgnoreCase)
-            ? scriptName
-            : $"{scriptName}.sql";
-
-        return Path.Combine(
-            AppContext.BaseDirectory,
-                ScriptFolderName,
-                QueryFolderName,
-                ModuleFolderName,
-                ScriptModuleFolderName,
-                ScriptQueryFolderName,
-            normalizedName);
-    }
-}
 
 internal static class SetupReceivingMySqlScriptStore
 {

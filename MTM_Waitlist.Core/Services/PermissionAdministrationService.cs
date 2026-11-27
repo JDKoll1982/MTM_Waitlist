@@ -19,12 +19,13 @@ namespace MTM_Waitlist.Module_Core.Services;
 /// lives here.
 /// </para>
 /// <para>
-/// <b>Why this talks to the provider directly rather than through <see cref="IMySqlHelperServer"/>.</b> The helper
-/// server retries a failed call and answers with its neutral result. Both halves of that are wrong here, and both
-/// were found by running it. A refusal this feature's procedures raise is a <b>refusal</b>, not an outage, so
-/// folding it into zero affected rows reports a change that was refused as a change that landed. And a write is
-/// not a read: retrying one after a connection dropped mid-transaction is how a single reader's single act becomes
-/// two. So the connection is opened here, the provider's own error is read, and nothing is retried.
+/// <b>Why this uses the seam's strict route rather than its lenient one.</b> The lenient route retries a failed
+/// call and answers with its neutral result. Both halves of that are wrong here, and both were found by running
+/// it. A refusal this feature's procedures raise is a <b>refusal</b>, not an outage, so folding it into zero
+/// affected rows reports a change that was refused as a change that landed. And a write is not a read: retrying
+/// one after a connection dropped mid-transaction is how a single reader's single act becomes two. So the call
+/// goes through <see cref="IMySqlHelperServer.ExecuteStrictAsync{T}"/>, which opens the connection, reads the
+/// provider's own error and retries nothing.
 /// </para>
 /// <para>
 /// <b>The composition is here, not in the store, and there is only one of it.</b> A key with a row of the person's
@@ -60,23 +61,24 @@ public sealed class PermissionAdministrationService : IPermissionAdministrationS
     private const string UserScopePrefix = "user:";
     private const string PermissionNamespace = "permission.";
 
-    private const string WaitlistConnectionStringEnvironmentVariable = "MTM_WAITLIST_DB_CONNECTION_STRING";
-    private const int DefaultCommandTimeoutSeconds = 15;
-
     private readonly WaitlistDatabaseOptions _waitlistDatabaseOptions;
     private readonly IPermissionService _permissionService;
     private readonly IPersonIdentity _personIdentity;
+    private readonly IMySqlHelperServer _mySqlHelperServer;
 
     public PermissionAdministrationService(
         IOptions<WaitlistDatabaseOptions> waitlistDatabaseOptions,
         IPermissionService permissionService,
-        IPersonIdentity personIdentity)
+        IPersonIdentity personIdentity,
+        IMySqlHelperServer mySqlHelperServer)
     {
         ArgumentNullException.ThrowIfNull(waitlistDatabaseOptions);
+        ArgumentNullException.ThrowIfNull(mySqlHelperServer);
 
         _waitlistDatabaseOptions = waitlistDatabaseOptions.Value;
         _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
         _personIdentity = personIdentity ?? throw new ArgumentNullException(nameof(personIdentity));
+        _mySqlHelperServer = mySqlHelperServer;
     }
 
     /// <inheritdoc />
@@ -420,113 +422,39 @@ public sealed class PermissionAdministrationService : IPermissionAdministrationS
 
     /// <summary>
     /// Runs one stored-procedure read and returns its rows as name/value pairs, so the procedures'
-    /// <c>setting_key</c> / <c>scope_type</c> columns are read by name rather than by position.
+    /// <c>setting_key</c> / <c>scope_type</c> columns are read by name rather than by position. The provider's
+    /// own error propagates; the callers above turn it into the unavailable state.
     /// </summary>
-    private async Task<IReadOnlyList<Dictionary<string, object?>>> ReadRowsAsync(
+    private Task<IReadOnlyList<Dictionary<string, object?>>> ReadRowsAsync(
         string procedureName,
         IReadOnlyDictionary<string, object?> parameters,
-        CancellationToken cancellationToken)
-    {
-        await using var connection = await OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var command = BuildCommand(connection, procedureName, parameters);
-        await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
-
-        var rows = new List<Dictionary<string, object?>>();
-        while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
-        {
-            var row = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
-            for (var ordinal = 0; ordinal < reader.FieldCount; ordinal++)
-            {
-                row[reader.GetName(ordinal)] = reader.IsDBNull(ordinal) ? null : reader.GetValue(ordinal);
-            }
-
-            rows.Add(row);
-        }
-
-        return rows;
-    }
+        CancellationToken cancellationToken) =>
+        _mySqlHelperServer.ExecuteStrictAsync(
+            CreateRequest(),
+            (scope, token) => scope.QueryAsync(procedureName, parameters, token),
+            cancellationToken);
 
     /// <summary>
     /// Runs one stored-procedure write and reads its affected-row count. The provider's own error propagates, so a
     /// refusal the procedure raised reaches <see cref="ApplyAsync"/> and is reported rather than swallowed.
     /// </summary>
-    private async Task<int> ExecuteNonQueryAsync(
+    private Task<int> ExecuteNonQueryAsync(
         string procedureName,
         IReadOnlyDictionary<string, object?> parameters,
-        CancellationToken cancellationToken)
-    {
-        await using var connection = await OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
-        await using var command = BuildCommand(connection, procedureName, parameters);
-
-        return await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-    }
-
-    private async Task<MySqlConnection> OpenConnectionAsync(CancellationToken cancellationToken)
-    {
-        var connectionString = ResolveConnectionString()
-            ?? throw new InvalidOperationException("No connection is configured for the mtm_waitlist store.");
-
-        var builder = new MySqlConnectionStringBuilder(connectionString)
-        {
-            ConnectionTimeout = (uint)Math.Max(1, _waitlistDatabaseOptions.ConnectionTimeoutSeconds),
-        };
-
-        // Resolved through the same host fallback every other reader uses: the configured host is the shared
-        // plant server, so a workstation off the plant network would otherwise time out here while the
-        // databases are present on the local server.
-        var connection = new MySqlConnection(
-            MySqlHostFallback.Apply(builder.ConnectionString) ?? builder.ConnectionString);
-        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
-
-        return connection;
-    }
-
-    private static MySqlCommand BuildCommand(
-        MySqlConnection connection,
-        string procedureName,
-        IReadOnlyDictionary<string, object?> parameters)
-    {
-        var command = new MySqlCommand(procedureName, connection)
-        {
-            CommandType = System.Data.CommandType.StoredProcedure,
-            CommandTimeout = DefaultCommandTimeoutSeconds,
-        };
-
-        foreach (var parameter in parameters)
-        {
-            command.Parameters.AddWithValue("@" + parameter.Key, parameter.Value ?? DBNull.Value);
-        }
-
-        return command;
-    }
+        CancellationToken cancellationToken) =>
+        _mySqlHelperServer.ExecuteStrictAsync(
+            CreateRequest(),
+            (scope, token) => scope.NonQueryAsync(procedureName, parameters, token),
+            cancellationToken);
 
     /// <summary>
-    /// The store this service reads and writes. The environment variable wins, then the variable the waitlist
-    /// database options name, then the configured string, so a test can point every store at a live server without
-    /// editing appsettings.
+    /// The strict request this service makes: the waitlist store, with the connect timeout it has always applied
+    /// over the connection string's own.
     /// </summary>
-    private string? ResolveConnectionString()
-    {
-        var fromEnvironment = Environment.GetEnvironmentVariable(WaitlistConnectionStringEnvironmentVariable);
-        if (!string.IsNullOrWhiteSpace(fromEnvironment))
-        {
-            return fromEnvironment;
-        }
-
-        var configuredName = _waitlistDatabaseOptions.ConnectionStringEnvironmentVariable;
-        if (!string.IsNullOrWhiteSpace(configuredName))
-        {
-            var fromConfiguredName = Environment.GetEnvironmentVariable(configuredName);
-            if (!string.IsNullOrWhiteSpace(fromConfiguredName))
-            {
-                return fromConfiguredName;
-            }
-        }
-
-        return string.IsNullOrWhiteSpace(_waitlistDatabaseOptions.ConnectionString)
-            ? null
-            : _waitlistDatabaseOptions.ConnectionString;
-    }
+    private MySqlStrictScopeRequest CreateRequest() =>
+        new(
+            MySqlDatabaseTarget.MtmWaitlist,
+            ConnectionTimeoutSeconds: _waitlistDatabaseOptions.ConnectionTimeoutSeconds);
 
     private static string ReadString(IReadOnlyDictionary<string, object?> row, string columnName) =>
         row.TryGetValue(columnName, out var value) && value is not null && value is not DBNull

@@ -31,9 +31,9 @@ namespace MTM_Waitlist.Tests.Module_Mock;
 /// <b>The wrong-helper-for-DML shape.</b> A marker scan alone will not catch a <c>rows.Count</c> read taken
 /// from a row-returning helper after a <c>DELETE</c>/<c>UPDATE</c> (a defect found three times during the
 /// SP-first conversion). That shape is only reachable when a DML statement exists somewhere to be routed —
-/// so the second assertion below pins the raw-SQL seams (<c>ExecuteSqlQueryAsync</c> /
-/// <c>ExecuteSqlNonQueryAsync</c>) to a reviewed allowlist. A new raw-SQL call site fails this audit instead
-/// of silently reopening the defect.
+/// so the second assertion below pins the seam's two non-procedure routes, the reviewed queue-script read and
+/// the test assembly's fixture statement route, to a reviewed allowlist. A new call site fails this audit
+/// instead of silently reopening the defect.
 /// </para>
 /// </remarks>
 [TestClass]
@@ -65,18 +65,21 @@ public sealed class InlineSqlAuditTests
     ];
 
     /// <summary>
-    /// The reviewed raw-SQL seams: the only application files allowed to reference the row-returning and
-    /// non-query statement seams. Everything else must go through a stored procedure.
+    /// The reviewed non-procedure routes: the only application files allowed to reference the reviewed
+    /// queue-script read or the test assembly's fixture statement route. Everything else must go through a
+    /// stored procedure.
     /// </summary>
     private static readonly Dictionary<string, string> s_rawSqlSeamAllowlist = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["MTM_Waitlist.Core/Contracts/Services/IMySqlHelperServer.cs"] =
-            "the seam's contract.",
+        ["MTM_Waitlist.Core/Contracts/Services/IReviewedQueueScriptReader.cs"] =
+            "the reviewed queue-script route's contract: it accepts a script name from the reviewed set and "
+            + "nothing else, so no caller can supply statement text through it.",
         ["MTM_Waitlist.Core/Services/MySqlHelperServer.cs"] =
-            "the seam's implementation.",
+            "the seam's implementation: it carries the reviewed queue-script route and, for the test "
+            + "assembly's database fixtures only, a statement route reachable through InternalsVisibleTo.",
         ["MTM_Waitlist.Core/Services/WipFloorInventoryService.cs"] =
-            "reads the checked-in MTMWipApp queue scripts GetWipFloorQuantities.sql and "
-            + "GetWipInventoryPartNumbers.sql and GetWipInventoryLocations.sql; the C# carries the script "
+            "names the checked-in MTMWipApp queue scripts GetWipFloorQuantities, GetWipInventoryPartNumbers "
+            + "and GetWipInventoryLocations and asks the reviewed route for them; the C# carries the script "
             + "names only and never statement text (Discovery/03 §C — stays live).",
     };
 
@@ -203,8 +206,7 @@ public sealed class InlineSqlAuditTests
         foreach (var file in EnumerateApplicationSourceFiles(repositoryRoot))
         {
             var content = File.ReadAllText(file);
-            if (!content.Contains("ExecuteSqlQueryAsync", StringComparison.Ordinal)
-                && !content.Contains("ExecuteSqlNonQueryAsync", StringComparison.Ordinal))
+            if (!ReferencesANonProcedureSeam(content))
             {
                 continue;
             }
@@ -247,10 +249,9 @@ public sealed class InlineSqlAuditTests
             }
 
             var content = File.ReadAllText(path);
-            if (!content.Contains("ExecuteSqlQueryAsync", StringComparison.Ordinal)
-                && !content.Contains("ExecuteSqlNonQueryAsync", StringComparison.Ordinal))
+            if (!ReferencesANonProcedureSeam(content))
             {
-                stale.Add($"{entry.Key}: no longer references a raw-SQL seam — remove the exemption.");
+                stale.Add($"{entry.Key}: no longer references a non-procedure seam — remove the exemption.");
             }
         }
 
@@ -260,8 +261,17 @@ public sealed class InlineSqlAuditTests
             "Stale raw-SQL seam exemptions:" + Environment.NewLine + string.Join(Environment.NewLine, stale));
     }
 
-    private static IEnumerable<string> EnumerateApplicationSourceFiles(string repositoryRoot)
-    {
+    /// <summary>
+    /// Whether a file references one of the seam's two non-procedure routes: the reviewed queue-script read or
+    /// the test assembly's fixture statement route.
+    /// </summary>
+    /// <param name="content">The file's text.</param>
+    private static bool ReferencesANonProcedureSeam(string content) =>
+        content.Contains("ExecuteReviewedScriptQueryAsync", StringComparison.Ordinal)
+        || content.Contains("ExecuteFixtureQueryAsync", StringComparison.Ordinal)
+        || content.Contains("ExecuteFixtureStatementAsync", StringComparison.Ordinal);
+
+    private static IEnumerable<string> EnumerateApplicationSourceFiles(string repositoryRoot)    {
         foreach (var file in Directory.EnumerateFiles(repositoryRoot, "*.cs", SearchOption.AllDirectories))
         {
             if (s_excludedDirectories.Any(excluded => file.Contains(excluded, StringComparison.OrdinalIgnoreCase)))

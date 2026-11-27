@@ -104,6 +104,12 @@ public sealed class ConnectionHealthService : IConnectionHealthService
 
     private static async Task<bool> ProbeMySqlAsync(string connectionString, CancellationToken cancellationToken)
     {
+        // simplified: this probe stays on its own connection rather than moving onto the data-access seam, because
+        // the seam cannot express what it does. It opens a connection and reads nothing — there is no procedure to
+        // call — it applies its own 5-second `ConnectionTimeout` instead of the waitlist options', and one of the
+        // two sources it probes is SQL Server, not MySQL. Moving it would change the health probe's timeout and its
+        // reach, which is a behaviour change rather than a refactor. The provider numbers it reads (1045, 1042,
+        // 1044) still reach `ClassifyException` because nothing here swallows them.
         var builder = new MySqlConnectionStringBuilder(connectionString) { ConnectionTimeout = (uint)ReceivingTimeoutSeconds };
         await using var connection = new MySqlConnection(builder.ConnectionString);
         await connection.OpenAsync(cancellationToken).ConfigureAwait(false);

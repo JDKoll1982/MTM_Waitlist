@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -205,18 +205,6 @@ public sealed class ActiveJobItemResolverServiceTests
             CancellationToken cancellationToken = default)
             => Task.FromResult(1);
 
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => Task.FromResult(_rows);
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => Task.FromResult(0);
     }
 }

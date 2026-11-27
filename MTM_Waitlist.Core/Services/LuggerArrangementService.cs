@@ -1,6 +1,5 @@
 using System.Globalization;
 
-using Microsoft.Extensions.Options;
 using MySqlConnector;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
@@ -9,78 +8,16 @@ using MTM_Waitlist.Module_Core.Models;
 
 namespace MTM_Waitlist.Module_Core.Services;
 
-/// <summary>
-/// The connection string this feature's writes use, resolved exactly the way every other reader and writer in the
-/// application resolves one.
-/// </summary>
-/// <remarks>
-/// <para>
-/// The configured host is the shared plant server, so a workstation off the plant network cannot reach it while the
-/// same databases are present on the local server. Every other writer in the application answers that with
-/// <see cref="MySqlHostFallback"/>; this one did not, and the omission was invisible until someone made a change:
-/// the arrangement read fine — the read goes through the helper, which does fall back — and then every write timed
-/// out against the plant host. Resolving here the same way keeps the two paths from disagreeing about which server
-/// the arrangement lives on.
-/// </para>
-/// <para>
-/// The database is named rather than taken from the string, so a connection string that points at something else
-/// can never send an arrangement write into the wrong store.
-/// </para>
-/// </remarks>
-internal static class LuggerWriteConnection
-{
-    /// <summary>The store the arrangement lives in.</summary>
-    internal const string DatabaseName = "mtm_waitlist";
-
-    /// <summary>
-    /// The connection string to open, with the host fallback applied, or <see langword="null" /> when nothing is
-    /// configured.
-    /// </summary>
-    /// <param name="configured">The connection string the options or the environment named.</param>
-    internal static string? Resolve(string? configured)
-    {
-        if (string.IsNullOrWhiteSpace(configured))
-        {
-            return null;
-        }
-
-        var builder = new MySqlConnectionStringBuilder(configured)
-        {
-            Database = DatabaseName,
-        };
-
-        return MySqlHostFallback.Apply(builder.ConnectionString) ?? builder.ConnectionString;
-    }
-
-    /// <summary>
-    /// The same decision with the reachability check supplied by the caller, so both branches can be exercised
-    /// without opening a socket.
-    /// </summary>
-    /// <param name="configured">The connection string the options or the environment named.</param>
-    /// <param name="isReachable">Reports whether a server is listening on the given host and port.</param>
-    internal static string? Resolve(string? configured, Func<string, uint, bool> isReachable)
-    {
-        if (string.IsNullOrWhiteSpace(configured))
-        {
-            return null;
-        }
-
-        var builder = new MySqlConnectionStringBuilder(configured)
-        {
-            Database = DatabaseName,
-        };
-
-        return MySqlHostFallback.Apply(builder.ConnectionString, isReachable) ?? builder.ConnectionString;
-    }
-}
 /// <inheritdoc cref="ILuggerArrangementService"/>
 /// <remarks>
 /// <para>
-/// <b>Reads go through <see cref="IMySqlHelperServer"/>; writes open the connection here.</b> The helper answers a
-/// failed call with its neutral result and retries it, which is right for a read a screen can show as unavailable.
-/// It is wrong for a write twice over: a refusal the procedures raise with <c>SIGNAL SQLSTATE '45000'</c> would be
-/// folded into "nothing matched", reporting a refused change as one that landed, and a write retried after a
-/// dropped connection is how one person's one act becomes two. The same reasoning, and the same shape, is used by
+/// <b>Reads go through <see cref="IMySqlHelperServer"/>'s lenient route; writes go through its strict one.</b> The
+/// lenient route answers a failed call with its neutral result and retries it, which is right for a read a screen
+/// can show as unavailable. It is wrong for a write twice over: a refusal the procedures raise with
+/// <c>SIGNAL SQLSTATE '45000'</c> would be folded into "nothing matched", reporting a refused change as one that
+/// landed, and a write retried after a dropped connection is how one person's one act becomes two. So the write
+/// goes through <see cref="IMySqlHelperServer.ExecuteStrictAsync{T}"/>, which propagates the provider's own error
+/// and retries nothing. The same reasoning, and the same shape, is used by
 /// <see cref="PermissionAdministrationService"/> and <see cref="UserManagementRepository"/>.
 /// </para>
 /// <para>
@@ -105,9 +42,6 @@ public sealed class LuggerArrangementService : ILuggerArrangementService
     private const string AssignmentsDeleteProcedure = "sp_waitlist_lugger_scrap_assignments_delete";
     private const string ChangesListProcedure = "sp_waitlist_lugger_arrangement_changes_list";
 
-    private const string WaitlistConnectionStringEnvironmentVariable = "MTM_WAITLIST_DB_CONNECTION_STRING";
-    private const int DefaultCommandTimeoutSeconds = 15;
-
     /// <summary>A refusal this feature's procedures raise with <c>SIGNAL SQLSTATE '45000'</c>.</summary>
     private const int SignalledRefusalErrorNumber = 1644;
 
@@ -120,17 +54,12 @@ public sealed class LuggerArrangementService : ILuggerArrangementService
     private const string LogModule = "LuggerArrangement";
 
     private readonly IMySqlHelperServer _mySqlHelperServer;
-    private readonly WaitlistDatabaseOptions _waitlistDatabaseOptions;
 
-    public LuggerArrangementService(
-        IMySqlHelperServer mySqlHelperServer,
-        IOptions<WaitlistDatabaseOptions> waitlistDatabaseOptions)
+    public LuggerArrangementService(IMySqlHelperServer mySqlHelperServer)
     {
         ArgumentNullException.ThrowIfNull(mySqlHelperServer);
-        ArgumentNullException.ThrowIfNull(waitlistDatabaseOptions);
 
         _mySqlHelperServer = mySqlHelperServer;
-        _waitlistDatabaseOptions = waitlistDatabaseOptions.Value;
     }
 
     /// <inheritdoc />
@@ -384,34 +313,35 @@ public sealed class LuggerArrangementService : ILuggerArrangementService
     }
 
     /// <summary>
-    /// Runs one write and answers its <c>affected_rows</c>, surfacing the store's refusal as
-    /// <see cref="LuggerArrangementRefusalException"/>.
+    /// Runs one write through the seam's strict route and answers its <c>affected_rows</c>, surfacing the store's
+    /// refusal as <see cref="LuggerArrangementRefusalException"/>.
     /// </summary>
     private async Task<int> ExecuteWriteAsync(
         string procedureName,
         IReadOnlyDictionary<string, object?> parameters,
         CancellationToken cancellationToken)
     {
-        var connectionString = ResolveConnectionString();
-        if (string.IsNullOrWhiteSpace(connectionString))
-        {
-            throw new InvalidOperationException("The waitlist store is not configured.");
-        }
-
         try
         {
-            await using var connection = new MySqlConnection(connectionString);
-            await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
-            await using var command = BuildCommand(connection, procedureName, parameters);
-
-            var answer = await command.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
-            return answer is null or DBNull
-                ? 0
-                : Convert.ToInt32(answer, CultureInfo.InvariantCulture);
+            return await _mySqlHelperServer.ExecuteStrictAsync(
+                new MySqlStrictScopeRequest(MySqlDatabaseTarget.MtmWaitlist),
+                async (scope, token) =>
+                {
+                    var answer = await scope.ScalarAsync(procedureName, parameters, token).ConfigureAwait(false);
+                    return answer is null or DBNull
+                        ? 0
+                        : Convert.ToInt32(answer, CultureInfo.InvariantCulture);
+                },
+                cancellationToken).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
             throw;
+        }
+        catch (MySqlStoreNotConfiguredException ex)
+        {
+            // The seam names the store; this service has always named the arrangement's store in its own words.
+            throw new InvalidOperationException("The waitlist store is not configured.", ex);
         }
         catch (MySqlException ex) when (ex.Number == SignalledRefusalErrorNumber)
         {
@@ -425,53 +355,6 @@ public sealed class LuggerArrangementService : ILuggerArrangementService
 
             throw new LuggerArrangementStoreOutOfDateException(ex.Message, ex);
         }
-    }
-
-    private static MySqlCommand BuildCommand(
-        MySqlConnection connection,
-        string procedureName,
-        IReadOnlyDictionary<string, object?> parameters)
-    {
-        var command = new MySqlCommand(procedureName, connection)
-        {
-            CommandType = System.Data.CommandType.StoredProcedure,
-            CommandTimeout = DefaultCommandTimeoutSeconds,
-        };
-
-        foreach (var parameter in parameters)
-        {
-            command.Parameters.AddWithValue("@" + parameter.Key, parameter.Value ?? DBNull.Value);
-        }
-
-        return command;
-    }
-
-    /// <summary>
-    /// The store this service writes to. The environment variable wins, then the variable the waitlist database
-    /// options name, then the configured string, so a test can point every store at a live server without editing
-    /// appsettings.
-    /// </summary>
-    private string? ResolveConnectionString()
-    {
-        var fromEnvironment = Environment.GetEnvironmentVariable(WaitlistConnectionStringEnvironmentVariable);
-        if (!string.IsNullOrWhiteSpace(fromEnvironment))
-        {
-            return LuggerWriteConnection.Resolve(fromEnvironment);
-        }
-
-        var configuredName = _waitlistDatabaseOptions.ConnectionStringEnvironmentVariable;
-        if (!string.IsNullOrWhiteSpace(configuredName))
-        {
-            var fromConfiguredName = Environment.GetEnvironmentVariable(configuredName);
-            if (!string.IsNullOrWhiteSpace(fromConfiguredName))
-            {
-                return LuggerWriteConnection.Resolve(fromConfiguredName);
-            }
-        }
-
-        return string.IsNullOrWhiteSpace(_waitlistDatabaseOptions.ConnectionString)
-            ? null
-            : LuggerWriteConnection.Resolve(_waitlistDatabaseOptions.ConnectionString);
     }
 
     private static Lugger MapLugger(IReadOnlyDictionary<string, object?> row) => new()

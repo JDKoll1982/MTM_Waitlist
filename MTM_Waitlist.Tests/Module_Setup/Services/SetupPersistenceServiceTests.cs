@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Services;
@@ -115,18 +115,6 @@ public sealed class SetupPersistenceServiceTests
             return Task.FromResult(_affectedRows);
         }
 
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => Task.FromResult(s_noRows);
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => Task.FromResult(0);
     }
 }

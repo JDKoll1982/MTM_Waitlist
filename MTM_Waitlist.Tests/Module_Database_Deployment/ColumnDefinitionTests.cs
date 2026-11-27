@@ -43,7 +43,7 @@ public sealed class Model_ColumnDefinitionTests
         StringAssert.Contains(column.ToColumnDefinitionSql(), "DEFAULT 'it''s'");
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("int", "0")]
     [DataRow("decimal(18,4)", "1.5000")]
     [DataRow("bigint unsigned", "0")]

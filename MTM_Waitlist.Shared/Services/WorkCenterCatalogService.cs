@@ -4,7 +4,6 @@ using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Core.Models;
-using MySqlConnector;
 using System.Globalization;
 
 namespace MTM_Waitlist.Module_Shared.Services;
@@ -286,49 +285,47 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
 
         try
         {
-            var builder = new MySqlConnectionStringBuilder(connectionString)
-            {
-                ConnectionTimeout = (uint)Math.Max(1, _waitlistDatabaseOptions.ConnectionTimeoutSeconds),
-                Database = "mtm_waitlist",
-            };
-
-            await using var connection = new MySqlConnection(builder.ConnectionString);
-            await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
-            await using var transaction = await connection.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-
-            // The clear and the re-assignment stay in one transaction so a failure between them cannot
-            // leave the computer with no hot work centers. Both are procedure calls now: the delete is
-            // that same statement, and the upsert is that same INSERT ... ON DUPLICATE KEY UPDATE done one
-            // row at a time, which is the only shape the procedure has (FR-015).
-            await using (var deleteCommand = new MySqlCommand(HotWorkCentersDeleteProcedure, connection, transaction)
-            {
-                CommandType = System.Data.CommandType.StoredProcedure,
-            })
-            {
-                deleteCommand.CommandTimeout = Math.Max(1, _waitlistDatabaseOptions.ConnectionTimeoutSeconds);
-                deleteCommand.Parameters.AddWithValue("@p_computer_id", workstationId);
-                _ = await deleteCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-            }
-
-            foreach (var item in resolvedHotWorkCenters)
-            {
-                await using var upsertCommand = new MySqlCommand(HotWorkCentersUpsertProcedure, connection, transaction)
+            // The clear and the re-assignment stay in one transaction so a failure between them cannot leave the
+            // computer with no hot work centers. Both are procedure calls, and the seam's strict route is what
+            // carries them as one unit: it commits when the operation returns and rolls back on any exception.
+            await _mySqlHelperServer.ExecuteStrictAsync(
+                new MySqlStrictScopeRequest(
+                    MySqlDatabaseTarget.MtmWaitlist,
+                    UseTransaction: true,
+                    ConnectionTimeoutSeconds: _waitlistDatabaseOptions.ConnectionTimeoutSeconds,
+                    CommandTimeoutSeconds: _waitlistDatabaseOptions.ConnectionTimeoutSeconds),
+                async (scope, token) =>
                 {
-                    CommandType = System.Data.CommandType.StoredProcedure,
-                };
+                    _ = await scope.NonQueryAsync(
+                        HotWorkCentersDeleteProcedure,
+                        new Dictionary<string, object?> { ["p_computer_id"] = workstationId },
+                        token).ConfigureAwait(false);
 
-                upsertCommand.CommandTimeout = Math.Max(1, _waitlistDatabaseOptions.ConnectionTimeoutSeconds);
-                upsertCommand.Parameters.AddWithValue("@p_computer_id", workstationId);
-                upsertCommand.Parameters.AddWithValue("@p_work_center_id", item.WorkCenterId);
-                upsertCommand.Parameters.AddWithValue("@p_sort_rank", item.SortRank);
-                upsertCommand.Parameters.AddWithValue("@p_modified_by_user_id", DBNull.Value);
+                    foreach (var item in resolvedHotWorkCenters)
+                    {
+                        _ = await scope.NonQueryAsync(
+                            HotWorkCentersUpsertProcedure,
+                            new Dictionary<string, object?>
+                            {
+                                ["p_computer_id"] = workstationId,
+                                ["p_work_center_id"] = item.WorkCenterId,
+                                ["p_sort_rank"] = item.SortRank,
+                                ["p_modified_by_user_id"] = null,
+                            },
+                            token).ConfigureAwait(false);
+                    }
 
-                _ = await upsertCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-            }
+                    return true;
+                },
+                cancellationToken).ConfigureAwait(false);
 
-            await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
             AppLog.Info("WorkCenterCatalog", $"SaveHotWorkCentersAsync completed. Workstation='{normalizedWorkstationName}', PersistedCount={resolvedHotWorkCenters.Length}.");
             return null;
+        }
+        catch (MySqlStoreNotConfiguredException)
+        {
+            AppLog.Info("WorkCenterCatalog", $"SaveHotWorkCentersAsync aborted. No database connection was available for workstation '{normalizedWorkstationName}'.");
+            return "Unable to save Local workcenters: database connection is not configured.";
         }
         catch (Exception ex)
         {
@@ -466,9 +463,8 @@ public sealed class WorkCenterCatalogService : IWorkCenterCatalogService
             return null;
         }
 
-        // The same host fallback every other reader applies. Without it this service's own connection, which
-        // is the one the hot-work-center save uses, tried the shared plant host and failed on a workstation
-        // that cannot reach it.
-        return MySqlHostFallback.Apply(resolvedConnectionString) ?? resolvedConnectionString;
+        // The one place a connection string is handed to the driver. A published build uses the configured
+        // server only; a development build may repoint it at this machine (StoreHostResolution).
+        return StoreHostResolution.Apply(resolvedConnectionString) ?? resolvedConnectionString;
     }
 }

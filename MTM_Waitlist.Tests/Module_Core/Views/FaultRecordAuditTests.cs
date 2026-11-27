@@ -49,8 +49,13 @@ public sealed class FaultRecordAuditTests
 
         StringAssert.Contains(
             host,
-            "TryFlushLogStore()",
+            "TryFlushLogStore(",
             "the store's queue dies with the process, so the record has to be forced out before the process goes");
+
+        StringAssert.Contains(
+            host,
+            "Task.Run(",
+            "the flush runs off the caller's thread, so a fault raised on the interface thread cannot deadlock on it (FR-021)");
 
         Assert.IsFalse(
             host.Contains("File.WriteAllText(", StringComparison.Ordinal),

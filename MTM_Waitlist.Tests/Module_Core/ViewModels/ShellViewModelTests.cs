@@ -38,7 +38,7 @@ public sealed class ShellViewModelTests
 
     // ── The badge offers Sign out (FR-033) ──────────────────────────────────────────────────────────────
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("ShellPage_CurrentUserButton", DisplayName = "the badge in the header template")]
     [DataRow("ShellPage_CurrentUserButtonDefault", DisplayName = "the badge in the live (Default) header template")]
     public void ViewModel_ShellViewModelTests_TheSignedInBadge_OffersSignOut(string badgeAutomationId)
@@ -139,7 +139,7 @@ public sealed class ShellViewModelTests
             "The startup module must register the sign-out service, or the shell cannot be constructed (FR-011).");
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("Shell_SignOut.Label", DisplayName = "the Sign out label")]
     [DataRow("Shell_SignOut.Tooltip", DisplayName = "the Sign out tooltip")]
     [DataRow("Shell_SignOut.RestartFailed", DisplayName = "the refused-relaunch report")]
@@ -162,7 +162,7 @@ public sealed class ShellViewModelTests
             "The badge must be answered by the one lookup, so every role the catalogue holds gets its own badge and no role reaches the grey default (FR-105).");
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("\"admin\"")]
     [DataRow("\"administrator\"")]
     [DataRow("\"supervisor\"")]

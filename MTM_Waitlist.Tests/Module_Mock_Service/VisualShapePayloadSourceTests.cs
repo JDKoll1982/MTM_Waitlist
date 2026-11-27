@@ -119,7 +119,7 @@ public sealed class VisualShapePayloadSourceTests
         var executor = new StubExecutor(Row(("NormalizedWorkOrder", "WO-1"), ("PartNumber", "P-1"), ("Description", "Ring")));
         var source = new VisualShapePayloadSource(executor, NullLogger<VisualShapePayloadSource>.Instance);
 
-        var exception = await Assert.ThrowsExceptionAsync<VisualSourceSchemaMismatchException>(
+        var exception = await Assert.ThrowsExactlyAsync<VisualSourceSchemaMismatchException>(
             () => source.BuildRefreshPayloadAsync(RequireShape("work_order_lookup")));
 
         StringAssert.Contains(exception.Message, "WorkCenter");
@@ -137,7 +137,7 @@ public sealed class VisualShapePayloadSourceTests
 
         var source = new VisualShapePayloadSource(executor, NullLogger<VisualShapePayloadSource>.Instance);
 
-        var exception = await Assert.ThrowsExceptionAsync<VisualSourceSchemaMismatchException>(
+        var exception = await Assert.ThrowsExactlyAsync<VisualSourceSchemaMismatchException>(
             () => source.BuildRefreshPayloadAsync(RequireShape("work_order_lookup")));
 
         StringAssert.Contains(exception.Message, "WorkOrderStatus");
@@ -160,7 +160,7 @@ public sealed class VisualShapePayloadSourceTests
         var executor = new StubExecutor { Unreachable = "connection timed out" };
         var source = new VisualShapePayloadSource(executor, NullLogger<VisualShapePayloadSource>.Instance);
 
-        var exception = await Assert.ThrowsExceptionAsync<VisualSourceUnreachableException>(
+        var exception = await Assert.ThrowsExactlyAsync<VisualSourceUnreachableException>(
             () => source.BuildRefreshPayloadAsync(RequireShape("work_order_lookup")));
 
         StringAssert.Contains(exception.Message, "connection timed out");
@@ -172,7 +172,7 @@ public sealed class VisualShapePayloadSourceTests
         var executor = new StubExecutor { Failure = "Invalid column name 'PART_ID'" };
         var source = new VisualShapePayloadSource(executor, NullLogger<VisualShapePayloadSource>.Instance);
 
-        await Assert.ThrowsExceptionAsync<VisualReadFailedException>(
+        await Assert.ThrowsExactlyAsync<VisualReadFailedException>(
             () => source.BuildRefreshPayloadAsync(RequireShape("work_order_lookup")),
             "Only unreachability may be treated as a skip; a real query error must surface.");
     }
@@ -185,7 +185,7 @@ public sealed class VisualShapePayloadSourceTests
 
         var shapeWithoutPopulation = RequireShape("work_order_lookup") with { PopulationScriptRelativePath = null };
 
-        await Assert.ThrowsExceptionAsync<VisualSourceSchemaMismatchException>(
+        await Assert.ThrowsExactlyAsync<VisualSourceSchemaMismatchException>(
             () => source.BuildRefreshPayloadAsync(shapeWithoutPopulation));
     }
 

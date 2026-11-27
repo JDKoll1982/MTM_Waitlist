@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Setup.Contracts.Services;
 using MTM_Waitlist.Module_Setup.Models;
 
@@ -11,7 +12,12 @@ public static class ModuleDependencyInjectionExtensions
     public static IServiceCollection AddSetupModuleServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<SetupWorkflowState>();
-        services.AddSingleton<InforVisualSqlQueryService>();
+
+        // One owner of the Infor Visual read path: the setup tool resolves its own queue scripts through
+        // Core's executor, which is the same type the rest of the application uses.
+        services.AddSingleton(sp => new InforVisualSqlQueryService(
+            sp.GetRequiredService<IConfiguration>(),
+            InforVisualSqlModule.Setup));
         services.AddSingleton<IWorkOrderValidationService, WorkOrderValidationService>();
         services.AddSingleton<ISetupWorkCenterService, SetupWorkCenterService>();
         services.AddSingleton<IInforVisualLookupService, SetupLookupService>();

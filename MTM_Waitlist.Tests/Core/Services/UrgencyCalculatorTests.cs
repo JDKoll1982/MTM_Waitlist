@@ -174,7 +174,7 @@ public sealed class UrgencyCalculatorTests
             "The fixture must be one where a real key gives a different order, or the fallback check proves nothing.");
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(WaitlistSortOrder.MostUrgent)]
     [DataRow(WaitlistSortOrder.LongestWaiting)]
     [DataRow(WaitlistSortOrder.Press)]

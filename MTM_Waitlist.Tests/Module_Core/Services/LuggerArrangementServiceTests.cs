@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
@@ -97,9 +97,7 @@ public sealed class LuggerArrangementServiceTests
     public void Service_LuggerArrangementServiceTests_GetSnapshotAsync_MapsTheArrangementReadInOneCall()
     {
         var stub = new StubMySqlHelperServer(SeededRows().Append(Row(Trailer, "Available", null, null, null, null)).ToArray());
-        var service = new LuggerArrangementService(
-            stub,
-            Options.Create(new WaitlistDatabaseOptions { ConnectionString = "Server=unused;" }));
+        var service = new LuggerArrangementService(stub);
 
         var snapshot = service.GetSnapshotAsync().GetAwaiter().GetResult();
 
@@ -183,19 +181,7 @@ public sealed class LuggerArrangementServiceTests
             MySqlDatabaseTarget databaseTarget,
             CancellationToken cancellationToken = default) => Task.FromResult(0);
 
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default) =>
-            throw new NotSupportedException("The arrangement service never sends statement text.");
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default) =>
-            throw new NotSupportedException("The arrangement service never sends statement text.");
 
         private static Dictionary<string, object?> ToRow(ScrapAssignment assignment) => new()
         {

@@ -98,7 +98,7 @@ public sealed class RoleBadgeCatalogTests
         }
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(null, DisplayName = "no role at all")]
     [DataRow("", DisplayName = "an empty role")]
     [DataRow("   ", DisplayName = "whitespace only")]
@@ -107,7 +107,7 @@ public sealed class RoleBadgeCatalogTests
         Assert.AreEqual(RoleBadgeCatalog.Fallback, RoleBadgeCatalog.For(roleCode));
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("supervisor")]
     [DataRow("quality inspector")]
     [DataRow("Setup Tech")]
@@ -121,7 +121,7 @@ public sealed class RoleBadgeCatalogTests
             $"'{roleCode}' must not have an entry in the lookup.");
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("administrator")]
     [DataRow("admin")]
     [DataRow("Admin")]

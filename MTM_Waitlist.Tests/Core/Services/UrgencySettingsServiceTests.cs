@@ -127,7 +127,7 @@ public sealed class UrgencySettingsServiceTests
         };
         var service = new UrgencySettingsService(store);
 
-        await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => service.SetMaxAllottedAsync(Item, 45));
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => service.SetMaxAllottedAsync(Item, 45));
     }
 
     // ── FR-017 / SC-007: the labelled 15-minute default, and the Item keeps its place in the order ──────

@@ -167,7 +167,7 @@ public sealed class MockServiceRefreshClientTests
         using var cts = new CancellationTokenSource();
         await cts.CancelAsync();
 
-        await Assert.ThrowsExceptionAsync<OperationCanceledException>(
+        await Assert.ThrowsExactlyAsync<OperationCanceledException>(
             () => client.RequestRefreshAsync(null, cts.Token));
     }
 

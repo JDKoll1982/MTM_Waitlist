@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace MTM_Waitlist.Module_Settings.Models;
 
@@ -31,7 +31,7 @@ public sealed record UserListFilter(string SearchText, string RoleCode)
         !string.IsNullOrWhiteSpace(SearchText) || !string.IsNullOrWhiteSpace(RoleCode);
 
     /// <summary>The payload as it is stored.</summary>
-    public string ToStoredValue() => JsonSerializer.Serialize(new Payload(SearchText, RoleCode));
+    public string ToStoredValue() => JsonSerializer.Serialize(new Payload(SearchText, RoleCode), SettingsJsonContext.Default.Payload);
 
     /// <summary>
     /// Reads a stored payload.
@@ -54,7 +54,7 @@ public sealed record UserListFilter(string SearchText, string RoleCode)
 
         try
         {
-            var payload = JsonSerializer.Deserialize<Payload>(stored);
+            var payload = JsonSerializer.Deserialize(stored, SettingsJsonContext.Default.Payload);
             if (payload is null)
             {
                 return FilterReadOutcome.Unreadable;
@@ -83,5 +83,5 @@ public sealed record UserListFilter(string SearchText, string RoleCode)
     }
 
     /// <summary>The stored shape. Both halves travel together or not at all.</summary>
-    private sealed record Payload(string? Search, string? RoleCode);
+    internal sealed record Payload(string? Search, string? RoleCode);
 }

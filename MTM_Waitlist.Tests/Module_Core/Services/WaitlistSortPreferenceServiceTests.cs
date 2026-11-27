@@ -25,7 +25,7 @@ public sealed class WaitlistSortPreferenceServiceTests
             "A viewer who has never chosen anything gets the most-urgent order the list ships with (FR-010).");
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(WaitlistSortOrder.MostUrgent)]
     [DataRow(WaitlistSortOrder.LongestWaiting)]
     [DataRow(WaitlistSortOrder.Press)]

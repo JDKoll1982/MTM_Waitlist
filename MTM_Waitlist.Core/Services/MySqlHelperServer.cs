@@ -19,8 +19,18 @@ public enum MySqlDatabaseTarget
     MtmMock,
 }
 
-public sealed class MySqlHelperServer : IMySqlHelperServer
+public sealed class MySqlHelperServer : IMySqlHelperServer, IReviewedQueueScriptReader
 {
+    /// <summary>
+    /// The most rows one read returns. Shared by the stored-procedure path and the reviewed script route, so a
+    /// procedure that answers more than a screen can use is bounded in one place rather than in each caller.
+    /// </summary>
+    /// <remarks>
+    /// A read that legitimately needs more than this is a read that has to page, not a cap to raise: a list
+    /// that cannot be shown in one screen cannot be shown better by making the response slower.
+    /// </remarks>
+    internal const int MaxRowsPerRead = 10_000;
+
     private const string WaitlistConnectionStringEnvironmentVariable = "MTM_WAITLIST_DB_CONNECTION_STRING";
     private const string WaitlistStartupConnectionStringEnvironmentVariable = "MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING";
     private const string ReceivingConnectionStringEnvironmentVariable = "MTM_RECEIVING_APPLICATION_DB_CONNECTION_STRING";
@@ -104,28 +114,122 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
             cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-        string sql,
-        IReadOnlyDictionary<string, object?> parameters,
-        MySqlDatabaseTarget databaseTarget,
+    /// <inheritdoc />
+    /// <remarks>
+    /// The connection open is not retried either, even though it precedes any transaction: a strict caller is a
+    /// write or a decision, and its own exceptions are what its caller shows. Nothing is logged here that the
+    /// caller does not already log, so one failure is reported once.
+    /// </remarks>
+    public async Task<T> ExecuteStrictAsync<T>(
+        MySqlStrictScopeRequest request,
+        Func<IMySqlStrictScope, CancellationToken, Task<T>> operation,
         CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(sql);
+        ArgumentNullException.ThrowIfNull(operation);
+
+        var connectionString = ResolveConnectionString(request.Target);
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            throw new MySqlStoreNotConfiguredException(GetDatabaseName(request.Target));
+        }
+
+        if (request.ConnectionTimeoutSeconds is { } connectionTimeoutSeconds)
+        {
+            connectionString = new MySqlConnectionStringBuilder(connectionString)
+            {
+                ConnectionTimeout = (uint)Math.Max(1, connectionTimeoutSeconds),
+            }.ConnectionString;
+        }
+
+        var commandTimeoutSeconds = request.CommandTimeoutSeconds is { } requestedCommandTimeout
+            ? Math.Max(1, requestedCommandTimeout)
+            : DefaultCommandTimeoutSeconds;
+
+        await using var connection = new MySqlConnection(connectionString);
+        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+
+        MySqlTransaction? transaction = null;
+        try
+        {
+            if (request.UseTransaction)
+            {
+                transaction = await connection.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            var result = await operation(
+                    new MySqlStrictScope(connection, transaction, commandTimeoutSeconds),
+                    cancellationToken)
+                .ConfigureAwait(false);
+
+            if (transaction is not null)
+            {
+                await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            return result;
+        }
+        catch
+        {
+            if (transaction is not null)
+            {
+                await RollBackQuietlyAsync(transaction).ConfigureAwait(false);
+            }
+
+            throw;
+        }
+        finally
+        {
+            if (transaction is not null)
+            {
+                await transaction.DisposeAsync().ConfigureAwait(false);
+            }
+        }
+    }
+
+    public async Task<IReadOnlyList<Dictionary<string, object?>>?> ExecuteReviewedScriptQueryAsync(
+        string reviewedScriptName,
+        IReadOnlyDictionary<string, object?> parameters,
+        CancellationToken cancellationToken = default)
+    {
+        // simplified: reviewed queue scripts stay checked-in text instead of stored procedures, because
+        // converting them is database authoring this feature does not do. When a procedure exists for the same
+        // read, route to it instead of adding a name here, and drop the name from the reviewed set.
+        var script = await WaitlistWipMySqlScriptStore
+            .LoadAsync(reviewedScriptName, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (string.IsNullOrWhiteSpace(script))
+        {
+            AppLog.Info(
+                "MySqlHelperServer",
+                $"Reviewed script '{reviewedScriptName}' is not installed or is not in the reviewed set; the read was refused.");
+            return null;
+        }
 
         return await ExecuteWithBoundedRetryAsync(
-            nameof(ExecuteSqlQueryAsync),
-            $"Sql='{DescribeSql(sql)}'",
-            databaseTarget,
-            Array.Empty<Dictionary<string, object?>>(),
+            nameof(ExecuteReviewedScriptQueryAsync),
+            $"ReviewedScript='{reviewedScriptName}'",
+            MySqlDatabaseTarget.MtmWipApplication,
+            (IReadOnlyList<Dictionary<string, object?>>?)null,
             async (connection, token) =>
             {
-                await using var command = CreateTextCommand(sql, parameters, connection);
+                await using var command = CreateTextCommand(script, parameters, connection);
                 return await ReadRowsAsync(command, token).ConfigureAwait(false);
             },
             cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task<int> ExecuteSqlNonQueryAsync(
+    /// <summary>
+    /// Runs statement text for the test project's database fixtures. Not reachable from application code.
+    /// </summary>
+    /// <remarks>
+    /// The integration suites seed and inspect rows with raw statements so a converted call site can be proven
+    /// against a live server; that is fixture setup, not application behaviour. Those suites reach this only
+    /// because the test assembly is a friend of this one, so no service in the application can call it. See
+    /// <see cref="MaxRowsPerRead"/> and <see cref="ExecuteReviewedScriptQueryAsync"/> for the two routes the
+    /// application itself has.
+    /// </remarks>
+    internal Task<int> ExecuteFixtureStatementAsync(
         string sql,
         IReadOnlyDictionary<string, object?> parameters,
         MySqlDatabaseTarget databaseTarget,
@@ -133,8 +237,8 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sql);
 
-        return await ExecuteWithBoundedRetryAsync(
-            nameof(ExecuteSqlNonQueryAsync),
+        return ExecuteWithBoundedRetryAsync(
+            nameof(ExecuteFixtureStatementAsync),
             $"Sql='{DescribeSql(sql)}'",
             databaseTarget,
             0,
@@ -143,7 +247,32 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
                 await using var command = CreateTextCommand(sql, parameters, connection);
                 return await command.ExecuteNonQueryAsync(token).ConfigureAwait(false);
             },
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken);
+    }
+
+    /// <summary>
+    /// Reads rows from statement text for the test project's database fixtures. Not reachable from application
+    /// code; see <see cref="ExecuteFixtureStatementAsync"/>.
+    /// </summary>
+    internal Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteFixtureQueryAsync(
+        string sql,
+        IReadOnlyDictionary<string, object?> parameters,
+        MySqlDatabaseTarget databaseTarget,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(sql);
+
+        return ExecuteWithBoundedRetryAsync(
+            nameof(ExecuteFixtureQueryAsync),
+            $"Sql='{DescribeSql(sql)}'",
+            databaseTarget,
+            Array.Empty<Dictionary<string, object?>>(),
+            async (connection, token) =>
+            {
+                await using var command = CreateTextCommand(sql, parameters, connection);
+                return await ReadRowsAsync(command, token).ConfigureAwait(false);
+            },
+            cancellationToken);
     }
 
     /// <summary>
@@ -198,10 +327,28 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
             }
             catch (Exception ex)
             {
+                // A permanent answer is not an outage, and no delay makes it a different answer: the procedure,
+                // table or database is not there, or this login may not use it. Asking three times turns one
+                // honest failure into a three-second stall and still reports the wrong cause, so the attempt
+                // budget is spent only where the budget can change the outcome.
+                var permanentReason = MySqlFailureClassification.PermanentReason(ex);
+
                 AppLog.Error(
                     "MySqlHelperServer",
                     ex,
-                    $"{operationName} failed. {statementDescription}, Target='{databaseName}', Attempt={attempt} of {_retryPolicy.MaxAttempts}.");
+                    $"{operationName} failed. {statementDescription}, Target='{databaseName}', Attempt={attempt} of "
+                    + $"{(permanentReason is null ? _retryPolicy.MaxAttempts : 1)}.");
+
+                if (permanentReason is not null)
+                {
+                    RecordAvailability(() => _storeAvailability?.RecordUnavailable(
+                        databaseTarget,
+                        attemptedUtc,
+                        attempt,
+                        DateTime.UtcNow + _retryPolicy.NextRetryDelay,
+                        $"The {databaseName} store cannot answer this read: {permanentReason}."));
+                    return unavailableResult;
+                }
 
                 if (attempt >= _retryPolicy.MaxAttempts)
                 {
@@ -247,12 +394,14 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
     private static MySqlCommand CreateStoredProcedureCommand(
         string storedProcedureName,
         IReadOnlyDictionary<string, object?> parameters,
-        MySqlConnection connection)
+        MySqlConnection connection,
+        MySqlTransaction? transaction = null,
+        int commandTimeoutSeconds = DefaultCommandTimeoutSeconds)
     {
-        var command = new MySqlCommand(storedProcedureName, connection)
+        var command = new MySqlCommand(storedProcedureName, connection, transaction)
         {
             CommandType = System.Data.CommandType.StoredProcedure,
-            CommandTimeout = DefaultCommandTimeoutSeconds,
+            CommandTimeout = commandTimeoutSeconds,
         };
 
         AddParameters(command, parameters);
@@ -287,9 +436,28 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
         MySqlCommand command,
         CancellationToken cancellationToken)
     {
-        var rows = new List<Dictionary<string, object?>>();
         await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
-        while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
+        return await ReadRowsBoundedAsync(reader, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Reads a result set into rows, stopping at <see cref="MaxRowsPerRead"/>.
+    /// </summary>
+    /// <param name="reader">The open reader.</param>
+    /// <param name="cancellationToken">A token to cancel the read.</param>
+    /// <returns>The rows read, at most <see cref="MaxRowsPerRead"/>.</returns>
+    /// <remarks>
+    /// The cap is applied while reading rather than after, so an oversized answer never occupies memory it
+    /// cannot be shown from. Reaching it is logged, because a truncated read that says nothing is
+    /// indistinguishable from a complete one at the caller.
+    /// </remarks>
+    internal static async Task<IReadOnlyList<Dictionary<string, object?>>> ReadRowsBoundedAsync(
+        System.Data.Common.DbDataReader reader,
+        CancellationToken cancellationToken)
+    {
+        var rows = new List<Dictionary<string, object?>>();
+        while (rows.Count < MaxRowsPerRead
+            && await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
         {
             var row = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
             for (var index = 0; index < reader.FieldCount; index++)
@@ -301,7 +469,107 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
             rows.Add(row);
         }
 
+        if (rows.Count == MaxRowsPerRead)
+        {
+            AppLog.Warn(
+                "MySqlHelperServer",
+                $"The read reached the shared row cap of {MaxRowsPerRead}; the rows beyond it were not returned.");
+        }
+
         return rows;
+    }
+
+    /// <summary>
+    /// Rolls back a strict transaction without letting the rollback's own failure replace the failure that caused
+    /// it. The caller is about to see the original exception; a connection that has already gone away must not
+    /// turn a refusal into something else.
+    /// </summary>
+    private static async Task RollBackQuietlyAsync(MySqlTransaction transaction)
+    {
+        try
+        {
+            await transaction.RollbackAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            AppLog.Error(
+                "MySqlHelperServer",
+                ex,
+                "The strict transaction could not be rolled back explicitly; the connection's own close is the remaining undo.");
+        }
+    }
+
+    /// <summary>
+    /// The strict scope: the same stored-procedure calls the lenient route makes, bound to one connection and,
+    /// when the request asked for it, to that connection's transaction.
+    /// </summary>
+    private sealed class MySqlStrictScope : IMySqlStrictScope
+    {
+        private readonly MySqlConnection _connection;
+        private readonly MySqlTransaction? _transaction;
+        private readonly int _commandTimeoutSeconds;
+
+        internal MySqlStrictScope(
+            MySqlConnection connection,
+            MySqlTransaction? transaction,
+            int commandTimeoutSeconds)
+        {
+            _connection = connection;
+            _transaction = transaction;
+            _commandTimeoutSeconds = commandTimeoutSeconds;
+        }
+
+        public async Task<IReadOnlyList<Dictionary<string, object?>>> QueryAsync(
+            string storedProcedureName,
+            IReadOnlyDictionary<string, object?> parameters,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(storedProcedureName);
+
+            await using var command = CreateStoredProcedureCommand(
+                storedProcedureName,
+                parameters,
+                _connection,
+                _transaction,
+                _commandTimeoutSeconds);
+
+            return await ReadRowsAsync(command, cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task<int> NonQueryAsync(
+            string storedProcedureName,
+            IReadOnlyDictionary<string, object?> parameters,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(storedProcedureName);
+
+            await using var command = CreateStoredProcedureCommand(
+                storedProcedureName,
+                parameters,
+                _connection,
+                _transaction,
+                _commandTimeoutSeconds);
+
+            return await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task<object?> ScalarAsync(
+            string storedProcedureName,
+            IReadOnlyDictionary<string, object?> parameters,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(storedProcedureName);
+
+            await using var command = CreateStoredProcedureCommand(
+                storedProcedureName,
+                parameters,
+                _connection,
+                _transaction,
+                _commandTimeoutSeconds);
+
+            var answer = await command.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
+            return answer is DBNull ? null : answer;
+        }
     }
 
     private string? ResolveConnectionString(MySqlDatabaseTarget databaseTarget)
@@ -326,6 +594,7 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
 
         var fallbackConnectionString = Environment.GetEnvironmentVariable(WaitlistConnectionStringEnvironmentVariable)?.Trim()
             ?? Environment.GetEnvironmentVariable(WaitlistStartupConnectionStringEnvironmentVariable)?.Trim()
+            ?? ReadConfiguredEnvironmentVariable(_waitlistDatabaseOptions.ConnectionStringEnvironmentVariable)
             ?? _waitlistDatabaseOptions.ConnectionString?.Trim();
 
         var resolvedConnectionString = string.IsNullOrWhiteSpace(environmentConnectionString)
@@ -342,9 +611,10 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
             Database = GetDatabaseName(databaseTarget),
         };
 
-        // A workstation off the plant network cannot reach the configured host; use the local server instead
-        // when one answers, and leave the string alone (so this fails and reports as usual) when none does.
-        return MySqlHostFallback.Apply(builder.ConnectionString);
+        // The single place a store's connection string is handed to the driver. In a published (Release) build
+        // this is the configured server, unchanged, and a server that does not answer fails loudly; only a
+        // development build may repoint it at this machine (StoreHostResolution).
+        return StoreHostResolution.Apply(builder.ConnectionString);
     }
 
     private static string GetDatabaseName(MySqlDatabaseTarget databaseTarget)
@@ -357,6 +627,15 @@ public sealed class MySqlHelperServer : IMySqlHelperServer
             _ => "mtm_waitlist",
         };
     }
+
+    /// <summary>
+    /// Reads an environment variable by a name the configuration supplied, tolerating a name that was left blank
+    /// so a caller that names its own variable is served without a null-name failure.
+    /// </summary>
+    /// <param name="name">The variable name to read, or a blank value.</param>
+    /// <returns>The value, or <see langword="null" /> when the name is blank or the variable is unset.</returns>
+    private static string? ReadConfiguredEnvironmentVariable(string? name) =>
+        string.IsNullOrWhiteSpace(name) ? null : Environment.GetEnvironmentVariable(name)?.Trim();
 
     private static string DescribeSql(string sql)
     {

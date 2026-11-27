@@ -2,7 +2,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using MTM_Waitlist.Module_Setup.Services;
+using MTM_Waitlist.Module_Core.Services;
 
 namespace MTM_Waitlist.Tests.Module_Setup.Services;
 
@@ -112,7 +112,9 @@ public sealed class InforVisualSqlQueryServiceTests
             })
             .Build();
 
-        return new InforVisualSqlQueryService(configuration);
+        // The surviving Core type, resolving this tool's own queue scripts: the same queue behaviour the
+        // deleted Setup copy provided, asserted through the one owner of the Infor Visual read path.
+        return new InforVisualSqlQueryService(configuration, InforVisualSqlModule.Setup);
     }
 
     private static async Task SkipIfServerUnavailableAsync()

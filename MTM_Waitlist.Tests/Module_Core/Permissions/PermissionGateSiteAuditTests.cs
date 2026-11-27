@@ -306,14 +306,36 @@ public sealed class PermissionGateSiteAuditTests
     }
 
     private static string ReadProductionFile(string relativePath)
-    {
-        var fullPath = Path.Combine(
+    {        var fullPath = Path.Combine(
             RepositoryPatternScan.FindRepositoryRoot(),
             relativePath.Replace('/', Path.DirectorySeparatorChar));
 
         Assert.IsTrue(File.Exists(fullPath), $"'{relativePath}' must exist for the gate-site audit to mean anything.");
 
         return StripComments(File.ReadAllText(fullPath));
+    }
+
+    /// <summary>
+    /// Every part of the split settings view model, concatenated: the gate and the permission assignment no longer live
+    /// in the same file, and an audit of one file would stop seeing a gate the moment it moved (MOD-008).
+    /// </summary>
+    private static string ReadSettingsViewModelParts()
+    {
+        var folder = Path.Combine(
+            RepositoryPatternScan.FindRepositoryRoot(),
+            "MTM_Waitlist.Settings",
+            "SettingsHub",
+            "ViewModels");
+
+        var parts = Directory
+            .EnumerateFiles(folder, "SettingsViewModel*.cs")
+            .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+            .Select(path => StripComments(File.ReadAllText(path)))
+            .ToArray();
+
+        Assert.IsTrue(parts.Length > 0, "the settings view model's source is not where the gate-site audit looks for it.");
+
+        return string.Join(Environment.NewLine, parts);
     }
 
     /// <summary>
@@ -360,7 +382,11 @@ public sealed class PermissionGateSiteAuditTests
     [TestMethod]
     public void Audit_PermissionGateSiteAuditTests_ThePictureCacheGate_ReadsTheStorageEntitlementAndNotThePictureOne()
     {
-        var settings = ReadProductionFile("MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.cs");
+        // The settings view model is split across cohesive parts (024-dependency-modernization, MOD-008): the gate lives
+        // with the panel's other visibility properties and the permission assignment lives with the permission read, so
+        // this reads the whole family rather than one file. Reading every part is also what stops the next split from
+        // quietly moving this gate out of the audit's sight.
+        var settings = ReadSettingsViewModelParts();
 
         var gate = Regex.Match(settings, @"IsPictureCachePanelVisible\s*=>[^;]+;").Value;
 

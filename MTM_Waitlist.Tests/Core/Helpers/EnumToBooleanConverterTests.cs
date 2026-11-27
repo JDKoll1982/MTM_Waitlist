@@ -29,7 +29,7 @@ public sealed class EnumToBooleanConverterTests
     [TestMethod]
     public void Converter_EnumToBooleanConverterTests_Convert_ThrowsWhenParameterIsNotString()
     {
-        Assert.ThrowsException<ArgumentException>(
+        Assert.ThrowsExactly<ArgumentException>(
             () => _converter.Convert(ElementTheme.Dark, typeof(bool), 123, "en-US"));
     }
 
@@ -44,7 +44,7 @@ public sealed class EnumToBooleanConverterTests
     [TestMethod]
     public void Converter_EnumToBooleanConverterTests_ConvertBack_ThrowsWhenParameterIsNotString()
     {
-        Assert.ThrowsException<ArgumentException>(
+        Assert.ThrowsExactly<ArgumentException>(
             () => _converter.ConvertBack(true, typeof(ElementTheme), 123, "en-US"));
     }
 }

@@ -9,12 +9,6 @@ namespace MTM_Database_Deployment.Services;
 /// </summary>
 public sealed class Service_DeploymentSettings
 {
-    private static readonly JsonSerializerOptions SerializerOptions = new()
-    {
-        WriteIndented = true,
-        PropertyNameCaseInsensitive = true
-    };
-
     public string SettingsPath { get; }
 
     public string SqlRoot { get; }
@@ -60,7 +54,7 @@ public sealed class Service_DeploymentSettings
         try
         {
             var json = File.ReadAllText(SettingsPath);
-            var settings = JsonSerializer.Deserialize<Model_ConnectionSettings>(json, SerializerOptions)
+            var settings = JsonSerializer.Deserialize(json, DeploymentSettingsJsonContext.Default.Model_ConnectionSettings)
                 ?? new Model_ConnectionSettings();
 
             // A settings file written by an older build does not name a database that build never knew about, so the
@@ -97,7 +91,7 @@ public sealed class Service_DeploymentSettings
     {
         try
         {
-            File.WriteAllText(SettingsPath, JsonSerializer.Serialize(settings, SerializerOptions));
+            File.WriteAllText(SettingsPath, JsonSerializer.Serialize(settings, DeploymentSettingsJsonContext.Default.Model_ConnectionSettings));
         }
         catch (Exception)
         {

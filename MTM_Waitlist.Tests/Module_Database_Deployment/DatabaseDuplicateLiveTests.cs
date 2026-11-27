@@ -107,7 +107,7 @@ public sealed class DatabaseDuplicateLiveTests
                 .ConfigureAwait(false);
 
             var thrown = await Assert
-                .ThrowsExceptionAsync<InvalidOperationException>(
+                .ThrowsExactlyAsync<InvalidOperationException>(
                     () => backup.DuplicateAsync(Source, Copy, replaceExisting: false, progress: null, CancellationToken.None))
                 .ConfigureAwait(false);
 

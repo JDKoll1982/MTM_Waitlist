@@ -10,18 +10,22 @@ namespace MTM_Waitlist.Module_Core.Services;
 /// <inheritdoc cref="IUserManagementRepository"/>
 /// <remarks>
 /// <para>
-/// <b>Why this talks to the provider directly rather than through <see cref="IMySqlHelperServer"/>.</b> The helper
-/// server answers a failed call with its neutral result — zero rows, zero affected — which is the right behaviour
-/// for a screen that shows its own unavailable state. It is the wrong behaviour here for two reasons the
-/// requirements name. A duplicate sign-in name must arrive as the provider's own <c>1062</c> answer rather than
-/// being folded into "something went wrong" (FR-008, and the pinned <c>1062</c>), and a roster read that failed
-/// must not be handed on as an empty list, because an empty roster is a different state with different words
-/// (FR-096). Both need the provider's error, so both open a connection.
+/// <b>Why this uses the seam's strict route rather than its lenient one.</b> The lenient route answers a failed
+/// call with its neutral result — zero rows, zero affected — which is the right behaviour for a screen that shows
+/// its own unavailable state. It is the wrong behaviour here for two reasons the requirements name. A duplicate
+/// sign-in name must arrive as the provider's own <c>1062</c> answer rather than being folded into "something went
+/// wrong" (FR-008, and the pinned <c>1062</c>), and a roster read that failed must not be handed on as an empty
+/// list, because an empty roster is a different state with different words (FR-096). Both need the provider's
+/// error, so both go through <see cref="IMySqlHelperServer.ExecuteStrictAsync{T}"/>, which propagates it and
+/// retries nothing.
 /// </para>
 /// <para>
 /// Nothing here composes statement text: every call names a stored procedure and passes parameters (constitution
 /// III). No retry lives here either — the error is reported, never hidden behind a second attempt, which is what
-/// keeps one press from creating two people.
+/// keeps one press from creating two people. The one throw this repository used to make itself, for an
+/// unconfigured store, still reaches the caller: the seam raises
+/// <see cref="MySqlStoreNotConfiguredException"/>, which is the <see cref="InvalidOperationException"/> this class
+/// threw under the same words.
 /// </para>
 /// </remarks>
 public sealed class UserManagementRepository : IUserManagementRepository
@@ -32,9 +36,6 @@ public sealed class UserManagementRepository : IUserManagementRepository
     private const string UpdateProcedure = "sp_user_management_update";
     private const string ResetPasswordProcedure = "sp_user_management_reset_password";
     private const string RecordAttemptProcedure = "sp_auth_temporary_credential_attempt_record";
-
-    private const string WaitlistConnectionStringEnvironmentVariable = "MTM_WAITLIST_DB_CONNECTION_STRING";
-    private const int DefaultCommandTimeoutSeconds = 15;
 
     /// <summary>The provider's duplicate-key answer, which the contract pins as the already-exists result.</summary>
     private const int DuplicateKeyErrorNumber = 1062;
@@ -49,10 +50,16 @@ public sealed class UserManagementRepository : IUserManagementRepository
     private const string RoleUnknownToken = "mtm_role_unknown";
 
     private readonly WaitlistDatabaseOptions _waitlistDatabaseOptions;
+    private readonly IMySqlHelperServer _mySqlHelperServer;
 
-    public UserManagementRepository(IOptions<WaitlistDatabaseOptions> waitlistDatabaseOptions)
+    public UserManagementRepository(
+        IMySqlHelperServer mySqlHelperServer,
+        IOptions<WaitlistDatabaseOptions> waitlistDatabaseOptions)
     {
+        ArgumentNullException.ThrowIfNull(mySqlHelperServer);
         ArgumentNullException.ThrowIfNull(waitlistDatabaseOptions);
+
+        _mySqlHelperServer = mySqlHelperServer;
         _waitlistDatabaseOptions = waitlistDatabaseOptions.Value;
     }
 
@@ -73,16 +80,16 @@ public sealed class UserManagementRepository : IUserManagementRepository
             ListProcedure,
             parameters,
             cancellationToken,
-            reader => rows.Add(new UserRosterRow(
-                reader.GetInt64(0),
-                ReadString(reader, 1),
-                ReadString(reader, 2),
-                ReadString(reader, 3),
-                ReadString(reader, 4),
-                ReadString(reader, 5),
-                ReadString(reader, 6),
-                ReadInt(reader, 7),
-                ReadBool(reader, 8))))
+            row => rows.Add(new UserRosterRow(
+                ReadLong(row, "user_id"),
+                ReadString(row, "public_id"),
+                ReadString(row, "username_normalized"),
+                ReadString(row, "display_name"),
+                ReadString(row, "employee_identifier"),
+                ReadString(row, "role_code"),
+                ReadString(row, "role_name"),
+                ReadInt(row, "role_rank"),
+                ReadBool(row, "is_active"))))
             .ConfigureAwait(false);
 
         return rows;
@@ -98,23 +105,23 @@ public sealed class UserManagementRepository : IUserManagementRepository
             GetProcedure,
             parameters,
             cancellationToken,
-            reader =>
+            row =>
             {
                 if (account is null)
                 {
                     account = new UserAccount(
-                        reader.GetInt64(0),
-                        ReadString(reader, 1),
-                        ReadString(reader, 2),
-                        ReadString(reader, 3),
-                        ReadString(reader, 4),
-                        ReadString(reader, 5),
-                        ReadString(reader, 6),
-                        ReadString(reader, 7),
-                        ReadString(reader, 8),
-                        ReadInt(reader, 9),
-                        ReadBool(reader, 10),
-                        ReadInt(reader, 11));
+                        ReadLong(row, "user_id"),
+                        ReadString(row, "public_id"),
+                        ReadString(row, "username_normalized"),
+                        ReadString(row, "first_name"),
+                        ReadString(row, "last_name"),
+                        ReadString(row, "display_name"),
+                        ReadString(row, "employee_identifier"),
+                        ReadString(row, "role_code"),
+                        ReadString(row, "role_name"),
+                        ReadInt(row, "role_rank"),
+                        ReadBool(row, "is_active"),
+                        ReadInt(row, "temporary_credential_failed_attempts"));
                 }
             })
             .ConfigureAwait(false);
@@ -236,8 +243,8 @@ public sealed class UserManagementRepository : IUserManagementRepository
     }
 
     /// <summary>
-    /// Runs one write through the non-query seam, reading the affected-row count, and turns the provider's own
-    /// answer into one typed outcome.
+    /// Runs one write through the seam's strict route, so the provider's own answer reaches
+    /// <see cref="MapProviderFailure"/> rather than being folded into a neutral one.
     /// </summary>
     private async Task<UserManagementResult> ExecuteWriteAsync(
         string procedureName,
@@ -245,34 +252,25 @@ public sealed class UserManagementRepository : IUserManagementRepository
         UserManagementOutcomeKind unavailableKind,
         CancellationToken cancellationToken)
     {
-        var connectionString = ResolveConnectionString();
-        if (string.IsNullOrWhiteSpace(connectionString))
+        try
+        {
+            await _mySqlHelperServer.ExecuteStrictAsync(
+                CreateRequest(),
+                async (scope, token) =>
+                {
+                    _ = await scope.NonQueryAsync(procedureName, parameters, token).ConfigureAwait(false);
+                    return true;
+                },
+                cancellationToken).ConfigureAwait(false);
+
+            return UserManagementResult.Succeeded();
+        }
+        catch (MySqlStoreNotConfiguredException)
         {
             return UserManagementResult.Failed(
                 unavailableKind,
                 UserManagementMessages.StoreUnavailableKey,
                 UserManagementMessages.StoreUnavailable);
-        }
-
-        try
-        {
-            await using var connection = new MySqlConnection(BuildTimeoutConnectionString(connectionString));
-            await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
-
-            await using var command = new MySqlCommand(procedureName, connection)
-            {
-                CommandType = System.Data.CommandType.StoredProcedure,
-                CommandTimeout = DefaultCommandTimeoutSeconds,
-            };
-
-            foreach (var parameter in parameters)
-            {
-                command.Parameters.AddWithValue("@" + parameter.Key, parameter.Value ?? DBNull.Value);
-            }
-
-            await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
-
-            return UserManagementResult.Succeeded();
         }
         catch (OperationCanceledException)
         {
@@ -359,91 +357,52 @@ public sealed class UserManagementRepository : IUserManagementRepository
     }
 
     /// <summary>
-    /// Runs one read and hands each row to <paramref name="readRow"/>. A failure propagates, because an
-    /// unreachable store and an empty roster must not look alike (FR-096).
+    /// Runs one read through the seam's strict route and hands each row to <paramref name="readRow"/>. A failure
+    /// propagates, because an unreachable store and an empty roster must not look alike (FR-096), and an
+    /// unconfigured store answers the <see cref="InvalidOperationException"/> this repository always answered.
     /// </summary>
     private async Task ExecuteReaderAsync(
         string procedureName,
         IReadOnlyDictionary<string, object?> parameters,
         CancellationToken cancellationToken,
-        Action<MySqlDataReader> readRow)
+        Action<IReadOnlyDictionary<string, object?>> readRow)
     {
-        var connectionString = ResolveConnectionString();
-        if (string.IsNullOrWhiteSpace(connectionString))
-        {
-            throw new InvalidOperationException("No connection is configured for the mtm_waitlist store.");
-        }
+        var rows = await _mySqlHelperServer.ExecuteStrictAsync(
+            CreateRequest(),
+            (scope, token) => scope.QueryAsync(procedureName, parameters, token),
+            cancellationToken).ConfigureAwait(false);
 
-        await using var connection = new MySqlConnection(BuildTimeoutConnectionString(connectionString));
-        await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
-
-        await using var command = new MySqlCommand(procedureName, connection)
+        foreach (var row in rows)
         {
-            CommandType = System.Data.CommandType.StoredProcedure,
-            CommandTimeout = DefaultCommandTimeoutSeconds,
-        };
-
-        foreach (var parameter in parameters)
-        {
-            command.Parameters.AddWithValue("@" + parameter.Key, parameter.Value ?? DBNull.Value);
-        }
-
-        await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
-        while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
-        {
-            readRow(reader);
+            readRow(row);
         }
     }
 
-    private string? ResolveConnectionString()
-    {
-        var fromEnvironment = Environment.GetEnvironmentVariable(WaitlistConnectionStringEnvironmentVariable);
-        if (!string.IsNullOrWhiteSpace(fromEnvironment))
-        {
-            return fromEnvironment;
-        }
-
-        var configuredName = _waitlistDatabaseOptions.ConnectionStringEnvironmentVariable;
-        if (!string.IsNullOrWhiteSpace(configuredName))
-        {
-            var fromConfiguredName = Environment.GetEnvironmentVariable(configuredName);
-            if (!string.IsNullOrWhiteSpace(fromConfiguredName))
-            {
-                return fromConfiguredName;
-            }
-        }
-
-        return string.IsNullOrWhiteSpace(_waitlistDatabaseOptions.ConnectionString)
-            ? null
-            : _waitlistDatabaseOptions.ConnectionString;
-    }
-
-    private string BuildTimeoutConnectionString(string connectionString)
-    {
-        var builder = new MySqlConnectionStringBuilder(connectionString)
-        {
-            ConnectionTimeout = (uint)Math.Max(1, _waitlistDatabaseOptions.ConnectionTimeoutSeconds),
-        };
-
-        // The configured host is the shared plant server, which a workstation off the plant network cannot
-        // reach. Every other reader in the application resolves through this fallback, so without it this
-        // repository alone tried the unreachable host and reported a timeout while the same databases sat
-        // on the local server.
-        return MySqlHostFallback.Apply(builder.ConnectionString) ?? builder.ConnectionString;
-    }
+    /// <summary>
+    /// The strict request this repository makes: the waitlist store, with the connect timeout it has always
+    /// applied over the connection string's own.
+    /// </summary>
+    private MySqlStrictScopeRequest CreateRequest() =>
+        new(
+            MySqlDatabaseTarget.MtmWaitlist,
+            ConnectionTimeoutSeconds: _waitlistDatabaseOptions.ConnectionTimeoutSeconds);
 
     private static string? NormalizeOrNull(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
-    private static string ReadString(MySqlDataReader reader, int ordinal) =>
-        reader.IsDBNull(ordinal)
-            ? string.Empty
-            : Convert.ToString(reader.GetValue(ordinal), System.Globalization.CultureInfo.InvariantCulture)?.Trim() ?? string.Empty;
+    private static string ReadString(IReadOnlyDictionary<string, object?> row, string columnName) =>
+        row.TryGetValue(columnName, out var value) && value is not null && value is not DBNull
+            ? Convert.ToString(value, System.Globalization.CultureInfo.InvariantCulture)?.Trim() ?? string.Empty
+            : string.Empty;
 
-    private static int ReadInt(MySqlDataReader reader, int ordinal) =>
-        reader.IsDBNull(ordinal) ? 0 : Convert.ToInt32(reader.GetValue(ordinal), System.Globalization.CultureInfo.InvariantCulture);
+    private static long ReadLong(IReadOnlyDictionary<string, object?> row, string columnName) =>
+        row.TryGetValue(columnName, out var value) && value is not null && value is not DBNull
+            ? Convert.ToInt64(value, System.Globalization.CultureInfo.InvariantCulture)
+            : 0L;
 
-    private static bool ReadBool(MySqlDataReader reader, int ordinal) =>
-        !reader.IsDBNull(ordinal)
-        && Convert.ToInt32(reader.GetValue(ordinal), System.Globalization.CultureInfo.InvariantCulture) != 0;
+    private static int ReadInt(IReadOnlyDictionary<string, object?> row, string columnName) =>
+        (int)ReadLong(row, columnName);
+
+    private static bool ReadBool(IReadOnlyDictionary<string, object?> row, string columnName) =>
+        ReadLong(row, columnName) != 0;
 }

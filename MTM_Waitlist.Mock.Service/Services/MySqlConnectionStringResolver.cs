@@ -78,16 +78,14 @@ public sealed class MySqlConnectionStringResolver
             dedicatedEnvironmentVariable is null ? null : Environment.GetEnvironmentVariable(dedicatedEnvironmentVariable),
             Environment.GetEnvironmentVariable(WaitlistConnectionStringEnvironmentVariable));
 
-        // The same configured-host fallback the application uses, from the same helper: the service ships
-        // pointed at the plant host, and a machine that cannot reach it would otherwise fail every read even
-        // though the same databases answer on this machine. Only an unreachable configured host is ever
-        // substituted, and only when this machine's own server answers.
+        // The one place a connection string is handed to the driver. On the plant host the configured server is
+        // this machine, so nothing is substituted; a development build may repoint it (StoreHostResolution).
         if (!string.IsNullOrWhiteSpace(candidate))
         {
-            return MySqlHostFallback.Apply(WithDatabase(candidate, databaseName));
+            return StoreHostResolution.Apply(WithDatabase(candidate, databaseName));
         }
 
-        return MySqlHostFallback.Apply(BuildFromSettings(databaseName));
+        return StoreHostResolution.Apply(BuildFromSettings(databaseName));
     }
 
     /// <summary>

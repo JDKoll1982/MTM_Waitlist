@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Models;
@@ -166,7 +166,7 @@ public sealed class ActiveJobSeedRoundTripTests
             parameters[parameterName] = _ownedWorkCenters[index];
         }
 
-        await _helper.ExecuteSqlNonQueryAsync(
+        await _helper.ExecuteFixtureStatementAsync(
             $"DELETE FROM setup_active_jobs WHERE work_center IN ({string.Join(", ", placeholders)});",
             parameters,
             MySqlDatabaseTarget.MtmWaitlist);
@@ -188,7 +188,7 @@ public sealed class ActiveJobSeedRoundTripTests
     {
         _ownedWorkCenters.Add(workCenter);
 
-        return await _helper!.ExecuteSqlNonQueryAsync(
+        return await _helper!.ExecuteFixtureStatementAsync(
             "INSERT INTO setup_active_jobs (public_id, work_order, part_number, sequence_number, work_center, selected_dunnage_type_id, selected_dunnage_part_id, subordinate_parts_json, selected_dunnage_parts_json, is_active, created_utc, updated_utc) "
                 + "VALUES (@p_public_id, @p_work_order, @p_part_number, @p_sequence, @p_work_center, @p_dunnage_type, @p_dunnage_part, @p_sub_parts, @p_dunnage_parts, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP());",
             new Dictionary<string, object?>

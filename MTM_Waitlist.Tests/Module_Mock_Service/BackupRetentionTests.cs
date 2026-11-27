@@ -125,7 +125,7 @@ public sealed class BackupRetentionTests
         using var fixture = new StoreFixture();
         await fixture.SeedAsync(BackupStore.MtmWaitlist, 1);
 
-        await Assert.ThrowsExceptionAsync<ArgumentOutOfRangeException>(
+        await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(
             () => fixture.Store.PruneAsync(BackupStore.MtmWaitlist, retentionCount: 0));
     }
 

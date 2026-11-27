@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Models;
@@ -101,7 +101,7 @@ public sealed class PermissionResolutionTests
         var service = CreateService(new FakeMySqlHelperServer());
 
         // A gate reading a key the declaration does not hold is a failure, not a quiet no (FR-061).
-        await Assert.ThrowsExceptionAsync<ArgumentException>(
+        await Assert.ThrowsExactlyAsync<ArgumentException>(
             () => service.HasPermissionAsync("permission.not_a_declared_action"));
     }
 
@@ -189,17 +189,7 @@ public sealed class PermissionResolutionTests
     /// <summary>A store that cannot be reached at all.</summary>
     private sealed class ThrowingMySqlHelperServer : IMySqlHelperServer
     {
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default) => throw new InvalidOperationException("The store is unreachable.");
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default) => throw new InvalidOperationException("The store is unreachable.");
 
         public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteStoredProcedureQueryAsync(
             string storedProcedureName,

@@ -222,7 +222,7 @@ public sealed class VisualReadFallbackParityTests
             new FakeVisualQueryExecutor(VisualQueryOutcome.Failed("SQL error 102")),
             cache);
 
-        var exception = await Assert.ThrowsExceptionAsync<VisualReadFailedException>(
+        var exception = await Assert.ThrowsExactlyAsync<VisualReadFailedException>(
             () => fallback.ReadAsync(new VisualWorkOrderLookupRequest("WO-1")));
 
         Assert.AreEqual("work_order_lookup", exception.ShapeKey);
@@ -236,7 +236,7 @@ public sealed class VisualReadFallbackParityTests
             new FakeVisualQueryExecutor(VisualQueryOutcome.Unreachable("down")),
             mySqlHelperServer: null);
 
-        await Assert.ThrowsExceptionAsync<VisualReadFailedException>(
+        await Assert.ThrowsExactlyAsync<VisualReadFailedException>(
             () => fallback.ReadAsync(new VisualWorkOrderLookupRequest("WO-1")));
     }
 
@@ -634,7 +634,7 @@ public sealed class VisualReadFallbackParityTests
             mySqlHelperServer: null,
             reachability: new StubReachabilityDetector(VisualReadStatus.Cached));
 
-        await Assert.ThrowsExceptionAsync<VisualReadFailedException>(
+        await Assert.ThrowsExactlyAsync<VisualReadFailedException>(
             () => fallback.ReadAsync(new VisualWorkOrderLookupRequest("WO-1")));
     }
 

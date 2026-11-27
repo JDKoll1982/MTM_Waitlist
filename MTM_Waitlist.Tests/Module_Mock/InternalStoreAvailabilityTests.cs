@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
@@ -106,7 +106,7 @@ public sealed class InternalStoreAvailabilityTests
             storeAvailability: tracker,
             retryPolicy: singleAttempt);
 
-        _ = await helper.ExecuteSqlQueryAsync(
+        _ = await helper.ExecuteFixtureQueryAsync(
             "SELECT 1", // never executed: the connection is refused first
             new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmWaitlist);
@@ -146,7 +146,7 @@ public sealed class InternalStoreAvailabilityTests
         using var cts = new CancellationTokenSource();
         await cts.CancelAsync();
 
-        await Assert.ThrowsExceptionAsync<OperationCanceledException>(() => helper.ExecuteStoredProcedureQueryAsync(
+        await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => helper.ExecuteStoredProcedureQueryAsync(
             "sp_anything",
             new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmWaitlist,

@@ -19,7 +19,7 @@ public sealed class DatabaseCopyNameTests
     [TestMethod]
     public void Service_DatabaseCopyNameTests_EnsureCopyNameIsUsable_RefusesTheSourceItself()
     {
-        var thrown = Assert.ThrowsException<ArgumentException>(
+        var thrown = Assert.ThrowsExactly<ArgumentException>(
             () => DatabaseBackup.EnsureCopyNameIsUsable("mtm_mock", "MTM_MOCK"));
 
         StringAssert.Contains(thrown.Message, "different name");
@@ -28,7 +28,7 @@ public sealed class DatabaseCopyNameTests
     [TestMethod]
     public void Service_DatabaseCopyNameTests_EnsureCopyNameIsUsable_RefusesAnEmptyName()
     {
-        var thrown = Assert.ThrowsException<ArgumentException>(
+        var thrown = Assert.ThrowsExactly<ArgumentException>(
             () => DatabaseBackup.EnsureCopyNameIsUsable("mtm_mock", "  "));
 
         StringAssert.Contains(thrown.Message, "Type a name");
@@ -37,7 +37,7 @@ public sealed class DatabaseCopyNameTests
     [TestMethod]
     public void Service_DatabaseCopyNameTests_EnsureCopyNameIsUsable_RefusesANameCarryingAStatement()
     {
-        var thrown = Assert.ThrowsException<ArgumentException>(
+        var thrown = Assert.ThrowsExactly<ArgumentException>(
             () => DatabaseBackup.EnsureCopyNameIsUsable("mtm_mock", "mtm_mock_test; DROP DATABASE mtm_waitlist"));
 
         StringAssert.Contains(thrown.Message, "letters, numbers and underscores");
@@ -46,7 +46,7 @@ public sealed class DatabaseCopyNameTests
     [TestMethod]
     public void Service_DatabaseCopyNameTests_EnsureCopyNameIsUsable_RefusesANameLongerThanSixtyFourCharacters()
     {
-        var thrown = Assert.ThrowsException<ArgumentException>(
+        var thrown = Assert.ThrowsExactly<ArgumentException>(
             () => DatabaseBackup.EnsureCopyNameIsUsable("mtm_mock", new string('a', 65)));
 
         StringAssert.Contains(thrown.Message, "64 characters");

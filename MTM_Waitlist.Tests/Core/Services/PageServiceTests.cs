@@ -39,7 +39,7 @@ public sealed class PageServiceTests
     {
         var service = new PageService();
 
-        var ex = Assert.ThrowsException<ArgumentException>(() => service.GetPageType("Missing.ViewModel"));
+        var ex = Assert.ThrowsExactly<ArgumentException>(() => service.GetPageType("Missing.ViewModel"));
 
         StringAssert.Contains(ex.Message, "Page not found");
     }
@@ -50,7 +50,7 @@ public sealed class PageServiceTests
         var service = new PageService();
         service.Configure<TestViewModelA, TestPageA>();
 
-        var ex = Assert.ThrowsException<ArgumentException>(() => service.Configure<TestViewModelA, TestPageB>());
+        var ex = Assert.ThrowsExactly<ArgumentException>(() => service.Configure<TestViewModelA, TestPageB>());
 
         StringAssert.Contains(ex.Message, "already configured");
     }
@@ -61,7 +61,7 @@ public sealed class PageServiceTests
         var service = new PageService();
         service.Configure<TestViewModelA, TestPageA>();
 
-        var ex = Assert.ThrowsException<ArgumentException>(() => service.Configure<TestViewModelB, TestPageA>());
+        var ex = Assert.ThrowsExactly<ArgumentException>(() => service.Configure<TestViewModelB, TestPageA>());
 
         StringAssert.Contains(ex.Message, "already configured");
     }

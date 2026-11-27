@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -192,7 +192,7 @@ public sealed class MockMirrorRefreshWriterIntegrationTests
         Assert.AreEqual(0L, previousTableCount, "The transient '_prev' table must not persist between cycles.");
 
         // No seed content may survive a real refresh (FR-017): the snapshot is live data now.
-        var seedRows = await _reader.ExecuteSqlQueryAsync(
+        var seedRows = await _reader.ExecuteFixtureQueryAsync(
             $"SELECT COUNT(*) AS seed_rows FROM {MirrorTable} WHERE is_seed_content = 1",
             new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmMock).ConfigureAwait(false);
@@ -218,7 +218,7 @@ public sealed class MockMirrorRefreshWriterIntegrationTests
     /// <summary>Reads the mirror's projected columns in a stable order, so two reads are comparable.</summary>
     private async Task<string[]> ReadSnapshotAsync(string table)
     {
-        var rows = await _reader.ExecuteSqlQueryAsync(
+        var rows = await _reader.ExecuteFixtureQueryAsync(
             $"SELECT normalized_work_order, part_number FROM {table} ORDER BY normalized_work_order",
             new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmMock).ConfigureAwait(false);
@@ -235,7 +235,7 @@ public sealed class MockMirrorRefreshWriterIntegrationTests
     /// </summary>
     private async Task<MirrorSnapshot> CaptureSnapshotAsync(string table)
     {
-        var rows = await _reader.ExecuteSqlQueryAsync(
+        var rows = await _reader.ExecuteFixtureQueryAsync(
             $"SELECT normalized_work_order, part_number, description, work_center, is_seed_content FROM {table} " +
             "ORDER BY normalized_work_order, part_number",
             new Dictionary<string, object?>(),
@@ -267,7 +267,7 @@ public sealed class MockMirrorRefreshWriterIntegrationTests
 
     private async Task<long> CountTableAsync(string tableName)
     {
-        var rows = await _reader.ExecuteSqlQueryAsync(
+        var rows = await _reader.ExecuteFixtureQueryAsync(
             "SELECT COUNT(*) AS table_count FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = @p_table",
             new Dictionary<string, object?>(StringComparer.Ordinal) { ["@p_table"] = tableName },
             MySqlDatabaseTarget.MtmMock).ConfigureAwait(false);

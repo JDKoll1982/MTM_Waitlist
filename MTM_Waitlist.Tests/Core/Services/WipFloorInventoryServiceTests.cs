@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Models;
@@ -12,7 +12,7 @@ public sealed class WipFloorInventoryServiceTests
     [TestMethod]
     public async Task Service_WipFloorInventoryServiceTests_GetFloorSnapshotAsync_ReturnsMappedSnapshotWhenScriptAndRowAvailable()
     {
-        var stub = new StubMySqlHelperServer(new[]
+        var stub = new StubReviewedScriptReader(new[]
         {
             FloorRow(finishedGoods: 10m, outsideService: 74m, nonConforming: 0m, wip: 33m),
         });
@@ -27,15 +27,16 @@ public sealed class WipFloorInventoryServiceTests
         Assert.AreEqual(33m, snapshot.WipFloorQuantity);
         Assert.IsTrue(snapshot.HasAnyFloorQuantity);
 
-        // The queue script must be executed against the MTM WIP Application database target.
-        Assert.AreEqual(MySqlDatabaseTarget.MtmWipApplication, stub.LastDatabaseTarget);
+        // The reviewed route has one store, so the target is structural; the script name is what proves the
+        // floor-quantity script is the one that ran.
+        Assert.AreEqual("GetWipFloorQuantities", stub.LastScriptName);
         Assert.AreEqual(1, stub.QueryCallCount);
     }
 
     [TestMethod]
     public async Task Service_WipFloorInventoryServiceTests_GetFloorSnapshotAsync_TrimsAndNormalizesPartNumber()
     {
-        var stub = new StubMySqlHelperServer(new[] { FloorRow(wip: 5m) });
+        var stub = new StubReviewedScriptReader(new[] { FloorRow(wip: 5m) });
         var service = new WipFloorInventoryService(stub);
 
         var snapshot = await service.GetFloorSnapshotAsync("  380397.001  ");
@@ -47,7 +48,7 @@ public sealed class WipFloorInventoryServiceTests
     [TestMethod]
     public async Task Service_WipFloorInventoryServiceTests_GetFloorSnapshotAsync_NoRowsReturnsNull()
     {
-        var stub = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
+        var stub = new StubReviewedScriptReader(Array.Empty<Dictionary<string, object?>>());
         var service = new WipFloorInventoryService(stub);
 
         var snapshot = await service.GetFloorSnapshotAsync("ZZZ-NOT-A-PART");
@@ -58,7 +59,7 @@ public sealed class WipFloorInventoryServiceTests
     [TestMethod]
     public async Task Service_WipFloorInventoryServiceTests_GetFloorSnapshotAsync_BlankPartReturnsNullWithoutCallingBackend()
     {
-        var stub = new StubMySqlHelperServer(new[] { FloorRow(wip: 5m) });
+        var stub = new StubReviewedScriptReader(new[] { FloorRow(wip: 5m) });
         var service = new WipFloorInventoryService(stub);
 
         var snapshot = await service.GetFloorSnapshotAsync("   ");
@@ -70,7 +71,7 @@ public sealed class WipFloorInventoryServiceTests
     [TestMethod]
     public async Task Service_WipFloorInventoryServiceTests_GetFloorSnapshotAsync_AllZeroBucketsSnapshotHasNoFloorQuantity()
     {
-        var stub = new StubMySqlHelperServer(new[] { FloorRow(finishedGoods: 0m, outsideService: 0m, nonConforming: 0m, wip: 0m) });
+        var stub = new StubReviewedScriptReader(new[] { FloorRow(finishedGoods: 0m, outsideService: 0m, nonConforming: 0m, wip: 0m) });
         var service = new WipFloorInventoryService(stub);
 
         var snapshot = await service.GetFloorSnapshotAsync("A18-71252-001");
@@ -87,7 +88,7 @@ public sealed class WipFloorInventoryServiceTests
     [TestMethod]
     public async Task Service_WipFloorInventoryServiceTests_GetInventoryPartNumbersAsync_ReturnsTheScriptsRowsThroughTheExistingSeam()
     {
-        var stub = new StubMySqlHelperServer(new[]
+        var stub = new StubReviewedScriptReader(new[]
         {
             new Dictionary<string, object?> { ["PartNumber"] = "MMC0001000" },
             new Dictionary<string, object?> { ["PartNumber"] = "  A22-77724-100  " },
@@ -101,10 +102,11 @@ public sealed class WipFloorInventoryServiceTests
             partNumbers.ToArray(),
             "The part numbers come back trimmed and in the script's own order.");
 
-        Assert.AreEqual(MySqlDatabaseTarget.MtmWipApplication, stub.LastDatabaseTarget);
-        StringAssert.Contains(stub.LastSql!, "AS PartNumber", "The read must execute the part-number script, not the floor-quantity one.");
-        StringAssert.Contains(stub.LastSql!, "inv_inventory", "The read must execute the part-number script, not the floor-quantity one.");
-        StringAssert.Contains(stub.LastSql!, "Dunnage", "Dunnage rows are packaging stock and are not parts the application pictures.");
+        Assert.AreEqual("GetWipInventoryPartNumbers", stub.LastScriptName);
+        var scriptText = await WaitlistWipMySqlScriptStore.LoadAsync("GetWipInventoryPartNumbers");
+        StringAssert.Contains(scriptText, "AS PartNumber", "The read must execute the part-number script, not the floor-quantity one.");
+        StringAssert.Contains(scriptText, "inv_inventory", "The read must execute the part-number script, not the floor-quantity one.");
+        StringAssert.Contains(scriptText, "Dunnage", "Dunnage rows are packaging stock and are not parts the application pictures.");
         Assert.AreEqual(0, stub.LastParameterCount, "The part-number read is not parameterised: it lists the floor.");
     }
 
@@ -112,7 +114,7 @@ public sealed class WipFloorInventoryServiceTests
     [TestMethod]
     public async Task Service_WipFloorInventoryServiceTests_GetInventoryPartNumbersAsync_NoRowsReturnsAnEmptyList()
     {
-        var stub = new StubMySqlHelperServer(Array.Empty<Dictionary<string, object?>>());
+        var stub = new StubReviewedScriptReader(Array.Empty<Dictionary<string, object?>>());
         var service = new WipFloorInventoryService(stub);
 
         Assert.AreEqual(0, (await service.GetInventoryPartNumbersAsync()).Count);
@@ -125,7 +127,7 @@ public sealed class WipFloorInventoryServiceTests
     [TestMethod]
     public async Task Service_WipFloorInventoryServiceTests_GetInventoryPartNumbersAsync_LeavesOutBlankPartNumbersAndRepeats()
     {
-        var stub = new StubMySqlHelperServer(new[]
+        var stub = new StubReviewedScriptReader(new[]
         {
             new Dictionary<string, object?> { ["PartNumber"] = "MMC0001000" },
             new Dictionary<string, object?> { ["PartNumber"] = "   " },
@@ -149,55 +151,30 @@ public sealed class WipFloorInventoryServiceTests
         ["WipFloorQuantity"] = wip,
     };
 
-    private sealed class StubMySqlHelperServer : IMySqlHelperServer
+    private sealed class StubReviewedScriptReader : IReviewedQueueScriptReader
     {
         private readonly IReadOnlyList<Dictionary<string, object?>> _rows;
 
-        public StubMySqlHelperServer(IReadOnlyList<Dictionary<string, object?>> rows) => _rows = rows;
+        public StubReviewedScriptReader(IReadOnlyList<Dictionary<string, object?>> rows) => _rows = rows;
 
         public int QueryCallCount { get; private set; }
 
-        public MySqlDatabaseTarget? LastDatabaseTarget { get; private set; }
+        public string? LastScriptName { get; private set; }
 
         public string? LastPartNumber { get; private set; }
 
-        public string? LastSql { get; private set; }
-
         public int LastParameterCount { get; private set; }
 
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteStoredProcedureQueryAsync(
-            string storedProcedureName,
+        public Task<IReadOnlyList<Dictionary<string, object?>>?> ExecuteReviewedScriptQueryAsync(
+            string reviewedScriptName,
             IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => Task.FromResult(_rows);
-
-        public Task<int> ExecuteStoredProcedureNonQueryAsync(
-            string storedProcedureName,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => Task.FromResult(1);
-
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
             CancellationToken cancellationToken = default)
         {
             QueryCallCount++;
-            LastDatabaseTarget = databaseTarget;
-            LastSql = sql;
+            LastScriptName = reviewedScriptName;
             LastParameterCount = parameters.Count;
             LastPartNumber = parameters.TryGetValue("PartNumber", out var part) ? Convert.ToString(part) : null;
-            return Task.FromResult(_rows);
+            return Task.FromResult<IReadOnlyList<Dictionary<string, object?>>?>(_rows);
         }
-
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => Task.FromResult(1);
     }
 }

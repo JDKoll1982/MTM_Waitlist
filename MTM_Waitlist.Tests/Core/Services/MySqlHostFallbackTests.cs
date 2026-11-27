@@ -1,3 +1,6 @@
+// The fallback these tests cover is compiled out of a Release build (Directory.Build.props defines
+// LOCAL_STORE_FALLBACK for every other configuration), so these tests only exist where the code does.
+#if LOCAL_STORE_FALLBACK
 using System.Net;
 using System.Net.Sockets;
 
@@ -193,3 +196,4 @@ public sealed class MySqlHostFallbackTests
         public void Dispose() => Stop();
     }
 }
+#endif

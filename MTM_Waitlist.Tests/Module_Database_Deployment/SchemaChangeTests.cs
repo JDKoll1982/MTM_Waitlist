@@ -14,7 +14,7 @@ namespace MTM_Waitlist.Tests.Module_Database_Deployment;
 [TestClass]
 public sealed class Model_SchemaChangeTests
 {
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(Enum_ChangeKind.ExtraTable)]
     [DataRow(Enum_ChangeKind.ExtraColumn)]
     [DataRow(Enum_ChangeKind.ExtraIndex)]
@@ -25,7 +25,7 @@ public sealed class Model_SchemaChangeTests
         Assert.IsTrue(CreateChange(kind).IsRemoval);
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(Enum_ChangeKind.CreateTable)]
     [DataRow(Enum_ChangeKind.AddColumn)]
     [DataRow(Enum_ChangeKind.AlterColumn)]

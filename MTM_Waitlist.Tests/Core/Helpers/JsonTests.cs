@@ -50,7 +50,7 @@ public sealed class JsonTests
     [TestMethod]
     public async Task Helper_JsonTests_ToObjectAsync_ThrowsForInvalidJson()
     {
-        await Assert.ThrowsExceptionAsync<System.Text.Json.JsonException>(
+        await Assert.ThrowsExactlyAsync<System.Text.Json.JsonException>(
             () => Json.ToObjectAsync<Payload>("not json"));
     }
 }

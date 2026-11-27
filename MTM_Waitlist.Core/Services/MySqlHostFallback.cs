@@ -1,3 +1,7 @@
+// This whole file is development-only and is compiled out of a Release build. See StoreHostResolution for why:
+// the published application talks to the server it was configured with and fails loudly when that server is
+// silent, so a save can never land in a copy the plant does not read.
+#if LOCAL_STORE_FALLBACK
 using System.Collections.Concurrent;
 using System.Net.Sockets;
 
@@ -190,3 +194,4 @@ public static class MySqlHostFallback
         }
     }
 }
+#endif

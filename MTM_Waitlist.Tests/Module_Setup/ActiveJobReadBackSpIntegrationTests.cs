@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Services;
@@ -54,7 +54,7 @@ public sealed class ActiveJobReadBackSpIntegrationTests
 
         if (!string.IsNullOrEmpty(_testWorkCenter))
         {
-            await _helper.ExecuteSqlNonQueryAsync(
+            await _helper.ExecuteFixtureStatementAsync(
                 "DELETE FROM setup_active_jobs WHERE work_center = @p_work_center;",
                 new Dictionary<string, object?> { ["p_work_center"] = _testWorkCenter },
                 MySqlDatabaseTarget.MtmWaitlist);
@@ -62,7 +62,7 @@ public sealed class ActiveJobReadBackSpIntegrationTests
 
         if (!string.IsNullOrEmpty(_testPartId))
         {
-            await _helper.ExecuteSqlNonQueryAsync(
+            await _helper.ExecuteFixtureStatementAsync(
                 "DELETE FROM receiving_history WHERE part_id = @p_part_id;",
                 new Dictionary<string, object?>
                 {
@@ -78,7 +78,7 @@ public sealed class ActiveJobReadBackSpIntegrationTests
         var partsJson = "[{\"Category\":\"Coil\",\"PartNumber\":\"MMC0001000\",\"Description\":\"C\",\"Location\":\"Rack A1\"}]";
         var dunnageJson = "[{\"Id\":\"dn-1\",\"PartNumber\":\"DN-STL-4\",\"DisplayName\":\"Steel Rack\"}]";
 
-        var inserted = await _helper.ExecuteSqlNonQueryAsync(
+        var inserted = await _helper.ExecuteFixtureStatementAsync(
             "INSERT INTO setup_active_jobs (public_id, work_order, part_number, sequence_number, work_center, subordinate_parts_json, selected_dunnage_parts_json, is_active, created_utc, updated_utc) VALUES (@p_public_id, @p_work_order, @p_part_number, @p_sequence, @p_work_center, @p_sub_parts, @p_dunnage, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP());",
             new Dictionary<string, object?>
             {
@@ -118,7 +118,7 @@ public sealed class ActiveJobReadBackSpIntegrationTests
         // Only the columns this test depends on. The procedure reads part_id and quantity; transaction_date
         // is the remaining NOT NULL column with no default, and the rest carry defaults. Naming columns from
         // a richer receiving_history revision made the fixture fail on a store that does not carry them.
-        await _helper.ExecuteSqlNonQueryAsync(
+        await _helper.ExecuteFixtureStatementAsync(
             "INSERT INTO receiving_history (load_guid, quantity, part_id, transaction_date) VALUES (@p_load_guid, @p_qty, @p_part_id, CURDATE());",
             new Dictionary<string, object?>
             {
@@ -127,7 +127,7 @@ public sealed class ActiveJobReadBackSpIntegrationTests
                 ["p_part_id"] = _testPartId,
             },
             MySqlDatabaseTarget.MtmReceivingApplication);
-        await _helper.ExecuteSqlNonQueryAsync(
+        await _helper.ExecuteFixtureStatementAsync(
             "INSERT INTO receiving_history (load_guid, quantity, part_id, transaction_date) VALUES (@p_load_guid, @p_qty, @p_part_id, CURDATE());",
             new Dictionary<string, object?>
             {

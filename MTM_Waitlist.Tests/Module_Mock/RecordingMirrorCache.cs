@@ -1,4 +1,4 @@
-using MTM_Waitlist.Module_Core.Contracts.Services;
+﻿using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Services;
 
 namespace MTM_Waitlist.Tests.Module_Mock;
@@ -52,17 +52,6 @@ public sealed class RecordingMirrorCache : IMySqlHelperServer
         CancellationToken cancellationToken = default) => Task.FromResult(0);
 
     /// <inheritdoc />
-    public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-        string sql,
-        IReadOnlyDictionary<string, object?> parameters,
-        MySqlDatabaseTarget databaseTarget,
-        CancellationToken cancellationToken = default) =>
-        Task.FromResult<IReadOnlyList<Dictionary<string, object?>>>(Array.Empty<Dictionary<string, object?>>());
 
     /// <inheritdoc />
-    public Task<int> ExecuteSqlNonQueryAsync(
-        string sql,
-        IReadOnlyDictionary<string, object?> parameters,
-        MySqlDatabaseTarget databaseTarget,
-        CancellationToken cancellationToken = default) => Task.FromResult(0);
 }

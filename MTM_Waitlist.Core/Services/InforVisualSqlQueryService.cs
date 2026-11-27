@@ -1,4 +1,4 @@
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using MTM_Waitlist.Module_Core.Helpers;
 using System.Runtime.InteropServices;
@@ -7,15 +7,27 @@ using System.Text;
 namespace MTM_Waitlist.Module_Core.Services;
 
 /// <summary>
-/// Shared executor for Infor Visual SQL Server queue scripts. This is the Core-owned, reusable
-/// executor for module queue scripts (mirrors the Module_Setup copy) so any module (Waitlist,
-/// and later Setup) can run checked-in scripts from <c>Database/InforVisual/Queues</c> against the
-/// on-premises Infor Visual database. Connection details resolve from environment variables first,
-/// then the <c>InforVisualDatabaseOptions</c> configuration section.
+/// Which module's checked-in queue scripts an <see cref="InforVisualSqlQueryService"/> resolves.
+/// </summary>
+public enum InforVisualSqlModule
+{
+    /// <summary><c>Database/InforVisual/Queues/Module_Waitlist/Queries</c>.</summary>
+    Waitlist,
+
+    /// <summary><c>Database/InforVisual/Queues/Module_Setup/Queries</c>.</summary>
+    Setup,
+}
+
+/// <summary>
+/// Shared executor for Infor Visual SQL Server queue scripts. This is the one owner of the Infor Visual read
+/// path: any module (Waitlist, and the setup tool) runs its checked-in scripts from
+/// <c>Database/InforVisual/Queues/&lt;module&gt;/Queries</c> against the on-premises Infor Visual database.
+/// Connection details resolve from environment variables first, then the <c>InforVisualDatabaseOptions</c>
+/// configuration section.
 ///
-/// This instance resolves scripts under the <c>Module_Waitlist</c> queue folder; it never throws —
-/// any missing script, missing connection, or SQL error yields an empty result so callers can fall
-/// back to an empty grid without crashing.
+/// The module chooses the script folder and nothing else, so one type serves both. It never throws — any
+/// missing script, missing connection, or SQL error yields an empty result so callers can fall back without
+/// crashing.
 /// </summary>
 public sealed class InforVisualSqlQueryService
 {
@@ -26,10 +38,19 @@ public sealed class InforVisualSqlQueryService
     private const string InforVisualPasswordEnvironmentVariable = "INFOR_VISUAL_SQL_PASSWORD";
 
     private readonly IConfiguration _configuration;
+    private readonly InforVisualSqlModule _module;
+    private readonly string _logModule;
 
     public InforVisualSqlQueryService(IConfiguration configuration)
+        : this(configuration, InforVisualSqlModule.Waitlist)
+    {
+    }
+
+    public InforVisualSqlQueryService(IConfiguration configuration, InforVisualSqlModule module)
     {
         _configuration = configuration;
+        _module = module;
+        _logModule = module == InforVisualSqlModule.Setup ? "SetupLookup.Sql" : "WaitlistInventory.Sql";
     }
 
     public async Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteQueueAsync(
@@ -37,23 +58,23 @@ public sealed class InforVisualSqlQueryService
         IReadOnlyDictionary<string, object?> parameters,
         CancellationToken cancellationToken = default)
     {
-        AppLog.Info("WaitlistInventory.Sql", $"ExecuteQueueAsync started. Script='{scriptName}', ParamCount={parameters.Count}.");
-        var script = await WaitlistInforVisualSqlScriptStore.LoadAsync(scriptName, cancellationToken).ConfigureAwait(false);
+        AppLog.Info(_logModule, $"ExecuteQueueAsync started. Script='{scriptName}', ParamCount={parameters.Count}.");
+        var script = await InforVisualSqlScriptStore.LoadAsync(_module, scriptName, cancellationToken).ConfigureAwait(false);
         if (string.IsNullOrWhiteSpace(script))
         {
-            AppLog.Info("WaitlistInventory.Sql", $"Script load returned empty content for '{scriptName}'.");
+            AppLog.Info(_logModule, $"Script load returned empty content for '{scriptName}'.");
             return Array.Empty<Dictionary<string, object?>>();
         }
 
         var connectionString = ResolveConnectionString();
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            AppLog.Info("WaitlistInventory.Sql", $"Connection string resolved empty for script '{scriptName}'.");
+            AppLog.Info(_logModule, $"Connection string resolved empty for script '{scriptName}'.");
             return Array.Empty<Dictionary<string, object?>>();
         }
 
         var parameterSummary = string.Join(", ", parameters.Select(entry => $"{entry.Key}='{Convert.ToString(entry.Value) ?? string.Empty}'"));
-        AppLog.Info("WaitlistInventory.Sql", $"Executing script '{scriptName}' with parameters: {parameterSummary}.");
+        AppLog.Info(_logModule, $"Executing script '{scriptName}' with parameters: {parameterSummary}.");
 
         try
         {
@@ -88,14 +109,14 @@ public sealed class InforVisualSqlQueryService
                 rows.Add(row);
             }
 
-            AppLog.Info("WaitlistInventory.Sql", $"Script '{scriptName}' executed successfully. RowCount={rows.Count}.");
+            AppLog.Info(_logModule, $"Script '{scriptName}' executed successfully. RowCount={rows.Count}.");
 
             return rows;
         }
         catch (SqlException sqlException)
         {
             AppLog.Error(
-                "WaitlistInventory.Sql",
+                _logModule,
                 sqlException,
                 $"SQL error executing '{scriptName}'. Number={sqlException.Number}, State={sqlException.State}, Line={sqlException.LineNumber}.");
             return Array.Empty<Dictionary<string, object?>>();
@@ -103,14 +124,14 @@ public sealed class InforVisualSqlQueryService
         catch (COMException comException)
         {
             AppLog.Error(
-                "WaitlistInventory.Sql",
+                _logModule,
                 comException,
                 $"COM error executing '{scriptName}'. HResult=0x{comException.HResult:X8}.");
             return Array.Empty<Dictionary<string, object?>>();
         }
         catch (Exception exception)
         {
-            AppLog.Error("WaitlistInventory.Sql", exception, $"Unhandled error executing '{scriptName}'.");
+            AppLog.Error(_logModule, exception, $"Unhandled error executing '{scriptName}'.");
             return Array.Empty<Dictionary<string, object?>>();
         }
     }
@@ -164,20 +185,30 @@ public sealed class InforVisualSqlQueryService
 }
 
 /// <summary>
-/// Resolves checked-in Infor Visual queue scripts for the Waitlist module from the app output,
-/// mirroring Module_Setup's <c>SetupSqlScriptStore</c> path layout.
+/// Resolves a module's checked-in Infor Visual queue scripts from the app output.
 /// </summary>
-internal static class WaitlistInforVisualSqlScriptStore
+internal static class InforVisualSqlScriptStore
 {
     private const string ScriptFolderName = "Database";
     private const string QueryFolderName = "InforVisual";
     private const string ModuleFolderName = "Queues";
-    private const string ScriptModuleFolderName = "Module_Waitlist";
     private const string ScriptQueryFolderName = "Queries";
 
-    public static async Task<string> LoadAsync(string scriptName, CancellationToken cancellationToken = default)
+    public static Task<string> LoadAsync(
+        InforVisualSqlModule module,
+        string scriptName,
+        CancellationToken cancellationToken = default)
     {
-        var scriptPath = GetScriptPath(scriptName);
+        var scriptModuleFolderName = module == InforVisualSqlModule.Setup ? "Module_Setup" : "Module_Waitlist";
+        return LoadAsync(scriptModuleFolderName, scriptName, cancellationToken);
+    }
+
+    private static async Task<string> LoadAsync(
+        string scriptModuleFolderName,
+        string scriptName,
+        CancellationToken cancellationToken)
+    {
+        var scriptPath = GetScriptPath(scriptModuleFolderName, scriptName);
         if (!File.Exists(scriptPath))
         {
             return string.Empty;
@@ -189,7 +220,7 @@ internal static class WaitlistInforVisualSqlScriptStore
         return await reader.ReadToEndAsync().ConfigureAwait(false);
     }
 
-    private static string GetScriptPath(string scriptName)
+    private static string GetScriptPath(string scriptModuleFolderName, string scriptName)
     {
         var normalizedName = scriptName.EndsWith(".sql", StringComparison.OrdinalIgnoreCase)
             ? scriptName
@@ -200,7 +231,7 @@ internal static class WaitlistInforVisualSqlScriptStore
             ScriptFolderName,
             QueryFolderName,
             ModuleFolderName,
-            ScriptModuleFolderName,
+            scriptModuleFolderName,
             ScriptQueryFolderName,
             normalizedName);
     }

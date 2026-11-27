@@ -146,7 +146,7 @@ public sealed class ServiceConfigurationStoreTests
             Api = new ApiSettings { Port = 70000 }
         };
 
-        Assert.ThrowsException<ArgumentException>(() => ServiceConfigurationStore.Validate(configuration));
+        Assert.ThrowsExactly<ArgumentException>(() => ServiceConfigurationStore.Validate(configuration));
     }
 
     [TestMethod]
@@ -158,7 +158,7 @@ public sealed class ServiceConfigurationStoreTests
             BackupPolicies = new Dictionary<BackupStore, BackupPolicy>()
         };
 
-        Assert.ThrowsException<ArgumentException>(() => ServiceConfigurationStore.Validate(configuration));
+        Assert.ThrowsExactly<ArgumentException>(() => ServiceConfigurationStore.Validate(configuration));
     }
 
     [TestMethod]
@@ -171,7 +171,7 @@ public sealed class ServiceConfigurationStoreTests
                 ? pair.Value with { RetentionCount = 0 }
                 : pair.Value);
 
-        Assert.ThrowsException<ArgumentException>(
+        Assert.ThrowsExactly<ArgumentException>(
             () => ServiceConfigurationStore.Validate(defaults with { BackupPolicies = policies }));
     }
 

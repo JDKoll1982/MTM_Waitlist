@@ -1,7 +1,6 @@
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Models;
-using System.Text;
 
 namespace MTM_Waitlist.Module_Core.Services;
 
@@ -52,7 +51,7 @@ public sealed record WipFloorReadResult<T>
 /// <summary>
 /// Executes the checked-in MTM WIP Application queue scripts <c>GetWipFloorQuantities.sql</c>,
 /// <c>GetWipInventoryPartNumbers.sql</c> and <c>GetWipInventoryLocations.sql</c> against the <c>mtm_wip_application_winforms</c> database (via
-/// <see cref="IMySqlHelperServer"/> with <see cref="MySqlDatabaseTarget.MtmWipApplication"/>), and maps
+/// <see cref="IReviewedQueueScriptReader"/>, which resolves the script by name against the reviewed set), and maps
 /// <c>GetWipFloorQuantities</c>' single result row to a <see cref="WipFloorQuantitySnapshot"/>. Never throws: a
 /// missing script/connection or SQL error yields <c>null</c> (or no part numbers) so a caller can fall back.
 /// </summary>
@@ -65,11 +64,11 @@ public sealed class WipFloorInventoryService
     private const string PartOperationsScriptName = "GetWipPartOperations";
     private const string OperationQuantityScriptName = "GetWipOperationQuantity";
 
-    private readonly IMySqlHelperServer _mysqlHelperServer;
+    private readonly IReviewedQueueScriptReader _queueScriptReader;
 
-    public WipFloorInventoryService(IMySqlHelperServer mysqlHelperServer)
+    public WipFloorInventoryService(IReviewedQueueScriptReader queueScriptReader)
     {
-        _mysqlHelperServer = mysqlHelperServer;
+        _queueScriptReader = queueScriptReader;
     }
 
     /// <summary>
@@ -85,20 +84,18 @@ public sealed class WipFloorInventoryService
     /// </remarks>
     public async Task<IReadOnlyList<string>> GetInventoryPartNumbersAsync(CancellationToken cancellationToken = default)
     {
-        var script = await WaitlistWipMySqlScriptStore.LoadAsync(InventoryPartNumbersScriptName, cancellationToken).ConfigureAwait(false);
-        if (string.IsNullOrWhiteSpace(script))
-        {
-            AppLog.Info("WipFloorInventory", $"Script '{InventoryPartNumbersScriptName}' loaded empty; returning no part numbers.");
-            return Array.Empty<string>();
-        }
-
         try
         {
-            var rows = await _mysqlHelperServer.ExecuteSqlQueryAsync(
-                script,
+            var rows = await _queueScriptReader.ExecuteReviewedScriptQueryAsync(
+                InventoryPartNumbersScriptName,
                 new Dictionary<string, object?>(),
-                MySqlDatabaseTarget.MtmWipApplication,
                 cancellationToken).ConfigureAwait(false);
+
+            if (rows is null)
+            {
+                AppLog.Info("WipFloorInventory", $"Script '{InventoryPartNumbersScriptName}' is not available; returning no part numbers.");
+                return Array.Empty<string>();
+            }
 
             var partNumbers = rows
                 .Select(row => GetString(row, "PartNumber"))
@@ -127,26 +124,18 @@ public sealed class WipFloorInventoryService
             return null;
         }
 
-        var script = await WaitlistWipMySqlScriptStore.LoadAsync(FloorSnapshotScriptName, cancellationToken).ConfigureAwait(false);
-        if (string.IsNullOrWhiteSpace(script))
-        {
-            AppLog.Info("WipFloorInventory", $"Script '{FloorSnapshotScriptName}' loaded empty; returning null.");
-            return null;
-        }
-
         AppLog.Info("WipFloorInventory", $"GetFloorSnapshotAsync executing '{FloorSnapshotScriptName}' for part '{normalized}'.");
         try
         {
-            var rows = await _mysqlHelperServer.ExecuteSqlQueryAsync(
-                script,
+            var rows = await _queueScriptReader.ExecuteReviewedScriptQueryAsync(
+                FloorSnapshotScriptName,
                 new Dictionary<string, object?>
                 {
                     ["PartNumber"] = normalized,
                 },
-                MySqlDatabaseTarget.MtmWipApplication,
                 cancellationToken).ConfigureAwait(false);
 
-            if (rows.Count == 0)
+            if (rows is null || rows.Count == 0)
             {
                 return null;
             }
@@ -181,20 +170,18 @@ public sealed class WipFloorInventoryService
             return Array.Empty<WipLocationQuantity>();
         }
 
-        var script = await WaitlistWipMySqlScriptStore.LoadAsync(InventoryLocationsScriptName, cancellationToken).ConfigureAwait(false);
-        if (string.IsNullOrWhiteSpace(script))
-        {
-            AppLog.Info("WipFloorInventory", $"Script '{InventoryLocationsScriptName}' loaded empty; returning no locations.");
-            return Array.Empty<WipLocationQuantity>();
-        }
-
         try
         {
-            var rows = await _mysqlHelperServer.ExecuteSqlQueryAsync(
-                script,
+            var rows = await _queueScriptReader.ExecuteReviewedScriptQueryAsync(
+                InventoryLocationsScriptName,
                 new Dictionary<string, object?> { ["PartNumber"] = normalized },
-                MySqlDatabaseTarget.MtmWipApplication,
                 cancellationToken).ConfigureAwait(false);
+
+            if (rows is null)
+            {
+                AppLog.Info("WipFloorInventory", $"Script '{InventoryLocationsScriptName}' is not available; returning no locations.");
+                return Array.Empty<WipLocationQuantity>();
+            }
 
             return rows
                 .Select(row => new WipLocationQuantity(GetString(row, "Location"), GetDecimal(row, "Quantity")))
@@ -314,8 +301,8 @@ public sealed class WipFloorInventoryService
     }
 
     /// <summary>
-    /// Load the named script and map its rows, reporting a missing script, an unreachable store and a SQL fault
-    /// all as one <see cref="WipFloorReadResult{T}.Unavailable"/>.
+    /// Ask for the named script's rows and map them, reporting a missing script, an unreachable store and a SQL
+    /// fault all as one <see cref="WipFloorReadResult{T}.Unavailable"/>.
     /// </summary>
     private async Task<WipFloorReadResult<T>> ReadAsync<T>(
         string scriptName,
@@ -323,20 +310,18 @@ public sealed class WipFloorInventoryService
         Func<IReadOnlyList<Dictionary<string, object?>>, IReadOnlyList<T>> map,
         CancellationToken cancellationToken)
     {
-        var script = await WaitlistWipMySqlScriptStore.LoadAsync(scriptName, cancellationToken).ConfigureAwait(false);
-        if (string.IsNullOrWhiteSpace(script))
-        {
-            AppLog.Info("WipFloorInventory", $"Script '{scriptName}' loaded empty; the floor is reported unavailable.");
-            return WipFloorReadResult<T>.Unavailable();
-        }
-
         try
         {
-            var rows = await _mysqlHelperServer.ExecuteSqlQueryAsync(
-                script,
+            var rows = await _queueScriptReader.ExecuteReviewedScriptQueryAsync(
+                scriptName,
                 parameters,
-                MySqlDatabaseTarget.MtmWipApplication,
                 cancellationToken).ConfigureAwait(false);
+
+            if (rows is null)
+            {
+                AppLog.Info("WipFloorInventory", $"Script '{scriptName}' is not available; the floor is reported unavailable.");
+                return WipFloorReadResult<T>.Unavailable();
+            }
 
             return WipFloorReadResult<T>.Answered(map(rows));
         }
@@ -374,47 +359,4 @@ public sealed class WipFloorInventoryService
         row.TryGetValue(key, out var value) && value is not null
             ? Convert.ToString(value)?.Trim() ?? string.Empty
             : string.Empty;
-}
-
-/// <summary>
-/// Resolves checked-in MTM WIP Application MySQL queue scripts for the Waitlist module from the app
-/// output (<c>Database/MTMWipApp/Queues/Module_Waitlist/Queues</c>).
-/// </summary>
-internal static class WaitlistWipMySqlScriptStore
-{
-    private const string ScriptFolderName = "Database";
-    private const string QueryFolderName = "MTMWipApp";
-    private const string ModuleFolderName = "Queues";
-    private const string ScriptModuleFolderName = "Module_Waitlist";
-    private const string ScriptQueryFolderName = "Queues";
-
-    public static async Task<string> LoadAsync(string scriptName, CancellationToken cancellationToken = default)
-    {
-        var scriptPath = GetScriptPath(scriptName);
-        if (!File.Exists(scriptPath))
-        {
-            return string.Empty;
-        }
-
-        await using var stream = File.OpenRead(scriptPath);
-        using var reader = new StreamReader(stream, Encoding.UTF8, true);
-        cancellationToken.ThrowIfCancellationRequested();
-        return await reader.ReadToEndAsync().ConfigureAwait(false);
-    }
-
-    private static string GetScriptPath(string scriptName)
-    {
-        var normalizedName = scriptName.EndsWith(".sql", StringComparison.OrdinalIgnoreCase)
-            ? scriptName
-            : $"{scriptName}.sql";
-
-        return Path.Combine(
-            AppContext.BaseDirectory,
-            ScriptFolderName,
-            QueryFolderName,
-            ModuleFolderName,
-            ScriptModuleFolderName,
-            ScriptQueryFolderName,
-            normalizedName);
-    }
 }
