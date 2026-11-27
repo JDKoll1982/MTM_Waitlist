@@ -36,7 +36,7 @@ public sealed class GenericRequestSubmitterTests
             },
             ProvenanceWorkOrder = "WO-9001",
             Description = "The skid is full.",
-            AcceptedWarnings = ["The die is shared."],
+            AcceptedWarnings = (string[])["The die is shared."],
             WorkCenterName = "PC-1",
             RequesterEmployeeNumber = "6229",
             RequesterEmployeeName = "John Koll",

@@ -3,7 +3,7 @@
   "specName": "Dependency Currentness, Credential Removal and Platform Modernization",
   "branch": "master",
   "currentStep": "implement",
-  "status": "implemented",
+  "status": "completed",
   "history": [
     {
       "step": "specify",
@@ -804,6 +804,43 @@
       "kind": "complete",
       "by": "ai",
       "at": "2026-11-27T11:59:26.933Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T049",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T08:00:00.000Z",
+      "did": "DEP-007 closed: DevWinUI 11.1.0 taken. The CS1705 was the Windows SDK projection package, not a missing platform release. Directory.Build.props now pins WindowsSdkPackageVersion 10.0.28000.87, the first Microsoft.Windows.SDK.NET.Ref that ships WinRT.Runtime 2.3.1.0. Build 0 warnings / 0 errors, suite 2,915 passed / 66 skipped / 0 failed, and the app was driven to sign-in, the shell, Settings, Work Center Setup and the WindowedContentDialog form. Six CsWinRT1032 collection expressions in the tests got the explicit array cast the analyzer documents, so the warning count stayed at 0.",
+      "files": [
+        "Directory.Packages.props",
+        "Directory.Build.props",
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/GenericRequestSubmitterTests.cs"
+      ]
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T125",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T08:00:01.000Z",
+      "did": "DEP-007 closed: DevWinUI 11.1.0 taken. The CS1705 was the Windows SDK projection package, not a missing platform release. Directory.Build.props now pins WindowsSdkPackageVersion 10.0.28000.87, the first Microsoft.Windows.SDK.NET.Ref that ships WinRT.Runtime 2.3.1.0. Build 0 warnings / 0 errors, suite 2,915 passed / 66 skipped / 0 failed, and the app was driven to sign-in, the shell, Settings, Work Center Setup and the WindowedContentDialog form. Six CsWinRT1032 collection expressions in the tests got the explicit array cast the analyzer documents, so the warning count stayed at 0.",
+      "files": [
+        "Directory.Packages.props",
+        "Directory.Build.props",
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/WaitlistRequestServiceTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/GenericRequestSubmitterTests.cs"
+      ]
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-11-27T18:28:20.428Z"
     }
   ],
   "request": "/speckit-companion-auto C:\\Users\\johnk\\Source\\repos\\MTM_Waitlist\\Dependency_Assessment\\2026-11-26-full-deep\\DEPENDENCY_AND_MODERNIZATION_SPECIFICATION.md",
@@ -1518,6 +1555,20 @@
       "at": "2026-11-27T06:40:53.929Z"
     },
     {
+      "decision": "SUPERSEDES the decision above: DevWinUI moves to 11.1.0, and the WinRT.Runtime projection is pinned through WindowsSdkPackageVersion 10.0.28000.87 in Directory.Build.props",
+      "why": "the original diagnosis treated the projection as a machine-level fact. It is a per-project package the .NET SDK picks from the target platform version, and WindowsSdkPackageVersion is the property Microsoft documents for overriding it. Microsoft.Windows.SDK.NET.Ref 10.0.28000.87 is the first release that ships WinRT.Runtime 2.3.1.0; every release up to 10.0.26100.57 ships 2.2.0.0. With the pin the CS1705 is gone, the solution builds at 0 warnings and 0 errors, the suite is 2,915 passed / 66 skipped / 0 failed, and the running application reaches sign-in, the shell, Settings, Work Center Setup and the WindowedContentDialog form. No approved proposal had to change: DEP-007 always targeted 11.1.0",
+      "rejected": "waiting for a platform release, which was the original condition and was wrong about what the block was; and pinning Microsoft.Windows.CsWinRT by PackageReference, which the documentation does not recommend for this",
+      "by": "agent",
+      "at": "2026-11-27T08:00:00.000Z"
+    },
+    {
+      "decision": "Six collection expressions in the test project carry an explicit array cast",
+      "why": "the projection pin brings the CsWinRT1032 authoring analyzer, which refuses a collection expression whose target is a non-mutable interface type. The cast names the concrete type the compiler was already synthesizing, so behaviour is unchanged and the warning count stayed at 0",
+      "rejected": "suppressing CsWinRT1032, which would hide the same shape wherever it appears next",
+      "by": "agent",
+      "at": "2026-11-27T08:00:00.000Z"
+    },
+    {
       "decision": "The reviewed queue-script route is a separate contract rather than a member of the data seam",
       "why": "The seam rule stays true: no member of it can run statement text, and the reader takes a name from the reviewed set so a caller cannot widen it",
       "rejected": "Keeping ExecuteSqlQueryAsync on the seam, or converting the queue scripts to stored procedures, which is database authoring this feature does not do",
@@ -1625,7 +1676,7 @@
   ],
   "step_summaries": {
     "specify": {
-      "summary": "Phases 1 to 4 landed and green with W16 and W17 of Phase 5; DevWinUI and the live-store proofs are recorded blocked; W18 onward not started",
+      "summary": "Phases 1 to 4 landed and green with W16 and W17 of Phase 5; the live-store proofs are recorded blocked (DevWinUI was later taken and now sits at 11.1.0); W18 onward not started",
       "key_finding": "The source document is narrower than the requirements in five places; the sharpest is MOD-006, whose prescribed move into the app project would break the on-host service that also shows that dialog"
     },
     "tasks": {
@@ -1660,7 +1711,7 @@
       "step": "implement"
     },
     {
-      "note": "Phase 3 W13 is blocked: DevWinUI 11.1.0 cannot be taken on a platform whose WinRT.Runtime projection is 2.2.0.0. T049, T037 and T050 are untouched and DevWinUI remains at 10.8.0.",
+      "note": "Phase 3 W13 was first recorded blocked, then closed on 2026-11-27: DevWinUI is at 11.1.0 because WindowsSdkPackageVersion 10.0.28000.87 supplies the WinRT.Runtime 2.3.1.0 it needs. T050's deployment-tool and display-scale screen passes remain open.",
       "step": "implement"
     },
     {
@@ -2229,7 +2280,7 @@
     },
     "T051": {
       "status": "DONE",
-      "did": "Phase 3 gate: Extensions 11.0.0, MySqlConnector 3.0.0, SqlClient 8.0.0 with the Pkcs pin gone, WindowsAppSDK 2.7.0, each after a clean restore, build and 2896-test suite; DevWinUI is NOT at 11.1.0 because that release references WinRT.Runtime 2.3.1 and this platform's projection supplies 2.2.0.0 (CS1705), so 10.8.0 stays and W13 is recorded blocked; plant-host and screen passes recorded blocked",
+      "did": "Phase 3 gate: Extensions 11.0.0, MySqlConnector 3.0.0, SqlClient 8.0.0 with the Pkcs pin gone, WindowsAppSDK 2.7.0, each after a clean restore, build and 2896-test suite; DevWinUI 11.1.0 was taken on 2026-11-27 by pinning WindowsSdkPackageVersion 10.0.28000.87, which supplies the WinRT.Runtime 2.3.1.0 it needs, so every runtime upgrade reached its target; plant-host and screen passes recorded blocked",
       "files": [
         "Directory.Packages.props",
         "Directory.Build.props",
@@ -2947,5 +2998,6 @@
       "finishedAt": "2026-11-27T08:03:10.365Z",
       "added": []
     }
-  ]
+  ],
+  "telemetryInstanceId": "02bb1e40-54d5-44c0-a1b1-a4d8f7187caf"
 }

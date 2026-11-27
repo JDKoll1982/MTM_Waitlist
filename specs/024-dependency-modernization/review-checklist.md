@@ -131,7 +131,7 @@ Next task: **Workflow: Open sign-in, the waitlist list, one request detail, Setu
 None of these is a defect to fix now. Each is a known, recorded hole that you are accepting knowingly.
 
 - [ ] **Frontend Engineer: Confirm the literal-wording extraction across the view definitions is either complete or still tracked as `T124`, and that no half-finished page exists.** The Setup views and the deployment tool window were the largest remaining sets. (Ref: tasks.md Phase 9 T124) | **Persona: Frontend Engineer**
-- [ ] **Frontend Engineer: Confirm DevWinUI is still at 10.8.0 and that the reason is recorded where a future reader will find it.** (Ref: tasks.md T125) | **Persona: Frontend Engineer**
+- [x] **Frontend Engineer: Confirm DevWinUI is at its approved 11.1.0 target and that the projection pin which makes that possible is recorded where a future reader will find it.** (Ref: tasks.md T049, T125) | **Persona: Frontend Engineer**
 - [ ] **Tech Lead: Confirm the three sign-in comparison documents are untouched and remain recorded as blocked, rather than regenerated from stale screens.** (Ref: tasks.md T118) | **Persona: Tech Lead**
 - [ ] **Tech Lead: Confirm the decimal-comma weight check is recorded as blocked rather than assumed to pass, since you cannot change this machine's regional format.** (Ref: tasks.md T105) | **Persona: Tech Lead**
 - [ ] **Tech Lead: Spot-check five ticked tasks from different phases against the tree and confirm each one is really present — a tick with nothing behind it is the failure this repository's guardrails exist to prevent.** (Ref: tasks.md, any ticked phase) | **Persona: Tech Lead**

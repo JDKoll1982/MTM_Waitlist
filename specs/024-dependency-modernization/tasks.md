@@ -255,12 +255,14 @@ screen pass where the wave changes observable behaviour. The local-instance proo
 **⟶ Wait for Wave W12 to finish, then:**
 
 **Wave W13 — DEP-007 — closes on T037, T049-T050:**
-- [ ] **T049** [US2] [DEP-007] Bump DevWinUI from 10.8.0 to 11.1.0, last among the runtime upgrades, recording 10.8.0 here before the edit · `Directory.Packages.props` ⛔ blocked-here: 11.1.0 is built against `WinRT.Runtime` 2.3.1.0 and this platform supplies 2.2.0.0, so the build fails `CS1705`; DevWinUI stays at 10.8.0, recorded in `T125`
+- [x] **T049** [US2] [DEP-007] Bump DevWinUI from 10.8.0 to 11.1.0, last among the runtime upgrades, recording 10.8.0 here before the edit · `Directory.Packages.props`
+  - The `CS1705` that blocked this wave was **not** a missing Windows platform release. DevWinUI 11.1.0 is compiled against `WinRT.Runtime` 2.3.1.0; every `Microsoft.Windows.SDK.NET.Ref` release the .NET SDK picks from the target platform version up to `10.0.26100.57` ships `2.2.0.0`, and `10.0.28000.87` is the first that ships `2.3.1.0`. The projection package is a per-project override, so `Directory.Build.props` now pins `WindowsSdkPackageVersion` to `10.0.28000.87` — the override Microsoft documents for exactly this case (a package newer than the .NET SDK's paired Windows SDK package). Verified: `dotnet build MTM_Waitlist.sln -p:Platform=x64` is 0 warnings / 0 errors, the suite is 2,915 passed / 66 skipped / 0 failed, and the running application reaches sign-in, the shell, Settings, Work Center Setup and the `WindowedContentDialog` form.
+  - The pin also brings the `CsWinRT1032` authoring analyzer, which flagged six collection expressions in the test project. Each now carries the explicit array cast the analyzer documents, so the warning count stayed at 0.
 - **⟶ then:**
-- [ ] **T050** [US2] [DEP-007] Review every screen for visual regression: a control template or theme change is the expected failure, and it is not caught by the build · the six screens `(no file change)` ⛔ blocked-here: needs an interactive screen review, which this workstation cannot drive
+- [ ] **T050** [US2] [DEP-007] Review every screen for visual regression: a control template or theme change is the expected failure, and it is not caught by the build · the six screens `(no file change)` ⛔ blocked-here: partially driven. Sign-in, the waitlist shell and its card, Settings, Work Center Setup and the work center form were driven through UI Automation on 2026-11-27 and render correctly. Still outstanding: the deployment tool window, and each screen re-read at each display scale the plant uses.
 
 **Phase 3 gate — closes on T051, after every wave above:**
-- [x] **T051** [US2] [FR-033, FR-036] Phase 3 evidence: each package at its target — DevWinUI excepted, blocked by `CS1705` and recorded in `T125` — the pin gone from its new home; a cold restore and the suite green at each wave; the local-instance proofs recorded; the plant-host and screen passes recorded as blocked rather than ticked · `MTM_Waitlist.sln`, `MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj`
+- [x] **T051** [US2] [FR-033, FR-036] Phase 3 evidence: every package at its target, DevWinUI included at 11.1.0 through the `WindowsSdkPackageVersion` pin recorded in `T049`; the pin gone from its new home; a cold restore and the suite green at each wave; the local-instance proofs recorded; the plant-host and display-scale screen passes recorded as blocked rather than ticked · `MTM_Waitlist.sln`, `MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj`
 
 ---
 
@@ -553,7 +555,7 @@ is required evidence that has to be produced somewhere else.
 | Task | What it needs |
 |---|---|
 | T025 | The plant operator and the deployment runbook owner, to provision two variables and rotate disclosed values |
-| T049 | A Windows platform release that supplies `WinRT.Runtime` 2.3.1.0, which DevWinUI 11.1.0 is built against; this platform supplies 2.2.0.0, so the upgrade fails `CS1705` and DevWinUI stays at 10.8.0 |
+| T049 | **Resolved 2026-11-27.** The block was the Windows SDK projection package, not a missing platform release: DevWinUI 11.1.0 needs `WinRT.Runtime` 2.3.1.0, and `WindowsSdkPackageVersion` 10.0.28000.87 supplies it. DevWinUI is at 11.1.0; `T050`'s deployment-tool and display-scale passes remain open |
 | T039 | The two connection-string variables, provisioned, and a reachable store |
 | T042 | The plant host, reachable |
 | T045 | The plant host, reachable |
@@ -610,13 +612,14 @@ the suite green at 2,909 passed, 65 skipped, 0 failed.
   before count from `T106`'s own search rather than the audit's figure · `Module_Setup/Views`,
   `MTM_Database_Deployment/MainWindow.xaml`, `Strings/en-us/Resources.resw` — per FR-023 (partial)
 
-- [x] **T125** [US2] [DEP-007] Record the DEP-007 outcome as the unresolved gap it is, with its reason and the condition
-  that reopens it: DevWinUI stays at 10.8.0 because 11.1.0 is built against `WinRT.Runtime` 2.3.1.0 while this platform
-  supplies 2.2.0.0, so the upgrade fails CS1705. `T049` carries no block marker of its own, the register above does not
-  list it, and `T051`'s "each package at its target" holds for the four other runtime upgrades and not this one, so add
-  `T049` to that register and read `T051` with this task. `T037` stays unchecked for the same reason. Re-attempt when
-  a platform release supplies `WinRT.Runtime` 2.3.1.0; until then the approved target for this one package is not reached
-  and saying so is the record · `Directory.Packages.props`, `MTM_Waitlist.sln` `(no file change unless the platform moves)` — per FR-007 (missing)
+- [x] **T125** [US2] [DEP-007] Record the DEP-007 outcome, its reason and the condition that closed it. **Closed 2026-11-27.**
+  The original reading was wrong about the cause: the platform did not need to ship a newer release, because the
+  Windows SDK projection package is a per-project override rather than a machine-level fact. DevWinUI 11.1.0 is built
+  against `WinRT.Runtime` 2.3.1.0; `Microsoft.Windows.SDK.NET.Ref` 10.0.28000.87 is the first release carrying it, so
+  `Directory.Build.props` pins `WindowsSdkPackageVersion` to that version and DevWinUI sits at 11.1.0. The pin is the
+  only thing to revisit: drop it once the .NET SDK on the build machines supplies `WinRT.Runtime` 2.3.1.0 or later from
+  the target platform version on its own. `T050`'s deployment-tool and display-scale passes stay open and are stated as
+  such · `Directory.Packages.props`, `Directory.Build.props`, `MTM_Waitlist.sln` — per FR-007
 
 - [x] **T126** [US5] [MOD-004] Give the two JSON-backed stores that still serialize by reflection the generated metadata the
   other stores got, or record a reasoned exception at each. `MTM_Waitlist.Waitlist.View/Services/LocalWaitlistMessageSeenStore.cs:66,92`

@@ -1971,7 +1971,11 @@ public sealed class WaitlistRequestServiceTests
     [TestMethod]
     public async Task Service_WaitlistRequestServiceTests_RefreshFromDatabaseAsync_AsksForResolvedRowsInsideTheRetentionWindow()
     {
-        var helper = new StubMySqlHelperServer([StoreRow("f0000000-00aa-4000-8000-0000000000ab", "Pending", null)]);
+        var helper = new StubMySqlHelperServer(
+        (Dictionary<string, object?>[])
+        [
+            StoreRow("f0000000-00aa-4000-8000-0000000000ab", "Pending", null),
+        ]);
         var service = new WaitlistRequestService(helper);
 
         await service.RefreshFromDatabaseAsync("Expo Drive");
@@ -1992,6 +1996,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_RefreshFromDatabaseAsync_KeepsAResolvedRequestInsideTheWindow()
     {
         var helper = new StubMySqlHelperServer(
+        (Dictionary<string, object?>[])
         [
             StoreRow("f0000000-00aa-4000-8000-0000000000ac", "Completed", DateTime.UtcNow.AddDays(-1)),
         ]);
@@ -2013,6 +2018,7 @@ public sealed class WaitlistRequestServiceTests
     public async Task Service_WaitlistRequestServiceTests_RefreshFromDatabaseAsync_DropsAResolvedRequestOlderThanTheWindow()
     {
         var helper = new StubMySqlHelperServer(
+        (Dictionary<string, object?>[])
         [
             StoreRow("f0000000-00aa-4000-8000-0000000000ad", "Completed", DateTime.UtcNow.AddDays(-91)),
             StoreRow("f0000000-00aa-4000-8000-0000000000ae", "Pending", null),
@@ -2036,6 +2042,7 @@ public sealed class WaitlistRequestServiceTests
         settings.SetInt(WaitlistRequestService.ResolvedRetentionSettingKey, 7);
 
         var helper = new StubMySqlHelperServer(
+        (Dictionary<string, object?>[])
         [
             StoreRow("f0000000-00aa-4000-8000-0000000000af", "Completed", DateTime.UtcNow.AddDays(-10)),
         ]);
@@ -2058,6 +2065,7 @@ public sealed class WaitlistRequestServiceTests
         settings.SetInt(WaitlistRequestService.ResolvedRetentionSettingKey, 0);
 
         var helper = new StubMySqlHelperServer(
+        (Dictionary<string, object?>[])
         [
             StoreRow("f0000000-00aa-4000-8000-0000000000b0", "Completed", DateTime.UtcNow.AddDays(-1)),
         ]);

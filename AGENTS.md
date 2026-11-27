@@ -20,7 +20,7 @@ before assuming the failure is environmental.
 .NET 10, `net10.0-windows10.0.19041.0`, WinUI 3. Every package the solution references:
 `Microsoft.WindowsAppSDK` 2.4.0, `CommunityToolkit.Mvvm` 8.4.2, `CommunityToolkit.WinUI.UI.Controls`
 and `CommunityToolkit.WinUI.UI.Animations` 7.1.2, `CommunityToolkit.WinUI.Controls.SettingsControls`
-8.2.251219, `DevWinUI` 10.8.0, `WinUIEx` 2.9.2, `Microsoft.Xaml.Behaviors.WinUI.Managed` 3.0.1,
+8.2.251219, `DevWinUI` 11.1.0, `WinUIEx` 2.9.2, `Microsoft.Xaml.Behaviors.WinUI.Managed` 3.0.1,
 `MySqlConnector` 2.6.1, `Microsoft.Data.SqlClient` 6.1.1,
 `Microsoft.Extensions.Hosting`, `Microsoft.Extensions.Configuration.Abstractions`,
 `Microsoft.Extensions.DependencyInjection.Abstractions`, `Microsoft.Extensions.Logging.Abstractions`

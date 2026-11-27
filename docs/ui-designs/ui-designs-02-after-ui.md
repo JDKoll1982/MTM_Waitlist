@@ -10,8 +10,8 @@
 Copy this whole file into the task. Replace the `<<…>>` placeholders in section 2.
 
 You are producing the **after** half of a QOL design record for the MTM Waitlist Application: a WinUI 3
-desktop app on .NET 10 (`net10.0-windows10.0.19041.0`), Windows App SDK 2.4.0,
-`CommunityToolkit.Mvvm` 8.4.2, `WinUIEx` 2.9.2, `DevWinUI` 10.8.0. The image shows an interface that
+desktop app on .NET 10 (`net10.0-windows10.0.19041.0`), Windows App SDK 2.7.0,
+`CommunityToolkit.Mvvm` 8.4.2, `WinUIEx` 2.9.3, `DevWinUI` 11.1.0. The image shows an interface that
 **does not exist yet** and that a developer must be able to build from the real control set.
 
 ---

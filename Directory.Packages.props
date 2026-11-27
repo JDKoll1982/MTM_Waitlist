@@ -21,7 +21,7 @@
     <PackageVersion Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2957" />
     <PackageVersion Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="3.0.1" />
     <PackageVersion Include="WinUIEx" Version="2.9.3" />
-    <PackageVersion Include="DevWinUI" Version="10.8.0" />
+    <PackageVersion Include="DevWinUI" Version="11.1.0" />
   </ItemGroup>
 
   <ItemGroup Label="Toolkit">
