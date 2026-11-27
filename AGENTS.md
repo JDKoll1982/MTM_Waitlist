@@ -17,17 +17,18 @@ before assuming the failure is environmental.
 
 ## Stack
 
-.NET 10, `net10.0-windows10.0.19041.0`, WinUI 3. Every package the solution references:
-`Microsoft.WindowsAppSDK` 2.4.0, `CommunityToolkit.Mvvm` 8.4.2, `CommunityToolkit.WinUI.UI.Controls`
-and `CommunityToolkit.WinUI.UI.Animations` 7.1.2, `CommunityToolkit.WinUI.Controls.SettingsControls`
-8.2.251219, `DevWinUI` 11.1.0, `WinUIEx` 2.9.2, `Microsoft.Xaml.Behaviors.WinUI.Managed` 3.0.1,
-`MySqlConnector` 2.6.1, `Microsoft.Data.SqlClient` 6.1.1,
-`Microsoft.Extensions.Hosting`, `Microsoft.Extensions.Configuration.Abstractions`,
-`Microsoft.Extensions.DependencyInjection.Abstractions`, `Microsoft.Extensions.Logging.Abstractions`
-and `Microsoft.Extensions.Options` at 10.0.10, `System.Security.Cryptography.ProtectedData` 10.0.0 and `System.Security.Cryptography.Pkcs` 9.0.21 (transitive
-through `Microsoft.Data.SqlClient`, pinned in `Directory.Build.props`), `Microsoft.Windows.SDK.BuildTools`, `MSTest.TestAdapter` and `MSTest.TestFramework` 3.7.0,
-`Microsoft.NET.Test.Sdk` 17.13.0, `coverlet.collector` 6.0.2. 17 projects, one target framework each,
-shared pins in `Directory.Build.props`.
+.NET 10, `net10.0-windows10.0.19041.0`, WinUI 3. Twenty packages are pinned centrally in
+`Directory.Packages.props`, and no `PackageReference` carries a `Version`:
+`Microsoft.WindowsAppSDK` 2.7.0, `WinUIEx` 2.9.3, `DevWinUI` 11.1.0,
+`Microsoft.Xaml.Behaviors.WinUI.Managed` 3.0.1, `CommunityToolkit.Mvvm` 8.4.2,
+`CommunityToolkit.WinUI.Animations` and `CommunityToolkit.WinUI.Controls.SettingsControls` 8.2.251219,
+`MySqlConnector` 3.0.0, `Microsoft.Data.SqlClient` 8.0.0,
+`Microsoft.Extensions.Hosting`, `.Configuration.Abstractions`, `.DependencyInjection.Abstractions`,
+`.Logging.Abstractions` and `.Options` 11.0.0, `System.Security.Cryptography.ProtectedData` 11.0.0,
+`Microsoft.Windows.SDK.BuildTools` 10.0.28000.2957, `MSTest.TestAdapter` and `MSTest.TestFramework`
+4.5.3, `Microsoft.NET.Test.Sdk` 18.12.0, `coverlet.collector` 10.1.1. 17 projects, one target framework
+each. `Directory.Build.props` pins `WindowsSdkPackageVersion` to `10.0.28000.87`, which is what supplies
+the `WinRT.Runtime` 2.3.1.0 that `DevWinUI` 11.1.0 is compiled against.
 
 ## Layout
 
