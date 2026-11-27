@@ -15,13 +15,19 @@
          for ever. See the file for why: without it a test that never finishes leaves a host holding the test
          assembly, and every later run then looks like it never started. -->
     <RunSettingsFilePath>$(MSBuildProjectDirectory)\MTM_Waitlist.Tests.runsettings</RunSettingsFilePath>
+
+    <!-- MSTest 4's analyser reports MSTEST0032 for an assertion whose two sides are both compile-time constants.
+         Nine cases here compare two constants on purpose: they pin a shipped default, a retention rule, two
+         distinct event names or two distinct prompt keys, so a later edit to either constant fails the test. The
+         assertion is the contract, not a tautology, and the analyser cannot tell the two apart. -->
+    <NoWarn>$(NoWarn);MSTEST0032</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="3.7.0" />
-    <PackageReference Include="MSTest.TestFramework" Version="3.7.0" />
-    <PackageReference Include="coverlet.collector" Version="6.0.2">
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="MSTest.TestAdapter" />
+    <PackageReference Include="MSTest.TestFramework" />
+    <PackageReference Include="coverlet.collector">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

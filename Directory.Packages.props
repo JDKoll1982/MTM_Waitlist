@@ -1,0 +1,54 @@
+<Project>
+
+  <!--
+    One version per package for the whole solution (DEP-008; FR-008).
+
+    Every project declares which packages it uses and none of them declares a version, so a version can no longer
+    drift between the fourteen projects that reference Microsoft.WindowsAppSDK or the twelve that reference
+    CommunityToolkit.Mvvm. NuGet raises NU1008 if a `PackageReference` in any project still carries a `Version`;
+    a genuine per-project exception is declared as `VersionOverride` on that one reference, never as a silent
+    second version here.
+
+    The previous version of every package below is recorded in
+    `specs/024-dependency-modernization/tasks.md` before each bump, so a revert is one edit.
+  -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup Label="UI platform">
+    <PackageVersion Include="Microsoft.WindowsAppSDK" Version="2.7.0" />
+    <PackageVersion Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2957" />
+    <PackageVersion Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="3.0.1" />
+    <PackageVersion Include="WinUIEx" Version="2.9.3" />
+    <PackageVersion Include="DevWinUI" Version="10.8.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Toolkit">
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageVersion Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
+    <PackageVersion Include="CommunityToolkit.WinUI.Animations" Version="8.2.251219" />
+  </ItemGroup>
+
+  <ItemGroup Label="Hosting, configuration, logging and options">
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="11.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="11.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="11.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="11.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="11.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Data access">
+    <PackageVersion Include="MySqlConnector" Version="3.0.0" />
+    <PackageVersion Include="Microsoft.Data.SqlClient" Version="8.0.0" />
+    <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="11.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Tests">
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.12.0" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="4.5.3" />
+    <PackageVersion Include="MSTest.TestFramework" Version="4.5.3" />
+    <PackageVersion Include="coverlet.collector" Version="10.1.1" />
+  </ItemGroup>
+
+</Project>
