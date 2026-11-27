@@ -69,8 +69,9 @@ pwsh scripts\docs\generate-docs.ps1 -Mode Gaps -Workflow startup-launch
 
 It writes `code-facts.json` (types, constructor/field/creation/call/DI-resolution edges, `sp_*`
 references, with file and line) and `diagram-gaps.md`, which names the JSON location to edit for each
-orphan node, label the code does not hold, and edge the code proves but the spec omits. It never edits
-a spec: the wording of a label, a note or a lane choice stays an authoring decision.
+orphan node, label the code does not hold, and edge the code proves but the spec omits. Both files are
+generated output and are not checked in, so look for them where the script wrote them rather than in this
+folder. It never edits a spec: the wording of a label, a note or a lane choice stays an authoring decision.
 
 ## Test
 

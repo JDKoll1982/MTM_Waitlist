@@ -33,9 +33,11 @@ and the annotations already neutralise the risk the deletion was meant to remove
 
 ## What the original audit got right (unchanged, still worth knowing)
 
-- **Reference facts:** .NET SDK `10.0.401`; TFM `net10.0-windows10.0.19041.0`;
-  `Microsoft.WindowsAppSDK` **2.3.1**; canonical build
+- **Reference facts:** .NET SDK `10.0.404`; TFM `net10.0-windows10.0.19041.0`;
+  `Microsoft.WindowsAppSDK` **2.7.0**; canonical build
   `dotnet build MTM_Waitlist.sln -p:Configuration=Debug -p:Platform=x64 /m:1 /nodeReuse:false`.
+  Re-measured on this workstation 2026-11-26; both figures were `10.0.401` / `2.3.1` when the audit
+  recorded them (the SDK has since moved to `10.0.404` and the platform to `2.7.0`).
 - **MCP tool scopes.** Workspace `.vscode/mcp.json`: `csv-mcp-server`, `xamlmcp`. User
   `%APPDATA%\Code\User\mcp.json`: `io.github.upstash/context7`, `microsoftdocs/mcp`,
   `microsoft/playwright-mcp`. (The workspace and user files were trimmed again on 2026-10-17 when the
@@ -54,7 +56,9 @@ and the annotations already neutralise the risk the deletion was meant to remove
   third underscore segment). **Fix in SQL, not in the validator.**
 - **Decisions #3 — outside `.github` scope, still open:** `Directory.Build.props:30` said "the **2.3.0** in
   use" (actual 2.3.1 — corrected 2026-09-20 by
-  `specs/004-unified-card-item-picker` T210); and
+  `specs/004-unified-card-item-picker` T210; the figure moved to 2.4.0 on 2026-11-26 (re-measured) and to
+  2.7.0 in the same day's platform upgrade);
+  and
   `Documents/Development/CompletedImplementations/Complete-Waitlist-Request-Workflow-Checklist.md:570` uses
   the stale `-p:WinUISDKReferences=false` build command, which is **still** stale.
 

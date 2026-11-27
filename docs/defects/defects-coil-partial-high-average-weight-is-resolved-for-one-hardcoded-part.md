@@ -74,8 +74,9 @@ placeholder.
 - The coil identity that *should* be used is already available in the app:
   `MTM_Waitlist.Waitlist.NewRequest/Services/CoilAvailabilityService.cs`
   (`GetCoilForJobAsync(workCenter)` → coil number / part number, with a coil part-number prefix rule),
-  and the work-order read shapes (`Database/InforVisual/Queues/Module_Waitlist/Queries/GetWorkOrderLookup.sql`
-  and its cached counterpart `sp_visual_work_order_lookup_get`).
+  and the work-order read shapes (`Database/InforVisual/Queues/Module_Setup/Queries/LookupWorkOrder.sql`
+  and its cached counterpart `Database/InforVisual/Queues/Module_Mock/Populations/work_order_lookup_population.sql`,
+  served as `sp_visual_work_order_lookup_get`).
 
 ## 4. Root cause
 

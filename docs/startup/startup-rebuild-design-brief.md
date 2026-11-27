@@ -226,8 +226,12 @@ Two consequences:
 
 ### S9.3 The migration script
 
-`tools/migrate-logging-callsites.ps1` performs the static-call-site rewrite. Dry run is the default; nothing is
-written without `-Apply`.
+> **Historical — the script described below no longer exists.** `tools/migrate-logging-callsites.ps1` was
+> deleted on 2026-10-17 (commit `5ba4d301`), and no `tools/` folder remains at the repository root. The
+> paragraph is kept as the record of how the call-site rewrite was done, not as an instruction.
+
+`tools/migrate-logging-callsites.ps1` performed the static-call-site rewrite. Dry run was the default; nothing
+was written without `-Apply`.
 
 - It handles the fully-qualified form first (one production file calls
   `MTM_Waitlist.Module_Core.Helpers.StartupDebugLog.Info(...)`), consuming the qualifier rather than leaving it

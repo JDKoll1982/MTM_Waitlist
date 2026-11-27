@@ -115,4 +115,3 @@ looking; an already-retired artefact needs nothing but the reference removed.
   Decisions #2 recorded `.github/copilot-startup-steps.yaml` and
   `.github/scripts/restructure-database-layout.ps1` as **DELETED**; **both are present in the tree** (restored
   with corrected "REFERENCE ONLY" / "ARCHIVED — DO NOT RE-RUN" headers). See that file's correction note.
-- `.github/memories/repo/document-inventory.md` — the wider inventory this ledger is named from.

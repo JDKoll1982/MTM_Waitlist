@@ -33,16 +33,19 @@ states where they live rather than copying one workstation's contents:
 | --- | --- | --- |
 | **user (Copilot CLI and agent hosts)** | `%USERPROFILE%\.copilot\mcp-config.json` | `io.github.upstash/context7` (http, `https://mcp.context7.com/mcp`) and `microsoftdocs/mcp` (http, `https://learn.microsoft.com/api/mcp`) |
 | **user (VS Code)** | `%APPDATA%\Code\User\mcp.json` | present but empty (`{"servers": {}}`) |
-| **repository** | `.mcp.json` | empty `mcpServers` object |
+| **repository** | `.mcp.json` | `microsoft-learn` (http, `https://learn.microsoft.com/api/mcp`) and `context7` (stdio, `npx @upstash/context7-mcp`), with their prerequisites recorded in the same file |
 
 `microsoft/playwright-mcp` is not registered anywhere on this workstation. Check the two user files
 before concluding a server is missing; do not assume their contents from this table.
 
-The repository declares **no** MCP server. `.mcp.json` keeps an empty `mcpServers` object as the place a
-future server is registered, and `.vscode/mcp.json` is gone: it held a duplicate `csv-mcp-server` whose
-storage path did not exist. The CSV server was retired because its `load_csv` fails on the repository's
-own schema exports and no fixed release exists; read those exports with
-`Import-Csv -Delimiter "`t"` instead.
+The repository declares those two servers, so a fresh clone has documentation lookup without any
+machine-local setup beyond Node.js: `microsoft-learn` answers over HTTPS with nothing installed, and
+`context7` is launched through `npx` rather than a global install. They were declared together, in
+`024-dependency-modernization` (AI-003), and the same rule applies to any server added later — a
+declaration whose runtime is missing is a failed launch on every session. `.vscode/mcp.json` stays gone:
+it held a duplicate `csv-mcp-server` whose storage path did not exist. The CSV server was retired because
+its `load_csv` fails on the repository's own schema exports and no fixed release exists; read those
+exports with `Import-Csv -Delimiter "`t"` instead.
 
 `xamlmcp` is intentionally unregistered: the WinUI in-process agent it attaches to is absent from this
 repository, so the server has nothing to serve. Restore its registration in the same change that adds the

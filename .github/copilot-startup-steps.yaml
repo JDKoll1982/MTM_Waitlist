@@ -16,9 +16,11 @@
 # =====================================================================================
 
 environment:
-  runtime: .NET 10 (SDK 10.0.401)
+  # Re-verified against this workstation on 2026-11-26. Update these three figures whenever the
+  # platform moves, in the same change that moves it (AI-001, FR-025).
+  runtime: .NET 10 (SDK 10.0.404)
   targetFramework: net10.0-windows10.0.19041.0
-  uiFramework: WinUI 3 (Microsoft.WindowsAppSDK 2.3.1)
+  uiFramework: WinUI 3 (Microsoft.WindowsAppSDK 2.7.0)
   xamlNamespacePolicy: Microsoft.UI.Xaml only - never legacy Windows.UI.Xaml
 
 activeToolChains:

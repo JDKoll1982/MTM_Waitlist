@@ -1,7 +1,7 @@
 # Deploying `MTM_Waitlist.Mock.Service`
 
 Executable deployment for the on-host half of the Module_Mock cached fallback:
-`install-mock-service.ps1`.
+`MTM_Waitlist.Mock.Service/deploy/install-mock-service.ps1`.
 
 `docs/operations/operations-mock-service-deploy-and-run.md` §2–§5 remains the narrative authority for *what* a deployment is
 (publish, deploy, first run, verify, uninstall). This folder is the **executable form** of it: one
@@ -75,8 +75,9 @@ describes, and nothing else.
 **Run it with no argument and it asks what you are trying to do.** That is the intended way to run it by hand:
 
 ```powershell
+# run from the repository root
 # guided: deploy, publish-then-deploy, install elsewhere, or a clean sweep
-.\install-mock-service.ps1
+.\MTM_Waitlist.Mock.Service\deploy\install-mock-service.ps1
 ```
 
 The guided flow asks the menu below, then the questions that are independent of it, then shows a summary with
@@ -100,16 +101,16 @@ the same exit codes:
 
 ```powershell
 # normal deployment: publish fresh, deploy, install + verify secrets, start and health-check
-pwsh -NoProfile -ExecutionPolicy Bypass -File ./deploy/install-mock-service.ps1 -Publish
+pwsh -NoProfile -ExecutionPolicy Bypass -File ./MTM_Waitlist.Mock.Service/deploy/install-mock-service.ps1 -Publish
 
 # redeploy an existing publish output (no rebuild); -NonInteractive says "no prompts, defaults"
-pwsh -NoProfile -ExecutionPolicy Bypass -File ./deploy/install-mock-service.ps1 -NonInteractive
+pwsh -NoProfile -ExecutionPolicy Bypass -File ./MTM_Waitlist.Mock.Service/deploy/install-mock-service.ps1 -NonInteractive
 
 # deploy to a different folder
-pwsh -NoProfile -ExecutionPolicy Bypass -File ./deploy/install-mock-service.ps1 -TargetPath D:\Services\MTM_Waitlist.Mock.Service
+pwsh -NoProfile -ExecutionPolicy Bypass -File ./MTM_Waitlist.Mock.Service/deploy/install-mock-service.ps1 -TargetPath D:\Services\MTM_Waitlist.Mock.Service
 
 # a clean sweep: also delete the stored configuration and the backups
-pwsh -NoProfile -ExecutionPolicy Bypass -File ./deploy/install-mock-service.ps1 -PurgeState
+pwsh -NoProfile -ExecutionPolicy Bypass -File ./MTM_Waitlist.Mock.Service/deploy/install-mock-service.ps1 -PurgeState
 ```
 
 ### Where it installs

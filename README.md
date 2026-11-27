@@ -98,6 +98,13 @@ Close the app first - the copy fails on the locked `MTM_Waitlist.exe`. A deploye
 `MTM_MOCK_SERVICE_ENDPOINT` and `MTM_MOCK_SERVICE_USER` (or the equivalent `MockServiceClient` section) before it
 can ask the service for an early refresh.
 
+A deployed client talks only to the MySQL server its connection string names. A workstation off the plant network
+may run a **development** build, which can fall back to that workstation's own MySQL server so the app can be
+worked on at the weekend; that fallback is compiled out of every Release build and therefore cannot exist in a
+published client. `MTM_Waitlist.Tests/Module_Core/LocalStoreFallbackAuditTests.cs` fails the suite if the guard,
+the build property or the single resolution seam stops holding. When the configured server does not answer, the
+launch stops and says so rather than reading a different store.
+
 ### On-host cache service
 
 `MTM_Waitlist.Mock.Service/deploy/install-mock-service.ps1` publishes, redeploys, installs and proves the

@@ -1,3 +1,19 @@
 {
-  "mcpServers": {}
+  "mcpServers": {
+    "microsoft-learn": {
+      "type": "http",
+      "url": "https://learn.microsoft.com/api/mcp"
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
+    }
+  },
+  "prerequisites": {
+    "runtime": "Node.js with npx is required for context7; the server is launched as `npx @upstash/context7-mcp` on this machine rather than installed.",
+    "network": "Outbound HTTPS to learn.microsoft.com (microsoft-learn), registry.npmjs.org (the context7 package download) and the Context7 service endpoint.",
+    "data": "Neither server reads this repository. Both answer documentation questions from public sources, and neither is given file-system access, credentials or a connection string.",
+    "note": "Both servers are declared together or not at all: a declaration whose runtime is missing costs a failed launch on every session."
+  }
 }

@@ -23,7 +23,7 @@ rather than the eight content dialogs and one windowed editor the codebase held 
 | `Window` | A top-level window: the shell, the service console, the control inspector. | Owned by the desktop. |
 | `Page` | A screen the shell navigates to. | Inside the one application window. |
 | `Dialog` | A modal surface. Its body is a `UserControl` presented through `WindowedDialogHost`, so it opens in its own window owned by the main one. | Owned by the main window, centred on it. |
-| `Control` | A reusable fragment of a screen, including the standard message body. Never a surface of its own (FR-033). | Inside whatever holds it. |
+| `Control` | A reusable fragment of a screen. Never a surface of its own (FR-033). | Inside whatever holds it. |
 | `ResourceDictionary` | Styles, brushes and sizes only. No visuals of its own, no `x:Class`, and still held to the rules (FR-026). | Merged by `App.xaml`. |
 
 ## Totals
@@ -34,9 +34,9 @@ rather than the eight content dialogs and one windowed editor the codebase held 
 | `Window` | 5 |
 | `Page` | 54 |
 | `Dialog` | 9 |
-| `Control` | 13 |
+| `Control` | 12 |
 | `ResourceDictionary` | 11 |
-| **All** | **96** |
+| **All** | **95** |
 
 ## The inventory
 
@@ -47,7 +47,6 @@ Paths are relative to the repository root. *Modal* says whether the surface open
 | App | (root) | App.xaml | `App.xaml` | no |
 | App | MTM_Waitlist.Mock.Service | App.xaml | `MTM_Waitlist.Mock.Service/App.xaml` | no |
 | App | MTM_Database_Deployment | App.xaml | `MTM_Database_Deployment/App.xaml` | no |
-| Control | MTM_Waitlist.Shared | MessageDialogContent.xaml | `MTM_Waitlist.Shared/Dialogs/MessageDialogContent.xaml` | no |
 | Control | Module_Mock | ReadStatusIndicator.xaml | `Module_Mock/Views/ReadStatusIndicator.xaml` | no |
 | Control | Module_Settings | DeveloperLogPanelView.xaml | `Module_Settings/Views/DeveloperLogPanelView.xaml` | no |
 | Control | Module_Settings | ImageOverrideEditorControl.xaml | `Module_Settings/Views/ImageOverrideEditorControl.xaml` | no |

@@ -207,8 +207,8 @@ at **1.1.0** and has taken further changes since. Republish and redeploy it **on
 belongs on the cache host, not on this workstation:
 
 ```powershell
-cd <repo>\MTM_Waitlist.Mock.Service
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\deploy\install-mock-service.ps1 -Publish
+# from the repository root
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\MTM_Waitlist.Mock.Service\deploy\install-mock-service.ps1 -Publish
 ```
 
 That publishes a fresh Release output, deploys it, re-proves the secrets, restarts the service and

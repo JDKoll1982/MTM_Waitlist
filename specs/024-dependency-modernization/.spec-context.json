@@ -1,0 +1,2951 @@
+{
+  "workflow": "companion",
+  "specName": "Dependency Currentness, Credential Removal and Platform Modernization",
+  "branch": "master",
+  "currentStep": "implement",
+  "status": "implemented",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-27T05:33:47.443Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-11-27T05:36:16.571Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T05:43:26.109Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T05:49:25.531Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-27T05:50:44.278Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T001",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T05:54:00.773Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T05:54:00.774Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T05:54:00.774Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T05:54:00.774Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T002",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T05:59:34.424Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T009",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T05:59:34.425Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T010",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T05:59:34.425Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T011",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T05:59:34.425Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T003",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:02:15.814Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T012",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:02:15.814Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T013",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:02:15.815Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T004",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:02:45.722Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T014",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:02:45.722Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T015",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:02:45.723Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T016",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:02:45.723Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:02:45.723Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:04:24.217Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T018",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:04:24.218Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T019",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:04:24.218Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T020",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:04:24.218Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T021",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:04:24.219Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T022",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:04:24.219Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T023",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:04:24.220Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T024",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:04:24.220Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T026",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:06:39.835Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T028",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:08:08.459Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T029",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:08:08.459Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T030",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:08:08.460Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T031",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:08:42.805Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T027",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:08:42.805Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T032",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:13:48.530Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T033",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:13:48.531Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T034",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:13:55.357Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T035",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:16:02.325Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T038",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:16:02.325Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T040",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:18:41.946Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T043",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:20:49.166Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T036",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:22:57.167Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T046",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:22:57.167Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T048",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:22:57.168Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T051",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:24:34.302Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T052",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:30:15.538Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T054",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:30:15.539Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T053",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:33:27.263Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T055",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:33:27.264Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T056",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:33:35.470Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T060",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:37:03.960Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T061",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:37:03.961Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T062",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:37:03.961Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T063",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:37:03.962Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T065",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:39:10.507Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T066",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:39:10.507Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T067",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:39:10.508Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T057",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:52:43.067Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T068",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:52:43.067Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T069",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:52:43.068Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T070",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:52:43.068Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T071",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:52:43.069Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T072",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:52:43.069Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T058",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:57:48.271Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T080",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T06:57:48.272Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T059",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:12:04.067Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T081",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:12:04.068Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T082",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:12:04.068Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T083",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:12:04.069Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T084",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:12:04.069Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T085",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:12:07.178Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T088",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:18:30.200Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T089",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:18:30.201Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T090",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:18:30.201Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T092",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:25:48.361Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T093",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:25:48.362Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T098",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:29:21.631Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T101",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:29:21.631Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T102",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:29:21.632Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T099",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:32:06.187Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T103",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:32:06.188Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T104",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:32:06.189Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T114",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:32:37.633Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T116",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:32:37.634Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T117",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:32:37.635Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T095",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:40:28.379Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T096",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:40:28.380Z"
+    },
+    {
+      "step": "converge",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-27T07:50:50.398Z"
+    },
+    {
+      "step": "converge",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-11-27T07:56:18.266Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T125",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:57:05.769Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T126",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T07:59:49.493Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T08:05:06.755Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T073",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T11:59:26.675Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T074",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T11:59:26.676Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T075",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T11:59:26.676Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T076",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T11:59:26.677Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T077",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T11:59:26.678Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T078",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T11:59:26.678Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T079",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T11:59:26.679Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T123",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T11:59:26.933Z"
+    }
+  ],
+  "request": "/speckit-companion-auto C:\\Users\\johnk\\Source\\repos\\MTM_Waitlist\\Dependency_Assessment\\2026-11-26-full-deep\\DEPENDENCY_AND_MODERNIZATION_SPECIFICATION.md",
+  "unattended": true,
+  "expectations": [
+    "Deleting the roughly 298 resource keys the audit could not prove were referenced",
+    "Any user-interface redesign or layout or interaction change",
+    "Trimming the specification-workflow agent files or the prompt stubs",
+    "Auditing or changing any workstation user-level editor configuration",
+    "Changing a running database, opening a MySQL connection or contacting the plant host",
+    "Migrating to a different database engine, object-relational mapper, UI framework or test framework",
+    "Profiling, benchmarking or load testing",
+    "Rewriting historical specification documents that cite the old platform version",
+    "Implementing a proposal that did not reach a decision"
+  ],
+  "context": [
+    "area: Dependency_Assessment/2026-11-26-full-deep/DEPENDENCY_AND_MODERNIZATION_SPECIFICATION.md, the completed audit carrying a 32-proposal decision register, all approved",
+    "area: MTM_Waitlist.sln and package declarations, 17 projects, per-project PackageReference, no Directory.Packages.props on disk",
+    "area: root NuGet.Config, tracked since commit 598c66cd, declares nuget.org only and carries no packageSourceMapping, which narrows DEP-009 to adding the mapping",
+    "area: .mcp.json, declares no servers, so AI-003 stands as written",
+    "area: specs/023-ai-tooling-remediation/spec.md, read for this repository's existing spec shape and Source line convention",
+    "constraint: stored procedures only, no demo or mock mode, mock-service deploy guard kept, no CI enforcement added, no explicit page item",
+    "constraint: no credential printed, copied or transmitted, no database opened, no plant host contacted, specification artifacts only",
+    "constraint: unattended run, python not python3, powershell scripts with -ExecutionPolicy Bypass",
+    "Second, closing converge pass; the work appended by the first pass is already in tasks.md",
+    "T122 open: owner-approved exception recorded, awaiting an owner decision rather than an unattended edit",
+    "T123 open: IMySqlHelperServer still exposes only ExecuteStoredProcedureQueryAsync and ExecuteStoredProcedureNonQueryAsync",
+    "T124 open: measured 88 literal prose attributes across the nine Module_Setup/Views files and 36 in MTM_Database_Deployment/MainWindow.xaml, with 0 x:Uid"
+  ],
+  "coverage": {
+    "FR-001": {
+      "title": "DEP-001 Windows platform UI framework reaches its approved target release, every screen behaves as today",
+      "tasks": [
+        "T036",
+        "T046",
+        "T047",
+        "T048"
+      ]
+    },
+    "FR-002": {
+      "title": "DEP-002 hosting, configuration, DI, logging and options abstractions reach their approved release and behave as today",
+      "tasks": [
+        "T035",
+        "T038",
+        "T039"
+      ]
+    },
+    "FR-003": {
+      "title": "DEP-003 test tooling reaches its approved releases, same tests discovered and green",
+      "tasks": [
+        "T052",
+        "T054"
+      ]
+    },
+    "FR-004": {
+      "title": "DEP-004 window helper, SDK build tools and protected-data library reach their approved releases",
+      "tasks": [
+        "T032",
+        "T033"
+      ]
+    },
+    "FR-005": {
+      "title": "DEP-005 SQL Server client reaches its approved release and the vulnerable-range version pin is retired",
+      "tasks": [
+        "T043",
+        "T044",
+        "T045"
+      ]
+    },
+    "FR-006": {
+      "title": "DEP-006 MySQL driver reaches its approved release, all stored-procedure paths exercised locally first",
+      "tasks": [
+        "T040",
+        "T041",
+        "T042"
+      ]
+    },
+    "FR-007": {
+      "title": "DEP-007 third-party WinUI control library reaches its approved release, every screen reviewed, sequenced last",
+      "tasks": [
+        "T037",
+        "T049",
+        "T050"
+      ]
+    },
+    "FR-008": {
+      "title": "DEP-008 one version declared once for the solution, per-project exceptions explicit",
+      "tasks": [
+        "T028",
+        "T029",
+        "T030"
+      ],
+      "assumes": "the declaration file is asserted by the restore itself, which raises NU1008 on an inline version"
+    },
+    "FR-009": {
+      "title": "DEP-009 tracked package configuration names the feed and maps package patterns to it",
+      "tasks": [
+        "T027",
+        "T031"
+      ]
+    },
+    "FR-010": {
+      "title": "MOD-001 terminal toolkit line replaced, unused package removed, connected animation still runs",
+      "tasks": [
+        "T060",
+        "T061",
+        "T062",
+        "T063",
+        "T064"
+      ]
+    },
+    "FR-011": {
+      "title": "MOD-002 services route through the shared data-access seam with no behaviour lost",
+      "tasks": [
+        "T073",
+        "T074",
+        "T075",
+        "T076",
+        "T077",
+        "T078",
+        "T079"
+      ]
+    },
+    "FR-012": {
+      "title": "MOD-003 seam executes stored procedures only, caller-supplied statement path removed after callers resolved",
+      "tasks": [
+        "T057",
+        "T068",
+        "T069",
+        "T070",
+        "T071",
+        "T072"
+      ]
+    },
+    "FR-013": {
+      "title": "MOD-004 JSON uses generated per-type metadata, one options definition per store, values round-trip unchanged",
+      "tasks": [
+        "T059",
+        "T081",
+        "T082",
+        "T083",
+        "T084"
+      ]
+    },
+    "FR-014": {
+      "title": "MOD-005 one owner of the Infor Visual read path, setup tool uses it",
+      "tasks": [
+        "T058",
+        "T080"
+      ]
+    },
+    "FR-015": {
+      "title": "MOD-006 shared library holds no view type, every caller of the moved dialog still shows it",
+      "tasks": [
+        "T088",
+        "T089",
+        "T090",
+        "T091"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Shared/Dialogs/DialogSizingAuditTests.cs::Audit_DialogSizingAuditTests_TheSharedBodyIsNotAViewType"
+      ]
+    },
+    "FR-016": {
+      "title": "MOD-007 generic-request libraries reference no waitlist UI project, flow works end to end",
+      "tasks": [
+        "T092",
+        "T093",
+        "T094"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/GenericRequestSubmitterTests.cs::Service_GenericRequestSubmitterTests_SubmitAsync_EveryCapturedValueReachesTheQueue"
+      ]
+    },
+    "FR-017": {
+      "title": "MOD-008 settings logic split into cohesive parts behind the existing page, surface unchanged",
+      "tasks": [
+        "T095",
+        "T096"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Settings (625 passed) and Module_Core/Permissions/PermissionGateSiteAuditTests.cs"
+      ]
+    },
+    "FR-018": {
+      "title": "MOD-009 rotating-text animation uses the toolkit idiom with visual parity",
+      "tasks": [
+        "T085",
+        "T086"
+      ]
+    },
+    "FR-019": {
+      "title": "SEC-001 no credential in any tracked file, env-var supply, loud failure naming the variable, rotate what was committed",
+      "tasks": [
+        "T001",
+        "T006",
+        "T007",
+        "T008",
+        "T025"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/ConfigurationRequirementTests.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/PreSignInStepsTests.cs"
+      ]
+    },
+    "FR-020": {
+      "title": "PERF-001 search reaches the plant once per typing pause, superseded result cannot overwrite, abandoned search cancelled",
+      "tasks": [
+        "T098",
+        "T101",
+        "T102"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestPartSearchTimingTests.cs"
+      ]
+    },
+    "FR-021": {
+      "title": "PERF-002 no blocking wait on the settings-load or shutdown path, window keeps painting",
+      "tasks": [
+        "T002",
+        "T009",
+        "T010",
+        "T011"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Core/Views/FaultRecordAuditTests.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/LocalStateFreeTests.cs"
+      ]
+    },
+    "FR-022": {
+      "title": "UX-001 setup review shows words not resource key names in both fallback places",
+      "tasks": [
+        "T003",
+        "T012",
+        "T013"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Setup/ViewModels/SetupReviewResourceKeyTests.cs"
+      ]
+    },
+    "FR-023": {
+      "title": "UX-002 no user-visible sentence is a literal in a view definition, one resource convention",
+      "tasks": [
+        "T100",
+        "T106",
+        "T107",
+        "T108",
+        "T109",
+        "T110",
+        "T111",
+        "T112"
+      ],
+      "assumes": "no test yet; UX-002 is not implemented"
+    },
+    "FR-024": {
+      "title": "UX-003 coil weight uses the machine number formatting and a unit from a resource",
+      "tasks": [
+        "T099",
+        "T103",
+        "T104",
+        "T105"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/AverageCoilWeightServiceTests.cs::Service_AverageCoilWeightServiceTests_CoilWeightText_TakesItsUnitFromTheResourceAndNotFromTheCode"
+      ]
+    },
+    "FR-025": {
+      "title": "AI-001 every agent-facing platform version statement names the version in use or carries none",
+      "tasks": [
+        "T004",
+        "T014",
+        "T015",
+        "T016",
+        "T048"
+      ]
+    },
+    "FR-026": {
+      "title": "AI-002 workflow hook runs its interpreter-wired arm with an interpreter that exists here",
+      "tasks": [
+        "T004",
+        "T017"
+      ]
+    },
+    "FR-027": {
+      "title": "AI-003 repository declares both documentation lookup servers with their prerequisites recorded",
+      "tasks": [
+        "T114",
+        "T116",
+        "T117"
+      ],
+      "assumes": "no test reads .mcp.json; the two servers were probed live instead"
+    },
+    "FR-028": {
+      "title": "AI-004 tooling note records the dependency-analysis failure, its signature and the working command",
+      "tasks": [
+        "T005",
+        "T024"
+      ]
+    },
+    "FR-029": {
+      "title": "DEV-001 runtime-identifier graph accommodation removed, gated on a cold restore with no compatibility warning",
+      "tasks": [
+        "T065",
+        "T066",
+        "T067"
+      ]
+    },
+    "FR-030": {
+      "title": "DEV-002 the five cited documentation references resolve or are marked historical with a date",
+      "tasks": [
+        "T005",
+        "T018",
+        "T019",
+        "T020",
+        "T021",
+        "T022",
+        "T023"
+      ]
+    },
+    "FR-031": {
+      "title": "DEV-003 clock-waiting test asserts through an injected time source or bound, faster and stronger",
+      "tasks": [
+        "T053",
+        "T055"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/VisualVerdictPrimingStepTests.cs"
+      ]
+    },
+    "FR-032": {
+      "title": "DEV-004 three comparison documents regenerated and newer than their design source",
+      "tasks": [
+        "T115",
+        "T118"
+      ]
+    },
+    "FR-033": {
+      "title": "Work proceeds in eight ordered phases, no phase starts before its prerequisites, each ends green",
+      "tasks": [
+        "T026",
+        "T034",
+        "T051",
+        "T056",
+        "T087",
+        "T097",
+        "T113",
+        "T121"
+      ],
+      "assumes": "the phase gate itself stays open: the five-service clause is unmet and two manual checks are unrun"
+    },
+    "FR-034": {
+      "title": "Existing plant behaviour survives: live stores, no mock mode, stored procedures, Visual fallback rule, deploy guard, default globs",
+      "tasks": [
+        "T120"
+      ],
+      "tests": [
+        "MTM_Waitlist.Tests/Module_Mock/InlineSqlAuditTests.cs::Audit_InlineSqlAuditTests_NoMySqlStatementTextRemainsInApplicationCode",
+        "::Audit_InlineSqlAuditTests_RawSqlSeamIsConfinedToItsReviewedAllowlist",
+        "::Audit_InlineSqlAuditTests_EveryRawSqlSeamAllowlistEntryIsStillAccurate"
+      ],
+      "assumes": "the deployment script host behaviour was read, not exercised"
+    },
+    "FR-035": {
+      "title": "Only work owned by an approved proposal changes, nothing outside the register implemented",
+      "tasks": [
+        "T119"
+      ]
+    },
+    "FR-036": {
+      "title": "Every phase boundary carries its verification evidence and every dependency change records its previous release",
+      "tasks": [
+        "T026",
+        "T034",
+        "T051",
+        "T056",
+        "T087",
+        "T097",
+        "T113",
+        "T121"
+      ],
+      "tests": [
+        "write-context receipts carry the previous release for every dependency change made in W16 and W17"
+      ]
+    }
+  },
+  "classification": {
+    "projectedFiles": 75,
+    "projectedTasks": 70,
+    "scopeSignal": "larger",
+    "verdict": "oversized"
+  },
+  "intent": "Bring every dependency to a supported current release, remove the one committed credential, finish the framework-native replacements, and make the AI and documentation records true, in eight ordered phases, without changing plant behaviour",
+  "size": "oversized",
+  "source": "Dependency_Assessment/2026-11-26-full-deep/DEPENDENCY_AND_MODERNIZATION_SPECIFICATION.md",
+  "planBlocks": [
+    "calls",
+    "code",
+    "states",
+    "screens"
+  ],
+  "planBlocksPicked": [
+    "calls",
+    "code",
+    "states",
+    "screens"
+  ],
+  "verified": [
+    {
+      "what": "plan blocks check out",
+      "command": "python3 .specify/extensions/companion/scripts/check_plan.py --feature-dir specs/024-dependency-modernization --strict",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 0.1,
+      "result": "  WARNING plan.md:270  `MTM_Waitlist.Core/Services/ConnectionHealthService.cs` has no `:line`, so it is unverified (no-line) ·   WARNING plan.md:327  screen `review` is not shown by any state: end the state it belongs to with `shows review`, or leave it if it belongs to none (screen-not-shown) ·   0 error(s), 6 warning(s)"
+    },
+    {
+      "what": "restore the solution from a cleared assets cache",
+      "command": "dotnet restore MTM_Waitlist.sln --no-cache",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 1.6,
+      "result": "  Restored C:\\Users\\johnk\\Source\\repos\\MTM_Waitlist\\MTM_Waitlist.GenericRequest.Data\\MTM_Waitlist.GenericRequest.Data.csproj (in 533 ms). ·   Restored C:\\Users\\johnk\\Source\\repos\\MTM_Waitlist\\MTM_Waitlist.Core\\MTM_Waitlist.Core.csproj (in 537 ms). ·   Restored C:\\Users\\johnk\\Source\\repos\\MTM_Waitlist\\MTM_Waitlist.Waitlist.View\\MTM_Waitlist.Waitlist.View.csproj (in 541 ms).",
+      "commit": "152e1fa4",
+      "tree": "cc1efe5f548fb11813e7c21934c55409e85c7509"
+    },
+    {
+      "what": "build the whole solution in Debug x64",
+      "command": "dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false --nologo",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 39.3,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:39.06",
+      "commit": "152e1fa4",
+      "tree": "cc1efe5f548fb11813e7c21934c55409e85c7509"
+    },
+    {
+      "what": "run the full test suite",
+      "command": "dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 --no-build --nologo",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 45.1,
+      "result": "  Skipped Service_SeedLedgerLiveTests_BuildPlanAsync_StillOffersASeedTheStoreHasNeverReceived [3 ms] ·   Skipped Service_SeedLedgerLiveTests_ApplyAsync_RecordsAStoreSetUpBeforeTheLedgerWithoutRunningItsSeeds [< 1 ms] · Passed!  - Failed:     0, Passed:  2896, Skipped:    65, Total:  2961, Duration: 44 s - MTM_Waitlist.Tests.dll (net10.0)",
+      "commit": "152e1fa4",
+      "tree": "cc1efe5f548fb11813e7c21934c55409e85c7509"
+    },
+    {
+      "what": "a host with no store connection refuses to start and names the variable",
+      "result": "T001 unit case plus two step cases that clear both variables; all green"
+    },
+    {
+      "what": "the appsettings values are gone but the configuration keeps its shape",
+      "result": "both ConnectionString values and the Visual server/user/password are empty; a search of tracked files finds no credential in appsettings.json"
+    },
+    {
+      "what": "no blocking wait remains on the settings-load or first-chance fault path",
+      "result": "the share path is awaitable, the alert preference loads as a task property, and the first-chance handler starts the flush without blocking"
+    },
+    {
+      "what": "the setup review shows words rather than key names",
+      "result": "both call sites now ask for the declared .Text keys, which carry sentences"
+    },
+    {
+      "what": "central package management covers every declaration",
+      "result": "22 distinct PackageVersion entries, zero inline Version attributes, restore raises no NU1008"
+    },
+    {
+      "what": "the package mapping covers the whole graph",
+      "result": "a forced restore through the tracked NuGet.Config succeeds with no unmatched package"
+    },
+    {
+      "what": "MySqlConnector 3.0.0 still runs a stored procedure",
+      "result": "a stored-procedure read returned one row from the local instance through the new driver"
+    },
+    {
+      "what": "the Pkcs pin is retired without restoring an advisory",
+      "result": "restore raises no NU1902 or NU1903; Pkcs resolves transitively at 10.0.15"
+    },
+    {
+      "what": "the platform and test-stack upgrades keep the suite identical",
+      "result": "2961 tests discovered and 2896 green at every wave from Phase 3 to Phase 5"
+    },
+    {
+      "what": "the toolkit replacement kept the build clean",
+      "result": "no 7.1.2 package in the graph, Win2D at 1.4.0, 0 warnings and 0 errors"
+    },
+    {
+      "what": "the RID-graph accommodation is no longer needed",
+      "result": "cold restore with the property gone raises no NETSDK1206"
+    },
+    {
+      "what": "solution build",
+      "command": "dotnet build MTM_Waitlist.sln --nologo",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 20.4,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:20.19",
+      "commit": "152e1fa4",
+      "tree": "49d49d3cd1899e70119a213f2896305e04974c89"
+    },
+    {
+      "what": "test suite",
+      "command": "dotnet test MTM_Waitlist.Tests\\MTM_Waitlist.Tests.csproj",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 60.3,
+      "result": "  Skipped Service_SeedLedgerLiveTests_BuildPlanAsync_StillOffersASeedTheStoreHasNeverReceived [2 ms] ·   Skipped Service_SeedLedgerLiveTests_ApplyAsync_RecordsAStoreSetUpBeforeTheLedgerWithoutRunningItsSeeds [< 1 ms] · Passed!  - Failed:     0, Passed:  2900, Skipped:    65, Total:  2965, Duration: 43 s - MTM_Waitlist.Tests.dll (net10.0)",
+      "commit": "152e1fa4",
+      "tree": "93ab8125618f046919af0d5719dbcb11bf213fcf"
+    },
+    {
+      "what": "The data seam now executes stored procedures only, plus one separately contracted reviewed-script route",
+      "result": "IMySqlHelperServer declares the two stored-procedure members and nothing else; the script route refuses any name outside the reviewed set"
+    },
+    {
+      "what": "A read past the shared row cap is bounded and the bounded list is what the caller gets",
+      "result": "MySqlHelperServerRowCapTests feeds 10,025 rows through the shared reader and gets exactly 10,000 back, retaining the first rows"
+    },
+    {
+      "what": "Statement text handed to the script route is refused before a connection is opened",
+      "result": "MySqlHelperServerRowCapTests asserts a null result and that no store availability was recorded"
+    },
+    {
+      "what": "The raw-SQL allowlist describes exactly the code that exists",
+      "result": "InlineSqlAuditTests confinement and accuracy assertions pass with the statement path confined to the seam implementation"
+    },
+    {
+      "what": "One owner of the Infor Visual read path",
+      "result": "The Setup copy is deleted; its test constructs the Core type with the Setup module and the setup queue scripts still resolve"
+    },
+    {
+      "what": "Every settings and mock-service store serializes through generated metadata, one options definition per store",
+      "result": "No store constructs serializer options at call time, and JsonRoundTripTests reads the stored shape the previous release wrote"
+    },
+    {
+      "what": "One animation idiom in RotatingTextView",
+      "result": "Both halves are built with the toolkit animation builder at the same duration, travel and easing; visual parity itself is not verified"
+    },
+    {
+      "what": "Shared declares no UserControl, Page or Window type after the dialog body moved into code",
+      "result": "a grep over MTM_Waitlist.Shared found no such declaration and the solution builds with every call site unchanged"
+    },
+    {
+      "what": "Neither generic-request library references a waitlist UI project",
+      "result": "both csproj files list Core, Settings, Shared, Mock and GenericRequest only, and no Module_Waitlist using remains"
+    },
+    {
+      "what": "The settings view model split lost no code",
+      "result": "the non-blank lines of the eight parts are a multiset match of the original file, and the settings and full suites pass"
+    },
+    {
+      "what": "Both documentation servers answer",
+      "result": "microsoft-learn answered a docs query for TreatWarningsAsErrors and Context7 resolved MSTest to /microsoft/testfx during this run"
+    },
+    {
+      "what": "full test suite",
+      "command": "dotnet test MTM_Waitlist.Tests\\MTM_Waitlist.Tests.csproj --nologo",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 57.6,
+      "result": "  Skipped Service_SeedLedgerLiveTests_BuildPlanAsync_StillOffersASeedTheStoreHasNeverReceived [3 ms] ·   Skipped Service_SeedLedgerLiveTests_ApplyAsync_RecordsAStoreSetUpBeforeTheLedgerWithoutRunningItsSeeds [< 1 ms] · Passed!  - Failed:     0, Passed:  2909, Skipped:    65, Total:  2974, Duration: 44 s - MTM_Waitlist.Tests.dll (net10.0)",
+      "commit": "152e1fa4",
+      "tree": "49d49d3cd1899e70119a213f2896305e04974c89"
+    },
+    {
+      "what": "tasks.md unchanged by the second converge pass",
+      "result": "pass",
+      "command": "Get-FileHash -Algorithm SHA256 = 3BE7AF497EAF23A293A6A9909A0D33A5134E32954E6B50F249E38715647E377B; 126 unique task IDs T001-T126; highest phase Phase 9"
+    },
+    {
+      "what": "T125 closed in the tree: T049 carries a blocked-here marker, sits in the Blocked on this workstation register, and T051 evidence is annotated",
+      "result": "pass",
+      "command": "Select-String tasks.md: T049 marker line 258, register row line 556, T051 evidence line 263, T125 ticked line 613"
+    },
+    {
+      "what": "T126 closed in the tree: CoreJsonContext and DeploymentSettingsJsonContext carry JsonSerializable metadata and both stores pass the generated JsonTypeInfo<T>; the reflection overloads in MTM_Waitlist.Core/Helpers/Json.cs are now used only by tests",
+      "result": "pass",
+      "command": "CoreJsonContext.cs:12 and DeploymentSettingsJsonContext.cs:12 each declare [JsonSerializable(typeof(...))]"
+    }
+  ],
+  "decisions": [
+    {
+      "decision": "DEP-009 adds packageSourceMapping to the already tracked root NuGet.Config",
+      "why": "git ls-files and git log show the file tracked since 598c66cd, so only the mapping is missing",
+      "rejected": "committing a NuGet configuration for the first time, which contradicts the tree",
+      "by": "agent",
+      "at": "2026-11-27T05:43:22.244Z"
+    },
+    {
+      "decision": "SEC-001 also owns a start-up guard that names the missing variable",
+      "why": "FR-019 and SC-001 require the refusal, and the seam plus ConfigurationStep plus StoreReachabilityStep currently report success on an unconfigured store",
+      "rejected": "making the seam throw on a blank connection, which breaks its documented unconfigured-store contract",
+      "by": "agent",
+      "at": "2026-11-27T05:43:22.244Z"
+    },
+    {
+      "decision": "UX-001 adds the two dot-less resource keys and keeps the .Text twins",
+      "why": "the values already exist as Setup_Review_Scrap_None.Text and Setup_Review_Section_SubordinateParts_Count.Text, and GetLocalized never appends .Text, so a code-side lookup cannot reach them",
+      "rejected": "changing the two call sites to ask for the .Text name, which would create the only markup-suffixed code lookup in the application",
+      "by": "agent",
+      "at": "2026-11-27T05:43:22.244Z"
+    },
+    {
+      "decision": "PERF-002 keeps the flush name and behaviour and changes only its signature to awaitable",
+      "why": "FaultRecordAuditTests and LocalStateFreeTests assert the flush declaration, and the bounded off-thread behaviour is the point of the line",
+      "rejected": "leaving the flush synchronous, which leaves a blocking wait on the shutdown path",
+      "by": "agent",
+      "at": "2026-11-27T05:43:22.244Z"
+    },
+    {
+      "decision": "MOD-006 composes the dialog body in code inside Shared instead of moving the XAML to Module_",
+      "why": "MessageDialogHost has 22 production callers including MTM_Waitlist.Mock.Service, and the app references the service, so the body cannot move into the app project",
+      "rejected": "a new shared dialogs library, which adds a project outside the approved register",
+      "by": "agent",
+      "at": "2026-11-27T05:43:22.244Z"
+    },
+    {
+      "decision": "DEP-008 relocates the Pkcs 9.0.21 pin into Directory.Packages.props and DEP-005 retires it from there",
+      "why": "central package management raises NU1008 for any PackageReference carrying a Version, and the pin is inherited by all 17 projects",
+      "rejected": "retiring the pin in Phase 2, which restores two advisory warnings on every restore",
+      "by": "agent",
+      "at": "2026-11-27T05:43:22.244Z"
+    },
+    {
+      "decision": "DEV-001 removes UseRidGraph only after a cold restore proves no NETSDK1206",
+      "why": "Microsoft Learn names exactly two remedies and the portable-asset remedy is the one MOD-001 delivers",
+      "rejected": "removing the property first and letting the build report",
+      "by": "agent",
+      "at": "2026-11-27T05:43:22.244Z"
+    },
+    {
+      "decision": "MOD-005 deletes the Setup copy of InforVisualSqlQueryService and retargets one test",
+      "why": "Setup already references Core, and the module test constructs the deleted type at line 115",
+      "rejected": "a shared base class with per-host overrides, which is the duplication with more files",
+      "by": "agent",
+      "at": "2026-11-27T05:43:22.244Z"
+    },
+    {
+      "decision": "UX-003 returns the number from the service and resolves the unit where the text is composed",
+      "why": "the value is a display string and keeping the unit out of a data service puts the words with the other words",
+      "rejected": "injecting a localizer into a data service for one string",
+      "by": "agent",
+      "at": "2026-11-27T05:43:22.244Z"
+    },
+    {
+      "decision": "The Infor Visual triple is not part of the fatal start-up guard",
+      "why": "the Visual path has a defined degraded fallback and no ConnectionStringEnvironmentVariable property to name",
+      "rejected": "adding a configuration property outside the approved register for symmetry",
+      "by": "agent",
+      "at": "2026-11-27T05:43:22.244Z"
+    },
+    {
+      "decision": "Pinned counts are re-measured at each gate rather than trusted",
+      "why": "the test-method count is exact at 2768 but SettingsViewModel, the resource corpus and the x:Uid count have all drifted since the audit",
+      "rejected": "rewriting the spec baselines, which would lose the comparison",
+      "by": "agent",
+      "at": "2026-11-27T05:43:22.244Z"
+    },
+    {
+      "decision": "The test suite is a gate at Phase 1 as well",
+      "why": "FR-033 requires it and Phase 1 changes the shutdown path of the application",
+      "rejected": "reading the source section 15 phase-2 qualifier as permission to skip Phase 1",
+      "by": "agent",
+      "at": "2026-11-27T05:43:22.244Z"
+    },
+    {
+      "decision": "PERF-001 uses a cancellation token per typing pause plus a sequence number for last-writer-wins",
+      "why": "a read the plant already answered is not cancellable, so the newest answer must be chosen by identity rather than arrival order",
+      "rejected": "a control built-in delay, which changes what a person experiences",
+      "by": "agent",
+      "at": "2026-11-27T05:43:22.244Z"
+    },
+    {
+      "decision": "MOD-002 keeps each existing throw at its caller when routing through the seam",
+      "why": "two services throw InvalidOperationException on an unconfigured store and the seam would return an empty result, which is a silent behaviour change",
+      "rejected": "routing every call blindly and relying on live tests that cannot run here",
+      "by": "agent",
+      "at": "2026-11-27T05:43:22.244Z"
+    },
+    {
+      "decision": "UX-001 asks for the declared .Text keys instead of adding dot-less twins",
+      "why": "MakePri reads a name containing a dot as a subtree plus a resource, so declaring Setup_Review_Scrap_None beside Setup_Review_Scrap_None.Text makes one entity both a resource and a scope and fails the build with PRI175/PRI278",
+      "rejected": "adding the two dot-less keys as the plan recorded, which cannot be built in one resw",
+      "by": "agent",
+      "at": "2026-11-27T06:40:53.929Z"
+    },
+    {
+      "decision": "packageSourceMapping uses family prefixes rather than a bare wildcard",
+      "why": "the graph carries over a hundred package ids including transitive ones, and NuGet refuses to restore any package no pattern covers, so exact ids for the 22 declared packages alone would break restore",
+      "rejected": "a single * pattern, which makes the mapping a formality",
+      "by": "agent",
+      "at": "2026-11-27T06:40:53.929Z"
+    },
+    {
+      "decision": "the two terminating fault handlers still block on the bounded flush while the first-chance handler does not",
+      "why": "the process ends when those handlers return, so there is no caller left to await the flush and the fault record would be lost; the first-chance hook fires on the throwing thread, often the interface thread, which is the freeze FR-021 is about",
+      "rejected": "making all three async void, which would drop the record on exactly the crash the flush exists for",
+      "by": "agent",
+      "at": "2026-11-27T06:40:53.929Z"
+    },
+    {
+      "decision": "MSTEST0032 is suppressed in the test project rather than editing nine assertions",
+      "why": "those nine compare two compile-time constants on purpose to pin a shipped default, a retention rule or two distinct names, which the analyser cannot tell from a tautology",
+      "rejected": "deleting the assertions, which would drop the contract they pin",
+      "by": "agent",
+      "at": "2026-11-27T06:40:53.929Z"
+    },
+    {
+      "decision": "DevWinUI stays at 10.8.0",
+      "why": "DevWinUI 11.1.0 references WinRT.Runtime 2.3.1.0 while this platform's projection supplies 2.2.0.0, so the build fails with CS1705 and a masked WMC9999; resolving it needs a Windows SDK projection change no approved proposal authorises",
+      "rejected": "pinning Microsoft.Windows.CsWinRT across every project, which is outside the register",
+      "by": "agent",
+      "at": "2026-11-27T06:40:53.929Z"
+    },
+    {
+      "decision": "The reviewed queue-script route is a separate contract rather than a member of the data seam",
+      "why": "The seam rule stays true: no member of it can run statement text, and the reader takes a name from the reviewed set so a caller cannot widen it",
+      "rejected": "Keeping ExecuteSqlQueryAsync on the seam, or converting the queue scripts to stored procedures, which is database authoring this feature does not do",
+      "by": "agent",
+      "at": "2026-11-27T07:14:43.299Z"
+    },
+    {
+      "decision": "The test project statement route stayed as internal members of the seam implementation",
+      "why": "About fifty database-gated fixture call sites seed and verify rows with raw statements; moving them would duplicate connection resolution into the test project. InternalsVisibleTo keeps them unreachable from application code and InlineSqlAuditTests confines them",
+      "rejected": "Deleting them from the class and rewriting thirteen integration suites, or giving the tests a private connection factory",
+      "by": "agent",
+      "at": "2026-11-27T07:14:43.299Z"
+    },
+    {
+      "decision": "The Infor Visual executor takes the module instead of keeping two types",
+      "why": "One owner of the read path; the module chooses only the script folder, so the setup tool keeps its own queue scripts and its own log tag",
+      "rejected": "Resolving both module folders from one path, which would let a caller reach another module scripts",
+      "by": "agent",
+      "at": "2026-11-27T07:14:43.299Z"
+    },
+    {
+      "decision": "The mock-service generated context carries the ignore-null and string-enum settings as context options",
+      "why": "Generated metadata bakes its options, so an ignore condition passed at call time has no effect; the stored-file format had to be expressed on the context",
+      "rejected": "One context per store",
+      "by": "agent",
+      "at": "2026-11-27T07:14:43.299Z"
+    },
+    {
+      "decision": "The dynamic mirror payload stays on the reflection writer",
+      "why": "Its values are typed as object by design; generated metadata would need every numeric CLR type registered and would throw at run time for the first one nobody listed",
+      "rejected": "Registering a dozen primitive types and hoping the set is closed",
+      "by": "agent",
+      "at": "2026-11-27T07:14:43.299Z"
+    },
+    {
+      "decision": "MessageDialogContent is composed as a Grid subclass in code, with styles resolved by key",
+      "why": "a UserControl is the view type MOD-006 forbids, and a Grid keeps the same three-row layout and sizing reads",
+      "rejected": "moving the body to a module, which Mock.Service could not reach",
+      "by": "agent",
+      "at": "2026-11-27T07:47:46.211Z"
+    },
+    {
+      "decision": "IGenericRequestSubmitter lives in the generic-request library and is implemented by GenericRequestSubmitter in Waitlist.View",
+      "why": "the module that owns the queue owns the mapping, the generic library knows only the contract, and the tests can drive the real adapter",
+      "rejected": "a composition-root adapter the test project cannot reference",
+      "by": "agent",
+      "at": "2026-11-27T07:47:46.211Z"
+    },
+    {
+      "decision": "The employee verification rule and the part-number width moved to Core",
+      "why": "both libraries already reference Core and the rule must have one owner",
+      "rejected": "leaving a forwarding shim on NewRequestFlowRules",
+      "by": "agent",
+      "at": "2026-11-27T07:47:46.211Z"
+    },
+    {
+      "decision": "One PausedSearch holds the pause, the cancellation and the attempt number, and the view model applies an answer only while its attempt is newest",
+      "why": "a read the plant already answered cannot be cancelled, so arrival order cannot decide",
+      "rejected": "cancelling only, which loses the late answer race",
+      "by": "agent",
+      "at": "2026-11-27T07:47:46.211Z"
+    },
+    {
+      "decision": "AverageCoilWeightService returns a decimal and CoilWeightText composes the text with CurrentCulture and the CoilWeight_Unit resource",
+      "why": "the unit is translated where the words are made and the number follows the machine",
+      "rejected": "formatting inside the service, which cannot follow the machine culture",
+      "by": "agent",
+      "at": "2026-11-27T07:47:46.211Z"
+    },
+    {
+      "decision": "The settings view model stays one type split across eight partial files",
+      "why": "MOD-008 forbids binding and message changes, and a partial split cannot alter either",
+      "rejected": "child view models, which would have rewritten every binding on the settings pages",
+      "by": "agent",
+      "at": "2026-11-27T07:47:46.211Z"
+    },
+    {
+      "decision": ".mcp.json carries a prerequisites object beside mcpServers",
+      "why": "AI-003 requires the prerequisites recorded beside the declaration and clients ignore unknown root keys",
+      "rejected": "a separate document the declaration does not sit in",
+      "by": "agent",
+      "at": "2026-11-27T07:47:46.211Z"
+    },
+    {
+      "decision": "Close converge with no tasks appended",
+      "why": "every remaining item is already open in its own phase or is human-gated, so a new task would duplicate the record rather than add work",
+      "rejected": "re-stating T122, T123 and T124 as fresh tasks, which would double-count the same open items",
+      "by": "agent",
+      "at": "2026-11-27T08:04:31.579Z"
+    },
+    {
+      "decision": "Report this pass as converged-with-open-items rather than feature-complete",
+      "why": "T122 waits on an owner decision and T123/T124 are still open, so the feature is not done",
+      "rejected": "reporting the feature as complete, which would misreport open work as finished",
+      "by": "agent",
+      "at": "2026-11-27T08:04:31.579Z"
+    },
+    {
+      "decision": "Leave T122 open for an owner decision instead of editing it unattended",
+      "why": "the owner-approved exception dated 2026-09-11 and scoped to the service host is recorded in .github/copilot-instructions.md and .github/memories/repo/workstation-secrets.md, so the next move is the owner decision",
+      "rejected": "an unattended edit to the exception or to the memory note",
+      "by": "agent",
+      "at": "2026-11-27T08:04:31.579Z"
+    }
+  ],
+  "step_summaries": {
+    "specify": {
+      "summary": "Phases 1 to 4 landed and green with W16 and W17 of Phase 5; DevWinUI and the live-store proofs are recorded blocked; W18 onward not started",
+      "key_finding": "The source document is narrower than the requirements in five places; the sharpest is MOD-006, whose prescribed move into the app project would break the on-host service that also shows that dialog"
+    },
+    "tasks": {
+      "summary": "121 tasks in 30 waves across the eight mandated phases, 8 phase gates, 13 tasks marked blocked-here and 2 local-instance-only; every task maps to one approved proposal or to FR-033 to FR-036"
+    },
+    "implement": {
+      "summary": "W23, W24, W26, W27, W29 and W25 closed: a view-free shared library, generic request contracts with no waitlist edge, a paused and identity-checked part search, a culturally formatted coil weight, both documentation servers declared, and the settings view model split eight ways"
+    },
+    "converge": {
+      "summary": "Second, closing converge pass against spec.md, plan.md and tasks.md: no tasks appended and tasks.md left byte-for-byte unchanged (SHA256 3BE7AF497EAF23A293A6A9909A0D33A5134E32954E6B50F249E38715647E377B, 126 task IDs T001-T126, highest phase still Phase 9). This pass is converged-with-open-items, not feature-complete.",
+      "key_finding": "Every remaining item is already recorded as open in its own phase or is human-gated, so appending new tasks would only duplicate the existing record.",
+      "risks": "No regression found against spec.md. T122 awaits an owner decision, T123 and T124 remain open, and the blockers already in the register (T037/T049/T050 and the interactive-only tasks) are unchanged."
+    }
+  },
+  "approach": "Eight ordered phases from section 14, each with a prerequisite gate and measured completion evidence, carried as 30 waves where a wave is one proposal or two text-only proposals sharing a review. Contract versions come from central package management first, then ascending runtime blast radius, then framework-native replacements, then architecture, then performance and strings, then the AI and design records.",
+  "concerns": [
+    {
+      "note": "W10 and W11 connectivity gates cannot run against the plant host in this environment; they are proven against the local instance and recorded as environment-gated, which principle VI allows"
+    },
+    {
+      "note": "MOD-006 remedy departs from the source document: the dialog body is composed in code rather than moved to Module_, because MTM_Waitlist.Mock.Service also calls MessageDialogHost. Confirm against MessageDialogAdoptionTests before implementing W23"
+    },
+    {
+      "note": "plan.md Phase 5 completion evidence reads \"the seam executes stored procedures only and its raw-SQL allowlist is empty of service sites\", but MTM_Waitlist.Core/Services/WipFloorInventoryService.cs is a reviewed and justified entry in the InlineSqlAuditTests allowlist that runs the checked-in MTM WIP queue scripts as command text. No approved proposal covers it and turning those scripts into stored procedures is database authoring, which the plan rules out, so W18 (T068 to T072) keeps one script-text route behind a narrowed seam, records the reason at the route and in the phase report, and the Phase 5 gate reads \"the raw-SQL allowlist describes exactly the code that exists\" instead of \"empty of service sites\"."
+    },
+    {
+      "note": "Nine tracked files still carry connection strings and credential values that SEC-001's register entry does not cover: the workstation-secrets memory note, the winui3-ui-automation skill procedure (the plant connection string), and seven test files whose fixtures use the plant host. Removing them is outside the approved register and needs a human decision.",
+      "step": "implement"
+    },
+    {
+      "note": "Running dotnet nuget locals all --clear for the DEP-004 cold restore partially deleted four package folders whose DLLs were held open by this workstation's running processes. Each was repaired in place from its nuget.org package and a plain restore now succeeds, but the cache is worth a glance on a machine where those processes are not running.",
+      "step": "implement"
+    },
+    {
+      "note": "Phase 3 W13 is blocked: DevWinUI 11.1.0 cannot be taken on a platform whose WinRT.Runtime projection is 2.2.0.0. T049, T037 and T050 are untouched and DevWinUI remains at 10.8.0.",
+      "step": "implement"
+    },
+    {
+      "note": "T041 needs a write and a mirror refresh against a live store and T044 needs an Infor Visual read; only the read half of T041 was exercised, so neither is ticked.",
+      "step": "implement"
+    },
+    {
+      "note": "Phases 5 W18 to W22 and all of Phases 6 to 8 are not started. The tree is green at the last closed wave (W17).",
+      "step": "implement"
+    },
+    {
+      "note": "W19 was not started. Routing the five services through the seam as it stands would drop behaviour three of them depend on: the provider duplicate-key answer and its signalled refusal tokens, the difference between a failed roster read and an empty one, and the single transaction around the hot work-centre clear and upsert. Preserving them needs capabilities W18 did not create, a strict execution route that surfaces the provider error and a transaction scope, which is a new public data-access surface a human should decide on; those paths can only be verified against a live store",
+      "step": "implement"
+    },
+    {
+      "note": "T064 and T086 remain blocked on interactive runs. The rotation was rewritten with the same 140 ms halves, 10 px travel and cubic ease-in-out, and the resting state is written explicitly, but nothing in this run observed it on screen",
+      "step": "implement"
+    },
+    {
+      "note": "The mock-service mirror payload still serializes through the reflection writer; it is a dynamically typed document, not a stored value",
+      "step": "implement"
+    },
+    {
+      "note": "The mock-service refresh HTTP client still builds its own options; it deserializes a wire response rather than a stored value, so it was left out of the per-store generated metadata",
+      "step": "implement"
+    },
+    {
+      "note": "T091, T094, T105, T112 and T118 stay unticked: each needs an interactive or foreign-culture run this workstation cannot make, so the dialog body is unverified on screen",
+      "step": "implement"
+    },
+    {
+      "note": "The composed dialog body resolves SubtitleTextBlockStyle, BodyTextBlockStyle and the TextFillColor brushes from application resources by key; a miss is now logged once through AppLog rather than silent, but whether the framework theme keys resolve in a running app is provable only by the blocked interactive run",
+      "step": "implement"
+    },
+    {
+      "note": "W28 UX-002 is not started: 209 literal Text, Header, Content and PlaceholderText attributes across 27 view files in four modules, and an unattended bulk extraction with no screen pass and a blocked T112 was judged more likely to break the PRI and the surface audits than to finish",
+      "step": "implement"
+    },
+    {
+      "note": "W30 DEV-004 is blocked on the design toolchain that produced the three comparison PDFs; nothing was changed for it",
+      "step": "implement"
+    },
+    {
+      "note": "Inherited risk from the independent requirements check, not from this run: the settings constructor starts InitializeNewRequestAlertsAsync instead of a blocking read, so the New Request Alerts toggle paints its stored OFF default until the read returns. It came from W2",
+      "step": "implement"
+    },
+    {
+      "note": "Inherited divergence from the same check: install-mock-service.ps1 documents that it reports rather than refuses off its own host, which does not match the FR-034 wording. The file was not touched by this run and the behaviour predates it",
+      "step": "implement"
+    },
+    {
+      "note": "A justification paragraph in .github/memories/repo/workstation-secrets.md is now stale; it belongs to the owner T122 decision, so it was recorded rather than turned into a task",
+      "step": "converge"
+    },
+    {
+      "note": "MTM_Database_Deployment.csproj:19 carries a project-scoped UseRidGraph=true that is outside the DEV-001 approved file, so it belongs to the still-open register audit T119 and was recorded rather than turned into a task",
+      "step": "converge"
+    },
+    {
+      "note": "The third observation from this pass - install-mock-service.ps1 reports rather than refuses off its own host, against the FR-034 wording - is already recorded under the implement step and belongs to the still-open audit T120; it was not re-recorded",
+      "step": "converge"
+    },
+    {
+      "note": "The feature is built and green except for work that needs a person, a plant host, or an owner decision. Still open: T122, the credential values still committed in the workstation secrets note and the deployment tool settings (owner-approved exception, awaiting the owner's decision, not an unattended edit); T123, the strict transaction-capable data-access seam that W19 and MOD-002 need before the five services can move onto it, unverifiable without a live store; T124, the 124 literal prose attributes in the Setup views and the deployment tool window; W28 and W19 in full; W30 and W13, blocked by a missing design toolchain and by DevWinUI requiring WinRT.Runtime 2.3.1.0 while this platform supplies 2.2.0.0; the closure audits T119-T121; and the human-gated tasks (interactive screen passes across display scales, a second culture, plant connectivity, environment-variable provisioning). Build and tests are green: 0 warnings, 0 errors, 2,909 passed, 65 skipped, 0 failed."
+    }
+  ],
+  "currentTask": "T123",
+  "task_summaries": {
+    "T001": {
+      "status": "DONE",
+      "did": "Refused a host with no store connection, naming the variable, and removed every credential value from appsettings.json",
+      "files": [
+        "appsettings.json",
+        "MTM_Waitlist.Startup/Services/ConfigurationRequirement.cs",
+        "MTM_Waitlist.Startup/Services/ConfigurationStep.cs",
+        "MTM_Waitlist.Startup/Services/StoreReachabilityStep.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/ConfigurationRequirementTests.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/PreSignInStepsTests.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/LaunchStepWiringTests.cs"
+      ],
+      "wave": "T001-T008"
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "Refused a host with no store connection, naming the variable, and removed every credential value from appsettings.json",
+      "files": [
+        "appsettings.json",
+        "MTM_Waitlist.Startup/Services/ConfigurationRequirement.cs",
+        "MTM_Waitlist.Startup/Services/ConfigurationStep.cs",
+        "MTM_Waitlist.Startup/Services/StoreReachabilityStep.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/ConfigurationRequirementTests.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/PreSignInStepsTests.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/LaunchStepWiringTests.cs"
+      ],
+      "wave": "T001-T008"
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "Refused a host with no store connection, naming the variable, and removed every credential value from appsettings.json",
+      "files": [
+        "appsettings.json",
+        "MTM_Waitlist.Startup/Services/ConfigurationRequirement.cs",
+        "MTM_Waitlist.Startup/Services/ConfigurationStep.cs",
+        "MTM_Waitlist.Startup/Services/StoreReachabilityStep.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/ConfigurationRequirementTests.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/PreSignInStepsTests.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/LaunchStepWiringTests.cs"
+      ],
+      "wave": "T001-T008"
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "Refused a host with no store connection, naming the variable, and removed every credential value from appsettings.json",
+      "files": [
+        "appsettings.json",
+        "MTM_Waitlist.Startup/Services/ConfigurationRequirement.cs",
+        "MTM_Waitlist.Startup/Services/ConfigurationStep.cs",
+        "MTM_Waitlist.Startup/Services/StoreReachabilityStep.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/ConfigurationRequirementTests.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/PreSignInStepsTests.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/LaunchStepWiringTests.cs"
+      ],
+      "wave": "T001-T008"
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "Removed the three blocking waits: the fault flush is an awaited bounded off-thread task, the share path is awaitable through the interface, and the alert preference loads as a task property",
+      "files": [
+        "App.xaml.cs",
+        "MTM_Waitlist.Settings/Services/IImageStorageService.cs",
+        "MTM_Waitlist.Settings/Services/ImageStorageService.cs",
+        "MTM_Waitlist.Settings/Pictures/ViewModels/ImageOverrideDialogViewModel.cs",
+        "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.cs",
+        "MTM_Waitlist.Tests/Module_Core/Views/FaultRecordAuditTests.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/LocalStateFreeTests.cs"
+      ],
+      "wave": "T002-T011"
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "Removed the three blocking waits: the fault flush is an awaited bounded off-thread task, the share path is awaitable through the interface, and the alert preference loads as a task property",
+      "files": [
+        "App.xaml.cs",
+        "MTM_Waitlist.Settings/Services/IImageStorageService.cs",
+        "MTM_Waitlist.Settings/Services/ImageStorageService.cs",
+        "MTM_Waitlist.Settings/Pictures/ViewModels/ImageOverrideDialogViewModel.cs",
+        "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.cs",
+        "MTM_Waitlist.Tests/Module_Core/Views/FaultRecordAuditTests.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/LocalStateFreeTests.cs"
+      ],
+      "wave": "T002-T011"
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "Removed the three blocking waits: the fault flush is an awaited bounded off-thread task, the share path is awaitable through the interface, and the alert preference loads as a task property",
+      "files": [
+        "App.xaml.cs",
+        "MTM_Waitlist.Settings/Services/IImageStorageService.cs",
+        "MTM_Waitlist.Settings/Services/ImageStorageService.cs",
+        "MTM_Waitlist.Settings/Pictures/ViewModels/ImageOverrideDialogViewModel.cs",
+        "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.cs",
+        "MTM_Waitlist.Tests/Module_Core/Views/FaultRecordAuditTests.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/LocalStateFreeTests.cs"
+      ],
+      "wave": "T002-T011"
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "Removed the three blocking waits: the fault flush is an awaited bounded off-thread task, the share path is awaitable through the interface, and the alert preference loads as a task property",
+      "files": [
+        "App.xaml.cs",
+        "MTM_Waitlist.Settings/Services/IImageStorageService.cs",
+        "MTM_Waitlist.Settings/Services/ImageStorageService.cs",
+        "MTM_Waitlist.Settings/Pictures/ViewModels/ImageOverrideDialogViewModel.cs",
+        "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.cs",
+        "MTM_Waitlist.Tests/Module_Core/Views/FaultRecordAuditTests.cs",
+        "MTM_Waitlist.Tests/Module_Startup/Services/LocalStateFreeTests.cs"
+      ],
+      "wave": "T002-T011"
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "Setup review shows the words for scrap-none and the subordinate-parts count instead of the key names, resolving the declared .Text keys because a resw cannot hold a name twice (PRI175)",
+      "files": [
+        "MTM_Waitlist.Setup/ViewModels/SetupReviewViewModel.cs",
+        "MTM_Waitlist.Tests/Module_Setup/ViewModels/SetupReviewResourceKeyTests.cs"
+      ],
+      "wave": "T003-T013"
+    },
+    "T012": {
+      "status": "DONE",
+      "did": "Setup review shows the words for scrap-none and the subordinate-parts count instead of the key names, resolving the declared .Text keys because a resw cannot hold a name twice (PRI175)",
+      "files": [
+        "MTM_Waitlist.Setup/ViewModels/SetupReviewViewModel.cs",
+        "MTM_Waitlist.Tests/Module_Setup/ViewModels/SetupReviewResourceKeyTests.cs"
+      ],
+      "wave": "T003-T013"
+    },
+    "T013": {
+      "status": "DONE",
+      "did": "Setup review shows the words for scrap-none and the subordinate-parts count instead of the key names, resolving the declared .Text keys because a resw cannot hold a name twice (PRI175)",
+      "files": [
+        "MTM_Waitlist.Setup/ViewModels/SetupReviewViewModel.cs",
+        "MTM_Waitlist.Tests/Module_Setup/ViewModels/SetupReviewResourceKeyTests.cs"
+      ],
+      "wave": "T003-T013"
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "Every agent-facing platform figure names the version in use (SDK 10.0.404, WindowsAppSDK 2.4.0) and both hook bash arms call python",
+      "files": [
+        ".github/copilot-startup-steps.yaml",
+        ".github/hooks/speckit.json",
+        "Directory.Build.props",
+        ".github/memories/repo/github-artifact-staleness.md"
+      ],
+      "wave": "T004-T017"
+    },
+    "T014": {
+      "status": "DONE",
+      "did": "Every agent-facing platform figure names the version in use (SDK 10.0.404, WindowsAppSDK 2.4.0) and both hook bash arms call python",
+      "files": [
+        ".github/copilot-startup-steps.yaml",
+        ".github/hooks/speckit.json",
+        "Directory.Build.props",
+        ".github/memories/repo/github-artifact-staleness.md"
+      ],
+      "wave": "T004-T017"
+    },
+    "T015": {
+      "status": "DONE",
+      "did": "Every agent-facing platform figure names the version in use (SDK 10.0.404, WindowsAppSDK 2.4.0) and both hook bash arms call python",
+      "files": [
+        ".github/copilot-startup-steps.yaml",
+        ".github/hooks/speckit.json",
+        "Directory.Build.props",
+        ".github/memories/repo/github-artifact-staleness.md"
+      ],
+      "wave": "T004-T017"
+    },
+    "T016": {
+      "status": "DONE",
+      "did": "Every agent-facing platform figure names the version in use (SDK 10.0.404, WindowsAppSDK 2.4.0) and both hook bash arms call python",
+      "files": [
+        ".github/copilot-startup-steps.yaml",
+        ".github/hooks/speckit.json",
+        "Directory.Build.props",
+        ".github/memories/repo/github-artifact-staleness.md"
+      ],
+      "wave": "T004-T017"
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "Every agent-facing platform figure names the version in use (SDK 10.0.404, WindowsAppSDK 2.4.0) and both hook bash arms call python",
+      "files": [
+        ".github/copilot-startup-steps.yaml",
+        ".github/hooks/speckit.json",
+        "Directory.Build.props",
+        ".github/memories/repo/github-artifact-staleness.md"
+      ],
+      "wave": "T004-T017"
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "Six documentation references now resolve or are marked historical, and the tooling note records the NuGet MCP failure with its signature and the working per-project command",
+      "files": [
+        "docs/operations/operations-mock-service-install-script.md",
+        "docs/operations/operations-database-live-and-mock-updates.md",
+        "docs/living-specs/living-specs-drift-ledger.md",
+        "docs/defects/defects-coil-partial-high-average-weight-is-resolved-for-one-hardcoded-part.md",
+        "docs/startup/startup-rebuild-design-brief.md",
+        "docs/diagrams/tools/README.md",
+        ".github/memories/repo/mcp-tooling.md"
+      ],
+      "wave": "T005-T024"
+    },
+    "T018": {
+      "status": "DONE",
+      "did": "Six documentation references now resolve or are marked historical, and the tooling note records the NuGet MCP failure with its signature and the working per-project command",
+      "files": [
+        "docs/operations/operations-mock-service-install-script.md",
+        "docs/operations/operations-database-live-and-mock-updates.md",
+        "docs/living-specs/living-specs-drift-ledger.md",
+        "docs/defects/defects-coil-partial-high-average-weight-is-resolved-for-one-hardcoded-part.md",
+        "docs/startup/startup-rebuild-design-brief.md",
+        "docs/diagrams/tools/README.md",
+        ".github/memories/repo/mcp-tooling.md"
+      ],
+      "wave": "T005-T024"
+    },
+    "T019": {
+      "status": "DONE",
+      "did": "Six documentation references now resolve or are marked historical, and the tooling note records the NuGet MCP failure with its signature and the working per-project command",
+      "files": [
+        "docs/operations/operations-mock-service-install-script.md",
+        "docs/operations/operations-database-live-and-mock-updates.md",
+        "docs/living-specs/living-specs-drift-ledger.md",
+        "docs/defects/defects-coil-partial-high-average-weight-is-resolved-for-one-hardcoded-part.md",
+        "docs/startup/startup-rebuild-design-brief.md",
+        "docs/diagrams/tools/README.md",
+        ".github/memories/repo/mcp-tooling.md"
+      ],
+      "wave": "T005-T024"
+    },
+    "T020": {
+      "status": "DONE",
+      "did": "Six documentation references now resolve or are marked historical, and the tooling note records the NuGet MCP failure with its signature and the working per-project command",
+      "files": [
+        "docs/operations/operations-mock-service-install-script.md",
+        "docs/operations/operations-database-live-and-mock-updates.md",
+        "docs/living-specs/living-specs-drift-ledger.md",
+        "docs/defects/defects-coil-partial-high-average-weight-is-resolved-for-one-hardcoded-part.md",
+        "docs/startup/startup-rebuild-design-brief.md",
+        "docs/diagrams/tools/README.md",
+        ".github/memories/repo/mcp-tooling.md"
+      ],
+      "wave": "T005-T024"
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "Six documentation references now resolve or are marked historical, and the tooling note records the NuGet MCP failure with its signature and the working per-project command",
+      "files": [
+        "docs/operations/operations-mock-service-install-script.md",
+        "docs/operations/operations-database-live-and-mock-updates.md",
+        "docs/living-specs/living-specs-drift-ledger.md",
+        "docs/defects/defects-coil-partial-high-average-weight-is-resolved-for-one-hardcoded-part.md",
+        "docs/startup/startup-rebuild-design-brief.md",
+        "docs/diagrams/tools/README.md",
+        ".github/memories/repo/mcp-tooling.md"
+      ],
+      "wave": "T005-T024"
+    },
+    "T022": {
+      "status": "DONE",
+      "did": "Six documentation references now resolve or are marked historical, and the tooling note records the NuGet MCP failure with its signature and the working per-project command",
+      "files": [
+        "docs/operations/operations-mock-service-install-script.md",
+        "docs/operations/operations-database-live-and-mock-updates.md",
+        "docs/living-specs/living-specs-drift-ledger.md",
+        "docs/defects/defects-coil-partial-high-average-weight-is-resolved-for-one-hardcoded-part.md",
+        "docs/startup/startup-rebuild-design-brief.md",
+        "docs/diagrams/tools/README.md",
+        ".github/memories/repo/mcp-tooling.md"
+      ],
+      "wave": "T005-T024"
+    },
+    "T023": {
+      "status": "DONE",
+      "did": "Six documentation references now resolve or are marked historical, and the tooling note records the NuGet MCP failure with its signature and the working per-project command",
+      "files": [
+        "docs/operations/operations-mock-service-install-script.md",
+        "docs/operations/operations-database-live-and-mock-updates.md",
+        "docs/living-specs/living-specs-drift-ledger.md",
+        "docs/defects/defects-coil-partial-high-average-weight-is-resolved-for-one-hardcoded-part.md",
+        "docs/startup/startup-rebuild-design-brief.md",
+        "docs/diagrams/tools/README.md",
+        ".github/memories/repo/mcp-tooling.md"
+      ],
+      "wave": "T005-T024"
+    },
+    "T024": {
+      "status": "DONE",
+      "did": "Six documentation references now resolve or are marked historical, and the tooling note records the NuGet MCP failure with its signature and the working per-project command",
+      "files": [
+        "docs/operations/operations-mock-service-install-script.md",
+        "docs/operations/operations-database-live-and-mock-updates.md",
+        "docs/living-specs/living-specs-drift-ledger.md",
+        "docs/defects/defects-coil-partial-high-average-weight-is-resolved-for-one-hardcoded-part.md",
+        "docs/startup/startup-rebuild-design-brief.md",
+        "docs/diagrams/tools/README.md",
+        ".github/memories/repo/mcp-tooling.md"
+      ],
+      "wave": "T005-T024"
+    },
+    "T026": {
+      "status": "DONE",
+      "did": "Phase 1 gate: restore ok, build 0 warnings 0 errors, suite 2896 passed 65 skipped 2961 total with 17 guardrails green; appsettings carries no credential value",
+      "files": [
+        "MTM_Waitlist.sln",
+        "MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj"
+      ]
+    },
+    "T028": {
+      "status": "DONE",
+      "did": "Central package management created with one PackageVersion per package (22 ids, 81 declarations), every inline Version removed from all 17 projects with NU1008 clean, and the Pkcs pin relocated",
+      "files": [
+        "Directory.Packages.props",
+        "Directory.Build.props",
+        "MTM_Waitlist.csproj",
+        "MTM_Database_Deployment.csproj",
+        "MTM_Database_Deployment.Core.csproj",
+        "MTM_Waitlist.Core.csproj",
+        "MTM_Waitlist.GenericRequest.csproj",
+        "MTM_Waitlist.GenericRequest.Data.csproj",
+        "MTM_Waitlist.Logging.csproj",
+        "MTM_Waitlist.Mock.csproj",
+        "MTM_Waitlist.Mock.Service.csproj",
+        "MTM_Waitlist.Settings.csproj",
+        "MTM_Waitlist.Setup.csproj",
+        "MTM_Waitlist.Shared.csproj",
+        "MTM_Waitlist.Startup.csproj",
+        "MTM_Waitlist.Tests.csproj",
+        "MTM_Waitlist.Waitlist.Controls.csproj",
+        "MTM_Waitlist.Waitlist.NewRequest.csproj",
+        "MTM_Waitlist.Waitlist.View.csproj"
+      ],
+      "wave": "T028-T030"
+    },
+    "T029": {
+      "status": "DONE",
+      "did": "Central package management created with one PackageVersion per package (22 ids, 81 declarations), every inline Version removed from all 17 projects with NU1008 clean, and the Pkcs pin relocated",
+      "files": [
+        "Directory.Packages.props",
+        "Directory.Build.props",
+        "MTM_Waitlist.csproj",
+        "MTM_Database_Deployment.csproj",
+        "MTM_Database_Deployment.Core.csproj",
+        "MTM_Waitlist.Core.csproj",
+        "MTM_Waitlist.GenericRequest.csproj",
+        "MTM_Waitlist.GenericRequest.Data.csproj",
+        "MTM_Waitlist.Logging.csproj",
+        "MTM_Waitlist.Mock.csproj",
+        "MTM_Waitlist.Mock.Service.csproj",
+        "MTM_Waitlist.Settings.csproj",
+        "MTM_Waitlist.Setup.csproj",
+        "MTM_Waitlist.Shared.csproj",
+        "MTM_Waitlist.Startup.csproj",
+        "MTM_Waitlist.Tests.csproj",
+        "MTM_Waitlist.Waitlist.Controls.csproj",
+        "MTM_Waitlist.Waitlist.NewRequest.csproj",
+        "MTM_Waitlist.Waitlist.View.csproj"
+      ],
+      "wave": "T028-T030"
+    },
+    "T030": {
+      "status": "DONE",
+      "did": "Central package management created with one PackageVersion per package (22 ids, 81 declarations), every inline Version removed from all 17 projects with NU1008 clean, and the Pkcs pin relocated",
+      "files": [
+        "Directory.Packages.props",
+        "Directory.Build.props",
+        "MTM_Waitlist.csproj",
+        "MTM_Database_Deployment.csproj",
+        "MTM_Database_Deployment.Core.csproj",
+        "MTM_Waitlist.Core.csproj",
+        "MTM_Waitlist.GenericRequest.csproj",
+        "MTM_Waitlist.GenericRequest.Data.csproj",
+        "MTM_Waitlist.Logging.csproj",
+        "MTM_Waitlist.Mock.csproj",
+        "MTM_Waitlist.Mock.Service.csproj",
+        "MTM_Waitlist.Settings.csproj",
+        "MTM_Waitlist.Setup.csproj",
+        "MTM_Waitlist.Shared.csproj",
+        "MTM_Waitlist.Startup.csproj",
+        "MTM_Waitlist.Tests.csproj",
+        "MTM_Waitlist.Waitlist.Controls.csproj",
+        "MTM_Waitlist.Waitlist.NewRequest.csproj",
+        "MTM_Waitlist.Waitlist.View.csproj"
+      ],
+      "wave": "T028-T030"
+    },
+    "T031": {
+      "status": "DONE",
+      "did": "packageSourceMapping added over the tracked nuget.org entry with family prefixes and no bare wildcard, and a forced restore verifies every declared and transitive package id is covered",
+      "files": [
+        "NuGet.Config"
+      ],
+      "wave": "T031-T027"
+    },
+    "T027": {
+      "status": "DONE",
+      "did": "packageSourceMapping added over the tracked nuget.org entry with family prefixes and no bare wildcard, and a forced restore verifies every declared and transitive package id is covered",
+      "files": [
+        "NuGet.Config"
+      ],
+      "wave": "T031-T027"
+    },
+    "T032": {
+      "status": "DONE",
+      "did": "WinUIEx 2.9.3, SDK.BuildTools 10.0.28000.2957 and ProtectedData 11.0.0 in use after a cache-cleared restore, build 0 warnings 0 errors, suite 2896 green",
+      "files": [
+        "Directory.Packages.props"
+      ],
+      "wave": "T032-T033"
+    },
+    "T033": {
+      "status": "DONE",
+      "did": "WinUIEx 2.9.3, SDK.BuildTools 10.0.28000.2957 and ProtectedData 11.0.0 in use after a cache-cleared restore, build 0 warnings 0 errors, suite 2896 green",
+      "files": [
+        "Directory.Packages.props"
+      ],
+      "wave": "T032-T033"
+    },
+    "T034": {
+      "status": "DONE",
+      "did": "Phase 2 gate: 22 distinct PackageVersion entries, zero inline versions, cache-cleared restore and build clean, NuGet.Config carries its mapping, 2896 tests green with all 17 guardrails",
+      "files": [
+        "Directory.Packages.props",
+        "NuGet.Config",
+        "MTM_Waitlist.sln",
+        "MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj"
+      ]
+    },
+    "T035": {
+      "status": "DONE",
+      "did": "Microsoft.Extensions Hosting, Configuration, DependencyInjection, Logging and Options at 11.0.0; restore and build clean, 2896 tests green at the unchanged discovered count",
+      "files": [
+        "Directory.Packages.props"
+      ],
+      "wave": "T035-T038"
+    },
+    "T038": {
+      "status": "DONE",
+      "did": "Microsoft.Extensions Hosting, Configuration, DependencyInjection, Logging and Options at 11.0.0; restore and build clean, 2896 tests green at the unchanged discovered count",
+      "files": [
+        "Directory.Packages.props"
+      ],
+      "wave": "T035-T038"
+    },
+    "T040": {
+      "status": "DONE",
+      "did": "MySqlConnector at 3.0.0: build clean with no API breakage, 2896 tests green, and a stored-procedure read returned a row from the local instance through the new driver",
+      "files": [
+        "Directory.Packages.props"
+      ]
+    },
+    "T043": {
+      "status": "DONE",
+      "did": "Microsoft.Data.SqlClient at 8.0.0 and the Pkcs 9.0.21 pin retired from both its homes; restore raises no NU1902 or NU1903, Pkcs resolves transitively at 10.0.15, build and 2896 tests green",
+      "files": [
+        "Directory.Packages.props",
+        "Directory.Build.props"
+      ]
+    },
+    "T036": {
+      "status": "DONE",
+      "did": "Microsoft.WindowsAppSDK at 2.7.0: restore and build clean with 0 warnings and 2896 tests green, and all three agent-facing statements now name 2.7.0",
+      "files": [
+        "Directory.Packages.props",
+        ".github/copilot-startup-steps.yaml",
+        "Directory.Build.props",
+        ".github/memories/repo/github-artifact-staleness.md"
+      ],
+      "wave": "T036-T048"
+    },
+    "T046": {
+      "status": "DONE",
+      "did": "Microsoft.WindowsAppSDK at 2.7.0: restore and build clean with 0 warnings and 2896 tests green, and all three agent-facing statements now name 2.7.0",
+      "files": [
+        "Directory.Packages.props",
+        ".github/copilot-startup-steps.yaml",
+        "Directory.Build.props",
+        ".github/memories/repo/github-artifact-staleness.md"
+      ],
+      "wave": "T036-T048"
+    },
+    "T048": {
+      "status": "DONE",
+      "did": "Microsoft.WindowsAppSDK at 2.7.0: restore and build clean with 0 warnings and 2896 tests green, and all three agent-facing statements now name 2.7.0",
+      "files": [
+        "Directory.Packages.props",
+        ".github/copilot-startup-steps.yaml",
+        "Directory.Build.props",
+        ".github/memories/repo/github-artifact-staleness.md"
+      ],
+      "wave": "T036-T048"
+    },
+    "T051": {
+      "status": "DONE",
+      "did": "Phase 3 gate: Extensions 11.0.0, MySqlConnector 3.0.0, SqlClient 8.0.0 with the Pkcs pin gone, WindowsAppSDK 2.7.0, each after a clean restore, build and 2896-test suite; DevWinUI is NOT at 11.1.0 because that release references WinRT.Runtime 2.3.1 and this platform's projection supplies 2.2.0.0 (CS1705), so 10.8.0 stays and W13 is recorded blocked; plant-host and screen passes recorded blocked",
+      "files": [
+        "Directory.Packages.props",
+        "Directory.Build.props",
+        "MTM_Waitlist.sln",
+        "MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj"
+      ]
+    },
+    "T052": {
+      "status": "DONE",
+      "did": "MSTest adapter and framework 4.5.3, Test.Sdk 18.12.0 and coverlet 10.1.1; ThrowsException migrated to ThrowsExactly and DataTestMethod to TestMethod across 46 test files, and the suite discovers and runs the identical 2961 tests green",
+      "files": [
+        "Directory.Packages.props",
+        "MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj"
+      ],
+      "wave": "T052-T054"
+    },
+    "T054": {
+      "status": "DONE",
+      "did": "MSTest adapter and framework 4.5.3, Test.Sdk 18.12.0 and coverlet 10.1.1; ThrowsException migrated to ThrowsExactly and DataTestMethod to TestMethod across 46 test files, and the suite discovers and runs the identical 2961 tests green",
+      "files": [
+        "Directory.Packages.props",
+        "MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj"
+      ],
+      "wave": "T052-T054"
+    },
+    "T053": {
+      "status": "DONE",
+      "did": "The unstoppable-step case waits on a task the test owns rather than a three-second clock, so it costs no real time, proves the runner ended the wait, and fails when the step is made to finish",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/VisualVerdictPrimingStepTests.cs"
+      ],
+      "wave": "T053-T055"
+    },
+    "T055": {
+      "status": "DONE",
+      "did": "The unstoppable-step case waits on a task the test owns rather than a three-second clock, so it costs no real time, proves the runner ended the wait, and fails when the step is made to finish",
+      "files": [
+        "MTM_Waitlist.Tests/Module_Startup/Services/VisualVerdictPrimingStepTests.cs"
+      ],
+      "wave": "T053-T055"
+    },
+    "T056": {
+      "status": "DONE",
+      "did": "Phase 4 gate: MSTest 4.5.3 discovers and runs the identical 2961 tests green (2896 passed, 65 skipped), the longest test clock wait is 120 ms, and the rewritten unstoppable-step case fails when its behaviour is broken",
+      "files": [
+        "Directory.Packages.props",
+        "MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj",
+        "MTM_Waitlist.Tests/Module_Startup/Services/VisualVerdictPrimingStepTests.cs"
+      ]
+    },
+    "T060": {
+      "status": "DONE",
+      "did": "CommunityToolkit 7.1.2 line replaced by CommunityToolkit.WinUI.Animations 8.2.251219, the unused Controls reference and both dead xmlns declarations removed, the namespace moved in two source files, and the frame-less connected-animation call guarded; build clean and 2896 tests green with the 17 guardrails",
+      "files": [
+        "Directory.Packages.props",
+        "MTM_Waitlist.csproj",
+        "MTM_Waitlist.Core/MTM_Waitlist.Core.csproj",
+        "Module_Waitlist/Views/WaitlistViewPage.xaml",
+        "Module_Waitlist/Views/WaitlistViewDetailPage.xaml",
+        "Module_Waitlist/Views/WaitlistViewDetailPage.xaml.cs",
+        "MTM_Waitlist.Core/Services/NavigationService.cs"
+      ],
+      "wave": "T060-T063"
+    },
+    "T061": {
+      "status": "DONE",
+      "did": "CommunityToolkit 7.1.2 line replaced by CommunityToolkit.WinUI.Animations 8.2.251219, the unused Controls reference and both dead xmlns declarations removed, the namespace moved in two source files, and the frame-less connected-animation call guarded; build clean and 2896 tests green with the 17 guardrails",
+      "files": [
+        "Directory.Packages.props",
+        "MTM_Waitlist.csproj",
+        "MTM_Waitlist.Core/MTM_Waitlist.Core.csproj",
+        "Module_Waitlist/Views/WaitlistViewPage.xaml",
+        "Module_Waitlist/Views/WaitlistViewDetailPage.xaml",
+        "Module_Waitlist/Views/WaitlistViewDetailPage.xaml.cs",
+        "MTM_Waitlist.Core/Services/NavigationService.cs"
+      ],
+      "wave": "T060-T063"
+    },
+    "T062": {
+      "status": "DONE",
+      "did": "CommunityToolkit 7.1.2 line replaced by CommunityToolkit.WinUI.Animations 8.2.251219, the unused Controls reference and both dead xmlns declarations removed, the namespace moved in two source files, and the frame-less connected-animation call guarded; build clean and 2896 tests green with the 17 guardrails",
+      "files": [
+        "Directory.Packages.props",
+        "MTM_Waitlist.csproj",
+        "MTM_Waitlist.Core/MTM_Waitlist.Core.csproj",
+        "Module_Waitlist/Views/WaitlistViewPage.xaml",
+        "Module_Waitlist/Views/WaitlistViewDetailPage.xaml",
+        "Module_Waitlist/Views/WaitlistViewDetailPage.xaml.cs",
+        "MTM_Waitlist.Core/Services/NavigationService.cs"
+      ],
+      "wave": "T060-T063"
+    },
+    "T063": {
+      "status": "DONE",
+      "did": "CommunityToolkit 7.1.2 line replaced by CommunityToolkit.WinUI.Animations 8.2.251219, the unused Controls reference and both dead xmlns declarations removed, the namespace moved in two source files, and the frame-less connected-animation call guarded; build clean and 2896 tests green with the 17 guardrails",
+      "files": [
+        "Directory.Packages.props",
+        "MTM_Waitlist.csproj",
+        "MTM_Waitlist.Core/MTM_Waitlist.Core.csproj",
+        "Module_Waitlist/Views/WaitlistViewPage.xaml",
+        "Module_Waitlist/Views/WaitlistViewDetailPage.xaml",
+        "Module_Waitlist/Views/WaitlistViewDetailPage.xaml.cs",
+        "MTM_Waitlist.Core/Services/NavigationService.cs"
+      ],
+      "wave": "T060-T063"
+    },
+    "T065": {
+      "status": "DONE",
+      "did": "UseRidGraph and its rationale block removed after a cold restore proved the unified portable Win2D 1.4.0 resolves without NETSDK1206; build 0 warnings and 2896 tests green",
+      "files": [
+        "Directory.Build.props"
+      ],
+      "wave": "T065-T067"
+    },
+    "T066": {
+      "status": "DONE",
+      "did": "UseRidGraph and its rationale block removed after a cold restore proved the unified portable Win2D 1.4.0 resolves without NETSDK1206; build 0 warnings and 2896 tests green",
+      "files": [
+        "Directory.Build.props"
+      ],
+      "wave": "T065-T067"
+    },
+    "T067": {
+      "status": "DONE",
+      "did": "UseRidGraph and its rationale block removed after a cold restore proved the unified portable Win2D 1.4.0 resolves without NETSDK1206; build 0 warnings and 2896 tests green",
+      "files": [
+        "Directory.Build.props"
+      ],
+      "wave": "T065-T067"
+    },
+    "T057": {
+      "status": "DONE",
+      "did": "Narrowed the data seam to stored procedures plus one reviewed-script route; removed the statement-text members from the contract; bounded every read at 10,000 rows; resolved the sole production caller by name and recorded the residual.",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IMySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Contracts/Services/IReviewedQueueScriptReader.cs",
+        "MTM_Waitlist.Core/Services/MySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Services/WaitlistWipMySqlScriptStore.cs",
+        "MTM_Waitlist.Core/Services/WipFloorInventoryService.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs",
+        "MTM_Waitlist.Tests/Core/Services/MySqlHelperServerRowCapTests.cs",
+        "MTM_Waitlist.Tests/Core/Services/WipFloorInventoryServiceTests.cs",
+        "MTM_Waitlist.Tests/Module_Mock/InlineSqlAuditTests.cs"
+      ],
+      "wave": "T057-T072"
+    },
+    "T068": {
+      "status": "DONE",
+      "did": "Narrowed the data seam to stored procedures plus one reviewed-script route; removed the statement-text members from the contract; bounded every read at 10,000 rows; resolved the sole production caller by name and recorded the residual.",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IMySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Contracts/Services/IReviewedQueueScriptReader.cs",
+        "MTM_Waitlist.Core/Services/MySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Services/WaitlistWipMySqlScriptStore.cs",
+        "MTM_Waitlist.Core/Services/WipFloorInventoryService.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs",
+        "MTM_Waitlist.Tests/Core/Services/MySqlHelperServerRowCapTests.cs",
+        "MTM_Waitlist.Tests/Core/Services/WipFloorInventoryServiceTests.cs",
+        "MTM_Waitlist.Tests/Module_Mock/InlineSqlAuditTests.cs"
+      ],
+      "wave": "T057-T072"
+    },
+    "T069": {
+      "status": "DONE",
+      "did": "Narrowed the data seam to stored procedures plus one reviewed-script route; removed the statement-text members from the contract; bounded every read at 10,000 rows; resolved the sole production caller by name and recorded the residual.",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IMySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Contracts/Services/IReviewedQueueScriptReader.cs",
+        "MTM_Waitlist.Core/Services/MySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Services/WaitlistWipMySqlScriptStore.cs",
+        "MTM_Waitlist.Core/Services/WipFloorInventoryService.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs",
+        "MTM_Waitlist.Tests/Core/Services/MySqlHelperServerRowCapTests.cs",
+        "MTM_Waitlist.Tests/Core/Services/WipFloorInventoryServiceTests.cs",
+        "MTM_Waitlist.Tests/Module_Mock/InlineSqlAuditTests.cs"
+      ],
+      "wave": "T057-T072"
+    },
+    "T070": {
+      "status": "DONE",
+      "did": "Narrowed the data seam to stored procedures plus one reviewed-script route; removed the statement-text members from the contract; bounded every read at 10,000 rows; resolved the sole production caller by name and recorded the residual.",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IMySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Contracts/Services/IReviewedQueueScriptReader.cs",
+        "MTM_Waitlist.Core/Services/MySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Services/WaitlistWipMySqlScriptStore.cs",
+        "MTM_Waitlist.Core/Services/WipFloorInventoryService.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs",
+        "MTM_Waitlist.Tests/Core/Services/MySqlHelperServerRowCapTests.cs",
+        "MTM_Waitlist.Tests/Core/Services/WipFloorInventoryServiceTests.cs",
+        "MTM_Waitlist.Tests/Module_Mock/InlineSqlAuditTests.cs"
+      ],
+      "wave": "T057-T072"
+    },
+    "T071": {
+      "status": "DONE",
+      "did": "Narrowed the data seam to stored procedures plus one reviewed-script route; removed the statement-text members from the contract; bounded every read at 10,000 rows; resolved the sole production caller by name and recorded the residual.",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IMySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Contracts/Services/IReviewedQueueScriptReader.cs",
+        "MTM_Waitlist.Core/Services/MySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Services/WaitlistWipMySqlScriptStore.cs",
+        "MTM_Waitlist.Core/Services/WipFloorInventoryService.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs",
+        "MTM_Waitlist.Tests/Core/Services/MySqlHelperServerRowCapTests.cs",
+        "MTM_Waitlist.Tests/Core/Services/WipFloorInventoryServiceTests.cs",
+        "MTM_Waitlist.Tests/Module_Mock/InlineSqlAuditTests.cs"
+      ],
+      "wave": "T057-T072"
+    },
+    "T072": {
+      "status": "DONE",
+      "did": "Narrowed the data seam to stored procedures plus one reviewed-script route; removed the statement-text members from the contract; bounded every read at 10,000 rows; resolved the sole production caller by name and recorded the residual.",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IMySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Contracts/Services/IReviewedQueueScriptReader.cs",
+        "MTM_Waitlist.Core/Services/MySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Services/WaitlistWipMySqlScriptStore.cs",
+        "MTM_Waitlist.Core/Services/WipFloorInventoryService.cs",
+        "Services/DependencyInjection/ServiceRegistrationExtensions.cs",
+        "MTM_Waitlist.Tests/Core/Services/MySqlHelperServerRowCapTests.cs",
+        "MTM_Waitlist.Tests/Core/Services/WipFloorInventoryServiceTests.cs",
+        "MTM_Waitlist.Tests/Module_Mock/InlineSqlAuditTests.cs"
+      ],
+      "wave": "T057-T072"
+    },
+    "T058": {
+      "status": "DONE",
+      "did": "Deleted the Setup copy of the Infor Visual query type and its now-unused script store; the surviving Core type takes the module, so the setup tool keeps resolving its own queue scripts from one owner of the read path.",
+      "files": [
+        "MTM_Waitlist.Core/Services/InforVisualSqlQueryService.cs",
+        "MTM_Waitlist.Setup/Services/InforVisualSqlQueryService.cs",
+        "MTM_Waitlist.Setup/Services/SetupSqlScriptStore.cs",
+        "MTM_Waitlist.Setup/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs",
+        "MTM_Waitlist.Tests/Module_Setup/Services/InforVisualSqlQueryServiceTests.cs"
+      ],
+      "wave": "T058-T080"
+    },
+    "T080": {
+      "status": "DONE",
+      "did": "Deleted the Setup copy of the Infor Visual query type and its now-unused script store; the surviving Core type takes the module, so the setup tool keeps resolving its own queue scripts from one owner of the read path.",
+      "files": [
+        "MTM_Waitlist.Core/Services/InforVisualSqlQueryService.cs",
+        "MTM_Waitlist.Setup/Services/InforVisualSqlQueryService.cs",
+        "MTM_Waitlist.Setup/Services/SetupSqlScriptStore.cs",
+        "MTM_Waitlist.Setup/Services/DependencyInjection/ModuleDependencyInjectionExtensions.cs",
+        "MTM_Waitlist.Tests/Module_Setup/Services/InforVisualSqlQueryServiceTests.cs"
+      ],
+      "wave": "T058-T080"
+    },
+    "T059": {
+      "status": "DONE",
+      "did": "Replaced the reflection-based serializer in every settings and mock-service store with one generated context per library and one options definition per store; added a round-trip test that reads the previous release's stored shape.",
+      "files": [
+        "MTM_Waitlist.Settings/Models/SettingsJsonContext.cs",
+        "MTM_Waitlist.Settings/Models/UserListFilter.cs",
+        "MTM_Waitlist.Mock.Service/Services/MockServiceJsonContext.cs",
+        "MTM_Waitlist.Mock.Service/Services/RunHistoryStore.cs",
+        "MTM_Waitlist.Mock.Service/Services/BackupArtifactStore.cs",
+        "MTM_Waitlist.Mock.Service/Services/ServiceConfigurationStore.cs",
+        "MTM_Waitlist.Mock.Service/Services/ServiceLog.cs",
+        "MTM_Waitlist.Mock.Service/Services/RefreshRunRecordStore.cs",
+        "MTM_Waitlist.Mock.Service/Services/VisualShapePayloadSource.cs",
+        "MTM_Waitlist.Tests/Module_Settings/Services/JsonRoundTripTests.cs"
+      ],
+      "wave": "T059-T084"
+    },
+    "T081": {
+      "status": "DONE",
+      "did": "Replaced the reflection-based serializer in every settings and mock-service store with one generated context per library and one options definition per store; added a round-trip test that reads the previous release's stored shape.",
+      "files": [
+        "MTM_Waitlist.Settings/Models/SettingsJsonContext.cs",
+        "MTM_Waitlist.Settings/Models/UserListFilter.cs",
+        "MTM_Waitlist.Mock.Service/Services/MockServiceJsonContext.cs",
+        "MTM_Waitlist.Mock.Service/Services/RunHistoryStore.cs",
+        "MTM_Waitlist.Mock.Service/Services/BackupArtifactStore.cs",
+        "MTM_Waitlist.Mock.Service/Services/ServiceConfigurationStore.cs",
+        "MTM_Waitlist.Mock.Service/Services/ServiceLog.cs",
+        "MTM_Waitlist.Mock.Service/Services/RefreshRunRecordStore.cs",
+        "MTM_Waitlist.Mock.Service/Services/VisualShapePayloadSource.cs",
+        "MTM_Waitlist.Tests/Module_Settings/Services/JsonRoundTripTests.cs"
+      ],
+      "wave": "T059-T084"
+    },
+    "T082": {
+      "status": "DONE",
+      "did": "Replaced the reflection-based serializer in every settings and mock-service store with one generated context per library and one options definition per store; added a round-trip test that reads the previous release's stored shape.",
+      "files": [
+        "MTM_Waitlist.Settings/Models/SettingsJsonContext.cs",
+        "MTM_Waitlist.Settings/Models/UserListFilter.cs",
+        "MTM_Waitlist.Mock.Service/Services/MockServiceJsonContext.cs",
+        "MTM_Waitlist.Mock.Service/Services/RunHistoryStore.cs",
+        "MTM_Waitlist.Mock.Service/Services/BackupArtifactStore.cs",
+        "MTM_Waitlist.Mock.Service/Services/ServiceConfigurationStore.cs",
+        "MTM_Waitlist.Mock.Service/Services/ServiceLog.cs",
+        "MTM_Waitlist.Mock.Service/Services/RefreshRunRecordStore.cs",
+        "MTM_Waitlist.Mock.Service/Services/VisualShapePayloadSource.cs",
+        "MTM_Waitlist.Tests/Module_Settings/Services/JsonRoundTripTests.cs"
+      ],
+      "wave": "T059-T084"
+    },
+    "T083": {
+      "status": "DONE",
+      "did": "Replaced the reflection-based serializer in every settings and mock-service store with one generated context per library and one options definition per store; added a round-trip test that reads the previous release's stored shape.",
+      "files": [
+        "MTM_Waitlist.Settings/Models/SettingsJsonContext.cs",
+        "MTM_Waitlist.Settings/Models/UserListFilter.cs",
+        "MTM_Waitlist.Mock.Service/Services/MockServiceJsonContext.cs",
+        "MTM_Waitlist.Mock.Service/Services/RunHistoryStore.cs",
+        "MTM_Waitlist.Mock.Service/Services/BackupArtifactStore.cs",
+        "MTM_Waitlist.Mock.Service/Services/ServiceConfigurationStore.cs",
+        "MTM_Waitlist.Mock.Service/Services/ServiceLog.cs",
+        "MTM_Waitlist.Mock.Service/Services/RefreshRunRecordStore.cs",
+        "MTM_Waitlist.Mock.Service/Services/VisualShapePayloadSource.cs",
+        "MTM_Waitlist.Tests/Module_Settings/Services/JsonRoundTripTests.cs"
+      ],
+      "wave": "T059-T084"
+    },
+    "T084": {
+      "status": "DONE",
+      "did": "Replaced the reflection-based serializer in every settings and mock-service store with one generated context per library and one options definition per store; added a round-trip test that reads the previous release's stored shape.",
+      "files": [
+        "MTM_Waitlist.Settings/Models/SettingsJsonContext.cs",
+        "MTM_Waitlist.Settings/Models/UserListFilter.cs",
+        "MTM_Waitlist.Mock.Service/Services/MockServiceJsonContext.cs",
+        "MTM_Waitlist.Mock.Service/Services/RunHistoryStore.cs",
+        "MTM_Waitlist.Mock.Service/Services/BackupArtifactStore.cs",
+        "MTM_Waitlist.Mock.Service/Services/ServiceConfigurationStore.cs",
+        "MTM_Waitlist.Mock.Service/Services/ServiceLog.cs",
+        "MTM_Waitlist.Mock.Service/Services/RefreshRunRecordStore.cs",
+        "MTM_Waitlist.Mock.Service/Services/VisualShapePayloadSource.cs",
+        "MTM_Waitlist.Tests/Module_Settings/Services/JsonRoundTripTests.cs"
+      ],
+      "wave": "T059-T084"
+    },
+    "T085": {
+      "status": "DONE",
+      "did": "Replaced the hand-built Storyboard and DoubleAnimation with the toolkit's animation builder, keeping the 140 ms halves, the 10 px travel and the ease-in-out curve; T086 (visual parity) is still blocked on an interactive run.",
+      "files": [
+        "Module_Shared/Controls/RotatingTextView.xaml.cs"
+      ]
+    },
+    "T088": {
+      "status": "DONE",
+      "did": "Composed the message dialog body in code, removed the XAML view type, and moved the sizing audit onto the composed body",
+      "files": [
+        "MTM_Waitlist.Shared/Dialogs/MessageDialogContent.cs",
+        "MTM_Waitlist.Shared/Dialogs/MessageDialogContent.xaml (removed)",
+        "MTM_Waitlist.Shared/Dialogs/MessageDialogContent.xaml.cs (removed)",
+        "MTM_Waitlist.Tests/Module_Shared/Dialogs/DialogSizingAuditTests.cs",
+        "docs/guides/guides-xaml-surface-inventory.md"
+      ],
+      "wave": "T088-T090"
+    },
+    "T089": {
+      "status": "DONE",
+      "did": "Composed the message dialog body in code, removed the XAML view type, and moved the sizing audit onto the composed body",
+      "files": [
+        "MTM_Waitlist.Shared/Dialogs/MessageDialogContent.cs",
+        "MTM_Waitlist.Shared/Dialogs/MessageDialogContent.xaml (removed)",
+        "MTM_Waitlist.Shared/Dialogs/MessageDialogContent.xaml.cs (removed)",
+        "MTM_Waitlist.Tests/Module_Shared/Dialogs/DialogSizingAuditTests.cs",
+        "docs/guides/guides-xaml-surface-inventory.md"
+      ],
+      "wave": "T088-T090"
+    },
+    "T090": {
+      "status": "DONE",
+      "did": "Composed the message dialog body in code, removed the XAML view type, and moved the sizing audit onto the composed body",
+      "files": [
+        "MTM_Waitlist.Shared/Dialogs/MessageDialogContent.cs",
+        "MTM_Waitlist.Shared/Dialogs/MessageDialogContent.xaml (removed)",
+        "MTM_Waitlist.Shared/Dialogs/MessageDialogContent.xaml.cs (removed)",
+        "MTM_Waitlist.Tests/Module_Shared/Dialogs/DialogSizingAuditTests.cs",
+        "docs/guides/guides-xaml-surface-inventory.md"
+      ],
+      "wave": "T088-T090"
+    },
+    "T092": {
+      "status": "DONE",
+      "did": "Removed both generic-request libraries' waitlist project references and moved the verification rule, the part-number width and the request raise onto contracts they can see",
+      "files": [
+        "MTM_Waitlist.GenericRequest/MTM_Waitlist.GenericRequest.csproj",
+        "MTM_Waitlist.GenericRequest.Data/MTM_Waitlist.GenericRequest.Data.csproj",
+        "MTM_Waitlist.GenericRequest/Contracts/IGenericRequestSubmitter.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestSubmitRequest.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestSubmitResult.cs",
+        "MTM_Waitlist.GenericRequest/Services/GenericRequestLiveStepData.cs",
+        "MTM_Waitlist.GenericRequest.Data/Services/GenericRequestDieData.cs",
+        "MTM_Waitlist.Waitlist.View/Services/GenericRequestSubmitter.cs",
+        "MTM_Waitlist.Core/Helpers/EmployeeIdentityVerification.cs",
+        "MTM_Waitlist.Core/Helpers/PartNumberFormat.cs",
+        "MTM_Waitlist.Core/Models/EmployeeVerificationResult.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/GenericRequestSubmitterTests.cs"
+      ],
+      "wave": "T092-T093"
+    },
+    "T093": {
+      "status": "DONE",
+      "did": "Removed both generic-request libraries' waitlist project references and moved the verification rule, the part-number width and the request raise onto contracts they can see",
+      "files": [
+        "MTM_Waitlist.GenericRequest/MTM_Waitlist.GenericRequest.csproj",
+        "MTM_Waitlist.GenericRequest.Data/MTM_Waitlist.GenericRequest.Data.csproj",
+        "MTM_Waitlist.GenericRequest/Contracts/IGenericRequestSubmitter.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestSubmitRequest.cs",
+        "MTM_Waitlist.GenericRequest/Models/GenericRequestSubmitResult.cs",
+        "MTM_Waitlist.GenericRequest/Services/GenericRequestLiveStepData.cs",
+        "MTM_Waitlist.GenericRequest.Data/Services/GenericRequestDieData.cs",
+        "MTM_Waitlist.Waitlist.View/Services/GenericRequestSubmitter.cs",
+        "MTM_Waitlist.Core/Helpers/EmployeeIdentityVerification.cs",
+        "MTM_Waitlist.Core/Helpers/PartNumberFormat.cs",
+        "MTM_Waitlist.Core/Models/EmployeeVerificationResult.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/GenericRequestSubmitterTests.cs"
+      ],
+      "wave": "T092-T093"
+    },
+    "T098": {
+      "status": "DONE",
+      "did": "The part box now reads once per typing pause with a cancellable token, and each pause's answer is applied only while it is the newest attempt",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Services/PausedSearch.cs",
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestPartPage.xaml.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestPartViewModel.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestPartSearchTimingTests.cs"
+      ],
+      "wave": "T098-T102"
+    },
+    "T101": {
+      "status": "DONE",
+      "did": "The part box now reads once per typing pause with a cancellable token, and each pause's answer is applied only while it is the newest attempt",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Services/PausedSearch.cs",
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestPartPage.xaml.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestPartViewModel.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestPartSearchTimingTests.cs"
+      ],
+      "wave": "T098-T102"
+    },
+    "T102": {
+      "status": "DONE",
+      "did": "The part box now reads once per typing pause with a cancellable token, and each pause's answer is applied only while it is the newest attempt",
+      "files": [
+        "MTM_Waitlist.GenericRequest/Services/PausedSearch.cs",
+        "MTM_Waitlist.GenericRequest/Views/GenericRequestPartPage.xaml.cs",
+        "MTM_Waitlist.GenericRequest/ViewModels/GenericRequestPartViewModel.cs",
+        "MTM_Waitlist.Tests/Module_GenericRequest/GenericRequestPartSearchTimingTests.cs"
+      ],
+      "wave": "T098-T102"
+    },
+    "T099": {
+      "status": "DONE",
+      "did": "The coil weight is formatted on this machine's culture and its unit now comes from the CoilWeight_Unit resource, with the service returning the number alone",
+      "files": [
+        "MTM_Waitlist.Core/Helpers/CoilWeightText.cs",
+        "MTM_Waitlist.Waitlist.View/Services/IAverageCoilWeightService.cs",
+        "MTM_Waitlist.Waitlist.View/Services/AverageCoilWeightService.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/Services/CoilAvailabilityService.cs",
+        "Services/RequestJobAvailabilityProvider.cs",
+        "Strings/en-us/Resources.resw",
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/AverageCoilWeightServiceTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/CoilAvailabilityServiceTests.cs"
+      ],
+      "wave": "T099-T104"
+    },
+    "T103": {
+      "status": "DONE",
+      "did": "The coil weight is formatted on this machine's culture and its unit now comes from the CoilWeight_Unit resource, with the service returning the number alone",
+      "files": [
+        "MTM_Waitlist.Core/Helpers/CoilWeightText.cs",
+        "MTM_Waitlist.Waitlist.View/Services/IAverageCoilWeightService.cs",
+        "MTM_Waitlist.Waitlist.View/Services/AverageCoilWeightService.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/Services/CoilAvailabilityService.cs",
+        "Services/RequestJobAvailabilityProvider.cs",
+        "Strings/en-us/Resources.resw",
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/AverageCoilWeightServiceTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/CoilAvailabilityServiceTests.cs"
+      ],
+      "wave": "T099-T104"
+    },
+    "T104": {
+      "status": "DONE",
+      "did": "The coil weight is formatted on this machine's culture and its unit now comes from the CoilWeight_Unit resource, with the service returning the number alone",
+      "files": [
+        "MTM_Waitlist.Core/Helpers/CoilWeightText.cs",
+        "MTM_Waitlist.Waitlist.View/Services/IAverageCoilWeightService.cs",
+        "MTM_Waitlist.Waitlist.View/Services/AverageCoilWeightService.cs",
+        "MTM_Waitlist.Waitlist.NewRequest/Services/CoilAvailabilityService.cs",
+        "Services/RequestJobAvailabilityProvider.cs",
+        "Strings/en-us/Resources.resw",
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/AverageCoilWeightServiceTests.cs",
+        "MTM_Waitlist.Tests/Module_Waitlist/Services/CoilAvailabilityServiceTests.cs"
+      ],
+      "wave": "T099-T104"
+    },
+    "T114": {
+      "status": "DONE",
+      "did": "Declared microsoft-learn and context7 in .mcp.json with their prerequisites beside them, and probed both servers answering a documentation query",
+      "files": [
+        ".mcp.json",
+        ".github/instructions/mcp-doc-research.instructions.md",
+        ".github/memories/repo/mcp-tooling.md"
+      ],
+      "wave": "T114-T117"
+    },
+    "T116": {
+      "status": "DONE",
+      "did": "Declared microsoft-learn and context7 in .mcp.json with their prerequisites beside them, and probed both servers answering a documentation query",
+      "files": [
+        ".mcp.json",
+        ".github/instructions/mcp-doc-research.instructions.md",
+        ".github/memories/repo/mcp-tooling.md"
+      ],
+      "wave": "T114-T117"
+    },
+    "T117": {
+      "status": "DONE",
+      "did": "Declared microsoft-learn and context7 in .mcp.json with their prerequisites beside them, and probed both servers answering a documentation query",
+      "files": [
+        ".mcp.json",
+        ".github/instructions/mcp-doc-research.instructions.md",
+        ".github/memories/repo/mcp-tooling.md"
+      ],
+      "wave": "T114-T117"
+    },
+    "T095": {
+      "status": "DONE",
+      "did": "Split the 3,023-line settings view model into eight cohesive partial parts with no change to behaviour, bindings or messages, and the settings and full suites are green",
+      "files": [
+        "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.cs",
+        "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.Navigation.cs",
+        "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.Permissions.cs",
+        "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.WorkCenters.cs",
+        "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.Locations.cs",
+        "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.GeneralSettings.cs",
+        "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.Pictures.cs",
+        "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.StoragePaths.cs",
+        "MTM_Waitlist.Tests/Module_Core/Permissions/PermissionGateSiteAuditTests.cs"
+      ],
+      "wave": "T095-T096"
+    },
+    "T096": {
+      "status": "DONE",
+      "did": "Split the 3,023-line settings view model into eight cohesive partial parts with no change to behaviour, bindings or messages, and the settings and full suites are green",
+      "files": [
+        "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.cs",
+        "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.Navigation.cs",
+        "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.Permissions.cs",
+        "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.WorkCenters.cs",
+        "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.Locations.cs",
+        "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.GeneralSettings.cs",
+        "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.Pictures.cs",
+        "MTM_Waitlist.Settings/SettingsHub/ViewModels/SettingsViewModel.StoragePaths.cs",
+        "MTM_Waitlist.Tests/Module_Core/Permissions/PermissionGateSiteAuditTests.cs"
+      ],
+      "wave": "T095-T096"
+    },
+    "T125": {
+      "status": "DONE",
+      "did": "Recorded the DEP-007 block: T049 marked blocked-here, added to the workstation-blocked register, and T051's package-at-target evidence annotated",
+      "files": [
+        "specs/024-dependency-modernization/tasks.md"
+      ]
+    },
+    "T126": {
+      "status": "DONE",
+      "did": "Both reflection-only stores now serialize through generated metadata: CoreJsonContext for the last-seen map and DeploymentSettingsJsonContext for deployment.settings.json; the reflection overloads remain documented as test-only",
+      "files": [
+        "MTM_Waitlist.Core/Helpers/Json.cs",
+        "MTM_Waitlist.Core/Helpers/CoreJsonContext.cs",
+        "MTM_Waitlist.Waitlist.View/Services/LocalWaitlistMessageSeenStore.cs",
+        "MTM_Database_Deployment.Core/Services/DeploymentSettingsJsonContext.cs",
+        "MTM_Database_Deployment.Core/Services/Service_DeploymentSettings.cs"
+      ]
+    },
+    "T073": {
+      "status": "DONE",
+      "did": "Four of the five services route through the strict seam (user management, permissions, lugger writes, work-centre catalog with its transaction); the health probe stays direct with a recorded reason; no direct connection remains in an application service outside that documented one; build and suite green",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IMySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Services/MySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Services/UserManagementRepository.cs",
+        "MTM_Waitlist.Core/Services/PermissionAdministrationService.cs",
+        "MTM_Waitlist.Core/Services/LuggerArrangementService.cs",
+        "MTM_Waitlist.Shared/Services/WorkCenterCatalogService.cs",
+        "MTM_Waitlist.Core/Services/ConnectionHealthService.cs",
+        "MTM_Waitlist.Tests/Core/Services/MySqlHelperServerStrictRouteTests.cs"
+      ],
+      "wave": "T073-T079"
+    },
+    "T074": {
+      "status": "DONE",
+      "did": "Four of the five services route through the strict seam (user management, permissions, lugger writes, work-centre catalog with its transaction); the health probe stays direct with a recorded reason; no direct connection remains in an application service outside that documented one; build and suite green",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IMySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Services/MySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Services/UserManagementRepository.cs",
+        "MTM_Waitlist.Core/Services/PermissionAdministrationService.cs",
+        "MTM_Waitlist.Core/Services/LuggerArrangementService.cs",
+        "MTM_Waitlist.Shared/Services/WorkCenterCatalogService.cs",
+        "MTM_Waitlist.Core/Services/ConnectionHealthService.cs",
+        "MTM_Waitlist.Tests/Core/Services/MySqlHelperServerStrictRouteTests.cs"
+      ],
+      "wave": "T073-T079"
+    },
+    "T075": {
+      "status": "DONE",
+      "did": "Four of the five services route through the strict seam (user management, permissions, lugger writes, work-centre catalog with its transaction); the health probe stays direct with a recorded reason; no direct connection remains in an application service outside that documented one; build and suite green",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IMySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Services/MySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Services/UserManagementRepository.cs",
+        "MTM_Waitlist.Core/Services/PermissionAdministrationService.cs",
+        "MTM_Waitlist.Core/Services/LuggerArrangementService.cs",
+        "MTM_Waitlist.Shared/Services/WorkCenterCatalogService.cs",
+        "MTM_Waitlist.Core/Services/ConnectionHealthService.cs",
+        "MTM_Waitlist.Tests/Core/Services/MySqlHelperServerStrictRouteTests.cs"
+      ],
+      "wave": "T073-T079"
+    },
+    "T076": {
+      "status": "DONE",
+      "did": "Four of the five services route through the strict seam (user management, permissions, lugger writes, work-centre catalog with its transaction); the health probe stays direct with a recorded reason; no direct connection remains in an application service outside that documented one; build and suite green",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IMySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Services/MySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Services/UserManagementRepository.cs",
+        "MTM_Waitlist.Core/Services/PermissionAdministrationService.cs",
+        "MTM_Waitlist.Core/Services/LuggerArrangementService.cs",
+        "MTM_Waitlist.Shared/Services/WorkCenterCatalogService.cs",
+        "MTM_Waitlist.Core/Services/ConnectionHealthService.cs",
+        "MTM_Waitlist.Tests/Core/Services/MySqlHelperServerStrictRouteTests.cs"
+      ],
+      "wave": "T073-T079"
+    },
+    "T077": {
+      "status": "DONE",
+      "did": "Four of the five services route through the strict seam (user management, permissions, lugger writes, work-centre catalog with its transaction); the health probe stays direct with a recorded reason; no direct connection remains in an application service outside that documented one; build and suite green",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IMySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Services/MySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Services/UserManagementRepository.cs",
+        "MTM_Waitlist.Core/Services/PermissionAdministrationService.cs",
+        "MTM_Waitlist.Core/Services/LuggerArrangementService.cs",
+        "MTM_Waitlist.Shared/Services/WorkCenterCatalogService.cs",
+        "MTM_Waitlist.Core/Services/ConnectionHealthService.cs",
+        "MTM_Waitlist.Tests/Core/Services/MySqlHelperServerStrictRouteTests.cs"
+      ],
+      "wave": "T073-T079"
+    },
+    "T078": {
+      "status": "DONE",
+      "did": "Four of the five services route through the strict seam (user management, permissions, lugger writes, work-centre catalog with its transaction); the health probe stays direct with a recorded reason; no direct connection remains in an application service outside that documented one; build and suite green",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IMySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Services/MySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Services/UserManagementRepository.cs",
+        "MTM_Waitlist.Core/Services/PermissionAdministrationService.cs",
+        "MTM_Waitlist.Core/Services/LuggerArrangementService.cs",
+        "MTM_Waitlist.Shared/Services/WorkCenterCatalogService.cs",
+        "MTM_Waitlist.Core/Services/ConnectionHealthService.cs",
+        "MTM_Waitlist.Tests/Core/Services/MySqlHelperServerStrictRouteTests.cs"
+      ],
+      "wave": "T073-T079"
+    },
+    "T079": {
+      "status": "DONE",
+      "did": "Four of the five services route through the strict seam (user management, permissions, lugger writes, work-centre catalog with its transaction); the health probe stays direct with a recorded reason; no direct connection remains in an application service outside that documented one; build and suite green",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IMySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Services/MySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Services/UserManagementRepository.cs",
+        "MTM_Waitlist.Core/Services/PermissionAdministrationService.cs",
+        "MTM_Waitlist.Core/Services/LuggerArrangementService.cs",
+        "MTM_Waitlist.Shared/Services/WorkCenterCatalogService.cs",
+        "MTM_Waitlist.Core/Services/ConnectionHealthService.cs",
+        "MTM_Waitlist.Tests/Core/Services/MySqlHelperServerStrictRouteTests.cs"
+      ],
+      "wave": "T073-T079"
+    },
+    "T123": {
+      "status": "DONE",
+      "did": "Added the strict transactional route to the seam: propagates provider exceptions, commits or rolls back, never retries inside a transaction, and exposes stored procedures only",
+      "files": [
+        "MTM_Waitlist.Core/Contracts/Services/IMySqlHelperServer.cs",
+        "MTM_Waitlist.Core/Services/MySqlHelperServer.cs",
+        "specs/024-dependency-modernization/contracts/data-access-seam.md"
+      ]
+    }
+  },
+  "last_action": "Closed the second converge pass with no tasks appended: tasks.md unchanged at SHA256 3BE7AF497EAF23A293A6A9909A0D33A5134E32954E6B50F249E38715647E377B with 126 task IDs, reported as converged-with-open-items with T122/T123/T124 still open",
+  "risk": {
+    "tier": "high",
+    "computed": "high",
+    "reasons": [
+      "205 files changed"
+    ]
+  },
+  "convergeStartedAt": "2026-11-27T08:02:36.911Z",
+  "convergePasses": [
+    {
+      "startedAt": "2026-11-27T07:50:50.610Z",
+      "by": "extension",
+      "finishedAt": "2026-11-27T07:56:18.345Z",
+      "added": [
+        "T122",
+        "T123",
+        "T124",
+        "T125",
+        "T126"
+      ]
+    },
+    {
+      "startedAt": "2026-11-27T08:02:37.029Z",
+      "by": "extension",
+      "finishedAt": "2026-11-27T08:03:10.365Z",
+      "added": []
+    }
+  ]
+}
