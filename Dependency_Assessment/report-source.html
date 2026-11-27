@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dependency Update and Modernization Report — MTM_Waitlist (AI Development Environment)</title>
+<style>
+  @page { size: 8.5in 11in; margin: 0.85in 0.8in 0.9in 0.8in; }
+  html { font-size: 10.2pt; }
+  body {
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: #1d2530; line-height: 1.45; margin: 0;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  h1, h2, h3, h4 { font-family: "Segoe UI Semibold", "Segoe UI", Arial, sans-serif; color: #12304d; }
+  h1 { font-size: 21pt; margin: 0 0 .2em; letter-spacing: -.2px; }
+  h2 { font-size: 14.5pt; margin: 1.5em 0 .45em; padding-bottom: .18em; border-bottom: 1.5px solid #c9d6e2; break-after: avoid; }
+  h3 { font-size: 11.4pt; margin: 1.15em 0 .3em; color: #1b4b73; break-after: avoid; }
+  h4 { font-size: 10.4pt; margin: .9em 0 .2em; color: #2b5f88; break-after: avoid; }
+  p { margin: 0 0 .55em; }
+  ul, ol { margin: .2em 0 .7em; padding-left: 1.25em; }
+  li { margin-bottom: .18em; }
+  a { color: #0f5d8c; text-decoration: none; border-bottom: .5px solid #a8c4d8; word-break: break-word; }
+  code, .mono { font-family: "Cascadia Mono", Consolas, monospace; font-size: .88em; background: #f1f4f8; padding: .05em .25em; border-radius: 2px; }
+  table { width: 100%; border-collapse: collapse; margin: .5em 0 .95em; font-size: 8.9pt; }
+  th { background: #e8eef5; color: #12304d; text-align: left; font-weight: 600; padding: .38em .45em; border-bottom: 1.2px solid #b8c9da; }
+  td { padding: .34em .45em; border-bottom: .6px solid #dde5ee; vertical-align: top; }
+  tbody tr:nth-child(even) td { background: #f7f9fc; }
+  tr, .row { break-inside: avoid; page-break-inside: avoid; }
+  thead { display: table-header-group; }
+  .cover { page-break-after: always; display: flex; flex-direction: column; justify-content: center; min-height: 8.4in; }
+  .cover .kicker { font-size: 10pt; letter-spacing: 2.4px; text-transform: uppercase; color: #4a6b87; margin-bottom: 1.1em; }
+  .cover .rule { height: 5px; width: 92px; background: #1b6ea8; margin: 1.4em 0 1.6em; }
+  .cover h1 { font-size: 27pt; line-height: 1.16; margin-bottom: .35em; }
+  .cover .subtitle { font-size: 12.6pt; color: #3d5a72; margin-bottom: 2.2em; line-height: 1.4; }
+  .facts { display: grid; grid-template-columns: 1fr 1fr; gap: .42em 1.6em; font-size: 9.4pt; margin-top: .4em; }
+  .facts div { border-top: .6px solid #d5dfe9; padding-top: .3em; }
+  .facts .k { display: block; color: #5c7a92; font-size: 8.2pt; text-transform: uppercase; letter-spacing: .7px; }
+  .facts .v { font-weight: 600; color: #17364f; }
+  .badge { display: inline-block; padding: .08em .5em; border-radius: 9px; font-size: 7.8pt; font-weight: 700; letter-spacing: .3px; text-transform: uppercase; white-space: nowrap; }
+  .p-high { background: #fde3d6; color: #8a3b0d; }
+  .p-medium { background: #fdf0cd; color: #7a5a06; }
+  .p-low { background: #e3ecf4; color: #33566f; }
+  .ok { background: #d9efe0; color: #176b39; }
+  .callout { border-left: 3.5px solid #1b6ea8; background: #f2f7fb; padding: .6em .85em; margin: .75em 0 1em; font-size: 9.4pt; break-inside: avoid; }
+  .callout.warn { border-left-color: #b9761a; background: #fdf7ec; }
+  .toc { font-size: 9.6pt; }
+  .toc ol { list-style: none; padding-left: 0; counter-reset: t; }
+  .toc > ol > li { margin-bottom: .42em; border-bottom: .5px dotted #ccd8e4; padding-bottom: .3em; }
+  .toc .num { display: inline-block; width: 1.9em; color: #6b8aa4; font-weight: 600; }
+  .lead { font-size: 10.6pt; color: #294a63; }
+  .metric-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6em; margin: .6em 0 1.1em; }
+  .metric { border: .8px solid #ccd9e5; border-radius: 4px; padding: .55em .65em; background: #fafcfe; }
+  .metric .n { display: block; font-size: 17pt; font-weight: 700; color: #14568a; line-height: 1.1; }
+  .metric .l { display: block; font-size: 8.3pt; color: #52708a; margin-top: .2em; }
+  .avoid { break-inside: avoid; }
+  .pagebreak { page-break-before: always; }
+  footer, header { display: none; }
+  .nowrap { white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<!-- ============ 1. COVER ============ -->
+<section class="cover">
+  <div class="kicker">Workspace modernization audit</div>
+  <h1>Dependency Update and Modernization Report</h1>
+  <div class="rule"></div>
+  <div class="subtitle">
+    MTM_Waitlist — the AI development environment:<br>
+    instructions, agents, skills, MCP servers and the context every request pays for
+  </div>
+  <div class="facts">
+    <div><span class="k">Workspace</span><span class="v">MTM_Waitlist</span></div>
+    <div><span class="k">Repository</span><span class="v">JDKoll1982/MTM_Waitlist</span></div>
+    <div><span class="k">Research date</span><span class="v">26 November 2026</span></div>
+    <div><span class="k">Report version</span><span class="v">1.0</span></div>
+    <div><span class="k">Projects reviewed</span><span class="v">17</span></div>
+    <div><span class="k">Dependencies reviewed</span><span class="v">21 distinct NuGet packages, 80 declarations</span></div>
+    <div><span class="k">Scope</span><span class="v">AI development environment only</span></div>
+    <div><span class="k">Available updates</span><span class="v">None in scope — no package version moves</span></div>
+    <div><span class="k">Modernization opportunities</span><span class="v">14, all approved</span></div>
+    <div><span class="k">Tickets, code or settings changed</span><span class="v">None — read-only audit</span></div>
+  </div>
+</section>
+
+<!-- ============ TOC ============ -->
+<section>
+  <h2 style="margin-top:0">Contents</h2>
+  <div class="toc">
+    <ol>
+      <li><span class="num">1</span>Executive summary</li>
+      <li><span class="num">2</span>Update overview</li>
+      <li><span class="num">3</span>Per-component assessment</li>
+      <li><span class="num">4</span>Custom functionality and modernization</li>
+      <li><span class="num">5</span>Development tools and AI optimization</li>
+      <li><span class="num">6</span>Workspace-wide changes</li>
+      <li><span class="num">7</span>Implementation roadmap</li>
+      <li><span class="num">8</span>Testing and risk</li>
+      <li><span class="num">9</span>Approval summary</li>
+      <li><span class="num">10</span>Final recommendations</li>
+      <li><span class="num">11</span>Sources</li>
+    </ol>
+  </div>
+  <div class="callout" style="margin-top:1.4em">
+    <strong>What this report is.</strong> A read-only assessment. It describes what was found, what
+    was approved, and what the work would involve. It is not a record of work performed: no package was
+    updated, no server installed, and no project, source or configuration file was edited.
+    The companion specification,
+    <span class="mono">DEPENDENCY_AND_MODERNIZATION_SPECIFICATION.md</span>, is the implementation input.
+  </div>
+</section>
+
+<!-- ============ 2. EXECUTIVE SUMMARY ============ -->
+<h2 class="pagebreak">1. Executive summary</h2>
+
+<p class="lead">
+  The application itself is healthy. What is unhealthy is the set of instructions and tools wrapped
+  around it: the repository tells an AI assistant things that stopped being true, points it at a file
+  that no longer exists, and registers two tool servers that cannot do their job. The cost is paid on
+  every single request, before any work starts.
+</p>
+
+<div class="metric-row">
+  <div class="metric"><span class="n">≈25,000</span><span class="l">tokens of instructions loaded before the first request is read</span></div>
+  <div class="metric"><span class="n">5</span><span class="l">verified wrong facts in the two always-loaded instruction files</span></div>
+  <div class="metric"><span class="n">54</span><span class="l">tool definitions from servers that cannot deliver their service</span></div>
+</div>
+
+<h3>Overall health</h3>
+<p>
+  Seventeen projects, one target framework, no continuous integration, and a documentation and
+  instruction surface that has grown to roughly 90 KB of text that loads on every request. The
+  application code was not in scope; the assessment covers the AI-facing configuration around it.
+</p>
+
+<h3>Update status</h3>
+<p>
+  No package update is proposed. This was an AI-tooling audit, and the two servers involved are
+  registration problems rather than version problems: the XAML inspection server is installed and
+  up to date but has nothing to connect to, and the CSV server is at its only published version.
+</p>
+
+<h3>Security concerns</h3>
+<p>
+  None of the approved work fixes a vulnerability, because no vulnerability was in scope. The two
+  server removals reduce exposed surface: one is a local executable that can never serve a request,
+  the other accepts a folder path and can write files. No secret value is reproduced in this report.
+</p>
+
+<h3>Modernization</h3>
+<p>
+  The pattern is duplication rather than obsolescence. The same rules are written in two
+  always-loaded files. The same commands exist as extension source, as agents and as skills. The
+  single largest instruction file — a 27 KB UI-automation procedure — matches almost every code edit
+  in the repository, whether or not the task involves UI automation.
+</p>
+
+<h3>AI development environment</h3>
+<p>
+  Two servers registered, neither usable. Seventeen agent files that no tool can load, twelve of
+  them pointing at extensions that are not installed. Twenty-four skill folders that no extension
+  registers. These are recoverable in a day, and every change is a text edit.
+</p>
+
+<h3>Highest-value recommendations</h3>
+<ol>
+  <li><strong>Load the UI-automation procedure on demand</strong> (AI-010). Removes about 27 KB from every code edit — the largest single saving available.</li>
+  <li><strong>Remove both MCP servers</strong> (AI-001, AI-004). Ends 54 tool definitions per request that cannot return anything useful.</li>
+  <li><strong>Correct the five wrong facts</strong> (AI-006) and the broken note pointer (AI-005). Wrong project counts and versions actively mislead.</li>
+  <li><strong>De-duplicate the instruction files</strong> (AI-008, AI-009, AI-012). About 6 KB of text is currently paid twice.</li>
+</ol>
+
+<!-- ============ 3. UPDATE OVERVIEW ============ -->
+<h2>2. Update overview</h2>
+<p>
+  This audit moved nothing to a new version. The table below is the complete inventory of the AI
+  components assessed, with the decision recorded for each. "Recommended" is the state after the
+  approved work.
+</p>
+<table>
+  <thead>
+    <tr><th style="width:20%">Component</th><th style="width:13%">Current</th><th style="width:13%">Latest stable</th><th style="width:17%">Recommended</th><th style="width:19%">Where it lives</th><th style="width:9%">Priority</th><th style="width:9%">Decision</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>XamlMcp MCP server</td><td>1.0.0-preview.3, registered</td><td>1.0.0-preview.3</td><td>Removed until the app carries the agent</td><td><span class="mono">.mcp.json</span></td><td><span class="badge p-high">High</span></td><td><span class="badge ok">Approved</span></td></tr>
+    <tr><td>CSV MCP server</td><td>1.0.0, registered twice</td><td>1.0.0 (only release)</td><td>Removed; PowerShell reads instead</td><td><span class="mono">.mcp.json</span>, <span class="mono">.vscode/mcp.json</span></td><td><span class="badge p-medium">Medium</span></td><td><span class="badge ok">Approved</span></td></tr>
+    <tr><td>Project instructions</td><td>30,536 B + 4,735 B, both loaded</td><td>n/a</td><td>≈25 KB + a short orientation file</td><td><span class="mono">.github/copilot-instructions.md</span>, <span class="mono">AGENTS.md</span></td><td><span class="badge p-high">High</span></td><td><span class="badge ok">Approved</span></td></tr>
+    <tr><td>UI-automation instruction</td><td>27,256 B, matched by <span class="mono">**/*.{xaml,cs,ps1,resw}</span></td><td>n/a</td><td>≤2 KB routing instruction + on-demand skill</td><td><span class="mono">.github/instructions/</span></td><td><span class="badge p-high">High</span></td><td><span class="badge ok">Approved</span></td></tr>
+    <tr><td>MCP documentation table</td><td>Describes servers that are not registered as described</td><td>n/a</td><td>Rewritten against the real configuration</td><td><span class="mono">.github/instructions/mcp-doc-research…</span></td><td><span class="badge p-high">High</span></td><td><span class="badge ok">Approved</span></td></tr>
+    <tr><td>Troubleshooting note pointer</td><td>Names a file that does not exist</td><td>n/a</td><td>Note created, or pointers removed</td><td><span class="mono">.github/memories/repo/</span></td><td><span class="badge p-high">High</span></td><td><span class="badge ok">Approved</span></td></tr>
+    <tr><td>Agent files</td><td>109 files, 17 unusable</td><td>n/a</td><td>92 files, all loadable</td><td><span class="mono">.github/agents/</span></td><td><span class="badge p-medium">Medium</span></td><td><span class="badge ok">Approved</span></td></tr>
+    <tr><td>Skill folders</td><td>43, of which 24 unregistered duplicates</td><td>n/a</td><td>19</td><td><span class="mono">.github/skills/</span></td><td><span class="badge p-low">Low</span></td><td><span class="badge ok">Approved</span></td></tr>
+    <tr><td>WinUI 3 scaling-routing instruction</td><td>Two copies, same file-pattern match</td><td>n/a</td><td>One copy, repository-owned</td><td>repository + user folder</td><td><span class="badge p-low">Low</span></td><td><span class="badge ok">Approved</span></td></tr>
+  </tbody>
+</table>
+
+<!-- ============ 4. PER-COMPONENT ============ -->
+<h2>3. Per-component assessment</h2>
+<p>
+  Each entry gives the current state, the evidence, why it matters to someone using the application,
+  the risk of changing it, and the effort. Evidence is a command result or a file measurement taken
+  on 26 November 2026.
+</p>
+
+<h3>XamlMcp — a tool server with nothing to connect to</h3>
+<table>
+  <tr><th style="width:22%">Current state</th><td>Registered in <span class="mono">.mcp.json</span> with every tool enabled. The tool itself is installed and passes its own health check (runtime .NET 10.0.15, server 1.0.0-preview.3).</td></tr>
+  <tr><th>Evidence</th><td>The health check reports <strong>0 instrumented desktop applications running</strong> and no discovery folder. A text search for the agent across every <span class="mono">.cs</span>, <span class="mono">.csproj</span> and <span class="mono">.xaml</span> file outside build output returns <strong>0 matches</strong>.</td></tr>
+  <tr><th>Why it matters</th><td>The server exists to inspect a running window. Without the in-application agent there is no window to inspect, so every request carries roughly 15 tool definitions that can only fail, and the instructions describe a ten-step workflow that cannot start.</td></tr>
+  <tr><th>Security</th><td>Removing it reduces the number of local executables the assistant can launch.</td></tr>
+  <tr><th>Risk</th><td>Low. Restoring it is one configuration block, and should happen in the same change that adds the agent to the application.</td></tr>
+  <tr><th>Effort</th><td>Small — two edits, one configuration and one instruction section.</td></tr>
+  <tr><th>Decision</th><td><span class="badge ok">Approved</span> — AI-001 and AI-002</td></tr>
+</table>
+
+<h3>CSV server — healthy, but its central operation fails</h3>
+<table>
+  <tr><th style="width:22%">Current state</th><td>Registered twice: once at the repository root pointing at <span class="mono">docs/database</span> (5,866 schema exports), and once under <span class="mono">.vscode</span> pointing at a folder that does not exist. It exposes 39 tools.</td></tr>
+  <tr><th>Evidence</th><td>The server reports healthy, but loading a real schema file fails every time with a validation error in its own progress reporting (<span class="mono">total … input_value='Validating file...'</span>). The package has exactly one published release, from 13 August 2025, so there is no fixed version to move to.</td></tr>
+  <tr><th>Why it matters</th><td>The repository reads these exports with ordinary PowerShell today. The server adds 39 tool definitions and a failing route, and the instructions tell the assistant to use it first.</td></tr>
+  <tr><th>Security</th><td>Removing it removes a server that accepts a storage path and can write files.</td></tr>
+  <tr><th>Risk</th><td>Medium. Convenient in-session table analysis is lost. Mitigated by naming the PowerShell equivalent in the replacement instruction.</td></tr>
+  <tr><th>Effort</th><td>Small.</td></tr>
+  <tr><th>Decision</th><td><span class="badge ok">Approved</span> — AI-003 and AI-004</td></tr>
+</table>
+
+<h3>Project instruction files — the largest recurring cost</h3>
+<table>
+  <tr><th style="width:22%">Current state</th><td>Two project instruction files, both loaded on every request: <span class="mono">.github/copilot-instructions.md</span> at 30,536 bytes and <span class="mono">AGENTS.md</span> at 4,735 bytes. Four further instruction files load on every request regardless of the task.</td></tr>
+  <tr><th>Evidence</th><td>Sum of the six always-applied repository files is 57,337 bytes; six user-level files add 33,550 bytes. Total <strong>90,887 bytes ≈ 25,000 tokens</strong> before a single file is read. Six rules appear in both project files: two build-failure signatures, the command-naming trap, the stored-procedure rule, the no-demo-mode rule and the view-model convention.</td></tr>
+  <tr><th>Why it matters</th><td>This text is paid on every request, and it competes for attention with the task. Duplicated rules also drift: the two files already disagree on the SDK version.</td></tr>
+  <tr><th>Risk</th><td>Low to medium. Deletions are reversible, but one deletion removes a workflow description the assistant may have been following; the report names it explicitly for that reason.</td></tr>
+  <tr><th>Effort</th><td>Small to medium — five proposals touch the same file, so the order matters.</td></tr>
+  <tr><th>Decision</th><td><span class="badge ok">Approved</span> — AI-002, AI-005, AI-006, AI-008, AI-009, AI-012</td></tr>
+</table>
+
+<h3>UI-automation instruction — the largest per-edit cost</h3>
+<table>
+  <tr><th style="width:22%">Current state</th><td>A 27,256-byte, 351-line procedure for driving the application's window, with a file-pattern match covering every XAML, C#, PowerShell and resource file in the repository.</td></tr>
+  <tr><th>Evidence</th><td>It is the largest instruction file (24% of all repository instruction bytes) and its match pattern covers nearly every edit made in this codebase.</td></tr>
+  <tr><th>Why it matters</th><td>A change to a database helper pays for the whole UI-automation procedure. Microsoft's own guidance puts multi-step procedures in skills and conventions in instruction files.</td></tr>
+  <tr><th>Risk</th><td>Medium. The skill must be discoverable from the task wording. Mitigated by keeping a short routing instruction that names it.</td></tr>
+  <tr><th>Effort</th><td>Medium — one file split into two, plus one routing line.</td></tr>
+  <tr><th>Decision</th><td><span class="badge ok">Approved</span> — AI-010</td></tr>
+</table>
+
+<h3>Agents, skills and instruction accuracy</h3>
+<table>
+  <tr><th style="width:22%">Current state</th><td>109 agent files (92 valid), 43 skill folders, 61 prompt shims, 13 memory notes. Instruction text states fifteen projects, fifteen audit tests and SDK 2.3.1; the build says seventeen, seventeen and 2.4.0. It also states that the Python launcher is broken; on this workstation it answers normally.</td></tr>
+  <tr><th>Evidence</th><td>Twelve agent files contain a single relative path and nothing else; all twelve targets resolve to files that are not installed. Five further agent files carry no header at all. Twenty-four skill folders duplicate commands that the extension registry records as agents, with no skills registered by any extension. Two memory-note pointers name files that do not exist.</td></tr>
+  <tr><th>Why it matters</th><td>A wrong project count sends the assistant looking for a project that is not there. A broken first-line pointer is the first thing it follows when a tool misbehaves. A directory listing cannot distinguish a working agent from a broken one.</td></tr>
+  <tr><th>Risk</th><td>Low. Every item is a deletion or a header addition, and each is individually reversible.</td></tr>
+  <tr><th>Effort</th><td>Small to medium.</td></tr>
+  <tr><th>Decision</th><td><span class="badge ok">Approved</span> — AI-005, AI-006, AI-007, AI-011, AI-013, AI-014</td></tr>
+</table>
+
+<!-- ============ 5. MODERNIZATION ============ -->
+<h2>4. Custom functionality and modernization</h2>
+<p>
+  The modernization opportunity here is not application code being replaced by a library. It is
+  hand-maintained configuration being replaced by the platform's own loading rules.
+</p>
+<table>
+  <thead><tr><th style="width:24%">Existing behaviour</th><th style="width:26%">Recommended alternative</th><th style="width:22%">Affected files</th><th style="width:16%">Benefit</th><th style="width:12%">Decision</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>A 27 KB procedure loaded by file pattern for all XAML and C# work</td>
+      <td>On-demand agent skill, with a short routing instruction left in place</td>
+      <td><span class="mono">winui3-ui-automation.instructions.md</span>, one new skill folder, <span class="mono">winui3-scaling-routing.instructions.md</span></td>
+      <td>≈7,570 tokens removed per code edit</td>
+      <td><span class="badge ok">AI-010</span></td>
+    </tr>
+    <tr>
+      <td>Rules restated inside the project instruction file although an instruction file already carries them</td>
+      <td>One owner per rule; the project file points at the owner</td>
+      <td><span class="mono">copilot-instructions.md</span></td>
+      <td>2,011 bytes and no drift</td>
+      <td><span class="badge ok">AI-008</span></td>
+    </tr>
+    <tr>
+      <td>Same rule written in both project instruction files</td>
+      <td><span class="mono">AGENTS.md</span> as short orientation; detail owned once</td>
+      <td><span class="mono">AGENTS.md</span>, <span class="mono">copilot-instructions.md</span></td>
+      <td>≈1,700 bytes and one edit per rule change</td>
+      <td><span class="badge ok">AI-012</span></td>
+    </tr>
+    <tr>
+      <td>Generic discover-edit-build loop described in prose</td>
+      <td>Rely on the harness loop; keep the two rules that are project-specific</td>
+      <td><span class="mono">copilot-instructions.md</span></td>
+      <td>≈2,500 bytes</td>
+      <td><span class="badge ok">AI-009</span></td>
+    </tr>
+    <tr>
+      <td>Commands shipped three times: extension source, agent, skill</td>
+      <td>Agents only; skills removed</td>
+      <td>24 folders under <span class="mono">.github/skills/</span></td>
+      <td>24 fewer catalogue entries</td>
+      <td><span class="badge ok">AI-014</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  <strong>Deliberately not modernized.</strong> Sixty prompt shims of about 40 bytes each were left
+  alone: they are the slash-command surface and cost almost nothing. The generated specification
+  folder (2.26 MB) was left alone because the extension installer owns it. A database tool server was
+  considered and rejected: the existing command-line tooling and the repository's own deployment
+  program already cover the work, and a new server would add credential exposure for no new
+  capability.
+</p>
+
+<!-- ============ 6. DEV TOOLS / AI ============ -->
+<h2>5. Development tools and AI optimization</h2>
+<h3>What the assistant sees today</h3>
+<table>
+  <thead><tr><th style="width:34%">Surface</th><th style="width:14%">Count</th><th style="width:30%">State</th><th style="width:22%">Approved change</th></tr></thead>
+  <tbody>
+    <tr><td>Always-on instruction text</td><td>90,887 B</td><td>≈25,000 tokens before the first request byte</td><td>≈79,000 B after</td></tr>
+    <tr><td>Instruction files matching a XAML/C# edit</td><td>6 files, 51,716 B</td><td>Loaded for almost every code change</td><td>≈24,460 B after</td></tr>
+    <tr><td>MCP servers</td><td>2 + 1 duplicate</td><td>Neither root server can serve</td><td>0</td></tr>
+    <tr><td>MCP tool definitions</td><td>54</td><td>15 + 39 from unusable servers</td><td>0 from those servers</td></tr>
+    <tr><td>Custom agents</td><td>109 files</td><td>17 cannot load</td><td>92, all loadable</td></tr>
+    <tr><td>Skills</td><td>43</td><td>24 unregistered duplicates</td><td>19</td></tr>
+    <tr><td>Prompt shims</td><td>61</td><td>60 delegate to an agent; negligible cost</td><td>Unchanged</td></tr>
+    <tr><td>Hooks</td><td>1 file, 2 events</td><td>Correct interpreter on Windows; no change needed</td><td>Unchanged</td></tr>
+  </tbody>
+</table>
+
+<h3>Where the assistant is being misled</h3>
+<ul>
+  <li><strong>Wrong counts.</strong> "Fifteen projects" against a solution of seventeen; "15 audit guardrails" against seventeen.</li>
+  <li><strong>Wrong version.</strong> The XAML compiler note names Windows App SDK 2.3.1; the project references 2.4.0.</li>
+  <li><strong>Wrong interpreter claim.</strong> The instructions say the Python launcher they tell the assistant to avoid is a broken store stub; it resolves and reports 3.13.15 here.</li>
+  <li><strong>Wrong server location.</strong> The MCP reference table says the CSV server lives in one file; the authoritative registration is in another.</li>
+  <li><strong>Obsolete rationale.</strong> The same table explains an absence using a tool-count ceiling that the workspace settings themselves record as removed.</li>
+  <li><strong>Dead first step.</strong> Three files instruct the assistant to consult a troubleshooting note that does not exist.</li>
+</ul>
+
+<h3>Related checks that must be run by hand</h3>
+<p>
+  Three repository checks are marked as manual-only, so no assistant can start them on its own. One
+  overlaps this audit — <span class="mono">agent-performance-audit</span> looks at how the assistant
+  behaves rather than how it is configured. It was not run, and none of its findings are claimed
+  here. Run it directly if a behavioural review is wanted. The other two,
+  <span class="mono">winui-agent</span> and <span class="mono">workflow-edgecase-inspection</span>,
+  matter only if UI work is implemented later.
+</p>
+
+<h3>What improves after the approved work</h3>
+<p>
+  A request starts with correct facts and no dead tool definitions. A code edit loads the guidance it
+  needs and not a UI-automation procedure it will not use. A rule has exactly one home, so it can be
+  changed once. The agents folder contains only files that load.
+</p>
+
+<!-- ============ 7. WORKSPACE-WIDE ============ -->
+<h2>6. Workspace-wide changes</h2>
+<p>
+  No project file, solution file, package reference, shared library or database object changes. The
+  work is confined to the repository root and <span class="mono">.github/</span>.
+</p>
+<table>
+  <thead><tr><th style="width:38%">Shared artefact</th><th style="width:28%">Proposals that touch it</th><th style="width:34%">Sequencing constraint</th></tr></thead>
+  <tbody>
+    <tr><td><span class="mono">.github/copilot-instructions.md</span></td><td>AI-002, AI-005, AI-006, AI-008, AI-009, AI-012</td><td>Six proposals, one file: correct facts, then delete, then compress, then de-duplicate</td></tr>
+    <tr><td><span class="mono">AGENTS.md</span></td><td>AI-006, AI-012</td><td>Correct facts before collapsing duplicates</td></tr>
+    <tr><td>MCP registration (three files)</td><td>AI-001, AI-003, AI-004</td><td>Removing the server (AI-004) first turns AI-003 into a deletion of the sampling key</td></tr>
+    <tr><td>Instruction files and skill folders</td><td>AI-010, AI-013, AI-014</td><td>A new skill folder is created before 24 folders are deleted; confirm it is not caught by the cleanup</td></tr>
+  </tbody>
+</table>
+<div class="callout warn">
+  <strong>One conflict resolved, not ignored.</strong> AI-003 was approved as "re-key the sampling
+  configuration to the working server". If AI-004 is also implemented, there is no working server to
+  re-key to. The specification resolves this explicitly: implement AI-004 first, and AI-003 becomes
+  the removal of the duplicate entry and the sampling block.
+</div>
+
+<!-- ============ 8. ROADMAP ============ -->
+<h2>7. Implementation roadmap</h2>
+<table>
+  <thead><tr><th style="width:8%">Phase</th><th style="width:26%">Objective</th><th style="width:22%">Proposals</th><th style="width:22%">Depends on</th><th style="width:22%">Done when</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>1</strong></td>
+      <td>Correct the instructions</td>
+      <td>AI-005, AI-006, AI-007, AI-011</td>
+      <td>Nothing</td>
+      <td>Every named file exists; every stated count and version matches the build; every agent file loads</td>
+    </tr>
+    <tr>
+      <td><strong>2</strong></td>
+      <td>Remove configuration that cannot work</td>
+      <td>AI-004, AI-001, AI-003, AI-014, AI-013</td>
+      <td>Phase 1 for the same files</td>
+      <td>A fresh session lists no tools from the removed servers; a companion command still runs</td>
+    </tr>
+    <tr>
+      <td><strong>3</strong></td>
+      <td>De-duplicate always-loaded rules</td>
+      <td>AI-008, AI-009, AI-012</td>
+      <td>Phases 1 and 2</td>
+      <td>Always-on total at or below 79,500 bytes; no rule in both files</td>
+    </tr>
+    <tr>
+      <td><strong>4</strong></td>
+      <td>Restructure context loading</td>
+      <td>AI-010</td>
+      <td>Phase 2 (skill cleanup)</td>
+      <td>Instruction at or below 2 KB; the procedure loads when a UI task starts</td>
+    </tr>
+  </tbody>
+</table>
+
+<table>
+  <thead><tr><th style="width:9%">ID</th><th style="width:37%">Change</th><th style="width:10%">Priority</th><th style="width:12%">Phase</th><th style="width:12%">Effort</th><th style="width:20%">Benefit</th></tr></thead>
+  <tbody>
+    <tr><td>AI-001</td><td>Remove the unwired XAML inspection server</td><td><span class="badge p-high">High</span></td><td>2</td><td>Small</td><td>−15 tool definitions</td></tr>
+    <tr><td>AI-002</td><td>Delete its instruction section</td><td><span class="badge p-high">High</span></td><td>1</td><td>Small</td><td>−5,673 B always-on</td></tr>
+    <tr><td>AI-003</td><td>Remove the dead duplicate CSV registration</td><td><span class="badge p-high">High</span></td><td>2</td><td>Small</td><td>One registration; working sampling key</td></tr>
+    <tr><td>AI-004</td><td>Remove the CSV server</td><td><span class="badge p-medium">Medium</span></td><td>2</td><td>Small</td><td>−39 tool definitions</td></tr>
+    <tr><td>AI-005</td><td>Repair the broken troubleshooting pointer</td><td><span class="badge p-high">High</span></td><td>1</td><td>Small</td><td>First troubleshooting step works</td></tr>
+    <tr><td>AI-006</td><td>Correct five stale facts</td><td><span class="badge p-high">High</span></td><td>1</td><td>Small</td><td>No wrong counts or versions</td></tr>
+    <tr><td>AI-007</td><td>Rewrite the MCP reference table</td><td><span class="badge p-high">High</span></td><td>1</td><td>Small</td><td>No three-way contradiction</td></tr>
+    <tr><td>AI-008</td><td>Delete sections duplicated by instruction files</td><td><span class="badge p-medium">Medium</span></td><td>3</td><td>Small</td><td>−2,011 B</td></tr>
+    <tr><td>AI-009</td><td>Retire generic workflow text; compress subagent table</td><td><span class="badge p-medium">Medium</span></td><td>3</td><td>Small</td><td>−2,500 B</td></tr>
+    <tr><td>AI-010</td><td>Load UI automation on demand</td><td><span class="badge p-high">High</span></td><td>4</td><td>Medium</td><td>−27,256 B per code edit</td></tr>
+    <tr><td>AI-011</td><td>Clean up 17 unusable agent files</td><td><span class="badge p-medium">Medium</span></td><td>1</td><td>Small</td><td>Every agent file loads</td></tr>
+    <tr><td>AI-012</td><td>De-duplicate the two project instruction files</td><td><span class="badge p-medium">Medium</span></td><td>3</td><td>Small</td><td>−1,700 B; one owner per rule</td></tr>
+    <tr><td>AI-013</td><td>Consolidate the scaling-routing instruction</td><td><span class="badge p-low">Low</span></td><td>2</td><td>Small (machine)</td><td>−2,170 B per code edit on this workstation</td></tr>
+    <tr><td>AI-014</td><td>Retire 24 unregistered skills</td><td><span class="badge p-low">Low</span></td><td>2</td><td>Medium</td><td>24 fewer catalogue entries</td></tr>
+  </tbody>
+</table>
+
+<p style="font-size:9.2pt"><strong>Deferred and pending items:</strong> none. All fourteen proposals were
+approved on 26 November 2026. Nothing was cut by a priority threshold or a research limit.</p>
+
+<!-- ============ 9. TESTING & RISK ============ -->
+<h2>8. Testing and risk</h2>
+<h3>How each change is proven</h3>
+<table>
+  <thead><tr><th style="width:26%">Change</th><th style="width:44%">Validation</th><th style="width:30%">Pass condition</th></tr></thead>
+  <tbody>
+    <tr><td>All</td><td>Build the solution</td><td>Build unchanged; no project or package touched</td></tr>
+    <tr><td>AI-001, AI-004</td><td>Open a fresh session and list MCP tools</td><td>Neither server contributes a tool</td></tr>
+    <tr><td>AI-003</td><td>Read both MCP configuration files and the settings file</td><td>One registration; no sampling key for a server that does not exist</td></tr>
+    <tr><td>AI-005</td><td>Resolve every note path named by an instruction</td><td>Every path exists</td></tr>
+    <tr><td>AI-006</td><td>Compare every stated number against the project files</td><td>17 projects, 17 audit tests, SDK 2.4.0</td></tr>
+    <tr><td>AI-007</td><td>Read the table against the registered servers</td><td>Exactly the servers registered</td></tr>
+    <tr><td>AI-008, AI-009, AI-012</td><td>Re-run the same byte sum used here</td><td>At or below 79,500 bytes always-on</td></tr>
+    <tr><td>AI-010</td><td>Run one non-UI code task, then one UI-automation task</td><td>Procedure absent, then present</td></tr>
+    <tr><td>AI-011</td><td>Scan every agent file for a header</td><td>No file without one</td></tr>
+    <tr><td>AI-013</td><td>List both instruction locations</td><td>One scaling-routing file in total</td></tr>
+    <tr><td>AI-014</td><td>List the skill catalogue</td><td>19 project skills</td></tr>
+  </tbody>
+</table>
+
+<h3>The risks that matter</h3>
+<table>
+  <thead><tr><th style="width:36%">Risk</th><th style="width:12%">Likelihood</th><th style="width:52%">Mitigation</th></tr></thead>
+  <tbody>
+    <tr><td>Removing the workflow and UI-automation text degrades how the assistant works</td><td>Medium</td><td>Both are one-commit reverts; the procedure remains reachable as a skill, and the report names the exact text removed</td></tr>
+    <tr><td>Removing the CSV server loses convenient table analysis</td><td>Medium</td><td>The replacement instruction names the PowerShell equivalent</td></tr>
+    <tr><td>A companion command disappears if a host loads it from a skill</td><td>Low</td><td>Run one companion command after the change; restore that single folder if it fails</td></tr>
+    <tr><td>Six proposals editing one file cause merge churn</td><td>High if parallel</td><td>The four-phase order is mandatory, not advisory</td></tr>
+    <tr><td>Instruction text is guidance, not a control</td><td>Certain</td><td>No acceptance check depends on model compliance; every check is a file or text measurement</td></tr>
+  </tbody>
+</table>
+
+<!-- ============ 10. APPROVAL ============ -->
+<h2>9. Approval summary</h2>
+<table>
+  <thead><tr><th style="width:26%">Decision</th><th style="width:12%">Count</th><th style="width:62%">Proposals</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Approved</strong></td><td>14</td><td>AI-001 through AI-014</td></tr>
+    <tr><td>Rejected</td><td>0</td><td>—</td></tr>
+    <tr><td>Deferred</td><td>0</td><td>—</td></tr>
+    <tr><td>More research required</td><td>0</td><td>—</td></tr>
+    <tr><td>Keep current</td><td>0</td><td>—</td></tr>
+    <tr><td>Pending decision</td><td>0</td><td>—</td></tr>
+  </tbody>
+</table>
+<p style="font-size:9.2pt">
+  Each proposal was put as its own question and answered individually on 26 November 2026. No
+  approval was inferred from a related one. The authoritative register is Section 19 of the
+  specification.
+</p>
+
+<!-- ============ 11. FINAL RECOMMENDATIONS ============ -->
+<h2>10. Final recommendations</h2>
+<ol>
+  <li>
+    <strong>Start with truth.</strong> Phase 1 corrects five wrong facts, a broken first-line pointer
+    and seventeen agent files that no tool can load. It changes nothing about how the application
+    behaves, and every later phase depends on it.
+  </li>
+  <li>
+    <strong>Then remove what cannot work.</strong> Two servers, 54 tool definitions, one duplicate
+    registration and a sampling key aimed at a server that never starts.
+  </li>
+  <li>
+    <strong>Then stop paying twice.</strong> About 6 KB of rules is currently loaded in two places.
+    Consolidating it makes a rule change a one-line edit instead of a hunt.
+  </li>
+  <li>
+    <strong>Finally, load the big procedure on demand.</strong> The UI-automation instruction is the
+    single largest recurring cost in the repository — 27 KB matched by almost every code edit. Moving
+    it behind a skill is the one change that will be felt on every task afterwards.
+  </li>
+  <li>
+    <strong>Keep the reversibility.</strong> Every change is a text edit to a tracked file. If the
+    assistant's behaviour worsens after Phase 3 or 4, revert that phase and keep the rest; the phases
+    do not depend on each other's text.
+  </li>
+</ol>
+
+<div class="callout">
+  <strong>Nothing was implemented.</strong> No package was installed or upgraded, no MCP server added
+  or removed, no instruction, agent, skill or setting edited, and no source file touched. The only
+  files this audit wrote are this report, its rendering source, and the specification in
+  <span class="mono">Dependency_Assessment/</span>.
+</div>
+
+<!-- ============ 12. SOURCES ============ -->
+<h2>11. Sources</h2>
+<table>
+  <thead><tr><th style="width:56%">Source</th><th style="width:30%">Used for</th><th style="width:14%">Checked</th></tr></thead>
+  <tbody>
+    <tr><td><a href="https://code.visualstudio.com/docs/agents/reference/custom-agent-file-reference">code.visualstudio.com — Custom agent file reference</a></td><td>Agent file locations and the requirement for a <span class="mono">description</span> in the Copilot schema</td><td>26 Nov 2026</td></tr>
+    <tr><td><a href="https://code.visualstudio.com/docs/agent-customization/custom-agents">code.visualstudio.com — Custom agents</a></td><td>What an agent is for; keeping shared rules in project instructions</td><td>26 Nov 2026</td></tr>
+    <tr><td><a href="https://code.visualstudio.com/docs/agent-customization/custom-instructions">code.visualstudio.com — Custom instructions</a></td><td>Project instruction files; file-pattern activation; skills for multi-step procedures</td><td>26 Nov 2026</td></tr>
+    <tr><td><a href="https://pypi.org/pypi/csv-mcp-server/json">pypi.org — csv-mcp-server</a></td><td>1.0.0, published 13 August 2025, is the only release</td><td>26 Nov 2026</td></tr>
+    <tr><td>Local — <span class="mono">xamlmcp check --json</span></td><td>Runtime pass, no instrumented application running</td><td>26 Nov 2026</td></tr>
+    <tr><td>Local — CSV server health and load calls</td><td>Server healthy; file loading fails with a validation error in its own progress reporting</td><td>26 Nov 2026</td></tr>
+    <tr><td>Local — <span class="mono">.specify/extensions/.registry</span></td><td>No extension registers a skill</td><td>26 Nov 2026</td></tr>
+    <tr><td>Local — <span class="mono">MTM_Waitlist.csproj</span>, <span class="mono">Directory.Build.props</span></td><td>Windows App SDK 2.4.0; SettingsControls 8.2.251219; version 1.1.1</td><td>26 Nov 2026</td></tr>
+    <tr><td>Local — instruction, agent, skill, MCP and settings files</td><td>Every measured size, count and quotation in this report</td><td>26 Nov 2026</td></tr>
+  </tbody>
+</table>
+
+</body>
+</html>
