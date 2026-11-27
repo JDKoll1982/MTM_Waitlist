@@ -1,1 +1,0 @@
-../../.specify/extensions/ci-guard/.specify-dev/agent-commands/copilot/speckit.ci-guard.drift.agent.md

@@ -39,6 +39,10 @@ so those are machine-local and will NOT be committed when you push.
 - `repo/tool-budget.md` — which tool groups were disabled to get under the model's 128-tool ceiling
   (owner decisions, 2026-10-11), which must never be disabled, and the 2026-10-17 retirement of the
   MCP-based code-exploration server (exploration now runs on built-in code intelligence and search).
+- `repo/mcp-tooling.md` — the MCP troubleshooting playbook: the stale-tool-snapshot fix for a tool that
+  reports "currently disabled by the user", how to prove a server healthy with an `initialize` probe,
+  what this repository registers (nothing), and the two servers retired on 2026-11-26 with the
+  condition each must meet before it returns.
 - `repo/ui-automation-drive.md` — driving the app with Windows UI Automation: the five-minute recipe that works on
   this workstation, and the ten roadblocks that stopped driven runs (empty `-Exe` default, thrown connection string,
   hardcoded sign-in account, missing `TogglePattern`, single-look finds, a `NumberBox` that ignored `ValuePattern`,

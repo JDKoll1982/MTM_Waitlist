@@ -23,20 +23,30 @@ platform guidance.
 - Map the relevant Views, ViewModels and registration structures before editing, and use what you find to
   narrow and validate edits before applying them.
 
-### Where the doc servers actually live (verified 2026-09-13)
+### Where the doc servers actually live (verified 2026-11-26)
 
-An audit of this machine found the registrations split across two files, which is why "it is not in
-`.vscode/mcp.json`" is **not** evidence that a server is unavailable:
+The registrations are split across two scopes, which is why "it is not in the repository `.mcp.json`" is
+**not** evidence that a server is unavailable. User-scope registrations are machine-local, so this table
+states where they live rather than copying one workstation's contents:
 
-| Server | Registered in | Transport |
+| Scope | File | What it holds on this workstation (2026-11-26) |
 | --- | --- | --- |
-| `microsoftdocs/mcp` (Microsoft Learn) | **user** `%APPDATA%\Code\User\mcp.json` | http → `https://learn.microsoft.com/api/mcp` |
-| `io.github.upstash/context7` | **user** `%APPDATA%\Code\User\mcp.json` | stdio, `npx @upstash/context7-mcp` |
-| `microsoft/playwright-mcp` | **user** `%APPDATA%\Code\User\mcp.json` | stdio, `npx @playwright/mcp` |
-| `csv-mcp-server` | **workspace** `.vscode/mcp.json` | stdio |
+| **user (Copilot CLI and agent hosts)** | `%USERPROFILE%\.copilot\mcp-config.json` | `io.github.upstash/context7` (http, `https://mcp.context7.com/mcp`) and `microsoftdocs/mcp` (http, `https://learn.microsoft.com/api/mcp`) |
+| **user (VS Code)** | `%APPDATA%\Code\User\mcp.json` | present but empty (`{"servers": {}}`) |
+| **repository** | `.mcp.json` | empty `mcpServers` object |
 
-`xamlmcp` is no longer registered in `.vscode/mcp.json`: its 24 tools were removed to keep the chat tool count
-under the 128-tool cap applied to BYOK models. Restore the entry when those tools are needed.
+`microsoft/playwright-mcp` is not registered anywhere on this workstation. Check the two user files
+before concluding a server is missing; do not assume their contents from this table.
+
+The repository declares **no** MCP server. `.mcp.json` keeps an empty `mcpServers` object as the place a
+future server is registered, and `.vscode/mcp.json` is gone: it held a duplicate `csv-mcp-server` whose
+storage path did not exist. The CSV server was retired because its `load_csv` fails on the repository's
+own schema exports and no fixed release exists; read those exports with
+`Import-Csv -Delimiter "`t"` instead.
+
+`xamlmcp` is intentionally unregistered: the WinUI in-process agent it attaches to is absent from this
+repository, so the server has nothing to serve. Restore its registration in the same change that adds the
+agent, not before.
 
 Server launch commands carry **workstation-absolute paths** (`C:\Users\<profile>\...`). A profile-folder
 change between environments (`jkoll` at work, `johnk` at home) breaks them, so a server that fails to launch
@@ -65,8 +75,8 @@ the live MS Learn tools are `mcp_microsoft_lea_microsoft_docs_search`, `..._micr
    `version 1.0.0`, all three tools advertised.
 3. **So it is the session.** A Copilot session that started before the server was registered or enabled holds a
    **stale tool snapshot** and keeps reporting disabled for the rest of that session. Start a **new chat
-   session** and the tools appear. This is the same class of failure as the XamlMcp one recorded in
-   `.github/copilot-instructions.md`.
+   session** and the tools appear. This is the same class of failure as the one recorded for the retired
+   XamlMcp server in `.github/memories/repo/mcp-tooling.md`.
 4. **Meanwhile, do the lookup anyway.** "Disabled" is not a licence to answer from memory — the constitution's
    MCP-first rule is about grounding the answer, not about which tool fetched it. `fetch_webpage` against the
    same Microsoft Learn page returns the same content the MCP server would have served, and it worked twice on

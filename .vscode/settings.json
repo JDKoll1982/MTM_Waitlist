@@ -4,18 +4,6 @@
         "*.csv": "tsv"
     },
     "python-envs.defaultEnvManager": "ms-python.python:system",
-    "chat.mcp.serverSampling": {
-        "MTM_Waitlist/.vscode/mcp.json: csv-mcp-server": {
-            "allowedModels": [
-                "copilotcli/auto",
-                "copilot/auto",
-                "agent-host-copilotcli:deepseek/deepseek-v4-flash",
-                "deepseek/deepseek-v4-flash",
-                "agent-host-copilotcli:deepseek/deepseek-v4-flash-vision-exp",
-                "deepseek/deepseek-v4-flash-vision-exp"
-            ]
-        }
-    },    
     "workbench.colorTheme": "Dark Modern",
     "todo-tree.ripgrep.ripgrep": "C:\\Users\\johnk\\AppData\\Local\\Microsoft\\WinGet\\Links\\rg.exe",
     "chat.promptFilesRecommendations": {

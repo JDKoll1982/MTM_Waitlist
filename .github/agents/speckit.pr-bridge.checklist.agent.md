@@ -1,1 +1,0 @@
-../../.specify/extensions/pr-bridge/.specify-dev/agent-commands/copilot/speckit.pr-bridge.checklist.agent.md

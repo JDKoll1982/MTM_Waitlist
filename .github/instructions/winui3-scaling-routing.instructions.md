@@ -24,6 +24,7 @@ applyTo: '**/*.{xaml,cs}'
 | Window min size, fullscreen, persistence, snap width, title bar | `winui3-windowing` — windowing rules |
 | Clipped labels or long identifiers (part numbers, bins) | `winui3-text-fit` — shrink-to-fit + middle ellipsis |
 | Tabular data that clips columns on narrow windows | `winui3-adaptive-table` — shared column-aware table |
+| Driving or inspecting the running window to prove routing, navigation or window state | `winui3-ui-automation` — UI Automation procedure |
 
 ## Work order
 
@@ -43,6 +44,8 @@ pwsh -NoProfile -File .github\skills\winui3-dpi-checklist\scripts\dpi-report.ps1
 
 Full decision rules: `.github/skills/winui3-scaling-policy/references/rules.md`.
 Manual release checklist: `docs/dpi-checklist.md`.
+The UI automation procedure: `.github/skills/winui3-ui-automation/references/procedure.md`, with its
+always-apply rules in `.github/instructions/winui3-ui-automation.instructions.md`.
 
 ## Relationship with `winui3-adoption.instructions.md`
 

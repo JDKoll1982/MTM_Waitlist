@@ -116,9 +116,10 @@ dotnet test MTM_Waitlist.Tests/MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x6
   shapes, and the audit/policy scans — over getters and trivial constructors
 - Add to the existing test class for a subject instead of creating a parallel one
 - **UI-only behaviour is not covered by this suite.** What renders, window geometry and navigation are verified
-  with the PowerShell UI-Automation recipe in `.github/instructions/winui3-ui-automation.instructions.md`, which
-  needs a signed-in session. The in-app XAML inspector (`xamlmcp`) is not wired in this repository, so do not
-  plan around it
+  with the PowerShell UI-Automation recipe in
+  `.github/skills/winui3-ui-automation/references/procedure.md`, which needs a signed-in session. Its rules and
+  the routing note are in `.github/instructions/winui3-ui-automation.instructions.md`. The in-app XAML inspector
+  (`xamlmcp`) is unregistered and unwired in this repository, so do not plan around it.
 
 ## Domain context that shapes expectations
 

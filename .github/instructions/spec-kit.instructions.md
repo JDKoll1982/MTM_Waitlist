@@ -42,8 +42,10 @@ Run the core sequence in order; `specify` must precede `plan`, which must preced
   `Nothing needed from you.`
 - **Run the spec-kit scripts with a real interpreter.** Every `.specify/scripts/powershell/*.ps1`
   invocation needs `-ExecutionPolicy Bypass`, and the Companion extension's `write-context.py` / `doctor.py`
-  / `drift.py` calls must use `python` or `py` — **never `python3`**, which on this machine is a 0-byte
-  Microsoft Store alias that answers "Python was not found" and silently drops the run journal.
+  / `drift.py` calls should use `python` or `py`. `python3` used to resolve to a 0-byte Microsoft Store
+  alias on this workstation that answered "Python was not found" and silently dropped the run journal;
+  it now resolves to a real interpreter (3.13.15, verified 2026-11-26), but that is a workstation fact.
+  Re-check `python3 --version` before relying on it rather than assuming either state.
 - **Specs are technology-agnostic** (WHAT/WHY, user value, acceptance scenarios, success criteria). No
   implementation details in `spec.md`; put the technical design in `plan.md` and the work items in `tasks.md`.
 - **One feature per `/speckit.specify`** invocation.

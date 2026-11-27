@@ -1,0 +1,1007 @@
+{
+  "workflow": "companion",
+  "specName": "AI Development Environment Remediation",
+  "branch": "ai-tooling-audit-fixes-round1",
+  "currentStep": "converge",
+  "status": "completed",
+  "history": [
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-27T02:44:44.309Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-11-27T02:45:59.102Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-27T02:46:02.330Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:47:49.290Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-27T02:47:49.468Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:48:33.366Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-27T02:48:42.147Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T001",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:48:49.749Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T002",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:49:44.333Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T003",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:49:44.333Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T004",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:49:47.161Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T005",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:50:28.347Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T009",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:50:33.907Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T010",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:50:35.167Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T011",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:50:42.324Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T012",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:50:42.325Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T013",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:50:59.337Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T006",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:50:59.478Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T008",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:50:59.478Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T014",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:51:53.159Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T015",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:51:53.388Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T016",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:51:53.610Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T017",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:51:53.851Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T018",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:52:02.758Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T019",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:52:02.758Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T020",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:52:03.194Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T023",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:53:02.104Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T024",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:53:02.352Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T025",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:53:10.537Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T021",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:53:17.207Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T022",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:53:17.441Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T007",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:53:32.593Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T028",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:53:41.454Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T029",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:53:46.509Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T030",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:53:52.416Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T026",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:54:18.759Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T027",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:54:19.007Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "task": "T031",
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:55:50.712Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "kind": "complete",
+      "by": "ai",
+      "at": "2026-11-27T02:55:50.787Z"
+    },
+    {
+      "step": "converge",
+      "substep": null,
+      "kind": "start",
+      "by": "extension",
+      "at": "2026-11-27T03:03:16.752Z"
+    },
+    {
+      "step": "converge",
+      "substep": null,
+      "kind": "complete",
+      "by": "extension",
+      "at": "2026-11-27T03:03:19.116Z"
+    }
+  ],
+  "unattended": true,
+  "request": "[DEPENDENCY_AND_MODERNIZATION_SPECIFICATION.md](file:///c%3A/Users/johnk/Source/repos/MTM_Waitlist/Dependency_Assessment/DEPENDENCY_AND_MODERNIZATION_SPECIFICATION.md)",
+  "expectations": [
+    "No NuGet, npm or Python package upgrade, addition or removal",
+    "No application code, XAML, view model, service or database change",
+    "No performance, security-CVE, UX, architecture, test or localization work",
+    "No other workstation user-level settings changed",
+    "No in-process UI-inspection agent added",
+    "No CI, linting or packaging change"
+  ],
+  "context": [
+    "area: .mcp.json + .vscode/mcp.json + .vscode/settings.json (MCP registration surface)",
+    "area: .github/copilot-instructions.md + AGENTS.md (always-loaded project instructions)",
+    "area: .github/instructions/** (mcp-doc-research, winui3-ui-automation, winui3-scaling-routing)",
+    "area: .github/agents/** and .github/skills/** (catalogue hygiene)",
+    "area: .github/memories/repo/** (named note paths)",
+    "constraint: no new MCP server, permission or dependency",
+    "constraint: every deleted rule must name its owning file",
+    "constraint: repository copy of an instruction file stays canonical"
+  ],
+  "coverage": {
+    "FR-001": {
+      "title": "Repository MCP config declares no server that cannot serve",
+      "tasks": [
+        "T009",
+        "T010",
+        "T006"
+      ],
+      "tests": [
+        ".mcp.json empty mcpServers verified by read"
+      ]
+    },
+    "FR-002": {
+      "title": "Workspace MCP config has no duplicate server and no dead storage path",
+      "tasks": [
+        "T011",
+        "T006"
+      ],
+      "tests": [
+        ".vscode/mcp.json deleted",
+        "Test-Path false"
+      ]
+    },
+    "FR-003": {
+      "title": "No model allow-list entry for a server that will not start",
+      "tasks": [
+        "T012"
+      ],
+      "tests": [
+        ".vscode/settings.json read",
+        "no chat.mcp.serverSampling key"
+      ]
+    },
+    "FR-004": {
+      "title": "Docs for a removed server are deleted, except still-working tooling",
+      "tasks": [
+        "T005"
+      ],
+      "tests": [
+        "copilot-instructions.md read",
+        "UI Automation section retained"
+      ]
+    },
+    "FR-005": {
+      "title": "CSV schema guidance keeps a working read-only path",
+      "tasks": [
+        "T013",
+        "T008"
+      ],
+      "tests": [
+        "Import-Csv -Delimiter \"`t\" on docs/database/tables/database-inforvisual-tables-account-balance.csv returned rows"
+      ]
+    },
+    "FR-006": {
+      "title": "Every named memory note path resolves",
+      "tasks": [
+        "T002",
+        "T016",
+        "T014"
+      ],
+      "tests": [
+        "path sweep over instruction files plus Test-Path on each named note"
+      ]
+    },
+    "FR-007": {
+      "title": "Every count, version and package claim matches measurement",
+      "tasks": [
+        "T002",
+        "T003",
+        "T015"
+      ],
+      "tests": [
+        "solution scan: 17 projects",
+        "17 AuditTests",
+        "2.4.0",
+        "21 packages vs AGENTS.md"
+      ]
+    },
+    "FR-008": {
+      "title": "Automation guidance separates universal truth from workstation-specific",
+      "tasks": [
+        "T002",
+        "T003"
+      ],
+      "tests": [
+        "spec-kit.instructions.md read",
+        "python3 claim now workstation-conditional"
+      ]
+    },
+    "FR-009": {
+      "title": "Doc-server table agrees with configuration and drops the retired rationale",
+      "tasks": [
+        "T013",
+        "T007"
+      ],
+      "tests": [
+        "grep for the retired tool-count rationale across .github"
+      ]
+    },
+    "FR-010": {
+      "title": "Project instructions do not restate an always-applied instruction file",
+      "tasks": [
+        "T005"
+      ],
+      "tests": [
+        "owner files read: response-format",
+        "mcp-doc-research",
+        "document-authoring still carry each rule"
+      ]
+    },
+    "FR-011": {
+      "title": "Generic workflow section removed; subagent guidance compressed to the rule",
+      "tasks": [
+        "T005"
+      ],
+      "tests": [
+        "copilot-instructions.md read",
+        "workflow section gone",
+        "subagent section slimmed to the rule"
+      ]
+    },
+    "FR-012": {
+      "title": "UI-automation instruction reduced to a routing note; procedure moved to a skill",
+      "tasks": [
+        "T023",
+        "T024"
+      ],
+      "tests": [
+        "byte measurement 27256 -> 2159 plus the new SKILL.md"
+      ]
+    },
+    "FR-013": {
+      "title": "WinUI skill routing note lists the new UI-automation skill",
+      "tasks": [
+        "T025"
+      ],
+      "tests": [
+        "grep winui3-ui-automation in winui3-scaling-routing.instructions.md",
+        "3 hits"
+      ]
+    },
+    "FR-014": {
+      "title": "Every agent file has a valid header; dead pointers deleted",
+      "tasks": [
+        "T028",
+        "T029",
+        "T026"
+      ],
+      "tests": [
+        "first-line sweep of all 92 agent files",
+        "0 without frontmatter"
+      ]
+    },
+    "FR-015": {
+      "title": "Orientation file stays short and points at owning files",
+      "tasks": [
+        "T004"
+      ],
+      "tests": [
+        "AGENTS.md read",
+        "duplicated blocks are pointers"
+      ]
+    },
+    "FR-016": {
+      "title": "Duplicate companion skill folders removed; catalogue counted",
+      "tasks": [
+        "T030",
+        "T027"
+      ],
+      "tests": [
+        "skill folder listing",
+        "20 folders",
+        "0 speckit-companion-*"
+      ]
+    },
+    "FR-017": {
+      "title": "No new server, permission or dependency introduced",
+      "tasks": [
+        "T031"
+      ],
+      "tests": [
+        "no new registration",
+        "permission or package in the diff"
+      ]
+    },
+    "FR-018": {
+      "title": "Every removed rule names the file that still owns it",
+      "tasks": [
+        "T019",
+        "T020"
+      ],
+      "tests": [
+        "owner map recorded in the feature context"
+      ]
+    }
+  },
+  "classification": {
+    "projectedFiles": 14,
+    "projectedTasks": 16,
+    "scopeSignal": "none",
+    "verdict": "normal"
+  },
+  "intent": "Bring the AI development environment back to the truth: only working servers, only true facts, less always-on context, no rule lost",
+  "size": "normal",
+  "source": "Dependency_Assessment/DEPENDENCY_AND_MODERNIZATION_SPECIFICATION.md",
+  "decisions": [
+    {
+      "decision": "A valid agent header means description present; name optional",
+      "why": "Microsoft Learn marks description required and name optional, and 89 loaded files carry description only",
+      "rejected": "Requiring both fields and failing 89 working files",
+      "by": "agent",
+      "at": "2026-11-27T02:47:45.956Z"
+    },
+    {
+      "decision": "Delete all 17 headerless agent files",
+      "why": "changelog, ci-guard, pr-bridge and superspec are absent from the extension registry, so every pointer is broken",
+      "rejected": "Giving the five superspec files headers for an uninstalled extension",
+      "by": "agent",
+      "at": "2026-11-27T02:47:45.956Z"
+    },
+    {
+      "decision": "Delete all 24 speckit-companion-* skill folders",
+      "why": "the companion registry reports no registered skills, so the folders are a third copy with no runtime",
+      "rejected": "Keeping the seven living-* folders",
+      "by": "agent",
+      "at": "2026-11-27T02:47:45.956Z"
+    },
+    {
+      "decision": "Delete the XamlMcp section but keep the Windows UI Automation paragraph",
+      "why": "the dead tool and the working tooling sit in the same section",
+      "rejected": "Keeping a one-line unavailable note",
+      "by": "agent",
+      "at": "2026-11-27T02:47:45.956Z"
+    },
+    {
+      "decision": "Record in the doc-server table that xamlmcp was unregistered for lack of an in-process agent",
+      "why": "re-registering belongs to the change that adds the agent",
+      "rejected": "Recording nothing",
+      "by": "agent",
+      "at": "2026-11-27T02:47:45.956Z"
+    },
+    {
+      "decision": "Create .github/memories/repo/mcp-tooling.md and index it",
+      "why": "the stale-tool-snapshot lesson survives every deletion in this feature",
+      "rejected": "Deleting both pointers",
+      "by": "agent",
+      "at": "2026-11-27T02:47:45.956Z"
+    },
+    {
+      "decision": "Reword the codegraphy-setup.md pointer instead of creating the file",
+      "why": "the rule is correct, only the path was wrong",
+      "rejected": "Manufacturing a note about a retired tool",
+      "by": "agent",
+      "at": "2026-11-27T02:47:45.956Z"
+    },
+    {
+      "decision": "Move the UI-automation procedure into .github/skills/winui3-ui-automation and leave a routing note",
+      "why": "Learn documents skills for multi-step procedures and instruction files for conventions",
+      "rejected": "Narrowing the applyTo glob",
+      "by": "agent",
+      "at": "2026-11-27T02:47:45.956Z"
+    },
+    {
+      "decision": "Delete the three restatement sections and the generic workflow section",
+      "why": "each duplicates an always-applied instruction file or harness behaviour",
+      "rejected": "Deleting the instruction files instead",
+      "by": "agent",
+      "at": "2026-11-27T02:47:45.956Z"
+    },
+    {
+      "decision": "Compress the subagent section to the operative rule",
+      "why": "provenance already lives in memories/repo/subagent-models.md",
+      "rejected": "Keeping the four-row table",
+      "by": "agent",
+      "at": "2026-11-27T02:47:45.956Z"
+    },
+    {
+      "decision": "Correct the AGENTS.md package list to the full solution set",
+      "why": "the current list omits nine referenced packages",
+      "rejected": "Adding only SettingsControls",
+      "by": "agent",
+      "at": "2026-11-27T02:47:45.956Z"
+    },
+    {
+      "decision": "Owner map for the deleted statements",
+      "why": "FR-018 traceability without reading a diff: Output Control Invariants -> .github/instructions/response-format.instructions.md; MCP-First -> mcp-doc-research.instructions.md; Document Authoring -> document-authoring.instructions.md; Multi-File Agentic Execution Workflow -> harness behaviour, no owner, deleted by design; Subagent Model table -> .github/memories/repo/subagent-models.md; XamlMcp section -> replaced by mcp-tooling.md plus the surviving UI Automation section",
+      "rejected": "Keeping the sections in both places",
+      "by": "agent",
+      "at": "2026-11-27T02:52:03.039Z"
+    }
+  ],
+  "step_summaries": {
+    "plan": {
+      "summary": "Plan is an edit list over existing paths plus one new skill folder and one memory note",
+      "key_finding": "17 agent files, not 5, fail the header rule, and description-only frontmatter is the valid form in this repo"
+    },
+    "tasks": {
+      "summary": "31 tasks in 8 phases: setup, shared-instruction foundational wave, five story phases, polish; one owner per file"
+    },
+    "implement": {
+      "summary": "Removed two unusable MCP servers, deleted their documentation and three restatement sections, corrected five stale facts, moved the 27 KB UI-automation procedure into a skill, and cleaned 17 agent files and 24 duplicate skill folders"
+    }
+  },
+  "approach": "Edit configuration and instruction files only, ordered facts-first then deletions then compression then catalogue cleanup, and verify by measurement plus the existing build and guardrail tests.",
+  "currentTask": null,
+  "task_summaries": {
+    "T001": {
+      "status": "DONE",
+      "did": "Captured baselines: always-on 57337 B, XAML/C#-matched 60470 B, 109 agents, 43 skills, 3 MCP registrations",
+      "files": [
+        "specs/023-ai-tooling-remediation/.spec-context.json"
+      ]
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "Corrected SDK version 2.3.1->2.4.0, repaired both memory pointers, added MCP troubleshooting pointer, fixed 17 projects / 17 AuditTests / full 21-package list, and restated the python3 claim as workstation-conditional",
+      "files": [
+        ".github/copilot-instructions.md",
+        "AGENTS.md",
+        ".github/instructions/spec-kit.instructions.md"
+      ],
+      "wave": "T002-T003"
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "Corrected SDK version 2.3.1->2.4.0, repaired both memory pointers, added MCP troubleshooting pointer, fixed 17 projects / 17 AuditTests / full 21-package list, and restated the python3 claim as workstation-conditional",
+      "files": [
+        ".github/copilot-instructions.md",
+        "AGENTS.md",
+        ".github/instructions/spec-kit.instructions.md"
+      ],
+      "wave": "T002-T003"
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "Collapsed AGENTS.md build-gotcha, data-rule and convention blocks into pointers, and completed the instructions-in-force list",
+      "files": [
+        "AGENTS.md"
+      ]
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "Deleted the XamlMcp section (keeping the UI Automation section), the three restatement sections and the workflow section, and compressed the subagent rule to a pointer; file 30536 -> 19721 B",
+      "files": [
+        ".github/copilot-instructions.md"
+      ]
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "Removed the csv-mcp-server block from .mcp.json",
+      "files": [
+        ".mcp.json"
+      ]
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "Removed the xamlmcp block from .mcp.json, leaving an empty mcpServers object",
+      "files": [
+        ".mcp.json"
+      ]
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "Deleted the duplicate workspace MCP config and the sampling block keyed to it",
+      "files": [
+        ".vscode/mcp.json",
+        ".vscode/settings.json"
+      ],
+      "wave": "T011-T012"
+    },
+    "T012": {
+      "status": "DONE",
+      "did": "Deleted the duplicate workspace MCP config and the sampling block keyed to it",
+      "files": [
+        ".vscode/mcp.json",
+        ".vscode/settings.json"
+      ],
+      "wave": "T011-T012"
+    },
+    "T013": {
+      "status": "DONE",
+      "did": "Rewrote the doc-server table against the empty .mcp.json, recorded the CSV retirement with the Import-Csv fallback, and recorded why xamlmcp is unregistered",
+      "files": [
+        ".github/instructions/mcp-doc-research.instructions.md"
+      ]
+    },
+    "T006": {
+      "status": "DONE",
+      "did": ".mcp.json declares no server and the workspace duplicate is gone; Import-Csv with a tab delimiter reads a real schema export",
+      "files": [
+        ".mcp.json",
+        ".vscode/mcp.json",
+        ".vscode/settings.json",
+        ".github/instructions/mcp-doc-research.instructions.md"
+      ],
+      "wave": "T006-T008"
+    },
+    "T008": {
+      "status": "DONE",
+      "did": ".mcp.json declares no server and the workspace duplicate is gone; Import-Csv with a tab delimiter reads a real schema export",
+      "files": [
+        ".mcp.json",
+        ".vscode/mcp.json",
+        ".vscode/settings.json",
+        ".github/instructions/mcp-doc-research.instructions.md"
+      ],
+      "wave": "T006-T008"
+    },
+    "T014": {
+      "status": "DONE",
+      "did": "Resolved every named path; the only truly missing file was mcp-tooling.md, now created",
+      "files": [
+        ".github/copilot-instructions.md",
+        "AGENTS.md",
+        ".github/instructions/"
+      ]
+    },
+    "T015": {
+      "status": "DONE",
+      "did": "Re-measured 17 projects, 17 AuditTests, WindowsAppSDK 2.4.0 and 21/21 packages present in AGENTS.md",
+      "files": [
+        "AGENTS.md"
+      ]
+    },
+    "T016": {
+      "status": "DONE",
+      "did": "Created the MCP troubleshooting note",
+      "files": [
+        ".github/memories/repo/mcp-tooling.md"
+      ]
+    },
+    "T017": {
+      "status": "DONE",
+      "did": "Added the new note to the memories index",
+      "files": [
+        ".github/memories/README.md"
+      ]
+    },
+    "T018": {
+      "status": "DONE",
+      "did": "Always-on instruction text is 47598 B, down 9739 B; each removed rule was found in its owning instruction file",
+      "files": [
+        ".github/copilot-instructions.md",
+        "AGENTS.md"
+      ],
+      "wave": "T018-T019"
+    },
+    "T019": {
+      "status": "DONE",
+      "did": "Always-on instruction text is 47598 B, down 9739 B; each removed rule was found in its owning instruction file",
+      "files": [
+        ".github/copilot-instructions.md",
+        "AGENTS.md"
+      ],
+      "wave": "T018-T019"
+    },
+    "T020": {
+      "status": "DONE",
+      "did": "Recorded the owner map for every deleted statement",
+      "files": [
+        "specs/023-ai-tooling-remediation/.spec-context.json"
+      ]
+    },
+    "T023": {
+      "status": "DONE",
+      "did": "Created the winui3-ui-automation skill with the full procedure in references/procedure.md and current XamlMcp facts",
+      "files": [
+        ".github/skills/winui3-ui-automation/"
+      ]
+    },
+    "T024": {
+      "status": "DONE",
+      "did": "Reduced the instruction from 27256 B to 2159 B, keeping applyTo and the always-apply rules and pointing at the skill",
+      "files": [
+        ".github/instructions/winui3-ui-automation.instructions.md"
+      ]
+    },
+    "T025": {
+      "status": "DONE",
+      "did": "Added the UI-automation skill row and location pointers to the WinUI routing note",
+      "files": [
+        ".github/instructions/winui3-scaling-routing.instructions.md"
+      ]
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "XAML/C#-loading instruction text fell from 95741 B to 60666 B, a 35075 B drop",
+      "files": [
+        ".github/instructions/winui3-ui-automation.instructions.md",
+        ".github/skills/winui3-ui-automation/"
+      ]
+    },
+    "T022": {
+      "status": "DONE",
+      "did": "Skill name matches its folder, description carries the use-when trigger, and the routing note names it",
+      "files": [
+        ".github/skills/winui3-ui-automation/SKILL.md",
+        ".github/instructions/winui3-scaling-routing.instructions.md"
+      ]
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "Every server name mentioned in the instruction files now resolves to actual registration state and the retired tool-count rationale is gone",
+      "files": [
+        ".github/instructions/mcp-doc-research.instructions.md",
+        ".github/instructions/winui3-ui-automation.instructions.md",
+        ".github/instructions/test-conventions.instructions.md"
+      ]
+    },
+    "T028": {
+      "status": "DONE",
+      "did": "Deleted 12 one-line agent stubs for the uninstalled changelog, ci-guard and pr-bridge extensions.",
+      "files": [
+        ".github/agents/"
+      ]
+    },
+    "T029": {
+      "status": "DONE",
+      "did": "Deleted 5 headerless speckit.superspec agent files for the uninstalled superspec extension.",
+      "files": [
+        ".github/agents/"
+      ]
+    },
+    "T030": {
+      "status": "DONE",
+      "did": "Deleted all 24 speckit-companion-* skill folders from .github/skills.",
+      "files": [
+        ".github/skills/"
+      ]
+    },
+    "T026": {
+      "status": "DONE",
+      "did": "92 agent files remain, all with frontmatter and a description; no dead extension pointers",
+      "files": [
+        ".github/agents/"
+      ]
+    },
+    "T027": {
+      "status": "DONE",
+      "did": "24 companion duplicate skill folders are gone and this very companion auto run proves the command still resolves",
+      "files": [
+        ".github/skills/"
+      ]
+    },
+    "T031": {
+      "status": "DONE",
+      "did": "Build 0 warnings 0 errors, tests 2889 passed / 65 skipped / 0 failed, all SC-001..SC-008 checks run, diff confined to AI configuration and docs",
+      "files": [
+        "MTM_Waitlist.sln",
+        "MTM_Waitlist.Tests/"
+      ]
+    }
+  },
+  "verified": [
+    {
+      "what": "SC-001 no non-serving MCP registration",
+      "result": ".mcp.json declares an empty mcpServers object; .vscode/mcp.json deleted"
+    },
+    {
+      "what": "SC-002 every named server and file path resolves",
+      "result": "the only missing file was mcp-tooling.md, now created; server mentions state real registration"
+    },
+    {
+      "what": "SC-003 stated figures match measurement",
+      "result": "17 projects, 17 AuditTests, WindowsAppSDK 2.4.0, 21/21 packages listed"
+    },
+    {
+      "what": "SC-004 always-on text shrinks 6000 B or more",
+      "result": "57337 -> 47598 B, a 9739 B drop"
+    },
+    {
+      "what": "SC-005 XAML/C# edit text shrinks 25000 B or more",
+      "result": "95741 -> 60666 B, a 35075 B drop"
+    },
+    {
+      "what": "SC-006 every agent file is loadable",
+      "result": "92 files, 0 headerless, 0 dead extension pointers"
+    },
+    {
+      "what": "SC-007 skill catalogue 43 -> 20 and a companion command still resolves",
+      "result": "24 duplicates removed, one skill added, this companion auto run dispatched normally"
+    },
+    {
+      "what": "SC-008 no application change",
+      "result": "git status shows only .mcp.json, .vscode, .github and the new spec folder"
+    },
+    {
+      "what": "solution build",
+      "command": "dotnet build MTM_Waitlist.sln -c Debug -p:Platform=x64 /m:1 /nodeReuse:false",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 48.9,
+      "result": "    0 Warning(s) ·     0 Error(s) · Time Elapsed 00:00:48.72",
+      "commit": "4f80c99e",
+      "tree": "3fb2b4c71a383dc854a35ea211d4ec0e3f0db6a9"
+    },
+    {
+      "what": "unit suite",
+      "command": "dotnet test MTM_Waitlist.Tests\\MTM_Waitlist.Tests.csproj -c Debug -p:Platform=x64 --no-build",
+      "source": "derived",
+      "exitCode": 0,
+      "durationSeconds": 43.2,
+      "result": "  Skipped Service_SeedLedgerLiveTests_BuildPlanAsync_StillOffersASeedTheStoreHasNeverReceived [3 ms] ·   Skipped Service_SeedLedgerLiveTests_ApplyAsync_RecordsAStoreSetUpBeforeTheLedgerWithoutRunningItsSeeds [< 1 ms] · Passed!  - Failed:     0, Passed:  2889, Skipped:    65, Total:  2954, Duration: 42 s - MTM_Waitlist.Tests.dll (net10.0)",
+      "commit": "4f80c99e",
+      "tree": "a53afe34115e5606c13c39464f9d3d7ccb7c0f8a"
+    },
+    {
+      "what": "SC-004 final after review fixes",
+      "result": "57337 -> 48710 B, a 8627 B drop"
+    },
+    {
+      "what": "SC-005 final after review fixes",
+      "result": "95741 -> 61370 B, a 34371 B drop"
+    },
+    {
+      "what": "Two independent reviews at high depth",
+      "result": "found five real defects: three broken relative links in the moved procedure, a stale registered-server claim, a lost CS0579 gotcha, lost work-center card driving facts, a wrong doc-server pointer, a wrong user-scope MCP table, a duplicated repo-focus list, a missing Pkcs pin and a wrong large-file count. All fixed."
+    }
+  ],
+  "concerns": [
+    {
+      "note": "SC-007 originally stated 43 -> 19; the added UI-automation skill makes the honest count 20, so the criterion was corrected rather than the count falsified",
+      "step": "implement"
+    },
+    {
+      "note": "The routing instruction file is 2159 B rather than the ~2 KB target because the always-apply rules were kept in it; the procedure itself moved out",
+      "step": "implement"
+    },
+    {
+      "note": "AI-013 (the duplicate user-level winui3-scaling-routing instruction) is a workstation action the owner must take; no repository change can remove it",
+      "step": "implement"
+    },
+    {
+      "note": "FR-014 asks for a name and description in every agent header; this repository's 89 generated agents carry description only, which Microsoft Learn states is valid because the name falls back to the filename. research.md D1 records the reconciliation.",
+      "step": "implement"
+    },
+    {
+      "note": "The 5 deleted superspec agent files contained no procedure text, only a pointer to an uninstalled extension, so no rule lost an owner. The 7 living-spec skills had no agent twin and were removed as companion-installation duplicates; the living-spec rules remain in docs/living-specs/living-specs-drift-ledger.md.",
+      "step": "implement"
+    }
+  ],
+  "last_action": "Applied review fixes and re-measured; ready to close implement",
+  "risk": {
+    "tier": "high",
+    "computed": "high",
+    "reasons": [
+      "55 files changed"
+    ]
+  },
+  "convergeStartedAt": "2026-11-27T03:03:16.842Z",
+  "convergePasses": [
+    {
+      "startedAt": "2026-11-27T03:03:16.959Z",
+      "by": "extension",
+      "finishedAt": "2026-11-27T03:03:19.308Z",
+      "added": [],
+      "completed": true
+    }
+  ],
+  "telemetryInstanceId": "fbff0da3-8501-4ebe-843b-5d17c1a2806c"
+}

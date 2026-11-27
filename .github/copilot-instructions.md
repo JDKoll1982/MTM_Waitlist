@@ -1,58 +1,18 @@
-# MCP-First Documentation and Code Sample Retrieval
-Use available MCP servers to ground implementation decisions before writing or changing code.
-Canonical MCP-first policy (Context7, Microsoft Learn) is maintained in
-`.github/instructions/mcp-doc-research.instructions.md` — that file is the single source of truth
-for tool names and server roles. Do not restate it here.
-# Output Control Invariants
-- Be highly terse and concise. Never explain code unless explicitly requested.
-- Strip all conversational filler, introductory pleasantries, and summarizing conclusions.
-- Prioritize raw information density over prose — but never at the cost of being readable.
-- **Do NOT print code blocks to show a change.** Make the edit with a tool. A code block in chat is
-  justified only when the person asked to see that code, or when quoting one line that genuinely matters.
-- **Fences must be renderable.** A fence starts at column 0. A fence indented by four or more spaces, or
-  placed inside a list item, renders as literal backticks and garbles the rest of the reply (GitHub
-  Flavored Markdown spec, "Indented Code Block (4 Spaces)"). Content that contains a fence goes inside a
-  longer backtick run. Never print a sample block that was only a template for a file you are writing.
-- **Anything the person must do comes last**, under the heading `## What you need to do`; if nothing, end
-  with the single line `Nothing needed from you.`
-- Inside any `/speckit.*` step, `.github/instructions/response-format.instructions.md` (constitution
-  Principle VII) governs the reply: plain English, end-user facing, no raw machine output.
-# Document Authoring
-Any document the agent produces (guide, report, summary, procedure, proposal, reference) follows
-`.github/instructions/document-authoring.instructions.md`: identify the reader first, choose the shape
-and output format from that reader, and verify the rendered result before calling it done. That file
-governs documents; the invariants above govern the chat reply.
+# MTM_Waitlist — Repository Instructions
+
 ## Repo-Specific Focus
-For this repository, prioritize MCP-backed validation for:
-- WinUI 3 and Windows App SDK APIs
-- App notifications and packaging flows
-- Local AI and Foundry-related guidance
-- Module_Setup shell-workflow implementation (now `MTM_Waitlist.Setup` + app Views) and the SQL queue persistence path for Infor Visual lookups under Database/InforVisual/Queues/Module
-## CSV Schema Exploration
-- The workspace CSV MCP server is configured in `.mcp.json` as `csv-mcp-server`.
-- Its storage root is `docs/database`, which contains the schema exports split into folders by type (`tables/`, `column-details/`, `indexes/`, `foreign-keys/`, …). Each file is named `database-inforvisual-<type>-<object>.csv`. **Every export is tab-delimited, not comma-delimited**, there are 11 type folders, and **no file sits at the root** — always pass a subfolder-relative path.
-- Note: `.vscode/mcp.json` carries a second `csv-mcp-server` registration pointed at `Documents\Development\InforVisual\DatabaseCSVFiles`, which does not exist on this machine. That instance is dead; the root `.mcp.json` one is authoritative.
-- Use the CSV server for CSV-specific profiling, filtering, sorting, grouping, validation, and export when its session can be loaded successfully.
-- Use code intelligence and search tools for repository code symbols, Context7 for library documentation, and Microsoft Learn for official Windows guidance; the CSV server complements those tools rather than replacing them.
-- Verified CSV server capability endpoint: `CSV Editor` version `1.0.0`, with load, filter, sort, group, statistics, profile, validation, quality, anomaly, and export capabilities.
-- Current limitation observed on 2026-08-03: `load_csv` fails before creating a session because the server emits a progress notification with text (`"Validating file..."`) where the MCP progress schema expects a numeric value. If this persists, use PowerShell/structured file reads for CSV inspection and record the failure rather than repeatedly retrying the same load operation.
-- Do not use CSV mutation tools (`update`, `add`, `remove`, `delete`, or export over source files) against the Infor schema exports unless the user explicitly requests a data change. Prefer read-only analysis and export to a separate temporary/output path.
+The prioritized MCP-backed validation list lives in `.github/instructions/mcp-doc-research.instructions.md`.
+Repository-specific additions:
+- Module_Setup shell-workflow implementation (now `MTM_Waitlist.Setup` + app Views) and the SQL queue persistence path for Infor Visual lookups under `Database/InforVisual/Queues/Module_*/`.
+- When an MCP tool is missing, reports itself disabled, or throws unexpectedly, read
+  `.github/memories/repo/mcp-tooling.md` before re-deriving the fix.
 
-## XamlMcp UI Inspection (Debug Diagnostics)
-- The workspace MCP server `xamlmcp` **is** registered in the root `.mcp.json` (command `%USERPROFILE%\.dotnet\tools\xamlmcp.exe`, args `--enable-driver` for native dialogs/windows) with `tools: ["*"]`. It is the global dotnet tool `XamlMcp.Server` (`xamlmcp check --json` validates the install and reports live instrumented apps). The earlier "128-tool BYOK cap" rationale for removing it is **obsolete**: deepseek-v4-for-copilot removed that limit in 0.9.4 (installed here: 0.9.5), so do not cite it when deciding whether to register a server.
-- **NOT WIRED — verified 2026-09-09 and again 2026-09-13:** the WinUI in-process agent is **absent from this repo**. `XamlMcp` appears in no `.cs` or `.xaml` file and has no `PackageReference` in `MTM_Waitlist.csproj` (re-confirmed 2026-09-13 against every `.cs`/`.csproj` in the workspace), and `App.xaml.cs` contains no `WinUiXamlMcp.Attach()` call. With no in-process agent the server has nothing to attach to — the workflow below cannot succeed until the `XamlMcp.WinUI` package reference and the `#if DEBUG` attach are restored in the app and the `.vscode/mcp.json` entry is put back.
-- **The CLI is installed and healthy (verified 2026-09-13):** `%USERPROFILE%\.dotnet\tools\xamlmcp.exe`, `check --json` reports `runtime pass (.NET 10.0.12)`, `server-version pass (1.0.0-preview.3)`, `discovery-directory pass` and `desktop-instances warning — found 0 live app(s)`. It is **not on `PATH`**, so invoke it by full path. `0 live app(s)` is the expected result given the agent is absent, not a tooling fault; the `winui3-ui-automation` instruction file carries the detail and the correction to its earlier "CLI is not installed" claim.
-- Workflow to inspect the running app:
-  1. Run the app in Debug (F5 or the built exe). The agent writes a discovery file under `%LOCALAPPDATA%\XamlMcp\instances\`.
-  2. Call `list-apps` → `attach(instanceId)` → `tree` / `search` / `props` / `set-prop` / `screenshot` / `input` / `action` / `wait-for` / `hit-test` / `styles` / `resources` / `assets` / `open-asset`.
-  3. `detach` when done; the app prunes its discovery file on graceful shutdown (the server prunes stale records on the next `check`).
-- WinUI capability notes: `bindings` and `failures` return `unsupported-capability`; `input` is enabled only for `mechanism: "raw"`; screenshots use `RenderTargetBitmap` (native HWND/airspace/GPU content is not captured); pseudo-class and style-class search are disabled.
-- Targets accept an exact `{snapshotId, nodeId}` or a locator (`automationId`, `name`, `type`, `text`, `styleClass`) optionally scoped by `within`; ambiguous locators return typed candidates instead of silently selecting a node.
-- Troubleshooting (2026-08-22): if `mcp_xamlmcp_*` tools report "currently disabled by the user" even though they are all checked/enabled in the global Configure Tools dialog, the **running Copilot session has a stale tool snapshot** — it started before the XamlMcp tools were registered/enabled. There is no settings-file gate (no `chat.tools`/MCP allowlist/blacklist). Fix: start a **new chat session** so the tool list refreshes; verify the `xamlmcp` server shows as connected in the MCP panel. First-chance `InspectorRpcException`s appearing in the app debug output are expected: they are the agent's normal JSON-RPC error path for invalid/ambiguous tool requests (e.g., a locator that matches many nodes) and are caught internally — not crashes.
-- When any `mcp_*` tool is missing, reports "currently disabled by the user", or throws an unexpected exception, **consult `/memories/repo/mcp-tooling.md` first** for the verified troubleshooting playbook (stale-tool-snapshot fix, CSV server limitation, XamlMcp notes) before re-deriving it from scratch.
-- Interaction notes (2026-08-22): Setup/New Request work center card selection is **model-driven** — the blue outline + blue photo frame bind to the item model's `IsSelected` (`WorkCenterSelectionItem`/`SetupWorkstation`), and the grids use `SelectionMode="None"` + `IsItemClickEnabled="True"` + `ItemClick` handlers. `action` select / `set-prop IsSelected` on a `GridViewItem` does **not** show the highlight; use a real click (`input` kind click) to trigger `ItemClick`. In New Request, clicking a card also advances to the next step — click then use **Back** to capture the selected card. Card templates now set `AutomationProperties.Name` (bound to the work center name); note `props` does not enumerate `AutomationProperties.*`, and `search` `name` matches `x:Name` only (`automationId` matches `AutomationProperties.AutomationId`) — use `search` `text` or `hit-test` to locate cards. For cropped on-disk screenshots, XamlMcp's `screenshot` returns a resource URI that can't be saved; use `scripts/ui-automation/capture_app_region.ps1` + `scripts/ui-automation/ocr_png.ps1` (see `/memories/repo/mcp-tooling.md`).
+## Infor Visual Schema Exports
+- The schema exports live under `docs/database`, split into 11 folders by type (`tables/`, `column-details/`, `indexes/`, `foreign-keys/`, …). Each file is named `database-inforvisual-<type>-<object>.csv`. **Every export is tab-delimited, not comma-delimited**, and **no file sits at the root** — path a read to its subfolder.
+- Read them with `Import-Csv -Delimiter "`t"`, or with `Get-Content` for a quick look. Treat them as read-only reference data; do not edit them.
 
-- **What actually works today is Windows UI Automation**, not XamlMcp: `scripts/ui-automation/` drives the real window through `UIAutomationClient`. Six driver faults that stopped a driven run were found and fixed on 2026-10-19 (an empty `-Exe` default from `$PSScriptRoot` in a parameter default, a thrown connection string, a hardcoded sign-in account, a missing `TogglePattern` arm, single-look finds, and a `NumberBox` that ignored a `ValuePattern` write). The recipe that works on this workstation, and each fault with its fix, are in
+## UI Automation (what works today)
+- `scripts/ui-automation/` drives the real application window through `UIAutomationClient`. Six driver faults that stopped a driven run were found and fixed on 2026-10-19 (an empty `-Exe` default from `$PSScriptRoot` in a parameter default, a thrown connection string, a hardcoded sign-in account, a missing `TogglePattern` arm, single-look finds, and a `NumberBox` that ignored a `ValuePattern` write). The recipe that works on this workstation, and each fault with its fix, are in
   **`.github/memories/repo/ui-automation-drive.md`** and **§11 of `docs/scripts/scripts-automation-ui-automation.md`** — read them before debugging a driven run, because every one of those faults complains in the app's voice.
 
 ## Code exploration — built-in tools only (owner decision, 2026-10-17)
@@ -61,8 +21,8 @@ For this repository, prioritize MCP-backed validation for:
 - Use the editor's code intelligence (symbol lookup, find references) for navigation, and
   `grep`/`glob`/`view` for text search and reading. Both are always available and need no setup.
 - The retired **CodeGraphy** decision (2026-10-11) stands for the same reason: its graph duplicated work the
-  built-in tools already do. Its `.codegraphy/` workspace config is gone, and older notes (including
-  `/memories/repo/codegraphy-setup.md`) must not be acted on.
+  built-in tools already do. Its `.codegraphy/` workspace config is gone, and older notes that mention it
+  must not be acted on.
 
 ---
 
@@ -124,25 +84,6 @@ For this repository, prioritize MCP-backed validation for:
 
 ---
 
-# Multi-File Agentic Execution Workflow
-When executing complex, cross-file architectural edits, you must strictly move through these three sequential phases:
-
-1. **Phase 1: Blueprint Discovery**
-   - Use code intelligence (symbol lookup, find references) and `grep`/`glob` to map out the Views, ViewModels, and registration structures.
-   - Ground architectural choices using documentation snippets gathered from `mcp_context7_get-library-docs`.
-   - You must map out your file dependencies completely before touching any codebase code.
-
-2. **Phase 2: Minimal Diff Application**
-   - Apply small, high-fidelity edits matching the existing structural patterns of the project.
-   - Do not orphan classes; modify both the layout layers, view-model structures, and dependency injection entries in the same pass.
-
-3. **Phase 3: Compilation Validation**
-   - Use your active **.NET Install Tool** and environment configurations to check your project builds cleanly.
-   - Run a terminal compilation pass using your build execution tools (`dotnet build`).
-   - **Self-Healing Loop**: If compiler errors occur, immediately copy the error text back into `mcp_context7_resolve-library-id` or your documentation lookups to cross-reference formatting rules. Attempt this self-healing fix twice before throwing a failure back to the user.
-
----
-
 # Interaction & Execution Guidance
 
 ## Ask Clarifying Questions
@@ -158,28 +99,13 @@ When executing complex, cross-file architectural edits, you must strictly move t
 - Work in small, verifiable steps and state progress as you go. If a long operation fails or is interrupted, explicitly say what completed and resume from that point rather than restarting from scratch.
 
 ## Subagent Model (owner instruction, 2026-10-11)
-- **Every background/subagent task MUST run on DeepSeek V4.1 Flash** — pass `model: "deepseek/deepseek-flash"`
-  on the `task` call.
-- **Do not confuse it with `deepseek/deepseek-v4-flash`.** The provider (`vizards.deepseek-v4-for-copilot`)
-  ships both, and they are *different models*:
-  | Model id | Display name | Version |
-  | --- | --- | --- |
-  | `deepseek-flash` | **DeepSeek V4.1 Flash** | `v4.1` ← the one to use |
-  | `deepseek-v4-flash` | DeepSeek V4 Flash | `v4` |
-  | `deepseek-v4-flash-vision-exp` | DeepSeek V4 Flash (vision, experimental) | `v4` |
-  | `deepseek-v4-pro` | DeepSeek V4 Pro | `v4` |
-  Verified 2026-10-11 by reading `out/consts.js` in
-  `%USERPROFILE%\.vscode\extensions\vizards.deepseek-v4-for-copilot-0.9.4`: the entry with
-  `name: 'DeepSeek V4.1 Flash'` carries `id: 'deepseek-flash'`. An earlier version of this section wrongly
-  claimed the two were the same model and told agents to use `v4-flash`; that was wrong and is corrected here.
-- This **overrides** the usual "leave `model` unset and let the runtime resolve `/subagents` preferences" default,
-  because the owner has explicitly required a specific model for this repo's subagents.
-- It applies to every agent type that accepts a model override — `Explore`, `task`, `general-purpose`,
-  `code-review`, `research`, and the custom agents registered for this repo.
-- Do **not** substitute a GitHub-hosted model (Claude, GPT, Gemini, Grok, Kimi, MAI) on a `task` call, and do not
-  fall back to one because a DeepSeek call failed. If DeepSeek V4 Flash is unavailable, say so and stop rather
-  than silently using a different provider.
+- **Every background/subagent task MUST run on `deepseek/deepseek-flash`** (DeepSeek V4.1 Flash),
+  passed as `model:` on the `task` call.
+- It is **not** the same model as `deepseek/deepseek-v4-flash` (V4). Do not substitute a GitHub-hosted
+  model, and do not fall back to one if DeepSeek is unavailable: say so and stop.
 - `reasoning_effort` and `context_tier` stay unset unless the request in hand names them.
+- Provenance, the full model-id table and the earlier correction are in
+  `.github/memories/repo/subagent-models.md`.
 
 ## Workstation Elevation (this environment)
 - **The normal loop needs no elevation.** `dotnet build`, `dotnet test`, launching the unpackaged `MTM_Waitlist.exe`,
@@ -229,9 +155,11 @@ When executing complex, cross-file architectural edits, you must strictly move t
 
 ## Known Build Quirks
 - `PRI175` / `PRI224 root node not found` during `dotnet build` is usually stale PRI artifacts or a running `MTM_Waitlist.exe` locking the output — not a code error. Stop the running app, delete stale `*.pri` under `obj/`/`bin/`, and rebuild before debugging the code.
-- `WMC9999: Could not find any resources appropriate for the specified culture ... ErrorMessages.resources` during `dotnet build` is a **MASKED XAML error, not an environment problem**. This machine's WindowsAppSDK 2.3.1 `XamlCompiler` (in `tools\net472` of the `microsoft.windowsappsdk.winui` package) is missing its `ErrorMessages.resources` satellite, so the compiler cannot report the underlying cause — any real XAML compile error (bad type, bad binding, wrong member name) surfaces only as this generic WMC9999. Treat WMC9999 as "there is a real XAML error somewhere; the tool can't tell you where." To surface the real error: temporarily introduce a deliberate C# error (e.g. duplicate a command) so the compiler reports the actual file/type problem, or bisect by simplifying the recently-changed XAML files.
+- `WMC9999: Could not find any resources appropriate for the specified culture ... ErrorMessages.resources` during `dotnet build` is a **MASKED XAML error, not an environment problem**. This machine's WindowsAppSDK 2.4.0 `XamlCompiler` (in `tools\net472` of the `microsoft.windowsappsdk.winui` package) is missing its `ErrorMessages.resources` satellite, so the compiler cannot report the underlying cause — any real XAML compile error (bad type, bad binding, wrong member name) surfaces only as this generic WMC9999. Treat WMC9999 as "there is a real XAML error somewhere; the tool can't tell you where." To surface the real error: temporarily introduce a deliberate C# error (e.g. duplicate a command) so the compiler reports the actual file/type problem, or bisect by simplifying the recently-changed XAML files.
 - CommunityToolkit.Mvvm `[RelayCommand]` STRIPS a trailing `Async` from the method name when generating the command: `private async Task ContinueToReviewAsync()` must be bound in XAML as `Command="{x:Bind ViewModel.ContinueToReviewCommand}"` (NOT `...AsyncCommand`). Binding the wrong name is a silent XAML failure that shows up only as the masked `WMC9999` above.
 - **Do not add explicit `<Page>` items for Views that live in the app project.** The SDK's default items already include `Module_*/Views/**/*.xaml`, so naming them again raises `NETSDK1022` (duplicate `Page` items). When a View must be excluded, use a `Remove` item (as the `mtm_waitlist.Mock.Service` exclusion does), never an `Include`.
+- `CS0579 Duplicate 'System.Reflection.AssemblyTitleAttribute'` pointing at a *nested* `obj\` folder (for example a leftover `Temp*.Preview\obj\`) happens because `MTM_Waitlist.csproj` compiles `**\*.cs` from the project directory and MSBuild only excludes the top-level `bin\` and `obj\`. Find the leftover with `git status --ignored` and remove the stale temp project before rebuilding.
+- When an edit spans layers, change the view model, its XAML and its DI registration in the same pass, and never orphan a class: a half-applied multi-file change is the most common source of a silent `WMC9999`.
 
 ## Destructive-Tooling Traps (read before running anything under `Database/`)
 

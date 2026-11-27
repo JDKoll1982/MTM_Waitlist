@@ -12,14 +12,22 @@ dotnet run --project MTM_Waitlist.csproj
 ```
 
 There is no CI workflow and no `.editorconfig`. Warnings are not errors. The test project carries
-15 `*AuditTests` guardrails that fail the build on architecture regressions — read the failing test
+17 `*AuditTests` guardrails that fail the build on architecture regressions — read the failing test
 before assuming the failure is environmental.
 
 ## Stack
 
-.NET 10, `net10.0-windows10.0.19041.0`, WinUI 3 on Windows App SDK 2.4.0, CommunityToolkit.Mvvm
-8.4.2, CommunityToolkit.WinUI.UI.Controls 7.1.2, DevWinUI 10.8.0, WinUIEx 2.9.2. Fifteen projects,
-one target framework each, shared pins in `Directory.Build.props`.
+.NET 10, `net10.0-windows10.0.19041.0`, WinUI 3. Every package the solution references:
+`Microsoft.WindowsAppSDK` 2.4.0, `CommunityToolkit.Mvvm` 8.4.2, `CommunityToolkit.WinUI.UI.Controls`
+and `CommunityToolkit.WinUI.UI.Animations` 7.1.2, `CommunityToolkit.WinUI.Controls.SettingsControls`
+8.2.251219, `DevWinUI` 10.8.0, `WinUIEx` 2.9.2, `Microsoft.Xaml.Behaviors.WinUI.Managed` 3.0.1,
+`MySqlConnector` 2.6.1, `Microsoft.Data.SqlClient` 6.1.1,
+`Microsoft.Extensions.Hosting`, `Microsoft.Extensions.Configuration.Abstractions`,
+`Microsoft.Extensions.DependencyInjection.Abstractions`, `Microsoft.Extensions.Logging.Abstractions`
+and `Microsoft.Extensions.Options` at 10.0.10, `System.Security.Cryptography.ProtectedData` 10.0.0 and `System.Security.Cryptography.Pkcs` 9.0.21 (transitive
+through `Microsoft.Data.SqlClient`, pinned in `Directory.Build.props`), `Microsoft.Windows.SDK.BuildTools`, `MSTest.TestAdapter` and `MSTest.TestFramework` 3.7.0,
+`Microsoft.NET.Test.Sdk` 17.13.0, `coverlet.collector` 6.0.2. 17 projects, one target framework each,
+shared pins in `Directory.Build.props`.
 
 ## Layout
 
@@ -43,7 +51,7 @@ Six-month churn concentrates in `Strings/en-us/Resources.resw`,
 `Database/StoredProcedures/AllSPs.sql`, `MTM_Waitlist.csproj`, and
 `Module_Settings/Views/SettingsPage.xaml`. Start orientation there rather than reading the tree.
 
-Six files exceed 1000 lines (`SettingsHub/ViewModels/SettingsViewModel.cs` is 2623). Slice them with
+Eight files exceed 1000 lines (`SettingsHub/ViewModels/SettingsViewModel.cs` is 2623). Slice them with
 `git log -L<start>,<end>:<file>` or `git blame -C` instead of reading them whole.
 
 ## Conventions
@@ -51,39 +59,35 @@ Six files exceed 1000 lines (`SettingsHub/ViewModels/SettingsViewModel.cs` is 26
 - Commit subjects: mixed style. Roughly a third use `feat:`/`fix:`/`chore:` prefixes, most do not;
   subjects average ~80 characters and generally carry no issue reference. Some commits use an `NNN:`
   spec-task prefix. Match the surrounding history rather than importing Conventional Commits.
-- View models derive from `ObservableRecipient`, use `[ObservableProperty]`/`[RelayCommand]`, and
-  implement `INavigationAware` with data loading in `OnNavigatedTo`.
-- UI strings resolve through `"ResourceKey".GetLocalized()`.
+- View models derive from `ObservableRecipient`, use `[ObservableProperty]`/`[RelayCommand]`, implement
+  `INavigationAware` with data loading in `OnNavigatedTo`, and resolve UI strings through
+  `"ResourceKey".GetLocalized()`. The detail lives in `.github/copilot-instructions.md` and
+  `.github/instructions/winui3-api-rules.instructions.md`.
 
 ## Data rules
 
-- Every data operation goes through a stored procedure; `InlineSqlAuditTests` fails the build on
-  inline statement text. Schema artifacts ship `create.sql` with `rollback.sql`.
-- Internal stores are always read and written live. There is no demo/mock mode, and
-  `RetiredSymbolAuditTests` fails the build if one is reintroduced.
+- Every data operation goes through a stored procedure, and internal stores are always read and written
+  live with no demo/mock mode; `InlineSqlAuditTests` and `RetiredSymbolAuditTests` fail the build
+  otherwise. The rules live in `.github/instructions/database-schema-rules.instructions.md` and
+  `.github/copilot-instructions.md`.
 - `appsettings.json` is tracked and carries connection strings. Never print, copy or commit a secret
   value.
 
 ## Build gotchas
 
-- `PRI175` / `PRI224 root node not found` — stale PRI artifacts or a running `MTM_Waitlist.exe`
-  holding the output. Stop the app, clear `*.pri` under `obj/` and `bin/`, rebuild.
-- `WMC9999: Could not find any resources appropriate for the specified culture` — a **masked XAML
-  error**, not an environment fault. Bisect the recently changed XAML files.
-- `[RelayCommand]` strips a trailing `Async`: `ContinueToReviewAsync()` binds as
-  `ContinueToReviewCommand`.
-- `CS0579 Duplicate 'System.Reflection.AssemblyTitleAttribute'` pointing at a *nested* `obj\` folder
-  (for example a leftover `Temp*.Preview\obj\`) — `MTM_Waitlist.csproj` compiles `**\*.cs` from the
-  project directory, and MSBuild only excludes the top-level `bin\` and `obj\`. Find leftovers with
-  `git status --ignored` and remove the stale temp project before rebuilding.
+- `PRI175` / `PRI224` (stale PRI artifacts or a running app), `WMC9999` (a masked XAML error, never an
+  environment fault), `[RelayCommand]` stripping a trailing `Async` from the generated command name, and
+  `CS0579` from a leftover nested `obj\` project all have documented fixes. Read "Known Build Quirks"
+  in `.github/copilot-instructions.md` before assuming a failure is environmental.
 
 ## Instructions in force
 
 Always applied: `.github/copilot-instructions.md`, plus
 `.github/instructions/{mcp-doc-research,response-format,spec-kit,document-authoring}.instructions.md`.
 Scoped by glob: `test-conventions`, `database-schema-rules`, `startup-rebuild`, `winui3-adoption`,
-`winui3-api-rules`, `winui3-ui-automation`, `csharp-xaml-naming-rules`, `packaging`,
-`diagram-authoring`.
+`winui3-api-rules`, `winui3-scaling-routing`, `winui3-ui-automation`, `csharp-xaml-naming-rules`,
+`packaging`, `diagram-authoring`. Files under `.github/instructions/records/` carry no `applyTo`, so
+they load only when something points at them.
 
 ## Before editing
 

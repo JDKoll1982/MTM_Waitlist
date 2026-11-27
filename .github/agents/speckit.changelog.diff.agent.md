@@ -1,1 +1,0 @@
-../../.specify/extensions/changelog/.specify-dev/agent-commands/copilot/speckit.changelog.diff.agent.md
