@@ -102,10 +102,10 @@ public sealed class LaunchActivityFeedTests
         var writable = (IList<LaunchFeedEntry>)feed.Entries;
 
         // Act / Assert: the view refuses every change rather than silently accepting one.
-        Assert.ThrowsException<NotSupportedException>(
+        Assert.ThrowsExactly<NotSupportedException>(
             () => writable.Add(Line("configuration", LaunchFeedEntryKind.SubOperation, "an added line")));
-        Assert.ThrowsException<NotSupportedException>(() => writable.RemoveAt(0));
-        Assert.ThrowsException<NotSupportedException>(() => writable.Clear());
+        Assert.ThrowsExactly<NotSupportedException>(() => writable.RemoveAt(0));
+        Assert.ThrowsExactly<NotSupportedException>(() => writable.Clear());
         Assert.AreEqual(1, feed.Entries.Count, "a refused change altered the feed");
         Assert.AreEqual("the only line", feed.Entries[0].Text);
     }

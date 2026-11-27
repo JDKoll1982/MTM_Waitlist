@@ -179,7 +179,7 @@ public sealed class LocalStateFreeTests
     {
         var app = File.ReadAllText(Path.Combine(Root, "App.xaml.cs"));
 
-        var start = app.IndexOf("private static void TryFlushLogStore", StringComparison.Ordinal);
+        var start = app.IndexOf("private static async Task TryFlushLogStore", StringComparison.Ordinal);
 
         Assert.IsTrue(start >= 0, "The bounded flush the fault routes rely on is gone.");
 

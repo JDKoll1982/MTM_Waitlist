@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Models;
@@ -577,19 +577,7 @@ public sealed class MachineConfigurationServiceTests
             return Task.FromResult(_affected.GetValueOrDefault(storedProcedureName, 1));
         }
 
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => throw new InvalidOperationException("No statement text is expected from this service (constitution III).");
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => throw new InvalidOperationException("No statement text is expected from this service (constitution III).");
 
         public sealed record Call(
             string Procedure,

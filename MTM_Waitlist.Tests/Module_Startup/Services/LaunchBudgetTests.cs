@@ -65,7 +65,7 @@ public sealed class LaunchBudgetTests
 
     [TestMethod]
     public void Service_LaunchBudgetTests_Budget_OfNoTimeIsRefused()
-        => Assert.ThrowsException<ArgumentOutOfRangeException>(
+        => Assert.ThrowsExactly<ArgumentOutOfRangeException>(
             () => new LaunchBudget(CancellationToken.None, TimeSpan.Zero));
 
     [TestMethod]

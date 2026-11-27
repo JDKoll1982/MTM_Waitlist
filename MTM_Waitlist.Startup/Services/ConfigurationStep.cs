@@ -56,19 +56,25 @@ public sealed class ConfigurationStep : ILaunchStep
     }
 
     /// <summary>Reads the saved settings and reports what they hold.</summary>
+    /// <remarks>
+    /// A machine whose connection comes from the environment rather than from its saved settings is still
+    /// satisfied, because the requirement accepts either. What is no longer reported as a success is a machine
+    /// that has neither: the launch stops here, naming the variable that would supply the connection, instead of
+    /// going on to a store read that has nothing to open (FR-019).
+    /// </remarks>
     private LaunchStepOutcome ReadSavedSettings()
     {
-        var connection = _savedSettings.Value.ConnectionString;
+        var requirement = ConfigurationRequirement.WaitlistStore(_savedSettings.Value);
 
-        return string.IsNullOrWhiteSpace(connection)
+        return requirement.IsSatisfied
             ? new LaunchStepOutcome(
                 LaunchStepStatus.Succeeded,
-                "This computer's saved settings name no store connection, so the store is reached from the environment instead.",
+                "This computer's settings name the store it reaches.",
                 LaunchRemedySet.None)
             : new LaunchStepOutcome(
-                LaunchStepStatus.Succeeded,
-                "This computer's saved settings name the store it reaches.",
-                LaunchRemedySet.None);
+                LaunchStepStatus.Failed,
+                requirement.RefusalMessage,
+                LaunchRemedySet.RetryOnly);
     }
 }
 

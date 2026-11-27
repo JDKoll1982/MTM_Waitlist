@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -104,18 +104,38 @@ public sealed class PreSignInStepsTests
     }
 
     [TestMethod]
-    public async Task Service_PreSignInStepsTests_ConfigurationStep_RunAsyncWhenTheSavedSettingsNameNoStoreReportsWhatItFoundRatherThanFailing()
+    public async Task Service_PreSignInStepsTests_ConfigurationStep_RunAsyncWhenNothingSuppliesAConnectionReportsFailedAndNamesTheVariable()
     {
-        // Arrange: this computer keeps no connection of its own, which is the state of a machine reached from the
-        // environment. The read still happened, and the store itself is what the next step consults.
-        var step = new ConfigurationStep(new LaunchStepCatalog(), Options.Create(new WaitlistDatabaseOptions()));
-
-        // Act
-        var outcome = await step.RunAsync(Context(new LaunchActivityFeed()), CancellationToken.None);
+        // Arrange: this computer keeps no connection of its own and no variable supplies one either, so there is
+        // nothing the store read could open. That is refused here rather than reported as a completed read
+        // (SEC-001, FR-019).
+        var outcome = await WithoutStoreConnectionAsync(() => new ConfigurationStep(
+            new LaunchStepCatalog(),
+            Options.Create(new WaitlistDatabaseOptions())).RunAsync(Context(new LaunchActivityFeed()), CancellationToken.None));
 
         // Assert
-        Assert.AreEqual(LaunchStepStatus.Succeeded, outcome.Status, "a completed read is not a failure");
-        StringAssert.Contains(outcome.Diagnosis!, "no store connection");
+        Assert.AreEqual(LaunchStepStatus.Failed, outcome.Status, "a host with no value is refused");
+        StringAssert.Contains(outcome.Diagnosis!, "MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING", "the refusal names the variable");
+        Assert.IsTrue(outcome.Remedies.CanRetry);
+    }
+
+    [TestMethod]
+    public async Task Service_PreSignInStepsTests_StoreReachabilityStep_RunAsyncWhenNothingSuppliesAConnectionRefusesWithoutAskingTheStore()
+    {
+        // Arrange: the seam answers a store it has no connection for with a neutral result, so before this the step
+        // reported "the store answered" on nothing (SEC-001, FR-019).
+        var store = new StubMySqlHelperServer();
+
+        // Act
+        var outcome = await WithoutStoreConnectionAsync(() => new StoreReachabilityStep(
+            new LaunchStepCatalog(),
+            store,
+            Options.Create(new WaitlistDatabaseOptions())).RunAsync(Context(new LaunchActivityFeed()), CancellationToken.None));
+
+        // Assert
+        Assert.AreEqual(LaunchStepStatus.Failed, outcome.Status);
+        StringAssert.Contains(outcome.Diagnosis!, "MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING");
+        Assert.AreEqual(0, store.QueryCallCount, "a store with no connection must not be reported as having answered");
     }
 
     [TestMethod]
@@ -140,7 +160,7 @@ public sealed class PreSignInStepsTests
     {
         // Arrange
         var store = new StubMySqlHelperServer();
-        var step = new StoreReachabilityStep(new LaunchStepCatalog(), store);
+        var step = new StoreReachabilityStep(new LaunchStepCatalog(), store, NamesAStore());
 
         // Act
         var outcome = await step.RunAsync(Context(new LaunchActivityFeed()), CancellationToken.None);
@@ -158,7 +178,7 @@ public sealed class PreSignInStepsTests
     public async Task Service_PreSignInStepsTests_StoreReachabilityStep_RunAsyncWhenTheStoreDoesNotAnswerReportsFailedWithARetryAndNoReset()
     {
         // Arrange
-        var step = new StoreReachabilityStep(new LaunchStepCatalog(), new StubMySqlHelperServer(throwOnQuery: true));
+        var step = new StoreReachabilityStep(new LaunchStepCatalog(), new StubMySqlHelperServer(throwOnQuery: true), NamesAStore());
 
         // Act
         var outcome = await step.RunAsync(Context(new LaunchActivityFeed()), CancellationToken.None);
@@ -421,7 +441,7 @@ public sealed class PreSignInStepsTests
         new ConfigurationStep(
             catalog,
             Options.Create(new WaitlistDatabaseOptions { ConnectionString = "Server=localhost;Database=mtm_waitlist;" })),
-        new StoreReachabilityStep(catalog, new StubMySqlHelperServer()),
+        new StoreReachabilityStep(catalog, new StubMySqlHelperServer(), NamesAStore()),
         new ReadHardwareIdentityStep(catalog),
         new ReadComputerRecordStep(catalog, new MachineFactsService(new StubMySqlHelperServer())),
         new MachineReadinessStep(catalog, new StubMachineConfigurationService(Configured())),
@@ -431,6 +451,40 @@ public sealed class PreSignInStepsTests
     /// <summary>What a step is handed: no person before sign-in, this machine's facts, and the feed.</summary>
     private static LaunchStepContext Context(ILaunchActivityFeed feed)
         => Context(feed, new MachineFactsService(new StubMySqlHelperServer()));
+
+    /// <summary>
+    /// Settings that name a store, so a case about what a step does with the store is not also a case about
+    /// whether this developer's machine happens to carry the connection variable.
+    /// </summary>
+    private static IOptions<WaitlistDatabaseOptions> NamesAStore()
+        => Options.Create(new WaitlistDatabaseOptions { ConnectionString = "Server=localhost;Database=mtm_waitlist;" });
+
+    /// <summary>
+    /// Runs a case with neither variable that supplies the records store set, restoring both afterwards. The suite
+    /// runs sequentially, so no other case sees the cleared values.
+    /// </summary>
+    private static async Task<T> WithoutStoreConnectionAsync<T>(Func<Task<T>> work)
+    {
+        string[] names = ["MTM_WAITLIST_DB_CONNECTION_STRING", "MTM_WAITLIST_STARTUP_DB_CONNECTION_STRING"];
+        var saved = names.Select(name => (name, value: Environment.GetEnvironmentVariable(name))).ToArray();
+
+        try
+        {
+            foreach (var name in names)
+            {
+                Environment.SetEnvironmentVariable(name, null);
+            }
+
+            return await work();
+        }
+        finally
+        {
+            foreach (var (name, value) in saved)
+            {
+                Environment.SetEnvironmentVariable(name, value);
+            }
+        }
+    }
 
     /// <summary>The same, over a machine a case states rather than over the one the suite happens to run on.</summary>
     private static LaunchStepContext Context(ILaunchActivityFeed feed, IMachineFacts machine)
@@ -518,19 +572,7 @@ public sealed class PreSignInStepsTests
             CancellationToken cancellationToken = default)
             => throw new NotSupportedException("The launch steps only read from the store.");
 
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => throw new NotSupportedException("No statement text is written in the launch steps (constitution III).");
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => throw new NotSupportedException("No statement text is written in the launch steps (constitution III).");
     }
 
     /// <summary>

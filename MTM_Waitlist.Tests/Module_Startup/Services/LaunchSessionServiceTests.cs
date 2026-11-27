@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Models;
@@ -199,7 +199,7 @@ public sealed class LaunchSessionServiceTests
         var store = new StubSessionStore();
 
         // Act / Assert: a session belongs to a person on a machine, so there is no row that could be written.
-        await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(
             () => new LaunchSessionService(store).IssueAsync(0, ComputerId, CancellationToken.None));
 
         Assert.AreEqual(0, store.CallCount(UpsertProcedure));
@@ -212,7 +212,7 @@ public sealed class LaunchSessionServiceTests
         var store = new StubSessionStore { UpsertAffectsNoRows = true };
 
         // Act / Assert
-        await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(
             () => new LaunchSessionService(store).IssueAsync(UserId, ComputerId, CancellationToken.None));
     }
 
@@ -292,19 +292,7 @@ public sealed class LaunchSessionServiceTests
             return Task.FromResult(1);
         }
 
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => throw new NotSupportedException("No statement text is written in the session path (constitution III).");
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => throw new NotSupportedException("No statement text is written in the session path (constitution III).");
 
         public int CallCount(string storedProcedureName)
             => _calls.Count(call => string.Equals(call.Procedure, storedProcedureName, StringComparison.Ordinal));

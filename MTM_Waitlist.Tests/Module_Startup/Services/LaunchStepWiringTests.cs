@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -131,7 +131,10 @@ public sealed class LaunchStepWiringTests
             new ConfigurationStep(
                 catalog,
                 Options.Create(new WaitlistDatabaseOptions { ConnectionString = "Server=localhost;Database=mtm_waitlist;" })),
-            new StoreReachabilityStep(catalog, store),
+            new StoreReachabilityStep(
+                catalog,
+                store,
+                Options.Create(new WaitlistDatabaseOptions { ConnectionString = "Server=localhost;Database=mtm_waitlist;" })),
             new ReadHardwareIdentityStep(catalog),
             new ReadComputerRecordStep(catalog, machine),
             new MachineReadinessStep(catalog, configuration),
@@ -164,19 +167,7 @@ public sealed class LaunchStepWiringTests
             CancellationToken cancellationToken = default)
             => Task.FromResult(0);
 
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => throw new NotSupportedException("No statement text is written in the launch steps (constitution III).");
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => throw new NotSupportedException("No statement text is written in the launch steps (constitution III).");
     }
 
     /// <summary>The picture mirror, which this check never drives.</summary>

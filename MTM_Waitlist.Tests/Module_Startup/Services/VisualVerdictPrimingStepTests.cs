@@ -128,7 +128,8 @@ public sealed class VisualVerdictPrimingStepTests
             true,
             "the picture share");
 
-        var step = new UnboundedBestEffortStep(descriptor);
+        var neverFinishes = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var step = new UnboundedBestEffortStep(descriptor, neverFinishes.Task);
         var stopwatch = Stopwatch.StartNew();
 
         // Act
@@ -138,6 +139,9 @@ public sealed class VisualVerdictPrimingStepTests
         // launch carry on, which is what makes "best effort" mean "cannot hold the splash" (FR-003, FR-026).
         stopwatch.Stop();
         Assert.AreEqual(LaunchStepStatus.Skipped, outcome.Status, "a best-effort step that overruns must not stop the launch");
+        Assert.IsFalse(
+            neverFinishes.Task.IsCompleted,
+            "the step is still waiting, so the runner ended the wait rather than the step finishing it");
         Assert.IsTrue(
             stopwatch.Elapsed < TimeSpan.FromSeconds(2),
             $"the runner waited {stopwatch.Elapsed.TotalSeconds:0.##} second(s), so the step held a launch it may not hold");
@@ -197,7 +201,12 @@ public sealed class VisualVerdictPrimingStepTests
     }
 
     /// <summary>A best-effort step that ignores the token it was given, which is the worst a step can do.</summary>
-    private sealed class UnboundedBestEffortStep(LaunchStep descriptor) : ILaunchStep
+    /// <remarks>
+    /// It waits on a task the test owns and never completes, rather than on a clock: the step is genuinely
+    /// unstoppable, no real time is spent, and the test can prove that the runner — not the step — ended the wait
+    /// (FR-031).
+    /// </remarks>
+    private sealed class UnboundedBestEffortStep(LaunchStep descriptor, Task neverFinishes) : ILaunchStep
     {
         /// <inheritdoc />
         public LaunchStep Descriptor { get; } = descriptor;
@@ -206,7 +215,7 @@ public sealed class VisualVerdictPrimingStepTests
         public async Task<LaunchStepOutcome> RunAsync(LaunchStepContext context, CancellationToken cancellationToken)
         {
             // Deliberately no token: this step cannot be stopped, so only the runner's own bound ends the wait.
-            await Task.Delay(TimeSpan.FromSeconds(3)).ConfigureAwait(false);
+            await neverFinishes.ConfigureAwait(false);
 
             return new LaunchStepOutcome(LaunchStepStatus.Succeeded, "It finished, eventually.", LaunchRemedySet.None);
         }

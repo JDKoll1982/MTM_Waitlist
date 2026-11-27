@@ -248,7 +248,7 @@ public sealed class LaunchStepRunnerTests
         var step = StepWith("configuration", (_, _) => Task.FromResult(Succeeded()), maximum: TimeSpan.Zero);
 
         // Act / Assert
-        await Assert.ThrowsExceptionAsync<ArgumentOutOfRangeException>(
+        await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(
             () => runner.RunAsync(step, Context(feed), CancellationToken.None));
 
         Assert.AreEqual(0, feed.Entries.Count, "a step the runner refused should not have been announced");
@@ -273,7 +273,7 @@ public sealed class LaunchStepRunnerTests
         abandoned.Cancel();
 
         // Act / Assert: a person closing the launch must not leave a step reading as if it had failed.
-        await Assert.ThrowsExceptionAsync<OperationCanceledException>(
+        await Assert.ThrowsExactlyAsync<OperationCanceledException>(
             () => runner.RunAsync(step, Context(feed), abandoned.Token));
 
         Assert.AreEqual("StepStarted", KindSequence(feed));

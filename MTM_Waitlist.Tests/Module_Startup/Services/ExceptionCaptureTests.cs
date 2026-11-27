@@ -1,4 +1,4 @@
-using System.Text.Json.Nodes;
+﻿using System.Text.Json.Nodes;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -199,18 +199,6 @@ public sealed class ExceptionCaptureTests
             CancellationToken cancellationToken = default)
             => throw new NotSupportedException("The writer only writes.");
 
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => throw new NotSupportedException("No statement text is written (constitution III).");
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => throw new NotSupportedException("No statement text is written (constitution III).");
     }
 }

@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Models;
@@ -84,7 +84,7 @@ public sealed class LaunchEdgeCaseTests
         });
 
         // Act
-        var abandoned = await Assert.ThrowsExceptionAsync<OperationCanceledException>(
+        var abandoned = await Assert.ThrowsExactlyAsync<OperationCanceledException>(
             () => run.Pipeline.RunAsync(closing.Token));
 
         // Assert: closing the window is not a step failure, so the feed carries no terminal line claiming one
@@ -235,19 +235,7 @@ public sealed class LaunchEdgeCaseTests
             CancellationToken cancellationToken = default)
             => Task.FromResult(1);
 
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => throw new NotSupportedException("No statement text is written in the sign-in path (constitution III).");
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => throw new NotSupportedException("No statement text is written in the sign-in path (constitution III).");
     }
 
     /// <summary>A store that answers the session reads and records that the session was ended.</summary>
@@ -277,19 +265,7 @@ public sealed class LaunchEdgeCaseTests
             return Task.FromResult(1);
         }
 
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => throw new NotSupportedException("No statement text is written in the session path (constitution III).");
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => throw new NotSupportedException("No statement text is written in the session path (constitution III).");
     }
 
     /// <summary>A relaunch that cannot happen, which is the case this file proves.</summary>
@@ -398,18 +374,6 @@ public sealed class LaunchEdgeCaseTests
             CancellationToken cancellationToken = default)
             => throw new NotSupportedException("No test in this file writes the store through this seam.");
 
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => throw new NotSupportedException("No statement text is written in the launch (constitution III).");
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => throw new NotSupportedException("No statement text is written in the launch (constitution III).");
     }
 }

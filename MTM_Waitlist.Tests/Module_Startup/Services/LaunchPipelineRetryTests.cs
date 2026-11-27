@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Models;
@@ -113,7 +113,7 @@ public sealed class LaunchPipelineRetryTests
         var run = new LaunchRun();
 
         // Act
-        var refused = await Assert.ThrowsExceptionAsync<ArgumentOutOfRangeException>(
+        var refused = await Assert.ThrowsExactlyAsync<ArgumentOutOfRangeException>(
             () => run.Pipeline.RetryFromAsync("not-a-step", CancellationToken.None));
 
         // Assert
@@ -356,18 +356,6 @@ public sealed class LaunchPipelineRetryTests
             CancellationToken cancellationToken = default)
             => throw new NotSupportedException("No test in this file writes the store.");
 
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => throw new NotSupportedException("No statement text is written in the launch (constitution III).");
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => throw new NotSupportedException("No statement text is written in the launch (constitution III).");
     }
 }

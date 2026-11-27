@@ -1,4 +1,7 @@
+using Microsoft.Extensions.Options;
+
 using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Startup.Models;
 
@@ -41,16 +44,34 @@ public sealed class StoreReachabilityStep : ILaunchStep
 
     private readonly LaunchStep _descriptor;
     private readonly IMySqlHelperServer _store;
+    private readonly WaitlistDatabaseOptions _waitlistSettings;
+    private readonly IStoreAvailabilityTracker? _availability;
 
     /// <summary>Creates the step over the store seam every internal read and write goes to.</summary>
     /// <param name="catalog">The sequence, which is where the step takes its descriptor from rather than restating it.</param>
     /// <param name="store">The data-access seam, which turns the call into a stored-procedure call.</param>
-    public StoreReachabilityStep(LaunchStepCatalog catalog, IMySqlHelperServer store)
+    /// <param name="waitlistSettings">
+    /// This computer's settings for the records store. The seam returns a neutral result for a store it has no
+    /// connection for, so without this the step would report "the store answered" on nothing (FR-019).
+    /// </param>
+    /// <param name="availability">
+    /// What the seam recorded about the last read. A store that is configured but silent answers the seam with the
+    /// same neutral result an empty store would, so the step would otherwise report success on an outage. Optional
+    /// so a test can state the host it describes rather than depending on a tracker being wired.
+    /// </param>
+    public StoreReachabilityStep(
+        LaunchStepCatalog catalog,
+        IMySqlHelperServer store,
+        IOptions<WaitlistDatabaseOptions> waitlistSettings,
+        IStoreAvailabilityTracker? availability = null)
     {
         ArgumentNullException.ThrowIfNull(store);
+        ArgumentNullException.ThrowIfNull(waitlistSettings);
 
         _descriptor = LaunchStepSupport.DescriptorFor(catalog, StepId);
         _store = store;
+        _waitlistSettings = waitlistSettings.Value;
+        _availability = availability;
     }
 
     /// <inheritdoc />
@@ -60,6 +81,18 @@ public sealed class StoreReachabilityStep : ILaunchStep
     public Task<LaunchStepOutcome> RunAsync(LaunchStepContext context, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(context);
+
+        // The seam answers a store it has no connection for with a neutral result, which is right for a screen
+        // that should not show an outage it cannot fix. It is wrong for this step, whose whole answer is "the
+        // store answered": a connection nothing supplies is refused here, naming the variable (FR-019).
+        var requirement = ConfigurationRequirement.WaitlistStore(_waitlistSettings);
+        if (!requirement.IsSatisfied)
+        {
+            return Task.FromResult(new LaunchStepOutcome(
+                LaunchStepStatus.Failed,
+                requirement.RefusalMessage,
+                LaunchRemedySet.RetryOnly));
+        }
 
         return LaunchStepSupport.RunGuardedAsync(
             "The store did not answer",
@@ -72,6 +105,21 @@ public sealed class StoreReachabilityStep : ILaunchStep
                         MySqlDatabaseTarget.MtmWaitlist,
                         token)
                     .ConfigureAwait(false);
+
+                // The seam answers a store that did not answer with the same neutral result an empty read would
+                // produce, so the read returning is not evidence that the store answered. What the seam recorded
+                // is: a configured store that was silent is an outage, and the launch stops here rather than
+                // opening a shell that can do nothing (FR-019, FR-021).
+                var observed = _availability?.Get(MySqlDatabaseTarget.MtmWaitlist);
+                if (observed is { Status: InternalStoreStatus.Unavailable })
+                {
+                    return new LaunchStepOutcome(
+                        LaunchStepStatus.Failed,
+                        string.IsNullOrWhiteSpace(observed.Message)
+                            ? "The store did not answer."
+                            : observed.Message,
+                        LaunchRemedySet.RetryOnly);
+                }
 
                 return new LaunchStepOutcome(
                     LaunchStepStatus.Succeeded,

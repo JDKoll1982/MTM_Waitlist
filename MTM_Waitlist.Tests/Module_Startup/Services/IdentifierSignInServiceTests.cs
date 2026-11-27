@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Models;
@@ -42,7 +42,7 @@ public sealed class IdentifierSignInServiceTests
     {
         var world = new World();
 
-        await Assert.ThrowsExceptionAsync<ArgumentException>(
+        await Assert.ThrowsExactlyAsync<ArgumentException>(
             () => new IdentifierSignInService(world.Directory, world.CredentialCheck, world.Plant).ResolveAsync("   "));
 
         Assert.AreEqual(0, world.Store.CallCount, "a blank identifier is refused by the field's own hint (FR-015)");
@@ -297,19 +297,7 @@ public sealed class IdentifierSignInServiceTests
             CancellationToken cancellationToken = default)
             => Task.FromResult(0);
 
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => Task.FromResult<IReadOnlyList<Dictionary<string, object?>>>([]);
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => Task.FromResult(0);
     }
 
     /// <summary>The store's account records, answering the employee-identifier read.</summary>

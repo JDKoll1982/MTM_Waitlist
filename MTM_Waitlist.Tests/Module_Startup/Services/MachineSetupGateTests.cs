@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -287,19 +287,7 @@ public sealed class MachineSetupGateTests
             CancellationToken cancellationToken = default)
             => throw new InvalidOperationException("The gate writes nothing, so no non-query is expected.");
 
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => throw new InvalidOperationException("No statement text is expected from this gate (constitution III).");
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => throw new InvalidOperationException("No statement text is expected from this gate (constitution III).");
 
         public sealed record Call(
             string Procedure,

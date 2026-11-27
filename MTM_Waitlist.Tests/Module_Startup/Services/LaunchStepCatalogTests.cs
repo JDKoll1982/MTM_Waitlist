@@ -331,7 +331,7 @@ public sealed class LaunchStepCatalogTests
         LaunchStep[] steps = [Step("configuration", TimeSpan.Zero, bestEffort: false)];
 
         // Act / Assert
-        Assert.ThrowsException<InvalidOperationException>(() => LaunchStepCatalog.Validate(steps));
+        Assert.ThrowsExactly<InvalidOperationException>(() => LaunchStepCatalog.Validate(steps));
     }
 
     [TestMethod]
@@ -341,7 +341,7 @@ public sealed class LaunchStepCatalogTests
         LaunchStep[] steps = [Step("picture-cache", LaunchStepCatalog.Ceiling, bestEffort: true)];
 
         // Act / Assert
-        Assert.ThrowsException<InvalidOperationException>(() => LaunchStepCatalog.Validate(steps));
+        Assert.ThrowsExactly<InvalidOperationException>(() => LaunchStepCatalog.Validate(steps));
     }
 
     [TestMethod]
@@ -351,7 +351,7 @@ public sealed class LaunchStepCatalogTests
         LaunchStep[] steps = [Step("store-reachability", LaunchStepCatalog.Ceiling + TimeSpan.FromSeconds(1), bestEffort: false)];
 
         // Act / Assert
-        Assert.ThrowsException<InvalidOperationException>(() => LaunchStepCatalog.Validate(steps));
+        Assert.ThrowsExactly<InvalidOperationException>(() => LaunchStepCatalog.Validate(steps));
     }
 
     [TestMethod]
@@ -365,7 +365,7 @@ public sealed class LaunchStepCatalogTests
         ];
 
         // Act / Assert
-        Assert.ThrowsException<InvalidOperationException>(() => LaunchStepCatalog.Validate(steps));
+        Assert.ThrowsExactly<InvalidOperationException>(() => LaunchStepCatalog.Validate(steps));
     }
 
     [TestMethod]
@@ -386,7 +386,7 @@ public sealed class LaunchStepCatalogTests
         ];
 
         // Act / Assert
-        Assert.ThrowsException<InvalidOperationException>(() => LaunchStepCatalog.Validate(steps));
+        Assert.ThrowsExactly<InvalidOperationException>(() => LaunchStepCatalog.Validate(steps));
     }
 
     [TestMethod]
@@ -399,14 +399,14 @@ public sealed class LaunchStepCatalogTests
         ];
 
         // Act / Assert
-        Assert.ThrowsException<InvalidOperationException>(() => LaunchStepCatalog.Validate(steps));
+        Assert.ThrowsExactly<InvalidOperationException>(() => LaunchStepCatalog.Validate(steps));
     }
 
     [TestMethod]
     public void Service_LaunchStepCatalogTests_Validate_WithAnEmptySequenceIsRefused()
     {
         // Act / Assert
-        Assert.ThrowsException<InvalidOperationException>(() => LaunchStepCatalog.Validate([]));
+        Assert.ThrowsExactly<InvalidOperationException>(() => LaunchStepCatalog.Validate([]));
     }
 
     [TestMethod]

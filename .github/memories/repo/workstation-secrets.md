@@ -33,16 +33,24 @@ Set these as **User**-scope variables (`HKCU\Environment`) so the per-user auto-
 | `INFOR_VISUAL_SQL_USER` | `SHOP2` | `VisualSourceSettings.UserId` defaults to **empty**, so the operator-supplied user must come from here (`VisualConnectionStringProvider` env precedence). Also the value `appsettings.json` already carries, so the app and the service agree. |
 | `INFOR_VISUAL_SQL_PASSWORD` | `SHOP` | Same resolution path; the Infor Visual password is never stored in the service configuration (FR-026). |
 
-## Source of truth, and why this adds no new exposure
+## Source of truth, and what this note now carries
 
-These are **pre-existing development credentials that are already committed** in `appsettings.json`:
-`StartupDatabaseOptions.ConnectionString` (`User ID=root;Password=root;`) and
-`InforVisualDatabaseOptions` (`User=SHOP2;Password=SHOP` — note both `SHOP` and `SHOP2` authenticate with password
-`SHOP`; verified live 2026-09-11). Recording them here discloses nothing that the repository does not already
-disclose; the environment variables change *where the service reads them from*, not who can already see them.
+`appsettings.json` **no longer holds these values.** SEC-001 blanked every credential in it, and the application now
+refuses to start without the environment variables that replace them. That makes this note **the only tracked
+carrier of these values**, so its justification is not the one it was originally written with. It is a recorded,
+owner-approved exception — granted 2026-09-11, and re-affirmed 2026-11-27 when the choice between removing the
+values and recording the exception was put to the owner as part of the dependency and modernization work.
 
-If `appsettings.json` changes, this note and the variables must be re-derived from it — treat the connection string as
-the source of truth, not this table.
+The values are the pre-existing development credentials of `172.16.1.104` / `V-MTMFG-5`: `root`/`root` for the four
+MySQL stores and `SHOP2`/`SHOP` for Infor Visual. The paragraph that used to stand here argued that recording them
+"discloses nothing that the repository does not already disclose", citing `appsettings.json` as the source of the
+same values. That is no longer true, and the claim is replaced rather than left to mislead a reader. The scope,
+rationale, compensating controls and end condition for the exception are recorded in the plan that owns this work
+(`specs/024-dependency-modernization/plan.md`, Constitution Check, governance point 3).
+
+**This table is now the source of truth for the values.** A future edit to `appsettings.json` cannot re-derive them,
+because that file carries none. If a value here is ever rotated, update it here and re-set the variables in the same
+change.
 
 ## Verified (2026-09-11, after setting)
 

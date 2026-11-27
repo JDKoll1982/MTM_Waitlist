@@ -554,7 +554,10 @@ public partial class App : Application
             AppLog.Info("UnhandledException", $"Unhandled exception message: {e.Message}");
         }
 
-        TryFlushLogStore();
+        // The process ends when this handler returns, so there is no caller left to await the flush: it is blocked
+        // on, for the two-second bound the flush itself carries, because the record of this death is the only
+        // thing that survives it (FR-037).
+        TryFlushLogStore().GetAwaiter().GetResult();
     }
 
     /// <summary>
@@ -571,13 +574,15 @@ public partial class App : Application
     /// have reached the machine's disk where the seam would have dropped it.
     /// </para>
     /// <para>
-    /// <b>Best effort, and bounded.</b> The store write is the seam's own bounded wait, and the enclosing wait is
-    /// bounded again, because a process that is already ending must not be held by a store that will not answer.
+    /// <b>Best effort, off the caller's thread, and bounded.</b> The store write runs on the thread pool so it
+    /// cannot deadlock on the interface thread's own context, and a cancellation source ends it after two seconds
+    /// so a store that will not answer cannot hold the process open. The callers that are still running when it
+    /// finishes await it; the two that are the process's last breath cannot, and say so where they block on it.
     /// A failure here is deliberately not reported: the fault it is recording has already been raised, and raising
     /// a second one would hide it (FR-037).
     /// </para>
     /// </remarks>
-    private static void TryFlushLogStore()
+    private static async Task TryFlushLogStore()
     {
         try
         {
@@ -586,9 +591,9 @@ public partial class App : Application
                 return;
             }
 
-            // Off the caller's thread so this cannot deadlock on the interface thread's context, and bounded so a
-            // store that will not answer does not hold the process open.
-            Task.Run(() => log.FlushAsync(CancellationToken.None)).Wait(TimeSpan.FromSeconds(2));
+            using var bound = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+
+            await Task.Run(() => log.FlushAsync(bound.Token)).ConfigureAwait(false);
         }
         catch (Exception)
         {
@@ -619,7 +624,9 @@ public partial class App : Application
             e.ExceptionObject as Exception,
             $"A fault on a thread that is not the interface thread is ending the process. Terminating={e.IsTerminating}.");
 
-        TryFlushLogStore();
+        // Same reason as the handler above: the runtime is already on its way out, so the flush is the last thing
+        // that can reach the store and it is blocked on rather than awaited (FR-037).
+        TryFlushLogStore().GetAwaiter().GetResult();
     }
 
     /// <summary>
@@ -710,7 +717,11 @@ public partial class App : Application
                     $"First-chance InvalidOperationException in MTM_Waitlist stack.{Environment.NewLine}"
                     + $"--- the stack the throw was standing on ---{Environment.NewLine}{liveStack}");
 
-                TryFlushLogStore();
+                // Nothing here is ending the process, so the flush is started and left to finish on the pool
+                // thread: this hook fires on the throw's own thread, which is often the interface thread, and
+                // freezing that thread for two seconds on every first-chance exception is the wait FR-021 forbids.
+                // The flush reports nothing, so there is no unobserved failure to carry.
+                _ = TryFlushLogStore();
             }
         }
 
