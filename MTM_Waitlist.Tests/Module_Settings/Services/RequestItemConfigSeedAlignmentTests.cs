@@ -24,7 +24,7 @@ namespace MTM_Waitlist.Tests.Module_Settings.Services;
 /// <c>data-model.md</c> §9's per-Item reconciliation and <c>docs/research/research-waitlist-card-layout-pre-spec.md</c> §5's cell table —
 /// and the actual side is <b>read from the shipped seed and from the shipped card</b>: the seed's
 /// <c>create.sql</c> is parsed here, and the card is driven through
-/// <see cref="WaitlistViewViewModel.CreateSessionOrder"/> with the declarations that parse produced. So this is
+/// <see cref="WaitlistSessionOrderFactory.CreateSessionOrder"/> with the declarations that parse produced. So this is
 /// not a copy of the seed checked against itself: a declaration that drifts away from what the card reads fails
 /// here, which is what makes the seed change (D33, T080) verifiable rather than merely reviewed.
 /// </para>
@@ -609,7 +609,7 @@ public sealed class RequestItemConfigSeedAlignmentTests
         IReadOnlyDictionary<string, RequestItemConfiguration> declarations,
         string itemCode)
     {
-        var order = WaitlistViewViewModel.CreateSessionOrder(
+        var order = WaitlistSessionOrderFactory.CreateSessionOrder(
             Shape(itemCode),
             Job(),
             declarations[itemCode]);

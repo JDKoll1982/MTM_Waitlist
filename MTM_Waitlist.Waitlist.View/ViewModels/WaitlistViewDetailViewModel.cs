@@ -648,7 +648,7 @@ public partial class WaitlistViewDetailViewModel : ObservableRecipient, INavigat
 
             // The requesting job travels with the card: the die's number and where the die is are job values the
             // request never stored, so without the job the die rows on this page cannot be drawn (FR-053).
-            Item = WaitlistViewViewModel.CreateSessionOrder(match, ResolveJobAvailability(match.WorkCenter));
+            Item = WaitlistSessionOrderFactory.CreateSessionOrder(match, ResolveJobAvailability(match.WorkCenter));
         }
 
         ApplyItemState(Item);

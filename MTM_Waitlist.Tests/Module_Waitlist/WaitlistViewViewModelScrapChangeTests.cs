@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Waitlist.Models;
+using MTM_Waitlist.Module_Waitlist.Services;
 using MTM_Waitlist.Module_Waitlist.ViewModels;
 
 namespace MTM_Waitlist.Tests.Module_Waitlist;
@@ -83,7 +84,7 @@ public sealed class WaitlistViewViewModelScrapChangeTests
             .SingleOrDefault(cell => string.Equals(cell.Label, label, StringComparison.OrdinalIgnoreCase));
 
     private static SampleOrder CreateCard(string statedScrapType, LuggerArrangementSnapshot arrangement) =>
-        WaitlistViewViewModel.CreateSessionOrder(
+        WaitlistSessionOrderFactory.CreateSessionOrder(
             new WaitlistRequest
             {
                 Building = "Expo Drive",

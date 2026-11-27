@@ -422,7 +422,7 @@ public sealed class WaitlistViewDetailActionTests
             messageSeenStore: seenStore);
 
         // Navigate in and straight back out, so the 30-second refresh timer never runs in a headless host.
-        viewModel.OnNavigatedTo(WaitlistViewViewModel.CreateSessionOrder(BuildRequest()).Id);
+        viewModel.OnNavigatedTo(WaitlistSessionOrderFactory.CreateSessionOrder(BuildRequest()).Id);
         viewModel.OnNavigatedFrom();
         return viewModel;
     }
@@ -449,7 +449,7 @@ public sealed class WaitlistViewDetailActionTests
 
         Assert.IsNotNull(submit.Request, "Submitting the fixture request failed.");
 
-        var order = WaitlistViewViewModel.CreateSessionOrder(submit.Request!);
+        var order = WaitlistSessionOrderFactory.CreateSessionOrder(submit.Request!);
         var viewModel = new WaitlistViewDetailViewModel(
             new WaitlistTestNavigationService(),
             new WaitlistTestBuildingSelectionService(),

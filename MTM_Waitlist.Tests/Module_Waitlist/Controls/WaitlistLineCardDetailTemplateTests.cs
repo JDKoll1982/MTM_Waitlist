@@ -28,7 +28,7 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.Controls;
 /// span and visibility are read off the row's own cell count.
 /// </para>
 /// <para>
-/// The <b>resolution</b> half drives <see cref="WaitlistViewViewModel.ResolveDeclaredCells"/> against the
+/// The <b>resolution</b> half drives <see cref="WaitlistSessionOrderFactory.ResolveDeclaredCells"/> against the
 /// <b>shipped</b> declaration seed, so what is checked is the cells the real configuration produces rather
 /// than a copy of it: every drawn label is one of the Item's settled cells, every declared field the card
 /// does not show stays undrawn, and the one cell whose value the requesting job's arrangement decides —
@@ -471,7 +471,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
         foreach (var label in new[] { "Request description", "Part description", "Coil description", "Description", "COIL DESCRIPTION" })
         {
             Assert.IsTrue(
-                WaitlistCardCellRules.DrawsScrollingText(label),
+                WaitlistLineCardCell.DrawsScrollingText(label),
                 $"'{label}' is a description, so its value must scroll rather than be clipped (FR-053).");
             Assert.IsTrue(
                 new WaitlistLineCardCell { Label = label, Value = "a sentence" }.UsesScrollingText,
@@ -482,7 +482,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
         foreach (var label in new[] { "Part", "Total Qty In House", "Item Type", "Die Location", "Lugger Location", "Scrap Type", "Size", "# of Skids", "" })
         {
             Assert.IsFalse(
-                WaitlistCardCellRules.DrawsScrollingText(label),
+                WaitlistLineCardCell.DrawsScrollingText(label),
                 $"'{label}' is not a description, so it must not take the scrolling line (FR-053).");
             Assert.IsFalse(
                 new WaitlistLineCardCell { Label = label, Value = "a value" }.UsesScrollingText,
@@ -657,7 +657,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
             // material is typed, so nothing is asked for. That it carries no answer is therefore not a gap.
             var declaration = Declaration("deliver-wrong-coil", ("Reason", RequestItemFieldDefinition.Sources.Answer, 1, true));
 
-            var order = WaitlistViewViewModel.CreateSessionOrder(
+            var order = WaitlistSessionOrderFactory.CreateSessionOrder(
                 Shape("deliver-wrong-coil", inputValue: null),
                 jobAvailability: null,
                 declaration);
@@ -689,7 +689,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
             // The die is asked for, so a request carrying no die is a source that exists and cannot be read.
             var declaration = Declaration("pickup-die", ("Die", RequestItemFieldDefinition.Sources.Answer, 1, true));
 
-            var order = WaitlistViewViewModel.CreateSessionOrder(
+            var order = WaitlistSessionOrderFactory.CreateSessionOrder(
                 Shape("pickup-die", inputValue: null),
                 jobAvailability: null,
                 declaration);
@@ -718,14 +718,14 @@ public sealed class WaitlistLineCardDetailTemplateTests
             ("Pickup location", RequestItemFieldDefinition.Sources.Job, 2, false),
             (WaitlistCardCellRules.DieShopAnswerLabel, RequestItemFieldDefinition.Sources.Answer, 3, false));
 
-        var unticked = WaitlistViewViewModel.CreateSessionOrder(
+        var unticked = WaitlistSessionOrderFactory.CreateSessionOrder(
             Shape("pickup-die"),
             Job(),
             declared);
 
         Assert.AreEqual(2, unticked.Cells.Count, "An unticked die request draws two cells, not three (FR-031).");
 
-        var ticked = WaitlistViewViewModel.CreateSessionOrder(
+        var ticked = WaitlistSessionOrderFactory.CreateSessionOrder(
             Shape("pickup-die", Answers([(WaitlistCardCellRules.DieShopAnswerLabel, "true")])),
             Job(),
             declared);
@@ -741,7 +741,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
             "The die-shop cell draws the phrase itself, not the answer's own text (FR-055).");
         Assert.AreNotEqual("true", dieShop.Value, "The answer's raw flag is drawn instead of the phrase (FR-055).");
 
-        var deliver = WaitlistViewViewModel.CreateSessionOrder(
+        var deliver = WaitlistSessionOrderFactory.CreateSessionOrder(
             Shape("deliver-die", Answers([(WaitlistCardCellRules.DieShopAnswerLabel, "true")])),
             Job(),
             Declaration("deliver-die", (WaitlistCardCellRules.DieShopAnswerLabel, RequestItemFieldDefinition.Sources.Answer, 1, false)));
@@ -757,7 +757,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
 
         foreach (var notTicked in new[] { "false", "no", "0", string.Empty })
         {
-            var leftUnticked = WaitlistViewViewModel.CreateSessionOrder(
+            var leftUnticked = WaitlistSessionOrderFactory.CreateSessionOrder(
                 Shape("pickup-die", Answers([(WaitlistCardCellRules.DieShopAnswerLabel, notTicked)])),
                 Job(),
                 declared);
@@ -780,7 +780,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
     {
         foreach (var hopper in new[] { "pickup-hopper", "deliver-hopper" })
         {
-            var sizeCell = WaitlistViewViewModel
+            var sizeCell = WaitlistSessionOrderFactory
                 .CreateSessionOrder(
                     Shape(hopper, Answers([("Size", "Large")])),
                     Job(),
@@ -804,7 +804,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
         // values, not pictures, so nothing on those cards offers an enlarge affordance (FR-078).
         foreach (var other in new[] { "pickup-coil", "pickup-die", "pickup-fg", "other" })
         {
-            var cells = WaitlistViewViewModel
+            var cells = WaitlistSessionOrderFactory
                 .CreateSessionOrder(Shape(other), Job(), SeedDeclarations()[other])
                 .Cells;
 
@@ -822,7 +822,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
     [TestMethod]
     public void Model_WaitlistLineCardDetailTemplateTests_TheHopperSizeCell_DrawsTheSharedPlaceholderUntilAPictureResolves()
     {
-        var sizeCell = WaitlistViewViewModel
+        var sizeCell = WaitlistSessionOrderFactory
             .CreateSessionOrder(
                 Shape("pickup-hopper", Answers([("Size", "Small")])),
                 Job(),
@@ -897,7 +897,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
             ("Coil number", RequestItemFieldDefinition.Sources.Job, 1, false),
             ("Weight of Coil", RequestItemFieldDefinition.Sources.Answer, 2, true));
 
-        var answered = WaitlistViewViewModel.CreateSessionOrder(
+        var answered = WaitlistSessionOrderFactory.CreateSessionOrder(
             Shape("assist-coil-turn", Answers([("Weight of Coil", "5120 lb")])),
             Job(),
             declared);
@@ -907,7 +907,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
             answered.Cells.Any(cell => string.Equals(cell.Value, Job().CoilAverageWeight, StringComparison.OrdinalIgnoreCase)),
             "The job's average coil weight is drawn, so the two weights have been conflated (FR-054).");
 
-        var unanswered = WaitlistViewViewModel.CreateSessionOrder(
+        var unanswered = WaitlistSessionOrderFactory.CreateSessionOrder(
             Shape("assist-coil-turn", inputValue: null),
             Job(),
             Declaration(
@@ -968,7 +968,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
             ("Scrap type", RequestItemFieldDefinition.Sources.Job, 1, false),
             ("Lugger Location", RequestItemFieldDefinition.Sources.Job, 2, false));
 
-        var scrap = WaitlistViewViewModel.CreateSessionOrder(
+        var scrap = WaitlistSessionOrderFactory.CreateSessionOrder(
             Shape("pickup-scrap"),
             ScrapJob(),
             scrapDeclaration);
@@ -995,7 +995,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
     {
         // The shipped declaration: scrap type first, the lugger last, with the three fields the card excludes
         // sitting between them.
-        var shipped = WaitlistViewViewModel.CreateSessionOrder(
+        var shipped = WaitlistSessionOrderFactory.CreateSessionOrder(
             Shape("pickup-scrap"),
             ScrapJob(),
             Declaration(
@@ -1012,7 +1012,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
 
         // A store whose declaration lists the two the other way round draws the same card: the pair's order is
         // the card's rule, not the configuration's.
-        var reversed = WaitlistViewViewModel.CreateSessionOrder(
+        var reversed = WaitlistSessionOrderFactory.CreateSessionOrder(
             Shape("pickup-scrap"),
             ScrapJob(),
             Declaration(
@@ -1044,7 +1044,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
 
         // The job's scrap type is real, and the arrangement answered no lugger for it: the cell is absent rather
         // than filled with a substitute value (FR-026).
-        var gap = WaitlistViewViewModel.CreateSessionOrder(
+        var gap = WaitlistSessionOrderFactory.CreateSessionOrder(
             Shape("pickup-scrap"),
             Job() with { ScrapType = "Galvanized Steel" },
             scrapDeclaration);
@@ -1057,7 +1057,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
             "The scrap card lost its Scrap Type cell along with the missing lugger (FR-030).");
 
         // A job with no real scrap decision is the other way the value stays null (FR-025).
-        var noDecision = WaitlistViewViewModel.CreateSessionOrder(
+        var noDecision = WaitlistSessionOrderFactory.CreateSessionOrder(
             Shape("pickup-scrap"),
             Job() with { ScrapType = "Scrap Type Required" },
             scrapDeclaration);
@@ -1302,7 +1302,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
         })
         {
             var cells = WaitlistLineCardCell.CellsToDraw(
-                WaitlistViewViewModel
+                WaitlistSessionOrderFactory
                     .CreateSessionOrder(Shape(itemCode), job, SeedDeclarations()[itemCode])
                     .Cells);
 
@@ -1376,7 +1376,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
         string itemCode,
         IReadOnlyDictionary<string, string>? answers = null)
     {
-        var order = WaitlistViewViewModel.CreateSessionOrder(
+        var order = WaitlistSessionOrderFactory.CreateSessionOrder(
             Shape(itemCode, answers),
             Job(),
             SeedDeclarations()[itemCode]);
@@ -1537,7 +1537,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
             ("Scrap type", RequestItemFieldDefinition.Sources.Job, 1, false),
             ("Lugger Location", RequestItemFieldDefinition.Sources.Job, 2, false));
 
-        var card = WaitlistViewViewModel.CreateSessionOrder(
+        var card = WaitlistSessionOrderFactory.CreateSessionOrder(
             Shape("pickup-scrap"),
             ScrapJob() with { LuggerLocationImagePath = @"C:\pictures\Lugger06.png" },
             declaration);
@@ -1564,7 +1564,7 @@ public sealed class WaitlistLineCardDetailTemplateTests
     [TestMethod]
     public void ViewModel_WaitlistLineCardDetailTemplateTests_ResolveDeclaredCells_ALuggerWithNoPictureStillDrawsThePicturedCell()
     {
-        var card = WaitlistViewViewModel.CreateSessionOrder(
+        var card = WaitlistSessionOrderFactory.CreateSessionOrder(
             Shape("pickup-scrap"),
             ScrapJob(),
             Declaration(

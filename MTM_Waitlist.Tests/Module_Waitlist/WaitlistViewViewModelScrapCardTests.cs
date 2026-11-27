@@ -50,7 +50,7 @@ public sealed class WaitlistViewViewModelScrapCardTests
             Row("3003 Aluminum", "Door 6 Lugger", LuggerStatus.Available, sortPosition: 2));
 
         var generic = CreateCard("3003 Aluminum", arrangement);
-        var workOrder = WaitlistViewViewModel.CreateSessionOrder(
+        var workOrder = WaitlistSessionOrderFactory.CreateSessionOrder(
             Shape("3003 Aluminum", isGeneric: false),
             RequestJobPartAvailability.All with { ScrapType = "3003 Aluminum", LuggerLocation = "Door 6 Lugger" },
             Declaration());
@@ -128,7 +128,7 @@ public sealed class WaitlistViewViewModelScrapCardTests
     {
         // The work centre happens to be running a job whose scrap has its own lugger picture. That picture belongs
         // to the job's scrap type, so a generic request must draw the shared placeholder instead of it (FR-006).
-        var card = WaitlistViewViewModel.CreateSessionOrder(
+        var card = WaitlistSessionOrderFactory.CreateSessionOrder(
             Shape("Galvanized Steel", isGeneric: true),
             RequestJobPartAvailability.All with
             {
@@ -150,7 +150,7 @@ public sealed class WaitlistViewViewModelScrapCardTests
             .SingleOrDefault(cell => string.Equals(cell.Label, label, StringComparison.OrdinalIgnoreCase));
 
     private static SampleOrder CreateCard(string statedScrapType, LuggerArrangementSnapshot? arrangement) =>
-        WaitlistViewViewModel.CreateSessionOrder(
+        WaitlistSessionOrderFactory.CreateSessionOrder(
             Shape(statedScrapType, isGeneric: true),
             jobAvailability: null,
             Declaration(),

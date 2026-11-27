@@ -35,7 +35,7 @@ public sealed class WaitlistDetailJobFillProvenanceTests
             new StubBuildingSelectionService(),
             requestService: requestService);
 
-        viewModel.OnNavigatedTo(WaitlistViewViewModel.CreateSessionOrder(request).Id);
+        viewModel.OnNavigatedTo(WaitlistSessionOrderFactory.CreateSessionOrder(request).Id);
 
         var section = viewModel.TemplateSections.Single(candidate => candidate.Title == "Request");
         var provenanceLabel = "Waitlist_Detail_JobFill_Provenance.Text".GetLocalized();
@@ -57,7 +57,7 @@ public sealed class WaitlistDetailJobFillProvenanceTests
             new StubBuildingSelectionService(),
             requestService: requestService);
 
-        viewModel.OnNavigatedTo(WaitlistViewViewModel.CreateSessionOrder(request).Id);
+        viewModel.OnNavigatedTo(WaitlistSessionOrderFactory.CreateSessionOrder(request).Id);
 
         var section = viewModel.TemplateSections.Single(candidate => candidate.Title == "Request");
         var provenanceLabel = "Waitlist_Detail_JobFill_Provenance.Text".GetLocalized();
@@ -73,7 +73,7 @@ public sealed class WaitlistDetailJobFillProvenanceTests
         var requestService = new WaitlistRequestService();
         var request = await SubmitAsync(requestService, provenanceWorkOrder: "WO-9001");
 
-        var order = WaitlistViewViewModel.CreateSessionOrder(request);
+        var order = WaitlistSessionOrderFactory.CreateSessionOrder(request);
 
         Assert.IsTrue(request.IsGeneric, "the request stays generic with a job behind it (FR-011)");
         Assert.IsTrue(

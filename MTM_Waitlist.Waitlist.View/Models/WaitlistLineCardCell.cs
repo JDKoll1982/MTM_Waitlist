@@ -122,10 +122,39 @@ public sealed class WaitlistLineCardCell
     /// </summary>
     /// <remarks>
     /// It is derived from the label the cell was produced for rather than set by each surface, so the card, the
-    /// request page and any later reader of a cell agree about which values scroll. See
-    /// <see cref="WaitlistCardCellRules.DrawsScrollingText"/> for the rule itself.
+    /// request page and any later reader of a cell agree about which values scroll. The rule itself is
+    /// <see cref="DrawsScrollingText"/>, which lives on the cell so a reader holding a cell needs nothing else.
     /// </remarks>
-    public bool UsesScrollingText => WaitlistCardCellRules.DrawsScrollingText(Label);
+    public bool UsesScrollingText => DrawsScrollingText(Label);
+
+    /// <summary>
+    /// The word a description cell's label carries, in every spelling the shipped declarations use: the request
+    /// description (<c>other</c>), the part description (<c>deliver-component</c>), the coil description (both coil
+    /// Items) and the dunnage <c>Description</c>, which is declared but not drawn today.
+    /// </summary>
+    private const string DescriptionLabelWord = "description";
+
+    /// <summary>
+    /// Whether a cell's value is a <b>description</b>, and so is drawn by the application's shared one-line
+    /// scrolling text control rather than as a fixed line that would be cut off with an ellipsis.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A description is the one value on a card that is a sentence rather than a code, a count or a place: a part
+    /// description ("BLANK, 16GA, UNPAINTED, 42.5 X 18.25") or a coil description is routinely longer than the cell
+    /// that holds it, and clipping it loses the words that tell a handler which material to fetch.
+    /// </para>
+    /// <para>
+    /// The rule reads the <b>declared label</b> rather than listing the Items, so every Item that declares a
+    /// description is covered — including one whose card is added later — and no Item has to be edited to gain the
+    /// behaviour. Matching on the word rather than on the three exact spellings also survives the seed's own
+    /// casing and wording drift, which is what FR-104 asks the labels to be free to do.
+    /// </para>
+    /// </remarks>
+    /// <param name="label">The label the field was declared under.</param>
+    public static bool DrawsScrollingText(string? label) =>
+        !string.IsNullOrWhiteSpace(label)
+        && label.Trim().Contains(DescriptionLabelWord, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// The picture the cell's value draws: the hopper's reference image, and the application's one shared

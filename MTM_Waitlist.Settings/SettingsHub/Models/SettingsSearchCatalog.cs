@@ -1,5 +1,3 @@
-using MTM_Waitlist.Module_Settings.ViewModels;
-
 namespace MTM_Waitlist.Module_Settings.Models;
 
 /// <summary>
@@ -15,48 +13,48 @@ internal static class SettingsSearchCatalog
     /// <summary>Every entry, in the order the pages are offered on the hub.</summary>
     internal static IReadOnlyList<SettingsSearchTarget> All { get; } =
     (MTM_Waitlist.Module_Settings.Models.SettingsSearchTarget[])[
-        new("App theme", "General", SettingsViewModel.GeneralSettingsRouteViewModelName, "AppearanceExpander",
+        new("App theme", "General", SettingsRoutes.GeneralSettingsRouteViewModelName, "AppearanceExpander",
             "appearance theme light dark default system colour color look style"),
-        new("New request alerts", "General", SettingsViewModel.GeneralSettingsRouteViewModelName, "NewRequestAlertsExpander",
+        new("New request alerts", "General", SettingsRoutes.GeneralSettingsRouteViewModelName, "NewRequestAlertsExpander",
             "notification notify announce alert toast new request arrived"),
-        new("About and version", "General", SettingsViewModel.GeneralSettingsRouteViewModelName, "AboutExpander",
+        new("About and version", "General", SettingsRoutes.GeneralSettingsRouteViewModelName, "AboutExpander",
             "about version build release privacy info installed"),
 
-        new("Local work centers", "Operations", SettingsViewModel.OperationsSettingsRouteViewModelName, "HotWorkCentersExpander",
+        new("Local work centers", "Operations", SettingsRoutes.OperationsSettingsRouteViewModelName, "HotWorkCentersExpander",
             "work centre center workstation computer local press list"),
-        new("Buildings", "Operations", SettingsViewModel.OperationsSettingsRouteViewModelName, "BuildingsExpander",
+        new("Buildings", "Operations", SettingsRoutes.OperationsSettingsRouteViewModelName, "BuildingsExpander",
             "building buildings plant facility site rename add work centre center computer"),
-        new("Dunnage type visibility", "Operations", SettingsViewModel.OperationsSettingsRouteViewModelName, "DunnageTypeVisibilityExpander",
+        new("Dunnage type visibility", "Operations", SettingsRoutes.OperationsSettingsRouteViewModelName, "DunnageTypeVisibilityExpander",
             "dunnage type show hide visibility receiving lists"),
-        new("Ignored Infor Visual locations", "Operations", SettingsViewModel.OperationsSettingsRouteViewModelName, "IgnoredLocationsExpander",
+        new("Ignored Infor Visual locations", "Operations", SettingsRoutes.OperationsSettingsRouteViewModelName, "IgnoredLocationsExpander",
             "ignored locations hide inventory location visual omit"),
-        new("How long a sign-in lasts", "Operations", SettingsViewModel.OperationsSettingsRouteViewModelName, "SessionLengthExpander",
+        new("How long a sign-in lasts", "Operations", SettingsRoutes.OperationsSettingsRouteViewModelName, "SessionLengthExpander",
             "session sign in signin timeout length idle minutes log out logout"),
-        new("Max allotted time", "Operations", SettingsViewModel.OperationsSettingsRouteViewModelName, "UrgencyAllotmentsExpander",
+        new("Max allotted time", "Operations", SettingsRoutes.OperationsSettingsRouteViewModelName, "UrgencyAllotmentsExpander",
             "allotted minutes urgency deadline per item time limit allowed"),
 
-        new("Picture folders", "Pictures", SettingsViewModel.PicturesSettingsRouteViewModelName, "SettingsPage_Images_FoldersCard",
+        new("Picture folders", "Pictures", SettingsRoutes.PicturesSettingsRouteViewModelName, "SettingsPage_Images_FoldersCard",
             "picture folder folders storage path share dunnage root hopper lugger archive keep days no picture no image placeholder default artwork"),
-        new("Item and work center pictures", "Pictures", SettingsViewModel.PicturesSettingsRouteViewModelName, "SettingsPage_Images_AssignmentsCard",
+        new("Item and work center pictures", "Pictures", SettingsRoutes.PicturesSettingsRouteViewModelName, "SettingsPage_Images_AssignmentsCard",
             "item picture pictures work centre center image manage assignments open part"),
-        new("Copies on this computer", "Pictures", SettingsViewModel.PicturesSettingsRouteViewModelName, "SettingsPage_Images_CacheCard",
+        new("Copies on this computer", "Pictures", SettingsRoutes.PicturesSettingsRouteViewModelName, "SettingsPage_Images_CacheCard",
             "cache copy copies local picture folder offline sync computer"),
 
-        new("Computers", "Devices", SettingsViewModel.DevicesSettingsRouteViewModelName, "ComputersExpander",
+        new("Computers", "Devices", SettingsRoutes.DevicesSettingsRouteViewModelName, "ComputersExpander",
             "computer computers registry device workstation machine name add edit display"),
 
-        new("Developer log", "Diagnostics", SettingsViewModel.DiagnosticsSettingsRouteViewModelName, "DeveloperLogExpander",
+        new("Developer log", "Diagnostics", SettingsRoutes.DiagnosticsSettingsRouteViewModelName, "DeveloperLogExpander",
             "log logs developer diagnostics panel entries errors"),
-        new("Log retention", "Diagnostics", SettingsViewModel.DiagnosticsSettingsRouteViewModelName, "LogStoreLevelExpander",
+        new("Log retention", "Diagnostics", SettingsRoutes.DiagnosticsSettingsRouteViewModelName, "LogStoreLevelExpander",
             "log level retention store keep minimum verbose amount"),
-        new("Cache refresh", "Diagnostics", SettingsViewModel.DiagnosticsSettingsRouteViewModelName, "CacheRefreshExpander",
+        new("Cache refresh", "Diagnostics", SettingsRoutes.DiagnosticsSettingsRouteViewModelName, "CacheRefreshExpander",
             "cache refresh mirror rebuild pull infor visual data"),
 
-        new("Users", "Administration", SettingsViewModel.AdministrationSettingsRouteViewModelName, "SettingsPage_UserManagementEntry",
+        new("Users", "Administration", SettingsRoutes.AdministrationSettingsRouteViewModelName, "SettingsPage_UserManagementEntry",
             "user users people person account accounts roster employee add create"),
-        new("Permissions", "Administration", SettingsViewModel.AdministrationSettingsRouteViewModelName, "SettingsPage_PermissionsEntry",
+        new("Permissions", "Administration", SettingsRoutes.AdministrationSettingsRouteViewModelName, "SettingsPage_PermissionsEntry",
             "permission permissions access allowed role roles who can grant"),
-        new("Lugger arrangement", "Administration", SettingsViewModel.AdministrationSettingsRouteViewModelName, "SettingsPage_LuggerArrangementEntry",
+        new("Lugger arrangement", "Administration", SettingsRoutes.AdministrationSettingsRouteViewModelName, "SettingsPage_LuggerArrangementEntry",
             "lugger arrangement scrap types assignment assign"),
     ];
 }

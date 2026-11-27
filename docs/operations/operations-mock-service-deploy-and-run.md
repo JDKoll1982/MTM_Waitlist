@@ -107,6 +107,6 @@ records and the backup artifacts live *there*, not beside the executable:
 | Refresh run records | `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\` |
 | Backup artifacts | `%LOCALAPPDATA%\MTM_Waitlist.Mock.Service\backups\<database>\` |
 
-(`ServiceHostBuilder.GetDefaultAppDataRoot()`, confirmed by running the published build on 2026-09-11.)
+(`ServicePaths.DefaultAppDataRoot`, resolved by the published build and confirmed on 2026-09-11.)
 Deleting only the install folder therefore leaves the configuration, the schedules and the
 backups behind on the host.

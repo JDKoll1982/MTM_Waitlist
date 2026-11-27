@@ -119,7 +119,7 @@ public sealed class WaitlistHandlerStatusRoundTripTests
             stored!.HandlerStatus,
             "The stored condition must be read back with the request, so a restart shows the same card (FR-073).");
 
-        var row = WaitlistViewViewModel.CreateSessionOrder(stored);
+        var row = WaitlistSessionOrderFactory.CreateSessionOrder(stored);
         Assert.AreEqual(
             "Changing Propane",
             row.HandlerStatus,
@@ -186,7 +186,7 @@ public sealed class WaitlistHandlerStatusRoundTripTests
             stored.HandlerStatus,
             "The store must clear the condition with the assignee instead of leaving it on a job nobody holds (FR-106).");
 
-        var row = WaitlistViewViewModel.CreateSessionOrder(stored);
+        var row = WaitlistSessionOrderFactory.CreateSessionOrder(stored);
         Assert.AreEqual("Waiting", row.StatusWord, "So the card reads Waiting again (FR-012).");
         Assert.AreEqual(
             StatusColumnTheme.Normal,

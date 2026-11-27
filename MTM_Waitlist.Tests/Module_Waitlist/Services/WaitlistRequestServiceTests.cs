@@ -296,7 +296,7 @@ public sealed class WaitlistRequestServiceTests
         Assert.AreEqual("6229", request.AssignedMaterialHandler, "The number the authorizations compare is kept.");
         Assert.AreEqual("John Koll", request.AssignedMaterialHandlerName, "And the name the screen prints comes with it.");
 
-        var order = WaitlistViewViewModel.CreateSessionOrder(request);
+        var order = WaitlistSessionOrderFactory.CreateSessionOrder(request);
         Assert.AreEqual("John Koll", order.PersonText);
     }
 
@@ -662,7 +662,7 @@ public sealed class WaitlistRequestServiceTests
             TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(5),
         };
 
-        var order = WaitlistViewViewModel.CreateSessionOrder(request);
+        var order = WaitlistSessionOrderFactory.CreateSessionOrder(request);
 
         Assert.AreEqual(request.Id, order.RequestId);
         Assert.AreEqual("6229", order.RequesterEmployeeNumber);
@@ -685,7 +685,7 @@ public sealed class WaitlistRequestServiceTests
             Status = "Accepted",
             RequesterEmployeeNumber = "6229",
         };
-        var acceptedOrder = WaitlistViewViewModel.CreateSessionOrder(accepted);
+        var acceptedOrder = WaitlistSessionOrderFactory.CreateSessionOrder(accepted);
         Assert.IsFalse(WaitlistViewViewModel.CanRequesterCancel(acceptedOrder));
 
         var staticRow = new SampleOrder { Id = 1, Title = "Static", Status = string.Empty };
@@ -708,7 +708,7 @@ public sealed class WaitlistRequestServiceTests
             IsOverdue = false,
         };
 
-        var wrongCoilOrder = WaitlistViewViewModel.CreateSessionOrder(wrongCoil);
+        var wrongCoilOrder = WaitlistSessionOrderFactory.CreateSessionOrder(wrongCoil);
 
         // Both the coil identifier and its average weight come from a coil lookup this surface does not
         // perform. The card therefore carries the Item it was raised with and the typed detail, and no
@@ -727,7 +727,7 @@ public sealed class WaitlistRequestServiceTests
             Status = "Pending",
             TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(5),
         };
-        var normalCoilOrder = WaitlistViewViewModel.CreateSessionOrder(normalCoil);
+        var normalCoilOrder = WaitlistSessionOrderFactory.CreateSessionOrder(normalCoil);
 
         Assert.IsFalse(normalCoilOrder.Fields.Any(item => string.Equals(item.Label, "Requested coil", StringComparison.Ordinal)));
         Assert.IsFalse(normalCoilOrder.Fields.Any(item => string.Equals(item.Label, "Average coil weight", StringComparison.Ordinal)));
@@ -744,7 +744,7 @@ public sealed class WaitlistRequestServiceTests
             Status = "Pending",
             TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(7),
         };
-        var bringCoilOrder = WaitlistViewViewModel.CreateSessionOrder(bringCoil);
+        var bringCoilOrder = WaitlistSessionOrderFactory.CreateSessionOrder(bringCoil);
 
         // A coil identifier would have to come from the coil lookup, so the card never renders a stand-in
         // coil either.
@@ -770,7 +770,7 @@ public sealed class WaitlistRequestServiceTests
                 Status = status,
                 TargetTimeUtc = DateTimeOffset.UtcNow.AddMinutes(5),
             };
-            var order = WaitlistViewViewModel.CreateSessionOrder(statusRequest);
+            var order = WaitlistSessionOrderFactory.CreateSessionOrder(statusRequest);
             Assert.AreEqual(expectedBadge, order.StatusBadgeText, $"Unexpected badge for status '{status}'.");
         }
 
@@ -787,7 +787,7 @@ public sealed class WaitlistRequestServiceTests
             IsOverdue = false,
         };
 
-        var pickupOtherOrder = WaitlistViewViewModel.CreateSessionOrder(pickupOther);
+        var pickupOtherOrder = WaitlistSessionOrderFactory.CreateSessionOrder(pickupOther);
         Assert.AreEqual("other", pickupOtherOrder.ItemCode);
 
         var scrapEmpty = new WaitlistRequest
@@ -803,7 +803,7 @@ public sealed class WaitlistRequestServiceTests
             IsOverdue = false,
         };
 
-        var scrapOrder = WaitlistViewViewModel.CreateSessionOrder(scrapEmpty);
+        var scrapOrder = WaitlistSessionOrderFactory.CreateSessionOrder(scrapEmpty);
         Assert.AreEqual("pickup-scrap", scrapOrder.ItemCode);
     }
 
@@ -857,7 +857,7 @@ public sealed class WaitlistRequestServiceTests
         Assert.AreEqual(
             0,
             new[] { forklift, flatstock, other, pickupOther }
-                .Select(request => WaitlistViewViewModel.CreateSessionOrder(request))
+                .Select(request => WaitlistSessionOrderFactory.CreateSessionOrder(request))
                 .SelectMany(order => order.Fields)
                 .Count(field => string.IsNullOrWhiteSpace(field.Label) && string.IsNullOrWhiteSpace(field.Value)),
             "A session row still carries empty padding slots, which only a per-type template's fixed slot count needed.");
@@ -879,7 +879,7 @@ public sealed class WaitlistRequestServiceTests
             IsOverdue = false,
         };
 
-        var order = WaitlistViewViewModel.CreateSessionOrder(request);
+        var order = WaitlistSessionOrderFactory.CreateSessionOrder(request);
 
         // The part, description, remaining quantity, customer and packlist all come from an item lookup
         // this surface does not perform, so none of those rows appears (FR-001/FR-002).
@@ -912,7 +912,7 @@ public sealed class WaitlistRequestServiceTests
             IsOverdue = false,
         };
 
-        var order = WaitlistViewViewModel.CreateSessionOrder(request);
+        var order = WaitlistSessionOrderFactory.CreateSessionOrder(request);
 
         Assert.AreEqual("00:08", order.RemainingTimeText);
         Assert.IsFalse(order.IsOverdue);
@@ -930,7 +930,7 @@ public sealed class WaitlistRequestServiceTests
             IsOverdue = true,
         };
 
-        var overdueOrder = WaitlistViewViewModel.CreateSessionOrder(overdueRequest);
+        var overdueOrder = WaitlistSessionOrderFactory.CreateSessionOrder(overdueRequest);
 
         Assert.AreEqual("Overdue", overdueOrder.RemainingTimeText);
         Assert.IsTrue(overdueOrder.IsOverdue);
@@ -952,7 +952,7 @@ public sealed class WaitlistRequestServiceTests
             IsOverdue = true,
         };
 
-        var order = WaitlistViewViewModel.CreateSessionOrder(activeOverdue);
+        var order = WaitlistSessionOrderFactory.CreateSessionOrder(activeOverdue);
         Assert.AreEqual("Overdue", order.RemainingTimeText);
         Assert.IsTrue(order.IsOverdue);
         Assert.AreEqual("Accepted", order.Status);
@@ -1018,7 +1018,7 @@ public sealed class WaitlistRequestServiceTests
         var accepted = await service.AcceptAsync(request.Id, "6229", "John Koll");
         Assert.IsNotNull(accepted);
 
-        var order = WaitlistViewViewModel.CreateSessionOrder(accepted!);
+        var order = WaitlistSessionOrderFactory.CreateSessionOrder(accepted!);
 
         Assert.AreEqual("John Koll", order.PersonText, "The card names the handler.");
         Assert.AreNotEqual("6229", order.PersonText, "And never prints their employee number as a name.");
@@ -1065,7 +1065,7 @@ public sealed class WaitlistRequestServiceTests
             "The reported condition goes with the assignee it was reported against (FR-106).");
         Assert.AreEqual("Pending", released.Status, "Which is the open list rather than a cancellation.");
 
-        var row = WaitlistViewViewModel.CreateSessionOrder(released);
+        var row = WaitlistSessionOrderFactory.CreateSessionOrder(released);
         Assert.AreEqual(
             "Waiting",
             row.StatusWord,
@@ -1202,9 +1202,9 @@ public sealed class WaitlistRequestServiceTests
     public void Service_WaitlistRequestServiceTests_GetWaitingForText_FormatsWaitingAge()
     {
         var now = DateTimeOffset.UtcNow;
-        Assert.AreEqual("Waiting < 1m", WaitlistViewViewModel.GetWaitingForText(now));
-        Assert.IsTrue(WaitlistViewViewModel.GetWaitingForText(now.AddMinutes(-35)).StartsWith("Waiting 35m", StringComparison.Ordinal));
-        Assert.IsTrue(WaitlistViewViewModel.GetWaitingForText(now.AddMinutes(-95)).Contains("1h", StringComparison.Ordinal));
+        Assert.AreEqual("Waiting < 1m", WaitlistSessionOrderFactory.GetWaitingForText(now));
+        Assert.IsTrue(WaitlistSessionOrderFactory.GetWaitingForText(now.AddMinutes(-35)).StartsWith("Waiting 35m", StringComparison.Ordinal));
+        Assert.IsTrue(WaitlistSessionOrderFactory.GetWaitingForText(now.AddMinutes(-95)).Contains("1h", StringComparison.Ordinal));
     }
 
     [TestMethod]
@@ -1371,7 +1371,7 @@ public sealed class WaitlistRequestServiceTests
     [TestMethod]
     public void Service_WaitlistRequestServiceTests_WaitlistViewViewModel_FilterToLocalWorkCentersNarrowsToThisComputersWorkCenters()
     {
-        var local = WaitlistViewViewModel.CreateSessionOrder(new WaitlistRequest
+        var local = WaitlistSessionOrderFactory.CreateSessionOrder(new WaitlistRequest
         {
             Id = Guid.NewGuid(),
             Building = "Expo Drive",
@@ -1382,7 +1382,7 @@ public sealed class WaitlistRequestServiceTests
             RequesterEmployeeNumber = "6229",
             RequesterEmployeeName = "John Koll",
         });
-        var elsewhere = WaitlistViewViewModel.CreateSessionOrder(new WaitlistRequest
+        var elsewhere = WaitlistSessionOrderFactory.CreateSessionOrder(new WaitlistRequest
         {
             Id = Guid.NewGuid(),
             Building = "Expo Drive",

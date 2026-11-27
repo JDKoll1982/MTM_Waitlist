@@ -27,7 +27,7 @@ namespace MTM_Waitlist.Mock.Service.Services;
 public sealed class ServiceHostBuilder
 {
     /// <summary>Directory name under the service's app-data root that holds backups and settings.</summary>
-    public const string AppDataDirectoryName = "MTM_Waitlist.Mock.Service";
+    public const string AppDataDirectoryName = ServicePaths.AppDataDirectoryName;
 
     private readonly IServiceCollection _services = new ServiceCollection();
 
@@ -60,25 +60,13 @@ public sealed class ServiceHostBuilder
     public ServiceConfigurationStore? ConfigurationStore => _configurationStoreInstance;
 
     /// <summary>
-    /// Creates the default app-data root for the current user.
-    /// </summary>
-    /// <remarks>
-    /// Service-local by design: the configuration and run records must survive a database restore, so
-    /// they never live in a store that restore replaces (<c>contracts/mock-service-configuration.md</c> §1).
-    /// </remarks>
-    public static string GetDefaultAppDataRoot() =>
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            AppDataDirectoryName);
-
-    /// <summary>
     /// Creates a builder over the given roots.
     /// </summary>
-    /// <param name="appDataRoot">Service app-data root; defaults to <see cref="GetDefaultAppDataRoot"/>.</param>
+    /// <param name="appDataRoot">Service app-data root; defaults to <see cref="ServicePaths.DefaultAppDataRoot"/>.</param>
     /// <param name="contentRoot">Script content root; defaults to the running executable's folder.</param>
     public static ServiceHostBuilder Create(string? appDataRoot = null, string? contentRoot = null) =>
         new(
-            string.IsNullOrWhiteSpace(appDataRoot) ? GetDefaultAppDataRoot() : appDataRoot,
+            string.IsNullOrWhiteSpace(appDataRoot) ? ServicePaths.DefaultAppDataRoot : appDataRoot,
             string.IsNullOrWhiteSpace(contentRoot) ? AppContext.BaseDirectory : contentRoot);
 
     /// <summary>

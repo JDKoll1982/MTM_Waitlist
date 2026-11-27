@@ -18,7 +18,7 @@ public sealed class WaitlistViewDetailViewModelTests
     {
         var requestService = new WaitlistRequestService();
         var request = await SubmitRequestAsync(requestService);
-        var item = WaitlistViewViewModel.CreateSessionOrder(request);
+        var item = WaitlistSessionOrderFactory.CreateSessionOrder(request);
 
         var viewModel = new WaitlistViewDetailViewModel(
             new RecordingNavigationService(),
@@ -39,7 +39,7 @@ public sealed class WaitlistViewDetailViewModelTests
     {
         var requestService = new WaitlistRequestService();
         var request = await SubmitRequestAsync(requestService, itemCode: "deliver-wrong-coil", inputValue: "Wrong material at press");
-        var item = WaitlistViewViewModel.CreateSessionOrder(request);
+        var item = WaitlistSessionOrderFactory.CreateSessionOrder(request);
 
         var viewModel = new WaitlistViewDetailViewModel(
             new RecordingNavigationService(),
@@ -206,7 +206,7 @@ public sealed class WaitlistViewDetailViewModelTests
     {
         var requestService = new WaitlistRequestService();
         var request = await SubmitRequestAsync(requestService);
-        var item = WaitlistViewViewModel.CreateSessionOrder(request);
+        var item = WaitlistSessionOrderFactory.CreateSessionOrder(request);
 
         var viewModel = new WaitlistViewDetailViewModel(
             new RecordingNavigationService(),

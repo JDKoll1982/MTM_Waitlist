@@ -59,7 +59,7 @@ internal static class ServiceLog
     /// service's own state.
     /// </remarks>
     internal static string Directory =>
-        s_directory ?? Path.Combine(ServiceHostBuilder.GetDefaultAppDataRoot(), DirectoryName);
+        s_directory ?? Path.Combine(ServicePaths.DefaultAppDataRoot, DirectoryName);
 
     /// <summary>
     /// Points the log at a directory, for tests and for a host that relocated its app-data root.

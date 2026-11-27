@@ -45,7 +45,7 @@ public sealed class WaitlistViewViewModelFieldTests
     {
         foreach (var request in EveryRequestShape)
         {
-            var order = WaitlistViewViewModel.CreateSessionOrder(request);
+            var order = WaitlistSessionOrderFactory.CreateSessionOrder(request);
 
             foreach (var field in order.Fields.Where(field => !string.IsNullOrWhiteSpace(field.Value)))
             {
@@ -61,7 +61,7 @@ public sealed class WaitlistViewViewModelFieldTests
     {
         foreach (var request in EveryRequestShape)
         {
-            var order = WaitlistViewViewModel.CreateSessionOrder(request);
+            var order = WaitlistSessionOrderFactory.CreateSessionOrder(request);
             var offenders = FabricatedValueGuard.FindFabricatedLooking(order.Fields.Select(field => field.Value));
 
             Assert.AreEqual(
@@ -76,7 +76,7 @@ public sealed class WaitlistViewViewModelFieldTests
     {
         foreach (var request in EveryRequestShape)
         {
-            var order = WaitlistViewViewModel.CreateSessionOrder(request);
+            var order = WaitlistSessionOrderFactory.CreateSessionOrder(request);
 
             foreach (var field in order.Fields.Where(field => string.IsNullOrWhiteSpace(field.Value)))
             {
@@ -98,7 +98,7 @@ public sealed class WaitlistViewViewModelFieldTests
     {
         foreach (var request in EveryRequestShape)
         {
-            var order = WaitlistViewViewModel.CreateSessionOrder(request);
+            var order = WaitlistSessionOrderFactory.CreateSessionOrder(request);
 
             Assert.AreEqual(
                 0,
@@ -114,7 +114,7 @@ public sealed class WaitlistViewViewModelFieldTests
         // itself. Every one of these comes from the request — nothing is derived into a value the request
         // does not carry, which is why the absent ones stay absent rather than being filled in.
         var request = Shape("pickup-ncm");
-        var order = WaitlistViewViewModel.CreateSessionOrder(request);
+        var order = WaitlistSessionOrderFactory.CreateSessionOrder(request);
 
         Assert.AreEqual(request.RequesterEmployeeName, order.RequestedByName, "The handler cannot see who asked.");
         Assert.AreEqual(request.WorkCenter, order.RequestedPressName, "The handler cannot see where the material goes.");
@@ -132,7 +132,7 @@ public sealed class WaitlistViewViewModelFieldTests
         // FR-021: handler data is surfaced through the card's existing slots, never by adding a section.
         foreach (var request in EveryRequestShape)
         {
-            var order = WaitlistViewViewModel.CreateSessionOrder(request);
+            var order = WaitlistSessionOrderFactory.CreateSessionOrder(request);
 
             Assert.AreEqual(
                 5,
@@ -156,7 +156,7 @@ public sealed class WaitlistViewViewModelFieldTests
             ("Coil number", RequestItemFieldDefinition.Sources.Job, 1, false),
             ("Coil description", RequestItemFieldDefinition.Sources.Job, 3, false));
 
-        var order = WaitlistViewViewModel.CreateSessionOrder(Shape("pickup-coil"), CoilJob(), declaration);
+        var order = WaitlistSessionOrderFactory.CreateSessionOrder(Shape("pickup-coil"), CoilJob(), declaration);
 
         var drawn = WaitlistLineCardCell.CellsToDraw(order.Cells);
 
@@ -182,7 +182,7 @@ public sealed class WaitlistViewViewModelFieldTests
             "pickup-coil",
             ("Coil number", RequestItemFieldDefinition.Sources.Job, 1, false));
 
-        var order = WaitlistViewViewModel.CreateSessionOrder(Shape("pickup-coil"), CoilJob(), declaration);
+        var order = WaitlistSessionOrderFactory.CreateSessionOrder(Shape("pickup-coil"), CoilJob(), declaration);
 
         Assert.AreEqual(1, order.Cells.Count, "The Item declares one field, so the row carries exactly one cell.");
         Assert.IsFalse(
@@ -210,7 +210,7 @@ public sealed class WaitlistViewViewModelFieldTests
                 "pickup-die",
                 ("Die", RequestItemFieldDefinition.Sources.Answer, 1, true));
 
-            var order = WaitlistViewViewModel.CreateSessionOrder(
+            var order = WaitlistSessionOrderFactory.CreateSessionOrder(
                 Shape("pickup-die", answers: null, inputValue: null),
                 jobAvailability: null,
                 declaration);
@@ -255,7 +255,7 @@ public sealed class WaitlistViewViewModelFieldTests
                 "pickup-coil",
                 ("CardCellPartType", "read-from-somewhere-else", 1, false));
 
-            var order = WaitlistViewViewModel.CreateSessionOrder(Shape("pickup-coil"), CoilJob(), declaration);
+            var order = WaitlistSessionOrderFactory.CreateSessionOrder(Shape("pickup-coil"), CoilJob(), declaration);
 
             Assert.AreEqual(0, order.Cells.Count, "A source nothing here reads is hidden rather than guessed at.");
             Assert.AreEqual(1, sink.Warnings.Count, "A declared source that cannot be read is recorded in the store log.");
@@ -282,7 +282,7 @@ public sealed class WaitlistViewViewModelFieldTests
             "deliver-wrong-coil",
             ("Coil number", RequestItemFieldDefinition.Sources.Job, 1, false));
 
-        var order = WaitlistViewViewModel.CreateSessionOrder(
+        var order = WaitlistSessionOrderFactory.CreateSessionOrder(
             Shape("deliver-wrong-coil", answers),
             CoilJob(),
             declaration);
@@ -307,7 +307,7 @@ public sealed class WaitlistViewViewModelFieldTests
             AllottedMinutes = 30,
         };
 
-        var live = WaitlistViewViewModel.CreateSessionOrder(Shape("pickup-coil"), CoilJob(), declaration);
+        var live = WaitlistSessionOrderFactory.CreateSessionOrder(Shape("pickup-coil"), CoilJob(), declaration);
 
         Assert.AreEqual(30, live.AllottedMinutes, "The ring's scale is the Item's declared allotment.");
         Assert.AreEqual(
@@ -315,7 +315,7 @@ public sealed class WaitlistViewViewModelFieldTests
             live.RingMeasure,
             "A request nobody has closed yet measures the time it still has left.");
 
-        var closed = WaitlistViewViewModel.CreateSessionOrder(
+        var closed = WaitlistSessionOrderFactory.CreateSessionOrder(
             Shape("pickup-coil", completedUtc: DateTimeOffset.UtcNow),
             CoilJob(),
             declaration);
@@ -344,7 +344,7 @@ public sealed class WaitlistViewViewModelFieldTests
             new RequestDunnagePart { PartNumber = "DN-STL-4", ImagePath = @"X:\Dunnage\Parts\Steel Rack.png" },
         ]);
 
-        var row = WaitlistViewViewModel.CreateSessionOrder(
+        var row = WaitlistSessionOrderFactory.CreateSessionOrder(
             Shape("deliver-dunnage", inputValue: "DN-STL-4"),
             job);
 
@@ -374,7 +374,7 @@ public sealed class WaitlistViewViewModelFieldTests
             new RequestDunnagePart { PartNumber = "DN-STL-4", ImagePath = @"X:\Dunnage\Parts\Steel Rack.png" },
         ]);
 
-        var row = WaitlistViewViewModel.CreateSessionOrder(
+        var row = WaitlistSessionOrderFactory.CreateSessionOrder(
             Shape("pickup-riser-table", inputValue: "DN-STL-4"),
             job);
 
@@ -400,7 +400,7 @@ public sealed class WaitlistViewViewModelFieldTests
     {
         foreach (var hopper in new[] { "pickup-hopper", "deliver-hopper" })
         {
-            var row = WaitlistViewViewModel.CreateSessionOrder(
+            var row = WaitlistSessionOrderFactory.CreateSessionOrder(
                 Shape(hopper, new Dictionary<string, string> { ["Size"] = "Large" }, inputValue: null));
 
             Assert.AreEqual(
@@ -422,7 +422,7 @@ public sealed class WaitlistViewViewModelFieldTests
     [TestMethod]
     public void ViewModel_WaitlistViewViewModelFieldTests_CreateSessionOrder_LeavesAHopperRowWithNoSizeOnTheSharedPlaceholder()
     {
-        var row = WaitlistViewViewModel.CreateSessionOrder(Shape("pickup-hopper"));
+        var row = WaitlistSessionOrderFactory.CreateSessionOrder(Shape("pickup-hopper"));
 
         Assert.AreEqual(
             string.Empty,
@@ -445,7 +445,7 @@ public sealed class WaitlistViewViewModelFieldTests
     [TestMethod]
     public void ViewModel_WaitlistViewViewModelFieldTests_CreateSessionOrder_KeepsAPartRequestsPictureInTheVisualPartScope()
     {
-        var row = WaitlistViewViewModel.CreateSessionOrder(Shape("pickup-coil"), CoilJob());
+        var row = WaitlistSessionOrderFactory.CreateSessionOrder(Shape("pickup-coil"), CoilJob());
 
         Assert.AreEqual("MMC0001000", row.MaterialPartNumber, "The coil card still pictures the coil the job holds.");
         Assert.AreEqual(
@@ -554,7 +554,7 @@ public sealed class WaitlistViewViewModelFieldTests
             HandlerStatus = "Changing Propane",
         };
 
-        var row = WaitlistViewViewModel.CreateSessionOrder(stored);
+        var row = WaitlistSessionOrderFactory.CreateSessionOrder(stored);
 
         Assert.AreEqual(
             "Changing Propane",

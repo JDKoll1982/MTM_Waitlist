@@ -148,7 +148,7 @@ public sealed class WaitlistViewDetailFieldTests
 
         Assert.IsNotNull(submit.Request, $"{itemCode}: submitting the fixture request failed.");
 
-        var order = WaitlistViewViewModel.CreateSessionOrder(submit.Request!);
+        var order = WaitlistSessionOrderFactory.CreateSessionOrder(submit.Request!);
         var viewModel = new WaitlistViewDetailViewModel(
             new WaitlistTestNavigationService(),
             new WaitlistTestBuildingSelectionService(),

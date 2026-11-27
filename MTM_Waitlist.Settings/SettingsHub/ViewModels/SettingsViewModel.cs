@@ -48,23 +48,15 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
     /// </summary>
     internal const string LuggerArrangementViewModelName = "MTM_Waitlist.Module_Settings.ViewModels.LuggerArrangementViewModel";
 
-    /// <summary>The General page: the settings every person may change for themselves.</summary>
-    internal const string GeneralSettingsRouteViewModelName = "MTM_Waitlist.Module_Settings.ViewModels.GeneralSettingsRoute";
-
-    /// <summary>The Operations page: the settings a lead changes for the floor.</summary>
-    internal const string OperationsSettingsRouteViewModelName = "MTM_Waitlist.Module_Settings.ViewModels.OperationsSettingsRoute";
-
-    /// <summary>The Pictures page: picture assignments, picture folders and the local copies.</summary>
-    internal const string PicturesSettingsRouteViewModelName = "MTM_Waitlist.Module_Settings.ViewModels.PicturesSettingsRoute";
-
-    /// <summary>The Devices page: the computer registry.</summary>
-    internal const string DevicesSettingsRouteViewModelName = "MTM_Waitlist.Module_Settings.ViewModels.DevicesSettingsRoute";
-
-    /// <summary>The Diagnostics page: the developer log, its retention, and the cache refresh.</summary>
-    internal const string DiagnosticsSettingsRouteViewModelName = "MTM_Waitlist.Module_Settings.ViewModels.DiagnosticsSettingsRoute";
-
-    /// <summary>The Administration page: people, permissions and the lugger arrangement.</summary>
-    internal const string AdministrationSettingsRouteViewModelName = "MTM_Waitlist.Module_Settings.ViewModels.AdministrationSettingsRoute";
+    // The six pages the hub itself offers keep their names here for the hub's own navigation commands, and take
+    // the value from SettingsRoutes so the search catalogue can name the same pages without reaching into this
+    // view model — a catalogue that did made the hub and its catalogue depend on each other.
+    internal const string GeneralSettingsRouteViewModelName = SettingsRoutes.GeneralSettingsRouteViewModelName;
+    internal const string OperationsSettingsRouteViewModelName = SettingsRoutes.OperationsSettingsRouteViewModelName;
+    internal const string PicturesSettingsRouteViewModelName = SettingsRoutes.PicturesSettingsRouteViewModelName;
+    internal const string DevicesSettingsRouteViewModelName = SettingsRoutes.DevicesSettingsRouteViewModelName;
+    internal const string DiagnosticsSettingsRouteViewModelName = SettingsRoutes.DiagnosticsSettingsRouteViewModelName;
+    internal const string AdministrationSettingsRouteViewModelName = SettingsRoutes.AdministrationSettingsRouteViewModelName;
 
 
     /// <summary>

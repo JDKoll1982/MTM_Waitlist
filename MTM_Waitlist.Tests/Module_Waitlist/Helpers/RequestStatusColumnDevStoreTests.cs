@@ -18,7 +18,7 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.Helpers;
 /// <summary>
 /// Every state FR-011 to FR-023 names, read off the card row the <b>live store's own rows</b> produce: the list
 /// procedure returns them, the service's own mapper turns them into requests, and
-/// <see cref="WaitlistViewViewModel.CreateSessionOrder"/> builds the row the card binds (SC-006, SC-007).
+/// <see cref="WaitlistSessionOrderFactory.CreateSessionOrder"/> builds the row the card binds (SC-006, SC-007).
 /// </summary>
 /// <remarks>
 /// <para>
@@ -81,7 +81,7 @@ public sealed class RequestStatusColumnDevStoreTests
     public async Task Database_RequestStatusColumnDevStoreTests_LiveUnclaimedRequest_ReadsWaitingWithTheRequesterInTheThirdRow()
     {
         var request = Row(await ReadStoreRowsAsync(), r => r.Status == "Pending" && !r.IsOverdue, "is an unclaimed request the store has not flagged overdue");
-        var row = WaitlistViewViewModel.CreateSessionOrder(request);
+        var row = WaitlistSessionOrderFactory.CreateSessionOrder(request);
 
         row.RefreshTimeDerivedText(request.RequestedUtc.AddMinutes(1));
 
@@ -102,7 +102,7 @@ public sealed class RequestStatusColumnDevStoreTests
     public async Task Database_RequestStatusColumnDevStoreTests_ClaimedRequest_RemovesThePersonRowRatherThanPrintingTheHandlersNumber()
     {
         var request = Row(await ReadStoreRowsAsync(), r => r.Status == "Accepted", "is a claimed request");
-        var row = WaitlistViewViewModel.CreateSessionOrder(request);
+        var row = WaitlistSessionOrderFactory.CreateSessionOrder(request);
 
         row.RefreshTimeDerivedText(request.RequestedUtc.AddMinutes(1));
 
@@ -126,7 +126,7 @@ public sealed class RequestStatusColumnDevStoreTests
     public async Task Database_RequestStatusColumnDevStoreTests_HandlerWhoseNameTheAuditRecords_IsNamedInTheThirdRow()
     {
         var request = Row(await ReadStoreRowsAsync(), r => !string.IsNullOrWhiteSpace(r.AssignedMaterialHandlerName), "records the name of the person holding it");
-        var row = WaitlistViewViewModel.CreateSessionOrder(request);
+        var row = WaitlistSessionOrderFactory.CreateSessionOrder(request);
 
         Assert.AreEqual(request.AssignedMaterialHandlerName, row.PersonText, "The third row must name the material handler the list procedure resolved (FR-022).");
         Assert.AreNotEqual(request.AssignedMaterialHandler, row.PersonText, "The third row falls back to the employee number when a name is recorded (FR-022).");
@@ -140,7 +140,7 @@ public sealed class RequestStatusColumnDevStoreTests
             await ReadStoreRowsAsync(),
             r => r.Status == "Accepted" && r.HandlerStatus is null && r.TargetTimeUtc is not null,
             "is a live claim with a due time and no reported condition");
-        var row = WaitlistViewViewModel.CreateSessionOrder(request);
+        var row = WaitlistSessionOrderFactory.CreateSessionOrder(request);
 
         row.RefreshTimeDerivedText(request.TargetTimeUtc!.Value.AddMinutes(5));
 
@@ -168,7 +168,7 @@ public sealed class RequestStatusColumnDevStoreTests
             rows,
             r => r.Status == "Completed" && r.CompletedUtc is not null && !string.IsNullOrWhiteSpace(r.AssignedMaterialHandlerName),
             "is a finished request whose handler the audit trail names");
-        var row = WaitlistViewViewModel.CreateSessionOrder(request);
+        var row = WaitlistSessionOrderFactory.CreateSessionOrder(request);
 
         Assert.AreEqual("Done", row.StatusBadgeText, "A finished request's lifecycle word is not Done (FR-012).");
         Assert.AreEqual(
@@ -202,7 +202,7 @@ public sealed class RequestStatusColumnDevStoreTests
                 && !string.IsNullOrWhiteSpace(r.AssignedMaterialHandler)
                 && !string.Equals(r.AssignedMaterialHandler, r.RequesterEmployeeName, StringComparison.Ordinal),
             "is a finished request held by somebody other than its requester, whose name the store does not record");
-        var unnamedRow = WaitlistViewViewModel.CreateSessionOrder(unnamedHandler);
+        var unnamedRow = WaitlistSessionOrderFactory.CreateSessionOrder(unnamedHandler);
         Assert.IsFalse(unnamedRow.HasPerson, "A finished request whose handler has no recorded name still draws a person row (FR-018, FR-022).");
         Assert.AreEqual(
             unnamedHandler.RequesterEmployeeName,
@@ -218,7 +218,7 @@ public sealed class RequestStatusColumnDevStoreTests
         Assert.IsTrue(cancelled.Count > 0, "The store carries no withdrawn request, so there is nothing to read this state from.");
 
         var afterClaim = Row(cancelled, r => !string.IsNullOrWhiteSpace(r.AssignedMaterialHandlerName), "was withdrawn after it was claimed");
-        var afterClaimRow = WaitlistViewViewModel.CreateSessionOrder(afterClaim);
+        var afterClaimRow = WaitlistSessionOrderFactory.CreateSessionOrder(afterClaim);
         Assert.AreEqual(
             afterClaim.AssignedMaterialHandlerName,
             afterClaimRow.PersonText,
@@ -230,7 +230,7 @@ public sealed class RequestStatusColumnDevStoreTests
         Assert.IsTrue(afterClaimRow.HasRequester, "A withdrawn request's requester row was removed even though it has a value (FR-018).");
 
         var whileWaiting = Row(cancelled, r => string.IsNullOrWhiteSpace(r.AssignedMaterialHandler), "was withdrawn before anyone claimed it");
-        var whileWaitingRow = WaitlistViewViewModel.CreateSessionOrder(whileWaiting);
+        var whileWaitingRow = WaitlistSessionOrderFactory.CreateSessionOrder(whileWaiting);
         Assert.AreEqual(
             whileWaiting.RequesterEmployeeName,
             whileWaitingRow.PersonText,
@@ -251,7 +251,7 @@ public sealed class RequestStatusColumnDevStoreTests
             await ReadStoreRowsAsync(),
             r => r.Status == "Accepted" && r.HandlerStatus is null && r.TargetTimeUtc is not null,
             "is a live claim with a due time and no reported condition");
-        var row = WaitlistViewViewModel.CreateSessionOrder(request);
+        var row = WaitlistSessionOrderFactory.CreateSessionOrder(request);
 
         Assert.IsNull(request.HandlerStatus, "The store row already carries a condition, so what is read below is not the condition taking precedence.");
         row.RefreshTimeDerivedText(request.TargetTimeUtc!.Value.AddMinutes(5));
@@ -284,7 +284,7 @@ public sealed class RequestStatusColumnDevStoreTests
 
         foreach (var request in rows)
         {
-            var row = WaitlistViewViewModel.CreateSessionOrder(request);
+            var row = WaitlistSessionOrderFactory.CreateSessionOrder(request);
 
             Assert.AreEqual(
                 !string.IsNullOrWhiteSpace(row.PersonText),
