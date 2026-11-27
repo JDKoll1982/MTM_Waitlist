@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
@@ -71,7 +71,8 @@ public sealed class PermissionChangeSetServiceTests
         _service = new PermissionAdministrationService(
             Options.Create(new WaitlistDatabaseOptions { ConnectionString = connectionString }),
             new RecordingPermissionService(),
-            state);
+            state,
+            _helper);
     }
 
     [TestCleanup]
@@ -214,7 +215,7 @@ public sealed class PermissionChangeSetServiceTests
     {
         var helper = _helper!;
 
-        await helper.ExecuteSqlNonQueryAsync(
+        await helper.ExecuteFixtureStatementAsync(
             """
             INSERT INTO core_users_profiles
                 (public_id, username_normalized, first_name, last_name, password_hash, password_salt,
@@ -232,14 +233,14 @@ public sealed class PermissionChangeSetServiceTests
             },
             MySqlDatabaseTarget.MtmWaitlist).ConfigureAwait(false);
 
-        var created = await helper.ExecuteSqlQueryAsync(
+        var created = await helper.ExecuteFixtureQueryAsync(
             "SELECT id FROM core_users_profiles WHERE username_normalized = @p_username;",
             new Dictionary<string, object?> { ["p_username"] = signInName },
             MySqlDatabaseTarget.MtmWaitlist).ConfigureAwait(false);
 
         var userId = Convert.ToInt64(created.Single().Values.First(), System.Globalization.CultureInfo.InvariantCulture);
 
-        await helper.ExecuteSqlNonQueryAsync(
+        await helper.ExecuteFixtureStatementAsync(
             """
             INSERT INTO auth_roles_assignments (public_id, user_id, role_id, assigned_utc)
             SELECT UUID(), @p_user_id, r.id, UTC_TIMESTAMP() FROM auth_roles_catalog r WHERE r.role_code = @p_role_code;
@@ -255,7 +256,7 @@ public sealed class PermissionChangeSetServiceTests
         var helper = _helper!;
 
         // The permission rows and their history go first: the history carries a foreign key to the value row.
-        await helper.ExecuteSqlNonQueryAsync(
+        await helper.ExecuteFixtureStatementAsync(
             """
             DELETE h FROM config_settings_history h
             INNER JOIN core_users_profiles u
@@ -279,7 +280,7 @@ public sealed class PermissionChangeSetServiceTests
 
     private async Task<long> HistoryCountAsync()
     {
-        var rows = await _helper!.ExecuteSqlQueryAsync(
+        var rows = await _helper!.ExecuteFixtureQueryAsync(
             """
             SELECT COUNT(*) FROM config_settings_history h
             INNER JOIN core_users_profiles u ON h.scope_key = CONCAT('user:', u.id)
@@ -294,7 +295,7 @@ public sealed class PermissionChangeSetServiceTests
     /// <summary>Every history row this person has, read back through the store rather than through the service.</summary>
     private async Task<IReadOnlyList<(string Key, long? ActorUserId, int? PreviousValue, int? ChangedValue)>> HistoryRowsAsync()
     {
-        var rows = await _helper!.ExecuteSqlQueryAsync(
+        var rows = await _helper!.ExecuteFixtureQueryAsync(
             """
             SELECT h.setting_key, h.changed_by_user_id, h.previous_setting_value_bool, h.changed_setting_value_bool
             FROM config_settings_history h

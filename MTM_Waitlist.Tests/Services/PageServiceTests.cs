@@ -31,6 +31,6 @@ public sealed class PageServiceTests
     {
         var service = new PageService();
 
-        Assert.ThrowsException<ArgumentException>(() => service.GetPageType("Missing.ViewModel"));
+        Assert.ThrowsExactly<ArgumentException>(() => service.GetPageType("Missing.ViewModel"));
     }
 }

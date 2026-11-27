@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.GenericRequest.Contracts;
 using MTM_Waitlist.GenericRequest.Models;
@@ -22,7 +22,7 @@ public sealed class GenericRequestScrapSubmissionTests
     [TestMethod]
     public async Task Service_GenericRequestScrapSubmissionTests_SubmitAsync_AScrapRequestRecordsTheStatedType()
     {
-        var requests = new RecordingWaitlistRequestService();
+        var requests = new RecordingGenericRequestSubmitter();
         var data = CreateLive(requests);
 
         var result = await data.SubmitAsync(ScrapDraft("Galvanized Steel"));
@@ -52,7 +52,7 @@ public sealed class GenericRequestScrapSubmissionTests
     public async Task Service_GenericRequestScrapSubmissionTests_SubmitAsync_ASecondScrapTypeAtTheSameWorkCenterIsNotADuplicate()
     {
         var queue = new WaitlistRequestService();
-        var data = CreateLive(queue);
+        var data = CreateLive(new GenericRequestSubmitter(queue));
 
         var first = await data.SubmitAsync(ScrapDraft("3003 Aluminum"));
         var second = await data.SubmitAsync(ScrapDraft("Steel"));
@@ -70,16 +70,10 @@ public sealed class GenericRequestScrapSubmissionTests
     [TestMethod]
     public async Task Service_GenericRequestScrapSubmissionTests_SubmitAsync_AQueueRefusalIsReportedAsADuplicateAndNotAFault()
     {
-        var queue = new RecordingWaitlistRequestService
+        var queue = new RecordingGenericRequestSubmitter
         {
-            SubmitResult = _ => WaitlistRequestSubmitResult.DuplicateWarning(new WaitlistRequest
-            {
-                Id = Guid.NewGuid(),
-                Building = "B-1",
-                WorkCenter = "WC-1",
-                Category = "Scrap",
-                Item = "Scrap",
-            }),
+            SubmitResult = _ => GenericRequestSubmitResult.DuplicateWarning(
+                "An active matching request already exists. Only one active request is allowed for the same work center, item and detail, so this request was not raised."),
         };
 
         var data = CreateLive(queue);
@@ -98,7 +92,7 @@ public sealed class GenericRequestScrapSubmissionTests
     [TestMethod]
     public async Task Service_GenericRequestScrapSubmissionTests_ReadStepAvailabilityAsync_TheScrapStepIsAnswerableWithNoJobAnywhere()
     {
-        var data = CreateLive(new RecordingWaitlistRequestService());
+        var data = CreateLive(new RecordingGenericRequestSubmitter());
 
         var scrap = await data.ReadStepAvailabilityAsync(GenericRequestStep.Scrap);
         var die = await data.ReadStepAvailabilityAsync(GenericRequestStep.Die);
@@ -113,7 +107,7 @@ public sealed class GenericRequestScrapSubmissionTests
             "The die step's source is the live Infor Visual search, so it can be shown without a job read either (020 FR-001).");
     }
 
-    private static GenericRequestLiveStepData CreateLive(IWaitlistRequestService requests) =>
+    private static GenericRequestLiveStepData CreateLive(IGenericRequestSubmitter requests) =>
         new(
             new StubWorkCenterCatalogService(),
             new StubNewRequestPickerService(),

@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.GenericRequest.Models;
 using MTM_Waitlist.GenericRequest.Services;
@@ -102,7 +102,7 @@ public sealed class GenericRequestScrapOptionsTests
             new StubWorkCenterCatalogService(),
             new StubNewRequestPickerService(),
             new StubRequestItemConfigurationService(),
-            new RecordingWaitlistRequestService(),
+            new RecordingGenericRequestSubmitter(),
             new StubPersonIdentity(),
             new StubEmployeeDirectoryService(),
             new StubGenericRequestPartData(),

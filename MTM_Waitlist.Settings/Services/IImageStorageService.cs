@@ -99,8 +99,12 @@ public interface IImageStorageService
     /// <summary>
     /// Gets the currently configured image share folder path.
     /// </summary>
+    /// <remarks>
+    /// Awaitable so no caller blocks the interface thread on it (FR-021). The value was previously returned through
+    /// a synchronous member that blocked on the same read.
+    /// </remarks>
     /// <returns>The UNC or local path to the image storage folder</returns>
-    string GetConfiguredSharePath();
+    Task<string> GetConfiguredSharePathAsync();
 
     /// <summary>
     /// Gets the currently configured validation rules.

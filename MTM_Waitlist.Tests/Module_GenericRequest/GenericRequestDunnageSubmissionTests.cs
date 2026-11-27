@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.GenericRequest.Models;
 using MTM_Waitlist.GenericRequest.Services;
@@ -107,9 +107,9 @@ public sealed class GenericRequestDunnageSubmissionTests
 
     private static GenericRequestLiveStepData CreateLive(
         FakeDunnageCatalogueReader reader,
-        out RecordingWaitlistRequestService requests)
+        out RecordingGenericRequestSubmitter requests)
     {
-        requests = new RecordingWaitlistRequestService();
+        requests = new RecordingGenericRequestSubmitter();
 
         return new GenericRequestLiveStepData(
             new StubWorkCenterCatalogService(),

@@ -1282,6 +1282,13 @@
   <data name="Coil Number" xml:space="preserve">
     <value>Coil Number</value>
   </data>
+  <!--
+      The unit of a coil's average weight (FR-024, UX-003). The figure comes from the receiving store and is formatted
+      on the machine that shows it; only the word beside it is translated, through MTM_Waitlist.Module_Core.Helpers.CoilWeightText.
+  -->
+  <data name="CoilWeight_Unit" xml:space="preserve">
+    <value>lb</value>
+  </data>
   <data name="Size" xml:space="preserve">
     <value>Size</value>
   </data>

@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Models;
@@ -44,7 +44,7 @@ public sealed class DefectTypesCrudIntegrationTests
             return;
         }
 
-        await _helper.ExecuteSqlNonQueryAsync(
+        await _helper.ExecuteFixtureStatementAsync(
             "DELETE FROM waitlist_defect_types WHERE defect_name LIKE 'IT-DEFECT-%';",
             new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmWaitlist);

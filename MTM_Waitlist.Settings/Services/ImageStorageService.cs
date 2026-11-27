@@ -398,9 +398,9 @@ public sealed class ImageStorageService : IImageStorageService
     }
 
     /// <inheritdoc />
-    public string GetConfiguredSharePath()
+    public Task<string> GetConfiguredSharePathAsync()
     {
-        return _configurationResolver.GetSharedFolderPathAsync().GetAwaiter().GetResult();
+        return _configurationResolver.GetSharedFolderPathAsync();
     }
 
     /// <inheritdoc />
@@ -421,7 +421,7 @@ public sealed class ImageStorageService : IImageStorageService
 
         // A stored path is relative to the picture root now; a row written earlier names the file itself. Both
         // forms resolve the same way here, so a picture set before the layout changed can still be deleted.
-        var targetPath = AppStoragePaths.ResolvePicturePath(GetConfiguredSharePath(), storedFilePath);
+        var targetPath = AppStoragePaths.ResolvePicturePath(await GetConfiguredSharePathAsync().ConfigureAwait(false), storedFilePath);
         if (string.IsNullOrWhiteSpace(targetPath) || !File.Exists(targetPath))
         {
             return false;

@@ -120,14 +120,14 @@ public sealed class ImageOverrideWriteServiceTests
     {
         var tooLong = new string('x', 501);
 
-        await Assert.ThrowsExceptionAsync<ArgumentException>(
+        await Assert.ThrowsExactlyAsync<ArgumentException>(
             () => _service.CreateOverrideAsync("request_item", "abc-123", tooLong));
     }
 
     [TestMethod]
     public async Task Service_ImageOverrideWriteServiceTests_CreateOverrideAsync_WithUnknownScopeThrows()
     {
-        await Assert.ThrowsExceptionAsync<ArgumentException>(
+        await Assert.ThrowsExactlyAsync<ArgumentException>(
             () => _service.CreateOverrideAsync("building", "abc-123", "rt.png"));
     }
 

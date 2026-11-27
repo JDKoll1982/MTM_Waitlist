@@ -14,6 +14,14 @@ public sealed partial class GenericRequestPartPage : Page
     /// </summary>
     private const int MinimumSearchLength = 2;
 
+    /// <summary>
+    /// How long typing has to stop before the term is read. Short enough that a pause reads as the requester finishing
+    /// a word, long enough that ten characters typed at speed are one read rather than ten (PERF-001).
+    /// </summary>
+    private static readonly TimeSpan PauseAfterTyping = TimeSpan.FromMilliseconds(300);
+
+    private readonly PausedSearch _search = new(PauseAfterTyping);
+
     public GenericRequestPartPage()
         : this(GenericRequestPageServices.Get<GenericRequestPartViewModel>())
     {
@@ -37,10 +45,12 @@ public sealed partial class GenericRequestPartPage : Page
 
         if (sender.Text.Length < MinimumSearchLength)
         {
+            // Nothing to read yet, and anything already in flight is about a term the requester has just erased.
+            _search.Cancel();
             return;
         }
 
-        await ViewModel.SearchAsync();
+        await _search.RestartAsync((attempt, token) => ViewModel.SearchAsync(attempt, token));
     }
 
     /// <summary>
@@ -67,7 +77,7 @@ public sealed partial class GenericRequestPartPage : Page
             return;
         }
 
-        await ViewModel.SearchAsync();
+        await _search.RunNowAsync((attempt, token) => ViewModel.SearchAsync(attempt, token));
 
         if (!ViewModel.IsPopulated)
         {

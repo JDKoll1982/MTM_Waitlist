@@ -90,9 +90,13 @@ public partial class SetupReviewViewModel : ObservableRecipient, INavigationAwar
     public bool HasNoSubordinateParts => !HasSubordinateParts;
 
     /// <summary>How many subordinate parts the operation consumes, as the section header states it.</summary>
+    /// <remarks>
+    /// The key is the one the markup asks for, suffix included: MakePri stores a name containing a dot as a subtree
+    /// and a resource, so a second dot-less key beside this one cannot be declared in the same file (PRI175).
+    /// </remarks>
     public string SubordinatePartsCountLabel => string.Format(
         CultureInfo.CurrentCulture,
-        "Setup_Review_Section_SubordinateParts_Count".GetLocalized(),
+        "Setup_Review_Section_SubordinateParts_Count.Text".GetLocalized(),
         State.SubordinateParts.Count);
 
     /// <summary>Whether the setup is paired with any dunnage, which decides whether the section draws a list.</summary>
@@ -106,7 +110,7 @@ public partial class SetupReviewViewModel : ObservableRecipient, INavigationAwar
     /// scrap, so the scrap type is stated rather than left to be discovered on the edit screen.
     /// </summary>
     public string ScrapTypeDisplay => string.IsNullOrWhiteSpace(State.SelectedScrapType)
-        ? "Setup_Review_Scrap_None".GetLocalized()
+        ? "Setup_Review_Scrap_None.Text".GetLocalized()
         : State.SelectedScrapType;
 
     public SetupReviewViewModel(

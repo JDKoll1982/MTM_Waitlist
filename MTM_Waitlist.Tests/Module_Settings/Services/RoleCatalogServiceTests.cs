@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
@@ -181,7 +181,7 @@ public sealed class RoleCatalogServiceTests
 
         var roles = await service.GetRolesAsync();
 
-        var catalogueRows = await helper.ExecuteSqlQueryAsync(
+        var catalogueRows = await helper.ExecuteFixtureQueryAsync(
             "SELECT role_code FROM auth_roles_catalog;",
             new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmWaitlist);
@@ -222,17 +222,7 @@ public sealed class RoleCatalogServiceTests
     /// <summary>A store that cannot be reached at all.</summary>
     private sealed class UnreachableMySqlHelperServer : IMySqlHelperServer
     {
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default) => throw new InvalidOperationException("The store is unreachable.");
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default) => throw new InvalidOperationException("The store is unreachable.");
 
         public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteStoredProcedureQueryAsync(
             string storedProcedureName,
@@ -276,17 +266,7 @@ public sealed class RoleCatalogServiceTests
             return Task.FromResult<IReadOnlyList<Dictionary<string, object?>>>(_rows);
         }
 
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default) => throw new NotSupportedException();
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default) => throw new NotSupportedException();
 
         public Task<int> ExecuteStoredProcedureNonQueryAsync(
             string storedProcedureName,

@@ -1,3 +1,5 @@
+﻿using CommunityToolkit.WinUI.Animations;
+
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Automation.Peers;
@@ -63,11 +65,11 @@ public sealed partial class RotatingTextView : UserControl
     private static readonly Lazy<UISettings> s_uiSettings = new(() => new UISettings());
 
     /// <summary>
-    /// The storyboard in flight, or <c>null</c> when the line is still. A change arriving mid-transition stops it
+    /// The rotation in flight, or <c>null</c> when the line is still. A change arriving mid-transition cancels it
     /// and starts again from where the line actually is, so a new value is never overwritten by the ending of the
     /// transition it interrupted.
     /// </summary>
-    private Storyboard? _running;
+    private CancellationTokenSource? _running;
 
     /// <summary>Creates the control.</summary>
     public RotatingTextView()
@@ -123,72 +125,56 @@ public sealed partial class RotatingTextView : UserControl
     /// <param name="animate">Whether to rotate to it rather than replacing it outright.</param>
     private void RotateTo(string value, bool animate)
     {
-        _running?.Stop();
+        _running?.Cancel();
+        _running?.Dispose();
         _running = null;
 
         if (!animate || !AnimationsEnabled())
         {
-            Line.Text = value;
-            Line.Opacity = 1;
-            Slide.Y = 0;
+            ShowAtRest(value);
             return;
         }
 
-        // What is on screen slips up and goes, starting from wherever the last transition left it.
-        var leaving = new Storyboard();
-        Add(leaving, Line, "Opacity", Line.Opacity, 0);
-        Add(leaving, Slide, "Y", Slide.Y, -TravelDistance);
+        var rotation = new CancellationTokenSource();
+        _running = rotation;
 
-        leaving.Completed += (_, _) =>
-        {
-            if (!ReferenceEquals(_running, leaving))
+        // What is on screen slips up and goes, starting from wherever the last transition left it. The XAML
+        // framework layer is used so the values commit to the same properties the code reads back, which is what
+        // makes an interrupted rotation resume from the frame it actually reached.
+        AnimationBuilder.Create()
+            .Opacity(0, Line.Opacity, null, HalfDuration, null, EasingType.Cubic, EasingMode.EaseInOut, FrameworkLayer.Xaml)
+            .Translation(Axis.Y, -TravelDistance, Slide.Y, null, HalfDuration, null, EasingType.Cubic, EasingMode.EaseInOut, FrameworkLayer.Xaml)
+            .Start(Line, () =>
             {
-                // A newer value has taken over, so this ending belongs to a line nobody is waiting for.
-                return;
-            }
+                if (rotation.IsCancellationRequested)
+                {
+                    // A newer value has taken over, so this ending belongs to a line nobody is waiting for.
+                    return;
+                }
 
-            Line.Text = value;
-            Slide.Y = TravelDistance;
+                Line.Text = value;
+                Line.Opacity = 0;
+                Slide.Y = TravelDistance;
 
-            var arriving = new Storyboard();
-            Add(arriving, Line, "Opacity", 0, 1);
-            Add(arriving, Slide, "Y", TravelDistance, 0);
-
-            _running = arriving;
-            arriving.Begin();
-        };
-
-        _running = leaving;
-        leaving.Begin();
+                AnimationBuilder.Create()
+                    .Opacity(1, 0, null, HalfDuration, null, EasingType.Cubic, EasingMode.EaseInOut, FrameworkLayer.Xaml)
+                    .Translation(Axis.Y, 0, TravelDistance, null, HalfDuration, null, EasingType.Cubic, EasingMode.EaseInOut, FrameworkLayer.Xaml)
+                    .Start(Line, () =>
+                    {
+                        // The resting state is written once the movement ends, so the line is fully drawn and in
+                        // its place whether or not the animation's own value was handed back.
+                        ShowAtRest(value);
+                    });
+            });
     }
 
-    /// <summary>Adds one half of the rotation: a property, from one value to another, over the shared duration.</summary>
-    /// <param name="storyboard">The storyboard being built.</param>
-    /// <param name="target">
-    /// The object that owns the property. It is passed rather than reached through a property path because the
-    /// line's slide lives on the transform the line carries, not on a property of the line, and a path that named
-    /// a named element could not resolve and threw while the surface was being built.
-    /// </param>
-    /// <param name="path">The property to animate, relative to <paramref name="target"/>.</param>
-    /// <param name="from">The value it starts at.</param>
-    /// <param name="to">The value it ends at.</param>
-    private static void Add(Storyboard storyboard, DependencyObject target, string path, double from, double to)
+    /// <summary>Puts the line at rest showing one value: fully drawn, in its own place.</summary>
+    /// <param name="value">The line to show.</param>
+    private void ShowAtRest(string value)
     {
-        var animation = new DoubleAnimation
-        {
-            From = from,
-            To = to,
-            Duration = new Duration(HalfDuration),
-
-            // Eased so the movement settles rather than stopping dead, which is what makes it read as one
-            // movement rather than as two.
-            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut },
-        };
-
-        Storyboard.SetTarget(animation, target);
-        Storyboard.SetTargetProperty(animation, path);
-
-        storyboard.Children.Add(animation);
+        Line.Text = value;
+        Line.Opacity = 1;
+        Slide.Y = 0;
     }
 
     /// <summary>Whether the system is currently animating transitions, honouring the reader's own setting.</summary>

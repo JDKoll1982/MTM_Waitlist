@@ -9,8 +9,6 @@ using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Shared.Helpers;
 using MTM_Waitlist.Module_Shared.Models;
 using MTM_Waitlist.Module_Shared.Services;
-using MTM_Waitlist.Module_Waitlist.Models;
-using MTM_Waitlist.Module_Waitlist.Services;
 
 namespace MTM_Waitlist.GenericRequest.Services;
 
@@ -41,7 +39,7 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
     private readonly IWorkCenterCatalogService _workCenterCatalogService;
     private readonly INewRequestPickerService _pickerService;
     private readonly IRequestItemConfigurationService _itemConfigurationService;
-    private readonly IWaitlistRequestService _requestService;
+    private readonly IGenericRequestSubmitter _submitter;
     private readonly IPersonIdentity _personIdentity;
     private readonly IEmployeeDirectoryService _employeeDirectoryService;
     private readonly IGenericRequestPartData _partData;
@@ -53,7 +51,7 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
         IWorkCenterCatalogService workCenterCatalogService,
         INewRequestPickerService pickerService,
         IRequestItemConfigurationService itemConfigurationService,
-        IWaitlistRequestService requestService,
+        IGenericRequestSubmitter submitter,
         IPersonIdentity personIdentity,
         IEmployeeDirectoryService employeeDirectoryService,
         IGenericRequestPartData partData,
@@ -64,7 +62,7 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
         _workCenterCatalogService = workCenterCatalogService ?? throw new ArgumentNullException(nameof(workCenterCatalogService));
         _pickerService = pickerService ?? throw new ArgumentNullException(nameof(pickerService));
         _itemConfigurationService = itemConfigurationService ?? throw new ArgumentNullException(nameof(itemConfigurationService));
-        _requestService = requestService ?? throw new ArgumentNullException(nameof(requestService));
+        _submitter = submitter ?? throw new ArgumentNullException(nameof(submitter));
         _personIdentity = personIdentity ?? throw new ArgumentNullException(nameof(personIdentity));
         _employeeDirectoryService = employeeDirectoryService ?? throw new ArgumentNullException(nameof(employeeDirectoryService));
         _partData = partData ?? throw new ArgumentNullException(nameof(partData));
@@ -279,7 +277,7 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
             var storedEmployee = await _employeeDirectoryService
                 .FindByEmployeeIdentifierAsync(employeeNumber, cancellationToken)
                 .ConfigureAwait(false);
-            var verification = NewRequestFlowRules.VerifyEmployeeIdentity(employeeNumber, storedEmployee);
+            var verification = EmployeeIdentityVerification.Verify(employeeNumber, storedEmployee);
 
             if (!verification.IsValid)
             {
@@ -300,16 +298,15 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
                 // the die when one was chosen. All of them ride the existing answers column.
                 var answers = await AnswersForAsync(draft, die, cancellationToken).ConfigureAwait(false);
 
-                var result = await _requestService
+                var result = await _submitter
                     .SubmitAsync(
-                        new WaitlistRequestDraft
+                        new GenericRequestSubmitRequest
                         {
                             Building = draft.Building,
                             WorkCenter = draft.WorkCenter,
                             Category = draft.Category,
                             Item = draft.ItemCode,
                             InputValue = die?.DieNumber ?? CapturedValue(draft),
-                            IsGeneric = true,
                             Description = draft.Description,
                             Answers = answers,
                             // The job a filled request took its values from is provenance, not identity: the request
@@ -330,14 +327,14 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
                         cancellationToken)
                     .ConfigureAwait(false);
 
-                if (result.Status == WaitlistRequestSubmitStatus.Success && result.Request is { } raised)
+                if (result.Status == GenericRequestSubmitStatus.Raised && result.RequestId is { } raisedId)
                 {
                     AppLog.Info(
                         LogCategory,
-                        $"Raised generic request '{raised.Id}' for work center '{draft.WorkCenter}', item '{draft.ItemCode}'"
+                        $"Raised generic request '{raisedId}' for work center '{draft.WorkCenter}', item '{draft.ItemCode}'"
                         + (die is null ? "." : $", die '{die.DieNumber}'."));
 
-                    raisedIds.Add(raised.Id.ToString());
+                    raisedIds.Add(raisedId.ToString());
                     continue;
                 }
 
@@ -346,7 +343,7 @@ public sealed class GenericRequestLiveStepData : IGenericRequestStepData
                 // A duplicate is the queue saying the need is already covered, which is an answer rather than a
                 // fault: the other chosen dies are still raised, and the result step shows the queue's own words
                 // when none of them could be (FR-019).
-                if (result.Status == WaitlistRequestSubmitStatus.DuplicateWarningRequired)
+                if (result.Status == GenericRequestSubmitStatus.DuplicateWarningRequired)
                 {
                     if (duplicateMessage.Length == 0)
                     {

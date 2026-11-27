@@ -44,7 +44,7 @@ public sealed class WaitlistViewViewModelActionTests
 
     // ── G4: the gate matrix ──────────────────────────────────────────────────────────────────────────
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(HandlerRole, "Pending", "none", true, false, false, DisplayName = "handler sees Accept on an available request")]
     [DataRow(HandlerRole, "Accepted", "self", false, true, true, DisplayName = "the assignee sees Complete, and Cancel comes with it")]
     [DataRow(HandlerRole, "Accepted", "other", false, false, false, DisplayName = "another handler sees nothing on a taken request")]
@@ -95,7 +95,7 @@ public sealed class WaitlistViewViewModelActionTests
             "The screen's Complete/Release gate disagrees with RequestActionPolicy.");
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(HandlerRole, "Pending", "none", DisplayName = "available request")]
     [DataRow(HandlerRole, "Accepted", "self", DisplayName = "request taken by the viewer")]
     [DataRow(HandlerRole, "Accepted", "other", DisplayName = "request taken by someone else")]

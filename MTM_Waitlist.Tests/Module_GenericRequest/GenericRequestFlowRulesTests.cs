@@ -66,7 +66,7 @@ public sealed class GenericRequestFlowRulesTests
             "the item step does not lead to the die step");
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(GenericRequestStep.Dunnage, DisplayName = "a dunnage request")]
     [DataRow(GenericRequestStep.Scrap, DisplayName = "a scrap request")]
     [DataRow(GenericRequestStep.Die, DisplayName = "a die request")]
@@ -110,7 +110,7 @@ public sealed class GenericRequestFlowRulesTests
             "a proved-part request is not one of the three answered on their own step, so it still answers details");
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("MMC0000658", DisplayName = "a coil")]
     [DataRow("MMF0005511", DisplayName = "a flatstock")]
     public void Audit_GenericRequestFlowRulesTests_ACoilOrFlatstockSkipsTheDetailsPage(string partNumber)

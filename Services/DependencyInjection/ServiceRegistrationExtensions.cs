@@ -141,6 +141,11 @@ public static partial class ServiceRegistrationExtensions
         services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IMySqlHelperServer>(
             sp => sp.GetRequiredService<MySqlHelperServer>());
 
+        // The one reviewed route that runs a checked-in WIP queue script. It is a separate contract on purpose:
+        // the data seam above runs stored procedures only, so no service can reach statement text through it.
+        services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IReviewedQueueScriptReader>(
+            sp => sp.GetRequiredService<MySqlHelperServer>());
+
         // The account records, read by the employee identifier the signed-in session carries. The request flow
         // attributes a request from this lookup rather than from a name or a literal (FR-046).
         services.AddSingleton<

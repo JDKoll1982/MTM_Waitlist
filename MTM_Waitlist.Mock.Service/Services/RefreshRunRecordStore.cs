@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using MTM_Waitlist.Mock.Service.Models;
@@ -29,13 +29,6 @@ public sealed class RefreshRunRecordStore
     private static readonly Regex s_secretPattern = new(
         @"(password|pwd|user\s*id|uid)\s*=\s*[^;]*",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-    private static readonly JsonSerializerOptions s_jsonOptions = new()
-    {
-        WriteIndented = true,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        Converters = { new JsonStringEnumConverter() }
-    };
 
     private readonly string _appDataRoot;
     private readonly string _filePath;
@@ -81,7 +74,7 @@ public sealed class RefreshRunRecordStore
             try
             {
                 records = await JsonSerializer
-                    .DeserializeAsync<List<RefreshRunRecord>>(stream, s_jsonOptions, cancellationToken)
+                    .DeserializeAsync<List<RefreshRunRecord>>(stream, MockServiceJson.StoredFile, cancellationToken)
                     .ConfigureAwait(false);
             }
             catch (JsonException)
@@ -157,7 +150,7 @@ public sealed class RefreshRunRecordStore
         await using (var stream = File.Create(temporaryPath))
         {
             await JsonSerializer
-                .SerializeAsync(stream, _lastRuns.Values.OrderBy(record => record.ShapeKey, StringComparer.Ordinal).ToList(), s_jsonOptions, cancellationToken)
+                .SerializeAsync(stream, _lastRuns.Values.OrderBy(record => record.ShapeKey, StringComparer.Ordinal).ToList(), MockServiceJson.StoredFile, cancellationToken)
                 .ConfigureAwait(false);
         }
 

@@ -32,7 +32,6 @@ public sealed class DialogSizingAuditTests
     /// <summary>Every XAML file that is the body of a dialog.</summary>
     private static readonly string[] s_dialogBodies =
     [
-        "MTM_Waitlist.Shared/Dialogs/MessageDialogContent.xaml",
         "Module_Settings/Views/ComputerEditDialog.xaml",
         "Module_Settings/Views/LuggerEditorDialog.xaml",
         "Module_Settings/Views/LuggerNameDialog.xaml",
@@ -43,6 +42,12 @@ public sealed class DialogSizingAuditTests
         "Module_Setup/Views/SetupWorkOrderSearchDialog.xaml",
         "Module_Waitlist/Views/PartStockDialog.xaml",
     ];
+
+    /// <summary>
+    /// The one dialog body composed in code rather than loaded from markup (024-dependency-modernization, MOD-006).
+    /// It carries no XAML, so it is held to the same sizing rule by reading its source.
+    /// </summary>
+    private const string s_composedBody = "MTM_Waitlist.Shared/Dialogs/MessageDialogContent.cs";
 
     /// <summary>The attributes that decide how large a whole dialog opens.</summary>
     private static readonly string[] s_sizeAttributes = ["Width", "Height", "MinWidth", "MinHeight", "MaxWidth", "MaxHeight"];
@@ -112,7 +117,9 @@ public sealed class DialogSizingAuditTests
     public void Audit_DialogSizingAuditTests_EveryDialogBodyTakesItsSizeFromTheScale()
     {
         var offenders = s_dialogBodies
-            .Where(body => !Read(RelativeCodeBehind(body)).Contains("DialogSizing.", StringComparison.Ordinal))
+            .Select(RelativeCodeBehind)
+            .Append(s_composedBody)
+            .Where(source => !Read(source).Contains("DialogSizing.", StringComparison.Ordinal))
             .ToList();
 
         Assert.AreEqual(
@@ -120,6 +127,35 @@ public sealed class DialogSizingAuditTests
             offenders.Count,
             "a dialog body that never reads DialogSizing is choosing its own size, or has none: "
                 + string.Join(", ", offenders));
+    }
+
+    [TestMethod]
+    public void Audit_DialogSizingAuditTests_TheComposedBodyDeclaresNoSizeOfItsOwn()
+    {
+        var offenders = Regex
+            .Matches(Read(s_composedBody), @"\b(?:Width|Height|MinWidth|MinHeight|MaxWidth|MaxHeight)\s*=\s*[0-9]")
+            .Select(match => match.Value)
+            .ToList();
+
+        Assert.AreEqual(
+            0,
+            offenders.Count,
+            "the composed dialog body is choosing a size instead of reading the one scale: "
+                + string.Join(", ", offenders));
+    }
+
+    [TestMethod]
+    public void Audit_DialogSizingAuditTests_TheSharedBodyIsNotAViewType()
+    {
+        var source = Read(s_composedBody);
+
+        foreach (var viewType in new[] { "UserControl", "Page", "Window" })
+        {
+            Assert.IsFalse(
+                Regex.IsMatch(source, $@"class\s+MessageDialogContent\s*:\s*{viewType}\b"),
+                $"the message body is a {viewType} again, so the shared library holds a view type and every library "
+                    + "that references it links XAML (024-dependency-modernization, MOD-006)");
+        }
     }
 
     private static IEnumerable<string> NumericSizes(XElement element) =>

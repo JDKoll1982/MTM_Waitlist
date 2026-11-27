@@ -241,7 +241,7 @@ public sealed class ImageLocationServiceCascadeTests
     [TestMethod]
     public async Task Service_ImageLocationServiceCascadeTests_ResolveRequestItemImagePathAsync_WithAnEmptyItemCodeThrows()
     {
-        await Assert.ThrowsExceptionAsync<ArgumentException>(
+        await Assert.ThrowsExactlyAsync<ArgumentException>(
             () => _service.ResolveRequestItemImagePathAsync("   "));
     }
 
@@ -255,7 +255,7 @@ public sealed class ImageLocationServiceCascadeTests
     [TestMethod]
     public async Task Service_ImageLocationServiceCascadeTests_ResolveWorkCenterImagePathAsync_WithNonNumericIdThrows()
     {
-        await Assert.ThrowsExceptionAsync<ArgumentException>(
+        await Assert.ThrowsExactlyAsync<ArgumentException>(
             () => _service.ResolveWorkCenterImagePathAsync("abc"));
     }
 
@@ -269,7 +269,7 @@ public sealed class ImageLocationServiceCascadeTests
             new FakeWorkCenterCatalogService(),
             TestDoubles.CreateUnusedMySqlHelperServer());
 
-        await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(
             () => uninitialised.ResolveRequestItemImagePathAsync("pickup-coil"));
     }
 

@@ -1,4 +1,4 @@
-using MTM_Waitlist.Module_Core.Contracts.Services;
+﻿using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Models;
@@ -504,28 +504,7 @@ internal sealed class FakeMySqlHelperServer : IMySqlHelperServer
     public void EnqueueNonQueryResult(int affectedRows) =>
         _nonQueryResults.Enqueue(affectedRows);
 
-    public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-        string sql,
-        IReadOnlyDictionary<string, object?> parameters,
-        MySqlDatabaseTarget databaseTarget,
-        CancellationToken cancellationToken = default)
-    {
-        ExecutedQueries.Add(new ExecutedStatement(sql, parameters));
-        var result = _queryResults.Count > 0
-            ? _queryResults.Dequeue()
-            : Array.Empty<Dictionary<string, object?>>();
-        return Task.FromResult(result);
-    }
 
-    public Task<int> ExecuteSqlNonQueryAsync(
-        string sql,
-        IReadOnlyDictionary<string, object?> parameters,
-        MySqlDatabaseTarget databaseTarget,
-        CancellationToken cancellationToken = default)
-    {
-        ExecutedNonQueries.Add(new ExecutedStatement(sql, parameters));
-        return Task.FromResult(_nonQueryResults.Count > 0 ? _nonQueryResults.Dequeue() : 0);
-    }
 
     public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteStoredProcedureQueryAsync(
         string storedProcedureName,

@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using MTM_Waitlist.Mock.Service.Models;
 
@@ -23,14 +23,7 @@ public sealed class BackupArtifactStore
     /// <summary>File name of the persisted artifact records under the service app-data root.</summary>
     public const string FileName = "backup-artifacts.json";
 
-    private static readonly JsonSerializerOptions s_jsonOptions = new()
-    {
-        WriteIndented = true,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        Converters = { new JsonStringEnumConverter() }
-    };
-
-    private readonly string _filePath;
+        private readonly string _filePath;
     private readonly SemaphoreSlim _gate = new(1, 1);
     private readonly List<BackupArtifact> _artifacts = [];
     private readonly Dictionary<BackupStore, BackupRunRecord> _lastRuns = [];
@@ -70,7 +63,7 @@ public sealed class BackupArtifactStore
             try
             {
                 state = await JsonSerializer
-                    .DeserializeAsync<PersistedState>(stream, s_jsonOptions, cancellationToken)
+                    .DeserializeAsync<PersistedState>(stream, MockServiceJson.StoredFile, cancellationToken)
                     .ConfigureAwait(false);
             }
             catch (JsonException)
@@ -251,14 +244,14 @@ public sealed class BackupArtifactStore
 
         await using (var stream = File.Create(temporaryPath))
         {
-            await JsonSerializer.SerializeAsync(stream, state, s_jsonOptions, cancellationToken).ConfigureAwait(false);
+            await JsonSerializer.SerializeAsync(stream, state, MockServiceJson.StoredFile, cancellationToken).ConfigureAwait(false);
         }
 
         File.Move(temporaryPath, _filePath, overwrite: true);
     }
 
     /// <summary>Serialization shape; kept private so the operator-facing types stay authoritative.</summary>
-    private sealed record PersistedState
+    internal sealed record PersistedState
     {
         public List<BackupArtifact> Artifacts { get; init; } = [];
 

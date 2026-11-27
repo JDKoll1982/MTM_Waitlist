@@ -341,7 +341,7 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
                 .FindByEmployeeIdentifierAsync(employeeNumber)
                 .ConfigureAwait(true);
 
-            verification = NewRequestFlowRules.VerifyEmployeeIdentity(employeeNumber, storedEmployee);
+            verification = EmployeeIdentityVerification.Verify(employeeNumber, storedEmployee);
         }
         catch (Exception ex)
         {

@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -400,18 +400,7 @@ public sealed class DeveloperLogPanelViewModelTests
             MySqlDatabaseTarget databaseTarget,
             CancellationToken cancellationToken = default) => Task.FromResult(0);
 
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default) =>
-            Task.FromResult<IReadOnlyList<Dictionary<string, object?>>>(Rows.ToList());
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default) => Task.FromResult(0);
     }
 
     /// <summary>The permission lookup, recording which keys were asked about.</summary>

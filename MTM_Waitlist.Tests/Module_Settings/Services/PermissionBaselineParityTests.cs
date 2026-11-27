@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.RegularExpressions;
 
 using Microsoft.Extensions.Options;
@@ -412,7 +412,7 @@ public sealed class PermissionBaselineParityTests
 
         // Nothing is stored for anybody in particular, which is what makes this a comparison of what each
         // person's role gives them rather than of rows somebody wrote (SC-004).
-        var storedForPeople = await helper.ExecuteSqlQueryAsync(
+        var storedForPeople = await helper.ExecuteFixtureQueryAsync(
             "SELECT COUNT(*) AS rows_stored FROM config_settings_values "
                 + "WHERE setting_key LIKE 'permission.%' AND scope_type = 'user';",
             new Dictionary<string, object?>(),
@@ -423,7 +423,7 @@ public sealed class PermissionBaselineParityTests
             Convert.ToString(storedForPeople.Single().Values.First(), CultureInfo.InvariantCulture),
             "Ship day changes nobody's access while the store holds no per-person permission value at all (SC-004).");
 
-        var people = await helper.ExecuteSqlQueryAsync(
+        var people = await helper.ExecuteFixtureQueryAsync(
             "SELECT u.id AS user_id, u.username_normalized AS sign_in_name, COALESCE(r.role_code, '') AS role_code "
                 + "FROM core_users_profiles u "
                 + "LEFT JOIN auth_roles_assignments ra ON ra.user_id = u.id "

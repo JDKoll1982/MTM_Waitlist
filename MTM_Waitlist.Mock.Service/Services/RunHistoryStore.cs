@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using MTM_Waitlist.Mock.Service.Models;
@@ -70,12 +70,7 @@ public sealed class RunHistoryStore
     /// <summary>The <c>reason</c> value for a skip caused by the source being unreachable.</summary>
     public const string SourceUnreachableReason = "sourceUnreachable";
 
-    private static readonly JsonSerializerOptions s_options = new()
-    {
-        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-    };
-
-    private readonly string _filePath;
+        private readonly string _filePath;
     private readonly ILogger<RunHistoryStore> _logger;
     private readonly TimeProvider _timeProvider;
     private readonly SemaphoreSlim _gate = new(1, 1);
@@ -133,7 +128,7 @@ public sealed class RunHistoryStore
     {
         ArgumentNullException.ThrowIfNull(entry);
 
-        var line = JsonSerializer.Serialize(entry, s_options);
+        var line = JsonSerializer.Serialize(entry, MockServiceJson.RunHistoryLine);
         var nowUtc = _timeProvider.GetUtcNow().UtcDateTime;
 
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -191,7 +186,7 @@ public sealed class RunHistoryStore
 
             try
             {
-                var entry = JsonSerializer.Deserialize<RunHistoryEntry>(line, s_options);
+                var entry = JsonSerializer.Deserialize<RunHistoryEntry>(line, MockServiceJson.RunHistoryLine);
                 if (entry is not null)
                 {
                     entries.Add(entry);

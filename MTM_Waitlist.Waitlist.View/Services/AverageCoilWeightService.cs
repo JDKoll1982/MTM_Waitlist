@@ -26,12 +26,12 @@ public sealed class AverageCoilWeightService : IAverageCoilWeightService
         _mySqlHelperServer = mySqlHelperServer;
     }
 
-    public async Task<string> ResolveAverageCoilWeightTextAsync(string partId, CancellationToken cancellationToken = default)
+    public async Task<decimal?> ResolveAverageCoilWeightAsync(string partId, CancellationToken cancellationToken = default)
     {
         var normalizedPart = partId?.Trim() ?? string.Empty;
         if (normalizedPart.Length == 0)
         {
-            return string.Empty;
+            return null;
         }
 
         // The receiving store is always read live (FR-001): there is no sample/mock short-circuit.
@@ -47,14 +47,13 @@ public sealed class AverageCoilWeightService : IAverageCoilWeightService
 
         if (rows.Count == 0 || !rows[0].TryGetValue("AverageWeight", out var raw) || raw is null)
         {
-            AppLog.Info("AverageCoilWeight", $"No rows for Part='{normalizedPart}'. Returning empty.");
-            return string.Empty;
+            AppLog.Info("AverageCoilWeight", $"No rows for Part='{normalizedPart}'. Returning nothing.");
+            return null;
         }
 
         var average = Convert.ToDecimal(raw, CultureInfo.InvariantCulture);
         var rounded = decimal.Round(average, 0);
-        var text = $"{rounded.ToString("N0", CultureInfo.InvariantCulture)} lb";
-        AppLog.Info("AverageCoilWeight", $"Part='{normalizedPart}' average skid weight = '{text}'.");
-        return text;
+        AppLog.Info("AverageCoilWeight", $"Part='{normalizedPart}' average skid weight = {rounded.ToString(CultureInfo.InvariantCulture)} lb.");
+        return rounded;
     }
 }

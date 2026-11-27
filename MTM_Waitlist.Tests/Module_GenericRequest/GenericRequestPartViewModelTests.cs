@@ -285,7 +285,7 @@ public sealed class GenericRequestPartViewModelTests
         Assert.AreEqual(0, navigator.Visited.Count);
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("pickup-coil", DisplayName = "the Pickup coil-and-flatstock item")]
     [DataRow("deliver-coil", DisplayName = "the Deliver coil item")]
     [DataRow("deliver-flatstock", DisplayName = "the Deliver flatstock item")]
@@ -307,7 +307,7 @@ public sealed class GenericRequestPartViewModelTests
             "a coil or flatstock request is only ever about a coil or a flatstock");
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("pickup-fg", DisplayName = "a finished-good pickup")]
     [DataRow("pickup-ncm", DisplayName = "a non-conforming pickup")]
     [DataRow("pickup-wip", DisplayName = "a work-in-process pickup")]

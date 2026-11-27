@@ -57,7 +57,7 @@ public sealed class ImageStorageServiceValidationTests
         Assert.AreEqual("UNSUPPORTED_EXTENSION", result.ErrorCode);
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(".png")]
     [DataRow(".jpg")]
     [DataRow(".jpeg")]
@@ -148,7 +148,7 @@ public sealed class ImageStorageServiceValidationTests
     [TestMethod]
     public async Task Service_ImageStorageServiceValidationTests_ValidateImageAsync_WhenPathIsEmptyThrows()
     {
-        await Assert.ThrowsExceptionAsync<ArgumentNullException>(
+        await Assert.ThrowsExactlyAsync<ArgumentNullException>(
             () => _service.ValidateImageAsync(string.Empty));
     }
 }

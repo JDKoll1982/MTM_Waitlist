@@ -33,9 +33,11 @@ public sealed partial class GenericRequestPartViewModel : GenericRequestStepView
 
     /// <summary>
     /// Which completion read is the newest. A read that lands after a later one must not draw: the requester is
-    /// typing, and only the term currently on screen describes what they want to see.
+    /// typing, and only the term currently on screen describes what they want to see. A read started by a typing pause
+    /// takes the pause's own number, so an answer is judged by the attempt it belongs to and never by the order the
+    /// answers happen to come back in (PERF-001).
     /// </summary>
-    private int _searchGeneration;
+    private long _searchGeneration;
 
     public GenericRequestPartViewModel(IGenericRequestPartData data, IGenericRequestNavigator navigator)
         : base(navigator)
@@ -227,6 +229,12 @@ public sealed partial class GenericRequestPartViewModel : GenericRequestStepView
     /// <summary>
     /// Read the completions for the current term. Called as the requester types and when they submit.
     /// </summary>
+    /// <param name="attempt">
+    /// The number of the typing pause that asked for this read, or zero when no pause asked. The answer is applied only
+    /// while this attempt is still the newest; a superseded one is discarded by its identity, because a read the plant
+    /// has already answered cannot be cancelled (PERF-001).
+    /// </param>
+    /// <param name="cancellationToken">Stops waiting for an answer once typing resumes.</param>
     /// <remarks>
     /// A completion read is about one half-typed term, not about whether this step has anything to show. So a read
     /// that found nothing leaves the step populated and the box usable, because a number the requester has not
@@ -234,7 +242,7 @@ public sealed partial class GenericRequestPartViewModel : GenericRequestStepView
     /// the attempt time and a retry (FR-017). A term nobody knows is refused once it is submitted, by
     /// <see cref="RefuseTypedNumber"/> (FR-002).
     /// </remarks>
-    public async Task SearchAsync()
+    public async Task SearchAsync(long attempt = 0, CancellationToken cancellationToken = default)
     {
         HasNoMatch = false;
 
@@ -247,8 +255,12 @@ public sealed partial class GenericRequestPartViewModel : GenericRequestStepView
             return;
         }
 
-        var generation = ++_searchGeneration;
-        var result = await _data.ReadCompletionsAsync(term);
+        // A pause brings its own number; a submit takes the next one, so both are compared against the newest read
+        // this step started rather than against each other's arrival.
+        var generation = attempt > _searchGeneration ? attempt : ++_searchGeneration;
+        _searchGeneration = generation;
+
+        var result = await _data.ReadCompletionsAsync(term, cancellationToken);
 
         // A read that lands after a later one describes a term the requester has already typed past. Applying it
         // would put the wrong suggestions on screen and, worse, could collapse the box while they are still typing.

@@ -26,7 +26,7 @@ public sealed class NewRequestPartSearchViewModelTests
     /// <summary>The wrong-coil Item's declared label for the incorrect part (data-model §9, §10).</summary>
     private const string IncorrectCoilLabel = "Coil number";
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("mmc1000", "MMC0001000")]
     [DataRow("MMF500", "MMF0000500")]
     [DataRow("fgt2000", "FGT0002000")]

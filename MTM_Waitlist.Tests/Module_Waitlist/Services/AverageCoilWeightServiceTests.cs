@@ -1,8 +1,10 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Waitlist.Services;
+using MTM_Waitlist.Tests.Module_Mock;
 
 namespace MTM_Waitlist.Tests.Module_Waitlist.Services;
 
@@ -14,14 +16,14 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.Services;
 public sealed class AverageCoilWeightServiceTests
 {
     [TestMethod]
-    public async Task Service_AverageCoilWeightServiceTests_Resolve_RunsQueryAndFormatsAverage()
+    public async Task Service_AverageCoilWeightServiceTests_Resolve_RunsQueryAndReturnsWholePounds()
     {
         var helper = new StubMySqlHelperServer(rows: new[] { AverageRow(5200m) });
         var service = new AverageCoilWeightService(helper);
 
-        var result = await service.ResolveAverageCoilWeightTextAsync("MMC0001000");
+        var result = await service.ResolveAverageCoilWeightAsync("MMC0001000");
 
-        Assert.AreEqual("5,200 lb", result);
+        Assert.AreEqual(5200m, result);
         Assert.AreEqual(1, helper.QueryCallCount);
         Assert.AreEqual(MySqlDatabaseTarget.MtmReceivingApplication, helper.LastDatabaseTarget);
     }
@@ -32,7 +34,7 @@ public sealed class AverageCoilWeightServiceTests
         var helper = new StubMySqlHelperServer(rows: new[] { AverageRow(5200m) });
         var service = new AverageCoilWeightService(helper);
 
-        await service.ResolveAverageCoilWeightTextAsync("MMC0001000");
+        await service.ResolveAverageCoilWeightAsync("MMC0001000");
 
         // FR-015 / constitution III: the read goes through the receiving store's procedure, and no
         // statement text is executed from the application. This is the regression guard for T088 —
@@ -51,31 +53,31 @@ public sealed class AverageCoilWeightServiceTests
         var helper = new StubMySqlHelperServer(rows: new[] { AverageRow(5199.6m) });
         var service = new AverageCoilWeightService(helper);
 
-        var result = await service.ResolveAverageCoilWeightTextAsync("MMC0001000");
+        var result = await service.ResolveAverageCoilWeightAsync("MMC0001000");
 
-        Assert.AreEqual("5,200 lb", result);
+        Assert.AreEqual(5200m, result);
     }
 
     [TestMethod]
-    public async Task Service_AverageCoilWeightServiceTests_Resolve_NoRowsReturnsEmpty()
+    public async Task Service_AverageCoilWeightServiceTests_Resolve_NoRowsReturnsNothing()
     {
         var helper = new StubMySqlHelperServer(rows: Array.Empty<Dictionary<string, object?>>());
         var service = new AverageCoilWeightService(helper);
 
-        var result = await service.ResolveAverageCoilWeightTextAsync("MMC0001000");
+        var result = await service.ResolveAverageCoilWeightAsync("MMC0001000");
 
-        Assert.AreEqual(string.Empty, result);
+        Assert.IsNull(result);
     }
 
     [TestMethod]
-    public async Task Service_AverageCoilWeightServiceTests_Resolve_EmptyPartReturnsEmptyWithoutQuery()
+    public async Task Service_AverageCoilWeightServiceTests_Resolve_EmptyPartReturnsNothingWithoutQuery()
     {
         var helper = new StubMySqlHelperServer(rows: Array.Empty<Dictionary<string, object?>>());
         var service = new AverageCoilWeightService(helper);
 
-        var result = await service.ResolveAverageCoilWeightTextAsync("   ");
+        var result = await service.ResolveAverageCoilWeightAsync("   ");
 
-        Assert.AreEqual(string.Empty, result);
+        Assert.IsNull(result);
         Assert.AreEqual(0, helper.QueryCallCount);
     }
 
@@ -83,6 +85,55 @@ public sealed class AverageCoilWeightServiceTests
     {
         ["AverageWeight"] = average,
     };
+
+    [TestMethod]
+    public void Service_AverageCoilWeightServiceTests_CoilWeightText_WritesTheWeightWithThisMachinesSeparators()
+    {
+        // FR-024: the figure uses the machine's own grouping, so a machine that groups with a space or a dot writes the
+        // weight that way instead of the invariant comma.
+        var original = System.Globalization.CultureInfo.CurrentCulture;
+
+        try
+        {
+            System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+            StringAssert.StartsWith(CoilWeightText.From(4820m), "4,820", "the invariant comma is not the only grouping.");
+
+            System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("de-DE");
+            StringAssert.StartsWith(CoilWeightText.From(4820m), "4.820", "a culture that groups with a dot must be honoured.");
+        }
+        finally
+        {
+            System.Globalization.CultureInfo.CurrentCulture = original;
+        }
+
+        Assert.AreEqual(string.Empty, CoilWeightText.From(null), "a part with no history has no weight to write.");
+    }
+
+    [TestMethod]
+    public void Service_AverageCoilWeightServiceTests_CoilWeightText_TakesItsUnitFromTheResourceAndNotFromTheCode()
+    {
+        // The unit word is translated with the application, so it lives in the resource file and never as a literal in
+        // the code that composes the weight (FR-024). The read is the file itself, because a resource lookup answers
+        // with its own key in a host that has no application.
+        var root = RepositoryPatternScan.FindRepositoryRoot();
+        var resources = File.ReadAllText(Path.Combine(root, "Strings", "en-us", "Resources.resw"));
+        var composition = File.ReadAllText(
+            Path.Combine(root, "MTM_Waitlist.Core", "Helpers", "CoilWeightText.cs"));
+
+        StringAssert.Contains(
+            resources,
+            $"name=\"{CoilWeightText.UnitKey}\"",
+            "the weight's unit is not in the resource file, so it can never be translated");
+
+        StringAssert.Contains(
+            composition,
+            $"{nameof(CoilWeightText.UnitKey)}.GetLocalized()",
+            "the unit is not resolved from the resource where the weight is composed");
+
+        Assert.IsFalse(
+            composition.Contains("\"lb\"", StringComparison.Ordinal),
+            "the unit is written into the code as a literal, so no translation can change it");
+    }
 
     private sealed class StubMySqlHelperServer : IMySqlHelperServer
     {
@@ -122,23 +173,6 @@ public sealed class AverageCoilWeightServiceTests
             CancellationToken cancellationToken = default)
             => Task.FromResult(1);
 
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-        {
-            QueryCallCount++;
-            SqlCallCount++;
-            LastDatabaseTarget = databaseTarget;
-            return Task.FromResult(_rows);
-        }
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => Task.FromResult(0);
     }
 }

@@ -11,6 +11,7 @@ public static class ModuleDependencyInjectionExtensions
         services.AddSingleton<MTM_Waitlist.Module_Core.Contracts.Services.IAppModuleClock, MTM_Waitlist.Module_Core.Services.AppModuleClock>();
         services.AddSingleton<WaitlistModuleService>();
         services.AddSingleton<IWaitlistRequestService, WaitlistRequestService>();
+        services.AddSingleton<MTM_Waitlist.GenericRequest.Contracts.IGenericRequestSubmitter, GenericRequestSubmitter>();
         services.AddSingleton<IWaitlistMessageSeenStore, LocalWaitlistMessageSeenStore>();
         services.AddSingleton<ILuggerChangeNoticeService, LuggerChangeNoticeService>();
         services.AddSingleton<IWaitlistInventoryService, WaitlistInventoryService>();

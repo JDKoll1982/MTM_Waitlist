@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging.Abstractions;
+﻿using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Services;
@@ -115,19 +115,6 @@ public sealed class ImageLocationServiceWorkCenterValidationTests
             CancellationToken cancellationToken = default) =>
             Task.FromException<int>(new InvalidOperationException("The work center catalog is unreachable."));
 
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default) =>
-            Task.FromException<IReadOnlyList<Dictionary<string, object?>>>(
-                new InvalidOperationException("The work center catalog is unreachable."));
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default) =>
-            Task.FromException<int>(new InvalidOperationException("The work center catalog is unreachable."));
     }
 }

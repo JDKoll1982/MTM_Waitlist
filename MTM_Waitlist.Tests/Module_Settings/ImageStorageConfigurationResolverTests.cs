@@ -143,7 +143,7 @@ public sealed class ImageStorageConfigurationResolverTests
     [TestMethod]
     public void Service_ImageStorageConfigurationResolverTests_Constructor_WithNullConfigServiceThrows()
     {
-        Assert.ThrowsException<ArgumentNullException>(() => new ImageStorageConfigurationResolver(
+        Assert.ThrowsExactly<ArgumentNullException>(() => new ImageStorageConfigurationResolver(
             NullLogger<ImageStorageConfigurationResolver>.Instance,
             Options.Create(new ImageStorageOptions()),
             null!));

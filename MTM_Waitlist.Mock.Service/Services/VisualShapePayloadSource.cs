@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using MTM_Waitlist.Mock.Contracts;
@@ -129,6 +129,9 @@ public sealed class VisualShapePayloadSource : IVisualShapePayloadSource
             payload.Add(item);
         }
 
+        // simplified: this payload is a document of dynamically typed values, so its runtime types are only
+        // known per row. Generated metadata would need every numeric CLR type registered and would throw at
+        // run time for the first one nobody listed; write it through the reflection-based writer instead.
         return JsonSerializer.Serialize(payload);
     }
 

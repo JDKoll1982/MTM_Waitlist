@@ -1,6 +1,7 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace MTM_Waitlist.Mock.Service.Services;
 
@@ -48,12 +49,7 @@ internal static class ServiceLog
 
     private static readonly object s_gate = new();
 
-    private static readonly JsonSerializerOptions s_jsonOptions = new()
-    {
-        WriteIndented = false
-    };
-
-    private static string? s_directory;
+        private static string? s_directory;
     private static DateOnly? s_lastRetentionDay;
 
     /// <summary>The directory the daily files are written to.</summary>
@@ -110,7 +106,7 @@ internal static class ServiceLog
                     string.IsNullOrWhiteSpace(area) ? "General" : area,
                     message ?? string.Empty,
                     exception),
-                s_jsonOptions);
+                MockServiceJson.LogLine);
 
             lock (s_gate)
             {
@@ -179,10 +175,13 @@ internal static class ServiceLog
     }
 
     /// <summary>One durable log line.</summary>
-    private sealed record ServiceLogEntry(
+    internal sealed record ServiceLogEntry(
         DateTimeOffset TimestampUtc,
         string Level,
         string Area,
         string Message,
-        string? Exception);
+
+        // A log line's fields are fixed: an absent exception is written as null rather than dropped, so a
+        // reader never has to guess whether a field is missing or simply not applicable.
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.Never)] string? Exception);
 }

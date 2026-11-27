@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Models;
@@ -62,11 +62,11 @@ public sealed class WaitlistHandlerStatusRoundTripTests
         }
 
         // The audit trail names the row, so it goes first; nothing else in the store references this test's row.
-        await _helper.ExecuteSqlNonQueryAsync(
+        await _helper.ExecuteFixtureStatementAsync(
             "DELETE FROM waitlist_requests_audit WHERE request_public_id = @p_public_id;",
             new Dictionary<string, object?> { ["p_public_id"] = _requestId.ToString() },
             MySqlDatabaseTarget.MtmWaitlist);
-        await _helper.ExecuteSqlNonQueryAsync(
+        await _helper.ExecuteFixtureStatementAsync(
             "DELETE FROM waitlist_requests_queue WHERE public_id = @p_public_id;",
             new Dictionary<string, object?> { ["p_public_id"] = _requestId.ToString() },
             MySqlDatabaseTarget.MtmWaitlist);

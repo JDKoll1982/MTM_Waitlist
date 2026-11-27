@@ -85,7 +85,7 @@ public sealed class LuggerChangeNoticeServiceTests
         Assert.AreEqual(0, arrangement.ChangeReads, "And does not even ask for the rows below it.");
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow(ArrangementChange.Kinds.LuggerAdded, null, null, null, "Lugger_Notice.LuggerAdded", "Lugger A", DisplayName = "an added lugger is named")]
     [DataRow(ArrangementChange.Kinds.LuggerAdded, ScrapType, null, null, "Lugger_Notice.LuggerAddedForScrap", "Lugger A|PET", DisplayName = "an added lugger names its scrap type")]
     [DataRow(ArrangementChange.Kinds.LuggerRenamed, null, "Lugger A", "Lugger B", "Lugger_Notice.LuggerRenamed", "Lugger A|Lugger B", DisplayName = "a rename names both names")]

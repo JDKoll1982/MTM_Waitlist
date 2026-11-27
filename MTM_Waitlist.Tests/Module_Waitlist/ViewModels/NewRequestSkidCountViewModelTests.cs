@@ -83,7 +83,7 @@ public sealed class NewRequestSkidCountViewModelTests
             "A blank answer is the default of one rather than a refusal, because the count defaults to one (FR-087).");
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("two")]
     [DataRow("0")]
     [DataRow("-1")]
@@ -129,7 +129,7 @@ public sealed class NewRequestSkidCountViewModelTests
         Assert.AreEqual(1, navigation.GoBackCount, "The step cannot run without the request in progress.");
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("pickup-fg")]
     [DataRow("pickup-ncm")]
     [DataRow("pickup-wip")]

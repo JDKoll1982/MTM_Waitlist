@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
@@ -92,7 +92,7 @@ public sealed class RoleRenameMigrationTests
 
         // The fixture is this test's own, so it goes whether the run passed or failed. The assignment goes first:
         // the foreign key from the assignment to the profile is RESTRICT.
-        await _helper.ExecuteSqlNonQueryAsync(
+        await _helper.ExecuteFixtureStatementAsync(
             "DELETE ra FROM auth_roles_assignments ra INNER JOIN core_users_profiles u ON u.id = ra.user_id WHERE u.username_normalized = @p_username;"
                 + " DELETE FROM core_users_profiles WHERE username_normalized = @p_username;",
             new Dictionary<string, object?> { ["p_username"] = FixtureSignInName },
@@ -214,11 +214,11 @@ public sealed class RoleRenameMigrationTests
         {
             if (statement.StartsWith("SELECT", StringComparison.OrdinalIgnoreCase))
             {
-                await _helper!.ExecuteSqlQueryAsync(statement, new Dictionary<string, object?>(), MySqlDatabaseTarget.MtmWaitlist);
+                await _helper!.ExecuteFixtureQueryAsync(statement, new Dictionary<string, object?>(), MySqlDatabaseTarget.MtmWaitlist);
             }
             else
             {
-                await _helper!.ExecuteSqlNonQueryAsync(statement, new Dictionary<string, object?>(), MySqlDatabaseTarget.MtmWaitlist);
+                await _helper!.ExecuteFixtureStatementAsync(statement, new Dictionary<string, object?>(), MySqlDatabaseTarget.MtmWaitlist);
             }
         }
     }
@@ -271,7 +271,7 @@ public sealed class RoleRenameMigrationTests
     /// </summary>
     private async Task WriteSwitchedOffFixtureHoldingAsync(string roleCode)
     {
-        await _helper!.ExecuteSqlNonQueryAsync(
+        await _helper!.ExecuteFixtureStatementAsync(
             "INSERT INTO core_users_profiles (public_id, username_normalized, first_name, last_name, password_hash, password_salt, require_password_change, display_name, employee_identifier, is_active, created_utc, updated_utc) "
                 + "VALUES (@p_public_id, @p_username, 'Migration', 'Fixture', '0000', NULL, 1, 'Migration Fixture', '0099', 0, UTC_TIMESTAMP(), UTC_TIMESTAMP()) "
                 + "ON DUPLICATE KEY UPDATE is_active = 0, updated_utc = UTC_TIMESTAMP();",
@@ -282,12 +282,12 @@ public sealed class RoleRenameMigrationTests
             },
             MySqlDatabaseTarget.MtmWaitlist);
 
-        await _helper.ExecuteSqlNonQueryAsync(
+        await _helper.ExecuteFixtureStatementAsync(
             "DELETE ra FROM auth_roles_assignments ra INNER JOIN core_users_profiles u ON u.id = ra.user_id WHERE u.username_normalized = @p_username;",
             new Dictionary<string, object?> { ["p_username"] = FixtureSignInName },
             MySqlDatabaseTarget.MtmWaitlist);
 
-        await _helper.ExecuteSqlNonQueryAsync(
+        await _helper.ExecuteFixtureStatementAsync(
             "INSERT INTO auth_roles_assignments (public_id, user_id, role_id, assigned_utc, assigned_by_user_id) "
                 + "SELECT UUID(), u.id, r.id, UTC_TIMESTAMP(), u.id FROM core_users_profiles u INNER JOIN auth_roles_catalog r ON r.role_code = @p_role_code "
                 + "WHERE u.username_normalized = @p_username;",
@@ -370,7 +370,7 @@ public sealed class RoleRenameMigrationTests
             parameters[parameterName] = parameterValue;
         }
 
-        var rows = await _helper!.ExecuteSqlQueryAsync(sql, parameters, MySqlDatabaseTarget.MtmWaitlist);
+        var rows = await _helper!.ExecuteFixtureQueryAsync(sql, parameters, MySqlDatabaseTarget.MtmWaitlist);
 
         return rows
             .Select(row => Convert.ToString(row.Values.First(), System.Globalization.CultureInfo.InvariantCulture)?.Trim() ?? string.Empty)

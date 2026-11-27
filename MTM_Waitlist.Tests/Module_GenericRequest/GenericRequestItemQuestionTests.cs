@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Microsoft.UI.Xaml;
 
@@ -123,7 +123,7 @@ public sealed class GenericRequestItemQuestionTests
             {
                 Configurations = RequestItemConfigurationSet.From((MTM_Waitlist.Module_Settings.Models.RequestItemConfiguration[])[configuration]),
             },
-            new RecordingWaitlistRequestService(),
+            new RecordingGenericRequestSubmitter(),
             new StubPersonIdentity(),
             new StubEmployeeDirectoryService(),
             new StubGenericRequestPartData(),

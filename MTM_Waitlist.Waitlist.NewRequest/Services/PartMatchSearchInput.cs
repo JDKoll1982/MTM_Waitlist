@@ -1,3 +1,4 @@
+using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Shared.Helpers;
 
 namespace MTM_Waitlist.Module_Waitlist.Services;
@@ -21,12 +22,9 @@ namespace MTM_Waitlist.Module_Waitlist.Services;
 /// </remarks>
 public static class PartMatchSearchInput
 {
-    /// <summary>The width a part number with a known prefix is padded to, in characters.</summary>
-    public const int PartNumberWidth = 10;
-
     /// <summary>
     /// The term as the live read is asked about it: upper-cased, and zero-padded to
-    /// <see cref="PartNumberWidth"/> characters when it starts with a known prefix.
+    /// <see cref="PartNumberFormat.Width"/> characters when it starts with a known prefix.
     /// </summary>
     /// <param name="term">What the operator typed, or null.</param>
     /// <returns>
@@ -56,7 +54,7 @@ public static class PartMatchSearchInput
                 return normalized;
             }
 
-            return prefix + digits.PadLeft(PartNumberWidth - prefix.Length, '0');
+            return prefix + digits.PadLeft(PartNumberFormat.Width - prefix.Length, '0');
         }
 
         return normalized;

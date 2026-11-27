@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging.Abstractions;
+﻿using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MTM_Waitlist.Module_Core.Services;
@@ -73,7 +73,7 @@ public sealed class ConfigImagesLocationsIntegrationTests
             return;
         }
 
-        await _helper.ExecuteSqlNonQueryAsync(
+        await _helper.ExecuteFixtureStatementAsync(
             "DELETE FROM config_images_locations WHERE scope_item_id = @p_scope_item_id;",
             new Dictionary<string, object?> { ["p_scope_item_id"] = _scopeItemId },
             MySqlDatabaseTarget.MtmWaitlist);
@@ -81,7 +81,7 @@ public sealed class ConfigImagesLocationsIntegrationTests
 
     private async Task AssertDatabaseReachableAsync()
     {
-        var rows = await _helper.ExecuteSqlQueryAsync(
+        var rows = await _helper.ExecuteFixtureQueryAsync(
             "SELECT COUNT(*) AS c FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'config_images_locations';",
             new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmWaitlist);
@@ -119,7 +119,7 @@ public sealed class ConfigImagesLocationsIntegrationTests
         Assert.IsFalse(second.Success);
         Assert.AreEqual("DUPLICATE_KEY", second.ErrorCode);
 
-        var rows = await _helper.ExecuteSqlQueryAsync(
+        var rows = await _helper.ExecuteFixtureQueryAsync(
             "SELECT COUNT(*) AS c FROM config_images_locations WHERE scope = 'request_item' AND scope_item_id = @p_scope_item_id;",
             new Dictionary<string, object?> { ["p_scope_item_id"] = _scopeItemId },
             MySqlDatabaseTarget.MtmWaitlist);
@@ -162,7 +162,7 @@ public sealed class ConfigImagesLocationsIntegrationTests
 
         Assert.IsNull(await _readService.GetOverrideAsync("work_center", _scopeItemId));
 
-        var rows = await _helper.ExecuteSqlQueryAsync(
+        var rows = await _helper.ExecuteFixtureQueryAsync(
             "SELECT is_active FROM config_images_locations WHERE scope = 'work_center' AND scope_item_id = @p_scope_item_id;",
             new Dictionary<string, object?> { ["p_scope_item_id"] = _scopeItemId },
             MySqlDatabaseTarget.MtmWaitlist);
@@ -185,7 +185,7 @@ public sealed class ConfigImagesLocationsIntegrationTests
         Assert.IsNotNull(loaded);
         Assert.AreEqual("second.png", loaded!.ImagePath);
 
-        var rows = await _helper.ExecuteSqlQueryAsync(
+        var rows = await _helper.ExecuteFixtureQueryAsync(
             "SELECT COUNT(*) AS c FROM config_images_locations WHERE scope = 'work_center' AND scope_item_id = @p_scope_item_id;",
             new Dictionary<string, object?> { ["p_scope_item_id"] = _scopeItemId },
             MySqlDatabaseTarget.MtmWaitlist);

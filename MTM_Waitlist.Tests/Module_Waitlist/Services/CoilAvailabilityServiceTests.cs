@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -24,7 +24,7 @@ public sealed class CoilAvailabilityServiceTests
     {
         var helper = new StubMySqlHelperServer(
             ActiveJobRow("MMC0001000", "COIL 0.5 X 12.0", 4_200m));
-        var weights = new StubAverageCoilWeightService("5,000 lb");
+        var weights = new StubAverageCoilWeightService(5000m);
         var service = new CoilAvailabilityService(helper, weights);
 
         var coil = await service.GetCoilForJobAsync(WorkCenter);
@@ -33,7 +33,11 @@ public sealed class CoilAvailabilityServiceTests
         Assert.AreEqual("MMC0001000", coil.CoilNumber);
         Assert.AreEqual("4200", coil.QuantityOnHand);
         Assert.AreEqual("COIL 0.5 X 12.0", coil.Description);
-        Assert.AreEqual("5,000 lb", coil.AverageWeight);
+        Assert.AreEqual(
+            5000m.ToString("N0", System.Globalization.CultureInfo.CurrentCulture),
+            coil.AverageWeight,
+            "the figure is written with this machine's separators, not the invariant ones; the unit beside it comes "
+                + "from the CoilWeight_Unit resource");
         Assert.AreEqual("sp_setup_active_jobs_latest_by_work_center_get", helper.LastStoredProcedureName);
         Assert.AreEqual(MySqlDatabaseTarget.MtmWaitlist, helper.LastDatabaseTarget);
         Assert.AreEqual(0, helper.SqlCallCount, "The active job must be read through its procedure (FR-015).");
@@ -46,7 +50,7 @@ public sealed class CoilAvailabilityServiceTests
         // A distinctive part proves the average weight is keyed on what the job actually carries: a fixed
         // key cannot satisfy this assertion, and neither can it satisfy the field being empty below.
         var helper = new StubMySqlHelperServer(ActiveJobRow("MMC778812", "COIL 0.050 X 48.0 GALV", 4_310m));
-        var weights = new StubAverageCoilWeightService("4180 lb");
+        var weights = new StubAverageCoilWeightService(4180m);
         var service = new CoilAvailabilityService(helper, weights);
 
         var coil = await service.GetCoilForJobAsync(WorkCenter);
@@ -59,7 +63,7 @@ public sealed class CoilAvailabilityServiceTests
     public async Task Service_CoilAvailabilityServiceTests_GetCoilForJobAsync_WhenTheWeightCannotBeResolvedLeavesTheFieldEmpty()
     {
         var helper = new StubMySqlHelperServer(ActiveJobRow("MMC778812", "COIL 0.050 X 48.0 GALV", 4_310m));
-        var service = new CoilAvailabilityService(helper, new StubAverageCoilWeightService(string.Empty));
+        var service = new CoilAvailabilityService(helper, new StubAverageCoilWeightService(null));
 
         var coil = await service.GetCoilForJobAsync(WorkCenter);
 
@@ -71,7 +75,7 @@ public sealed class CoilAvailabilityServiceTests
     public async Task Service_CoilAvailabilityServiceTests_GetCoilForJobAsync_WhenNoActiveJobIsSavedReportsNoCoil()
     {
         var helper = new StubMySqlHelperServer();
-        var service = new CoilAvailabilityService(helper, new StubAverageCoilWeightService("5,000 lb"));
+        var service = new CoilAvailabilityService(helper, new StubAverageCoilWeightService(5000m));
 
         var coil = await service.GetCoilForJobAsync(WorkCenter);
 
@@ -83,7 +87,7 @@ public sealed class CoilAvailabilityServiceTests
     public async Task Service_CoilAvailabilityServiceTests_GetCoilForJobAsync_WhenTheSavedJobIsForAnotherWorkCenterReportsNoCoil()
     {
         var helper = new StubMySqlHelperServer(ActiveJobRow("MMC0001000", "COIL", 10m, workCenter: "999-9"));
-        var service = new CoilAvailabilityService(helper, new StubAverageCoilWeightService("5,000 lb"));
+        var service = new CoilAvailabilityService(helper, new StubAverageCoilWeightService(5000m));
 
         var coil = await service.GetCoilForJobAsync(WorkCenter);
 
@@ -95,7 +99,7 @@ public sealed class CoilAvailabilityServiceTests
     {
         // A flatstock/die-only job: subordinate parts exist but none carries the MMC coil prefix.
         var helper = new StubMySqlHelperServer(ActiveJobRow("MMF0001154", "FLATSTOCK", 12m));
-        var service = new CoilAvailabilityService(helper, new StubAverageCoilWeightService("5,000 lb"));
+        var service = new CoilAvailabilityService(helper, new StubAverageCoilWeightService(5000m));
 
         var coil = await service.GetCoilForJobAsync(WorkCenter);
 
@@ -110,7 +114,7 @@ public sealed class CoilAvailabilityServiceTests
             ["work_center"] = WorkCenter,
             ["subordinate_parts_json"] = "{ not json",
         });
-        var service = new CoilAvailabilityService(helper, new StubAverageCoilWeightService("5,000 lb"));
+        var service = new CoilAvailabilityService(helper, new StubAverageCoilWeightService(5000m));
 
         var coil = await service.GetCoilForJobAsync(WorkCenter);
 
@@ -121,7 +125,7 @@ public sealed class CoilAvailabilityServiceTests
     public async Task Service_CoilAvailabilityServiceTests_GetCoilForJobAsync_WithoutAWorkCenterReadsNothingAndReportsNoCoil()
     {
         var helper = new StubMySqlHelperServer(ActiveJobRow("MMC0001000", "COIL", 10m));
-        var service = new CoilAvailabilityService(helper, new StubAverageCoilWeightService("5,000 lb"));
+        var service = new CoilAvailabilityService(helper, new StubAverageCoilWeightService(5000m));
 
         var coil = await service.GetCoilForJobAsync(null);
 
@@ -134,11 +138,11 @@ public sealed class CoilAvailabilityServiceTests
     {
         var service = new CoilAvailabilityService(
             new StubMySqlHelperServer(),
-            new StubAverageCoilWeightService("5,000 lb"));
+            new StubAverageCoilWeightService(5000m));
         using var cts = new CancellationTokenSource();
         await cts.CancelAsync();
 
-        await Assert.ThrowsExceptionAsync<OperationCanceledException>(
+        await Assert.ThrowsExactlyAsync<OperationCanceledException>(
             () => service.GetCoilForJobAsync(WorkCenter, cts.Token));
     }
 
@@ -176,16 +180,16 @@ public sealed class CoilAvailabilityServiceTests
 
     private sealed class StubAverageCoilWeightService : IAverageCoilWeightService
     {
-        private readonly string _text;
+        private readonly decimal? _pounds;
 
-        public StubAverageCoilWeightService(string text) => _text = text;
+        public StubAverageCoilWeightService(decimal? pounds) => _pounds = pounds;
 
         public string? LastPartNumber { get; private set; }
 
-        public Task<string> ResolveAverageCoilWeightTextAsync(string partId, CancellationToken cancellationToken = default)
+        public Task<decimal?> ResolveAverageCoilWeightAsync(string partId, CancellationToken cancellationToken = default)
         {
             LastPartNumber = partId;
-            return Task.FromResult(_text);
+            return Task.FromResult(_pounds);
         }
     }
 
@@ -224,24 +228,6 @@ public sealed class CoilAvailabilityServiceTests
             CancellationToken cancellationToken = default)
             => Task.FromResult(0);
 
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-        {
-            SqlCallCount++;
-            return Task.FromResult<IReadOnlyList<Dictionary<string, object?>>>(Array.Empty<Dictionary<string, object?>>());
-        }
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-        {
-            SqlCallCount++;
-            return Task.FromResult(0);
-        }
     }
 }

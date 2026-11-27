@@ -63,7 +63,7 @@ public sealed class LocalWaitlistMessageSeenStore : IWaitlistMessageSeenStore
         try
         {
             await _preferences
-                .WriteTextAsync(SettingsKey, PreferenceScope.Person, await Json.StringifyAsync(map).ConfigureAwait(false), cancellationToken)
+                .WriteTextAsync(SettingsKey, PreferenceScope.Person, await Json.StringifyAsync(map, CoreJsonContext.Default.DictionaryStringDateTimeOffset).ConfigureAwait(false), cancellationToken)
                 .ConfigureAwait(false);
         }
         catch (Exception ex)
@@ -89,7 +89,7 @@ public sealed class LocalWaitlistMessageSeenStore : IWaitlistMessageSeenStore
                 return new Dictionary<string, DateTimeOffset>(StringComparer.OrdinalIgnoreCase);
             }
 
-            var map = await Json.ToObjectAsync<Dictionary<string, DateTimeOffset>>(stored).ConfigureAwait(false);
+            var map = await Json.ToObjectAsync(stored, CoreJsonContext.Default.DictionaryStringDateTimeOffset).ConfigureAwait(false);
 
             return map is null
                 ? new Dictionary<string, DateTimeOffset>(StringComparer.OrdinalIgnoreCase)

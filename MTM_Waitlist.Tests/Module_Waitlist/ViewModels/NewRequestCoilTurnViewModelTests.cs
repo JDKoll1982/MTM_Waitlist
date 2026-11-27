@@ -55,7 +55,7 @@ public sealed class NewRequestCoilTurnViewModelTests
             "The report is plain language, never a bare resource key (FR-022).");
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("not a weight")]
     [DataRow("1840 lb")]
     [DataRow("0")]

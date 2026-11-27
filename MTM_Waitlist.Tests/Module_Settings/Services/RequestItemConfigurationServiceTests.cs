@@ -111,7 +111,7 @@ public sealed class RequestItemConfigurationServiceTests
 
     // ── A payload that cannot be read is a plain-language configuration problem ─────────────────────────
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("{ not json", DisplayName = "detail_fields_json is not JSON at all")]
     [DataRow("\"just a string\"", DisplayName = "detail_fields_json is not an array")]
     [DataRow("[{\"label\":\"\",\"value_type\":\"string\",\"source\":\"job\",\"order\":1}]", DisplayName = "a declared field has no label")]
@@ -142,7 +142,7 @@ public sealed class RequestItemConfigurationServiceTests
         Assert.AreEqual(0, configuration.DetailFields.Count, "A payload that cannot be read must not be half-applied.");
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("[unterminated", DisplayName = "options_json is not JSON at all")]
     [DataRow("{\"Alpha\":true}", DisplayName = "options_json is not an array")]
     [DataRow("[\"Alpha\",\"\"]", DisplayName = "an option has no text")]

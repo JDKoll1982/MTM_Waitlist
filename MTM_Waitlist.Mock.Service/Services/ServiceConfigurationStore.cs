@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using MTM_Waitlist.Mock.Service.Contracts;
@@ -36,14 +36,7 @@ public sealed class ServiceConfigurationStore
     /// <summary>File name of the persisted configuration under the service app-data root.</summary>
     public const string ConfigurationFileName = "service-configuration.json";
 
-    private static readonly JsonSerializerOptions s_jsonOptions = new()
-    {
-        WriteIndented = true,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        Converters = { new JsonStringEnumConverter() }
-    };
-
-    /// <summary>
+        /// <summary>
     /// Properties of the retired shared-credential feature (T147). An install that ran a pre-T147 build still
     /// carries the DPAPI blob this build can no longer use, and nothing rewrites the file unless an operator
     /// saves — so the secret would otherwise outlive the feature that owned it (T156).
@@ -106,7 +99,7 @@ public sealed class ServiceConfigurationStore
 
         await using var stream = File.OpenRead(_configurationFilePath);
         var dto = await JsonSerializer
-            .DeserializeAsync<ServiceConfigurationFile>(stream, s_jsonOptions, cancellationToken)
+            .DeserializeAsync<ServiceConfigurationFile>(stream, MockServiceJson.StoredFile, cancellationToken)
             .ConfigureAwait(false);
 
         _current = dto?.ToConfiguration(_appDataRoot) ?? ServiceConfiguration.CreateDefault(_appDataRoot);
@@ -160,7 +153,7 @@ public sealed class ServiceConfigurationStore
         }
 
         var temporaryPath = _configurationFilePath + ".tmp";
-        File.WriteAllText(temporaryPath, root.ToJsonString(s_jsonOptions));
+        File.WriteAllText(temporaryPath, root.ToJsonString(MockServiceJson.StoredFile));
         File.Move(temporaryPath, _configurationFilePath, overwrite: true);
         return true;
     }
@@ -184,7 +177,7 @@ public sealed class ServiceConfigurationStore
 
         await using (var stream = File.Create(temporaryPath))
         {
-            await JsonSerializer.SerializeAsync(stream, dto, s_jsonOptions, cancellationToken).ConfigureAwait(false);
+            await JsonSerializer.SerializeAsync(stream, dto, MockServiceJson.StoredFile, cancellationToken).ConfigureAwait(false);
         }
 
         // Swap into place: a reader never observes a half-written configuration.
@@ -411,7 +404,7 @@ public sealed class ServiceConfigurationStore
     /// Serialization shape for the configuration file. Kept private so the operator-facing contract
     /// stays <see cref="ServiceConfiguration"/> and the credential never gains a plaintext property.
     /// </summary>
-    private sealed record ServiceConfigurationFile
+    internal sealed record ServiceConfigurationFile
     {
         public int RefreshIntervalMinutes { get; init; } = 180;
 
@@ -466,7 +459,7 @@ public sealed class ServiceConfigurationStore
         }
     }
 
-    private sealed record MySqlConnectionFile
+    internal sealed record MySqlConnectionFile
     {
         public string Server { get; init; } = "localhost";
 
@@ -494,7 +487,7 @@ public sealed class ServiceConfigurationStore
         };
     }
 
-    private sealed record VisualSourceFile
+    internal sealed record VisualSourceFile
     {
         public string Server { get; init; } = "VISUAL";
 
@@ -521,7 +514,7 @@ public sealed class ServiceConfigurationStore
         };
     }
 
-    private sealed record ApiFile
+    internal sealed record ApiFile
     {
         public string BindAddress { get; init; } = "0.0.0.0";
 
@@ -540,7 +533,7 @@ public sealed class ServiceConfigurationStore
         };
     }
 
-    private sealed record BackupPolicyFile
+    internal sealed record BackupPolicyFile
     {
         public bool IsEnabled { get; init; } = true;
 

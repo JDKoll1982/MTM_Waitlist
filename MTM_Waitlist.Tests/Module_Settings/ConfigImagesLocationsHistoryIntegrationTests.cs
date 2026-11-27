@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging.Abstractions;
+﻿using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MTM_Waitlist.Module_Core.Models;
@@ -97,12 +97,12 @@ public sealed class ConfigImagesLocationsHistoryIntegrationTests
     {
         if (_helper is not null && !string.IsNullOrEmpty(_partNumber))
         {
-            await _helper.ExecuteSqlNonQueryAsync(
+            await _helper.ExecuteFixtureStatementAsync(
                 "DELETE FROM config_images_locations_history WHERE scope_item_id IN (@p_part, @p_move);",
                 new Dictionary<string, object?> { ["p_part"] = _partNumber, ["p_move"] = _movePrefix },
                 MySqlDatabaseTarget.MtmWaitlist);
 
-            await _helper.ExecuteSqlNonQueryAsync(
+            await _helper.ExecuteFixtureStatementAsync(
                 "DELETE FROM config_images_locations WHERE scope_item_id IN (@p_part, @p_move);",
                 new Dictionary<string, object?> { ["p_part"] = _partNumber, ["p_move"] = _movePrefix },
                 MySqlDatabaseTarget.MtmWaitlist);
@@ -154,7 +154,7 @@ public sealed class ConfigImagesLocationsHistoryIntegrationTests
         var originalPath = $"{_movePrefix}/picture.png";
         var movedPath = $"Waitlist/{_movePrefix}/picture.png";
 
-        await _helper.ExecuteSqlNonQueryAsync(
+        await _helper.ExecuteFixtureStatementAsync(
             "INSERT INTO config_images_locations (public_id, scope, scope_item_id, image_path, is_active, created_utc, updated_utc) VALUES (UUID(), @p_scope, @p_item, @p_path, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP());",
             new Dictionary<string, object?>
             {
@@ -183,7 +183,7 @@ public sealed class ConfigImagesLocationsHistoryIntegrationTests
 
     private async Task<string?> ReadPicturePathAsync(string scopeItemId)
     {
-        var rows = await _helper.ExecuteSqlQueryAsync(
+        var rows = await _helper.ExecuteFixtureQueryAsync(
             "SELECT image_path FROM config_images_locations WHERE scope_item_id = @p_item;",
             new Dictionary<string, object?> { ["p_item"] = scopeItemId },
             MySqlDatabaseTarget.MtmWaitlist);
@@ -193,7 +193,7 @@ public sealed class ConfigImagesLocationsHistoryIntegrationTests
 
     private async Task AssertDatabaseReachableAsync()
     {
-        var rows = await _helper.ExecuteSqlQueryAsync(
+        var rows = await _helper.ExecuteFixtureQueryAsync(
             "SELECT COUNT(*) AS c FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name IN ('config_images_locations', 'config_images_locations_history');",
             new Dictionary<string, object?>(),
             MySqlDatabaseTarget.MtmWaitlist);

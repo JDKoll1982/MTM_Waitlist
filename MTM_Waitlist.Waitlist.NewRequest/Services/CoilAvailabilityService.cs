@@ -92,7 +92,7 @@ public sealed class CoilAvailabilityService : ICoilAvailabilityService
         }
 
         var averageWeight = await _averageCoilWeightService
-            .ResolveAverageCoilWeightTextAsync(coil.PartNumber, cancellationToken)
+            .ResolveAverageCoilWeightAsync(coil.PartNumber, cancellationToken)
             .ConfigureAwait(false);
 
         var quantityOnHand = coil.OnHandQuantity.ToString("0.##", CultureInfo.InvariantCulture);
@@ -106,7 +106,7 @@ public sealed class CoilAvailabilityService : ICoilAvailabilityService
             CoilNumber = coil.PartNumber,
             QuantityOnHand = quantityOnHand,
             Description = coil.Description,
-            AverageWeight = averageWeight,
+            AverageWeight = CoilWeightText.From(averageWeight),
         };
     }
 

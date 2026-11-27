@@ -666,11 +666,44 @@ public sealed class ImageLocationService : IImageLocationService, IWorkCenterIma
         var target = AppStoragePaths.NormalizeSeparators(candidatePath);
         if (Path.IsPathRooted(target))
         {
-            return File.Exists(target);
+            return SharedFileProbe.Exists(target);
         }
 
         var appRelative = Path.Combine(AppContext.BaseDirectory, target);
-        return File.Exists(appRelative);
+        return SharedFileProbe.Exists(appRelative);
+    }
+
+    /// <summary>
+    /// A file probe that asks whether the share is answering before it asks whether the file is there.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Why this is not <c>File.Exists</c>.</b> A probe against a silent picture share does not fail quickly:
+    /// the name has to be resolved and the attempt has to time out, measured here at <b>2,685 ms</b> for
+    /// <c>\\mtmanu-fs01\Expo Drive</c> on a workstation off the plant network (2026-11-27). Resolving one
+    /// screen's pictures means several such probes, and the resolution runs again on every page change, so a
+    /// share that is away is paid for repeatedly. <see cref="PictureShareReachability"/> already remembers that
+    /// verdict per share for a short window — this is the same answer it gives, reached without the seconds.
+    /// </para>
+    /// <para>
+    /// While the share answers, nothing here changes: the verdict is <c>true</c> and the file is probed exactly
+    /// as before, so a picture that appears on the share still appears at once.
+    /// </para>
+    /// </remarks>
+    private static class SharedFileProbe
+    {
+        public static bool Exists(string path)
+        {
+            var shareRoot = PictureShareReachability.ShareRootOf(path);
+            if (shareRoot is not null && PictureShareReachability.IsReachable(shareRoot) is false)
+            {
+                // The share is not answering, so the file is not there as far as any caller can act on. The
+                // verdict is remembered, so the next path on the same share costs nothing at all.
+                return false;
+            }
+
+            return File.Exists(path);
+        }
     }
 
     /// <summary>

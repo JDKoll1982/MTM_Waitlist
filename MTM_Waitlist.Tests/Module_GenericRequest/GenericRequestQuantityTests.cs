@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.GenericRequest.Contracts;
 using MTM_Waitlist.GenericRequest.Data.Services;
@@ -212,7 +212,7 @@ public sealed class GenericRequestQuantityTests
     }
 
     /// <summary>The floor's store, answering the same rows to every script and counting how often it was asked.</summary>
-    private sealed class RecordingFloor : IMySqlHelperServer
+    private sealed class RecordingFloor : IMySqlHelperServer, IReviewedQueueScriptReader
     {
         private readonly IReadOnlyList<Dictionary<string, object?>> _rows;
 
@@ -234,21 +234,13 @@ public sealed class GenericRequestQuantityTests
             CancellationToken cancellationToken = default) =>
             Task.FromResult(0);
 
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
+        public Task<IReadOnlyList<Dictionary<string, object?>>?> ExecuteReviewedScriptQueryAsync(
+            string reviewedScriptName,
             IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
             CancellationToken cancellationToken = default)
         {
             QueryCount++;
-            return Task.FromResult(_rows);
+            return Task.FromResult<IReadOnlyList<Dictionary<string, object?>>?>(_rows);
         }
-
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default) =>
-            Task.FromResult(0);
     }
 }

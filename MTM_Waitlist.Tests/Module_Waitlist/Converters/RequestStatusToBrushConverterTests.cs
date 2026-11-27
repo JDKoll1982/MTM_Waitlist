@@ -151,7 +151,7 @@ public sealed class RequestStatusToBrushConverterTests
     public void Converter_RequestStatusToBrushConverterTests_ConvertBackIsRefusedRatherThanGuessed()
     {
         // A colour cannot be turned back into a status, and a converter that invented one would be inventing data.
-        Assert.ThrowsException<NotSupportedException>(
+        Assert.ThrowsExactly<NotSupportedException>(
             () => s_converter.ConvertBack(RequestStatusPalette.NormalColumnColor, typeof(string), null!, string.Empty));
     }
 

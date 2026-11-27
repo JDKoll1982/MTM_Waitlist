@@ -144,10 +144,10 @@ public sealed class RequestJobAvailabilityProvider : IRequestJobPartAvailability
         try
         {
             var averageWeight = await _averageCoilWeightService
-                .ResolveAverageCoilWeightTextAsync(availability.CoilPartNumber, cancellationToken)
+                .ResolveAverageCoilWeightAsync(availability.CoilPartNumber, cancellationToken)
                 .ConfigureAwait(false);
 
-            return availability with { CoilAverageWeight = averageWeight };
+            return availability with { CoilAverageWeight = CoilWeightText.From(averageWeight) };
         }
         catch (Exception ex)
         {

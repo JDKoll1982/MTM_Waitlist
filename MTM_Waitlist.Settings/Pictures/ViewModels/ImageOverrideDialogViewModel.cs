@@ -257,7 +257,7 @@ public abstract partial class ImageOverrideDialogViewModel : ObservableObject
         var needsShare = dirtyRows.Any(r => !string.IsNullOrWhiteSpace(r.CustomPath));
         if (needsShare && !await _storageService.IsShareAccessibleAsync(cancellationToken).ConfigureAwait(true))
         {
-            ErrorMessage = $"The image share '{_storageService.GetConfiguredSharePath()}' is unavailable. No changes were saved.";
+            ErrorMessage = $"The image share '{await _storageService.GetConfiguredSharePathAsync().ConfigureAwait(true)}' is unavailable. No changes were saved.";
             return false;
         }
 

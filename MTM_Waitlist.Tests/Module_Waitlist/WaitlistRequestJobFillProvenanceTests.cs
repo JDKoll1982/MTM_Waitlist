@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.GenericRequest.Models;
 using MTM_Waitlist.GenericRequest.Services;
@@ -96,12 +96,15 @@ public sealed class WaitlistRequestJobFillProvenanceTests
     [TestMethod]
     public async Task Service_WaitlistRequestJobFillProvenanceTests_SubmitAsync_TheGenericRaiseCarriesTheJobAsProvenanceOnly()
     {
-        var requests = new RecordingWaitlistRequestService();
+        // The real submitter over the in-memory queue, so what is asserted below is the draft the queue actually
+        // holds rather than the seam's own record: provenance and the generic flag are the draft's business
+        // (024-dependency-modernization, MOD-007).
+        var queue = new WaitlistRequestService();
         var data = new GenericRequestLiveStepData(
             new StubWorkCenterCatalogService(),
             new StubNewRequestPickerService(),
             new StubRequestItemConfigurationService(),
-            requests,
+            new GenericRequestSubmitter(queue),
             new StubPersonIdentity(),
             new StubEmployeeDirectoryService
             {
@@ -116,9 +119,8 @@ public sealed class WaitlistRequestJobFillProvenanceTests
         var result = await data.SubmitAsync(draft);
 
         Assert.IsTrue(result.IsRaised, result.FailureMessage);
-        Assert.AreEqual(1, requests.Submitted.Count);
 
-        var recorded = requests.Submitted[0];
+        var recorded = queue.GetActiveRequests().Single();
 
         Assert.AreEqual("WO-9001", recorded.ProvenanceWorkOrder, "the raise records the job it was filled from (FR-013)");
         Assert.IsTrue(recorded.IsGeneric, "the fill never makes the request a work-order request (FR-011)");
@@ -177,25 +179,8 @@ public sealed class WaitlistRequestJobFillProvenanceTests
             return Task.FromResult(1);
         }
 
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default) =>
-            Task.FromResult((IReadOnlyList<Dictionary<string, object?>>)Array.Empty<Dictionary<string, object?>>());
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default) =>
-            Task.FromResult(0);
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            CancellationToken cancellationToken = default) =>
-            Task.FromResult(0);
 
         public Task<object?> ExecuteScalarAsync(
             string sql,

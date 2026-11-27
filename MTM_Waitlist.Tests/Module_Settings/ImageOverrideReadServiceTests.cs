@@ -63,7 +63,7 @@ public sealed class ImageOverrideReadServiceTests
         Assert.IsNull(await _service.GetOverrideAsync("request_item", "abc-123"));
     }
 
-    [DataTestMethod]
+    [TestMethod]
     [DataRow("request_item")]
     [DataRow("request_category")]
     [DataRow("work_center")]
@@ -79,14 +79,14 @@ public sealed class ImageOverrideReadServiceTests
     [TestMethod]
     public async Task Service_ImageOverrideReadServiceTests_GetOverrideAsync_WithUnknownScopeThrows()
     {
-        await Assert.ThrowsExceptionAsync<ArgumentException>(
+        await Assert.ThrowsExactlyAsync<ArgumentException>(
             () => _service.GetOverrideAsync("building", "1"));
     }
 
     [TestMethod]
     public async Task Service_ImageOverrideReadServiceTests_GetOverrideAsync_WithEmptyScopeItemIdThrows()
     {
-        await Assert.ThrowsExceptionAsync<ArgumentNullException>(
+        await Assert.ThrowsExactlyAsync<ArgumentNullException>(
             () => _service.GetOverrideAsync("request_item", " "));
     }
 

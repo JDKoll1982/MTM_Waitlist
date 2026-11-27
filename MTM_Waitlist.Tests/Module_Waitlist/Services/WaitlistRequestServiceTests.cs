@@ -1,8 +1,9 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.Module_Core.Contracts.Services;
+using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Shared.Models;
@@ -412,18 +413,7 @@ public sealed class WaitlistRequestServiceTests
             return Task.FromResult(AffectedRows);
         }
 
-        public Task<IReadOnlyList<Dictionary<string, object?>>> ExecuteSqlQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default)
-            => Task.FromResult((IReadOnlyList<Dictionary<string, object?>>)Array.Empty<Dictionary<string, object?>>());
 
-        public Task<int> ExecuteSqlNonQueryAsync(
-            string sql,
-            IReadOnlyDictionary<string, object?> parameters,
-            MySqlDatabaseTarget databaseTarget,
-            CancellationToken cancellationToken = default) => Task.FromResult(0);
     }
 
     [TestMethod]
@@ -486,7 +476,7 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public void Service_WaitlistRequestServiceTests_NewRequestFlowRules_VerifyEmployeeIdentityAcceptsTheSignedInEmployeeFromTheDirectory()
+    public void Service_WaitlistRequestServiceTests_EmployeeIdentityVerification_VerifyAcceptsTheSignedInEmployeeFromTheDirectory()
     {
         // The rule is given the record the lookup returned for the signed-in number (FR-046). 9004 is
         // deliberately not 6229: a name that is not "John Koll" has to come back, or the step is still
@@ -498,7 +488,7 @@ public sealed class WaitlistRequestServiceTests
             IsActive = true,
         };
 
-        var result = NewRequestFlowRules.VerifyEmployeeIdentity("9004", stored);
+        var result = EmployeeIdentityVerification.Verify("9004", stored);
 
         Assert.IsTrue(result.IsValid);
         Assert.IsTrue(result.IsActive);
@@ -507,12 +497,12 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public void Service_WaitlistRequestServiceTests_NewRequestFlowRules_VerifyEmployeeIdentityRefusesANumberTheDirectoryDoesNotHold()
+    public void Service_WaitlistRequestServiceTests_EmployeeIdentityVerification_VerifyRefusesANumberTheDirectoryDoesNotHold()
     {
         // The refusal is the requirement: an unknown number is still refused rather than accepted, because
         // the lookup — not the caller — is what decides (FR-046).
-        var unknown = NewRequestFlowRules.VerifyEmployeeIdentity("999999", null);
-        var blank = NewRequestFlowRules.VerifyEmployeeIdentity("   ", null);
+        var unknown = EmployeeIdentityVerification.Verify("999999", null);
+        var blank = EmployeeIdentityVerification.Verify("   ", null);
 
         Assert.IsFalse(unknown.IsValid);
         Assert.IsFalse(unknown.IsActive);
@@ -521,7 +511,7 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public void Service_WaitlistRequestServiceTests_NewRequestFlowRules_VerifyEmployeeIdentityRefusesAKnownButInactiveEmployee()
+    public void Service_WaitlistRequestServiceTests_EmployeeIdentityVerification_VerifyRefusesAKnownButInactiveEmployee()
     {
         var stored = new EmployeeIdentity
         {
@@ -530,14 +520,14 @@ public sealed class WaitlistRequestServiceTests
             IsActive = false,
         };
 
-        var result = NewRequestFlowRules.VerifyEmployeeIdentity("0000", stored);
+        var result = EmployeeIdentityVerification.Verify("0000", stored);
 
         Assert.IsFalse(result.IsValid);
         Assert.IsFalse(result.IsActive);
     }
 
     [TestMethod]
-    public void Service_WaitlistRequestServiceTests_NewRequestFlowRules_VerifyEmployeeIdentityComparesTheStoredIdentifierNotTheName()
+    public void Service_WaitlistRequestServiceTests_EmployeeIdentityVerification_VerifyComparesTheStoredIdentifierNotTheName()
     {
         // A row that came back for a different number is not an answer for this number, and a name that
         // happens to match is never the evidence: the two identifiers have to agree (FR-046).
@@ -548,7 +538,7 @@ public sealed class WaitlistRequestServiceTests
             IsActive = true,
         };
 
-        var result = NewRequestFlowRules.VerifyEmployeeIdentity("6229", stored);
+        var result = EmployeeIdentityVerification.Verify("6229", stored);
 
         Assert.IsFalse(result.IsValid);
         Assert.IsFalse(result.IsActive);
@@ -597,7 +587,7 @@ public sealed class WaitlistRequestServiceTests
         // next step to resolve — the type/subtype steps that used to decide this are gone (FR-003).
         var state = new NewRequestFlowState { WorkCenter = "Press 12" };
 
-        Assert.ThrowsException<ArgumentNullException>(() => NewRequestFlowRules.GetNextStepType(state));
+        Assert.ThrowsExactly<ArgumentNullException>(() => NewRequestFlowRules.GetNextStepType(state));
     }
 
     [TestMethod]

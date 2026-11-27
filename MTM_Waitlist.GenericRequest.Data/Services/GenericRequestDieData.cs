@@ -1,10 +1,9 @@
-using MTM_Waitlist.GenericRequest.Contracts;
+﻿using MTM_Waitlist.GenericRequest.Contracts;
 using MTM_Waitlist.GenericRequest.Models;
 using MTM_Waitlist.Mock.Contracts;
 using MTM_Waitlist.Mock.Models;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Shared.Helpers;
-using MTM_Waitlist.Module_Waitlist.Services;
 
 namespace MTM_Waitlist.GenericRequest.Data.Services;
 
@@ -156,7 +155,7 @@ public sealed class GenericRequestDieData : IGenericRequestDieData
         }
 
         return term.All(char.IsAsciiDigit)
-            ? DiePrefix + term.PadLeft(PartMatchSearchInput.PartNumberWidth - DiePrefix.Length, '0')
+            ? DiePrefix + term.PadLeft(PartNumberFormat.Width - DiePrefix.Length, '0')
             : null;
     }
 }

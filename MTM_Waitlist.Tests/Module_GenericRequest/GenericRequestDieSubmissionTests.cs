@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using MTM_Waitlist.GenericRequest.Contracts;
 using MTM_Waitlist.GenericRequest.Models;
@@ -22,7 +22,7 @@ public sealed class GenericRequestDieSubmissionTests
     [TestMethod]
     public async Task Service_GenericRequestDieSubmissionTests_SubmitAsync_ThreeChosenDiesRaiseThreeRequests()
     {
-        var requests = new RecordingWaitlistRequestService();
+        var requests = new RecordingGenericRequestSubmitter();
         var data = CreateLive(requests);
 
         var result = await data.SubmitAsync(DieDraft(
@@ -42,7 +42,7 @@ public sealed class GenericRequestDieSubmissionTests
     [TestMethod]
     public async Task Service_GenericRequestDieSubmissionTests_SubmitAsync_EachRequestRecordsItsOwnDieAndLocation()
     {
-        var requests = new RecordingWaitlistRequestService();
+        var requests = new RecordingGenericRequestSubmitter();
         var data = CreateLive(requests);
 
         await data.SubmitAsync(DieDraft(Die("FGT0602-01", "U-B0-01"), Die("FGT0602-02", "U-B0-02")));
@@ -61,7 +61,7 @@ public sealed class GenericRequestDieSubmissionTests
     [TestMethod]
     public async Task Service_GenericRequestDieSubmissionTests_SubmitAsync_ADieWithNoLocationRecordsNoLocationKey()
     {
-        var requests = new RecordingWaitlistRequestService();
+        var requests = new RecordingGenericRequestSubmitter();
         var data = CreateLive(requests);
 
         await data.SubmitAsync(DieDraft(Die("FGT0602-01", string.Empty)));
@@ -78,7 +78,7 @@ public sealed class GenericRequestDieSubmissionTests
     [TestMethod]
     public async Task Service_GenericRequestDieSubmissionTests_SubmitAsync_OneChosenDieStillRaisesOneRequest()
     {
-        var requests = new RecordingWaitlistRequestService();
+        var requests = new RecordingGenericRequestSubmitter();
         var data = CreateLive(requests);
 
         var result = await data.SubmitAsync(DieDraft(Die("FGT0602-01", "U-B0-01")));
@@ -108,7 +108,7 @@ public sealed class GenericRequestDieSubmissionTests
         return draft;
     }
 
-    private static GenericRequestLiveStepData CreateLive(IWaitlistRequestService requests) =>
+    private static GenericRequestLiveStepData CreateLive(IGenericRequestSubmitter requests) =>
         new(
             new StubWorkCenterCatalogService(),
             new StubNewRequestPickerService(),

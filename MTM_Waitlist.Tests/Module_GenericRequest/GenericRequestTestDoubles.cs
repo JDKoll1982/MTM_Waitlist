@@ -1,4 +1,4 @@
-using MTM_Waitlist.GenericRequest.Contracts;
+﻿using MTM_Waitlist.GenericRequest.Contracts;
 using MTM_Waitlist.GenericRequest.Models;
 using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Models;
@@ -467,106 +467,29 @@ internal static class FakeScrapAssignment
         };
 }
 
-/// <summary>The queue's write door, recording every draft it is handed.</summary>
-internal sealed class RecordingWaitlistRequestService : IWaitlistRequestService
+/// <summary>The queue's write door, recording every request it is handed.</summary>
+/// <remarks>
+/// It records what the flow asks to raise rather than what the queue's own draft looks like, because that is the seam
+/// the flow now knows (024-dependency-modernization, MOD-007). Where the mapping onto the draft matters, a test uses the
+/// real submitter over the in-memory queue instead.
+/// </remarks>
+internal sealed class RecordingGenericRequestSubmitter : IGenericRequestSubmitter
 {
-    public List<WaitlistRequestDraft> Submitted { get; } = new();
+    public List<GenericRequestSubmitRequest> Submitted { get; } = new();
 
     /// <summary>
     /// What the queue answers, when a test needs something other than "raised". The default raises the request, so a
     /// test that says nothing about the outcome still gets the ordinary one.
     /// </summary>
-    public Func<WaitlistRequestDraft, WaitlistRequestSubmitResult>? SubmitResult { get; set; }
+    public Func<GenericRequestSubmitRequest, GenericRequestSubmitResult>? SubmitResult { get; set; }
 
-    public event EventHandler? RequestsChanged
-    {
-        add { }
-        remove { }
-    }
-
-    public IReadOnlyList<WaitlistRequest> GetActiveRequests(string? building = null) => [];
-
-    public WaitlistRequest? GetRequest(Guid requestId) => null;
-
-    public IReadOnlyList<WaitlistRequest> GetMyRequests(string requesterEmployeeNumber, string? building = null) => [];
-
-    public IReadOnlyList<WaitlistRequestAuditEntry> GetAuditTrail(Guid requestId) => [];
-
-    public Task<IReadOnlyList<WaitlistRequestAuditEntry>> LoadAuditTrailAsync(
-        Guid requestId,
-        CancellationToken cancellationToken = default) =>
-        Task.FromResult<IReadOnlyList<WaitlistRequestAuditEntry>>([]);
-
-    public void Reset()
-    {
-    }
-
-    public Task<int> RefreshFromDatabaseAsync(string? building = null, CancellationToken cancellationToken = default) =>
-        Task.FromResult(0);
-
-    public Task<WaitlistRequestSubmitResult> SubmitAsync(
-        WaitlistRequestDraft draft,
+    public Task<GenericRequestSubmitResult> SubmitAsync(
+        GenericRequestSubmitRequest request,
         CancellationToken cancellationToken = default)
     {
-        Submitted.Add(draft);
+        Submitted.Add(request);
 
-        if (SubmitResult is not null)
-        {
-            return Task.FromResult(SubmitResult(draft));
-        }
-
-        return Task.FromResult(WaitlistRequestSubmitResult.Success(new WaitlistRequest
-        {
-            Id = Guid.NewGuid(),
-            Building = draft.Building,
-            WorkCenter = draft.WorkCenter,
-            Category = draft.Category,
-            Item = draft.Item,
-            InputValue = draft.InputValue,
-        }));
+        return Task.FromResult(
+            SubmitResult is not null ? SubmitResult(request) : GenericRequestSubmitResult.Raised(Guid.NewGuid()));
     }
-
-    public Task<bool> TransitionStatusAsync(
-        Guid requestId,
-        string status,
-        string? cancellationReason = null,
-        string? canceledByEmployeeNumber = null,
-        CancellationToken cancellationToken = default) => Task.FromResult(false);
-
-    public Task<WaitlistRequestCancelResult> CancelOwnRequestAsync(
-        Guid requestId,
-        string requesterEmployeeNumber,
-        string? reason = null,
-        CancellationToken cancellationToken = default) => throw new NotSupportedException();
-
-    public Task<WaitlistRequest?> UpdateNoteAsync(
-        Guid requestId,
-        string? note,
-        string? actorEmployeeNumber = null,
-        string? actorEmployeeName = null,
-        CancellationToken cancellationToken = default) => Task.FromResult<WaitlistRequest?>(null);
-
-    public Task<WaitlistRequest?> AcceptAsync(
-        Guid requestId,
-        string handlerEmployeeNumber,
-        string? handlerEmployeeName = null,
-        CancellationToken cancellationToken = default) => Task.FromResult<WaitlistRequest?>(null);
-
-    public Task<WaitlistRequest?> CompleteAsync(
-        Guid requestId,
-        string handlerEmployeeNumber,
-        string? handlerEmployeeName = null,
-        CancellationToken cancellationToken = default) => Task.FromResult<WaitlistRequest?>(null);
-
-    public Task<WaitlistRequest?> ReleaseAsync(
-        Guid requestId,
-        string handlerEmployeeNumber,
-        string? handlerEmployeeName = null,
-        CancellationToken cancellationToken = default) => Task.FromResult<WaitlistRequest?>(null);
-
-    public Task<int> SetHandlerStatusAsync(
-        Guid requestId,
-        string? handlerStatus,
-        string expectedMaterialHandler,
-        CancellationToken cancellationToken = default) => Task.FromResult(0);
 }

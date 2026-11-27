@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Security.Cryptography;
 
 using Microsoft.Extensions.Options;
@@ -277,7 +277,7 @@ public sealed class UserManagementLiveIntegrationTests
             call.Parameters.AddWithValue("@p_change_group_id", Guid.NewGuid().ToString());
 
             var failure = await Assert
-                .ThrowsExceptionAsync<MySqlException>(() => call.ExecuteNonQueryAsync())
+                .ThrowsExactlyAsync<MySqlException>(() => call.ExecuteNonQueryAsync())
                 .ConfigureAwait(false);
 
             Assert.AreEqual(
@@ -531,7 +531,7 @@ public sealed class UserManagementLiveIntegrationTests
 
     private IUserManagementService BuildService(long userId, string signInName, string roleCode) =>
         new UserManagementService(
-            new UserManagementRepository(Options.Create(_options!)),
+            new UserManagementRepository(_helper!, Options.Create(_options!)),
             new FakePersonIdentity { UserId = userId, SignInName = signInName, CurrentRoleCode = roleCode });
 
     /// <summary>One search fact, and the peer found by it. The store is where the matching happens.</summary>
@@ -546,7 +546,7 @@ public sealed class UserManagementLiveIntegrationTests
 
     private async Task<long> CreateFixtureAsync(string signInName, string roleCode)
     {
-        await _helper!.ExecuteSqlNonQueryAsync(
+        await _helper!.ExecuteFixtureStatementAsync(
             "INSERT INTO core_users_profiles (public_id, username_normalized, first_name, last_name, password_hash, password_salt, require_password_change, temporary_credential_failed_attempts, display_name, employee_identifier, is_active, created_utc, updated_utc) "
                 + "VALUES (UUID(), @p_sign_in, 'Fixture', 'Person', 'fixture-hash', @p_salt, 0, 0, 'Fixture Person', '0000', 1, UTC_TIMESTAMP(), UTC_TIMESTAMP());",
             new Dictionary<string, object?> { ["p_sign_in"] = signInName, ["p_salt"] = new byte[32] },
@@ -560,7 +560,7 @@ public sealed class UserManagementLiveIntegrationTests
             long.TryParse(created, NumberStyles.Integer, CultureInfo.InvariantCulture, out var userId),
             $"The fixture account must be in the store: {signInName} ({created}).");
 
-        await _helper.ExecuteSqlNonQueryAsync(
+        await _helper.ExecuteFixtureStatementAsync(
             "INSERT INTO auth_roles_assignments (public_id, user_id, role_id, assigned_utc, assigned_by_user_id) "
                 + "SELECT UUID(), @p_user_id, r.id, UTC_TIMESTAMP(), @p_user_id FROM auth_roles_catalog r WHERE r.role_code = @p_role_code;",
             new Dictionary<string, object?> { ["p_user_id"] = userId, ["p_role_code"] = roleCode },
@@ -583,7 +583,7 @@ public sealed class UserManagementLiveIntegrationTests
         // The rebuilt session store holds one row per person per machine, so the fixture's running session is
         // written through the same upsert shape the sign-in path uses rather than as a second row that a real
         // sign-in could never produce.
-        await _helper!.ExecuteSqlNonQueryAsync(
+        await _helper!.ExecuteFixtureStatementAsync(
             "INSERT INTO user_active_sessions (public_id, user_id, computer_id, token_hash, token_salt, issued_utc, expires_utc, revoked_utc, is_active, source_label, created_utc) "
                 + "VALUES (UUID(), @p_user_id, @p_computer_id, @p_token_hash, @p_token_salt, UTC_TIMESTAMP(), @p_expires_utc, NULL, 1, 'sign_in', UTC_TIMESTAMP()) "
                 + "ON DUPLICATE KEY UPDATE token_hash = VALUES(token_hash), token_salt = VALUES(token_salt), issued_utc = VALUES(issued_utc), expires_utc = VALUES(expires_utc), revoked_utc = NULL, is_active = 1;",
@@ -613,7 +613,7 @@ public sealed class UserManagementLiveIntegrationTests
             return found;
         }
 
-        await _helper!.ExecuteSqlNonQueryAsync(
+        await _helper!.ExecuteFixtureStatementAsync(
             "INSERT INTO core_computers_registry (public_id, computer_name, hostname_normalized, mac_address_normalized, display_name, description, is_registered, created_utc, updated_utc) "
                 + "VALUES (UUID(), @p_name, @p_name, @p_mac, @p_display, NULL, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP());",
             new Dictionary<string, object?>
@@ -662,7 +662,7 @@ public sealed class UserManagementLiveIntegrationTests
             ["p_computer_prefix"] = $"{OwnedComputerPrefix}%",
         };
 
-        await _helper!.ExecuteSqlNonQueryAsync(
+        await _helper!.ExecuteFixtureStatementAsync(
             "DELETE FROM auth_user_management_audit WHERE target_user_id IN (SELECT id FROM core_users_profiles WHERE username_normalized LIKE @p_prefix);"
                 + " DELETE FROM user_active_sessions WHERE user_id IN (SELECT id FROM core_users_profiles WHERE username_normalized LIKE @p_prefix);"
                 + " DELETE ra FROM auth_roles_assignments ra INNER JOIN core_users_profiles u ON u.id = ra.user_id WHERE u.username_normalized LIKE @p_prefix;"
@@ -713,7 +713,7 @@ public sealed class UserManagementLiveIntegrationTests
     private async Task<string> ScalarAsync(string sql, IReadOnlyDictionary<string, object?> parameters)
     {
         var rows = await _helper!
-            .ExecuteSqlQueryAsync(sql, parameters, MySqlDatabaseTarget.MtmWaitlist)
+            .ExecuteFixtureQueryAsync(sql, parameters, MySqlDatabaseTarget.MtmWaitlist)
             .ConfigureAwait(false);
 
         return rows.Count == 0

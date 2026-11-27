@@ -1,6 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 
-using CommunityToolkit.WinUI.UI.Animations;
+using CommunityToolkit.WinUI.Animations;
 
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
@@ -158,5 +158,13 @@ public class NavigationService : INavigationService
         }
     }
 
-    public void SetListDataItemForNextConnectedAnimation(object item) => Frame.SetListDataItemForNextConnectedAnimation(item);
+    public void SetListDataItemForNextConnectedAnimation(object item)
+    {
+        // The connected animation is an enhancement: a host with no frame yet has nothing to animate from, which
+        // is not a fault, and the toolkit's 8.x call requires a frame rather than tolerating the absence.
+        if (Frame is { } frame)
+        {
+            frame.SetListDataItemForNextConnectedAnimation(item);
+        }
+    }
 }
