@@ -14,22 +14,8 @@
           "Dialogs"
         ],
         "unlessNameSuffixes": [
-          "Selector"
-        ]
-      },
-      {
-        "layer": "view",
-        "kinds": [
-          "class"
-        ],
-        "nameSuffixes": [
-          "Page",
-          "Window",
-          "Dialog",
-          "UserControl",
-          "Control",
-          "View",
-          "Panel"
+          "Selector",
+          "Host"
         ]
       },
       {
@@ -60,14 +46,6 @@
         ]
       },
       {
-        "layer": "service",
-        "namespaceSegments": [
-          "Services",
-          "Service",
-          "DependencyInjection"
-        ]
-      },
-      {
         "layer": "model",
         "kinds": [
           "class"
@@ -91,7 +69,109 @@
           "Options",
           "Card",
           "Credentials",
-          "Display"
+          "Display",
+          "Route",
+          "Exception"
+        ]
+      },
+      {
+        "layer": "model",
+        "kinds": [
+          "interface"
+        ],
+        "nameSuffixes": [
+          "Data",
+          "Result",
+          "Row",
+          "Entry",
+          "Option",
+          "Item",
+          "Column",
+          "Request",
+          "Payload",
+          "Outcome",
+          "Kind",
+          "State",
+          "Dto",
+          "EventArgs",
+          "Args",
+          "Options",
+          "Card",
+          "Credentials",
+          "Display",
+          "Route",
+          "Exception"
+        ]
+      },
+      {
+        "layer": "service",
+        "kinds": [
+          "interface"
+        ],
+        "nameSuffixes": [
+          "Service",
+          "Store",
+          "Provider",
+          "Reader",
+          "Writer",
+          "Catalog",
+          "Resolver",
+          "Fallback",
+          "Policy",
+          "Tracker",
+          "Hasher",
+          "Server",
+          "Gate",
+          "Host",
+          "Pipeline",
+          "Notifier",
+          "Prompt",
+          "Repository",
+          "Client",
+          "Handler",
+          "Converter",
+          "Selector",
+          "Extensions"
+        ]
+      },
+      {
+        "layer": "service",
+        "kinds": [
+          "interface"
+        ],
+        "namePrefixes": [
+          "Service_"
+        ]
+      },
+      {
+        "layer": "service",
+        "namespaceSegments": [
+          "Services",
+          "Service",
+          "DependencyInjection"
+        ]
+      },
+      {
+        "layer": "service",
+        "kinds": [
+          "interface"
+        ],
+        "namespaceSegments": [
+          "Services",
+          "Service",
+          "Contracts"
+        ]
+      },
+      {
+        "layer": "service",
+        "namespaceSegments": [
+          "Helpers"
+        ]
+      },
+      {
+        "layer": "service",
+        "namespaceSegments": [
+          "Api"
         ]
       },
       {
@@ -121,14 +201,12 @@
           "State",
           "Kind",
           "Model",
+          "Route",
           "Routes"
         ]
       },
       {
         "layer": "service",
-        "kinds": [
-          "interface"
-        ],
         "nameSuffixes": [
           "Service",
           "Store",
@@ -157,62 +235,44 @@
       },
       {
         "layer": "service",
-        "kinds": [
-          "interface"
-        ],
         "namePrefixes": [
           "Service_"
         ]
       },
       {
-        "layer": "service",
+        "layer": "model",
         "kinds": [
-          "interface"
+          "class"
         ],
         "namespaceSegments": [
-          "Services",
-          "Service",
-          "Contracts"
+          "Models"
+        ]
+      },
+      {
+        "layer": "view",
+        "kinds": [
+          "class"
+        ],
+        "nameSuffixes": [
+          "Page",
+          "Window",
+          "Dialog",
+          "UserControl",
+          "Control",
+          "View",
+          "Panel"
+        ]
+      },
+      {
+        "layer": "view",
+        "namespaceSegments": [
+          "Behaviors"
         ]
       },
       {
         "layer": "model",
         "kinds": [
           "interface"
-        ]
-      },
-      {
-        "layer": "service",
-        "nameSuffixes": [
-          "Service",
-          "Store",
-          "Provider",
-          "Reader",
-          "Writer",
-          "Catalog",
-          "Resolver",
-          "Fallback",
-          "Policy",
-          "Tracker",
-          "Hasher",
-          "Server",
-          "Gate",
-          "Host",
-          "Pipeline",
-          "Notifier",
-          "Prompt",
-          "Repository",
-          "Client",
-          "Handler",
-          "Converter",
-          "Selector",
-          "Extensions"
-        ]
-      },
-      {
-        "layer": "service",
-        "namePrefixes": [
-          "Service_"
         ]
       }
     ],
