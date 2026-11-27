@@ -581,13 +581,13 @@ public sealed class WaitlistRequestServiceTests
     }
 
     [TestMethod]
-    public void Service_WaitlistRequestServiceTests_NewRequestFlowRules_GetNextStepTypeRequiresAChosenItem()
+    public void Service_WaitlistRequestServiceTests_NewRequestFlowRules_GetNextStepRouteRequiresAChosenItem()
     {
         // The step order is a property of the chosen Item's stored configuration, so a state with no Item has no
         // next step to resolve — the type/subtype steps that used to decide this are gone (FR-003).
         var state = new NewRequestFlowState { WorkCenter = "Press 12" };
 
-        Assert.ThrowsExactly<ArgumentNullException>(() => NewRequestFlowRules.GetNextStepType(state));
+        Assert.ThrowsExactly<ArgumentNullException>(() => NewRequestFlowRules.GetNextStepRoute(state));
     }
 
     [TestMethod]

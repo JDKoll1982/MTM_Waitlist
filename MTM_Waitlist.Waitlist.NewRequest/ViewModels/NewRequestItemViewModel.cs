@@ -21,7 +21,7 @@ namespace MTM_Waitlist.Module_Waitlist.ViewModels;
 /// </summary>
 /// <remarks>
 /// Nothing here branches on the Item's identity. Which step follows is decided by the chosen Item's stored
-/// configuration through <see cref="NewRequestFlowRules.GetNextStepType"/>, and a catalogued Item with no usable
+/// configuration through <see cref="NewRequestFlowRules.GetNextStepRoute"/>, and a catalogued Item with no usable
 /// configuration row stops the flow with a plain-language report instead of proceeding half-configured
 /// (FR-014, FR-026).
 /// </remarks>
@@ -231,7 +231,7 @@ public partial class NewRequestItemViewModel : ObservableRecipient, INavigationA
 
         _state.ItemConfiguration = configuration;
         _state.InputValue = null;
-        _navigationService.NavigateTo(NewRequestFlowRules.GetNextStepType(_state).FullName!, _state);
+        _navigationService.NavigateTo(NewRequestFlowRules.GetNextStepRoute(_state), _state);
     }
 
     [RelayCommand]

@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Controls;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Startup.Services;
 using MTM_Waitlist.Module_Startup.ViewModels;
+using MTM_Waitlist.Services;
 
 namespace MTM_Waitlist.Module_Startup.Views;
 
@@ -43,11 +44,20 @@ internal sealed partial class SplashPage : Page, ILaunchStageSurface
     /// <summary>Guards the ending, so the person's close and the hand-over cannot both run it.</summary>
     private static bool s_isEnding;
 
-    public SplashPage()
+    private readonly IPictureCopyHold _pictureCopyHold;
+    private readonly IApplicationHost _host;
+
+    public SplashPage(SplashViewModel viewModel, IPictureCopyHold pictureCopyHold, IApplicationHost host)
     {
-        // The state is resolved from the host rather than taken as a constructor argument, because the host
-        // builds this page by type.
-        ViewModel = App.GetService<SplashViewModel>();
+        ArgumentNullException.ThrowIfNull(viewModel);
+        ArgumentNullException.ThrowIfNull(pictureCopyHold);
+        ArgumentNullException.ThrowIfNull(host);
+
+        _pictureCopyHold = pictureCopyHold;
+        _host = host;
+
+        // The state is resolved before the markup loads, so every binding sees its source on the first pass.
+        ViewModel = viewModel;
 
         // Set before anything is drawn, so a line written by a launch that is already running is marshalled too.
         ViewModel.UiThreadMarshaller = SendToThisThread;
@@ -117,7 +127,7 @@ internal sealed partial class SplashPage : Page, ILaunchStageSurface
     /// on, the copies on this computer are the ones in use, and the person is saying they have read that.
     /// </remarks>
     private void OnContinueClick(object sender, RoutedEventArgs e)
-        => App.GetService<IPictureCopyHold>().Acknowledge();
+        => _pictureCopyHold.Acknowledge();
 
     /// <summary>
     /// Ends the process from the surface's own button bar.
@@ -144,7 +154,7 @@ internal sealed partial class SplashPage : Page, ILaunchStageSurface
     /// Why the process is ending, in the reader's words. It is the same ending whichever route reached it, so the
     /// surface's own button and the window's close answer alike.
     /// </param>
-    internal static async Task EndProcessAsync(string reason)
+    private async Task EndProcessAsync(string reason)
     {
         if (s_isEnding)
         {
@@ -154,7 +164,7 @@ internal sealed partial class SplashPage : Page, ILaunchStageSurface
         s_isEnding = true;
 
         AppLog.Info("StartupLaunch", reason);
-        await App.ShutdownHostAsync().ConfigureAwait(true);
-        App.ExitApplication();
+        await _host.ShutdownAsync().ConfigureAwait(true);
+        _host.ExitApplication();
     }
 }

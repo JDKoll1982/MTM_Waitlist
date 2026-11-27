@@ -178,7 +178,7 @@ public partial class NewRequestJobTypeViewModel : ObservableRecipient, INavigati
         _state.SelectedDunnagePart = null;
 
         AppLog.Info("NewRequestJobType", $"Selected category '{category}' for work center '{_state.WorkCenter}'.");
-        _navigationService.NavigateTo(typeof(NewRequestItemViewModel).FullName!, _state);
+        _navigationService.NavigateTo(NewRequestStepRoutes.Item, _state);
     }
 
     [RelayCommand]

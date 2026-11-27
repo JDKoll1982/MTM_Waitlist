@@ -206,7 +206,7 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
         State.StatusMessage = string.Empty;
         State.CurrentStep = SetupWorkflowStep.WorkOrderEntry;
         await Task.CompletedTask;
-        _navigationService.NavigateTo(typeof(SetupWorkOrderViewModel).FullName!, null);
+        _navigationService.NavigateTo(SetupRoutes.WorkOrder, null);
     }
 
     [RelayCommand]
@@ -218,7 +218,7 @@ public partial class SetupWorkCenterViewModel : ObservableRecipient, INavigation
         }
 
         _navigationService.NavigateTo(
-            typeof(SetupWorkCenterHistoryViewModel).FullName!,
+            SetupRoutes.WorkCenterHistory,
             new SetupWorkCenterHistoryNavigationData(workCenter.Name, workCenter.Building));
     }
 

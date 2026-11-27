@@ -43,13 +43,22 @@ internal sealed partial class SignInPage : Page, ILaunchStageSurface
 {
     private readonly ILaunchPipeline _pipeline;
 
-    public SignInPage()
+    public SignInPage(
+        SignInViewModel viewModel,
+        PasswordChangeViewModel passwordChange,
+        SetUpPanelViewModel panel,
+        ILaunchPipeline pipeline)
     {
+        ArgumentNullException.ThrowIfNull(viewModel);
+        ArgumentNullException.ThrowIfNull(passwordChange);
+        ArgumentNullException.ThrowIfNull(panel);
+        ArgumentNullException.ThrowIfNull(pipeline);
+
         // Every state is resolved before the markup loads, so each binding sees its source on the first pass.
-        ViewModel = App.GetService<SignInViewModel>();
-        PasswordChange = App.GetService<PasswordChangeViewModel>();
-        Panel = App.GetService<SetUpPanelViewModel>();
-        _pipeline = App.GetService<ILaunchPipeline>();
+        ViewModel = viewModel;
+        PasswordChange = passwordChange;
+        Panel = panel;
+        _pipeline = pipeline;
 
         InitializeComponent();
 

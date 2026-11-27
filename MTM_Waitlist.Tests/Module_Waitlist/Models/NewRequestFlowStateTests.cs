@@ -89,7 +89,7 @@ public sealed class NewRequestFlowStateTests
     };
 
     [TestMethod]
-    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsDetailsWhenTheConfigurationAsksForAnAnswer()
+    public void Model_NewRequestFlowStateTests_GetNextStepRoute_ReturnsDetailsWhenTheConfigurationAsksForAnAnswer()
     {
         var state = StateWith(new RequestItemConfiguration
         {
@@ -101,11 +101,11 @@ public sealed class NewRequestFlowStateTests
             MaxLength = 200,
         });
 
-        Assert.AreEqual(typeof(NewRequestDetailsViewModel), NewRequestFlowRules.GetNextStepType(state));
+        Assert.AreEqual(NewRequestStepRoutes.Details, NewRequestFlowRules.GetNextStepRoute(state));
     }
 
     [TestMethod]
-    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheConfirmationStepWhenTheConfigurationAsksForNothing()
+    public void Model_NewRequestFlowStateTests_GetNextStepRoute_ReturnsTheConfirmationStepWhenTheConfigurationAsksForNothing()
     {
         var state = StateWith(new RequestItemConfiguration
         {
@@ -113,11 +113,11 @@ public sealed class NewRequestFlowStateTests
             ControlFlow = RequestItemConfiguration.DirectToConfirmation,
         });
 
-        Assert.AreEqual(typeof(NewRequestSummaryViewModel), NewRequestFlowRules.GetNextStepType(state));
+        Assert.AreEqual(NewRequestStepRoutes.Summary, NewRequestFlowRules.GetNextStepRoute(state));
     }
 
     [TestMethod]
-    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheConfirmationStepOnceTheAnswerIsCaptured()
+    public void Model_NewRequestFlowStateTests_GetNextStepRoute_ReturnsTheConfirmationStepOnceTheAnswerIsCaptured()
     {
         var state = StateWith(
             new RequestItemConfiguration
@@ -129,11 +129,11 @@ public sealed class NewRequestFlowStateTests
             },
             inputValue: "Please assist");
 
-        Assert.AreEqual(typeof(NewRequestSummaryViewModel), NewRequestFlowRules.GetNextStepType(state));
+        Assert.AreEqual(NewRequestStepRoutes.Summary, NewRequestFlowRules.GetNextStepRoute(state));
     }
 
     [TestMethod]
-    public void Model_NewRequestFlowStateTests_GetNextStepType_TreatsTheConfiguredControlFlowAsAnAnswerRequirement()
+    public void Model_NewRequestFlowStateTests_GetNextStepRoute_TreatsTheConfiguredControlFlowAsAnAnswerRequirement()
     {
         // A row that says "collect input" but leaves requires_answer unset still asks for an answer: the flow is a
         // property of the row, and the two columns must not be able to disagree into a skipped step.
@@ -144,62 +144,62 @@ public sealed class NewRequestFlowStateTests
             RequiresAnswer = false,
         });
 
-        Assert.AreEqual(typeof(NewRequestDetailsViewModel), NewRequestFlowRules.GetNextStepType(state));
+        Assert.AreEqual(NewRequestStepRoutes.Details, NewRequestFlowRules.GetNextStepRoute(state));
     }
 
     [TestMethod]
-    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheDieStepWhenTheAnswerNamesTheDieList()
+    public void Model_NewRequestFlowStateTests_GetNextStepRoute_ReturnsTheDieStepWhenTheAnswerNamesTheDieList()
     {
         // FR-054: both die Items ask which die, so the step that asks is chosen by the row exactly as the
         // dunnage step is. A die Item used to go straight to confirmation, which is why this is asserted.
         var state = StateWith(ConfigurationNaming(RequestItemFieldDefinition.Lists.Die));
 
-        Assert.AreEqual(typeof(NewRequestDieViewModel), NewRequestFlowRules.GetNextStepType(state));
+        Assert.AreEqual(NewRequestStepRoutes.Die, NewRequestFlowRules.GetNextStepRoute(state));
     }
 
     [TestMethod]
-    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheConfirmationStepOnceTheDieAnswerIsCaptured()
+    public void Model_NewRequestFlowStateTests_GetNextStepRoute_ReturnsTheConfirmationStepOnceTheDieAnswerIsCaptured()
     {
         var state = StateWith(ConfigurationNaming(RequestItemFieldDefinition.Lists.Die), inputValue: "FGT0002000");
 
-        Assert.AreEqual(typeof(NewRequestSummaryViewModel), NewRequestFlowRules.GetNextStepType(state));
+        Assert.AreEqual(NewRequestStepRoutes.Summary, NewRequestFlowRules.GetNextStepRoute(state));
     }
 
     [TestMethod]
-    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheDunnageStepWhenTheAnswerNamesTheDunnageList()
+    public void Model_NewRequestFlowStateTests_GetNextStepRoute_ReturnsTheDunnageStepWhenTheAnswerNamesTheDunnageList()
     {
         // FR-050: which step asks for the answer is decided by what the ROW declares, never by the Item's code —
         // this row is deliberately not one of the two dunnage Items.
         var state = StateWith(ConfigurationNaming(RequestItemFieldDefinition.Lists.Dunnage));
 
-        Assert.AreEqual(typeof(NewRequestDunnageViewModel), NewRequestFlowRules.GetNextStepType(state));
+        Assert.AreEqual(NewRequestStepRoutes.Dunnage, NewRequestFlowRules.GetNextStepRoute(state));
     }
 
     [TestMethod]
-    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheComponentStepWhenTheAnswerNamesTheComponentList()
+    public void Model_NewRequestFlowStateTests_GetNextStepRoute_ReturnsTheComponentStepWhenTheAnswerNamesTheComponentList()
     {
         // The component list has a step of its own: the operator clicks a box for each component the job carries
         // instead of picking a part number out of a drop-down list on the details step. Which step asks is still
         // the ROW's declaration, never the Item's code (FR-013).
         var state = StateWith(ConfigurationNaming(RequestItemFieldDefinition.Lists.Component));
 
-        Assert.AreEqual(typeof(NewRequestComponentViewModel), NewRequestFlowRules.GetNextStepType(state));
+        Assert.AreEqual(NewRequestStepRoutes.Component, NewRequestFlowRules.GetNextStepRoute(state));
     }
 
     [TestMethod]
-    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheConfirmationStepOnceTheComponentAnswerIsCaptured()
+    public void Model_NewRequestFlowStateTests_GetNextStepRoute_ReturnsTheConfirmationStepOnceTheComponentAnswerIsCaptured()
     {
         var state = StateWith(ConfigurationNaming(RequestItemFieldDefinition.Lists.Component), inputValue: "V-EMB-2");
 
-        Assert.AreEqual(typeof(NewRequestSummaryViewModel), NewRequestFlowRules.GetNextStepType(state));
+        Assert.AreEqual(NewRequestStepRoutes.Summary, NewRequestFlowRules.GetNextStepRoute(state));
     }
 
     [TestMethod]
-    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheConfirmationStepOnceTheDunnageAnswerIsCaptured()
+    public void Model_NewRequestFlowStateTests_GetNextStepRoute_ReturnsTheConfirmationStepOnceTheDunnageAnswerIsCaptured()
     {
         var state = StateWith(ConfigurationNaming(RequestItemFieldDefinition.Lists.Dunnage), inputValue: "DN-STL-4");
 
-        Assert.AreEqual(typeof(NewRequestSummaryViewModel), NewRequestFlowRules.GetNextStepType(state));
+        Assert.AreEqual(NewRequestStepRoutes.Summary, NewRequestFlowRules.GetNextStepRoute(state));
     }
 
     /// <summary>A usable row that asks for one enumerated answer drawn from the named job list.</summary>
@@ -262,56 +262,56 @@ public sealed class NewRequestFlowStateTests
     }
 
     [TestMethod]
-    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheHopperStepWhenTheRowAsksForTheSize()
+    public void Model_NewRequestFlowStateTests_GetNextStepRoute_ReturnsTheHopperStepWhenTheRowAsksForTheSize()
     {
         // The step is chosen by the answer the row declares, never by the Item's code (FR-013, FR-077).
         var state = StateDeclaring(NewRequestFlowRules.HopperSizeLabel, requiresAnswer: false);
 
-        Assert.AreEqual(typeof(NewRequestHopperViewModel), NewRequestFlowRules.GetNextStepType(state));
+        Assert.AreEqual(NewRequestStepRoutes.Hopper, NewRequestFlowRules.GetNextStepRoute(state));
     }
 
     [TestMethod]
-    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheConfirmationStepOnceTheSizeIsCaptured()
+    public void Model_NewRequestFlowStateTests_GetNextStepRoute_ReturnsTheConfirmationStepOnceTheSizeIsCaptured()
     {
         var state = StateDeclaring(NewRequestFlowRules.HopperSizeLabel, requiresAnswer: false);
         state.RecordAnswer(NewRequestFlowRules.HopperSizeLabel, "Large");
 
-        Assert.AreEqual(typeof(NewRequestSummaryViewModel), NewRequestFlowRules.GetNextStepType(state));
+        Assert.AreEqual(NewRequestStepRoutes.Summary, NewRequestFlowRules.GetNextStepRoute(state));
     }
 
     [TestMethod]
-    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheCoilTurnStepWhenTheRowAsksForTheWeightOfCoil()
+    public void Model_NewRequestFlowStateTests_GetNextStepRoute_ReturnsTheCoilTurnStepWhenTheRowAsksForTheWeightOfCoil()
     {
         var state = StateDeclaring(NewRequestFlowRules.CoilWeightLabel, requiresAnswer: true);
 
-        Assert.AreEqual(typeof(NewRequestCoilTurnViewModel), NewRequestFlowRules.GetNextStepType(state));
+        Assert.AreEqual(NewRequestStepRoutes.CoilTurn, NewRequestFlowRules.GetNextStepRoute(state));
     }
 
     [TestMethod]
-    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheSkidCountStepWhenTheRowAsksForTheSkidCount()
+    public void Model_NewRequestFlowStateTests_GetNextStepRoute_ReturnsTheSkidCountStepWhenTheRowAsksForTheSkidCount()
     {
         var state = StateDeclaring(NewRequestFlowRules.SkidCountLabel, requiresAnswer: false);
 
-        Assert.AreEqual(typeof(NewRequestSkidCountViewModel), NewRequestFlowRules.GetNextStepType(state));
+        Assert.AreEqual(NewRequestStepRoutes.SkidCount, NewRequestFlowRules.GetNextStepRoute(state));
     }
 
     [TestMethod]
-    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsThePartSearchStepWhenTheRowAsksForTheIncorrectPart()
+    public void Model_NewRequestFlowStateTests_GetNextStepRoute_ReturnsThePartSearchStepWhenTheRowAsksForTheIncorrectPart()
     {
         var state = StateDeclaring(NewRequestFlowRules.IncorrectCoilLabel, requiresAnswer: true);
 
-        Assert.AreEqual(typeof(NewRequestPartSearchViewModel), NewRequestFlowRules.GetNextStepType(state));
+        Assert.AreEqual(NewRequestStepRoutes.PartSearch, NewRequestFlowRules.GetNextStepRoute(state));
     }
 
     [TestMethod]
-    public void Model_NewRequestFlowStateTests_GetNextStepType_ReturnsTheDetailsStepAfterThePartSearchWhenTheRowAlsoAsksForAReason()
+    public void Model_NewRequestFlowStateTests_GetNextStepRoute_ReturnsTheDetailsStepAfterThePartSearchWhenTheRowAlsoAsksForAReason()
     {
         // The wrong-part Items ask two things: the incorrect part through the search, and the reason as the row's
         // own single answer. Capturing the part must not skip the reason the row still requires (data-model §10).
         var state = StateDeclaring(NewRequestFlowRules.IncorrectCoilLabel, requiresAnswer: true, alsoDeclaresReason: true);
         state.RecordAnswer(NewRequestFlowRules.IncorrectCoilLabel, "MMC0001000");
 
-        Assert.AreEqual(typeof(NewRequestDetailsViewModel), NewRequestFlowRules.GetNextStepType(state));
+        Assert.AreEqual(NewRequestStepRoutes.Details, NewRequestFlowRules.GetNextStepRoute(state));
     }
 
     /// <summary>A row that declares one answer-sourced field under <paramref name="label"/> and nothing else.</summary>
@@ -357,5 +357,27 @@ public sealed class NewRequestFlowStateTests
                 DetailFields = fields,
             },
         };
+    }
+    /// <summary>
+    /// Every route key equals the view model it names, so a step that is renamed or moved cannot leave a key that
+    /// navigates nowhere. The flow rules hold strings rather than type references, and this is the check that makes
+    /// that safe.
+    /// </summary>
+    [TestMethod]
+    public void Model_NewRequestFlowStateTests_StepRoutes_NameTheirViewModels()
+    {
+        Assert.AreEqual(NewRequestStepRoutes.WorkCenter, typeof(NewRequestWorkCenterViewModel).FullName);
+        Assert.AreEqual(NewRequestStepRoutes.JobType, typeof(NewRequestJobTypeViewModel).FullName);
+        Assert.AreEqual(NewRequestStepRoutes.Item, typeof(NewRequestItemViewModel).FullName);
+        Assert.AreEqual(NewRequestStepRoutes.Details, typeof(NewRequestDetailsViewModel).FullName);
+        Assert.AreEqual(NewRequestStepRoutes.Summary, typeof(NewRequestSummaryViewModel).FullName);
+        Assert.AreEqual(NewRequestStepRoutes.Result, typeof(NewRequestResultViewModel).FullName);
+        Assert.AreEqual(NewRequestStepRoutes.Die, typeof(NewRequestDieViewModel).FullName);
+        Assert.AreEqual(NewRequestStepRoutes.Dunnage, typeof(NewRequestDunnageViewModel).FullName);
+        Assert.AreEqual(NewRequestStepRoutes.Component, typeof(NewRequestComponentViewModel).FullName);
+        Assert.AreEqual(NewRequestStepRoutes.Hopper, typeof(NewRequestHopperViewModel).FullName);
+        Assert.AreEqual(NewRequestStepRoutes.CoilTurn, typeof(NewRequestCoilTurnViewModel).FullName);
+        Assert.AreEqual(NewRequestStepRoutes.SkidCount, typeof(NewRequestSkidCountViewModel).FullName);
+        Assert.AreEqual(NewRequestStepRoutes.PartSearch, typeof(NewRequestPartSearchViewModel).FullName);
     }
 }

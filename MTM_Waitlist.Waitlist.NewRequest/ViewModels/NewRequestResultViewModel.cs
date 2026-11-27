@@ -181,7 +181,7 @@ public partial class NewRequestResultViewModel : ObservableRecipient, INavigatio
         {
             Building = _state?.Building ?? string.Empty,
         };
-        _navigationService.NavigateTo(typeof(NewRequestWorkCenterViewModel).FullName!, freshState, true);
+        _navigationService.NavigateTo(NewRequestStepRoutes.WorkCenter, freshState, true);
     }
 
     [RelayCommand]

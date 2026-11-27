@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.UI.Xaml;
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
@@ -9,15 +10,18 @@ using MTM_Waitlist.Module_Core.Services;
 using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Shared.Services;
 using MTM_Waitlist.Module_Startup.Models;
+using MTM_Waitlist.Module_Startup.Options;
 using MTM_Waitlist.Module_Startup.Services;
+using MTM_Waitlist.Module_Startup.ViewModels;
 using MTM_Waitlist.Module_Startup.Views;
 using MTM_Waitlist.Mock.Contracts;
 using MTM_Waitlist.Notifications;
+using MTM_Waitlist.Services;
 using MTM_Waitlist.Services.DependencyInjection;
 
 namespace MTM_Waitlist;
 
-public partial class App : Application
+public partial class App : Application, IApplicationHost
 {
     private static Microsoft.UI.Dispatching.DispatcherQueue? _uiDispatcher;
     private static MainWindow? _mainWindow;
@@ -49,7 +53,46 @@ public partial class App : Application
         return service;
     }
 
-    public static MainWindow MainWindow => _mainWindow ??= new MainWindow();
+    public static MainWindow MainWindow => _mainWindow ??= CreateMainWindow();
+
+    /// <summary>
+    /// Builds the one window, handing it the host seam it answers closes with and the launch size to read.
+    /// </summary>
+    /// <remarks>
+    /// A window that cannot read the launch size is still a window: the size is resolved here, and a container that
+    /// cannot answer leaves it at the surface's own default rather than failing the window's construction
+    /// (checklist 8.2c).
+    /// </remarks>
+    private static MainWindow CreateMainWindow()
+    {
+        IOptions<LaunchWindowOptions>? launchWindowOptions = null;
+
+        try
+        {
+            launchWindowOptions = GetService<IOptions<LaunchWindowOptions>>();
+        }
+        catch (Exception)
+        {
+            // No usable setting was supplied, so the window opens at the launch surface's own default.
+        }
+
+        return new MainWindow(ApplicationHost, launchWindowOptions);
+    }
+
+    /// <summary>The host seam the window and the launch surfaces take their outward routes from.</summary>
+    private static IApplicationHost ApplicationHost => (App)Current!;
+
+    UIElement? IApplicationHost.Titlebar => AppTitlebar;
+
+    bool IApplicationHost.HasHandedOverToShell => HasHandedOverToShell;
+
+    bool IApplicationHost.IsExitRequested => IsExitRequested;
+
+    void IApplicationHost.OnWindowClosingDuringLaunch() => OnMainWindowClosingDuringLaunch();
+
+    Task IApplicationHost.ShutdownAsync() => ShutdownHostAsync();
+
+    void IApplicationHost.ExitApplication() => ExitApplication();
 
     /// <summary>
     /// The one window for the whole life of the application, or <c>null</c> before it has been built.
@@ -224,7 +267,10 @@ public partial class App : Application
     /// screens therefore leaves this stage in place, and the host replaces it with the stage the outcome means as
     /// each phase lands.
     /// </remarks>
-    private static void ShowLaunchWindow() => ShowLaunchStage(LaunchStage.Splash, new SplashPage());
+    private static void ShowLaunchWindow() =>
+        ShowLaunchStage(
+            LaunchStage.Splash,
+            new SplashPage(GetService<SplashViewModel>(), GetService<IPictureCopyHold>(), ApplicationHost));
 
     /// <summary>
     /// Shows one launch stage as the whole content of the one window, and remembers it so the window's close box
@@ -276,13 +322,24 @@ public partial class App : Application
             case LaunchStage.SignIn:
                 // The sign-in stage is where a launch ends when nobody is signed in yet (FR-001). It takes the
                 // launch surface's place in the same window rather than opening one of its own.
-                ShowLaunchStage(LaunchStage.SignIn, new SignInPage());
+                ShowLaunchStage(
+                    LaunchStage.SignIn,
+                    new SignInPage(
+                        GetService<SignInViewModel>(),
+                        GetService<PasswordChangeViewModel>(),
+                        GetService<SetUpPanelViewModel>(),
+                        GetService<ILaunchPipeline>()));
                 break;
 
             case LaunchStage.MachineSetup:
                 // Setup takes the launch surface's place for the same reason sign-in does: the window the person
                 // is working in is the one that owns the ending when they abandon it (FR-008).
-                ShowLaunchStage(LaunchStage.MachineSetup, new MachineSetupPage());
+                ShowLaunchStage(
+                    LaunchStage.MachineSetup,
+                    new MachineSetupPage(
+                        GetService<MachineSetupViewModel>(),
+                        GetService<ILaunchPipeline>(),
+                        MainWindow));
                 break;
 
             case LaunchStage.Blocked:
@@ -308,7 +365,10 @@ public partial class App : Application
     /// </remarks>
     private static void ShowBlockedStateStage()
     {
-        var page = new BlockedStatePage();
+        var page = new BlockedStatePage(
+            GetService<BlockedStateViewModel>(),
+            GetService<ILaunchPipeline>(),
+            MainWindow);
 
         ShowLaunchStage(LaunchStage.Blocked, page);
 

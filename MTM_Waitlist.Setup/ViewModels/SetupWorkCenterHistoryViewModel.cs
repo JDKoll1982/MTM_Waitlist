@@ -69,7 +69,7 @@ public partial class SetupWorkCenterHistoryViewModel : ObservableRecipient, INav
     {
         if (!_navigationService.GoBack())
         {
-            _navigationService.NavigateTo(typeof(SetupWorkCenterViewModel).FullName!, null, true);
+            _navigationService.NavigateTo(SetupRoutes.WorkCenter, null, true);
         }
     }
 

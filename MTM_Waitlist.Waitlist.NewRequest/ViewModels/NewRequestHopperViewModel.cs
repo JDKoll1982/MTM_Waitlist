@@ -210,7 +210,7 @@ public partial class NewRequestHopperViewModel : ObservableRecipient, INavigatio
             "NewRequestHopper",
             $"Hopper size '{chosen}' captured for work center '{state.WorkCenter}'.");
 
-        _navigationService.NavigateTo(NewRequestFlowRules.GetNextStepType(state).FullName!, state);
+        _navigationService.NavigateTo(NewRequestFlowRules.GetNextStepRoute(state), state);
     }
 
     [RelayCommand]

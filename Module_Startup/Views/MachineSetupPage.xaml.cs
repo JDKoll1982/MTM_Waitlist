@@ -53,10 +53,18 @@ internal sealed partial class MachineSetupPage : Page, ILaunchStageSurface
     /// <summary>Guards the ending, so two routes cannot both run it.</summary>
     private int _isEnding;
 
-    public MachineSetupPage()
+    private readonly ILaunchPipeline _pipeline;
+    private readonly WindowEx? _window;
+
+    public MachineSetupPage(MachineSetupViewModel viewModel, ILaunchPipeline pipeline, WindowEx? window)
     {
+        ArgumentNullException.ThrowIfNull(viewModel);
+        ArgumentNullException.ThrowIfNull(pipeline);
+
         // Resolved before the markup loads, so every binding sees its source on the first pass.
-        ViewModel = App.GetService<MachineSetupViewModel>();
+        ViewModel = viewModel;
+        _pipeline = pipeline;
+        _window = window;
 
         InitializeComponent();
 
@@ -112,7 +120,7 @@ internal sealed partial class MachineSetupPage : Page, ILaunchStageSurface
     /// window at all.
     /// </summary>
     private async void OnConfigurationSaved(object? sender, EventArgs e)
-        => await App.GetService<ILaunchPipeline>()
+        => await _pipeline
             .RetryFromAsync(SaveStepId, CancellationToken.None)
             .ConfigureAwait(true);
 
@@ -132,7 +140,7 @@ internal sealed partial class MachineSetupPage : Page, ILaunchStageSurface
 
         try
         {
-            if (App.MainWindow is { } owner)
+            if (_window is { } owner)
             {
                 await MessageDialogHost.AskAsync(owner, new MessageDialogRequest
                 {
@@ -150,6 +158,6 @@ internal sealed partial class MachineSetupPage : Page, ILaunchStageSurface
             AppLog.Error("MachineSetup", exception, "The reason setup was ending could not be shown on the stage.");
         }
 
-        App.GetService<ILaunchPipeline>().End(statement);
+        _pipeline.End(statement);
     }
 }

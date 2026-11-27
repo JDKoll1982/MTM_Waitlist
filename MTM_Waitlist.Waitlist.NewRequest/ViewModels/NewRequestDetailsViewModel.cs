@@ -243,7 +243,7 @@ public partial class NewRequestDetailsViewModel : ObservableRecipient, INavigati
 
         // The answer is complete; never route back to this page. The confirmation step is the next and last
         // step before the request is raised.
-        _navigationService.NavigateTo(typeof(NewRequestSummaryViewModel).FullName!, _state);
+        _navigationService.NavigateTo(NewRequestStepRoutes.Summary, _state);
     }
 
     [RelayCommand]

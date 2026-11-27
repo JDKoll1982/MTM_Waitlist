@@ -230,7 +230,7 @@ public partial class NewRequestDunnageViewModel : ObservableRecipient, INavigati
         AppLog.Info(
             "NewRequestDunnage",
             $"Dunnage part '{partNumber}' captured for work center '{state.WorkCenter}' (substitute={option is null}).");
-        _navigationService.NavigateTo(NewRequestFlowRules.GetNextStepType(state).FullName!, state);
+        _navigationService.NavigateTo(NewRequestFlowRules.GetNextStepRoute(state), state);
     }
 
     private static bool IsAmongAssigned(RequestDunnagePart part, NewRequestFlowState state) =>

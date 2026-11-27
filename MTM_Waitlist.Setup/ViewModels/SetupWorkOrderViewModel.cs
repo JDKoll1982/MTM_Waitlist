@@ -264,7 +264,7 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
     [RelayCommand]
     private void BackToWorkCenters()
     {
-        _navigationService.NavigateTo(typeof(SetupWorkCenterViewModel).FullName!, null);
+        _navigationService.NavigateTo(SetupRoutes.WorkCenter, null);
     }
 
     [RelayCommand]
@@ -311,7 +311,7 @@ public partial class SetupWorkOrderViewModel : ObservableRecipient, INavigationA
 
             if (result.Success)
             {
-                _navigationService.NavigateTo(typeof(SetupDunnageTypeViewModel).FullName!, null);
+                _navigationService.NavigateTo(SetupRoutes.DunnageType, null);
             }
         }
         catch (OperationCanceledException)

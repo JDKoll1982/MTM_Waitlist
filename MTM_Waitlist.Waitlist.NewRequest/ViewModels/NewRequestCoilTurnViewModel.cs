@@ -129,7 +129,7 @@ public partial class NewRequestCoilTurnViewModel : ObservableRecipient, INavigat
             "NewRequestCoilTurn",
             $"Weight of coil '{weight.ToString(CultureInfo.InvariantCulture)}' captured for work center '{state.WorkCenter}'.");
 
-        _navigationService.NavigateTo(NewRequestFlowRules.GetNextStepType(state).FullName!, state);
+        _navigationService.NavigateTo(NewRequestFlowRules.GetNextStepRoute(state), state);
     }
 
     [RelayCommand]

@@ -433,7 +433,7 @@ public partial class NewRequestSummaryViewModel : ObservableRecipient, INavigati
         }
 
         _navigationService.NavigateTo(
-            typeof(NewRequestResultViewModel).FullName!,
+            NewRequestStepRoutes.Result,
             new NewRequestResultNavigationData { State = _state, Phase = phase, Message = message });
     }
 

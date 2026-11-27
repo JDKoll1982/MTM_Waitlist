@@ -28,12 +28,12 @@ namespace MTM_Waitlist.Tests.Module_Waitlist.Views;
 /// resources as text for the same reason, and the same approach works here.
 /// </para>
 /// <para>
-/// <b>The one exemption.</b> <c>ShellPage</c> is the shell host: it is constructed with its view model and is
-/// never a <c>Frame.Navigate</c> target — that is the point of it, since it is what assigns
-/// <c>NavigationService.Frame</c>. The exempt set is pinned to exactly that one type so a second parameterised
-/// page cannot slip in unnoticed: adding one means editing this list, and the comment there has to say why it is
-/// not navigable. The retired splash and sign-in pages were the only other parameterised pages and are gone, so
-/// the pinned set is unchanged by their removal.
+/// <b>Two exempt categories, each pinned.</b> <c>ShellPage</c> is the shell host: it is constructed with its view
+/// model and is never a <c>Frame.Navigate</c> target — that is the point of it, since it is what assigns
+/// <c>NavigationService.Frame</c>. The launch surfaces (<c>ILaunchStageSurface</c>) are the other category: the
+/// host builds each of them and sets it as the one window's content, so none of them is ever activated by a
+/// frame. Both sets are pinned, so a second parameterised page cannot slip in unnoticed: adding one means editing
+/// a list here, and the comment there has to say why it is not navigable.
 /// </para>
 /// </remarks>
 [TestClass]
@@ -58,6 +58,23 @@ public sealed class PageActivationAuditTests
         "ShellPage",
     ];
 
+    /// <summary>
+    /// The launch surfaces: pages the host constructs with what they need and sets as the one window's content.
+    /// </summary>
+    /// <remarks>
+    /// A launch surface is never a <c>Frame.Navigate</c> target, so the framework never has to activate one: the
+    /// host resolves the state each of them drives and hands it over, which is what keeps a stage's view model out
+    /// of reach of the page's own details. The set is pinned like the exemption above, so a fifth surface — or a
+    /// stage that quietly became navigable — has to be reviewed here rather than pass unnoticed.
+    /// </remarks>
+    private static readonly string[] s_launchStagePages =
+    [
+        "SplashPage",
+        "SignInPage",
+        "MachineSetupPage",
+        "BlockedStatePage",
+    ];
+
     /// <summary>Matches a view class declaration and captures its name and base-type list.</summary>
     private static readonly Regex s_classDeclaration = new(
         @"\bclass\s+(?<name>\w+)\s*:\s*(?<bases>[^\r\n{]+)",
@@ -69,12 +86,19 @@ public sealed class PageActivationAuditTests
         var repositoryRoot = RepositoryPatternScan.FindRepositoryRoot();
         var violations = new List<string>();
         var exempted = new List<string>();
+        var launchSurfaces = new List<string>();
 
-        foreach (var (relativePath, className) in EnumeratePageClasses(repositoryRoot))
+        foreach (var (relativePath, className, isLaunchStage) in EnumeratePageClasses(repositoryRoot))
         {
             if (s_pagesConstructedWithDependencies.Contains(className, StringComparer.Ordinal))
             {
                 exempted.Add(className);
+                continue;
+            }
+
+            if (isLaunchStage)
+            {
+                launchSurfaces.Add(className);
                 continue;
             }
 
@@ -103,6 +127,13 @@ public sealed class PageActivationAuditTests
             "The exemption list is pinned to the pages that are genuinely constructed with dependencies. If a "
                 + "page was deleted the list is stale; if a page was added it must justify itself here rather "
                 + "than escape the audit.");
+
+        CollectionAssert.AreEquivalent(
+            s_launchStagePages,
+            launchSurfaces,
+            "The launch surfaces are pinned to the pages the host builds and sets as the one window's content. If "
+                + "a surface was deleted or stopped implementing ILaunchStageSurface the list is stale; a fifth "
+                + "one must be reviewed here rather than escape the audit.");
     }
 
     [TestMethod]
@@ -112,7 +143,6 @@ public sealed class PageActivationAuditTests
         var discovered = EnumeratePageClasses(repositoryRoot)
             .Select(page => page.ClassName)
             .ToHashSet(StringComparer.Ordinal);
-
         var missing = s_newRequestWizardPages.Where(page => !discovered.Contains(page)).ToList();
 
         Assert.AreEqual(
@@ -128,8 +158,8 @@ public sealed class PageActivationAuditTests
     /// Finds every <c>Page</c>-derived class declared in a view code-behind file.
     /// </summary>
     /// <param name="repositoryRoot">The repository root.</param>
-    /// <returns>Each page's path relative to the root, with its class name.</returns>
-    private static IEnumerable<(string RelativePath, string ClassName)> EnumeratePageClasses(string repositoryRoot)
+    /// <returns>Each page's path relative to the root, its class name, and whether it is a launch surface.</returns>
+    private static IEnumerable<(string RelativePath, string ClassName, bool IsLaunchStage)> EnumeratePageClasses(string repositoryRoot)
     {
         foreach (var file in Directory.EnumerateFiles(repositoryRoot, "*.xaml.cs", SearchOption.AllDirectories))
         {
@@ -156,7 +186,13 @@ public sealed class PageActivationAuditTests
                 continue;
             }
 
-            yield return (relativePath, match.Groups["name"].Value);
+            // A launch surface is content of the one window, built by the host rather than activated by a frame.
+            var isLaunchStage = bases.Any(baseType => string.Equals(
+                baseType.Split('.')[^1],
+                "ILaunchStageSurface",
+                StringComparison.Ordinal));
+
+            yield return (relativePath, match.Groups["name"].Value, isLaunchStage);
         }
     }
 

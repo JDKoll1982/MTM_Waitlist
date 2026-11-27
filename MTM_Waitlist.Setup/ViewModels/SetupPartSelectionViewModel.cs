@@ -118,7 +118,7 @@ public partial class SetupPartSelectionViewModel : ObservableRecipient, INavigat
 
         if (result.Success)
         {
-            _navigationService.NavigateTo(typeof(SetupSequenceSelectionViewModel).FullName!, null);
+            _navigationService.NavigateTo(SetupRoutes.SequenceSelection, null);
         }
     }
 }

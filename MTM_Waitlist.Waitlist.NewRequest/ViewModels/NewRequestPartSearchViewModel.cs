@@ -269,7 +269,7 @@ public partial class NewRequestPartSearchViewModel : ObservableRecipient, INavig
             "NewRequestPartSearch",
             $"Incorrect part '{chosen}' captured under '{_answerLabel}' for work center '{state.WorkCenter}'.");
 
-        _navigationService.NavigateTo(NewRequestFlowRules.GetNextStepType(state).FullName!, state);
+        _navigationService.NavigateTo(NewRequestFlowRules.GetNextStepRoute(state), state);
     }
 
     [RelayCommand]

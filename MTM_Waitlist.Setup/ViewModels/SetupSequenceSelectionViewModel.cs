@@ -74,7 +74,7 @@ public partial class SetupSequenceSelectionViewModel : ObservableRecipient, INav
 
         if (result.Success)
         {
-            _navigationService.NavigateTo(typeof(SetupDunnageTypeViewModel).FullName!, null);
+            _navigationService.NavigateTo(SetupRoutes.DunnageType, null);
         }
     }
 }

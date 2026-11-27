@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dependency Update and Modernization Report — MTM_Waitlist (Documentation)</title>
+<style>
+  @page { size: 8.5in 11in; margin: 0.85in 0.8in 0.9in 0.8in; }
+  html { font-size: 10.2pt; }
+  body {
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: #1d2530; line-height: 1.45; margin: 0;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  h1, h2, h3, h4 { font-family: "Segoe UI Semibold", "Segoe UI", Arial, sans-serif; color: #12304d; }
+  h1 { font-size: 21pt; margin: 0 0 .2em; letter-spacing: -.2px; }
+  h2 { font-size: 14.5pt; margin: 1.5em 0 .45em; padding-bottom: .18em; border-bottom: 1.5px solid #c9d6e2; break-after: avoid; }
+  h3 { font-size: 11.4pt; margin: 1.15em 0 .3em; color: #1b4b73; break-after: avoid; }
+  h4 { font-size: 10.4pt; margin: .9em 0 .2em; color: #2b5f88; break-after: avoid; }
+  p { margin: 0 0 .55em; }
+  ul, ol { margin: .2em 0 .7em; padding-left: 1.25em; }
+  li { margin-bottom: .18em; }
+  a { color: #0f5d8c; text-decoration: none; border-bottom: .5px solid #a8c4d8; word-break: break-word; }
+  code, .mono { font-family: "Cascadia Mono", Consolas, monospace; font-size: .88em; background: #f1f4f8; padding: .05em .25em; border-radius: 2px; }
+  table { width: 100%; border-collapse: collapse; margin: .5em 0 .95em; font-size: 8.9pt; }
+  th { background: #e8eef5; color: #12304d; text-align: left; font-weight: 600; padding: .38em .45em; border-bottom: 1.2px solid #b8c9da; }
+  td { padding: .34em .45em; border-bottom: .6px solid #dde5ee; vertical-align: top; }
+  th, td, code, .mono { overflow-wrap: anywhere; }
+  tbody tr:nth-child(even) td { background: #f7f9fc; }
+  tr, .row { break-inside: avoid; page-break-inside: avoid; }
+  thead { display: table-header-group; }
+  .cover { page-break-after: always; display: flex; flex-direction: column; justify-content: center; min-height: 8.4in; }
+  .cover .kicker { font-size: 10pt; letter-spacing: 2.4px; text-transform: uppercase; color: #4a6b87; margin-bottom: 1.1em; }
+  .cover .rule { height: 5px; width: 92px; background: #1b6ea8; margin: 1.4em 0 1.6em; }
+  .cover h1 { font-size: 27pt; line-height: 1.16; margin-bottom: .35em; }
+  .cover .subtitle { font-size: 12.6pt; color: #3d5a72; margin-bottom: 2.2em; line-height: 1.4; }
+  .facts { display: grid; grid-template-columns: 1fr 1fr; gap: .42em 1.6em; font-size: 9.4pt; margin-top: .4em; }
+  .facts div { border-top: .6px solid #d5dfe9; padding-top: .3em; }
+  .facts .k { display: block; color: #5c7a92; font-size: 8.2pt; text-transform: uppercase; letter-spacing: .7px; }
+  .facts .v { font-weight: 600; color: #17364f; }
+  .badge { display: inline-block; padding: .08em .5em; border-radius: 9px; font-size: 7.8pt; font-weight: 700; letter-spacing: .3px; text-transform: uppercase; white-space: nowrap; }
+  .p-high { background: #fde3d6; color: #8a3b0d; }
+  .p-medium { background: #fdf0cd; color: #7a5a06; }
+  .p-low { background: #e3ecf4; color: #33566f; }
+  .ok { background: #d9efe0; color: #176b39; }
+  .keep { background: #e9e6f6; color: #463579; }
+  .callout { border-left: 3.5px solid #1b6ea8; background: #f2f7fb; padding: .6em .85em; margin: .75em 0 1em; font-size: 9.4pt; break-inside: avoid; }
+  .callout.warn { border-left-color: #b9761a; background: #fdf7ec; }
+  .toc { font-size: 9.6pt; }
+  .toc ol { list-style: none; padding-left: 0; counter-reset: t; }
+  .toc > ol > li { margin-bottom: .42em; border-bottom: .5px dotted #ccd8e4; padding-bottom: .3em; }
+  .toc .num { display: inline-block; width: 1.9em; color: #6b8aa4; font-weight: 600; }
+  .lead { font-size: 10.6pt; color: #294a63; }
+  .metric-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6em; margin: .6em 0 1.1em; }
+  .metric { border: .8px solid #ccd9e5; border-radius: 4px; padding: .55em .65em; background: #fafcfe; }
+  .metric .n { display: block; font-size: 17pt; font-weight: 700; color: #14568a; line-height: 1.1; }
+  .metric .l { display: block; font-size: 8.3pt; color: #52708a; margin-top: .2em; }
+  .avoid { break-inside: avoid; }
+  .pagebreak { page-break-before: always; }
+  .nowrap { white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<section class="cover">
+  <div class="kicker">Workspace modernization audit</div>
+  <h1>Documentation Accuracy Report</h1>
+  <div class="rule"></div>
+  <p class="subtitle">
+    MTM_Waitlist — whether the repository's own documentation still describes the code it ships.<br>
+    Audit area: <strong>docs</strong> · depth: <strong>deep</strong>
+  </p>
+  <div class="facts">
+    <div><span class="k">Workspace</span><span class="v">JDKoll1982/MTM_Waitlist</span></div>
+    <div><span class="k">Research date</span><span class="v">27 November 2026</span></div>
+    <div><span class="k">Report version</span><span class="v">1.0 (docs run)</span></div>
+    <div><span class="k">Projects reviewed</span><span class="v">17 (.NET 10, WinUI 3)</span></div>
+    <div><span class="k">Documents reviewed</span><span class="v">74 prose docs, 14 instructions, 13 notes, 1 AGENTS.md</span></div>
+    <div><span class="k">Reference data excluded</span><span class="v">5,866 schema CSVs under docs/database</span></div>
+    <div><span class="k">Findings</span><span class="v">16 — 14 approved, 2 keep-current</span></div>
+    <div><span class="k">Dependencies reviewed</span><span class="v">None — out of scope for this run</span></div>
+  </div>
+</section>
+
+<!-- ============ TOC ============ -->
+<h2>Contents</h2>
+<div class="toc">
+  <ol>
+    <li><span class="num">1</span>Executive summary</li>
+    <li><span class="num">2</span>What was examined, and what was not</li>
+    <li><span class="num">3</span>Findings at a glance</li>
+    <li><span class="num">4</span>Finding detail</li>
+    <li><span class="num">5</span>Live guidance: instructions an agent follows</li>
+    <li><span class="num">6</span>What stays as it is</li>
+    <li><span class="num">7</span>Implementation roadmap</li>
+    <li><span class="num">8</span>Testing and risk</li>
+    <li><span class="num">9</span>Approval summary</li>
+    <li><span class="num">10</span>Final recommendations</li>
+    <li><span class="num">11</span>Sources</li>
+  </ol>
+</div>
+
+<!-- ============ 1. EXECUTIVE SUMMARY ============ -->
+<h2 class="pagebreak">1. Executive summary</h2>
+<p class="lead">
+The application's documentation is broadly sound but has drifted at the edges: the boundaries where a
+file was renamed, a tree was deleted, or a feature shipped and its planning document stayed behind.
+Sixteen places were found where a reader — including an AI agent that loads these files on every
+request — is sent to something that no longer exists.
+</p>
+
+<div class="metric-row">
+  <div class="metric"><span class="n">16</span><span class="l">findings, all documentation</span></div>
+  <div class="metric"><span class="n">14</span><span class="l">approved for correction</span></div>
+  <div class="metric"><span class="n">0</span><span class="l">code, package or database changes</span></div>
+</div>
+
+<h3>Overall health</h3>
+<p>
+Most of the 74 prose documents resolve cleanly. The problems concentrate in three habits rather than
+spreading evenly: a document that names a file by a path that was later reorganised; a planning document
+that was never retired once its feature shipped; and a diagram index that still advertises workflows the
+application no longer contains.
+</p>
+
+<h3>The highest-value items</h3>
+<ol>
+  <li><strong>Always-applied guidance points at a deleted tree.</strong> The Spec Kit instruction file tells
+    the agent that <span class="mono">WeekendProject/</span> is the authority for checklists and the seed for
+    the first feature. That folder is gone, so the instruction cannot be followed. It also names a helper
+    script, <span class="mono">drift.py</span>, that the installed tooling does not contain.</li>
+  <li><strong>A living specification has six dead references.</strong> The drift ledger — a document meant to
+    be kept current — cites five files that do not exist and one spec path that moved.</li>
+  <li><strong>The diagrams index advertises four workflows that are not there.</strong> The README describes
+    five workflows and ten PDFs; only the startup-launch pair exists. Eight links resolve to nothing.</li>
+  <li><strong>A shipped feature still reads as unbuilt.</strong> The startup design brief says "nothing here
+    is implemented yet" and points at a checklist that does not exist, although the feature has shipped.</li>
+</ol>
+
+<h3>Security and privacy</h3>
+<p>
+No vulnerability, credential or dependency issue was researched. One finding is privacy-adjacent: two
+documents link to <span class="mono">file:///C:/Users/jkoll/…</span> paths, which disclose a second
+workstation's profile name inside this repository. Removing them is approved.
+</p>
+
+<h3>What this changes for the people who use the application</h3>
+<p>
+Nothing at run time. Every approved change is an edit to a document or an instruction file. The benefit is
+to the people and agents who maintain the application: they stop following dead ends, and the review of a
+future change is not slowed by having to work out which document is still true.
+</p>
+
+<!-- ============ 2. WHAT WAS EXAMINED ============ -->
+<h2>2. What was examined, and what was not</h2>
+<table>
+  <thead><tr><th style="width:26%">Surface</th><th style="width:38%">What was read</th><th style="width:36%">How it was judged</th></tr></thead>
+  <tbody>
+    <tr><td>Prose documentation</td><td>74 Markdown files under <span class="mono">docs/</span> — defects, diagrams, guides, living specs, modules, operations, reference, research, scripts, startup, UI designs</td><td>Every relative link, every inline-code path, every <span class="mono">Type.Member</span> reference, and every numeric claim</td></tr>
+    <tr><td>Reference data</td><td>5,866 tab-delimited CSVs under <span class="mono">docs/database/</span></td><td><em>Excluded</em> — read-only schema exports, not prose</td></tr>
+    <tr><td>Agent guidance</td><td><span class="mono">AGENTS.md</span>, <span class="mono">.github/copilot-instructions.md</span>, 14 files under <span class="mono">.github/instructions/</span></td><td>Whether each cited path exists and each stated count matches the tree</td></tr>
+    <tr><td>Repository memories</td><td>13 notes under <span class="mono">.github/memories/repo/</span></td><td>Same tests as agent guidance</td></tr>
+    <tr><td>Skills and agents</td><td>82 skills, 92 agents</td><td><em>Inventoried only</em> — assessing them is the AI-tooling area, which this run did not cover</td></tr>
+    <tr><td>Dependencies, code, database, tests</td><td>Not examined</td><td>Out of scope for a <span class="mono">docs</span> run</td></tr>
+  </tbody>
+</table>
+<p>
+The scan produced 58 link candidates, 558 path candidates and 29 symbol candidates. Each surviving
+candidate was then read in its own context, which removed the false alarms: 29 links were inline
+<span class="mono">data:</span> images rather than references, 20 symbols were framework APIs, configuration
+keys or database columns, and several documents already say "retired" or "deleted" about the path they
+name — which is correct history, not drift.
+</p>
+
+<!-- ============ 3. FINDINGS AT A GLANCE ============ -->
+<h2>3. Findings at a glance</h2>
+<table>
+  <thead><tr><th style="width:9%">ID</th><th style="width:41%">Finding</th><th style="width:20%">Where</th><th style="width:11%">Priority</th><th style="width:19%">Decision</th></tr></thead>
+  <tbody>
+    <tr><td>DEV-001</td><td>Guidance calls the deleted <span class="mono">WeekendProject/</span> tree authoritative</td><td>spec-kit instructions</td><td><span class="badge p-medium">Medium</span></td><td><span class="badge ok">Approved</span></td></tr>
+    <tr><td>DEV-002</td><td>Guidance names a helper script that is not installed</td><td>spec-kit instructions</td><td><span class="badge p-medium">Medium</span></td><td><span class="badge ok">Approved</span></td></tr>
+    <tr><td>DEV-003</td><td>Living drift ledger has six dead references</td><td>docs/living-specs</td><td><span class="badge p-medium">Medium</span></td><td><span class="badge ok">Approved</span></td></tr>
+    <tr><td>DEV-004</td><td>Diagram index advertises four workflows whose PDFs are gone</td><td>docs/diagrams</td><td><span class="badge p-medium">Medium</span></td><td><span class="badge ok">Approved</span></td></tr>
+    <tr><td>DEV-005</td><td>A shipped feature's design brief reads as unbuilt</td><td>docs/startup</td><td><span class="badge p-medium">Medium</span></td><td><span class="badge ok">Approved</span></td></tr>
+    <tr><td>DEV-006</td><td>QOL proposals link their images from the wrong folder</td><td>5 UI-design docs</td><td><span class="badge p-low">Low</span></td><td><span class="badge ok">Approved</span></td></tr>
+    <tr><td>DEV-007</td><td>A checklist filename offered as an example does not exist</td><td>copilot instructions</td><td><span class="badge p-low">Low</span></td><td><span class="badge ok">Approved</span></td></tr>
+    <tr><td>DEV-008</td><td>Audit-test path is short by two folders</td><td>test conventions</td><td><span class="badge p-low">Low</span></td><td><span class="badge ok">Approved</span></td></tr>
+    <tr><td>DEV-009</td><td>Design-system guidance states 65 XAML files; there are 92</td><td>winui3 adoption</td><td><span class="badge p-low">Low</span></td><td><span class="badge ok">Approved</span></td></tr>
+    <tr><td>DEV-010</td><td>A memory note cites a spec path that moved</td><td>memories/repo</td><td><span class="badge p-low">Low</span></td><td><span class="badge ok">Approved</span></td></tr>
+    <tr><td>DEV-011</td><td>A memory note cites four diagram PDFs at a flat path</td><td>memories/repo</td><td><span class="badge p-low">Low</span></td><td><span class="badge ok">Approved</span></td></tr>
+    <tr><td>DEV-012</td><td>Generated artefacts are listed as committed files</td><td>scripts index</td><td><span class="badge p-low">Low</span></td><td><span class="badge ok">Approved</span></td></tr>
+    <tr><td>DEV-013</td><td>Links to another workstation's absolute paths, exposing a profile name</td><td>scripts guide</td><td><span class="badge p-low">Low</span></td><td><span class="badge ok">Approved</span></td></tr>
+    <tr><td>DEV-014</td><td><span class="mono">AGENTS.md</span> says 17 guardrail tests; there are 18</td><td>AGENTS.md</td><td><span class="badge p-low">Low</span></td><td><span class="badge ok">Approved</span></td></tr>
+    <tr><td>DEV-015</td><td>12 defect records cite paths that later moved</td><td>docs/defects</td><td><span class="badge p-low">Low</span></td><td><span class="badge keep">Keep current</span></td></tr>
+    <tr><td>DEV-016</td><td>A pre-spec research record cites pre-spec paths</td><td>docs/research</td><td><span class="badge p-low">Low</span></td><td><span class="badge keep">Keep current</span></td></tr>
+  </tbody>
+</table>
+
+<!-- ============ 4. FINDING DETAIL ============ -->
+<h2 class="pagebreak">4. Finding detail</h2>
+
+<h3>DEV-001 · Guidance points at a deleted tree</h3>
+<p>
+The Spec Kit instruction file is applied to every request. Line 61 tells the agent that
+<span class="mono">WeekendProject/PromptFiles/*</span> remains authoritative for checklists, and line 64 names
+<span class="mono">WeekendProject/Module_Mock/Spec.md</span> as the seed for the first feature. Neither exists:
+the folder was deleted with the Module_Mock workstream, and the work survives as the first feature spec.
+<em>Approved:</em> point at <span class="mono">specs/001-module-mock-visual-fallback/</span> and at the two
+checklist skills that already hold the rule.
+</p>
+
+<h3>DEV-002 · A helper script that is not installed</h3>
+<p>
+Line 45 explains why the Companion's Python helpers must be called with <span class="mono">python</span>
+rather than <span class="mono">python3</span> — a real and current caution. It lists
+<span class="mono">write-context.py</span>, <span class="mono">doctor.py</span> and
+<span class="mono">drift.py</span>; the extension ships 17 scripts, and there is no
+<span class="mono">drift.py</span>. <em>Approved:</em> name <span class="mono">doctor.py</span> and keep the
+caution intact.
+</p>
+
+<h3>DEV-003 · A living document with dead references</h3>
+<p>
+The drift ledger is one of three living specs — documents expected to stay true. It cites
+<span class="mono">FEATURES.md</span>, <span class="mono">OPEN-TASKS.md</span>,
+<span class="mono">RELEASE-NOTES.md</span>, <span class="mono">DeveloperUI-VisualPrompts.md</span>,
+<span class="mono">VALIDATION-PROMPT-SERVER.md</span> and <span class="mono">drift.py</span>, none of which
+exist, and <span class="mono">specs/001/tasks.md</span>, which is now
+<span class="mono">specs/001-module-mock-visual-fallback/tasks.md</span>. <em>Approved:</em> repoint the spec
+path and remove the five dead references, saying in the line that those artefacts are gone.
+</p>
+
+<h3>DEV-004 · Diagrams for workflows that no longer exist</h3>
+<p>
+The diagrams README opens "Five workflows in this application" and presents a table of ten documents. The
+folder contains one workflow: <span class="mono">pdf/startup-launch/</span> with an engineer and a plain
+language PDF, and five Graphviz sources for it. The other four workflows — work-order and generic-request
+request and setup flows — have neither a PDF nor a source. The refactor notes repeat the same eight dead
+links in a flat form. <em>Approved:</em> reduce the README to the workflow that exists and state plainly
+that the other four were removed with their flows; strip the dead links from the notes.
+</p>
+<div class="callout warn">
+  <strong>One check before implementing:</strong> confirm whether the four workflows were removed or only
+  paused. The README's wording must match the answer, and "removed" is wrong if the diagrams are waiting to
+  be rebuilt.
+</div>
+
+<h3>DEV-005 · A shipped feature that still reads as unbuilt</h3>
+<p>
+<span class="mono">docs/startup/startup-rebuild-design-brief.md</span> begins "Nothing here is implemented
+yet; the removal checklist is the first work" and defers its section references to
+<span class="mono">STARTUP-REBUILD-CHECKLIST.md</span>, which does not exist. The startup rebuild shipped as
+feature 010, and 27 of the brief's file references have since moved or been deleted. <em>Approved:</em> move
+the brief beside its feature, into <span class="mono">specs/010-startup-rebuild/</span>, where a planning
+document is read as a record rather than as current state.
+</p>
+
+<h3>DEV-006 · Proposals that cannot show their own pictures</h3>
+<p>
+Five design proposals render BEFORE and AFTER images. Each links them as siblings
+(<span class="mono">name-the-authority-before.png</span>), but the files sit in a
+<span class="mono">pngs/</span> folder beside the proposal. The picture exists and the link is wrong, which
+is the cheapest kind of drift to fix and the most confusing to read.
+</p>
+
+<h3>DEV-007 to DEV-014 · Path and count hygiene</h3>
+<table>
+  <thead><tr><th style="width:10%">ID</th><th style="width:44%">What is wrong</th><th style="width:46%">What it should be</th></tr></thead>
+  <tbody>
+    <tr><td>DEV-007</td><td><span class="mono">WAITLIST_REQUEST_WORKFLOW_TASKS.md</span> offered as a checklist example</td><td>The checklist-execution skill, which is the mechanism that exists</td></tr>
+    <tr><td>DEV-008</td><td><span class="mono">Module_Mock/RetiredSymbolAuditTests.cs</span></td><td><span class="mono">MTM_Waitlist.Tests/Module_Mock/RetiredSymbolAuditTests.cs</span></td></tr>
+    <tr><td>DEV-009</td><td>"65 XAML files" in the design-system instruction</td><td>92, with the date of the count</td></tr>
+    <tr><td>DEV-010</td><td><span class="mono">specs/001/tasks.md</span></td><td><span class="mono">specs/001-module-mock-visual-fallback/tasks.md</span></td></tr>
+    <tr><td>DEV-011</td><td>Four diagram PDFs at <span class="mono">pdf/&lt;name&gt;.pdf</span></td><td>The startup-launch PDFs that exist; the rest stated as gone</td></tr>
+    <tr><td>DEV-012</td><td>Three tooltip-inventory files listed as part of the repository</td><td>Stated as outputs of <span class="mono">Generate-TooltipInventory.ps1</span></td></tr>
+    <tr><td>DEV-013</td><td>Two <span class="mono">file:///C:/Users/jkoll/…</span> links</td><td>The in-repo script the guide documents, or nothing</td></tr>
+    <tr><td>DEV-014</td><td>"17 <span class="mono">*AuditTests</span> guardrails"</td><td>18</td></tr>
+  </tbody>
+</table>
+
+<!-- ============ 5. LIVE GUIDANCE ============ -->
+<h2>5. Live guidance: instructions an agent follows</h2>
+<p>
+Eight of the sixteen findings sit in files that are loaded or applied without being asked for:
+<span class="mono">AGENTS.md</span>, <span class="mono">.github/copilot-instructions.md</span>, two files under
+<span class="mono">.github/instructions/</span>, and two notes under
+<span class="mono">.github/memories/repo/</span>. That is why they matter out of proportion to their size: a
+wrong path in a document nobody opens costs nothing, and a wrong path in an instruction every request reads
+costs a failed lookup every time.
+</p>
+<table>
+  <thead><tr><th style="width:34%">File</th><th style="width:14%">Loaded</th><th style="width:52%">What is wrong there</th></tr></thead>
+  <tbody>
+    <tr><td><span class="mono">.github/instructions/spec-kit.instructions.md</span></td><td>Always</td><td>DEV-001, DEV-002</td></tr>
+    <tr><td><span class="mono">.github/copilot-instructions.md</span></td><td>Always</td><td>DEV-007</td></tr>
+    <tr><td><span class="mono">AGENTS.md</span></td><td>Always</td><td>DEV-014</td></tr>
+    <tr><td><span class="mono">.github/instructions/test-conventions.instructions.md</span></td><td>On test paths</td><td>DEV-008</td></tr>
+    <tr><td><span class="mono">.github/instructions/winui3-adoption.instructions.md</span></td><td>On XAML</td><td>DEV-009</td></tr>
+    <tr><td><span class="mono">.github/memories/repo/tasks-md-id-allocation.md</span></td><td>On demand</td><td>DEV-010</td></tr>
+    <tr><td><span class="mono">.github/memories/repo/workflow-diagrams.md</span></td><td>On demand</td><td>DEV-011</td></tr>
+  </tbody>
+</table>
+<p>
+The instruction is to change the reference and nothing else. These files are always applied, so a sentence
+that gains or loses meaning changes how work is done; a sentence whose path is corrected only stops wasting a
+lookup.
+</p>
+
+<!-- ============ 6. WHAT STAYS ============ -->
+<h2>6. What stays as it is</h2>
+<p>
+Two findings were deliberately left alone, and the decision records that they must not be "tidied" later.
+Twelve defect records and one research record cite paths as they stood when they were written. A defect
+record is the evidence for a diagnosis; rewriting its paths would misrepresent where the fault was found, and
+a research record is a snapshot of what was known before the design. Both were reviewed and both are correct
+as history.
+</p>
+<p>
+The same reasoning protects several things this audit noticed but did not raise: documents that name a
+deleted file while saying it was deleted, and the design proposals that share one template heading. Neither is
+drift.
+</p>
+
+<!-- ============ 7. ROADMAP ============ -->
+<h2>7. Implementation roadmap</h2>
+<table>
+  <thead><tr><th style="width:8%">Phase</th><th style="width:22%">Objective</th><th style="width:34%">Work</th><th style="width:14%">Depends on</th><th style="width:22%">Done when</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>Live guidance can be followed</td><td>DEV-001, DEV-002, DEV-007, DEV-008, DEV-009, DEV-014 — five instruction files and <span class="mono">AGENTS.md</span></td><td>Nothing</td><td>No dead path in any always-applied file; the guardrail count reads 18</td></tr>
+    <tr><td>2</td><td>Living documents are true</td><td>DEV-003 — the drift ledger</td><td>Phase 1</td><td>The ledger's reference scan is clean</td></tr>
+    <tr><td>3</td><td>Shipped work stops reading as pending</td><td>DEV-004, DEV-005 — the diagrams index, refactor notes and the startup brief</td><td>Phase 2</td><td>The brief sits in <span class="mono">specs/010-startup-rebuild/</span>; every diagram link resolves</td></tr>
+    <tr><td>4</td><td>Paths in notes, scripts and proposals</td><td>DEV-006, DEV-010, DEV-011, DEV-012, DEV-013</td><td>Independent</td><td>The proposals render their images; no <span class="mono">file:///C:/Users/</span> string remains</td></tr>
+  </tbody>
+</table>
+<p>
+Phase 4 can run in parallel with the first three: it touches none of their files. Phases 2 and 3 are ordered
+only because a corrected ledger is the natural place to record that the four workflows were removed.
+</p>
+
+<!-- ============ 8. TESTING ============ -->
+<h2>8. Testing and risk</h2>
+<p>
+No build, test or restore is involved: every approved change is an edit to documentation or an instruction
+file, and this repository does not build its documentation. Validation is therefore a reference scan, which is
+also how this audit measured the problem in the first place, so the same measure proves the fix.
+</p>
+<table>
+  <thead><tr><th style="width:38%">Risk</th><th style="width:14%">Likelihood</th><th style="width:48%">Mitigation</th></tr></thead>
+  <tbody>
+    <tr><td>Rewording always-applied guidance changes agent behaviour</td><td>Low</td><td>Change only the reference inside each sentence; add no guidance; review the diff line by line</td></tr>
+    <tr><td>Removing a ledger line loses the fact that an artefact existed</td><td>Medium</td><td>Say in the line that the artefact was removed rather than dropping it silently</td></tr>
+    <tr><td>"Removed" is wrong if the four diagram workflows are paused</td><td>Medium</td><td>Confirm with the owner before writing the README sentence</td></tr>
+    <tr><td>Moving the design brief breaks a document that links to it</td><td>Low</td><td>Search for the old path before and after the move</td></tr>
+    <tr><td>Counts go stale again</td><td>Certain</td><td>Each count carries the date it was taken</td></tr>
+  </tbody>
+</table>
+
+<!-- ============ 9. APPROVAL SUMMARY ============ -->
+<h2>9. Approval summary</h2>
+<table>
+  <thead><tr><th style="width:40%">Decision</th><th style="width:14%">Count</th><th style="width:46%">Items</th></tr></thead>
+  <tbody>
+    <tr><td><span class="badge ok">Approved</span></td><td>14</td><td>DEV-001 to DEV-014</td></tr>
+    <tr><td><span class="badge keep">Keep current</span></td><td>2</td><td>DEV-015, DEV-016</td></tr>
+    <tr><td>Rejected</td><td>0</td><td>—</td></tr>
+    <tr><td>Deferred</td><td>0</td><td>—</td></tr>
+    <tr><td>More research required</td><td>0</td><td>—</td></tr>
+    <tr><td>Pending user decision</td><td>0</td><td>—</td></tr>
+  </tbody>
+</table>
+
+<!-- ============ 10. FINAL RECOMMENDATIONS ============ -->
+<h2>10. Final recommendations</h2>
+<ol>
+  <li><strong>Do Phase 1 first and on its own.</strong> Correcting the six live-guidance references is small,
+    reversible and removes the only findings that cost every request rather than every reader.</li>
+  <li><strong>Answer the diagram question before Phase 3.</strong> "Removed" and "paused" lead to different
+    sentences, and the wrong one would be a new inaccuracy in place of an old one.</li>
+  <li><strong>Treat the move of the startup brief as a record, not a rewrite.</strong> Its value is the design
+    rationale; its paths are history.</li>
+  <li><strong>Keep a reference scan in the loop.</strong> This audit found 16 items with a mechanical scan plus
+    a reading of each candidate. Re-running the same scan after any documentation change is the cheapest way to
+    stop the same drift returning.</li>
+</ol>
+
+<div class="callout">
+  <strong>Nothing was implemented.</strong> No file in this repository was edited by this audit. The only
+  files written are this report, its rendering source and the specification, all under
+  <span class="mono">Dependency_Assessment/2026-11-27-docs-deep/</span>.
+</div>
+
+<!-- ============ 11. SOURCES ============ -->
+<h2>11. Sources</h2>
+<table>
+  <thead><tr><th style="width:56%">Source</th><th style="width:30%">Used for</th><th style="width:14%">Checked</th></tr></thead>
+  <tbody>
+    <tr><td>Local — <span class="mono">.github/instructions/spec-kit.instructions.md</span></td><td>DEV-001, DEV-002</td><td>27 Nov 2026</td></tr>
+    <tr><td>Local — <span class="mono">.specify/extensions/companion/scripts/</span></td><td>The 17 scripts that do exist; no <span class="mono">drift.py</span></td><td>27 Nov 2026</td></tr>
+    <tr><td>Local — <span class="mono">docs/living-specs/living-specs-drift-ledger.md</span></td><td>DEV-003</td><td>27 Nov 2026</td></tr>
+    <tr><td>Local — <span class="mono">docs/diagrams/</span> (README, notes, <span class="mono">pdf/</span>, <span class="mono">dot/</span>)</td><td>DEV-004</td><td>27 Nov 2026</td></tr>
+    <tr><td>Local — <span class="mono">docs/startup/startup-rebuild-design-brief.md</span></td><td>DEV-005</td><td>27 Nov 2026</td></tr>
+    <tr><td>Local — <span class="mono">docs/ui-designs/startup-launch/**</span></td><td>DEV-006</td><td>27 Nov 2026</td></tr>
+    <tr><td>Local — <span class="mono">.github/copilot-instructions.md</span>, <span class="mono">.github/instructions/*</span>, <span class="mono">.github/memories/repo/*</span></td><td>DEV-007 to DEV-011</td><td>27 Nov 2026</td></tr>
+    <tr><td>Local — <span class="mono">docs/scripts/</span>, <span class="mono">scripts/</span></td><td>DEV-012, DEV-013</td><td>27 Nov 2026</td></tr>
+    <tr><td>Local — <span class="mono">AGENTS.md</span>, <span class="mono">MTM_Waitlist.Tests/**/*AuditTests.cs</span></td><td>DEV-014</td><td>27 Nov 2026</td></tr>
+    <tr><td>Local — <span class="mono">docs/defects/</span>, <span class="mono">docs/research/</span></td><td>DEV-015, DEV-016 (keep current)</td><td>27 Nov 2026</td></tr>
+  </tbody>
+</table>
+<p class="mono" style="margin-top:1.2em; color:#6b8aa4;">No external source was consulted for this run.</p>
+
+</body>
+</html>

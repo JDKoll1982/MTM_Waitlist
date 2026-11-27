@@ -386,7 +386,7 @@ public partial class NewRequestWorkCenterViewModel : ObservableRecipient, INavig
             return;
         }
 
-        _navigationService.NavigateTo(typeof(NewRequestJobTypeViewModel).FullName!, _state);
+        _navigationService.NavigateTo(NewRequestStepRoutes.JobType, _state);
     }
 
     [RelayCommand]

@@ -4,6 +4,7 @@ using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Startup.Models;
 using MTM_Waitlist.Module_Startup.Options;
 using MTM_Waitlist.Module_Startup.Services;
+using MTM_Waitlist.Services;
 using Windows.Graphics;
 using Windows.UI.ViewManagement;
 
@@ -17,13 +18,24 @@ public sealed partial class MainWindow : WindowEx
     private readonly Microsoft.UI.Dispatching.DispatcherQueue? _dispatcherQueue;
     private readonly UISettings? _settings;
 
+    /// <summary>What the window's close box and its theme hook answer through, so the window names no host type.</summary>
+    private readonly IApplicationHost _host;
+
+    /// <summary>The launch size to read, or null when no usable setting was supplied.</summary>
+    private readonly IOptions<LaunchWindowOptions>? _launchWindowOptions;
+
     /// <summary>Places the one window: centred while it hosts a launch stage, maximised for the shell.</summary>
     private readonly WindowPlacementService _placement = new();
 
     private bool _isDisposed;
 
-    public MainWindow()
+    internal MainWindow(IApplicationHost host, IOptions<LaunchWindowOptions>? launchWindowOptions = null)
     {
+        ArgumentNullException.ThrowIfNull(host);
+
+        _host = host;
+        _launchWindowOptions = launchWindowOptions;
+
         InitializeComponent();
         AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets/Packaging/window-icon.ico"));
         Title = "AppDisplayName".GetLocalized();
@@ -123,7 +135,7 @@ public sealed partial class MainWindow : WindowEx
     /// splash uses the configured launch size so a workstation can still be given a different one (checklist
     /// 8.2c); the shell maximises rather than being sized here.
     /// </summary>
-    private static SizeInt32 SizeFor(LaunchStage stage) => stage switch
+    private SizeInt32 SizeFor(LaunchStage stage) => stage switch
     {
         // The sign-in stage holds two columns: the form, and a rule, and the six people who signed in here
         // before. The size is what that reads at, so all six are visible rather than cut off (FR-048, SC-022).
@@ -138,11 +150,11 @@ public sealed partial class MainWindow : WindowEx
     /// The configured launch size, or the surface's own default when no usable setting was supplied. A window the
     /// person can still read beats refusing to size over a mistyped figure (checklist 8.2c).
     /// </summary>
-    private static SizeInt32 ConfiguredLaunchSize()
+    private SizeInt32 ConfiguredLaunchSize()
     {
         try
         {
-            var options = App.GetService<IOptions<LaunchWindowOptions>>().Value;
+            var options = _launchWindowOptions?.Value;
 
             return options is { IsUsable: true }
                 ? new SizeInt32(options.Width, options.Height)
@@ -165,14 +177,14 @@ public sealed partial class MainWindow : WindowEx
     /// </remarks>
     private void OnWindowClosing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
     {
-        if (App.HasHandedOverToShell || App.IsExitRequested)
+        if (_host.HasHandedOverToShell || _host.IsExitRequested)
         {
             return;
         }
 
         args.Cancel = true;
 
-        App.OnMainWindowClosingDuringLaunch();
+        _host.OnWindowClosingDuringLaunch();
     }
 
     private void Settings_ColorValuesChanged(UISettings sender, object args)
@@ -194,7 +206,7 @@ public sealed partial class MainWindow : WindowEx
             {
                 return;
             }
-            TitleBarHelper.ApplySystemThemeToCaptionButtons(App.MainWindow, App.AppTitlebar);
+            TitleBarHelper.ApplySystemThemeToCaptionButtons(this, _host.Titlebar);
         });
     }
 

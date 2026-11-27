@@ -2,7 +2,6 @@ using MTM_Waitlist.Module_Core.Models;
 using MTM_Waitlist.Module_Settings.Models;
 using MTM_Waitlist.Module_Settings.Services;
 using MTM_Waitlist.Module_Waitlist.Models;
-using MTM_Waitlist.Module_Waitlist.ViewModels;
 
 namespace MTM_Waitlist.Module_Waitlist.Services;
 
@@ -14,6 +13,8 @@ namespace MTM_Waitlist.Module_Waitlist.Services;
 /// <remarks>
 /// Re-laid for specs/004-unified-card-item-picker (US1): the type and subtype steps are gone, and the step order
 /// is decided by the chosen Item's <b>stored configuration</b> rather than by the Item's identity (FR-013).
+/// A step is named by its route key from <see cref="NewRequestStepRoutes"/> rather than by a view-model type, so
+/// these rules carry no reference to a view model and the steps do not reach each other through them.
 /// </remarks>
 public static class NewRequestFlowRules
 {
@@ -144,7 +145,7 @@ public static class NewRequestFlowRules
     }
 
     /// <summary>
-    /// Resolves which wizard page follows the current accumulated state.
+    /// Resolves which wizard page follows the current accumulated state, as the page's route key.
     /// Text-input flows go to Details; once the answer is captured, or where the row asks for nothing at all,
     /// the confirmation Summary page follows and it is the last step before the request is raised.
     /// </summary>
@@ -153,7 +154,7 @@ public static class NewRequestFlowRules
     /// wizard collected, the coil the job carries, and the count of requests it will raise, so an intermediate
     /// page between the last answer and the submission only repeated it and cost the operator a click.
     /// </remarks>
-    public static Type GetNextStepType(NewRequestFlowState state)
+    public static string GetNextStepRoute(NewRequestFlowState state)
     {
         ArgumentNullException.ThrowIfNull(state);
         ArgumentNullException.ThrowIfNull(state.Item);
@@ -163,7 +164,7 @@ public static class NewRequestFlowRules
         // A declared answer a step of this flow asks is asked by that step, whether or not the row also declares a
         // single answer: the size, the weight of coil, the skid count and the incorrect part each have a step of
         // their own, chosen by the label the ROW declares rather than by the Item's identity (FR-013, FR-082).
-        if (PendingAnswerStep(state) is { } answerStep)
+        if (PendingAnswerRoute(state) is { } answerStep)
         {
             return answerStep;
         }
@@ -174,7 +175,7 @@ public static class NewRequestFlowRules
         var answerCaptured = !string.IsNullOrWhiteSpace(state.InputValue);
         if (!requiresAnswer || answerCaptured)
         {
-            return typeof(NewRequestSummaryViewModel);
+            return NewRequestStepRoutes.Summary;
         }
 
         // An answer the job supplies is asked for by the step that can show it: the dunnage list is asked for on
@@ -186,12 +187,12 @@ public static class NewRequestFlowRules
         return RequestItemAnswerOptionsResolver.DeclaredJobListName(configuration) switch
         {
             var list when string.Equals(list, RequestItemFieldDefinition.Lists.Dunnage, StringComparison.OrdinalIgnoreCase)
-                => typeof(NewRequestDunnageViewModel),
+                => NewRequestStepRoutes.Dunnage,
             var list when string.Equals(list, RequestItemFieldDefinition.Lists.Die, StringComparison.OrdinalIgnoreCase)
-                => typeof(NewRequestDieViewModel),
+                => NewRequestStepRoutes.Die,
             var list when string.Equals(list, RequestItemFieldDefinition.Lists.Component, StringComparison.OrdinalIgnoreCase)
-                => typeof(NewRequestComponentViewModel),
-            _ => typeof(NewRequestDetailsViewModel),
+                => NewRequestStepRoutes.Component,
+            _ => NewRequestStepRoutes.Details,
         };
     }
 
@@ -204,7 +205,7 @@ public static class NewRequestFlowRules
     /// die-shop checkbox is deliberately absent from this map: it is asked on the die step, beside the die it
     /// belongs to, rather than on a step of its own (FR-081).
     /// </remarks>
-    private static Type? PendingAnswerStep(NewRequestFlowState state)
+    private static string? PendingAnswerRoute(NewRequestFlowState state)
     {
         var configuration = state.ItemConfiguration;
         if (configuration is null)
@@ -221,7 +222,7 @@ public static class NewRequestFlowRules
                 continue;
             }
 
-            if (StepForAnswerLabel(field.Label) is { } step)
+            if (RouteForAnswerLabel(field.Label) is { } step)
             {
                 return step;
             }
@@ -234,12 +235,12 @@ public static class NewRequestFlowRules
     /// The step a declared answer's label names, or null when no step of this flow asks that answer.
     /// </summary>
     /// <param name="label">The label the row declares the answer under.</param>
-    private static Type? StepForAnswerLabel(string label) => label.Trim().ToLowerInvariant() switch
+    private static string? RouteForAnswerLabel(string label) => label.Trim().ToLowerInvariant() switch
     {
-        "size" => typeof(NewRequestHopperViewModel),
-        "weight of coil" => typeof(NewRequestCoilTurnViewModel),
-        "# of skids" => typeof(NewRequestSkidCountViewModel),
-        "coil number" or "part" => typeof(NewRequestPartSearchViewModel),
+        "size" => NewRequestStepRoutes.Hopper,
+        "weight of coil" => NewRequestStepRoutes.CoilTurn,
+        "# of skids" => NewRequestStepRoutes.SkidCount,
+        "coil number" or "part" => NewRequestStepRoutes.PartSearch,
         _ => null,
     };
 

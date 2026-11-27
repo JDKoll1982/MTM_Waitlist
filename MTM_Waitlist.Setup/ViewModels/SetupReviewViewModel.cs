@@ -258,7 +258,7 @@ public partial class SetupReviewViewModel : ObservableRecipient, INavigationAwar
 
         try
         {
-            _ = _navigationService.NavigateTo(typeof(SetupCompletionViewModel).FullName!, navigationData);
+            _ = _navigationService.NavigateTo(SetupRoutes.Completion, navigationData);
         }
         catch (COMException ex)
         {
@@ -269,7 +269,7 @@ public partial class SetupReviewViewModel : ObservableRecipient, INavigationAwar
             {
                 _ = dispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
                 {
-                    _ = _navigationService.NavigateTo(typeof(SetupCompletionViewModel).FullName!, navigationData);
+                    _ = _navigationService.NavigateTo(SetupRoutes.Completion, navigationData);
                 });
             }
         }

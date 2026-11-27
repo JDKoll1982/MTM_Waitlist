@@ -1,6 +1,8 @@
-﻿using Microsoft.UI.Xaml;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using MTM_Waitlist.Mock.Service.Contracts;
+using MTM_Waitlist.Mock.Service.Services;
 using MTM_Waitlist.Mock.Service.ViewModels;
 using MTM_Waitlist.Module_Shared.Dialogs;
 
@@ -26,10 +28,20 @@ namespace MTM_Waitlist.Mock.Service.Views;
 /// </remarks>
 public sealed partial class ServiceSettingsPage : Page, IServiceSearchHost
 {
+    private readonly IServiceRuntime _runtime;
+
     /// <summary>Creates the page and resolves its view model.</summary>
     public ServiceSettingsPage()
     {
-        ViewModel = App.GetService<ServiceSettingsViewModel>();
+        // The runtime is the running application rather than a reference to it, so this page names no application
+        // type while still resolving the one container and the one window the service owns.
+        _runtime = Application.Current as IServiceRuntime
+            ?? throw new InvalidOperationException("The service's runtime is not available, so this page cannot be built.");
+
+        var services = _runtime.Services
+            ?? throw new InvalidOperationException("The service container has not been built yet.");
+
+        ViewModel = services.GetRequiredService<ServiceSettingsViewModel>();
 
         InitializeComponent();
 
@@ -53,7 +65,7 @@ public sealed partial class ServiceSettingsPage : Page, IServiceSearchHost
             return;
         }
 
-        if (App.CurrentWindow is not { } owner)
+        if (_runtime.ShellWindow is not { } owner)
         {
             ViewModel.RestoreSelectedCommand.Execute(false);
             return;

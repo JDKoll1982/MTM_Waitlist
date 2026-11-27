@@ -269,7 +269,7 @@ public partial class NewRequestDieViewModel : ObservableRecipient, INavigationAw
         AppLog.Info(
             "NewRequestDie",
             $"Die step for work center '{state.WorkCenter}' captured {chosen.Length} die(s): {string.Join(", ", chosen.Select(die => die.Label))}. DieShop={IsDieShopSelected}.");
-        _navigationService.NavigateTo(NewRequestFlowRules.GetNextStepType(state).FullName!, state);
+        _navigationService.NavigateTo(NewRequestFlowRules.GetNextStepRoute(state), state);
     }
 
     [RelayCommand]

@@ -208,7 +208,7 @@ public partial class NewRequestComponentViewModel : ObservableRecipient, INaviga
         AppLog.Info(
             "NewRequestComponent",
             $"Component '{partNumber}' captured for work center '{state.WorkCenter}'.");
-        _navigationService.NavigateTo(NewRequestFlowRules.GetNextStepType(state).FullName!, state);
+        _navigationService.NavigateTo(NewRequestFlowRules.GetNextStepRoute(state), state);
     }
 
     [RelayCommand]

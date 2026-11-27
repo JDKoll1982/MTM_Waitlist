@@ -243,7 +243,7 @@ public partial class SetupDunnageTypeViewModel : ObservableRecipient, INavigatio
     {
         if (State.SelectedDunnageParts.Count > 0 || await ConfirmNoDunnageAsync().ConfigureAwait(true))
         {
-            _navigationService.NavigateTo(typeof(SetupReviewViewModel).FullName!, null);
+            _navigationService.NavigateTo(SetupRoutes.Review, null);
         }
     }
 

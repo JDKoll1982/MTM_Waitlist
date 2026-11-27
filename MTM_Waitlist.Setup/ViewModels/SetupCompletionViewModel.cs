@@ -6,6 +6,7 @@ using MTM_Waitlist.Module_Core.Contracts.Services;
 using MTM_Waitlist.Module_Core.Contracts.ViewModels;
 using MTM_Waitlist.Module_Core.Helpers;
 using MTM_Waitlist.Module_Setup.Contracts.Services;
+using MTM_Waitlist.Module_Setup.Models;
 
 namespace MTM_Waitlist.Module_Setup.ViewModels;
 
@@ -89,7 +90,7 @@ public partial class SetupCompletionViewModel : ObservableRecipient, INavigation
     private async Task StartOverAsync()
     {
         await _workflowService.ResetAsync().ConfigureAwait(true);
-        _navigationService.NavigateTo(typeof(SetupWorkCenterViewModel).FullName!, null, true);
+        _navigationService.NavigateTo(SetupRoutes.WorkCenter, null, true);
     }
 
     [RelayCommand]

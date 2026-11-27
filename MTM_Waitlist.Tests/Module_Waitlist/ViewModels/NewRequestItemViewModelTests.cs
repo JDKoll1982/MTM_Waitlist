@@ -107,7 +107,7 @@ public sealed class NewRequestItemViewModelTests
         viewModel.SelectItemCommand.Execute(viewModel.Items.Single(option => option.Item!.Id == "other"));
 
         Assert.AreEqual(1, navigation.Navigations.Count, "The card click is this step's advance; no second action may be needed.");
-        Assert.AreEqual(NewRequestFlowRules.GetNextStepType(state).FullName, navigation.Navigations[0].PageKey);
+        Assert.AreEqual(NewRequestFlowRules.GetNextStepRoute(state), navigation.Navigations[0].PageKey);
     }
 
     [TestMethod]

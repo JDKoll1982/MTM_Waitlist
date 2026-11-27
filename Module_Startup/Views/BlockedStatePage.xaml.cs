@@ -39,10 +39,18 @@ internal sealed partial class BlockedStatePage : Page, ILaunchStageSurface
     /// <summary>Guards the ending, so the window's close and the close control cannot both run it.</summary>
     private int _isEnding;
 
-    public BlockedStatePage()
+    private readonly ILaunchPipeline _pipeline;
+    private readonly WindowEx? _window;
+
+    public BlockedStatePage(BlockedStateViewModel viewModel, ILaunchPipeline pipeline, WindowEx? window)
     {
+        ArgumentNullException.ThrowIfNull(viewModel);
+        ArgumentNullException.ThrowIfNull(pipeline);
+
         // Resolved before the markup loads, so every binding sees its source on the first pass.
-        ViewModel = App.GetService<BlockedStateViewModel>();
+        ViewModel = viewModel;
+        _pipeline = pipeline;
+        _window = window;
 
         InitializeComponent();
     }
@@ -99,7 +107,7 @@ internal sealed partial class BlockedStatePage : Page, ILaunchStageSurface
 
         try
         {
-            if (App.MainWindow is { } owner)
+            if (_window is { } owner)
             {
                 var outcome = await MessageDialogHost.AskAsync(owner, new MessageDialogRequest
                 {
@@ -151,6 +159,6 @@ internal sealed partial class BlockedStatePage : Page, ILaunchStageSurface
             return;
         }
 
-        App.GetService<ILaunchPipeline>().End(ViewModel.CloseReasonText);
+        _pipeline.End(ViewModel.CloseReasonText);
     }
 }

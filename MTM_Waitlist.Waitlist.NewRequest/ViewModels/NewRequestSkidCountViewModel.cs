@@ -147,7 +147,7 @@ public partial class NewRequestSkidCountViewModel : ObservableRecipient, INaviga
             "NewRequestSkidCount",
             $"Skid count '{count}' captured for work center '{state.WorkCenter}'.");
 
-        _navigationService.NavigateTo(NewRequestFlowRules.GetNextStepType(state).FullName!, state);
+        _navigationService.NavigateTo(NewRequestFlowRules.GetNextStepRoute(state), state);
     }
 
     private void Refuse(string key, string fallback)
